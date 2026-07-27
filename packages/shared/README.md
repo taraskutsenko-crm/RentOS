@@ -3,6 +3,9 @@
 RentOS shared types, utilities, and constants, consumed across `@rentos/web`
 and `@rentos/api`.
 
-No code has been added yet — this package currently exists only to establish
-the workspace, its wiring into the pnpm/Turborepo pipeline, and its shared
-TypeScript/ESLint configuration.
+- `src/env.ts` — zod schemas + `parseEnv()` for validating process env
+  (API and web variable contracts).
+- `src/countries.ts` — minimal country configuration (US, PL, DE, UA, ES,
+  GB): ISO code, i18n display-name key, default currency/language, common
+  time zones.
+- `src/constants.ts` — app-wide constants (`APP_NAME`, `APP_TAGLINE`).

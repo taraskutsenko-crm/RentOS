@@ -1,5 +1,6 @@
 import { Controller, Get } from "@nestjs/common";
 
+import { Public } from "../auth/decorators/public.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 
 interface HealthCheckResult {
@@ -13,6 +14,7 @@ interface HealthCheckResult {
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
 
+  @Public()
   @Get()
   async check(): Promise<HealthCheckResult> {
     const databaseUp = await this.isDatabaseUp();

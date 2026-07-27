@@ -1,0 +1,71 @@
+{
+  "app": {
+    "name": "RentOS",
+    "tagline": "Eine Plattform. Jedes Asset."
+  },
+  "common": {
+    "loading": "Wird geladen…",
+    "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+  },
+  "nav": {
+    "logout": "Abmelden",
+    "selectTenant": "Unternehmen auswählen"
+  },
+  "auth": {
+    "register": {
+      "title": "Konto erstellen",
+      "subtitle": "Richten Sie Ihren Unternehmensbereich ein",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "passwordConfirmation": "Passwort bestätigen",
+      "companyName": "Firmenname",
+      "country": "Land",
+      "language": "Sprache",
+      "currency": "Währung",
+      "timezone": "Zeitzone",
+      "submit": "Konto erstellen",
+      "submitting": "Konto wird erstellt…",
+      "haveAccount": "Sie haben bereits ein Konto?",
+      "signIn": "Anmelden"
+    },
+    "login": {
+      "title": "Anmelden",
+      "subtitle": "Willkommen zurück",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "submit": "Anmelden",
+      "submitting": "Anmeldung läuft…",
+      "noAccount": "Noch kein Konto?",
+      "signUp": "Konto erstellen"
+    },
+    "errors": {
+      "required": "Dieses Feld ist erforderlich",
+      "invalidEmail": "Geben Sie eine gültige E-Mail-Adresse ein",
+      "passwordTooShort": "Das Passwort muss mindestens 12 Zeichen lang sein",
+      "passwordUppercase": "Das Passwort muss einen Großbuchstaben enthalten",
+      "passwordLowercase": "Das Passwort muss einen Kleinbuchstaben enthalten",
+      "passwordNumber": "Das Passwort muss eine Zahl enthalten",
+      "passwordMismatch": "Die Passwörter stimmen nicht überein",
+      "emailInUse": "Für diese E-Mail-Adresse existiert bereits ein Konto",
+      "invalidCredentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+      "accountInactive": "Dieses Konto ist inaktiv",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+    }
+  },
+  "tenant": {
+    "selectTitle": "Unternehmen auswählen",
+    "selectSubtitle": "Wählen Sie den zu öffnenden Unternehmensbereich",
+    "noTenants": "Sie gehören noch keinem Unternehmen an",
+    "role": "Rolle"
+  },
+  "country": {
+    "US": "Vereinigte Staaten",
+    "PL": "Polen",
+    "DE": "Deutschland",
+    "UA": "Ukraine",
+    "ES": "Spanien",
+    "GB": "Vereinigtes Königreich"
+  }
+}

@@ -1,14 +1,25 @@
 import "reflect-metadata";
 import { ValidationPipe } from "@nestjs/common";
-import { NestFactory } from "@nestjs/core";
 import { ConfigService } from "@nestjs/config";
+import { NestFactory } from "@nestjs/core";
+import type { ApiEnv } from "@rentos/shared";
+import cookieParser from "cookie-parser";
+import helmet from "helmet";
 
 import { AppModule } from "./app.module";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService<ApiEnv, true>);
 
-  app.enableCors();
+  app.use(helmet());
+  app.use(cookieParser());
+
+  app.enableCors({
+    origin: configService.get("WEB_ORIGIN", { infer: true }),
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -17,8 +28,7 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  const configService = app.get(ConfigService);
-  const port = configService.get<number>("PORT", 4000);
+  const port = configService.get("PORT", { infer: true });
 
   await app.listen(port);
 }

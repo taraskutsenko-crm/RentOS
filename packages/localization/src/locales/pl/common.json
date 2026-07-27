@@ -1,0 +1,71 @@
+{
+  "app": {
+    "name": "RentOS",
+    "tagline": "Jedna platforma. Każdy zasób."
+  },
+  "common": {
+    "loading": "Ładowanie…",
+    "error": "Coś poszło nie tak. Spróbuj ponownie."
+  },
+  "nav": {
+    "logout": "Wyloguj się",
+    "selectTenant": "Wybierz firmę"
+  },
+  "auth": {
+    "register": {
+      "title": "Utwórz konto",
+      "subtitle": "Skonfiguruj przestrzeń roboczą firmy",
+      "firstName": "Imię",
+      "lastName": "Nazwisko",
+      "email": "E-mail",
+      "password": "Hasło",
+      "passwordConfirmation": "Potwierdź hasło",
+      "companyName": "Nazwa firmy",
+      "country": "Kraj",
+      "language": "Język",
+      "currency": "Waluta",
+      "timezone": "Strefa czasowa",
+      "submit": "Utwórz konto",
+      "submitting": "Tworzenie konta…",
+      "haveAccount": "Masz już konto?",
+      "signIn": "Zaloguj się"
+    },
+    "login": {
+      "title": "Zaloguj się",
+      "subtitle": "Witaj ponownie",
+      "email": "E-mail",
+      "password": "Hasło",
+      "submit": "Zaloguj się",
+      "submitting": "Logowanie…",
+      "noAccount": "Nie masz konta?",
+      "signUp": "Utwórz je"
+    },
+    "errors": {
+      "required": "To pole jest wymagane",
+      "invalidEmail": "Podaj prawidłowy adres e-mail",
+      "passwordTooShort": "Hasło musi mieć co najmniej 12 znaków",
+      "passwordUppercase": "Hasło musi zawierać wielką literę",
+      "passwordLowercase": "Hasło musi zawierać małą literę",
+      "passwordNumber": "Hasło musi zawierać cyfrę",
+      "passwordMismatch": "Hasła nie są zgodne",
+      "emailInUse": "Konto z tym adresem e-mail już istnieje",
+      "invalidCredentials": "Nieprawidłowy e-mail lub hasło",
+      "accountInactive": "To konto jest nieaktywne",
+      "generic": "Coś poszło nie tak. Spróbuj ponownie."
+    }
+  },
+  "tenant": {
+    "selectTitle": "Wybierz firmę",
+    "selectSubtitle": "Wybierz przestrzeń roboczą firmy do otwarcia",
+    "noTenants": "Nie należysz jeszcze do żadnej firmy",
+    "role": "Rola"
+  },
+  "country": {
+    "US": "Stany Zjednoczone",
+    "PL": "Polska",
+    "DE": "Niemcy",
+    "UA": "Ukraina",
+    "ES": "Hiszpania",
+    "GB": "Wielka Brytania"
+  }
+}

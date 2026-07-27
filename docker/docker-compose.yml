@@ -41,6 +41,11 @@ services:
       PORT: ${API_PORT:-4000}
       DATABASE_URL: postgresql://${POSTGRES_USER:-rentos}:${POSTGRES_PASSWORD:-rentos}@postgres:5432/${POSTGRES_DB:-rentos}?schema=public
       REDIS_URL: redis://redis:6379
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev-only-change-me-dev-only-change-me-dev-only}
+      ACCESS_TOKEN_TTL_SECONDS: ${ACCESS_TOKEN_TTL_SECONDS:-900}
+      REFRESH_TOKEN_TTL_DAYS: ${REFRESH_TOKEN_TTL_DAYS:-30}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
     ports:
       - "${API_PORT:-4000}:4000"
     depends_on:

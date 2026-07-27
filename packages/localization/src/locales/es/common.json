@@ -1,0 +1,71 @@
+{
+  "app": {
+    "name": "RentOS",
+    "tagline": "Una plataforma. Cualquier activo."
+  },
+  "common": {
+    "loading": "Cargando…",
+    "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  "nav": {
+    "logout": "Cerrar sesión",
+    "selectTenant": "Seleccionar empresa"
+  },
+  "auth": {
+    "register": {
+      "title": "Crea tu cuenta",
+      "subtitle": "Configura el espacio de trabajo de tu empresa",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "passwordConfirmation": "Confirmar contraseña",
+      "companyName": "Nombre de la empresa",
+      "country": "País",
+      "language": "Idioma",
+      "currency": "Moneda",
+      "timezone": "Zona horaria",
+      "submit": "Crear cuenta",
+      "submitting": "Creando cuenta…",
+      "haveAccount": "¿Ya tienes una cuenta?",
+      "signIn": "Iniciar sesión"
+    },
+    "login": {
+      "title": "Iniciar sesión",
+      "subtitle": "Bienvenido de nuevo",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión…",
+      "noAccount": "¿No tienes una cuenta?",
+      "signUp": "Crear una"
+    },
+    "errors": {
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Introduce una dirección de correo válida",
+      "passwordTooShort": "La contraseña debe tener al menos 12 caracteres",
+      "passwordUppercase": "La contraseña debe contener una letra mayúscula",
+      "passwordLowercase": "La contraseña debe contener una letra minúscula",
+      "passwordNumber": "La contraseña debe contener un número",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "emailInUse": "Ya existe una cuenta con este correo electrónico",
+      "invalidCredentials": "Correo electrónico o contraseña incorrectos",
+      "accountInactive": "Esta cuenta está inactiva",
+      "generic": "Algo salió mal. Inténtalo de nuevo."
+    }
+  },
+  "tenant": {
+    "selectTitle": "Selecciona una empresa",
+    "selectSubtitle": "Elige el espacio de trabajo que quieres abrir",
+    "noTenants": "Todavía no perteneces a ninguna empresa",
+    "role": "Rol"
+  },
+  "country": {
+    "US": "Estados Unidos",
+    "PL": "Polonia",
+    "DE": "Alemania",
+    "UA": "Ucrania",
+    "ES": "España",
+    "GB": "Reino Unido"
+  }
+}

@@ -12,6 +12,7 @@ COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages/config/package.json ./packages/config/package.json
 COPY packages/shared/package.json ./packages/shared/package.json
 COPY packages/ui/package.json ./packages/ui/package.json
+COPY packages/localization/package.json ./packages/localization/package.json
 COPY apps/web/package.json ./apps/web/package.json
 COPY apps/api/package.json ./apps/api/package.json
 RUN pnpm install --frozen-lockfile
@@ -20,6 +21,7 @@ FROM deps AS builder
 COPY . .
 RUN pnpm --filter @rentos/shared build
 RUN pnpm --filter @rentos/ui build
+RUN pnpm --filter @rentos/localization build
 RUN pnpm --filter @rentos/web build
 
 FROM node:24-alpine AS runner

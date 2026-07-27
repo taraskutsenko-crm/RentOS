@@ -1,0 +1,26 @@
+{
+  "name": "@rentos/localization",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RentOS shared i18n resources and configuration.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node -e \"require('node:fs').cpSync('src/locales','dist/locales',{recursive:true})\"",
+    "lint": "eslint . --config ../../eslint.config.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
+  },
+  "dependencies": {}
+}

@@ -13,6 +13,25 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: rentos
+          POSTGRES_PASSWORD: rentos
+          POSTGRES_DB: rentos_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rentos -d rentos_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://rentos:rentos@localhost:5432/rentos_test?schema=public
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,11 +48,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Format check
+        run: pnpm format:check
 
       - name: Lint
         run: pnpm lint
 
       - name: Typecheck
         run: pnpm typecheck
+
+      - name: Apply test database migrations
+        run: pnpm --filter @rentos/api exec prisma migrate deploy
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build

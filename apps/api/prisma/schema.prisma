@@ -7,13 +7,130 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum MembershipRole {
+  OWNER
+  ADMIN
+  MANAGER
+  ACCOUNTANT
+  TECHNICIAN
+  VIEWER
+}
+
+enum MembershipStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+}
+
+/// Platform user identity. Not tenant-scoped — a user may belong to
+/// multiple tenants via TenantMembership.
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  preferredLanguage String    @default("en") @db.VarChar(10)
+  emailVerifiedAt   DateTime?
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  memberships   TenantMembership[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+
+  @@index([deletedAt])
+  @@map("users")
+}
+
 /// Multi-tenancy foundation: the tenant/organization boundary every future
 /// business entity will reference for isolation. Not a business module.
 model Tenant {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String    @id @default(uuid())
+  name            String
+  slug            String    @unique
+  countryCode     String    @db.VarChar(2)
+  defaultLanguage String    @default("en") @db.VarChar(10)
+  defaultCurrency String    @db.VarChar(3)
+  timezone        String
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
 
+  memberships   TenantMembership[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+
+  @@index([deletedAt])
   @@map("tenants")
+}
+
+/// A user's membership within a tenant — carries their role and status.
+/// The (tenantId, userId) pair is unique: a user has at most one
+/// membership per tenant.
+model TenantMembership {
+  id        String           @id @default(uuid())
+  tenantId  String
+  userId    String
+  role      MembershipRole
+  status    MembershipStatus @default(ACTIVE)
+  joinedAt  DateTime         @default(now())
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId])
+  @@index([userId])
+  @@index([tenantId, status])
+  @@map("tenant_memberships")
+}
+
+/// Rotating refresh tokens. Only a SHA-256 hash of the token is stored —
+/// never the plain-text value. tenantId records the tenant that was
+/// active when the token was issued; it is informational only and is
+/// never trusted for authorization (see TenantGuard).
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tenantId  String?
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  userAgent String?
+  ipAddress String?
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+/// Append-only audit trail for security-relevant events. Never
+/// cascade-deleted so history survives entity deletion.
+model AuditLog {
+  id         String   @id @default(uuid())
+  tenantId   String?
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([userId, createdAt])
+  @@map("audit_logs")
 }

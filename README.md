@@ -6,37 +6,53 @@ RentOS is a multi-tenant SaaS platform for asset and rental management,
 designed to support any asset type, any country, any language, subscription
 billing, and future mobile clients through an API-first architecture.
 
-> **Status:** Production infrastructure complete. Docker, PostgreSQL, Redis,
-> Prisma, the Next.js web app, and the NestJS API are all configured and
-> wired together. No business modules (assets, rentals, customers, billing)
-> or authentication have been implemented yet — that is intentionally out of
-> scope until those tasks are explicitly requested.
+> **Status:** Production infrastructure, authentication, and multi-tenant
+> RBAC foundation complete. Registration, login/logout, rotating refresh
+> tokens, tenant onboarding, and tenant-isolated access control are all
+> implemented and tested end-to-end. Business modules (assets, rentals,
+> customers, billing) are still out of scope until those tasks are
+> explicitly requested.
 
 ## Tech Stack
 
-| Layer    | Choices                                               |
-| -------- | ----------------------------------------------------- |
-| Frontend | Next.js, React, TypeScript, TailwindCSS v4, shadcn/ui |
-| Backend  | NestJS, TypeScript, Prisma, PostgreSQL, Redis         |
-| Infra    | Docker, Docker Compose, GitHub Actions                |
+| Layer    | Choices                                                                                              |
+| -------- | ---------------------------------------------------------------------------------------------------- |
+| Frontend | Next.js, React, TypeScript, TailwindCSS v4, shadcn/ui, TanStack Query, React Hook Form, Zod, i18next |
+| Backend  | NestJS, TypeScript, Prisma, PostgreSQL, Redis, Argon2id, JWT                                         |
+| Infra    | Docker, Docker Compose, GitHub Actions                                                               |
 
-TanStack Query, Zustand, React Hook Form, Zod (for forms), i18next, BullMQ,
-and JWT/RBAC auth are part of the platform's intended stack but are not yet
-wired in — they land with the tasks that need them (data fetching, forms,
-localization, background jobs, authentication).
+Zustand, BullMQ, and OAuth are part of the platform's intended stack but
+are not yet wired in — they land with the tasks that need them.
+
+## Authentication & Multi-Tenancy
+
+- **Auth**: email/password registration and login, `argon2id` password
+  hashing, short-lived JWT access tokens + rotating refresh tokens, all
+  carried in `httpOnly` cookies (never `localStorage`).
+- **Tenancy**: a user may belong to multiple tenants; every tenant-scoped
+  request re-verifies active membership against the database — a tenant ID
+  is never trusted on its own.
+- **RBAC**: `OWNER | ADMIN | MANAGER | ACCOUNTANT | TECHNICIAN | VIEWER`
+  membership roles, enforced via `RolesGuard` + `@Roles(...)`.
+
+Full details, request/response shapes, and the reasoning behind the cookie
+strategy: [docs/architecture.md](docs/architecture.md),
+[docs/api.md](docs/api.md), and
+[ADR 0001](docs/adr/0001-authentication-and-tenant-context.md).
 
 ## Monorepo Structure
 
 ```
 apps/
-  web/            Next.js frontend — App Router, Tailwind v4, consumes @rentos/ui
-  api/            NestJS backend — Prisma, config validation, health check
+  web/            Next.js frontend — App Router, Tailwind v4, auth pages, protected /app shell
+  api/            NestJS backend — auth, users, tenants, memberships, audit modules
 packages/
   ui/             Shared UI component library (Tailwind v4 + shadcn/ui)
-  shared/         Shared types, env validation (zod), constants
+  shared/         Shared types, env validation (zod), country config, constants
+  localization/   Shared i18n resources (en, ru, uk, de, pl, es)
   config/         Shared TypeScript & ESLint configuration
-docs/             Architecture and reference documentation
-docker/           Dockerfiles' compose stack (postgres, redis, api, web)
+docs/             Architecture notes, API reference, ADRs
+docker/           Dockerfiles + compose stack (postgres, redis, api, web)
 scripts/          Repository automation (reserved)
 .github/          CI workflow (install, build, lint, typecheck)
 ```
@@ -66,7 +82,8 @@ pnpm --filter @rentos/api prisma:deploy
 pnpm dev
 ```
 
-Or run the entire stack (web, API, Postgres, Redis) in Docker:
+Then visit `http://localhost:3000/register` to create an account, or run
+the entire stack (web, API, Postgres, Redis) in Docker:
 
 ```bash
 docker compose --env-file .env -f docker/docker-compose.yml up -d
@@ -85,22 +102,24 @@ See [docker/README.md](docker/README.md) for details.
 | `pnpm format`       | Format the repository with Prettier      |
 | `pnpm format:check` | Check formatting without writing changes |
 
-Per-app scripts (`pnpm --filter @rentos/api <script>`):
+Per-app scripts:
 
-| Script            | Description                             |
-| ----------------- | --------------------------------------- |
-| `prisma:generate` | Generate the Prisma Client              |
-| `prisma:migrate`  | Create/apply a migration in development |
-| `prisma:deploy`   | Apply pending migrations (production)   |
-| `prisma:studio`   | Open Prisma Studio                      |
+| Script                                      | Description                               |
+| ------------------------------------------- | ----------------------------------------- |
+| `pnpm --filter @rentos/api test`            | Backend integration tests (real Postgres) |
+| `pnpm --filter @rentos/web test`            | Frontend component tests                  |
+| `pnpm --filter @rentos/api prisma:generate` | Generate the Prisma Client                |
+| `pnpm --filter @rentos/api prisma:migrate`  | Create/apply a migration in development   |
+| `pnpm --filter @rentos/api prisma:deploy`   | Apply pending migrations (production)     |
+| `pnpm --filter @rentos/api prisma:studio`   | Open Prisma Studio                        |
 
 ## Database
 
-Prisma is configured against PostgreSQL in [`apps/api/prisma/schema.prisma`](apps/api/prisma/schema.prisma).
-The only model currently defined is `Tenant` — the multi-tenancy boundary
-every future business entity will reference for isolation. It exists purely
-so the initial migration has something real to apply; no other business
-schema has been added.
+Prisma is configured against PostgreSQL in
+[`apps/api/prisma/schema.prisma`](apps/api/prisma/schema.prisma):
+`User`, `Tenant`, `TenantMembership`, `RefreshToken`, `AuditLog`, plus
+`MembershipRole`/`MembershipStatus` enums. No business schema (assets,
+rentals, customers) has been added.
 
 ## Environment Variables
 
@@ -108,15 +127,17 @@ See [`.env.example`](.env.example) at the repository root (used by Docker
 Compose), and `.env.example` in [`apps/api`](apps/api/.env.example) /
 [`apps/web`](apps/web/.env.example) for running each app directly outside
 Docker. Environment variables consumed by the API are validated at startup
-via a zod schema in [`packages/shared`](packages/shared/src/env.ts).
+via a zod schema in [`packages/shared`](packages/shared/src/env.ts). See
+[docs/architecture.md](docs/architecture.md#required-environment-variables)
+for the auth-specific variables.
 
 ## Roadmap
 
 Deliberately out of scope so far:
 
-- Authentication implementation
 - Business modules (assets, rentals, customers, billing)
-- i18n, theming, background jobs (BullMQ), forms
+- OAuth, email sending, password reset, two-factor authentication
+- Theming, background jobs (BullMQ)
 
 These will be introduced in subsequent, explicitly scoped tasks.
 

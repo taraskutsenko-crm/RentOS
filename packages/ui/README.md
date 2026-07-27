@@ -4,7 +4,8 @@ RentOS shared UI component library, built on TailwindCSS v4 and shadcn/ui
 conventions, consumed by `@rentos/web` and future frontend surfaces.
 
 - `src/lib/utils.ts` — `cn()` class-name helper (clsx + tailwind-merge).
-- `src/components/` — shadcn/ui-style components (currently: `Button`).
+- `src/components/` — shadcn/ui-style components: `Button`, `Input`,
+  `Label`, `Card` (+ sub-components), `Alert`.
 - `src/styles/theme.css` — shared design tokens (`@theme`), imported by
   consuming apps' global stylesheet.
 

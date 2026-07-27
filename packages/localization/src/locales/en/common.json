@@ -1,0 +1,71 @@
+{
+  "app": {
+    "name": "RentOS",
+    "tagline": "One Platform. Every Asset."
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong. Please try again."
+  },
+  "nav": {
+    "logout": "Log out",
+    "selectTenant": "Select company"
+  },
+  "auth": {
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Set up your company workspace",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "passwordConfirmation": "Confirm password",
+      "companyName": "Company name",
+      "country": "Country",
+      "language": "Language",
+      "currency": "Currency",
+      "timezone": "Time zone",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "noAccount": "Don't have an account?",
+      "signUp": "Create one"
+    },
+    "errors": {
+      "required": "This field is required",
+      "invalidEmail": "Enter a valid email address",
+      "passwordTooShort": "Password must be at least 12 characters",
+      "passwordUppercase": "Password must contain an uppercase letter",
+      "passwordLowercase": "Password must contain a lowercase letter",
+      "passwordNumber": "Password must contain a number",
+      "passwordMismatch": "Passwords do not match",
+      "emailInUse": "An account with this email already exists",
+      "invalidCredentials": "Invalid email or password",
+      "accountInactive": "This account is inactive",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "tenant": {
+    "selectTitle": "Select a company",
+    "selectSubtitle": "Choose which company workspace to open",
+    "noTenants": "You don't belong to any company yet",
+    "role": "Role"
+  },
+  "country": {
+    "US": "United States",
+    "PL": "Poland",
+    "DE": "Germany",
+    "UA": "Ukraine",
+    "ES": "Spain",
+    "GB": "United Kingdom"
+  }
+}

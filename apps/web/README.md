@@ -1,7 +1,17 @@
 # @rentos/web
 
-RentOS web application. Reserved for the Next.js frontend.
+RentOS web application — Next.js (App Router), TypeScript, TailwindCSS v4,
+consuming `@rentos/ui` and `@rentos/shared`.
 
-No application code has been added yet — this package currently exists only to
-establish the workspace, its wiring into the pnpm/Turborepo pipeline, and its
-shared TypeScript/ESLint configuration.
+## Scripts
+
+| Script           | Description                                        |
+| ---------------- | -------------------------------------------------- |
+| `pnpm dev`       | Start the Next.js dev server                       |
+| `pnpm build`     | Production build (`output: standalone` for Docker) |
+| `pnpm start`     | Run the production build                           |
+| `pnpm lint`      | ESLint (shared preset + Next.js rules)             |
+| `pnpm typecheck` | `tsc --noEmit`                                     |
+
+No business pages/features have been added yet — this is the application
+shell only.

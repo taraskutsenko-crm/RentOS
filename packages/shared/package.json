@@ -2,12 +2,27 @@
   "name": "@rentos/shared",
   "version": "0.1.0",
   "private": true,
-  "description": "RentOS shared types, utilities, and constants — placeholder, no code yet.",
+  "description": "RentOS shared types, utilities, and constants.",
   "license": "UNLICENSED",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "echo \"@rentos/shared: nothing to build yet\"",
-    "lint": "echo \"@rentos/shared: nothing to lint yet\"",
-    "typecheck": "echo \"@rentos/shared: nothing to type-check yet\"",
-    "clean": "echo \"@rentos/shared: nothing to clean yet\""
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint . --config ../../eslint.config.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
   }
 }

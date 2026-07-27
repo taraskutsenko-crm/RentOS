@@ -2,13 +2,28 @@
   "name": "@rentos/web",
   "version": "0.1.0",
   "private": true,
-  "description": "RentOS web application (Next.js) — placeholder, no application code yet.",
+  "description": "RentOS web application (Next.js).",
   "license": "UNLICENSED",
   "scripts": {
-    "build": "echo \"@rentos/web: nothing to build yet\"",
-    "dev": "echo \"@rentos/web: nothing to run yet\"",
-    "lint": "echo \"@rentos/web: nothing to lint yet\"",
-    "typecheck": "echo \"@rentos/web: nothing to type-check yet\"",
-    "clean": "echo \"@rentos/web: nothing to clean yet\""
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --config ./eslint.config.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('.next',{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "@rentos/shared": "workspace:*",
+    "@rentos/ui": "workspace:*",
+    "next": "^16.2.12",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "eslint-config-next": "^16.2.12",
+    "tailwindcss": "^4.3.3"
   }
 }

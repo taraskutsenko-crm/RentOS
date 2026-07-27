@@ -2,13 +2,35 @@
   "name": "@rentos/api",
   "version": "0.1.0",
   "private": true,
-  "description": "RentOS API application (NestJS) — placeholder, no application code yet.",
+  "description": "RentOS API application (NestJS).",
   "license": "UNLICENSED",
   "scripts": {
-    "build": "echo \"@rentos/api: nothing to build yet\"",
-    "dev": "echo \"@rentos/api: nothing to run yet\"",
-    "lint": "echo \"@rentos/api: nothing to lint yet\"",
-    "typecheck": "echo \"@rentos/api: nothing to type-check yet\"",
-    "clean": "echo \"@rentos/api: nothing to clean yet\""
+    "dev": "tsx watch src/main.ts",
+    "build": "prisma generate && tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "lint": "eslint . --config ./eslint.config.mjs",
+    "typecheck": "prisma generate && tsc --noEmit -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.28",
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/core": "^11.1.28",
+    "@nestjs/platform-express": "^11.1.28",
+    "@prisma/client": "^6.19.3",
+    "@rentos/shared": "workspace:*",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "prisma": "^6.19.3",
+    "tsx": "^4.23.1"
   }
 }

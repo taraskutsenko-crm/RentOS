@@ -20,12 +20,15 @@ consuming `@rentos/ui`, `@rentos/shared`, and `@rentos/localization`.
 - `src/app/register/`, `src/app/login/` — auth pages (React Hook Form + Zod)
 - `src/app/app/` — protected shell (`layout.tsx` verifies the session via
   `GET /auth/me`, redirects to `/login` on failure), `select-tenant/` for
-  the tenant switcher
+  the tenant switcher, `customers/` for the first business module (list
+  with search/filter/pagination, `new/`, `[id]/` edit)
 - `src/proxy.ts` — lightweight cookie-presence redirect for `/app/*`
   (UX only — the API is the real security boundary)
-- `src/hooks/use-auth.ts` — TanStack Query hooks wrapping the auth/tenant API
+- `src/hooks/use-auth.ts`, `use-customers.ts` — TanStack Query hooks
+  wrapping the API; `use-current-tenant.ts` persists the selected tenant
+  (client-side convenience only, not a security boundary)
 - `src/lib/i18n.ts` — i18next setup, resources from `@rentos/localization`
-- `test/` — component tests, auth hooks mocked (see `docs/api.md` for the
-  real contract they mock against)
+- `test/` — component tests, hooks mocked (see `docs/api.md` for the real
+  contract they mock against)
 
-No business pages/features have been added yet.
+No other business modules (assets, rentals, billing) have been added yet.

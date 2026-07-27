@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useRegister } from "../../hooks/use-auth";
+import { useCurrentTenantId } from "../../hooks/use-current-tenant";
 import { apiErrorKey } from "../../lib/api-error-i18n";
 import { registerSchema, type RegisterFormValues } from "../../lib/validation";
 
@@ -16,6 +17,7 @@ export function RegisterForm() {
   const { t } = useTranslation();
   const router = useRouter();
   const registerMutation = useRegister();
+  const [, setCurrentTenantId] = useCurrentTenantId();
 
   const {
     register,
@@ -44,7 +46,8 @@ export function RegisterForm() {
   async function onSubmit(values: RegisterFormValues): Promise<void> {
     const { passwordConfirmation: _passwordConfirmation, ...registerInput } = values;
     try {
-      await registerMutation.mutateAsync(registerInput);
+      const result = await registerMutation.mutateAsync(registerInput);
+      setCurrentTenantId(result.tenant.id);
       router.push("/app");
     } catch {
       // Surfaced below via registerMutation.error.

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@rentos/ui";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -39,7 +40,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between border-b p-4">
-        <span className="font-semibold">{t("app.name")}</span>
+        <div className="flex items-center gap-6">
+          <span className="font-semibold">{t("app.name")}</span>
+          <nav className="flex items-center gap-4 text-sm">
+            <Link href="/app/customers" className="text-muted-foreground hover:text-foreground">
+              {t("customer.title")}
+            </Link>
+          </nav>
+        </div>
         <div className="flex items-center gap-4">
           <span className="text-muted-foreground text-sm">
             {data.user.firstName} {data.user.lastName}

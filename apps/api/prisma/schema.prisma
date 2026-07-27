@@ -22,6 +22,11 @@ enum MembershipStatus {
   SUSPENDED
 }
 
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+}
+
 /// Platform user identity. Not tenant-scoped — a user may belong to
 /// multiple tenants via TenantMembership.
 model User {
@@ -63,6 +68,7 @@ model Tenant {
   memberships   TenantMembership[]
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
+  customers     Customer[]
 
   @@index([deletedAt])
   @@map("tenants")
@@ -133,4 +139,31 @@ model AuditLog {
   @@index([tenantId, createdAt])
   @@index([userId, createdAt])
   @@map("audit_logs")
+}
+
+/// A tenant's customer record. Fully tenant-scoped — every query and
+/// mutation is filtered by tenantId at the database level, never trusted
+/// from a route param alone (see CustomersService).
+model Customer {
+  id        String         @id @default(uuid())
+  tenantId  String
+  firstName String
+  lastName  String
+  company   String?
+  phone     String?
+  email     String?
+  vatNumber String?
+  address   String?
+  notes     String?
+  status    CustomerStatus @default(ACTIVE)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  deletedAt DateTime?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([tenantId, deletedAt])
+  @@index([tenantId, email])
+  @@map("customers")
 }

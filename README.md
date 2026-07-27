@@ -6,12 +6,13 @@ RentOS is a multi-tenant SaaS platform for asset and rental management,
 designed to support any asset type, any country, any language, subscription
 billing, and future mobile clients through an API-first architecture.
 
-> **Status:** Production infrastructure, authentication, and multi-tenant
-> RBAC foundation complete. Registration, login/logout, rotating refresh
-> tokens, tenant onboarding, and tenant-isolated access control are all
-> implemented and tested end-to-end. Business modules (assets, rentals,
-> customers, billing) are still out of scope until those tasks are
-> explicitly requested.
+> **Status:** Production infrastructure, authentication, multi-tenant RBAC,
+> and the first business module (Customers) are complete. Registration,
+> login/logout, rotating refresh tokens, tenant onboarding, tenant-isolated
+> access control, and full customer CRUD (search, filter, pagination) are
+> all implemented and tested end-to-end. Remaining business modules
+> (assets, rentals, billing) are still out of scope until explicitly
+> requested.
 
 ## Tech Stack
 
@@ -40,12 +41,20 @@ strategy: [docs/architecture.md](docs/architecture.md),
 [docs/api.md](docs/api.md), and
 [ADR 0001](docs/adr/0001-authentication-and-tenant-context.md).
 
+## Customers
+
+The first business module: full CRUD (`POST`/`GET`/`PATCH`/`DELETE` under
+`/tenants/:tenantId/customers`), search across name/company/email/phone,
+status filtering, pagination, and soft delete. Every request is scoped by
+`tenantId` server-side (`TenantGuard`) — never trusted from the URL alone.
+See [docs/api.md](docs/api.md#customers) for the full endpoint reference.
+
 ## Monorepo Structure
 
 ```
 apps/
-  web/            Next.js frontend — App Router, Tailwind v4, auth pages, protected /app shell
-  api/            NestJS backend — auth, users, tenants, memberships, audit modules
+  web/            Next.js frontend — App Router, Tailwind v4, auth + customers pages, protected /app shell
+  api/            NestJS backend — auth, users, tenants, memberships, customers, audit modules
 packages/
   ui/             Shared UI component library (Tailwind v4 + shadcn/ui)
   shared/         Shared types, env validation (zod), country config, constants
@@ -117,9 +126,9 @@ Per-app scripts:
 
 Prisma is configured against PostgreSQL in
 [`apps/api/prisma/schema.prisma`](apps/api/prisma/schema.prisma):
-`User`, `Tenant`, `TenantMembership`, `RefreshToken`, `AuditLog`, plus
-`MembershipRole`/`MembershipStatus` enums. No business schema (assets,
-rentals, customers) has been added.
+`User`, `Tenant`, `TenantMembership`, `RefreshToken`, `AuditLog`,
+`Customer`, plus `MembershipRole`/`MembershipStatus`/`CustomerStatus`
+enums. No other business schema (assets, rentals) has been added.
 
 ## Environment Variables
 
@@ -135,7 +144,7 @@ for the auth-specific variables.
 
 Deliberately out of scope so far:
 
-- Business modules (assets, rentals, customers, billing)
+- Remaining business modules (assets, rentals, billing)
 - OAuth, email sending, password reset, two-factor authentication
 - Theming, background jobs (BullMQ)
 

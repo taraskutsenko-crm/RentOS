@@ -1,4 +1,4 @@
-# API Reference — Authentication & Tenancy
+# API Reference — Authentication, Tenancy & Customers
 
 Base URL: `NEXT_PUBLIC_API_URL` (`http://localhost:4000` in local dev).
 All endpoints are JSON. Authenticated endpoints read the
@@ -86,6 +86,63 @@ Same guard as above.
 
 **200** → `{ tenant: Tenant, role: MembershipRole }`
 **403** → not a member, membership not `ACTIVE`, or tenant inactive/deleted
+
+## Customers
+
+All endpoints require authentication + active membership in `:tenantId`
+(`TenantGuard`, same as the `/tenants/:tenantId` endpoints above). Records
+are soft-deleted (`deletedAt`) and always scoped server-side by `tenantId`
+— never trusted from the URL alone.
+
+### `POST /tenants/:tenantId/customers`
+
+**Body**
+
+| Field       | Type   | Notes                                                          |
+| ----------- | ------ | -------------------------------------------------------------- |
+| `firstName` | string | Required, 1–100 chars                                          |
+| `lastName`  | string | Required, 1–100 chars                                          |
+| `company`   | string | Optional, ≤200 chars                                           |
+| `phone`     | string | Optional, ≤50 chars                                            |
+| `email`     | string | Optional, must be valid if set                                 |
+| `vatNumber` | string | Optional, ≤50 chars (free-text; no per-country validation yet) |
+| `address`   | string | Optional, ≤500 chars                                           |
+| `notes`     | string | Optional, ≤2000 chars                                          |
+| `status`    | enum   | `ACTIVE` \| `INACTIVE`, defaults to `ACTIVE`                   |
+
+**201** → the created `Customer`
+**400** → validation failure
+**403** → not an active member of `:tenantId`
+
+### `GET /tenants/:tenantId/customers`
+
+**Query params:** `page` (default 1), `pageSize` (default 20, max 100),
+`search` (matches first/last name, company, email, phone —
+case-insensitive substring), `status` (`ACTIVE` \| `INACTIVE`)
+
+**200** → `{ items: Customer[], total: number, page: number, pageSize: number }`
+
+### `GET /tenants/:tenantId/customers/:id`
+
+**200** → the `Customer`
+**404** → not found (including soft-deleted, or belonging to another tenant)
+
+### `PATCH /tenants/:tenantId/customers/:id`
+
+Body: any subset of the `POST` fields.
+
+**200** → the updated `Customer`
+**404** → not found
+
+### `DELETE /tenants/:tenantId/customers/:id`
+
+Soft-delete (sets `deletedAt`, `status = INACTIVE`).
+
+**204** → no content
+**404** → not found
+
+Every create/update/delete writes an `AuditLog` entry
+(`customer.created` / `customer.updated` / `customer.deleted`).
 
 ---
 

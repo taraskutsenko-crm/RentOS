@@ -6,6 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { apiEnvSchema } from "@rentos/shared";
 
 import { AuthModule } from "./auth/auth.module";
+import { CustomersModule } from "./customers/customers.module";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { TenantsModule } from "./tenants/tenants.module";
@@ -27,6 +28,7 @@ import { TenantsModule } from "./tenants/tenants.module";
     HealthModule,
     AuthModule,
     TenantsModule,
+    CustomersModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

@@ -25,10 +25,11 @@ and [docs/api.md](../../docs/api.md) for the full auth/tenancy reference.
 - `src/app.module.ts` — root module (env validation via `@rentos/shared`, global rate limiting)
 - `src/auth/` — register/login/refresh/logout/me, password hashing, tokens, cookies, guards, decorators
 - `src/users/`, `src/tenants/`, `src/memberships/`, `src/audit/` — feature modules
+- `src/customers/` — first business module: full CRUD, search/filter/pagination, tenant-scoped
 - `src/prisma/` — global `PrismaModule`/`PrismaService`
 - `src/health/` — `GET /health`, includes a live database check
-- `prisma/schema.prisma` — `User`, `Tenant`, `TenantMembership`, `RefreshToken`, `AuditLog`
+- `prisma/schema.prisma` — `User`, `Tenant`, `TenantMembership`, `RefreshToken`, `AuditLog`, `Customer`
 - `test/` — integration tests (`*.e2e-spec.ts`), run against a real
   dedicated test database (`.env.test`, never the dev/prod database)
 
-No business modules (assets, rentals, customers, billing) have been added yet.
+No other business modules (assets, rentals, billing) have been added yet.

@@ -43,11 +43,34 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
+export type QueryParams = Record<string, string | number | boolean | undefined>;
+
+export function toQueryString(params?: QueryParams): string {
+  if (!params) {
+    return "";
+  }
+  const searchParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== "") {
+      searchParams.set(key, String(value));
+    }
+  }
+  const query = searchParams.toString();
+  return query ? `?${query}` : "";
+}
+
 export const apiClient = {
-  get: <T>(path: string): Promise<T> => request<T>(path, { method: "GET" }),
+  get: <T>(path: string, params?: QueryParams): Promise<T> =>
+    request<T>(`${path}${toQueryString(params)}`, { method: "GET" }),
   post: <T>(path: string, data?: unknown): Promise<T> =>
     request<T>(path, {
       method: "POST",
       body: data !== undefined ? JSON.stringify(data) : null,
     }),
+  patch: <T>(path: string, data?: unknown): Promise<T> =>
+    request<T>(path, {
+      method: "PATCH",
+      body: data !== undefined ? JSON.stringify(data) : null,
+    }),
+  delete: <T>(path: string): Promise<T> => request<T>(path, { method: "DELETE" }),
 };

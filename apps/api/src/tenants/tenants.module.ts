@@ -9,6 +9,9 @@ import { TenantsService } from "./tenants.service";
   imports: [MembershipsModule],
   controllers: [TenantsController],
   providers: [TenantsService, TenantGuard],
-  exports: [TenantsService],
+  // Re-export MembershipsModule: any module that imports TenantsModule to
+  // reuse TenantGuard must also have TenantGuard's own dependency
+  // (MembershipsService) resolvable, or Nest fails to instantiate it.
+  exports: [TenantsService, TenantGuard, MembershipsModule],
 })
 export class TenantsModule {}

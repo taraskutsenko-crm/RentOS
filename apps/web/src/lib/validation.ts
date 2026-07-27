@@ -37,3 +37,17 @@ export const loginSchema = z.object({
 });
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
+
+export const customerSchema = z.object({
+  firstName: z.string().min(1, "auth.errors.required").max(100),
+  lastName: z.string().min(1, "auth.errors.required").max(100),
+  company: z.string().max(200),
+  phone: z.string().max(50),
+  email: z.union([z.literal(""), z.string().max(255).email("auth.errors.invalidEmail")]),
+  vatNumber: z.string().max(50),
+  address: z.string().max(500),
+  notes: z.string().max(2000),
+  status: z.enum(["ACTIVE", "INACTIVE"]),
+});
+
+export type CustomerFormValues = z.infer<typeof customerSchema>;

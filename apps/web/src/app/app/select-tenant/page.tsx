@@ -5,15 +5,18 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { useSelectTenant, useTenants } from "../../../hooks/use-auth";
+import { useCurrentTenantId } from "../../../hooks/use-current-tenant";
 
 export default function SelectTenantPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { data, isLoading } = useTenants();
   const selectTenant = useSelectTenant();
+  const [, setCurrentTenantId] = useCurrentTenantId();
 
   async function handleSelect(tenantId: string): Promise<void> {
     await selectTenant.mutateAsync(tenantId);
+    setCurrentTenantId(tenantId);
     router.push("/app");
   }
 

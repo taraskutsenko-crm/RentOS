@@ -1,0 +1,13 @@
+{
+  "name": "@rentos/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RentOS shared types, utilities, and constants — placeholder, no code yet.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "echo \"@rentos/shared: nothing to build yet\"",
+    "lint": "echo \"@rentos/shared: nothing to lint yet\"",
+    "typecheck": "echo \"@rentos/shared: nothing to type-check yet\"",
+    "clean": "echo \"@rentos/shared: nothing to clean yet\""
+  }
+}

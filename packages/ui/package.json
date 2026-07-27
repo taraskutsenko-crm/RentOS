@@ -1,0 +1,13 @@
+{
+  "name": "@rentos/ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RentOS shared UI component library — placeholder, no components yet.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "echo \"@rentos/ui: nothing to build yet\"",
+    "lint": "echo \"@rentos/ui: nothing to lint yet\"",
+    "typecheck": "echo \"@rentos/ui: nothing to type-check yet\"",
+    "clean": "echo \"@rentos/ui: nothing to clean yet\""
+  }
+}

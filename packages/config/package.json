@@ -1,0 +1,21 @@
+{
+  "name": "@rentos/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared TypeScript, ESLint, and Prettier configuration for RentOS packages.",
+  "license": "UNLICENSED",
+  "files": [
+    "tsconfig.base.json",
+    "eslint-preset.mjs"
+  ],
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./eslint-preset": "./eslint-preset.mjs"
+  },
+  "scripts": {
+    "build": "echo \"@rentos/config: nothing to build yet\"",
+    "lint": "eslint . --config ../../eslint.config.mjs --no-error-on-unmatched-pattern",
+    "typecheck": "echo \"@rentos/config: nothing to type-check yet\"",
+    "clean": "echo \"@rentos/config: nothing to clean yet\""
+  }
+}

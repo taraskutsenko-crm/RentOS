@@ -1,0 +1,14 @@
+{
+  "name": "@rentos/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RentOS API application (NestJS) — placeholder, no application code yet.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "echo \"@rentos/api: nothing to build yet\"",
+    "dev": "echo \"@rentos/api: nothing to run yet\"",
+    "lint": "echo \"@rentos/api: nothing to lint yet\"",
+    "typecheck": "echo \"@rentos/api: nothing to type-check yet\"",
+    "clean": "echo \"@rentos/api: nothing to clean yet\""
+  }
+}

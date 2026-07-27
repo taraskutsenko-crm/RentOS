@@ -1,0 +1,14 @@
+{
+  "name": "@rentos/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RentOS web application (Next.js) — placeholder, no application code yet.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "echo \"@rentos/web: nothing to build yet\"",
+    "dev": "echo \"@rentos/web: nothing to run yet\"",
+    "lint": "echo \"@rentos/web: nothing to lint yet\"",
+    "typecheck": "echo \"@rentos/web: nothing to type-check yet\"",
+    "clean": "echo \"@rentos/web: nothing to clean yet\""
+  }
+}

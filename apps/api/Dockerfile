@@ -37,6 +37,10 @@ COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 
+# Local-development/production-fallback file storage adapter root (asset
+# images/documents) — see docs/adr/0005-asset-file-storage-strategy.md.
+RUN mkdir -p /app/storage-uploads && chown -R nestjs:nodejs /app/storage-uploads
+
 USER nestjs
 EXPOSE 4000
 CMD ["node", "apps/api/dist/main.js"]

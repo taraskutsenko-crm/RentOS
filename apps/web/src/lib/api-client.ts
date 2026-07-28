@@ -59,6 +59,32 @@ export function toQueryString(params?: QueryParams): string {
   return query ? `?${query}` : "";
 }
 
+async function requestForm<T>(
+  path: string,
+  method: "POST" | "PATCH",
+  formData: FormData,
+): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, {
+    method,
+    credentials: "include",
+    body: formData,
+  });
+
+  const isJson = response.headers.get("content-type")?.includes("application/json") ?? false;
+  const body: unknown = isJson ? await response.json() : undefined;
+
+  if (!response.ok) {
+    const errorBody = body as ApiErrorBody | undefined;
+    const rawMessage = errorBody?.message;
+    const message = Array.isArray(rawMessage)
+      ? rawMessage.join(", ")
+      : (rawMessage ?? "Request failed");
+    throw new ApiError(message, response.status, errorBody);
+  }
+
+  return body as T;
+}
+
 export const apiClient = {
   get: <T>(path: string, params?: QueryParams): Promise<T> =>
     request<T>(`${path}${toQueryString(params)}`, { method: "GET" }),
@@ -73,4 +99,7 @@ export const apiClient = {
       body: data !== undefined ? JSON.stringify(data) : null,
     }),
   delete: <T>(path: string): Promise<T> => request<T>(path, { method: "DELETE" }),
+  /** For multipart/form-data endpoints (file uploads) — never sets a JSON Content-Type. */
+  postForm: <T>(path: string, formData: FormData): Promise<T> =>
+    requestForm<T>(path, "POST", formData),
 };

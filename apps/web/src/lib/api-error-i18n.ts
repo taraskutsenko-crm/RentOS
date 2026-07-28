@@ -13,3 +13,15 @@ export function apiErrorKey(error: unknown): string {
   }
   return "auth.errors.generic";
 }
+
+/**
+ * For modules (e.g. Assets) whose backend validation/conflict messages are
+ * numerous and already human-readable — shows the raw message instead of
+ * forcing every distinct error through a translation-key map.
+ */
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError && error.message) {
+    return error.message;
+  }
+  return fallback;
+}

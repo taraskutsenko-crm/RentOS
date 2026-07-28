@@ -46,6 +46,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link href="/app/customers" className="text-muted-foreground hover:text-foreground">
               {t("customer.title")}
             </Link>
+            <Link href="/app/assets" className="text-muted-foreground hover:text-foreground">
+              {t("asset.title")}
+            </Link>
+            <Link
+              href="/app/settings/asset-categories"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {t("asset.categorySettings.navLabel")}
+            </Link>
+            <Link
+              href="/app/settings/asset-statuses"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {t("asset.statusSettings.navLabel")}
+            </Link>
+            <Link
+              href="/app/settings/asset-fields"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {t("asset.fieldSettings.navLabel")}
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">

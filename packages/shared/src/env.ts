@@ -17,6 +17,10 @@ export const apiEnvSchema = z.object({
   ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(900),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
   COOKIE_DOMAIN: z.string().optional(),
+  // File storage (asset images/documents). Only a local-filesystem adapter
+  // is implemented today — see docs/adr/0007-asset-file-storage-strategy.md
+  // for the S3-compatible interface this is designed to swap into.
+  STORAGE_LOCAL_DIR: z.string().min(1).default("./storage-uploads"),
 });
 export type ApiEnv = z.infer<typeof apiEnvSchema>;
 

@@ -46,8 +46,11 @@ services:
       ACCESS_TOKEN_TTL_SECONDS: ${ACCESS_TOKEN_TTL_SECONDS:-900}
       REFRESH_TOKEN_TTL_DAYS: ${REFRESH_TOKEN_TTL_DAYS:-30}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
+      STORAGE_LOCAL_DIR: /app/storage-uploads
     ports:
       - "${API_PORT:-4000}:4000"
+    volumes:
+      - api_storage:/app/storage-uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -71,3 +74,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  api_storage:

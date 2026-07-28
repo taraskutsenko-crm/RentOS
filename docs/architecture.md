@@ -109,3 +109,116 @@ current list with defaults. The auth-specific ones:
 | `ACCESS_TOKEN_TTL_SECONDS` | Access token lifetime (default 900 = 15 min)                   |
 | `REFRESH_TOKEN_TTL_DAYS`   | Refresh token lifetime (default 30)                            |
 | `COOKIE_DOMAIN`            | Optional; set in production to share cookies across subdomains |
+
+### Asset file storage
+
+| Variable            | Purpose                                                                          |
+| ------------------- | -------------------------------------------------------------------------------- |
+| `STORAGE_LOCAL_DIR` | Root directory for the local-filesystem storage adapter (asset images/documents) |
+
+Only a local-filesystem `StorageAdapter` is implemented today — see
+[ADR 0005](adr/0005-asset-file-storage-strategy.md) for the S3-compatible
+interface it satisfies and how a production adapter would be swapped in.
+
+## Assets module
+
+See [ADR 0002](adr/0002-universal-asset-model.md) through
+[ADR 0005](adr/0005-asset-file-storage-strategy.md) for the full design
+rationale. This section is the practical "how it works" reference,
+mirroring the style of the Authentication & Tenancy sections above.
+
+### Domain model
+
+```
+AssetCategory (tenant-scoped, nested via parentId)
+  └─ Asset (categoryId, currentStatusId, money in minor units, universal fields only)
+       ├─ AssetCustomFieldValue (assetId, fieldDefinitionId, valueJson)  — typed per AssetCustomFieldDefinition
+       ├─ AssetStatusHistory (fromStatusId → toStatusId, append-only)
+       ├─ AssetLocationHistory (previousLocation → newLocation, append-only, free text)
+       ├─ AssetImage (storageKey, isPrimary, soft-deleted)
+       └─ AssetDocument (storageKey, documentType, soft-deleted)
+
+AssetStatusDefinition (tenant-scoped; 8 system rows seeded automatically + tenant-defined custom ones)
+AssetCustomFieldDefinition (tenant-scoped; categoryId nullable = applies globally)
+```
+
+Every table above carries `tenantId` and every service method filters by
+it directly in the Prisma `where` clause (never a post-fetch check) — the
+same non-negotiable rule ADR 0001 established for Customers extends to
+every asset table without exception.
+
+### Custom field validation
+
+`AssetCustomFieldDefinition.validationRules` is a small declarative shape
+(`min`, `max`, `minLength`, `maxLength`, `pattern`) — never executable code.
+`AssetFieldValuesService` resolves the applicable definitions for an
+asset's category (global + category-specific), validates each submitted
+value via `validateFieldValue` (one case per `AssetFieldType`), and
+enforces that every `isRequired` definition ends up with a value after
+merging the incoming payload over any existing stored values. See
+[ADR 0003](adr/0003-custom-field-storage-strategy.md).
+
+### Money storage
+
+`purchasePriceMinor` / `replacementValueMinor` are integers in the
+currency's minor unit (e.g. cents); `purchaseCurrency` /
+`replacementCurrency` are validated ISO 4217 codes
+(`packages/shared/src/currencies.ts`). A minor-units value and its
+currency must always be set together (`AssetsService.assertMoneyPairing`).
+The frontend never exposes raw minor units to a user — see
+`apps/web/src/lib/money.ts` for the major-unit ↔ minor-unit conversion at
+the form/display boundary.
+
+### Status transitions
+
+`POST /tenants/:tenantId/assets/:assetId/status` atomically (single
+`$transaction`) updates `Asset.currentStatusId` and inserts an
+`AssetStatusHistory` row recording `fromStatusId`, `toStatusId`,
+`changedByUserId`, and an optional `reason`. An inactive status cannot be
+assigned. System statuses (`isSystem = true`) can have every field edited
+except `code`, and can never be deleted; a custom status cannot be deleted
+while any active asset currently has it. See
+[ADR 0004](adr/0004-configurable-asset-statuses.md).
+
+### File upload flow
+
+Images and documents are uploaded via direct `multipart/form-data` POSTs
+(not a presigned-URL flow — see [ADR 0005](adr/0005-asset-file-storage-strategy.md)
+for why), validated for MIME type and size
+(`image/jpeg`/`image/png`/`image/webp` for images, plus `application/pdf`
+for documents), and persisted through a small `StorageAdapter` interface
+— `LocalFilesystemStorageAdapter` in every environment today, with a
+production S3-compatible adapter as the documented next step. Reads go
+through a protected, tenant-scoped streaming endpoint
+(`GET .../images/:imageId/file`), not a raw/public URL. Deleting an image
+or document soft-deletes the metadata row and then best-effort deletes the
+underlying object from storage.
+
+### Timeline event structure
+
+`GET /tenants/:tenantId/assets/:assetId/timeline` returns a single,
+chronologically-sorted (oldest first) array combining creation, updates
+(from `AuditLog`), status changes, location changes, image uploads, and
+document uploads:
+
+```json
+[
+  {
+    "id": "string",
+    "type": "created | updated | status_changed | location_changed | image_uploaded | document_uploaded",
+    "occurredAt": "ISO-8601 string",
+    "actorUserId": "string | null",
+    "data": { "...": "event-specific metadata" }
+  }
+]
+```
+
+### Permissions
+
+See [`docs/api.md#permissions`](api.md#permissions) for the full
+permission-to-role mapping. Authorization is granular
+(`assets.read`, `assets.create`, …), enforced by a reusable
+`PermissionsGuard` + `@RequirePermissions(...)` decorator
+(`apps/api/src/permissions/`) applied after `TenantGuard` on every
+asset-module controller — controllers never check `MembershipRole` names
+directly.

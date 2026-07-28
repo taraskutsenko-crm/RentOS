@@ -4,6 +4,7 @@ import { APP_GUARD } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import type { ApiEnv } from "@rentos/shared";
 
+import { AssetStatusesModule } from "../asset-statuses/asset-statuses.module";
 import { AuditModule } from "../audit/audit.module";
 import { MembershipsModule } from "../memberships/memberships.module";
 import { TenantsModule } from "../tenants/tenants.module";
@@ -21,6 +22,7 @@ import { TokenService } from "./token.service";
     TenantsModule,
     MembershipsModule,
     AuditModule,
+    AssetStatusesModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

@@ -51,3 +51,92 @@ export const customerSchema = z.object({
 });
 
 export type CustomerFormValues = z.infer<typeof customerSchema>;
+
+export const assetSchema = z.object({
+  name: z.string().min(1, "auth.errors.required").max(200),
+  internalNumber: z.string().min(1, "auth.errors.required").max(100),
+  categoryId: z.string().min(1, "asset.errors.categoryRequired"),
+  statusId: z.string(),
+  sku: z.string().max(100),
+  serialNumber: z.string().max(100),
+  barcode: z.string().max(100),
+  qrCodeValue: z.string().max(200),
+  manufacturer: z.string().max(150),
+  model: z.string().max(150),
+  description: z.string().max(2000),
+  purchaseDate: z.string(),
+  purchasePriceDisplay: z.string(),
+  purchaseCurrency: z.string(),
+  replacementValueDisplay: z.string(),
+  replacementCurrency: z.string(),
+  conditionNotes: z.string().max(2000),
+  isRentable: z.boolean(),
+  isActive: z.boolean(),
+  customFields: z.record(z.string(), z.unknown()),
+});
+
+export type AssetFormValues = z.infer<typeof assetSchema>;
+
+export const assetCategorySchema = z.object({
+  name: z.string().min(1, "auth.errors.required").max(150),
+  description: z.string().max(1000),
+  code: z.string().max(50),
+  parentId: z.string(),
+  isActive: z.boolean(),
+  sortOrder: z.number().int().min(0),
+});
+
+export type AssetCategoryFormValues = z.infer<typeof assetCategorySchema>;
+
+export const assetStatusSchema = z.object({
+  name: z.string().min(1, "auth.errors.required").max(100),
+  code: z
+    .string()
+    .min(1, "auth.errors.required")
+    .regex(/^[A-Z][A-Z0-9_]{0,49}$/, "asset.errors.statusCodeFormat"),
+  description: z.string().max(500),
+  colorToken: z.string().max(50),
+  icon: z.string().max(50),
+  isAvailableForRental: z.boolean(),
+  isActive: z.boolean(),
+  sortOrder: z.number().int().min(0),
+});
+
+export type AssetStatusFormValues = z.infer<typeof assetStatusSchema>;
+
+export const assetCustomFieldOptionSchema = z.object({
+  value: z.string().min(1, "auth.errors.required"),
+  label: z.string().min(1, "auth.errors.required"),
+});
+
+export const assetCustomFieldSchema = z.object({
+  name: z.string().min(1, "auth.errors.required").max(150),
+  key: z
+    .string()
+    .min(1, "auth.errors.required")
+    .regex(/^[a-z][a-z0-9_]{0,49}$/, "asset.errors.fieldKeyFormat"),
+  description: z.string().max(500),
+  categoryId: z.string(),
+  fieldType: z.enum([
+    "TEXT",
+    "TEXTAREA",
+    "INTEGER",
+    "DECIMAL",
+    "BOOLEAN",
+    "DATE",
+    "DATETIME",
+    "SELECT",
+    "MULTISELECT",
+    "URL",
+    "EMAIL",
+    "PHONE",
+  ]),
+  isRequired: z.boolean(),
+  isActive: z.boolean(),
+  isFilterable: z.boolean(),
+  isSearchable: z.boolean(),
+  sortOrder: z.number().int().min(0),
+  options: z.array(assetCustomFieldOptionSchema),
+});
+
+export type AssetCustomFieldFormValues = z.infer<typeof assetCustomFieldSchema>;

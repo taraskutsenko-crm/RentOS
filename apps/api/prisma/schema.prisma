@@ -27,6 +27,31 @@ enum CustomerStatus {
   INACTIVE
 }
 
+enum AssetFieldType {
+  TEXT
+  TEXTAREA
+  INTEGER
+  DECIMAL
+  BOOLEAN
+  DATE
+  DATETIME
+  SELECT
+  MULTISELECT
+  URL
+  EMAIL
+  PHONE
+}
+
+enum AssetDocumentType {
+  PURCHASE_DOCUMENT
+  MANUAL
+  CERTIFICATE
+  INSURANCE
+  REGISTRATION
+  INSPECTION
+  OTHER
+}
+
 /// Platform user identity. Not tenant-scoped — a user may belong to
 /// multiple tenants via TenantMembership.
 model User {
@@ -45,6 +70,13 @@ model User {
   memberships   TenantMembership[]
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
+
+  createdAssets          Asset[]                @relation("AssetCreatedBy")
+  updatedAssets          Asset[]                @relation("AssetUpdatedBy")
+  assetStatusChanges     AssetStatusHistory[]   @relation("AssetStatusHistoryChangedBy")
+  assetLocationChanges   AssetLocationHistory[] @relation("AssetLocationHistoryChangedBy")
+  uploadedAssetImages    AssetImage[]           @relation("AssetImageUploadedBy")
+  uploadedAssetDocuments AssetDocument[]        @relation("AssetDocumentUploadedBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -69,6 +101,16 @@ model Tenant {
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
   customers     Customer[]
+
+  assetCategories             AssetCategory[]
+  assets                      Asset[]
+  assetStatusDefinitions      AssetStatusDefinition[]
+  assetStatusHistory          AssetStatusHistory[]
+  assetLocationHistory        AssetLocationHistory[]
+  assetCustomFieldDefinitions AssetCustomFieldDefinition[]
+  assetCustomFieldValues      AssetCustomFieldValue[]
+  assetImages                 AssetImage[]
+  assetDocuments              AssetDocument[]
 
   @@index([deletedAt])
   @@map("tenants")
@@ -166,4 +208,284 @@ model Customer {
   @@index([tenantId, deletedAt])
   @@index([tenantId, email])
   @@map("customers")
+}
+
+/// A universal, tenant-scoped classification for rentable assets. Deliberately
+/// generic — "Vehicles", "Containers", "Generators" etc. are tenant-created
+/// data, never hardcoded business logic. Supports nesting via parentId.
+/// Name uniqueness within (tenantId, parentId) and cycle prevention are
+/// enforced in AssetCategoriesService, not the database: Postgres unique
+/// indexes treat NULL parentId values as distinct, so a DB-level constraint
+/// alone cannot cover root-level (parentId IS NULL) siblings.
+model AssetCategory {
+  id          String    @id @default(uuid())
+  tenantId    String
+  parentId    String?
+  name        String
+  description String?
+  code        String?
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  tenant   Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent   AssetCategory?  @relation("AssetCategoryParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children AssetCategory[] @relation("AssetCategoryParent")
+
+  assets                 Asset[]
+  customFieldDefinitions AssetCustomFieldDefinition[]
+
+  @@index([tenantId, parentId, name])
+  @@index([tenantId, deletedAt])
+  @@map("asset_categories")
+}
+
+/// Tenant-configurable lifecycle status for assets. Eight system statuses
+/// (isSystem = true) are seeded automatically for every new tenant — see
+/// AssetStatusesService.seedSystemStatuses — and cannot be renamed or
+/// deleted. Tenants may additionally define their own custom statuses.
+model AssetStatusDefinition {
+  id                   String    @id @default(uuid())
+  tenantId             String
+  name                 String
+  code                 String
+  description          String?
+  colorToken           String?
+  icon                 String?
+  isSystem             Boolean   @default(false)
+  isActive             Boolean   @default(true)
+  isAvailableForRental Boolean   @default(false)
+  sortOrder            Int       @default(0)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  currentOnAssets Asset[] @relation("AssetCurrentStatus")
+
+  statusHistoryFrom AssetStatusHistory[] @relation("AssetStatusHistoryFrom")
+  statusHistoryTo   AssetStatusHistory[] @relation("AssetStatusHistoryTo")
+
+  @@unique([tenantId, code])
+  @@index([tenantId, isActive])
+  @@map("asset_status_definitions")
+}
+
+/// A tenant's rentable physical property of any kind — a vehicle, a
+/// container, a generator, a tool, or anything else. Business logic here is
+/// deliberately type-agnostic; type-specific attributes live in
+/// AssetCustomFieldValue, never as columns on this table.
+model Asset {
+  id                    String    @id @default(uuid())
+  tenantId              String
+  categoryId            String
+  currentStatusId       String
+  name                  String
+  internalNumber        String
+  sku                   String?
+  serialNumber          String?
+  barcode               String?
+  qrCodeValue           String?
+  manufacturer          String?
+  model                 String?
+  description           String?
+  purchaseDate          DateTime?
+  purchasePriceMinor    Int?
+  purchaseCurrency      String?   @db.VarChar(3)
+  replacementValueMinor Int?
+  replacementCurrency   String?   @db.VarChar(3)
+  currentLocationText   String?
+  conditionNotes        String?
+  isRentable            Boolean   @default(true)
+  isActive              Boolean   @default(true)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  deletedAt             DateTime?
+  createdByUserId       String
+  updatedByUserId       String?
+
+  tenant        Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category      AssetCategory         @relation(fields: [categoryId], references: [id])
+  currentStatus AssetStatusDefinition @relation("AssetCurrentStatus", fields: [currentStatusId], references: [id])
+  createdByUser User                  @relation("AssetCreatedBy", fields: [createdByUserId], references: [id])
+  updatedByUser User?                 @relation("AssetUpdatedBy", fields: [updatedByUserId], references: [id])
+
+  customFieldValues AssetCustomFieldValue[]
+  statusHistory     AssetStatusHistory[]
+  locationHistory   AssetLocationHistory[]
+  images            AssetImage[]
+  documents         AssetDocument[]
+
+  @@unique([tenantId, internalNumber])
+  @@unique([tenantId, sku])
+  @@unique([tenantId, serialNumber])
+  @@unique([tenantId, barcode])
+  @@unique([tenantId, qrCodeValue])
+  @@index([tenantId, categoryId])
+  @@index([tenantId, currentStatusId])
+  @@index([tenantId, deletedAt])
+  @@index([tenantId, isActive])
+  @@index([tenantId, manufacturer])
+  @@index([tenantId, model])
+  @@map("assets")
+}
+
+/// Append-only record of every status transition for an asset. Written
+/// atomically with the Asset.currentStatusId update in a single transaction.
+model AssetStatusHistory {
+  id              String   @id @default(uuid())
+  tenantId        String
+  assetId         String
+  fromStatusId    String?
+  toStatusId      String
+  changedByUserId String
+  reason          String?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  tenant        Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset         Asset                  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  fromStatus    AssetStatusDefinition? @relation("AssetStatusHistoryFrom", fields: [fromStatusId], references: [id])
+  toStatus      AssetStatusDefinition  @relation("AssetStatusHistoryTo", fields: [toStatusId], references: [id])
+  changedByUser User                   @relation("AssetStatusHistoryChangedBy", fields: [changedByUserId], references: [id])
+
+  @@index([tenantId, assetId, createdAt])
+  @@map("asset_status_history")
+}
+
+/// Append-only record of every location change for an asset. Location is
+/// deliberately a free-text field for now — see ADR 0002 for the documented
+/// extension point toward branchId/warehouseId/GPS coordinates once those
+/// concepts exist elsewhere in the platform.
+model AssetLocationHistory {
+  id               String   @id @default(uuid())
+  tenantId         String
+  assetId          String
+  previousLocation String?
+  newLocation      String?
+  changedByUserId  String
+  reason           String?
+  createdAt        DateTime @default(now())
+
+  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset         Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  changedByUser User   @relation("AssetLocationHistoryChangedBy", fields: [changedByUserId], references: [id])
+
+  @@index([tenantId, assetId, createdAt])
+  @@map("asset_location_history")
+}
+
+/// A tenant-defined custom attribute, optionally scoped to one AssetCategory
+/// (categoryId = null means it applies to every asset regardless of
+/// category). Values are stored per-asset in AssetCustomFieldValue as typed
+/// JSON — see ADR 0003 for why EAV-via-JSON was chosen over per-type tables
+/// or a fully dynamic schema.
+model AssetCustomFieldDefinition {
+  id              String         @id @default(uuid())
+  tenantId        String
+  categoryId      String?
+  name            String
+  key             String
+  description     String?
+  fieldType       AssetFieldType
+  isRequired      Boolean        @default(false)
+  isActive        Boolean        @default(true)
+  isFilterable    Boolean        @default(false)
+  isSearchable    Boolean        @default(false)
+  sortOrder       Int            @default(0)
+  validationRules Json?
+  options         Json?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deletedAt       DateTime?
+
+  tenant   Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category AssetCategory?          @relation(fields: [categoryId], references: [id])
+  values   AssetCustomFieldValue[]
+
+  // Covers the categoryId != null case; the categoryId == null ("global")
+  // case is enforced in AssetCustomFieldsService (see AssetCategory note
+  // above re: NULL and unique indexes).
+  @@unique([tenantId, categoryId, key])
+  @@index([tenantId, fieldType])
+  @@index([tenantId, categoryId, deletedAt])
+  @@map("asset_custom_field_definitions")
+}
+
+/// The typed value of one custom field on one asset. valueJson always holds
+/// a JSON-encodable representation appropriate to the field's fieldType
+/// (string, number, boolean, ISO date string, or string[] for MULTISELECT).
+model AssetCustomFieldValue {
+  id                String   @id @default(uuid())
+  tenantId          String
+  assetId           String
+  fieldDefinitionId String
+  valueJson         Json
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  tenant          Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset           Asset                      @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  fieldDefinition AssetCustomFieldDefinition @relation(fields: [fieldDefinitionId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, fieldDefinitionId])
+  @@index([tenantId, fieldDefinitionId])
+  @@map("asset_custom_field_values")
+}
+
+/// Metadata for one image of an asset. The binary itself lives in
+/// S3-compatible object storage (see StorageService / ADR 0005) — storageKey
+/// is the only pointer to it. Only one non-deleted image per asset may have
+/// isPrimary = true (enforced by AssetFilesService in a transaction, and by
+/// a partial unique index added in the migration for defense in depth).
+model AssetImage {
+  id               String    @id @default(uuid())
+  tenantId         String
+  assetId          String
+  storageKey       String
+  originalFileName String
+  mimeType         String
+  sizeBytes        Int
+  sortOrder        Int       @default(0)
+  isPrimary        Boolean   @default(false)
+  altText          String?
+  uploadedByUserId String
+  createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
+
+  tenant         Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset          Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  uploadedByUser User   @relation("AssetImageUploadedBy", fields: [uploadedByUserId], references: [id])
+
+  @@index([tenantId, assetId, deletedAt])
+  @@map("asset_images")
+}
+
+/// Metadata for one document attached to an asset (manual, certificate,
+/// insurance, etc). Rental-specific documents (contracts) are explicitly out
+/// of scope — see docs/adr/0005-asset-file-storage-strategy.md.
+model AssetDocument {
+  id               String            @id @default(uuid())
+  tenantId         String
+  assetId          String
+  documentType     AssetDocumentType
+  title            String
+  storageKey       String
+  originalFileName String
+  mimeType         String
+  sizeBytes        Int
+  expiresAt        DateTime?
+  uploadedByUserId String
+  createdAt        DateTime          @default(now())
+  deletedAt        DateTime?
+
+  tenant         Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset          Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  uploadedByUser User   @relation("AssetDocumentUploadedBy", fields: [uploadedByUserId], references: [id])
+
+  @@index([tenantId, assetId, deletedAt])
+  @@map("asset_documents")
 }

@@ -7,11 +7,13 @@ designed to support any asset type, any country, any language, subscription
 billing, and future mobile clients through an API-first architecture.
 
 > **Status:** Production infrastructure, authentication, multi-tenant RBAC,
-> and the first business module (Customers) are complete. Registration,
+> and the Customers and Assets business modules are complete. Registration,
 > login/logout, rotating refresh tokens, tenant onboarding, tenant-isolated
-> access control, and full customer CRUD (search, filter, pagination) are
-> all implemented and tested end-to-end. Remaining business modules
-> (assets, rentals, billing) are still out of scope until explicitly
+> access control, full customer CRUD, and a universal Assets module
+> (categories, tenant-configurable statuses, category-scoped custom
+> fields, images/documents, status/location history, and a unified
+> timeline) are all implemented and tested end-to-end. Remaining business
+> modules (rentals, billing) are still out of scope until explicitly
 > requested.
 
 ## Tech Stack
@@ -49,12 +51,50 @@ status filtering, pagination, and soft delete. Every request is scoped by
 `tenantId` server-side (`TenantGuard`) — never trusted from the URL alone.
 See [docs/api.md](docs/api.md#customers) for the full endpoint reference.
 
+## Assets
+
+A universal module for renting and managing **any** kind of physical
+property — vehicles, containers, tools, generators, portable toilets, and
+anything else a tenant defines. Business logic is never tied to one asset
+type: type-specific attributes (a VIN, a tank capacity, an engine power
+rating) are represented entirely through tenant-defined custom fields, not
+hardcoded columns. Covers:
+
+- **Categories** — tenant-scoped, nested (`AssetCategory`), with cycle
+  prevention and safety checks before deletion.
+- **Assets** — universal identity/lifecycle/financial fields, money always
+  stored as integer minor units + a validated ISO 4217 currency, full-text
+  and custom-field search, pagination, and filtering.
+- **Statuses** — eight system statuses seeded per tenant
+  (`AVAILABLE`, `RESERVED`, `RENTED`, `INSPECTION_REQUIRED`,
+  `MAINTENANCE`, `REPAIR`, `LOST`, `RETIRED`) plus unlimited
+  tenant-defined custom statuses; every status change is recorded in
+  `AssetStatusHistory`.
+- **Custom fields** — category-scoped or global, twelve field types,
+  declarative (non-executable) validation rules, enforced on asset
+  create/update.
+- **Images & documents** — S3-compatible storage abstraction with a
+  local-filesystem development adapter, MIME/size-validated uploads, one
+  primary image per asset, soft delete plus storage cleanup.
+- **Timeline** — a normalized, chronological feed combining creation,
+  updates, status changes, location changes, and file uploads for one
+  asset.
+- **Granular permissions** — `assets.*`, `asset_categories.*`,
+  `asset_statuses.*`, and `asset_fields.*`, enforced by a reusable
+  `PermissionsGuard` (never role-name checks in controllers).
+
+See [docs/api.md](docs/api.md#assets) for the full endpoint reference, and
+[docs/adr/0002-universal-asset-model.md](docs/adr/0002-universal-asset-model.md)
+through
+[docs/adr/0005-asset-file-storage-strategy.md](docs/adr/0005-asset-file-storage-strategy.md)
+for the design rationale.
+
 ## Monorepo Structure
 
 ```
 apps/
   web/            Next.js frontend — App Router, Tailwind v4, auth + customers pages, protected /app shell
-  api/            NestJS backend — auth, users, tenants, memberships, customers, audit modules
+  api/            NestJS backend — auth, users, tenants, memberships, customers, assets, permissions, storage, audit modules
 packages/
   ui/             Shared UI component library (Tailwind v4 + shadcn/ui)
   shared/         Shared types, env validation (zod), country config, constants
@@ -127,8 +167,12 @@ Per-app scripts:
 Prisma is configured against PostgreSQL in
 [`apps/api/prisma/schema.prisma`](apps/api/prisma/schema.prisma):
 `User`, `Tenant`, `TenantMembership`, `RefreshToken`, `AuditLog`,
-`Customer`, plus `MembershipRole`/`MembershipStatus`/`CustomerStatus`
-enums. No other business schema (assets, rentals) has been added.
+`Customer`, `AssetCategory`, `Asset`, `AssetStatusDefinition`,
+`AssetStatusHistory`, `AssetLocationHistory`, `AssetCustomFieldDefinition`,
+`AssetCustomFieldValue`, `AssetImage`, `AssetDocument`, plus
+`MembershipRole`/`MembershipStatus`/`CustomerStatus`/`AssetFieldType`/
+`AssetDocumentType` enums. No other business schema (rentals, billing) has
+been added.
 
 ## Environment Variables
 
@@ -138,13 +182,17 @@ Compose), and `.env.example` in [`apps/api`](apps/api/.env.example) /
 Docker. Environment variables consumed by the API are validated at startup
 via a zod schema in [`packages/shared`](packages/shared/src/env.ts). See
 [docs/architecture.md](docs/architecture.md#required-environment-variables)
-for the auth-specific variables.
+for the auth-specific variables, and
+[docs/architecture.md#asset-file-storage](docs/architecture.md#asset-file-storage)
+for `STORAGE_LOCAL_DIR`.
 
 ## Roadmap
 
 Deliberately out of scope so far:
 
-- Remaining business modules (assets, rentals, billing)
+- Rentals, reservations, availability calendars, quotations, invoices,
+  payments, deposits, maintenance/repair workflows
+- Branches, warehouses, GPS tracking, customer portal
 - OAuth, email sending, password reset, two-factor authentication
 - Theming, background jobs (BullMQ)
 

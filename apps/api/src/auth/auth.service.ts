@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import type { Prisma, RefreshToken } from "@prisma/client";
 import { isSupportedCountryCode, type ApiEnv } from "@rentos/shared";
 
+import { AssetStatusesService } from "../asset-statuses/asset-statuses.service";
 import { AuditService } from "../audit/audit.service";
 import { MembershipsService } from "../memberships/memberships.service";
 import { PrismaService } from "../prisma/prisma.service";
@@ -30,6 +31,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly tenantsService: TenantsService,
     private readonly membershipsService: MembershipsService,
+    private readonly assetStatusesService: AssetStatusesService,
     private readonly auditService: AuditService,
     private readonly passwordService: PasswordService,
     private readonly tokenService: TokenService,
@@ -72,6 +74,8 @@ export class AuthService {
           userId: user.id,
           role: "OWNER",
         });
+
+        await this.assetStatusesService.seedSystemStatuses(tenant.id, tx);
 
         const refreshToken = await this.issueRefreshToken(tx, user.id, tenant.id, meta);
 

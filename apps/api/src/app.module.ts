@@ -5,6 +5,11 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 import { apiEnvSchema } from "@rentos/shared";
 
+import { AssetCategoriesModule } from "./asset-categories/asset-categories.module";
+import { AssetCustomFieldsModule } from "./asset-custom-fields/asset-custom-fields.module";
+import { AssetFilesModule } from "./asset-files/asset-files.module";
+import { AssetStatusesModule } from "./asset-statuses/asset-statuses.module";
+import { AssetsModule } from "./assets/assets.module";
 import { AuthModule } from "./auth/auth.module";
 import { CustomersModule } from "./customers/customers.module";
 import { HealthModule } from "./health/health.module";
@@ -29,6 +34,11 @@ import { TenantsModule } from "./tenants/tenants.module";
     AuthModule,
     TenantsModule,
     CustomersModule,
+    AssetStatusesModule,
+    AssetCategoriesModule,
+    AssetCustomFieldsModule,
+    AssetsModule,
+    AssetFilesModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

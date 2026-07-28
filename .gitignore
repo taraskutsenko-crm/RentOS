@@ -32,6 +32,12 @@ Thumbs.db
 # Testing / coverage
 coverage/
 
+# Local-development file storage adapter output (asset images/documents)
+storage-uploads/
+storage-uploads-test/
+apps/api/storage-uploads/
+apps/api/storage-uploads-test/
+
 # Misc
 *.tsbuildinfo
 

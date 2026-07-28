@@ -128,13 +128,22 @@ carries all four possible unit prices (`dailyPriceMinor`,
 is meaningful, selected by `billingMode`
 (`apps/api/src/rentals/rental-pricing.util.ts`):
 
-- **DAILY/WEEKLY/MONTHLY** — `unitPrice × ceil(durationInDays / periodDays) × quantity`,
-  minus the item's own `discountMinor`, floored at 0. A rental spanning
-  any part of a day counts that whole day (a same-day rental is 1 day,
-  never 0). A "month" is simplified to a flat 30 days — documented, not
-  hidden; a calendar-accurate month (28–31 days) would need to know the
-  actual start date's month length, adding complexity not justified for
-  this task.
+- **DAILY/WEEKLY** — `unitPrice × ceil(durationInDays / periodDays) ×
+quantity`, minus the item's own `discountMinor`, floored at 0. A rental
+  spanning any part of a day counts that whole day (a same-day rental is
+  1 day, never 0).
+- **MONTHLY** — `unitPrice × monthsInRange(plannedStart, plannedEnd) ×
+quantity`, minus `discountMinor`, floored at 0. `monthsInRange` uses
+  real calendar-month arithmetic (UTC fields, never the host's local
+  timezone): the smallest `n` such that `plannedStart` plus `n` calendar
+  months reaches or passes `plannedEnd`, so a rental spanning any part of
+  a month counts that whole month (never 0) — the same rounding rule as
+  DAILY/WEEKLY, just calendar-accurate instead of a flat 30-day period.
+  Adding a calendar month clamps the day-of-month to the target month's
+  actual length (Jan 31 + 1 month = Feb 28, or Feb 29 in a leap year;
+  Aug 31 + 1 month = Sep 30), and each step is computed from the original
+  `plannedStart` (not cumulatively from the previous step) so a
+  multi-month span anchored on a 31st doesn't drift.
 - **CUSTOM** — a single negotiated flat price for the whole line,
   ignoring both duration _and_ quantity (it's the one mode meant for "we
   agreed on one total price for this," not a per-unit rate).

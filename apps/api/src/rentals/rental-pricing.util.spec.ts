@@ -5,6 +5,7 @@ import {
   computeItemLineTotalMinor,
   computeRentalTotals,
   durationInDays,
+  monthsInRange,
   type PricedRentalItemInput,
 } from "./rental-pricing.util";
 
@@ -23,6 +24,62 @@ describe("durationInDays", () => {
   it("computes a clean multi-day span", () => {
     const end = new Date("2026-08-08T00:00:00Z");
     expect(durationInDays(start, end)).toBe(7);
+  });
+});
+
+describe("monthsInRange", () => {
+  it("Jan 1 -> Feb 1 is exactly 1 calendar month", () => {
+    expect(monthsInRange(new Date("2026-01-01T00:00:00Z"), new Date("2026-02-01T00:00:00Z"))).toBe(
+      1,
+    );
+  });
+
+  it("Feb 1 -> Mar 1 is exactly 1 calendar month", () => {
+    expect(monthsInRange(new Date("2026-02-01T00:00:00Z"), new Date("2026-03-01T00:00:00Z"))).toBe(
+      1,
+    );
+  });
+
+  it("Mar 15 -> Apr 15 is exactly 1 calendar month", () => {
+    expect(monthsInRange(new Date("2026-03-15T00:00:00Z"), new Date("2026-04-15T00:00:00Z"))).toBe(
+      1,
+    );
+  });
+
+  it("Jan 31 -> Feb 28 is exactly 1 calendar month in a non-leap year", () => {
+    expect(monthsInRange(new Date("2027-01-31T00:00:00Z"), new Date("2027-02-28T00:00:00Z"))).toBe(
+      1,
+    );
+  });
+
+  it("Jan 31 -> Feb 29 is exactly 1 calendar month in a leap year", () => {
+    expect(monthsInRange(new Date("2028-01-31T00:00:00Z"), new Date("2028-02-29T00:00:00Z"))).toBe(
+      1,
+    );
+  });
+
+  it("Aug 31 -> Sep 30 is exactly 1 calendar month", () => {
+    expect(monthsInRange(new Date("2026-08-31T00:00:00Z"), new Date("2026-09-30T00:00:00Z"))).toBe(
+      1,
+    );
+  });
+
+  it("does not drift across a multi-month span anchored on a 31st", () => {
+    // Jan 31 -> Apr 30: Jan31+1mo=Feb28, +2mo=Mar31, +3mo=Apr30 (matches end exactly) -> 3 months
+    expect(monthsInRange(new Date("2026-01-31T00:00:00Z"), new Date("2026-04-30T00:00:00Z"))).toBe(
+      3,
+    );
+  });
+
+  it("rounds up a partial month", () => {
+    // Jan 1 -> Mar 5: 2 full months (Jan1->Mar1) plus a few days -> 3rd month started
+    expect(monthsInRange(new Date("2026-01-01T00:00:00Z"), new Date("2026-03-05T00:00:00Z"))).toBe(
+      3,
+    );
+  });
+
+  it("counts a same-instant range as 1 month, never 0", () => {
+    expect(monthsInRange(start, start)).toBe(1);
   });
 });
 
@@ -51,14 +108,26 @@ describe("computeItemLineTotalMinor", () => {
     expect(result).toBe(5000 * 2);
   });
 
-  it("computes a MONTHLY line total: unitPrice * ceil(days/30) * quantity", () => {
-    const end = new Date("2026-09-15T00:00:00Z"); // 45 days -> 2 months (30-day simplification)
+  it("computes a MONTHLY line total: unitPrice * calendar-months(start, end) * quantity", () => {
+    // Aug 1 -> Sep 15: Aug1+1mo=Sep1 (< end), Aug1+2mo=Oct1 (>= end) -> 2 months
+    const end = new Date("2026-09-15T00:00:00Z");
     const result = computeItemLineTotalMinor(
       item({ billingMode: "MONTHLY", monthlyPriceMinor: 20000 }),
       start,
       end,
     );
     expect(result).toBe(20000 * 2);
+  });
+
+  it("computes a MONTHLY line total across a calendar-month-exact span (Jan 31 -> Feb 28)", () => {
+    const monthlyStart = new Date("2027-01-31T00:00:00Z");
+    const end = new Date("2027-02-28T00:00:00Z");
+    const result = computeItemLineTotalMinor(
+      item({ billingMode: "MONTHLY", monthlyPriceMinor: 15000 }),
+      monthlyStart,
+      end,
+    );
+    expect(result).toBe(15000);
   });
 
   it("computes a CUSTOM line total as a flat price, ignoring duration and quantity", () => {

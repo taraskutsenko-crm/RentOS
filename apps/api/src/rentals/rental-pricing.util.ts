@@ -2,8 +2,6 @@ import { BadRequestException } from "@nestjs/common";
 import type { RentalBillingMode } from "@prisma/client";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-/** Simplification: a "month" of billing is treated as 30 days. Documented in ADR 0006. */
-const DAYS_PER_MONTH = 30;
 
 export interface PricedRentalItemInput {
   billingMode: RentalBillingMode;
@@ -19,6 +17,46 @@ export interface PricedRentalItemInput {
 export function durationInDays(plannedStart: Date, plannedEnd: Date): number {
   const days = Math.ceil((plannedEnd.getTime() - plannedStart.getTime()) / MS_PER_DAY);
   return Math.max(1, days);
+}
+
+/**
+ * Adds `months` calendar months to `date` using UTC fields (never the host's
+ * local timezone), clamping the day-of-month to the target month's actual
+ * length — e.g. Jan 31 + 1 month = Feb 28 (or 29 in a leap year), Aug 31 + 1
+ * month = Sep 30. Time-of-day is preserved unchanged.
+ */
+function addCalendarMonthsUtc(date: Date, months: number): Date {
+  const targetMonthIndex = date.getUTCMonth() + months;
+  // Day 0 of the month *after* the target month is the last day of the target month.
+  const daysInTargetMonth = new Date(
+    Date.UTC(date.getUTCFullYear(), targetMonthIndex + 1, 0),
+  ).getUTCDate();
+  const clampedDay = Math.min(date.getUTCDate(), daysInTargetMonth);
+  return new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      targetMonthIndex,
+      clampedDay,
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+      date.getUTCMilliseconds(),
+    ),
+  );
+}
+
+/**
+ * Number of real calendar months to bill for a MONTHLY rental item — the
+ * smallest `n` such that `plannedStart` plus `n` calendar months reaches or
+ * passes `plannedEnd`. A rental spanning any part of a month counts that
+ * whole month (never 0), matching the DAILY/WEEKLY rounding rule.
+ */
+export function monthsInRange(plannedStart: Date, plannedEnd: Date): number {
+  let months = 1;
+  while (addCalendarMonthsUtc(plannedStart, months).getTime() < plannedEnd.getTime()) {
+    months++;
+  }
+  return months;
 }
 
 /**
@@ -68,7 +106,7 @@ export function computeItemLineTotalMinor(
       break;
     case "MONTHLY":
       unitPriceMinor = item.monthlyPriceMinor!;
-      units = Math.ceil(days / DAYS_PER_MONTH);
+      units = monthsInRange(plannedStart, plannedEnd);
       break;
   }
 

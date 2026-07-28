@@ -1,7 +1,6 @@
 import type { RentalBillingMode } from "../types/rental";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const DAYS_PER_MONTH = 30;
 
 export interface EstimatedItemInput {
   billingMode: RentalBillingMode;
@@ -28,6 +27,50 @@ export function estimateDurationInDays(plannedStart: string, plannedEnd: string)
   return Math.max(1, Math.ceil((end - start) / MS_PER_DAY));
 }
 
+/**
+ * Adds `months` calendar months to `date` using UTC fields (never the host's
+ * local timezone), clamping the day-of-month to the target month's actual
+ * length — e.g. Jan 31 + 1 month = Feb 28 (or 29 in a leap year), Aug 31 + 1
+ * month = Sep 30. Time-of-day is preserved unchanged. Mirrors
+ * apps/api/src/rentals/rental-pricing.util.ts.
+ */
+function addCalendarMonthsUtc(date: Date, months: number): Date {
+  const targetMonthIndex = date.getUTCMonth() + months;
+  const daysInTargetMonth = new Date(
+    Date.UTC(date.getUTCFullYear(), targetMonthIndex + 1, 0),
+  ).getUTCDate();
+  const clampedDay = Math.min(date.getUTCDate(), daysInTargetMonth);
+  return new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      targetMonthIndex,
+      clampedDay,
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+      date.getUTCMilliseconds(),
+    ),
+  );
+}
+
+/**
+ * Number of real calendar months to estimate for a MONTHLY rental item — the
+ * smallest `n` such that `plannedStart` plus `n` calendar months reaches or
+ * passes `plannedEnd` (never 0, even for an invalid/empty range).
+ */
+export function estimateMonthsInRange(plannedStart: string, plannedEnd: string): number {
+  const start = new Date(plannedStart);
+  const end = new Date(plannedEnd);
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) {
+    return 0;
+  }
+  let months = 1;
+  while (addCalendarMonthsUtc(start, months).getTime() < end.getTime()) {
+    months++;
+  }
+  return months;
+}
+
 export function estimateItemLineTotalMinor(
   item: EstimatedItemInput,
   plannedStart: string,
@@ -48,7 +91,7 @@ export function estimateItemLineTotalMinor(
     units = Math.ceil(days / 7);
   } else if (item.billingMode === "MONTHLY") {
     unitPriceMinor = item.monthlyPriceMinor ?? 0;
-    units = Math.ceil(days / DAYS_PER_MONTH);
+    units = estimateMonthsInRange(plannedStart, plannedEnd);
   }
 
   return Math.max(0, unitPriceMinor * units * item.quantity - item.discountMinor);

@@ -167,6 +167,21 @@ truth.
 | `asset_fields.manage`     |  ✅   |  ✅   |         |            |            |        |
 | `asset_statuses.read`     |  ✅   |  ✅   |   ✅    |     ✅     |     ✅     |   ✅   |
 | `asset_statuses.manage`   |  ✅   |  ✅   |         |            |            |        |
+| `rentals.view`            |  ✅   |  ✅   |   ✅    |     ✅     |     ✅     |   ✅   |
+| `rentals.create`          |  ✅   |  ✅   |   ✅    |            |            |        |
+| `rentals.update`          |  ✅   |  ✅   |   ✅    |            |            |        |
+| `rentals.delete`          |  ✅   |  ✅   |         |            |            |        |
+| `rentals.reserve`         |  ✅   |  ✅   |   ✅    |            |            |        |
+| `rentals.start`           |  ✅   |  ✅   |   ✅    |     ✅     |            |        |
+| `rentals.return`          |  ✅   |  ✅   |   ✅    |     ✅     |            |        |
+| `rentals.cancel`          |  ✅   |  ✅   |   ✅    |            |            |        |
+
+`rentals.update` also covers location-independent edits (dates/items are
+only editable in `DRAFT`/`QUOTE` — see [ADR 0006](adr/0006-rental-lifecycle-and-availability.md)).
+TECHNICIAN — the role that physically handles equipment — gets `view`,
+`start`, and `return` (the two lifecycle steps tied to physically handing
+over or receiving back an asset) but not `create`/`update`/`reserve`/
+`cancel`, which are commercial/booking decisions.
 
 `assets.update` also covers location changes (`POST .../location`) —
 there is no separate permission for it, since location is just another
@@ -422,6 +437,168 @@ Soft-delete + best-effort storage cleanup.
 ### `GET .../documents/:documentId/file`
 
 Streams the document bytes (tenant/permission-checked).
+
+## Rentals
+
+All endpoints live under `/tenants/:tenantId/rentals` (see
+[ADR 0006](adr/0006-rental-lifecycle-and-availability.md) for why this
+codebase namespaces every business module by tenant, rather than the flat
+`/rentals` shorthand). Require authentication + active membership
+(`TenantGuard`) plus the permission noted per endpoint
+(`PermissionsGuard`). Records are soft-deleted and always scoped
+server-side by `tenantId`. Business logic is universal — nothing here is
+tied to a specific asset type.
+
+### `POST /tenants/:tenantId/rentals`
+
+Requires `rentals.create`. Creates a `DRAFT` rental with an
+automatically-generated `rentalNumber` (`RNT-000001`, unique per tenant).
+
+**Body**
+
+| Field           | Type   | Notes                                                       |
+| --------------- | ------ | ----------------------------------------------------------- |
+| `customerId`    | string | Required, must belong to the same tenant                    |
+| `plannedStart`  | string | Required, ISO date-time                                     |
+| `plannedEnd`    | string | Required, ISO date-time, must be after `plannedStart`       |
+| `currency`      | string | Optional, defaults to the tenant's default currency         |
+| `discountMinor` | number | Optional, rental-level discount, integer minor units, ≥ 0   |
+| `taxMinor`      | number | Optional, integer minor units, ≥ 0                          |
+| `notes`         | string | Optional, customer-facing                                   |
+| `internalNotes` | string | Optional, internal-only                                     |
+| `items`         | array  | Optional (a draft may start empty) — see `RentalItem` below |
+
+**`RentalItem` body shape** (each entry in `items`):
+
+| Field                                                                       | Type   | Notes                                                         |
+| --------------------------------------------------------------------------- | ------ | ------------------------------------------------------------- |
+| `assetId`                                                                   | string | Required, must belong to the tenant, be active and rentable   |
+| `quantity`                                                                  | number | Optional, default 1 — a pricing multiplier only, see ADR 0006 |
+| `billingMode`                                                               | enum   | `DAILY` \| `WEEKLY` \| `MONTHLY` \| `CUSTOM`                  |
+| `dailyPriceMinor`/`weeklyPriceMinor`/`monthlyPriceMinor`/`customPriceMinor` | number | Exactly the one matching `billingMode` is required            |
+| `depositMinor`                                                              | number | Optional, default 0, ≥ 0                                      |
+| `discountMinor`                                                             | number | Optional, default 0, ≥ 0 — this item's own discount           |
+| `notes`                                                                     | string | Optional                                                      |
+
+**201** → the created rental (see response shape below)
+**400** → validation failure (missing customer/dates, end before start,
+negative price/deposit, duplicate asset in one rental, inactive/
+non-rentable asset)
+**404** → `customerId` or an item's `assetId` doesn't belong to this
+tenant, or the asset was soft-deleted
+
+**Response shape** (also returned by `GET .../:id`, `PATCH`, and every
+lifecycle action):
+
+```json
+{
+  "id": "...",
+  "tenantId": "...",
+  "customerId": "...",
+  "rentalNumber": "RNT-000001",
+  "status": "DRAFT",
+  "plannedStart": "...",
+  "plannedEnd": "...",
+  "actualStart": null,
+  "actualEnd": null,
+  "currency": "USD",
+  "subtotalMinor": 3000,
+  "discountMinor": 0,
+  "taxMinor": 0,
+  "totalMinor": 3000,
+  "notes": null,
+  "internalNotes": null,
+  "customer": { "id": "...", "firstName": "...", "...": "..." },
+  "items": [
+    {
+      "id": "...",
+      "assetId": "...",
+      "billingMode": "DAILY",
+      "dailyPriceMinor": 1000,
+      "returnedAt": null,
+      "asset": { "...": "..." }
+    }
+  ]
+}
+```
+
+### `GET /tenants/:tenantId/rentals`
+
+Requires `rentals.view`.
+
+**Query params:** `page`, `pageSize` (max 100), `search` (rentalNumber,
+customer first/last name/company), `status`, `customerId`, `assetId`
+(rentals containing this asset), `plannedStartFrom`/`plannedStartTo`,
+`sortBy` (`rentalNumber`\|`plannedStart`\|`plannedEnd`\|`createdAt`\|`totalMinor`),
+`sortDirection`.
+
+**200** → `{ items: Rental[], total, page, pageSize }` — list items include
+`itemCount` instead of the full `items` array.
+
+### `GET /tenants/:tenantId/rentals/availability`
+
+Requires `rentals.view`. The availability engine's read endpoint — see
+[ADR 0006](adr/0006-rental-lifecycle-and-availability.md).
+
+**Query params:** `assetIds` (comma-separated), `plannedStart`,
+`plannedEnd`, `excludeRentalId?` (exclude a rental from its own conflict
+check while editing it).
+
+**200** → `{ results: [{ assetId, isAvailable, conflicts: [{ rentalId, rentalNumber, plannedStart, plannedEnd }] }] }`
+
+### `GET /tenants/:tenantId/rentals/:id`
+
+Requires `rentals.view`. **404** → not found (including soft-deleted, or another tenant's).
+
+### `PATCH /tenants/:tenantId/rentals/:id`
+
+Requires `rentals.update`. Body: any subset of the `POST` fields.
+**409** → attempting to change `items`, `plannedStart`, or `plannedEnd`
+on a rental that is no longer `DRAFT`/`QUOTE`.
+
+### `DELETE /tenants/:tenantId/rentals/:id`
+
+Requires `rentals.delete`. Soft-delete. **409** → rental is
+`RESERVED`/`ACTIVE`/`RETURNED`/`COMPLETED` (cancel it first — deleting is
+only for `DRAFT`/`QUOTE`/`CANCELLED`, which never became real operational
+history).
+
+### `POST /tenants/:tenantId/rentals/:id/reserve`
+
+Requires `rentals.reserve`. **Body:** `{ reason? }`. Moves `DRAFT`/`QUOTE`
+→ `RESERVED`. Re-validates every item's asset is still active/rentable,
+then runs the hard availability check.
+**400** → no items on the rental. **409** → wrong starting status, or an
+availability conflict (lists every unavailable asset).
+
+### `POST /tenants/:tenantId/rentals/:id/start`
+
+Requires `rentals.start`. **Body:** `{ reason? }`. Moves `RESERVED` →
+`ACTIVE`, sets `actualStart`, and (best-effort) moves every item's asset
+to the tenant's `RENTED` status. **409** → wrong starting status.
+
+### `POST /tenants/:tenantId/rentals/:id/return`
+
+Requires `rentals.return`. **Body:** `{ itemIds?, reason? }` — omit
+`itemIds` to return everything still outstanding (a full return).
+Marks the targeted items' `returnedAt`; moves the rental to `RETURNED`
+(and sets `actualEnd`) only once every item has been returned — a partial
+return keeps it `ACTIVE`. Returned assets are (best-effort) moved back to
+`AVAILABLE` and immediately become bookable again for the freed window.
+**400** → wrong starting status (must be `ACTIVE`), or no unreturned items
+match.
+
+### `POST /tenants/:tenantId/rentals/:id/cancel`
+
+Requires `rentals.cancel`. **Body:** `{ reason? }`. Allowed from `DRAFT`,
+`QUOTE`, `RESERVED`, or `ACTIVE`. Cancelling an `ACTIVE` rental implicitly
+returns and releases every not-yet-returned item. **409** → rental is
+already `RETURNED`, `COMPLETED`, or `CANCELLED`.
+
+### `GET /tenants/:tenantId/rentals/:id/timeline`
+
+Requires `rentals.view`. Returns a normalized, chronologically-sorted
+array combining creation, updates, status changes, and return events.
 
 ---
 

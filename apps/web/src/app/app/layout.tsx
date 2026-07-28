@@ -49,6 +49,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link href="/app/assets" className="text-muted-foreground hover:text-foreground">
               {t("asset.title")}
             </Link>
+            <Link href="/app/rentals" className="text-muted-foreground hover:text-foreground">
+              {t("rental.title")}
+            </Link>
             <Link
               href="/app/settings/asset-categories"
               className="text-muted-foreground hover:text-foreground"

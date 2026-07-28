@@ -52,6 +52,28 @@ enum AssetDocumentType {
   OTHER
 }
 
+/// Rental lifecycle: DRAFT -> QUOTE -> RESERVED -> ACTIVE -> RETURNED -> COMPLETED,
+/// with CANCELLED reachable from every non-terminal state. See
+/// docs/adr/0006-rental-lifecycle-and-availability.md.
+enum RentalStatus {
+  DRAFT
+  QUOTE
+  RESERVED
+  ACTIVE
+  RETURNED
+  COMPLETED
+  CANCELLED
+}
+
+/// How a RentalItem's line price is computed. CUSTOM uses customPriceMinor
+/// as a flat total, ignoring duration entirely (e.g. a negotiated package price).
+enum RentalBillingMode {
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
+
 /// Platform user identity. Not tenant-scoped — a user may belong to
 /// multiple tenants via TenantMembership.
 model User {
@@ -77,6 +99,10 @@ model User {
   assetLocationChanges   AssetLocationHistory[] @relation("AssetLocationHistoryChangedBy")
   uploadedAssetImages    AssetImage[]           @relation("AssetImageUploadedBy")
   uploadedAssetDocuments AssetDocument[]        @relation("AssetDocumentUploadedBy")
+
+  createdRentals      Rental[]              @relation("RentalCreatedBy")
+  updatedRentals      Rental[]              @relation("RentalUpdatedBy")
+  rentalStatusChanges RentalStatusHistory[] @relation("RentalStatusHistoryChangedBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -111,6 +137,10 @@ model Tenant {
   assetCustomFieldValues      AssetCustomFieldValue[]
   assetImages                 AssetImage[]
   assetDocuments              AssetDocument[]
+
+  rentals             Rental[]
+  rentalItems         RentalItem[]
+  rentalStatusHistory RentalStatusHistory[]
 
   @@index([deletedAt])
   @@map("tenants")
@@ -202,7 +232,8 @@ model Customer {
   updatedAt DateTime       @updatedAt
   deletedAt DateTime?
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rentals Rental[]
 
   @@index([tenantId, status])
   @@index([tenantId, deletedAt])
@@ -318,6 +349,7 @@ model Asset {
   locationHistory   AssetLocationHistory[]
   images            AssetImage[]
   documents         AssetDocument[]
+  rentalItems       RentalItem[]
 
   @@unique([tenantId, internalNumber])
   @@unique([tenantId, sku])
@@ -488,4 +520,100 @@ model AssetDocument {
 
   @@index([tenantId, assetId, deletedAt])
   @@map("asset_documents")
+}
+
+/// A tenant's rental order — the universal booking of one or more Assets to
+/// one Customer over a shared planned date window. Never asset-type-specific
+/// (see docs/adr/0006-rental-lifecycle-and-availability.md). Money is always
+/// integer minor units in `currency`, matching every other module.
+model Rental {
+  id              String       @id @default(uuid())
+  tenantId        String
+  customerId      String
+  rentalNumber    String
+  status          RentalStatus @default(DRAFT)
+  plannedStart    DateTime
+  plannedEnd      DateTime
+  actualStart     DateTime?
+  actualEnd       DateTime?
+  currency        String       @db.VarChar(3)
+  subtotalMinor   Int          @default(0)
+  discountMinor   Int          @default(0)
+  taxMinor        Int          @default(0)
+  totalMinor      Int          @default(0)
+  notes           String?
+  internalNotes   String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+  createdByUserId String
+  updatedByUserId String?
+
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer      Customer @relation(fields: [customerId], references: [id])
+  createdByUser User     @relation("RentalCreatedBy", fields: [createdByUserId], references: [id])
+  updatedByUser User?    @relation("RentalUpdatedBy", fields: [updatedByUserId], references: [id])
+
+  items         RentalItem[]
+  statusHistory RentalStatusHistory[]
+
+  @@unique([tenantId, rentalNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+  @@index([tenantId, deletedAt])
+  @@index([tenantId, plannedStart, plannedEnd])
+  @@map("rentals")
+}
+
+/// One asset booked within a Rental. quantity is a pricing multiplier only —
+/// the current Asset model represents one serialized physical unit per row
+/// (see ADR 0002), so availability/overlap checking is always per-assetId,
+/// never divided by quantity. Exactly one of dailyPriceMinor/weeklyPriceMinor/
+/// monthlyPriceMinor/customPriceMinor is meaningful, selected by billingMode.
+model RentalItem {
+  id                String            @id @default(uuid())
+  tenantId          String
+  rentalId          String
+  assetId           String
+  quantity          Int               @default(1)
+  billingMode       RentalBillingMode
+  dailyPriceMinor   Int?
+  weeklyPriceMinor  Int?
+  monthlyPriceMinor Int?
+  customPriceMinor  Int?
+  depositMinor      Int               @default(0)
+  discountMinor     Int               @default(0)
+  notes             String?
+  returnedAt        DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rental Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  asset  Asset  @relation(fields: [assetId], references: [id])
+
+  @@index([tenantId, rentalId])
+  @@index([tenantId, assetId])
+  @@map("rental_items")
+}
+
+/// Append-only history of Rental.status transitions, written atomically with
+/// the status change itself (single transaction — see RentalsService).
+model RentalStatusHistory {
+  id              String        @id @default(uuid())
+  tenantId        String
+  rentalId        String
+  fromStatus      RentalStatus?
+  toStatus        RentalStatus
+  changedByUserId String
+  reason          String?
+  metadata        Json?
+  createdAt       DateTime      @default(now())
+
+  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rental        Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  changedByUser User   @relation("RentalStatusHistoryChangedBy", fields: [changedByUserId], references: [id])
+
+  @@index([tenantId, rentalId, createdAt])
+  @@map("rental_status_history")
 }

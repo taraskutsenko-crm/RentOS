@@ -249,5 +249,102 @@
       "create": "Añadir campo",
       "deleteConfirm": "¿Eliminar esta definición de campo personalizado?"
     }
+  },
+  "rental": {
+    "title": "Alquileres",
+    "subtitle": "Reserva, sigue y gestiona la devolución de activos alquilados",
+    "newRental": "Nuevo alquiler",
+    "editRental": "Editar alquiler",
+    "save": "Guardar",
+    "deleteConfirm": "¿Seguro que quieres eliminar este alquiler?",
+    "searchPlaceholder": "Buscar alquileres…",
+    "allStatuses": "Todos los estados",
+    "noRentals": "No se encontraron alquileres",
+    "statuses": {
+      "DRAFT": "Borrador",
+      "QUOTE": "Presupuesto",
+      "RESERVED": "Reservado",
+      "ACTIVE": "Activo",
+      "RETURNED": "Devuelto",
+      "COMPLETED": "Completado",
+      "CANCELLED": "Cancelado"
+    },
+    "billingModes": {
+      "DAILY": "Diario",
+      "WEEKLY": "Semanal",
+      "MONTHLY": "Mensual",
+      "CUSTOM": "Personalizado"
+    },
+    "fields": {
+      "rentalNumber": "Número de alquiler",
+      "status": "Estado",
+      "plannedStart": "Inicio previsto",
+      "plannedEnd": "Fin previsto",
+      "actualStart": "Inicio real",
+      "actualEnd": "Fin real",
+      "billingMode": "Modo de facturación",
+      "quantity": "Cantidad",
+      "dailyPrice": "Precio diario",
+      "weeklyPrice": "Precio semanal",
+      "monthlyPrice": "Precio mensual",
+      "customPrice": "Precio personalizado",
+      "deposit": "Depósito",
+      "itemDiscount": "Descuento de la línea",
+      "discount": "Descuento",
+      "tax": "Impuesto",
+      "subtotal": "Subtotal",
+      "total": "Total",
+      "internalNotes": "Notas internas",
+      "returnedAt": "Devuelto el"
+    },
+    "sections": {
+      "details": "Detalles",
+      "items": "Activos",
+      "financial": "Resumen financiero"
+    },
+    "actions": {
+      "reserve": "Reservar",
+      "start": "Iniciar alquiler",
+      "returnAll": "Devolver todo",
+      "cancel": "Cancelar alquiler"
+    },
+    "timeline": {
+      "created": "Alquiler creado",
+      "updated": "Alquiler actualizado",
+      "status_changed": "Estado cambiado",
+      "items_returned": "Elemento(s) devuelto(s)"
+    },
+    "errors": {
+      "customerRequired": "Selecciona un cliente",
+      "datesRequired": "Se requieren las fechas previstas de inicio y fin",
+      "endBeforeStart": "El fin previsto debe ser posterior al inicio previsto",
+      "assetRequired": "Selecciona un activo",
+      "selectAtLeastOneAsset": "Selecciona al menos un activo"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Cliente",
+        "assets": "Activos",
+        "dates": "Fechas",
+        "pricing": "Precios",
+        "review": "Revisión"
+      },
+      "back": "Atrás",
+      "next": "Siguiente",
+      "creating": "Creando alquiler…",
+      "createRental": "Crear alquiler",
+      "availabilityCheck": "Comprobación de disponibilidad",
+      "available": "Disponible",
+      "unavailable": "No disponible para estas fechas"
+    },
+    "availabilityCalendar": {
+      "title": "Calendario de disponibilidad",
+      "subtitle": "Comprueba cuándo están libres los activos antes de reservarlos",
+      "previousMonth": "Mes anterior",
+      "nextMonth": "Mes siguiente",
+      "selectAssetsHint": "Selecciona uno o más activos para ver su disponibilidad",
+      "booked": "Reservado",
+      "free": "Libre"
+    }
   }
 }

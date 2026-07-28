@@ -7,13 +7,15 @@ designed to support any asset type, any country, any language, subscription
 billing, and future mobile clients through an API-first architecture.
 
 > **Status:** Production infrastructure, authentication, multi-tenant RBAC,
-> and the Customers and Assets business modules are complete. Registration,
-> login/logout, rotating refresh tokens, tenant onboarding, tenant-isolated
-> access control, full customer CRUD, and a universal Assets module
-> (categories, tenant-configurable statuses, category-scoped custom
+> and the Customers, Assets, and Rentals business modules are complete.
+> Registration, login/logout, rotating refresh tokens, tenant onboarding,
+> tenant-isolated access control, full customer CRUD, a universal Assets
+> module (categories, tenant-configurable statuses, category-scoped custom
 > fields, images/documents, status/location history, and a unified
-> timeline) are all implemented and tested end-to-end. Remaining business
-> modules (rentals, billing) are still out of scope until explicitly
+> timeline), and a universal Rentals module (booking wizard, lifecycle
+> state machine, real availability/double-booking prevention, automatic
+> pricing) are all implemented and tested end-to-end. Remaining business
+> modules (billing, invoicing) are still out of scope until explicitly
 > requested.
 
 ## Tech Stack
@@ -89,12 +91,40 @@ through
 [docs/adr/0005-asset-file-storage-strategy.md](docs/adr/0005-asset-file-storage-strategy.md)
 for the design rationale.
 
+## Rentals
+
+The core rental engine: books one or more Assets (any type — never
+container/vehicle/equipment-specific) to a Customer over a shared planned
+date window, with real availability checking that prevents double-booking.
+Covers:
+
+- **Lifecycle** — `DRAFT → QUOTE → RESERVED → ACTIVE → RETURNED → COMPLETED`,
+  with cancellation from any non-terminal state; every transition writes a
+  `RentalStatusHistory` row in the same transaction as the status change.
+- **Availability engine** — queries confirmed (`RESERVED`/`ACTIVE`)
+  bookings directly (never a single status field) to support future
+  reservations, back-to-back same-day turnover, and assets freed
+  immediately by a partial return.
+- **Automatic pricing** — daily/weekly/monthly/custom billing modes,
+  item- and rental-level discounts plus tax, money always in integer minor
+  units, recomputed and stored on every create/update.
+- **Partial returns** — return some items while a rental stays `ACTIVE`;
+  each returned asset is immediately available for a new booking.
+- **Booking wizard** — a 6-step guided flow (customer → assets → dates →
+  pricing → review → create) plus a visual availability calendar.
+- **Granular permissions** — `rentals.view/create/update/delete/reserve/
+start/return/cancel`, enforced by the same `PermissionsGuard` as Assets.
+
+See [docs/api.md](docs/api.md#rentals) for the full endpoint reference, and
+[ADR 0006](docs/adr/0006-rental-lifecycle-and-availability.md) for the
+lifecycle, availability, and pricing design rationale.
+
 ## Monorepo Structure
 
 ```
 apps/
   web/            Next.js frontend — App Router, Tailwind v4, auth + customers pages, protected /app shell
-  api/            NestJS backend — auth, users, tenants, memberships, customers, assets, permissions, storage, audit modules
+  api/            NestJS backend — auth, users, tenants, memberships, customers, assets, rentals, permissions, storage, audit modules
 packages/
   ui/             Shared UI component library (Tailwind v4 + shadcn/ui)
   shared/         Shared types, env validation (zod), country config, constants
@@ -169,10 +199,11 @@ Prisma is configured against PostgreSQL in
 `User`, `Tenant`, `TenantMembership`, `RefreshToken`, `AuditLog`,
 `Customer`, `AssetCategory`, `Asset`, `AssetStatusDefinition`,
 `AssetStatusHistory`, `AssetLocationHistory`, `AssetCustomFieldDefinition`,
-`AssetCustomFieldValue`, `AssetImage`, `AssetDocument`, plus
+`AssetCustomFieldValue`, `AssetImage`, `AssetDocument`, `Rental`,
+`RentalItem`, `RentalStatusHistory`, plus
 `MembershipRole`/`MembershipStatus`/`CustomerStatus`/`AssetFieldType`/
-`AssetDocumentType` enums. No other business schema (rentals, billing) has
-been added.
+`AssetDocumentType`/`RentalStatus`/`RentalBillingMode` enums. No other
+business schema (billing, invoicing) has been added.
 
 ## Environment Variables
 
@@ -190,8 +221,8 @@ for `STORAGE_LOCAL_DIR`.
 
 Deliberately out of scope so far:
 
-- Rentals, reservations, availability calendars, quotations, invoices,
-  payments, deposits, maintenance/repair workflows
+- Quotations as a distinct commercial document, invoices, payments,
+  deposits handling, maintenance/repair workflows
 - Branches, warehouses, GPS tracking, customer portal
 - OAuth, email sending, password reset, two-factor authentication
 - Theming, background jobs (BullMQ)

@@ -249,5 +249,102 @@
       "create": "Feld hinzufügen",
       "deleteConfirm": "Diese Definition eines benutzerdefinierten Feldes löschen?"
     }
+  },
+  "rental": {
+    "title": "Vermietungen",
+    "subtitle": "Vermietete Anlagen buchen, verfolgen und zurücknehmen",
+    "newRental": "Neue Vermietung",
+    "editRental": "Vermietung bearbeiten",
+    "save": "Speichern",
+    "deleteConfirm": "Möchten Sie diese Vermietung wirklich löschen?",
+    "searchPlaceholder": "Vermietungen suchen…",
+    "allStatuses": "Alle Status",
+    "noRentals": "Keine Vermietungen gefunden",
+    "statuses": {
+      "DRAFT": "Entwurf",
+      "QUOTE": "Angebot",
+      "RESERVED": "Reserviert",
+      "ACTIVE": "Aktiv",
+      "RETURNED": "Zurückgegeben",
+      "COMPLETED": "Abgeschlossen",
+      "CANCELLED": "Storniert"
+    },
+    "billingModes": {
+      "DAILY": "Täglich",
+      "WEEKLY": "Wöchentlich",
+      "MONTHLY": "Monatlich",
+      "CUSTOM": "Individuell"
+    },
+    "fields": {
+      "rentalNumber": "Vermietungsnummer",
+      "status": "Status",
+      "plannedStart": "Geplanter Beginn",
+      "plannedEnd": "Geplantes Ende",
+      "actualStart": "Tatsächlicher Beginn",
+      "actualEnd": "Tatsächliches Ende",
+      "billingMode": "Abrechnungsmodus",
+      "quantity": "Menge",
+      "dailyPrice": "Tagespreis",
+      "weeklyPrice": "Wochenpreis",
+      "monthlyPrice": "Monatspreis",
+      "customPrice": "Individueller Preis",
+      "deposit": "Kaution",
+      "itemDiscount": "Positionsrabatt",
+      "discount": "Rabatt",
+      "tax": "Steuer",
+      "subtotal": "Zwischensumme",
+      "total": "Gesamt",
+      "internalNotes": "Interne Notizen",
+      "returnedAt": "Zurückgegeben am"
+    },
+    "sections": {
+      "details": "Details",
+      "items": "Anlagen",
+      "financial": "Finanzübersicht"
+    },
+    "actions": {
+      "reserve": "Reservieren",
+      "start": "Vermietung starten",
+      "returnAll": "Alle zurücknehmen",
+      "cancel": "Vermietung stornieren"
+    },
+    "timeline": {
+      "created": "Vermietung erstellt",
+      "updated": "Vermietung aktualisiert",
+      "status_changed": "Status geändert",
+      "items_returned": "Position(en) zurückgegeben"
+    },
+    "errors": {
+      "customerRequired": "Wählen Sie einen Kunden",
+      "datesRequired": "Geplanter Beginn und geplantes Ende sind erforderlich",
+      "endBeforeStart": "Das geplante Ende muss nach dem geplanten Beginn liegen",
+      "assetRequired": "Wählen Sie eine Anlage",
+      "selectAtLeastOneAsset": "Wählen Sie mindestens eine Anlage"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Kunde",
+        "assets": "Anlagen",
+        "dates": "Termine",
+        "pricing": "Preise",
+        "review": "Überprüfung"
+      },
+      "back": "Zurück",
+      "next": "Weiter",
+      "creating": "Vermietung wird erstellt…",
+      "createRental": "Vermietung erstellen",
+      "availabilityCheck": "Verfügbarkeitsprüfung",
+      "available": "Verfügbar",
+      "unavailable": "Für diese Termine nicht verfügbar"
+    },
+    "availabilityCalendar": {
+      "title": "Verfügbarkeitskalender",
+      "subtitle": "Prüfen Sie, wann Anlagen frei sind, bevor Sie sie buchen",
+      "previousMonth": "Vorheriger Monat",
+      "nextMonth": "Nächster Monat",
+      "selectAssetsHint": "Wählen Sie eine oder mehrere Anlagen, um deren Verfügbarkeit zu sehen",
+      "booked": "Gebucht",
+      "free": "Frei"
+    }
   }
 }

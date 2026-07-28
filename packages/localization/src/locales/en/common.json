@@ -249,5 +249,102 @@
       "create": "Add field",
       "deleteConfirm": "Delete this custom field definition?"
     }
+  },
+  "rental": {
+    "title": "Rentals",
+    "subtitle": "Book, track, and return rented assets",
+    "newRental": "New rental",
+    "editRental": "Edit rental",
+    "save": "Save",
+    "deleteConfirm": "Are you sure you want to delete this rental?",
+    "searchPlaceholder": "Search rentals…",
+    "allStatuses": "All statuses",
+    "noRentals": "No rentals found",
+    "statuses": {
+      "DRAFT": "Draft",
+      "QUOTE": "Quote",
+      "RESERVED": "Reserved",
+      "ACTIVE": "Active",
+      "RETURNED": "Returned",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "billingModes": {
+      "DAILY": "Daily",
+      "WEEKLY": "Weekly",
+      "MONTHLY": "Monthly",
+      "CUSTOM": "Custom"
+    },
+    "fields": {
+      "rentalNumber": "Rental number",
+      "status": "Status",
+      "plannedStart": "Planned start",
+      "plannedEnd": "Planned end",
+      "actualStart": "Actual start",
+      "actualEnd": "Actual end",
+      "billingMode": "Billing mode",
+      "quantity": "Quantity",
+      "dailyPrice": "Daily price",
+      "weeklyPrice": "Weekly price",
+      "monthlyPrice": "Monthly price",
+      "customPrice": "Custom price",
+      "deposit": "Deposit",
+      "itemDiscount": "Item discount",
+      "discount": "Discount",
+      "tax": "Tax",
+      "subtotal": "Subtotal",
+      "total": "Total",
+      "internalNotes": "Internal notes",
+      "returnedAt": "Returned at"
+    },
+    "sections": {
+      "details": "Details",
+      "items": "Assets",
+      "financial": "Financial summary"
+    },
+    "actions": {
+      "reserve": "Reserve",
+      "start": "Start rental",
+      "returnAll": "Return all",
+      "cancel": "Cancel rental"
+    },
+    "timeline": {
+      "created": "Rental created",
+      "updated": "Rental updated",
+      "status_changed": "Status changed",
+      "items_returned": "Item(s) returned"
+    },
+    "errors": {
+      "customerRequired": "Select a customer",
+      "datesRequired": "Planned start and end dates are required",
+      "endBeforeStart": "Planned end must be after planned start",
+      "assetRequired": "Select an asset",
+      "selectAtLeastOneAsset": "Select at least one asset"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Customer",
+        "assets": "Assets",
+        "dates": "Dates",
+        "pricing": "Pricing",
+        "review": "Review"
+      },
+      "back": "Back",
+      "next": "Next",
+      "creating": "Creating rental…",
+      "createRental": "Create rental",
+      "availabilityCheck": "Availability check",
+      "available": "Available",
+      "unavailable": "Not available for these dates"
+    },
+    "availabilityCalendar": {
+      "title": "Availability calendar",
+      "subtitle": "Check when assets are free before you book them",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "selectAssetsHint": "Select one or more assets to see their availability",
+      "booked": "Booked",
+      "free": "Free"
+    }
   }
 }

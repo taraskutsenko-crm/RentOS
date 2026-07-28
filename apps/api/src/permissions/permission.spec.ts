@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { ASSET_PERMISSIONS, ROLE_PERMISSIONS, roleHasPermission } from "./permission";
+import { ALL_PERMISSIONS, ROLE_PERMISSIONS, roleHasPermission } from "./permission";
 
 describe("ROLE_PERMISSIONS", () => {
   it("grants OWNER and ADMIN every permission", () => {
-    for (const permission of ASSET_PERMISSIONS) {
+    for (const permission of ALL_PERMISSIONS) {
       expect(ROLE_PERMISSIONS.OWNER).toContain(permission);
       expect(ROLE_PERMISSIONS.ADMIN).toContain(permission);
     }
@@ -13,7 +13,7 @@ describe("ROLE_PERMISSIONS", () => {
   it("restricts ACCOUNTANT and VIEWER to read-only permissions", () => {
     for (const role of ["ACCOUNTANT", "VIEWER"] as const) {
       for (const permission of ROLE_PERMISSIONS[role]) {
-        expect(permission.endsWith(".read")).toBe(true);
+        expect(permission.endsWith(".read") || permission.endsWith(".view")).toBe(true);
       }
     }
   });
@@ -40,9 +40,45 @@ describe("ROLE_PERMISSIONS", () => {
     expect(roleHasPermission("TECHNICIAN", "assets.create")).toBe(false);
   });
 
-  it("every role maps to at least assets.read", () => {
+  it("every role maps to at least assets.read and rentals.view", () => {
     for (const role of Object.keys(ROLE_PERMISSIONS) as (keyof typeof ROLE_PERMISSIONS)[]) {
       expect(roleHasPermission(role, "assets.read")).toBe(true);
+      expect(roleHasPermission(role, "rentals.view")).toBe(true);
+    }
+  });
+
+  it("does not grant MANAGER rentals.delete", () => {
+    expect(roleHasPermission("MANAGER", "rentals.delete")).toBe(false);
+    expect(roleHasPermission("OWNER", "rentals.delete")).toBe(true);
+  });
+
+  it("grants MANAGER full rental lifecycle control except delete", () => {
+    for (const permission of [
+      "rentals.create",
+      "rentals.update",
+      "rentals.reserve",
+      "rentals.start",
+      "rentals.return",
+      "rentals.cancel",
+    ] as const) {
+      expect(roleHasPermission("MANAGER", permission)).toBe(true);
+    }
+  });
+
+  it("restricts TECHNICIAN to view/start/return, not create/update/reserve/cancel", () => {
+    expect(roleHasPermission("TECHNICIAN", "rentals.start")).toBe(true);
+    expect(roleHasPermission("TECHNICIAN", "rentals.return")).toBe(true);
+    expect(roleHasPermission("TECHNICIAN", "rentals.create")).toBe(false);
+    expect(roleHasPermission("TECHNICIAN", "rentals.update")).toBe(false);
+    expect(roleHasPermission("TECHNICIAN", "rentals.reserve")).toBe(false);
+    expect(roleHasPermission("TECHNICIAN", "rentals.cancel")).toBe(false);
+  });
+
+  it("ACCOUNTANT and VIEWER cannot mutate rentals", () => {
+    for (const role of ["ACCOUNTANT", "VIEWER"] as const) {
+      expect(roleHasPermission(role, "rentals.create")).toBe(false);
+      expect(roleHasPermission(role, "rentals.reserve")).toBe(false);
+      expect(roleHasPermission(role, "rentals.cancel")).toBe(false);
     }
   });
 });

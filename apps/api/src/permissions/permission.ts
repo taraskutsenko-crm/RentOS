@@ -1,9 +1,9 @@
 import type { MembershipRole } from "@prisma/client";
 
 /**
- * Granular, resource-scoped permissions for the Assets module (and future
- * business modules). Controllers must authorize against these, not against
- * `MembershipRole` names directly — see PermissionsGuard.
+ * Granular, resource-scoped permissions for the Assets module. Controllers
+ * must authorize against these, not against `MembershipRole` names
+ * directly — see PermissionsGuard.
  */
 export const ASSET_PERMISSIONS = [
   "assets.read",
@@ -21,34 +21,62 @@ export const ASSET_PERMISSIONS = [
   "asset_statuses.manage",
 ] as const;
 
-export type Permission = (typeof ASSET_PERMISSIONS)[number];
+/**
+ * Granular permissions for the Rentals module (TASK-0006). `rentals.view`
+ * is deliberately named `view` (not `read`, unlike the Assets module) to
+ * match the task's own endpoint/permission naming exactly.
+ */
+export const RENTAL_PERMISSIONS = [
+  "rentals.view",
+  "rentals.create",
+  "rentals.update",
+  "rentals.delete",
+  "rentals.reserve",
+  "rentals.start",
+  "rentals.return",
+  "rentals.cancel",
+] as const;
 
-const ALL_ASSET_PERMISSIONS: Permission[] = [...ASSET_PERMISSIONS];
+export const ALL_PERMISSIONS = [...ASSET_PERMISSIONS, ...RENTAL_PERMISSIONS] as const;
 
-const READ_ONLY_PERMISSIONS: Permission[] = [
+export type Permission = (typeof ALL_PERMISSIONS)[number];
+
+const EVERY_PERMISSION: Permission[] = [...ALL_PERMISSIONS];
+
+const ASSET_READ_ONLY: Permission[] = [
   "assets.read",
   "asset_categories.read",
   "asset_fields.read",
   "asset_statuses.read",
 ];
 
+const RENTAL_READ_ONLY: Permission[] = ["rentals.view"];
+
 /**
  * Default role -> permission mapping. OWNER and ADMIN get every permission.
- * MANAGER and TECHNICIAN get full operational control over assets
- * (including images/documents/status changes) but not `assets.delete` or
- * `*.manage` on categories/statuses/fields (configuration stays with
- * OWNER/ADMIN). ACCOUNTANT and VIEWER are read-only across the module.
  *
- * Known limitation: the spec asks TECHNICIAN to be restricted to
- * "condition/location" updates and "allowed operational" status changes,
- * but the permission model here is resource-level, not field- or
- * value-level. TECHNICIAN therefore gets the same `assets.update` /
- * `assets.change_status` as MANAGER. Field- and value-scoped authorization
- * would need a finer-grained policy engine — out of scope for this task.
+ * Assets: MANAGER and TECHNICIAN get full operational control (including
+ * images/documents/status changes) but not `assets.delete` or `*.manage`
+ * on categories/statuses/fields (configuration stays with OWNER/ADMIN).
+ *
+ * Rentals: MANAGER gets full lifecycle control except `rentals.delete`
+ * (deleting a rental record is destructive and reserved for OWNER/ADMIN,
+ * mirroring `assets.delete`). TECHNICIAN — the role that physically
+ * handles equipment — gets `view`/`start`/`return` (the two lifecycle
+ * steps tied to physically handing over or receiving back an asset) but
+ * not `create`/`update`/`reserve`/`cancel` (those are commercial/booking
+ * decisions, not physical-handling ones).
+ *
+ * ACCOUNTANT and VIEWER are read-only across both modules.
+ *
+ * Known limitation: the permission model is resource-level, not field- or
+ * value-level (e.g. TECHNICIAN's asset `update` isn't restricted to only
+ * condition/location fields). See ADR references in each module's
+ * documentation for how this tradeoff is judged acceptable at this stage.
  */
 export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
-  OWNER: ALL_ASSET_PERMISSIONS,
-  ADMIN: ALL_ASSET_PERMISSIONS,
+  OWNER: EVERY_PERMISSION,
+  ADMIN: EVERY_PERMISSION,
   MANAGER: [
     "assets.read",
     "assets.create",
@@ -59,6 +87,13 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "asset_categories.read",
     "asset_fields.read",
     "asset_statuses.read",
+    "rentals.view",
+    "rentals.create",
+    "rentals.update",
+    "rentals.reserve",
+    "rentals.start",
+    "rentals.return",
+    "rentals.cancel",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -69,9 +104,12 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "asset_categories.read",
     "asset_fields.read",
     "asset_statuses.read",
+    "rentals.view",
+    "rentals.start",
+    "rentals.return",
   ],
-  ACCOUNTANT: READ_ONLY_PERMISSIONS,
-  VIEWER: READ_ONLY_PERMISSIONS,
+  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY],
+  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY],
 };
 
 export function roleHasPermission(role: MembershipRole, permission: Permission): boolean {

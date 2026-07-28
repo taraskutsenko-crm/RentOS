@@ -249,5 +249,102 @@
       "create": "Додати поле",
       "deleteConfirm": "Видалити визначення цього додаткового поля?"
     }
+  },
+  "rental": {
+    "title": "Оренди",
+    "subtitle": "Бронюйте, відстежуйте та повертайте орендовані активи",
+    "newRental": "Нова оренда",
+    "editRental": "Редагувати оренду",
+    "save": "Зберегти",
+    "deleteConfirm": "Ви впевнені, що хочете видалити цю оренду?",
+    "searchPlaceholder": "Пошук оренд…",
+    "allStatuses": "Усі статуси",
+    "noRentals": "Оренд не знайдено",
+    "statuses": {
+      "DRAFT": "Чернетка",
+      "QUOTE": "Кошторис",
+      "RESERVED": "Заброньовано",
+      "ACTIVE": "Активна",
+      "RETURNED": "Повернена",
+      "COMPLETED": "Завершена",
+      "CANCELLED": "Скасована"
+    },
+    "billingModes": {
+      "DAILY": "Подобово",
+      "WEEKLY": "Потижнево",
+      "MONTHLY": "Помісячно",
+      "CUSTOM": "Індивідуально"
+    },
+    "fields": {
+      "rentalNumber": "Номер оренди",
+      "status": "Статус",
+      "plannedStart": "Плановий початок",
+      "plannedEnd": "Плановий кінець",
+      "actualStart": "Фактичний початок",
+      "actualEnd": "Фактичний кінець",
+      "billingMode": "Режим тарифікації",
+      "quantity": "Кількість",
+      "dailyPrice": "Ціна за день",
+      "weeklyPrice": "Ціна за тиждень",
+      "monthlyPrice": "Ціна за місяць",
+      "customPrice": "Індивідуальна ціна",
+      "deposit": "Застава",
+      "itemDiscount": "Знижка на позицію",
+      "discount": "Знижка",
+      "tax": "Податок",
+      "subtotal": "Проміжний підсумок",
+      "total": "Разом",
+      "internalNotes": "Внутрішні нотатки",
+      "returnedAt": "Повернено"
+    },
+    "sections": {
+      "details": "Деталі",
+      "items": "Активи",
+      "financial": "Фінансовий підсумок"
+    },
+    "actions": {
+      "reserve": "Забронювати",
+      "start": "Почати оренду",
+      "returnAll": "Повернути все",
+      "cancel": "Скасувати оренду"
+    },
+    "timeline": {
+      "created": "Оренду створено",
+      "updated": "Оренду оновлено",
+      "status_changed": "Статус змінено",
+      "items_returned": "Позиції повернено"
+    },
+    "errors": {
+      "customerRequired": "Оберіть клієнта",
+      "datesRequired": "Потрібні планові дати початку та завершення",
+      "endBeforeStart": "Плановий кінець має бути пізніше планового початку",
+      "assetRequired": "Оберіть актив",
+      "selectAtLeastOneAsset": "Оберіть принаймні один актив"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Клієнт",
+        "assets": "Активи",
+        "dates": "Дати",
+        "pricing": "Ціни",
+        "review": "Перевірка"
+      },
+      "back": "Назад",
+      "next": "Далі",
+      "creating": "Створення оренди…",
+      "createRental": "Створити оренду",
+      "availabilityCheck": "Перевірка доступності",
+      "available": "Доступний",
+      "unavailable": "Недоступний на ці дати"
+    },
+    "availabilityCalendar": {
+      "title": "Календар доступності",
+      "subtitle": "Перевірте, коли активи вільні, перед бронюванням",
+      "previousMonth": "Попередній місяць",
+      "nextMonth": "Наступний місяць",
+      "selectAssetsHint": "Оберіть один або декілька активів, щоб побачити їхню доступність",
+      "booked": "Заброньовано",
+      "free": "Вільно"
+    }
   }
 }

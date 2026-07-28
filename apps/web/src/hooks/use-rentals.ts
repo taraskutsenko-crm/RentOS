@@ -1,0 +1,178 @@
+"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { apiClient } from "../lib/api-client";
+import type {
+  AssetAvailabilityResult,
+  PaginatedRentals,
+  Rental,
+  RentalBillingMode,
+  RentalStatus,
+  RentalTimelineEvent,
+} from "../types/rental";
+
+export interface RentalListParams {
+  page?: number | undefined;
+  pageSize?: number | undefined;
+  search?: string | undefined;
+  status?: RentalStatus | undefined;
+  customerId?: string | undefined;
+  assetId?: string | undefined;
+  sortBy?: string | undefined;
+  sortDirection?: "asc" | "desc" | undefined;
+}
+
+export interface RentalItemInput {
+  assetId: string;
+  quantity?: number;
+  billingMode: RentalBillingMode;
+  dailyPriceMinor?: number;
+  weeklyPriceMinor?: number;
+  monthlyPriceMinor?: number;
+  customPriceMinor?: number;
+  depositMinor?: number;
+  discountMinor?: number;
+  notes?: string | null;
+}
+
+export interface RentalInput {
+  customerId: string;
+  plannedStart: string;
+  plannedEnd: string;
+  currency?: string;
+  discountMinor?: number;
+  taxMinor?: number;
+  notes?: string | null;
+  internalNotes?: string | null;
+  items?: RentalItemInput[];
+}
+
+const BASE_KEY = "rentals";
+
+export function useRentals(tenantId: string | null, params: RentalListParams = {}) {
+  return useQuery({
+    queryKey: [BASE_KEY, tenantId, params],
+    queryFn: () => apiClient.get<PaginatedRentals>(`/tenants/${tenantId}/rentals`, { ...params }),
+    enabled: !!tenantId,
+  });
+}
+
+export function useRental(tenantId: string | null, id: string | null) {
+  return useQuery({
+    queryKey: [BASE_KEY, tenantId, "detail", id],
+    queryFn: () => apiClient.get<Rental>(`/tenants/${tenantId}/rentals/${id}`),
+    enabled: !!tenantId && !!id,
+  });
+}
+
+export function useRentalTimeline(tenantId: string | null, id: string | null) {
+  return useQuery({
+    queryKey: [BASE_KEY, tenantId, "timeline", id],
+    queryFn: () =>
+      apiClient.get<RentalTimelineEvent[]>(`/tenants/${tenantId}/rentals/${id}/timeline`),
+    enabled: !!tenantId && !!id,
+  });
+}
+
+export function useAvailability(
+  tenantId: string | null,
+  params: {
+    assetIds: string[];
+    plannedStart: string;
+    plannedEnd: string;
+    excludeRentalId?: string;
+  } | null,
+) {
+  return useQuery({
+    queryKey: [BASE_KEY, tenantId, "availability", params],
+    queryFn: () =>
+      apiClient.get<{ results: AssetAvailabilityResult[] }>(
+        `/tenants/${tenantId}/rentals/availability`,
+        {
+          assetIds: params!.assetIds.join(","),
+          plannedStart: params!.plannedStart,
+          plannedEnd: params!.plannedEnd,
+          excludeRentalId: params?.excludeRentalId,
+        },
+      ),
+    enabled:
+      !!tenantId &&
+      !!params &&
+      params.assetIds.length > 0 &&
+      !!params.plannedStart &&
+      !!params.plannedEnd,
+  });
+}
+
+export function useCreateRental(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: RentalInput) =>
+      apiClient.post<Rental>(`/tenants/${tenantId}/rentals`, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
+    },
+  });
+}
+
+export function useUpdateRental(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Partial<RentalInput> }) =>
+      apiClient.patch<Rental>(`/tenants/${tenantId}/rentals/${id}`, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
+    },
+  });
+}
+
+export function useDeleteRental(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiClient.delete<void>(`/tenants/${tenantId}/rentals/${id}`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
+    },
+  });
+}
+
+function useRentalLifecycleAction(tenantId: string | null, action: "reserve" | "start" | "cancel") {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
+      apiClient.post<Rental>(`/tenants/${tenantId}/rentals/${id}/${action}`, { reason }),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
+      void queryClient.invalidateQueries({
+        queryKey: [BASE_KEY, tenantId, "timeline", variables.id],
+      });
+    },
+  });
+}
+
+export function useReserveRental(tenantId: string | null) {
+  return useRentalLifecycleAction(tenantId, "reserve");
+}
+
+export function useStartRental(tenantId: string | null) {
+  return useRentalLifecycleAction(tenantId, "start");
+}
+
+export function useCancelRental(tenantId: string | null) {
+  return useRentalLifecycleAction(tenantId, "cancel");
+}
+
+export function useReturnRental(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, itemIds, reason }: { id: string; itemIds?: string[]; reason?: string }) =>
+      apiClient.post<Rental>(`/tenants/${tenantId}/rentals/${id}/return`, { itemIds, reason }),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
+      void queryClient.invalidateQueries({
+        queryKey: [BASE_KEY, tenantId, "timeline", variables.id],
+      });
+    },
+  });
+}

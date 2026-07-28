@@ -16,15 +16,29 @@ export const ASSET_PERMISSIONS = [
   "asset_statuses.manage",
 ] as const;
 
-export type Permission = (typeof ASSET_PERMISSIONS)[number];
+export const RENTAL_PERMISSIONS = [
+  "rentals.view",
+  "rentals.create",
+  "rentals.update",
+  "rentals.delete",
+  "rentals.reserve",
+  "rentals.start",
+  "rentals.return",
+  "rentals.cancel",
+] as const;
 
-const ALL_PERMISSIONS: Permission[] = [...ASSET_PERMISSIONS];
-const READ_ONLY: Permission[] = [
+export const ALL_PERMISSIONS = [...ASSET_PERMISSIONS, ...RENTAL_PERMISSIONS] as const;
+
+export type Permission = (typeof ALL_PERMISSIONS)[number];
+
+const EVERY_PERMISSION: Permission[] = [...ALL_PERMISSIONS];
+const ASSET_READ_ONLY: Permission[] = [
   "assets.read",
   "asset_categories.read",
   "asset_fields.read",
   "asset_statuses.read",
 ];
+const RENTAL_READ_ONLY: Permission[] = ["rentals.view"];
 
 /**
  * Mirrors apps/api/src/permissions/permission.ts. This is a UX convenience
@@ -32,8 +46,8 @@ const READ_ONLY: Permission[] = [
  * boundary; the API independently re-checks every permission server-side.
  */
 export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
-  OWNER: ALL_PERMISSIONS,
-  ADMIN: ALL_PERMISSIONS,
+  OWNER: EVERY_PERMISSION,
+  ADMIN: EVERY_PERMISSION,
   MANAGER: [
     "assets.read",
     "assets.create",
@@ -44,6 +58,13 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "asset_categories.read",
     "asset_fields.read",
     "asset_statuses.read",
+    "rentals.view",
+    "rentals.create",
+    "rentals.update",
+    "rentals.reserve",
+    "rentals.start",
+    "rentals.return",
+    "rentals.cancel",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -54,9 +75,12 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "asset_categories.read",
     "asset_fields.read",
     "asset_statuses.read",
+    "rentals.view",
+    "rentals.start",
+    "rentals.return",
   ],
-  ACCOUNTANT: READ_ONLY,
-  VIEWER: READ_ONLY,
+  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY],
+  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY],
 };
 
 export function roleHasPermission(

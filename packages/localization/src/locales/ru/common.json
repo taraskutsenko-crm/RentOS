@@ -249,5 +249,102 @@
       "create": "Добавить поле",
       "deleteConfirm": "Удалить определение этого дополнительного поля?"
     }
+  },
+  "rental": {
+    "title": "Аренды",
+    "subtitle": "Бронируйте, отслеживайте и возвращайте арендованные активы",
+    "newRental": "Новая аренда",
+    "editRental": "Редактировать аренду",
+    "save": "Сохранить",
+    "deleteConfirm": "Вы уверены, что хотите удалить эту аренду?",
+    "searchPlaceholder": "Поиск аренд…",
+    "allStatuses": "Все статусы",
+    "noRentals": "Аренды не найдены",
+    "statuses": {
+      "DRAFT": "Черновик",
+      "QUOTE": "Смета",
+      "RESERVED": "Забронировано",
+      "ACTIVE": "Активна",
+      "RETURNED": "Возвращена",
+      "COMPLETED": "Завершена",
+      "CANCELLED": "Отменена"
+    },
+    "billingModes": {
+      "DAILY": "Посуточно",
+      "WEEKLY": "Понедельно",
+      "MONTHLY": "Помесячно",
+      "CUSTOM": "Индивидуально"
+    },
+    "fields": {
+      "rentalNumber": "Номер аренды",
+      "status": "Статус",
+      "plannedStart": "Плановое начало",
+      "plannedEnd": "Плановое окончание",
+      "actualStart": "Фактическое начало",
+      "actualEnd": "Фактическое окончание",
+      "billingMode": "Режим тарификации",
+      "quantity": "Количество",
+      "dailyPrice": "Цена за день",
+      "weeklyPrice": "Цена за неделю",
+      "monthlyPrice": "Цена за месяц",
+      "customPrice": "Индивидуальная цена",
+      "deposit": "Залог",
+      "itemDiscount": "Скидка на позицию",
+      "discount": "Скидка",
+      "tax": "Налог",
+      "subtotal": "Промежуточный итог",
+      "total": "Итого",
+      "internalNotes": "Внутренние заметки",
+      "returnedAt": "Возвращено"
+    },
+    "sections": {
+      "details": "Детали",
+      "items": "Активы",
+      "financial": "Финансовая сводка"
+    },
+    "actions": {
+      "reserve": "Забронировать",
+      "start": "Начать аренду",
+      "returnAll": "Вернуть всё",
+      "cancel": "Отменить аренду"
+    },
+    "timeline": {
+      "created": "Аренда создана",
+      "updated": "Аренда обновлена",
+      "status_changed": "Статус изменён",
+      "items_returned": "Позиции возвращены"
+    },
+    "errors": {
+      "customerRequired": "Выберите клиента",
+      "datesRequired": "Требуются плановые даты начала и окончания",
+      "endBeforeStart": "Плановое окончание должно быть позже планового начала",
+      "assetRequired": "Выберите актив",
+      "selectAtLeastOneAsset": "Выберите хотя бы один актив"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Клиент",
+        "assets": "Активы",
+        "dates": "Даты",
+        "pricing": "Цены",
+        "review": "Проверка"
+      },
+      "back": "Назад",
+      "next": "Далее",
+      "creating": "Создание аренды…",
+      "createRental": "Создать аренду",
+      "availabilityCheck": "Проверка доступности",
+      "available": "Доступен",
+      "unavailable": "Недоступен на эти даты"
+    },
+    "availabilityCalendar": {
+      "title": "Календарь доступности",
+      "subtitle": "Проверьте, когда активы свободны, перед бронированием",
+      "previousMonth": "Предыдущий месяц",
+      "nextMonth": "Следующий месяц",
+      "selectAssetsHint": "Выберите один или несколько активов, чтобы увидеть их доступность",
+      "booked": "Забронировано",
+      "free": "Свободно"
+    }
   }
 }

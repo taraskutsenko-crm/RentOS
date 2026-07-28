@@ -249,5 +249,102 @@
       "create": "Dodaj pole",
       "deleteConfirm": "Usunąć definicję tego pola niestandardowego?"
     }
+  },
+  "rental": {
+    "title": "Wynajmy",
+    "subtitle": "Rezerwuj, śledź i przyjmuj zwroty wynajętych aktywów",
+    "newRental": "Nowy wynajem",
+    "editRental": "Edytuj wynajem",
+    "save": "Zapisz",
+    "deleteConfirm": "Czy na pewno chcesz usunąć ten wynajem?",
+    "searchPlaceholder": "Szukaj wynajmów…",
+    "allStatuses": "Wszystkie statusy",
+    "noRentals": "Nie znaleziono wynajmów",
+    "statuses": {
+      "DRAFT": "Szkic",
+      "QUOTE": "Wycena",
+      "RESERVED": "Zarezerwowany",
+      "ACTIVE": "Aktywny",
+      "RETURNED": "Zwrócony",
+      "COMPLETED": "Zakończony",
+      "CANCELLED": "Anulowany"
+    },
+    "billingModes": {
+      "DAILY": "Dziennie",
+      "WEEKLY": "Tygodniowo",
+      "MONTHLY": "Miesięcznie",
+      "CUSTOM": "Indywidualnie"
+    },
+    "fields": {
+      "rentalNumber": "Numer wynajmu",
+      "status": "Status",
+      "plannedStart": "Planowany początek",
+      "plannedEnd": "Planowany koniec",
+      "actualStart": "Rzeczywisty początek",
+      "actualEnd": "Rzeczywisty koniec",
+      "billingMode": "Tryb rozliczenia",
+      "quantity": "Ilość",
+      "dailyPrice": "Cena dzienna",
+      "weeklyPrice": "Cena tygodniowa",
+      "monthlyPrice": "Cena miesięczna",
+      "customPrice": "Cena indywidualna",
+      "deposit": "Kaucja",
+      "itemDiscount": "Rabat na pozycję",
+      "discount": "Rabat",
+      "tax": "Podatek",
+      "subtotal": "Suma częściowa",
+      "total": "Razem",
+      "internalNotes": "Notatki wewnętrzne",
+      "returnedAt": "Zwrócono"
+    },
+    "sections": {
+      "details": "Szczegóły",
+      "items": "Aktywa",
+      "financial": "Podsumowanie finansowe"
+    },
+    "actions": {
+      "reserve": "Zarezerwuj",
+      "start": "Rozpocznij wynajem",
+      "returnAll": "Zwróć wszystko",
+      "cancel": "Anuluj wynajem"
+    },
+    "timeline": {
+      "created": "Wynajem utworzony",
+      "updated": "Wynajem zaktualizowany",
+      "status_changed": "Status zmieniony",
+      "items_returned": "Zwrócono pozycję/e"
+    },
+    "errors": {
+      "customerRequired": "Wybierz klienta",
+      "datesRequired": "Wymagane są planowane daty rozpoczęcia i zakończenia",
+      "endBeforeStart": "Planowany koniec musi być późniejszy niż planowany początek",
+      "assetRequired": "Wybierz aktywo",
+      "selectAtLeastOneAsset": "Wybierz co najmniej jedno aktywo"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Klient",
+        "assets": "Aktywa",
+        "dates": "Daty",
+        "pricing": "Ceny",
+        "review": "Podsumowanie"
+      },
+      "back": "Wstecz",
+      "next": "Dalej",
+      "creating": "Tworzenie wynajmu…",
+      "createRental": "Utwórz wynajem",
+      "availabilityCheck": "Sprawdzenie dostępności",
+      "available": "Dostępne",
+      "unavailable": "Niedostępne w tych terminach"
+    },
+    "availabilityCalendar": {
+      "title": "Kalendarz dostępności",
+      "subtitle": "Sprawdź, kiedy aktywa są wolne, zanim je zarezerwujesz",
+      "previousMonth": "Poprzedni miesiąc",
+      "nextMonth": "Następny miesiąc",
+      "selectAssetsHint": "Wybierz jedno lub więcej aktywów, aby zobaczyć ich dostępność",
+      "booked": "Zarezerwowane",
+      "free": "Wolne"
+    }
   }
 }

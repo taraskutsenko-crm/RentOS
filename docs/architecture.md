@@ -222,3 +222,67 @@ permission-to-role mapping. Authorization is granular
 (`apps/api/src/permissions/`) applied after `TenantGuard` on every
 asset-module controller — controllers never check `MembershipRole` names
 directly.
+
+## Rentals module
+
+See [ADR 0006](adr/0006-rental-lifecycle-and-availability.md) for the full
+design rationale. Routes live under `/tenants/:tenantId/rentals`,
+consistent with every other business module (the master spec's flat
+`/rentals` listing is treated as shorthand — see the ADR).
+
+### Domain model
+
+```
+Customer
+  └─ Rental (rentalNumber, status, plannedStart/End, actualStart/End, money in minor units)
+       ├─ RentalItem[] (assetId, quantity, billingMode, per-mode price, deposit, discount, returnedAt)
+       └─ RentalStatusHistory (fromStatus → toStatus, append-only)
+
+Asset (from the Assets module) ← referenced by RentalItem.assetId, never asset-type-specific
+```
+
+### Lifecycle
+
+```
+DRAFT → QUOTE → RESERVED → ACTIVE → RETURNED → COMPLETED
+  ↓       ↓         ↓         ↓
+              CANCELLED (from DRAFT, QUOTE, RESERVED, or ACTIVE)
+```
+
+Items and planned dates are editable only in `DRAFT`/`QUOTE`; they become
+immutable once `RESERVED`. Every transition is atomic (single
+`$transaction`) with its `RentalStatusHistory` row and `AuditLog` entry.
+`POST .../start` and `POST .../return` additionally sync the affected
+assets' `currentStatusId` (`RENTED`/`AVAILABLE`) as a best-effort side
+effect — never part of the availability guarantee itself (see below).
+
+### Availability engine
+
+`AvailabilityService` is the single source of truth for whether an asset
+is free over a date range. It queries `RentalItem` rows whose parent
+`Rental.status` is `RESERVED` or `ACTIVE` (the only two statuses that
+represent a confirmed claim) and checks interval overlap using a
+half-open window (`existingStart < requestedEnd && existingEnd >
+requestedStart`) — so back-to-back same-day bookings are allowed. An item
+returned early (`returnedAt` set via a partial return) stops blocking
+immediately, even before the rental's overall planned end. The hard
+availability check (`assertAvailable`, throws `409 Conflict` listing every
+unavailable asset) runs exactly once, at `POST .../reserve` — drafts and
+quotes never claim an asset.
+
+### Pricing
+
+`apps/api/src/rentals/rental-pricing.util.ts` computes each `RentalItem`'s
+line total from its `billingMode` (`DAILY`/`WEEKLY`/`MONTHLY` = unit price
+× periods × quantity, minus the item discount; `CUSTOM` = a flat price,
+ignoring duration and quantity), then sums into `Rental.subtotalMinor` and
+applies the rental-level discount/tax to get `Rental.totalMinor` — always
+integer minor units, recomputed and stored on every create/update. The
+frontend wizard mirrors this formula (`apps/web/src/lib/rental-pricing.ts`)
+only for live UI feedback; the API is always the source of truth.
+
+### Timeline
+
+`GET /tenants/:tenantId/rentals/:id/timeline` combines creation, updates,
+status changes, and return events into one chronologically-sorted feed,
+the same normalized shape as the Assets module's timeline.

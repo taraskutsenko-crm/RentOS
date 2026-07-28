@@ -140,3 +140,36 @@ export const assetCustomFieldSchema = z.object({
 });
 
 export type AssetCustomFieldFormValues = z.infer<typeof assetCustomFieldSchema>;
+
+export const rentalItemFormSchema = z.object({
+  assetId: z.string().min(1, "rental.errors.assetRequired"),
+  billingMode: z.enum(["DAILY", "WEEKLY", "MONTHLY", "CUSTOM"]),
+  quantity: z.number().int().min(1),
+  dailyPriceDisplay: z.string(),
+  weeklyPriceDisplay: z.string(),
+  monthlyPriceDisplay: z.string(),
+  customPriceDisplay: z.string(),
+  depositDisplay: z.string(),
+  discountDisplay: z.string(),
+  notes: z.string().max(2000),
+});
+
+export type RentalItemFormValues = z.infer<typeof rentalItemFormSchema>;
+
+export const rentalSchema = z
+  .object({
+    customerId: z.string().min(1, "rental.errors.customerRequired"),
+    plannedStart: z.string().min(1, "rental.errors.datesRequired"),
+    plannedEnd: z.string().min(1, "rental.errors.datesRequired"),
+    currency: z.string().min(1, "auth.errors.required"),
+    discountDisplay: z.string(),
+    taxDisplay: z.string(),
+    notes: z.string().max(2000),
+    internalNotes: z.string().max(2000),
+  })
+  .refine((data) => new Date(data.plannedEnd) > new Date(data.plannedStart), {
+    path: ["plannedEnd"],
+    message: "rental.errors.endBeforeStart",
+  });
+
+export type RentalFormValues = z.infer<typeof rentalSchema>;

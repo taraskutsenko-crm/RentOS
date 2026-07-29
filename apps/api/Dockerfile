@@ -20,6 +20,7 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS builder
 COPY . .
 RUN pnpm --filter @rentos/shared build
+RUN pnpm --filter @rentos/localization build
 RUN pnpm --filter @rentos/api exec prisma generate
 RUN pnpm --filter @rentos/api build
 

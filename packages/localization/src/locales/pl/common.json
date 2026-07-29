@@ -346,5 +346,137 @@
       "booked": "Zarezerwowane",
       "free": "Wolne"
     }
+  },
+  "quote": {
+    "title": "Oferty",
+    "subtitle": "Przygotowuj i wysyłaj oferty handlowe przed utworzeniem wynajmu",
+    "newQuote": "Nowa oferta",
+    "editQuote": "Edytuj ofertę",
+    "save": "Zapisz",
+    "deleteConfirm": "Czy na pewno chcesz usunąć tę ofertę?",
+    "searchPlaceholder": "Szukaj ofert…",
+    "allStatuses": "Wszystkie statusy",
+    "noQuotes": "Nie znaleziono ofert",
+    "convertConfirm": "Przekształcić tę ofertę w wynajem?",
+    "convertedNotice": "Ta oferta została przekształcona w wynajem",
+    "availabilityWarningTitle": "Jedno lub więcej aktywów może być niedostępne w planowanych terminach",
+    "statuses": {
+      "DRAFT": "Szkic",
+      "SENT": "Wysłana",
+      "VIEWED": "Wyświetlona",
+      "ACCEPTED": "Zaakceptowana",
+      "REJECTED": "Odrzucona",
+      "EXPIRED": "Wygasła",
+      "CONVERTED": "Przekształcona",
+      "CANCELLED": "Anulowana"
+    },
+    "itemTypes": {
+      "ASSET": "Aktywo",
+      "SERVICE": "Usługa",
+      "PRODUCT": "Produkt",
+      "FEE": "Opłata",
+      "DELIVERY": "Dostawa",
+      "COLLECTION": "Odbiór",
+      "LABOR": "Robocizna",
+      "CUSTOM": "Inne"
+    },
+    "billingModes": {
+      "DAILY": "Dziennie",
+      "WEEKLY": "Tygodniowo",
+      "MONTHLY": "Miesięcznie",
+      "CUSTOM": "Indywidualnie",
+      "FLAT": "Ryczałt"
+    },
+    "discountTypes": {
+      "FIXED": "Kwota stała",
+      "PERCENTAGE": "Procent"
+    },
+    "fields": {
+      "quoteNumber": "Numer oferty",
+      "status": "Status",
+      "issueDate": "Data wystawienia",
+      "validUntil": "Ważna do",
+      "name": "Nazwa",
+      "description": "Opis",
+      "itemType": "Typ pozycji",
+      "unit": "Jednostka",
+      "unitPlaceholder": "np. dzień, godzina, sztuka",
+      "billingMode": "Tryb rozliczenia",
+      "quantity": "Ilość",
+      "unitPrice": "Cena jednostkowa",
+      "dailyPrice": "Cena dzienna",
+      "weeklyPrice": "Cena tygodniowa",
+      "monthlyPrice": "Cena miesięczna",
+      "customPrice": "Cena indywidualna",
+      "deposit": "Kaucja",
+      "discountType": "Typ rabatu",
+      "noDiscount": "Brak rabatu",
+      "discountPercent": "Rabat (%)",
+      "discountAmount": "Kwota rabatu",
+      "taxRatePercent": "Stawka podatku (%)",
+      "taxTotal": "Podatek",
+      "depositTotal": "Kaucja",
+      "customerNotes": "Notatki dla klienta",
+      "termsAndConditions": "Warunki"
+    },
+    "actions": {
+      "send": "Wyślij ofertę",
+      "accept": "Zaakceptuj",
+      "reject": "Odrzuć",
+      "rejectPrompt": "Powód odrzucenia (opcjonalnie)",
+      "cancel": "Anuluj ofertę",
+      "duplicate": "Duplikuj",
+      "convert": "Przekształć w wynajem",
+      "removeItem": "Usuń",
+      "addServiceItem": "Dodaj produkt lub usługę",
+      "viewPdf": "Zobacz PDF",
+      "regeneratePdf": "Wygeneruj ponownie PDF",
+      "downloadPdf": "Pobierz PDF"
+    },
+    "timeline": {
+      "created": "Oferta utworzona",
+      "updated": "Oferta zaktualizowana",
+      "status_changed": "Status zmieniony",
+      "sent": "Oferta wysłana",
+      "viewed": "Wyświetlona przez klienta",
+      "accepted": "Zaakceptowana",
+      "rejected": "Odrzucona",
+      "duplicated": "Zduplikowana",
+      "converted": "Przekształcona w wynajem",
+      "pdf_generated": "PDF wygenerowany"
+    },
+    "errors": {
+      "customerRequired": "Wybierz klienta",
+      "validUntilRequired": "Data ważności jest wymagana",
+      "datesRequired": "Wymagane są planowane daty rozpoczęcia i zakończenia",
+      "endBeforeStart": "Planowany koniec musi być późniejszy niż planowany początek",
+      "validUntilBeforeIssueDate": "Data ważności nie może być w przeszłości",
+      "itemNameRequired": "Podaj nazwę tej pozycji",
+      "quantityMustBePositive": "Ilość musi wynosić co najmniej 1",
+      "noItems": "Dodaj co najmniej jedną pozycję",
+      "onlyDraftEditable": "Edytować można tylko szkice — zamiast tego zduplikuj tę ofertę"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Klient",
+        "dates": "Daty",
+        "assets": "Aktywa",
+        "services": "Produkty i usługi",
+        "pricing": "Ceny",
+        "terms": "Warunki",
+        "review": "Podsumowanie"
+      },
+      "saving": "Zapisywanie oferty…",
+      "createQuote": "Utwórz ofertę",
+      "noServiceItems": "Nie dodano jeszcze produktów ani usług"
+    },
+    "public": {
+      "notFound": "Ten link do oferty jest nieprawidłowy lub wygasł",
+      "acceptedNotice": "Zaakceptowano przez {{name}}",
+      "rejectedNotice": "Ta oferta została odrzucona",
+      "acceptanceDisclaimer": "Akceptacja poniżej rejestruje Twoją zgodę na tę ofertę. Nie jest to kwalifikowany podpis elektroniczny.",
+      "rejectReasonPlaceholder": "Daj nam znać dlaczego (opcjonalnie)",
+      "confirmReject": "Potwierdź odrzucenie"
+    }
   }
 }

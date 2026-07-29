@@ -1,0 +1,158 @@
+import type { QuoteBillingMode, QuoteDiscountType } from "../types/quote";
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const BASIS_POINTS_DENOMINATOR = 10_000;
+
+export interface EstimatedQuoteItemInput {
+  billingMode: QuoteBillingMode;
+  quantity: number;
+  unitPriceMinor?: number | undefined;
+  dailyPriceMinor?: number | undefined;
+  weeklyPriceMinor?: number | undefined;
+  monthlyPriceMinor?: number | undefined;
+  customPriceMinor?: number | undefined;
+  discountType?: QuoteDiscountType | undefined;
+  discountValue?: number | undefined;
+  taxRateBp?: number | undefined;
+  depositMinor?: number | undefined;
+}
+
+/**
+ * A client-side mirror of apps/api/src/quotes/quote-pricing.util.ts, used
+ * only to give the wizard live pricing feedback before the quote is saved.
+ * The API recomputes and stores the authoritative totals — this estimate is
+ * never trusted or submitted directly.
+ */
+export function estimateDurationInDays(plannedStart: string, plannedEnd: string): number {
+  const start = new Date(plannedStart).getTime();
+  const end = new Date(plannedEnd).getTime();
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+    return 0;
+  }
+  return Math.max(1, Math.ceil((end - start) / MS_PER_DAY));
+}
+
+function addCalendarMonthsUtc(date: Date, months: number): Date {
+  const targetMonthIndex = date.getUTCMonth() + months;
+  const daysInTargetMonth = new Date(
+    Date.UTC(date.getUTCFullYear(), targetMonthIndex + 1, 0),
+  ).getUTCDate();
+  const clampedDay = Math.min(date.getUTCDate(), daysInTargetMonth);
+  return new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      targetMonthIndex,
+      clampedDay,
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+      date.getUTCMilliseconds(),
+    ),
+  );
+}
+
+export function estimateMonthsInRange(plannedStart: string, plannedEnd: string): number {
+  const start = new Date(plannedStart);
+  const end = new Date(plannedEnd);
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) {
+    return 0;
+  }
+  let months = 1;
+  while (addCalendarMonthsUtc(start, months).getTime() < end.getTime()) {
+    months++;
+  }
+  return months;
+}
+
+function resolveDiscountMinor(
+  baseMinor: number,
+  discountType: QuoteDiscountType | null | undefined,
+  discountValue: number,
+): number {
+  if (!discountType || discountValue <= 0 || baseMinor <= 0) {
+    return 0;
+  }
+  const raw =
+    discountType === "FIXED"
+      ? discountValue
+      : Math.round((baseMinor * discountValue) / BASIS_POINTS_DENOMINATOR);
+  return Math.min(baseMinor, Math.max(0, raw));
+}
+
+function resolveTaxMinor(baseMinor: number, taxRateBp: number): number {
+  if (taxRateBp <= 0 || baseMinor <= 0) {
+    return 0;
+  }
+  return Math.max(0, Math.round((baseMinor * taxRateBp) / BASIS_POINTS_DENOMINATOR));
+}
+
+export interface EstimatedQuoteItemPricing {
+  lineSubtotalMinor: number;
+  discountTotalMinor: number;
+  taxTotalMinor: number;
+  lineTotalMinor: number;
+}
+
+export function estimateQuoteItemPricing(
+  item: EstimatedQuoteItemInput,
+  plannedStart: string,
+  plannedEnd: string,
+): EstimatedQuoteItemPricing {
+  let lineSubtotalMinor: number;
+  if (item.billingMode === "CUSTOM") {
+    lineSubtotalMinor = item.customPriceMinor ?? 0;
+  } else if (item.billingMode === "FLAT") {
+    lineSubtotalMinor = (item.unitPriceMinor ?? 0) * item.quantity;
+  } else {
+    const days = estimateDurationInDays(plannedStart, plannedEnd);
+    let unitPriceMinor = 0;
+    let units = 0;
+    if (item.billingMode === "DAILY") {
+      unitPriceMinor = item.dailyPriceMinor ?? 0;
+      units = days;
+    } else if (item.billingMode === "WEEKLY") {
+      unitPriceMinor = item.weeklyPriceMinor ?? 0;
+      units = Math.ceil(days / 7);
+    } else if (item.billingMode === "MONTHLY") {
+      unitPriceMinor = item.monthlyPriceMinor ?? 0;
+      units = estimateMonthsInRange(plannedStart, plannedEnd);
+    }
+    lineSubtotalMinor = unitPriceMinor * units * item.quantity;
+  }
+
+  const discountTotalMinor = resolveDiscountMinor(
+    lineSubtotalMinor,
+    item.discountType,
+    item.discountValue ?? 0,
+  );
+  const afterDiscount = lineSubtotalMinor - discountTotalMinor;
+  const taxTotalMinor = resolveTaxMinor(afterDiscount, item.taxRateBp ?? 0);
+  const lineTotalMinor = Math.max(0, afterDiscount + taxTotalMinor);
+
+  return { lineSubtotalMinor, discountTotalMinor, taxTotalMinor, lineTotalMinor };
+}
+
+export interface EstimatedQuoteTotals {
+  subtotalMinor: number;
+  discountTotalMinor: number;
+  taxTotalMinor: number;
+  depositTotalMinor: number;
+  totalMinor: number;
+}
+
+export function estimateQuoteTotals(
+  items: EstimatedQuoteItemInput[],
+  plannedStart: string,
+  plannedEnd: string,
+  discountType: QuoteDiscountType | null | undefined,
+  discountValue: number,
+): EstimatedQuoteTotals {
+  const itemResults = items.map((item) => estimateQuoteItemPricing(item, plannedStart, plannedEnd));
+  const subtotalMinor = itemResults.reduce((sum, result) => sum + result.lineTotalMinor, 0);
+  const taxTotalMinor = itemResults.reduce((sum, result) => sum + result.taxTotalMinor, 0);
+  const depositTotalMinor = items.reduce((sum, item) => sum + (item.depositMinor ?? 0), 0);
+  const discountTotalMinor = resolveDiscountMinor(subtotalMinor, discountType, discountValue);
+  const totalMinor = Math.max(0, subtotalMinor - discountTotalMinor);
+
+  return { subtotalMinor, discountTotalMinor, taxTotalMinor, depositTotalMinor, totalMinor };
+}

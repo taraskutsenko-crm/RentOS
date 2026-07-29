@@ -346,5 +346,137 @@
       "booked": "Gebucht",
       "free": "Frei"
     }
+  },
+  "quote": {
+    "title": "Angebote",
+    "subtitle": "Erstellen und versenden Sie kommerzielle Angebote, bevor Sie eine Vermietung anlegen",
+    "newQuote": "Neues Angebot",
+    "editQuote": "Angebot bearbeiten",
+    "save": "Speichern",
+    "deleteConfirm": "Möchten Sie dieses Angebot wirklich löschen?",
+    "searchPlaceholder": "Angebote suchen…",
+    "allStatuses": "Alle Status",
+    "noQuotes": "Keine Angebote gefunden",
+    "convertConfirm": "Dieses Angebot in eine Vermietung umwandeln?",
+    "convertedNotice": "Dieses Angebot wurde in die Vermietung umgewandelt",
+    "availabilityWarningTitle": "Eine oder mehrere Anlagen könnten zu den geplanten Terminen nicht verfügbar sein",
+    "statuses": {
+      "DRAFT": "Entwurf",
+      "SENT": "Gesendet",
+      "VIEWED": "Angesehen",
+      "ACCEPTED": "Angenommen",
+      "REJECTED": "Abgelehnt",
+      "EXPIRED": "Abgelaufen",
+      "CONVERTED": "Umgewandelt",
+      "CANCELLED": "Storniert"
+    },
+    "itemTypes": {
+      "ASSET": "Anlage",
+      "SERVICE": "Dienstleistung",
+      "PRODUCT": "Produkt",
+      "FEE": "Gebühr",
+      "DELIVERY": "Lieferung",
+      "COLLECTION": "Abholung",
+      "LABOR": "Arbeitsleistung",
+      "CUSTOM": "Sonstiges"
+    },
+    "billingModes": {
+      "DAILY": "Täglich",
+      "WEEKLY": "Wöchentlich",
+      "MONTHLY": "Monatlich",
+      "CUSTOM": "Individuell",
+      "FLAT": "Pauschal"
+    },
+    "discountTypes": {
+      "FIXED": "Festbetrag",
+      "PERCENTAGE": "Prozentsatz"
+    },
+    "fields": {
+      "quoteNumber": "Angebotsnummer",
+      "status": "Status",
+      "issueDate": "Ausstellungsdatum",
+      "validUntil": "Gültig bis",
+      "name": "Name",
+      "description": "Beschreibung",
+      "itemType": "Positionstyp",
+      "unit": "Einheit",
+      "unitPlaceholder": "z. B. Tag, Stunde, Stück",
+      "billingMode": "Abrechnungsmodus",
+      "quantity": "Menge",
+      "unitPrice": "Einzelpreis",
+      "dailyPrice": "Tagespreis",
+      "weeklyPrice": "Wochenpreis",
+      "monthlyPrice": "Monatspreis",
+      "customPrice": "Individueller Preis",
+      "deposit": "Kaution",
+      "discountType": "Rabattart",
+      "noDiscount": "Kein Rabatt",
+      "discountPercent": "Rabatt (%)",
+      "discountAmount": "Rabattbetrag",
+      "taxRatePercent": "Steuersatz (%)",
+      "taxTotal": "Steuer",
+      "depositTotal": "Kaution",
+      "customerNotes": "Notizen für den Kunden",
+      "termsAndConditions": "Allgemeine Geschäftsbedingungen"
+    },
+    "actions": {
+      "send": "Angebot senden",
+      "accept": "Annehmen",
+      "reject": "Ablehnen",
+      "rejectPrompt": "Ablehnungsgrund (optional)",
+      "cancel": "Angebot stornieren",
+      "duplicate": "Duplizieren",
+      "convert": "In Vermietung umwandeln",
+      "removeItem": "Entfernen",
+      "addServiceItem": "Produkt oder Dienstleistung hinzufügen",
+      "viewPdf": "PDF ansehen",
+      "regeneratePdf": "PDF neu erstellen",
+      "downloadPdf": "PDF herunterladen"
+    },
+    "timeline": {
+      "created": "Angebot erstellt",
+      "updated": "Angebot aktualisiert",
+      "status_changed": "Status geändert",
+      "sent": "Angebot gesendet",
+      "viewed": "Vom Kunden angesehen",
+      "accepted": "Angenommen",
+      "rejected": "Abgelehnt",
+      "duplicated": "Dupliziert",
+      "converted": "In Vermietung umgewandelt",
+      "pdf_generated": "PDF erstellt"
+    },
+    "errors": {
+      "customerRequired": "Wählen Sie einen Kunden",
+      "validUntilRequired": "Gültigkeitsdatum ist erforderlich",
+      "datesRequired": "Geplanter Beginn und geplantes Ende sind erforderlich",
+      "endBeforeStart": "Das geplante Ende muss nach dem geplanten Beginn liegen",
+      "validUntilBeforeIssueDate": "Das Gültigkeitsdatum darf nicht in der Vergangenheit liegen",
+      "itemNameRequired": "Geben Sie einen Namen für diese Position ein",
+      "quantityMustBePositive": "Die Menge muss mindestens 1 sein",
+      "noItems": "Fügen Sie mindestens eine Position hinzu",
+      "onlyDraftEditable": "Nur Entwürfe können bearbeitet werden — duplizieren Sie dieses Angebot stattdessen"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Kunde",
+        "dates": "Termine",
+        "assets": "Anlagen",
+        "services": "Produkte & Dienstleistungen",
+        "pricing": "Preise",
+        "terms": "Bedingungen",
+        "review": "Überprüfung"
+      },
+      "saving": "Angebot wird gespeichert…",
+      "createQuote": "Angebot erstellen",
+      "noServiceItems": "Noch keine Produkte oder Dienstleistungen hinzugefügt"
+    },
+    "public": {
+      "notFound": "Dieser Angebotslink ist ungültig oder abgelaufen",
+      "acceptedNotice": "Angenommen von {{name}}",
+      "rejectedNotice": "Dieses Angebot wurde abgelehnt",
+      "acceptanceDisclaimer": "Die Annahme unten dokumentiert Ihre Zustimmung zu diesem Angebot. Dies ist keine qualifizierte elektronische Signatur.",
+      "rejectReasonPlaceholder": "Teilen Sie uns den Grund mit (optional)",
+      "confirmReject": "Ablehnung bestätigen"
+    }
   }
 }

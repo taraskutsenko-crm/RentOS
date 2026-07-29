@@ -346,5 +346,137 @@
       "booked": "Заброньовано",
       "free": "Вільно"
     }
+  },
+  "quote": {
+    "title": "Кошториси",
+    "subtitle": "Готуйте та надсилайте комерційні пропозиції перед створенням оренди",
+    "newQuote": "Новий кошторис",
+    "editQuote": "Редагувати кошторис",
+    "save": "Зберегти",
+    "deleteConfirm": "Ви впевнені, що хочете видалити цей кошторис?",
+    "searchPlaceholder": "Пошук кошторисів…",
+    "allStatuses": "Усі статуси",
+    "noQuotes": "Кошторисів не знайдено",
+    "convertConfirm": "Перетворити цей кошторис на оренду?",
+    "convertedNotice": "Цей кошторис перетворено на оренду",
+    "availabilityWarningTitle": "Один або декілька активів можуть бути недоступні на плановані дати",
+    "statuses": {
+      "DRAFT": "Чернетка",
+      "SENT": "Надіслано",
+      "VIEWED": "Переглянуто",
+      "ACCEPTED": "Прийнято",
+      "REJECTED": "Відхилено",
+      "EXPIRED": "Прострочено",
+      "CONVERTED": "Перетворено",
+      "CANCELLED": "Скасовано"
+    },
+    "itemTypes": {
+      "ASSET": "Актив",
+      "SERVICE": "Послуга",
+      "PRODUCT": "Товар",
+      "FEE": "Збір",
+      "DELIVERY": "Доставка",
+      "COLLECTION": "Забір",
+      "LABOR": "Робота",
+      "CUSTOM": "Інше"
+    },
+    "billingModes": {
+      "DAILY": "Подобово",
+      "WEEKLY": "Потижнево",
+      "MONTHLY": "Помісячно",
+      "CUSTOM": "Індивідуально",
+      "FLAT": "Фіксовано"
+    },
+    "discountTypes": {
+      "FIXED": "Фіксована сума",
+      "PERCENTAGE": "Відсоток"
+    },
+    "fields": {
+      "quoteNumber": "Номер кошторису",
+      "status": "Статус",
+      "issueDate": "Дата видачі",
+      "validUntil": "Дійсний до",
+      "name": "Назва",
+      "description": "Опис",
+      "itemType": "Тип позиції",
+      "unit": "Одиниця",
+      "unitPlaceholder": "напр. день, година, штука",
+      "billingMode": "Режим тарифікації",
+      "quantity": "Кількість",
+      "unitPrice": "Ціна за одиницю",
+      "dailyPrice": "Ціна за день",
+      "weeklyPrice": "Ціна за тиждень",
+      "monthlyPrice": "Ціна за місяць",
+      "customPrice": "Індивідуальна ціна",
+      "deposit": "Застава",
+      "discountType": "Тип знижки",
+      "noDiscount": "Без знижки",
+      "discountPercent": "Знижка (%)",
+      "discountAmount": "Сума знижки",
+      "taxRatePercent": "Ставка податку (%)",
+      "taxTotal": "Податок",
+      "depositTotal": "Застава",
+      "customerNotes": "Нотатки для клієнта",
+      "termsAndConditions": "Умови"
+    },
+    "actions": {
+      "send": "Надіслати кошторис",
+      "accept": "Прийняти",
+      "reject": "Відхилити",
+      "rejectPrompt": "Причина відхилення (необов'язково)",
+      "cancel": "Скасувати кошторис",
+      "duplicate": "Дублювати",
+      "convert": "Перетворити на оренду",
+      "removeItem": "Видалити",
+      "addServiceItem": "Додати товар або послугу",
+      "viewPdf": "Переглянути PDF",
+      "regeneratePdf": "Перегенерувати PDF",
+      "downloadPdf": "Завантажити PDF"
+    },
+    "timeline": {
+      "created": "Кошторис створено",
+      "updated": "Кошторис оновлено",
+      "status_changed": "Статус змінено",
+      "sent": "Кошторис надіслано",
+      "viewed": "Переглянуто клієнтом",
+      "accepted": "Прийнято",
+      "rejected": "Відхилено",
+      "duplicated": "Продубльовано",
+      "converted": "Перетворено на оренду",
+      "pdf_generated": "PDF сформовано"
+    },
+    "errors": {
+      "customerRequired": "Оберіть клієнта",
+      "validUntilRequired": "Потрібна дата закінчення дії",
+      "datesRequired": "Потрібні планові дати початку та завершення",
+      "endBeforeStart": "Плановий кінець має бути пізніше планового початку",
+      "validUntilBeforeIssueDate": "Дата закінчення дії не може бути в минулому",
+      "itemNameRequired": "Введіть назву позиції",
+      "quantityMustBePositive": "Кількість має бути не менше 1",
+      "noItems": "Додайте принаймні одну позицію",
+      "onlyDraftEditable": "Редагувати можна лише чернетки — натомість продублюйте кошторис"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Клієнт",
+        "dates": "Дати",
+        "assets": "Активи",
+        "services": "Товари та послуги",
+        "pricing": "Ціни",
+        "terms": "Умови",
+        "review": "Перевірка"
+      },
+      "saving": "Збереження кошторису…",
+      "createQuote": "Створити кошторис",
+      "noServiceItems": "Товари або послуги ще не додано"
+    },
+    "public": {
+      "notFound": "Це посилання на кошторис недійсне або застаріло",
+      "acceptedNotice": "Прийнято: {{name}}",
+      "rejectedNotice": "Цей кошторис було відхилено",
+      "acceptanceDisclaimer": "Прийняття нижче фіксує вашу згоду з цим кошторисом. Це не є кваліфікованим електронним підписом.",
+      "rejectReasonPlaceholder": "Повідомте причину (необов'язково)",
+      "confirmReject": "Підтвердити відхилення"
+    }
   }
 }

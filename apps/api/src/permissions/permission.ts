@@ -37,7 +37,34 @@ export const RENTAL_PERMISSIONS = [
   "rentals.cancel",
 ] as const;
 
-export const ALL_PERMISSIONS = [...ASSET_PERMISSIONS, ...RENTAL_PERMISSIONS] as const;
+/**
+ * Granular permissions for the Quotes module (TASK-0007). `quotes.accept`/
+ * `quotes.reject` gate the *staff-recorded* accept/reject endpoints (e.g. a
+ * customer approved verbally) — the public customer-facing accept/reject
+ * flow uses a token, not a membership role, and is never gated by these.
+ * `quotes.manageTemplates` is a reserved extension point for a future
+ * PDF/email template editor — no such feature exists yet (same convention
+ * ADR 0001 used for a permission with no matching endpoint yet).
+ */
+export const QUOTE_PERMISSIONS = [
+  "quotes.view",
+  "quotes.create",
+  "quotes.update",
+  "quotes.delete",
+  "quotes.send",
+  "quotes.accept",
+  "quotes.reject",
+  "quotes.convert",
+  "quotes.duplicate",
+  "quotes.download",
+  "quotes.manageTemplates",
+] as const;
+
+export const ALL_PERMISSIONS = [
+  ...ASSET_PERMISSIONS,
+  ...RENTAL_PERMISSIONS,
+  ...QUOTE_PERMISSIONS,
+] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
 
@@ -51,6 +78,8 @@ const ASSET_READ_ONLY: Permission[] = [
 ];
 
 const RENTAL_READ_ONLY: Permission[] = ["rentals.view"];
+
+const QUOTE_READ_ONLY: Permission[] = ["quotes.view", "quotes.download"];
 
 /**
  * Default role -> permission mapping. OWNER and ADMIN get every permission.
@@ -67,7 +96,15 @@ const RENTAL_READ_ONLY: Permission[] = ["rentals.view"];
  * not `create`/`update`/`reserve`/`cancel` (those are commercial/booking
  * decisions, not physical-handling ones).
  *
- * ACCOUNTANT and VIEWER are read-only across both modules.
+ * Quotes: MANAGER gets full commercial control except `quotes.delete` and
+ * `quotes.manageTemplates` (destructive/configuration actions reserved for
+ * OWNER/ADMIN, same reasoning as Assets/Rentals). TECHNICIAN gets no quote
+ * permissions at all — a commercial offer is never something the
+ * equipment-handling role creates or approves.
+ *
+ * ACCOUNTANT and VIEWER are read-only across all three modules (Quotes:
+ * `view`+`download` only — they can retrieve the PDF for bookkeeping but
+ * never send/accept/reject/convert).
  *
  * Known limitation: the permission model is resource-level, not field- or
  * value-level (e.g. TECHNICIAN's asset `update` isn't restricted to only
@@ -94,6 +131,15 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "rentals.start",
     "rentals.return",
     "rentals.cancel",
+    "quotes.view",
+    "quotes.create",
+    "quotes.update",
+    "quotes.send",
+    "quotes.accept",
+    "quotes.reject",
+    "quotes.convert",
+    "quotes.duplicate",
+    "quotes.download",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -108,8 +154,8 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "rentals.start",
     "rentals.return",
   ],
-  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY],
-  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY],
+  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY],
+  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY],
 };
 
 export function roleHasPermission(role: MembershipRole, permission: Permission): boolean {

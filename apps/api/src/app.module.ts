@@ -14,6 +14,7 @@ import { AuthModule } from "./auth/auth.module";
 import { CustomersModule } from "./customers/customers.module";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
+import { QuotesModule } from "./quotes/quotes.module";
 import { RentalsModule } from "./rentals/rentals.module";
 import { TenantsModule } from "./tenants/tenants.module";
 
@@ -41,6 +42,7 @@ import { TenantsModule } from "./tenants/tenants.module";
     AssetsModule,
     AssetFilesModule,
     RentalsModule,
+    QuotesModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

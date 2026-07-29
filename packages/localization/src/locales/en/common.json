@@ -346,5 +346,137 @@
       "booked": "Booked",
       "free": "Free"
     }
+  },
+  "quote": {
+    "title": "Quotes",
+    "subtitle": "Prepare and send commercial offers before creating a rental",
+    "newQuote": "New quote",
+    "editQuote": "Edit quote",
+    "save": "Save",
+    "deleteConfirm": "Are you sure you want to delete this quote?",
+    "searchPlaceholder": "Search quotes…",
+    "allStatuses": "All statuses",
+    "noQuotes": "No quotes found",
+    "convertConfirm": "Convert this quote into a rental?",
+    "convertedNotice": "This quote was converted into rental",
+    "availabilityWarningTitle": "One or more assets may not be available for the planned dates",
+    "statuses": {
+      "DRAFT": "Draft",
+      "SENT": "Sent",
+      "VIEWED": "Viewed",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired",
+      "CONVERTED": "Converted",
+      "CANCELLED": "Cancelled"
+    },
+    "itemTypes": {
+      "ASSET": "Asset",
+      "SERVICE": "Service",
+      "PRODUCT": "Product",
+      "FEE": "Fee",
+      "DELIVERY": "Delivery",
+      "COLLECTION": "Collection",
+      "LABOR": "Labor",
+      "CUSTOM": "Custom"
+    },
+    "billingModes": {
+      "DAILY": "Daily",
+      "WEEKLY": "Weekly",
+      "MONTHLY": "Monthly",
+      "CUSTOM": "Custom",
+      "FLAT": "Flat"
+    },
+    "discountTypes": {
+      "FIXED": "Fixed amount",
+      "PERCENTAGE": "Percentage"
+    },
+    "fields": {
+      "quoteNumber": "Quote number",
+      "status": "Status",
+      "issueDate": "Issue date",
+      "validUntil": "Valid until",
+      "name": "Name",
+      "description": "Description",
+      "itemType": "Item type",
+      "unit": "Unit",
+      "unitPlaceholder": "e.g. day, hour, piece",
+      "billingMode": "Billing mode",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "dailyPrice": "Daily price",
+      "weeklyPrice": "Weekly price",
+      "monthlyPrice": "Monthly price",
+      "customPrice": "Custom price",
+      "deposit": "Deposit",
+      "discountType": "Discount type",
+      "noDiscount": "No discount",
+      "discountPercent": "Discount (%)",
+      "discountAmount": "Discount amount",
+      "taxRatePercent": "Tax rate (%)",
+      "taxTotal": "Tax",
+      "depositTotal": "Deposit",
+      "customerNotes": "Customer notes",
+      "termsAndConditions": "Terms and conditions"
+    },
+    "actions": {
+      "send": "Send quote",
+      "accept": "Accept",
+      "reject": "Reject",
+      "rejectPrompt": "Reason for rejection (optional)",
+      "cancel": "Cancel quote",
+      "duplicate": "Duplicate",
+      "convert": "Convert to rental",
+      "removeItem": "Remove",
+      "addServiceItem": "Add product or service",
+      "viewPdf": "View PDF",
+      "regeneratePdf": "Regenerate PDF",
+      "downloadPdf": "Download PDF"
+    },
+    "timeline": {
+      "created": "Quote created",
+      "updated": "Quote updated",
+      "status_changed": "Status changed",
+      "sent": "Quote sent",
+      "viewed": "Viewed by customer",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "duplicated": "Duplicated",
+      "converted": "Converted to rental",
+      "pdf_generated": "PDF generated"
+    },
+    "errors": {
+      "customerRequired": "Select a customer",
+      "validUntilRequired": "Validity date is required",
+      "datesRequired": "Planned start and end dates are required",
+      "endBeforeStart": "Planned end must be after planned start",
+      "validUntilBeforeIssueDate": "Valid until cannot be in the past",
+      "itemNameRequired": "Enter a name for this item",
+      "quantityMustBePositive": "Quantity must be at least 1",
+      "noItems": "Add at least one item",
+      "onlyDraftEditable": "Only draft quotes can be edited — duplicate this quote instead"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Customer",
+        "dates": "Dates",
+        "assets": "Assets",
+        "services": "Products & services",
+        "pricing": "Pricing",
+        "terms": "Terms",
+        "review": "Review"
+      },
+      "saving": "Saving quote…",
+      "createQuote": "Create quote",
+      "noServiceItems": "No products or services added yet"
+    },
+    "public": {
+      "notFound": "This quote link is invalid or has expired",
+      "acceptedNotice": "Accepted by {{name}}",
+      "rejectedNotice": "This quote has been rejected",
+      "acceptanceDisclaimer": "Accepting below records your acceptance of this quote. This is not a qualified electronic signature.",
+      "rejectReasonPlaceholder": "Let us know why (optional)",
+      "confirmReject": "Confirm rejection"
+    }
   }
 }

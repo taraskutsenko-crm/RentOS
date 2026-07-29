@@ -18,6 +18,7 @@ import type { RentalItemDto } from "./dto/rental-item.dto";
 import type { ReturnRentalDto } from "./dto/return-rental.dto";
 import type { StatusActionDto } from "./dto/status-action.dto";
 import type { UpdateRentalDto } from "./dto/update-rental.dto";
+import { generateRentalNumber } from "./rental-numbering.util";
 import { computeRentalTotals, type PricedRentalItemInput } from "./rental-pricing.util";
 import {
   RENTAL_DETAIL_INCLUDE,
@@ -72,7 +73,7 @@ export class RentalsService {
     );
 
     const created = await this.prisma.$transaction(async (tx) => {
-      const rentalNumber = await this.generateRentalNumber(tx, tenantId);
+      const rentalNumber = await generateRentalNumber(tx, tenantId);
 
       const rental = await tx.rental.create({
         data: {
@@ -640,23 +641,6 @@ export class RentalsService {
         reason,
       });
     }
-  }
-
-  private async generateRentalNumber(
-    tx: Prisma.TransactionClient,
-    tenantId: string,
-  ): Promise<string> {
-    const existingCount = await tx.rental.count({ where: { tenantId } });
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const candidate = `RNT-${String(existingCount + 1 + attempt).padStart(6, "0")}`;
-      const existing = await tx.rental.findUnique({
-        where: { tenantId_rentalNumber: { tenantId, rentalNumber: candidate } },
-      });
-      if (!existing) {
-        return candidate;
-      }
-    }
-    return `RNT-${Date.now()}`;
   }
 
   private async assertCustomerBelongsToTenant(tenantId: string, customerId: string): Promise<void> {

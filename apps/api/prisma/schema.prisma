@@ -74,6 +74,58 @@ enum RentalBillingMode {
   CUSTOM
 }
 
+/// Quote lifecycle: DRAFT -> SENT -> VIEWED -> ACCEPTED -> CONVERTED, with
+/// REJECTED/EXPIRED reachable from SENT/VIEWED and CANCELLED reachable from
+/// DRAFT/SENT. See docs/adr/0007-quotes-and-commercial-offers.md.
+enum QuoteStatus {
+  DRAFT
+  SENT
+  VIEWED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED
+  CANCELLED
+}
+
+/// What a QuoteItem represents. Deliberately generic — never a specific
+/// rental industry's vocabulary. ASSET items may become RentalItem rows on
+/// conversion; every other type is a commercial line that stays on the
+/// Quote only (see ADR 0007).
+enum QuoteItemType {
+  ASSET
+  SERVICE
+  PRODUCT
+  FEE
+  DELIVERY
+  COLLECTION
+  LABOR
+  CUSTOM
+}
+
+/// How a QuoteItem's line price is computed. A superset of RentalBillingMode
+/// with FLAT added: unitPriceMinor * quantity, no duration factor — for
+/// lines that aren't priced per day/week/month (a delivery fee, N hours of
+/// labor, N units of a product). ASSET items should use DAILY/WEEKLY/
+/// MONTHLY/CUSTOM only (enforced in QuotesService, not the database) since
+/// those are the only modes RentalItem itself supports on conversion.
+enum QuoteBillingMode {
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+  FLAT
+}
+
+/// Whether a discount is a percentage (discountValue is interpreted as
+/// integer basis points, e.g. 1000 = 10.00%) or a fixed amount (discountValue
+/// is interpreted as integer minor currency units). Never floating point —
+/// see ADR 0007's "decimal-safe arithmetic" section.
+enum QuoteDiscountType {
+  PERCENTAGE
+  FIXED
+}
+
 /// Platform user identity. Not tenant-scoped — a user may belong to
 /// multiple tenants via TenantMembership.
 model User {
@@ -103,6 +155,11 @@ model User {
   createdRentals      Rental[]              @relation("RentalCreatedBy")
   updatedRentals      Rental[]              @relation("RentalUpdatedBy")
   rentalStatusChanges RentalStatusHistory[] @relation("RentalStatusHistoryChangedBy")
+
+  createdQuotes           Quote[]              @relation("QuoteCreatedBy")
+  updatedQuotes           Quote[]              @relation("QuoteUpdatedBy")
+  quoteStatusChanges      QuoteStatusHistory[] @relation("QuoteStatusHistoryChangedBy")
+  generatedQuoteDocuments QuoteDocument[]      @relation("QuoteDocumentGeneratedBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -141,6 +198,12 @@ model Tenant {
   rentals             Rental[]
   rentalItems         RentalItem[]
   rentalStatusHistory RentalStatusHistory[]
+
+  quotes             Quote[]
+  quoteItems         QuoteItem[]
+  quoteStatusHistory QuoteStatusHistory[]
+  quoteDocuments     QuoteDocument[]
+  quoteSequences     QuoteSequence[]
 
   @@index([deletedAt])
   @@map("tenants")
@@ -234,6 +297,7 @@ model Customer {
 
   tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   rentals Rental[]
+  quotes  Quote[]
 
   @@index([tenantId, status])
   @@index([tenantId, deletedAt])
@@ -350,6 +414,7 @@ model Asset {
   images            AssetImage[]
   documents         AssetDocument[]
   rentalItems       RentalItem[]
+  quoteItems        QuoteItem[]
 
   @@unique([tenantId, internalNumber])
   @@unique([tenantId, sku])
@@ -543,6 +608,12 @@ model Rental {
   totalMinor      Int          @default(0)
   notes           String?
   internalNotes   String?
+  /// Set when this Rental was created by converting an accepted Quote (see
+  /// QuotesService.convertToRental / ADR 0007). Only the ASSET-type
+  /// QuoteItems become RentalItem rows here — the full commercial breakdown
+  /// (including non-asset lines) stays on the immutable source Quote,
+  /// reachable through this link. Null for every Rental created directly.
+  sourceQuoteId   String?      @unique
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   deletedAt       DateTime?
@@ -553,6 +624,7 @@ model Rental {
   customer      Customer @relation(fields: [customerId], references: [id])
   createdByUser User     @relation("RentalCreatedBy", fields: [createdByUserId], references: [id])
   updatedByUser User?    @relation("RentalUpdatedBy", fields: [updatedByUserId], references: [id])
+  sourceQuote   Quote?   @relation("QuoteConvertedToRental", fields: [sourceQuoteId], references: [id])
 
   items         RentalItem[]
   statusHistory RentalStatusHistory[]
@@ -616,4 +688,189 @@ model RentalStatusHistory {
 
   @@index([tenantId, rentalId, createdAt])
   @@map("rental_status_history")
+}
+
+/// A tenant's commercial offer to a Customer — assets, generic products or
+/// services, delivery/labor/fee lines, pricing, discounts, tax, deposits,
+/// and terms — prepared before any Rental is created. Never reserves an
+/// asset by itself (see AvailabilityService integration in QuotesService);
+/// only converting an ACCEPTED quote creates a real Rental. See
+/// docs/adr/0007-quotes-and-commercial-offers.md.
+model Quote {
+  id                    String             @id @default(uuid())
+  tenantId              String
+  customerId            String
+  quoteNumber           String
+  status                QuoteStatus        @default(DRAFT)
+  issueDate             DateTime
+  validUntil            DateTime
+  plannedStart          DateTime
+  plannedEnd            DateTime
+  currency              String             @db.VarChar(3)
+  subtotalMinor         Int                @default(0)
+  discountType          QuoteDiscountType?
+  discountValue         Int                @default(0)
+  discountTotalMinor    Int                @default(0)
+  taxTotalMinor         Int                @default(0)
+  depositTotalMinor     Int                @default(0)
+  totalMinor            Int                @default(0)
+  customerNotes         String?
+  internalNotes         String?
+  termsAndConditions    String?
+  acceptedAt            DateTime?
+  /// Free-text name/email captured at acceptance time — the public flow has
+  /// no authenticated User to reference, so this is never a User FK.
+  acceptedBy            String?
+  rejectedAt            DateTime?
+  rejectionReason       String?
+  /// SHA-256 hash of the current public access token (see TokenService's
+  /// identical hashing convention for refresh tokens) — the plaintext token
+  /// is never stored. One active token at a time; regenerated on every send.
+  publicTokenHash       String?            @unique
+  publicTokenExpiresAt  DateTime?
+  /// Lineage pointer set by QuotesService.duplicate — deliberately just a
+  /// single self-relation, not a full revision chain (see ADR 0007).
+  duplicatedFromQuoteId String?
+  createdByUserId       String
+  updatedByUserId       String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  deletedAt             DateTime?
+
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer            Customer @relation(fields: [customerId], references: [id])
+  createdByUser       User     @relation("QuoteCreatedBy", fields: [createdByUserId], references: [id])
+  updatedByUser       User?    @relation("QuoteUpdatedBy", fields: [updatedByUserId], references: [id])
+  duplicatedFromQuote Quote?   @relation("QuoteDuplicatedFrom", fields: [duplicatedFromQuoteId], references: [id])
+  duplicates          Quote[]  @relation("QuoteDuplicatedFrom")
+  /// Populated once this quote has been converted — the created Rental
+  /// holds the FK (Rental.sourceQuoteId); this is the derived inverse side.
+  convertedRental     Rental?  @relation("QuoteConvertedToRental")
+
+  items         QuoteItem[]
+  statusHistory QuoteStatusHistory[]
+  documents     QuoteDocument[]
+
+  @@unique([tenantId, quoteNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+  @@index([tenantId, deletedAt])
+  @@index([tenantId, issueDate])
+  @@index([tenantId, validUntil])
+  @@index([tenantId, plannedStart, plannedEnd])
+  @@index([tenantId, totalMinor])
+  @@index([tenantId, createdByUserId])
+  @@map("quotes")
+}
+
+/// One line on a Quote — either a physical Asset (assetId set, itemType
+/// ASSET) or a generic product/service/fee/delivery/collection/labor/custom
+/// line (assetId null). Exactly one of dailyPriceMinor/weeklyPriceMinor/
+/// monthlyPriceMinor/customPriceMinor/unitPriceMinor is meaningful,
+/// selected by billingMode (FLAT uses unitPriceMinor * quantity, the other
+/// four modes mirror RentalItem's pricing exactly — see quote-pricing.util.ts).
+model QuoteItem {
+  id                 String             @id @default(uuid())
+  tenantId           String
+  quoteId            String
+  itemType           QuoteItemType
+  assetId            String?
+  name               String
+  description        String?
+  quantity           Int                @default(1)
+  /// Free-text unit label for display only (e.g. "day", "hour", "piece") —
+  /// never used in price computation, which is driven by billingMode.
+  unit               String?
+  billingMode        QuoteBillingMode
+  unitPriceMinor     Int?
+  dailyPriceMinor    Int?
+  weeklyPriceMinor   Int?
+  monthlyPriceMinor  Int?
+  customPriceMinor   Int?
+  discountType       QuoteDiscountType?
+  discountValue      Int                @default(0)
+  discountTotalMinor Int                @default(0)
+  /// Integer basis points (2000 = 20.00%) — never a float rate.
+  taxRateBp          Int                @default(0)
+  taxTotalMinor      Int                @default(0)
+  depositMinor       Int                @default(0)
+  lineSubtotalMinor  Int                @default(0)
+  lineTotalMinor     Int                @default(0)
+  sortOrder          Int                @default(0)
+  notes              String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  quote  Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  asset  Asset? @relation(fields: [assetId], references: [id])
+
+  @@index([tenantId, quoteId])
+  @@index([tenantId, assetId])
+  @@map("quote_items")
+}
+
+/// Append-only history of Quote.status transitions. changedByUserId is
+/// nullable (unlike RentalStatusHistory's required field) because the
+/// public accept/reject flow has no authenticated User — reason captures
+/// context instead (e.g. "Accepted via public link").
+model QuoteStatusHistory {
+  id              String       @id @default(uuid())
+  tenantId        String
+  quoteId         String
+  fromStatus      QuoteStatus?
+  toStatus        QuoteStatus
+  changedByUserId String?
+  reason          String?
+  metadata        Json?
+  createdAt       DateTime     @default(now())
+
+  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  quote         Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  changedByUser User?  @relation("QuoteStatusHistoryChangedBy", fields: [changedByUserId], references: [id])
+
+  @@index([tenantId, quoteId, createdAt])
+  @@map("quote_status_history")
+}
+
+/// Metadata for one generated PDF of a Quote. The binary lives in
+/// S3-compatible object storage (StorageService, ADR 0005) — storageKey is
+/// the only pointer. A new row is created on every (re)generation; the most
+/// recent non-deleted row is what GET .../pdf serves.
+model QuoteDocument {
+  id                String    @id @default(uuid())
+  tenantId          String
+  quoteId           String
+  storageKey        String
+  originalFileName  String
+  mimeType          String
+  sizeBytes         Int
+  generatedByUserId String?
+  createdAt         DateTime  @default(now())
+  deletedAt         DateTime?
+
+  tenant          Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  quote           Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  generatedByUser User?  @relation("QuoteDocumentGeneratedBy", fields: [generatedByUserId], references: [id])
+
+  @@index([tenantId, quoteId, deletedAt])
+  @@map("quote_documents")
+}
+
+/// A per-tenant-per-year atomic counter backing quoteNumber generation
+/// (format Q-2026-000001). Incremented via a single Postgres
+/// `INSERT ... ON CONFLICT DO UPDATE ... RETURNING` (see
+/// quote-numbering.util.ts) — genuinely concurrency-safe, unlike Rental's
+/// existing count-then-check generateRentalNumber. Never decremented, so a
+/// cancelled/deleted quote's number is never reused.
+model QuoteSequence {
+  id         String @id @default(uuid())
+  tenantId   String
+  year       Int
+  lastNumber Int    @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, year])
+  @@map("quote_sequences")
 }

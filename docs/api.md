@@ -602,6 +602,261 @@ array combining creation, updates, status changes, and return events.
 
 ---
 
+## Quotes
+
+All authenticated endpoints live under `/tenants/:tenantId/quotes` (see
+[ADR 0007](adr/0007-quotes-and-commercial-offers.md)). Require
+authentication + active membership (`TenantGuard`) plus the permission
+noted per endpoint (`PermissionsGuard`). A separate, unauthenticated
+`/public/quotes/:token` namespace serves the customer-facing acceptance
+flow — see below. Business logic is universal: `QuoteItem.itemType` is
+never restricted to a specific rental industry.
+
+### `POST /tenants/:tenantId/quotes`
+
+Requires `quotes.create`. Creates a `DRAFT` quote with an
+automatically-generated `quoteNumber` (`Q-2026-000001`, unique per
+tenant, concurrency-safe — see ADR 0007's numbering section).
+
+**Body**
+
+| Field                | Type   | Notes                                                                    |
+| -------------------- | ------ | ------------------------------------------------------------------------ |
+| `customerId`         | string | Required, must belong to the same tenant                                 |
+| `issueDate`          | string | Optional ISO date-time, defaults to now                                  |
+| `validUntil`         | string | Required ISO date-time, must not be before `issueDate`                   |
+| `plannedStart`       | string | Required ISO date-time                                                   |
+| `plannedEnd`         | string | Required ISO date-time, must be after `plannedStart`                     |
+| `currency`           | string | Optional, defaults to the tenant's default currency                      |
+| `discountType`       | enum   | Optional, `PERCENTAGE` \| `FIXED`                                        |
+| `discountValue`      | number | Optional, integer — basis points if `PERCENTAGE`, minor units if `FIXED` |
+| `customerNotes`      | string | Optional, shown to the customer (PDF + public page)                      |
+| `internalNotes`      | string | Optional, staff-only, never exposed publicly                             |
+| `termsAndConditions` | string | Optional, shown to the customer                                          |
+| `items`              | array  | Optional (a draft may start empty) — see `QuoteItem` below               |
+
+**`QuoteItem` body shape** (each entry in `items`):
+
+| Field                                                                       | Type        | Notes                                                                             |
+| --------------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------- |
+| `itemType`                                                                  | enum        | `ASSET`\|`SERVICE`\|`PRODUCT`\|`FEE`\|`DELIVERY`\|`COLLECTION`\|`LABOR`\|`CUSTOM` |
+| `assetId`                                                                   | string      | Required (and only allowed) when `itemType` is `ASSET`                            |
+| `name`                                                                      | string      | Required                                                                          |
+| `description`                                                               | string      | Optional                                                                          |
+| `quantity`                                                                  | number      | Optional, default 1                                                               |
+| `unit`                                                                      | string      | Optional, free-text display label (e.g. "day", "hour") — never priced             |
+| `billingMode`                                                               | enum        | `DAILY`\|`WEEKLY`\|`MONTHLY`\|`CUSTOM`\|`FLAT` — `ASSET` items may not use `FLAT` |
+| `unitPriceMinor`                                                            | number      | Required when `billingMode` is `FLAT` (= unitPrice × quantity)                    |
+| `dailyPriceMinor`/`weeklyPriceMinor`/`monthlyPriceMinor`/`customPriceMinor` | number      | Exactly the one matching `billingMode` is required                                |
+| `discountType`/`discountValue`                                              | enum/number | Optional, this line's own discount, same interpretation as above                  |
+| `taxRateBp`                                                                 | number      | Optional, default 0, integer basis points (2000 = 20.00%)                         |
+| `depositMinor`                                                              | number      | Optional, default 0                                                               |
+| `sortOrder`                                                                 | number      | Optional, display order                                                           |
+| `notes`                                                                     | string      | Optional                                                                          |
+
+**201** → the created quote (response shape below), with a live
+`availabilityWarnings` array (never blocking — see below)
+**400** → validation failure (missing customer/dates, `validUntil`
+before `issueDate`, end before start, an `ASSET` item without/with a
+mismatched `assetId`, an `ASSET` item using `FLAT`, duplicate asset
+lines, zero/negative quantity)
+**404** → `customerId` or an item's `assetId` doesn't belong to this
+tenant
+
+**Response shape** (also returned by `GET .../:id`, `PATCH`, and every
+lifecycle action except the public ones):
+
+```json
+{
+  "id": "...",
+  "tenantId": "...",
+  "customerId": "...",
+  "quoteNumber": "Q-2026-000001",
+  "status": "DRAFT",
+  "issueDate": "...",
+  "validUntil": "...",
+  "plannedStart": "...",
+  "plannedEnd": "...",
+  "currency": "USD",
+  "subtotalMinor": 10800,
+  "discountType": "FIXED",
+  "discountValue": 500,
+  "discountTotalMinor": 500,
+  "taxTotalMinor": 1800,
+  "depositTotalMinor": 2000,
+  "totalMinor": 10300,
+  "customerNotes": null,
+  "internalNotes": null,
+  "termsAndConditions": null,
+  "acceptedAt": null,
+  "acceptedBy": null,
+  "rejectedAt": null,
+  "rejectionReason": null,
+  "duplicatedFromQuoteId": null,
+  "customer": { "id": "...", "firstName": "...", "...": "..." },
+  "items": [
+    {
+      "id": "...",
+      "itemType": "ASSET",
+      "assetId": "...",
+      "lineTotalMinor": 10800,
+      "asset": { "...": "..." }
+    }
+  ],
+  "convertedRental": null,
+  "availabilityWarnings": [
+    {
+      "assetId": "...",
+      "conflicts": [
+        { "rentalId": "...", "rentalNumber": "...", "plannedStart": "...", "plannedEnd": "..." }
+      ]
+    }
+  ]
+}
+```
+
+Note: `publicTokenHash` is never included in any response, authenticated
+or public — see ADR 0007's public-token security section.
+
+### `GET /tenants/:tenantId/quotes`
+
+Requires `quotes.view`.
+
+**Query params:** `page`, `pageSize` (max 100), `search` (quoteNumber,
+customer first/last name/company), `status`, `customerId`,
+`createdByUserId`, `issueDateFrom`/`issueDateTo`,
+`validUntilFrom`/`validUntilTo`, `plannedStartFrom`/`plannedStartTo`,
+`totalMinorFrom`/`totalMinorTo`, `expired` (boolean — `SENT`/`VIEWED`
+past `validUntil`), `converted` (boolean), `sortBy`
+(`quoteNumber`\|`issueDate`\|`validUntil`\|`plannedStart`\|`plannedEnd`\|`createdAt`\|`totalMinor`),
+`sortDirection`.
+
+**200** → `{ items: Quote[], total, page, pageSize }` — list items
+include `itemCount` instead of the full `items` array.
+
+### `GET /tenants/:tenantId/quotes/:id`
+
+Requires `quotes.view`. **404** → not found (including soft-deleted, or
+another tenant's).
+
+### `PATCH /tenants/:tenantId/quotes/:id`
+
+Requires `quotes.update`. Body: any subset of the `POST` fields.
+**409** → attempting to change `customerId`, `plannedStart`,
+`plannedEnd`, `currency`, `discountType`/`discountValue`, or `items` on a
+quote that is no longer `DRAFT` (duplicate it instead — see ADR 0007);
+or attempting to change `validUntil` once the quote is in a terminal
+status (`ACCEPTED`/`REJECTED`/`EXPIRED`/`CONVERTED`/`CANCELLED`).
+`customerNotes`/`internalNotes`/`termsAndConditions` may be edited
+regardless of status.
+
+### `DELETE /tenants/:tenantId/quotes/:id`
+
+Requires `quotes.delete`. Soft-delete. **409** → quote is not `DRAFT` or
+`CANCELLED` (cancel it first).
+
+### `POST /tenants/:tenantId/quotes/:id/send`
+
+Requires `quotes.send`. **Body:** `{ recipientEmail?, message? }` —
+`recipientEmail` overrides the customer's on-file email for this send
+only. First send moves `DRAFT` → `SENT`; a later call while
+`SENT`/`VIEWED` is a resend (no status change) that regenerates the
+public token and re-dispatches the email. A PDF is (re)generated and
+attached. **400** → no items, or no email available. **409** → quote is
+in a terminal status.
+
+**200** → `{ quote: Quote, emailSent: boolean, emailError?: string }` —
+`emailSent` and `emailError` honestly reflect what the configured
+`EmailProvider` reported; the status change is never rolled back on a
+failed send (see ADR 0007).
+
+### `POST /tenants/:tenantId/quotes/:id/accept`
+
+Requires `quotes.accept`. Staff-recorded acceptance (e.g. the customer
+approved verbally or by email) — distinct from the public token-based
+flow below. **Body:** `{ acceptedBy? }`. Idempotent: calling this again
+on an already-`ACCEPTED` quote is a no-op. **409** → quote is not
+`SENT`/`VIEWED`/`ACCEPTED`.
+
+### `POST /tenants/:tenantId/quotes/:id/reject`
+
+Requires `quotes.reject`. **Body:** `{ reason? }`. Idempotent. **409** →
+quote is not `SENT`/`VIEWED`/`REJECTED`.
+
+### `POST /tenants/:tenantId/quotes/:id/cancel`
+
+Requires `quotes.update`. **Body:** `{ reason? }`. Allowed from `DRAFT`
+or `SENT` only. Idempotent. **409** → quote is not
+`DRAFT`/`SENT`/`CANCELLED`.
+
+### `POST /tenants/:tenantId/quotes/:id/duplicate`
+
+Requires `quotes.duplicate`. Creates a new `DRAFT` quote with a fresh
+`quoteNumber`, `duplicatedFromQuoteId` set to the source, all
+acceptance/rejection/conversion metadata cleared, and items/commercial
+terms copied verbatim with totals recomputed under current rules.
+
+### `POST /tenants/:tenantId/quotes/:id/convert-to-rental`
+
+Requires `quotes.convert`. Only an `ACCEPTED` quote may be converted.
+Inside one transaction: revalidates the customer and every `ASSET`
+item's asset (tenant ownership, active, rentable), re-checks
+availability for the planned window, then creates a `RESERVED` `Rental`
+whose `RentalItem` rows come only from `ASSET`-type quote items — the
+Rental's stored totals are copied verbatim from the Quote's own
+authoritative totals (which include every item type), not recomputed
+from just the asset items (see ADR 0007). Idempotent: calling this again
+on an already-`CONVERTED` quote returns the same rental, never creating
+a second one.
+**400** → quote has no `ASSET` items. **409** → quote is not `ACCEPTED`
+(and not already `CONVERTED`), or one or more assets are unavailable for
+the planned window (lists every conflicting asset, mirroring the
+Rentals `reserve` conflict shape).
+
+**201** → `{ rental: Rental, alreadyConverted: boolean }`
+
+### `GET /tenants/:tenantId/quotes/:id/pdf`
+
+Requires `quotes.download`. Serves the most recently generated PDF,
+generating one on first request if none exists yet. `Content-Type:
+application/pdf`.
+
+### `POST /tenants/:tenantId/quotes/:id/pdf`
+
+Requires `quotes.download`. Forces regeneration — creates a new
+`QuoteDocument` row and returns the fresh PDF bytes.
+
+### `GET /tenants/:tenantId/quotes/:id/history`
+
+Requires `quotes.view`. Returns a normalized, chronologically-sorted
+array combining creation, updates, every status change, sends, views,
+acceptance/rejection, duplication, conversion, and PDF generation.
+
+### Public quote access — `/public/quotes/:token`
+
+No authentication, no `tenantId` in the URL — a single high-entropy
+token (only its SHA-256 hash is ever persisted) resolves directly to the
+one quote it was issued for. Marked `@Public()` (exempt from the global
+`JwtAuthGuard`) and throttled more tightly than the platform default.
+Never exposes `internalNotes`, `tenantId`, user ids, or the token hash —
+see ADR 0007's public-token security section for the full response
+shape (`PublicQuoteView`).
+
+- `GET /public/quotes/:token` — views the quote; the first view
+  transitions `SENT` → `VIEWED` (idempotent — later views don't re-fire
+  it). **404** → unknown, expired, or `CANCELLED` quote's token.
+- `POST /public/quotes/:token/accept` — **Body:** `{ acceptedBy? }`.
+  Idempotent. **409** → quote is not `SENT`/`VIEWED`/`ACCEPTED`.
+- `POST /public/quotes/:token/reject` — **Body:** `{ reason? }`.
+  Idempotent. **409** → quote is not `SENT`/`VIEWED`/`REJECTED`.
+- `GET /public/quotes/:token/pdf` — same PDF the authenticated endpoint
+  serves.
+
+Acceptance/rejection here is explicitly labeled quote acceptance, not a
+qualified electronic signature (see ADR 0007).
+
+---
+
 `PublicUser` is the `User` model with `passwordHash` always stripped —
 verified by an automated test that no response body ever contains
 `passwordHash` or `tokenHash`.

@@ -26,4 +26,17 @@ describe("roleHasPermission", () => {
   it("returns false for an undefined role", () => {
     expect(roleHasPermission(undefined, "assets.read")).toBe(false);
   });
+
+  it("grants MANAGER quote commercial actions but not delete/manageTemplates", () => {
+    expect(roleHasPermission("MANAGER", "quotes.send")).toBe(true);
+    expect(roleHasPermission("MANAGER", "quotes.convert")).toBe(true);
+    expect(roleHasPermission("MANAGER", "quotes.delete")).toBe(false);
+    expect(roleHasPermission("MANAGER", "quotes.manageTemplates")).toBe(false);
+  });
+
+  it("restricts VIEWER to quotes.view/quotes.download", () => {
+    expect(roleHasPermission("VIEWER", "quotes.view")).toBe(true);
+    expect(roleHasPermission("VIEWER", "quotes.download")).toBe(true);
+    expect(roleHasPermission("VIEWER", "quotes.send")).toBe(false);
+  });
 });

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { ALL_PERMISSIONS, ROLE_PERMISSIONS, roleHasPermission } from "./permission";
+import {
+  ALL_PERMISSIONS,
+  QUOTE_PERMISSIONS,
+  ROLE_PERMISSIONS,
+  roleHasPermission,
+} from "./permission";
 
 describe("ROLE_PERMISSIONS", () => {
   it("grants OWNER and ADMIN every permission", () => {
@@ -11,9 +16,15 @@ describe("ROLE_PERMISSIONS", () => {
   });
 
   it("restricts ACCOUNTANT and VIEWER to read-only permissions", () => {
+    // .download is included as read-only-safe: retrieving a generated PDF
+    // never mutates anything, unlike every other quotes.* permission.
     for (const role of ["ACCOUNTANT", "VIEWER"] as const) {
       for (const permission of ROLE_PERMISSIONS[role]) {
-        expect(permission.endsWith(".read") || permission.endsWith(".view")).toBe(true);
+        expect(
+          permission.endsWith(".read") ||
+            permission.endsWith(".view") ||
+            permission.endsWith(".download"),
+        ).toBe(true);
       }
     }
   });
@@ -79,6 +90,44 @@ describe("ROLE_PERMISSIONS", () => {
       expect(roleHasPermission(role, "rentals.create")).toBe(false);
       expect(roleHasPermission(role, "rentals.reserve")).toBe(false);
       expect(roleHasPermission(role, "rentals.cancel")).toBe(false);
+    }
+  });
+
+  it("does not grant MANAGER quotes.delete or quotes.manageTemplates", () => {
+    expect(roleHasPermission("MANAGER", "quotes.delete")).toBe(false);
+    expect(roleHasPermission("MANAGER", "quotes.manageTemplates")).toBe(false);
+    expect(roleHasPermission("OWNER", "quotes.delete")).toBe(true);
+    expect(roleHasPermission("OWNER", "quotes.manageTemplates")).toBe(true);
+  });
+
+  it("grants MANAGER full quote commercial control except delete/manageTemplates", () => {
+    for (const permission of [
+      "quotes.view",
+      "quotes.create",
+      "quotes.update",
+      "quotes.send",
+      "quotes.accept",
+      "quotes.reject",
+      "quotes.convert",
+      "quotes.duplicate",
+      "quotes.download",
+    ] as const) {
+      expect(roleHasPermission("MANAGER", permission)).toBe(true);
+    }
+  });
+
+  it("grants TECHNICIAN no quote permissions at all", () => {
+    for (const permission of QUOTE_PERMISSIONS) {
+      expect(roleHasPermission("TECHNICIAN", permission)).toBe(false);
+    }
+  });
+
+  it("restricts ACCOUNTANT and VIEWER to quotes.view/quotes.download", () => {
+    for (const role of ["ACCOUNTANT", "VIEWER"] as const) {
+      expect(roleHasPermission(role, "quotes.view")).toBe(true);
+      expect(roleHasPermission(role, "quotes.download")).toBe(true);
+      expect(roleHasPermission(role, "quotes.send")).toBe(false);
+      expect(roleHasPermission(role, "quotes.convert")).toBe(false);
     }
   });
 });

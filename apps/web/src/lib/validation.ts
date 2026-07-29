@@ -173,3 +173,58 @@ export const rentalSchema = z
   });
 
 export type RentalFormValues = z.infer<typeof rentalSchema>;
+
+export const quoteItemFormSchema = z.object({
+  itemType: z.enum([
+    "ASSET",
+    "SERVICE",
+    "PRODUCT",
+    "FEE",
+    "DELIVERY",
+    "COLLECTION",
+    "LABOR",
+    "CUSTOM",
+  ]),
+  assetId: z.string(),
+  name: z.string().min(1, "quote.errors.itemNameRequired"),
+  description: z.string(),
+  quantity: z.number().int().min(1, "quote.errors.quantityMustBePositive"),
+  unit: z.string(),
+  billingMode: z.enum(["DAILY", "WEEKLY", "MONTHLY", "CUSTOM", "FLAT"]),
+  unitPriceDisplay: z.string(),
+  dailyPriceDisplay: z.string(),
+  weeklyPriceDisplay: z.string(),
+  monthlyPriceDisplay: z.string(),
+  customPriceDisplay: z.string(),
+  discountType: z.enum(["PERCENTAGE", "FIXED"]).nullable(),
+  discountValueDisplay: z.string(),
+  taxRateDisplay: z.string(),
+  depositDisplay: z.string(),
+  notes: z.string().max(2000),
+});
+
+export type QuoteItemFormValues = z.infer<typeof quoteItemFormSchema>;
+
+export const quoteSchema = z
+  .object({
+    customerId: z.string().min(1, "quote.errors.customerRequired"),
+    validUntil: z.string().min(1, "quote.errors.validUntilRequired"),
+    plannedStart: z.string().min(1, "quote.errors.datesRequired"),
+    plannedEnd: z.string().min(1, "quote.errors.datesRequired"),
+    currency: z.string().min(1, "auth.errors.required"),
+    discountType: z.enum(["PERCENTAGE", "FIXED"]).nullable(),
+    discountValueDisplay: z.string(),
+    customerNotes: z.string().max(2000),
+    internalNotes: z.string().max(2000),
+    termsAndConditions: z.string().max(10000),
+  })
+  .refine((data) => new Date(data.plannedEnd) > new Date(data.plannedStart), {
+    path: ["plannedEnd"],
+    message: "quote.errors.endBeforeStart",
+  })
+  .refine((data) => !data.validUntil || new Date(data.validUntil) >= new Date(), {
+    path: ["validUntil"],
+    message: "quote.errors.validUntilBeforeIssueDate",
+  });
+
+export type QuoteFormValues = z.infer<typeof quoteSchema>;

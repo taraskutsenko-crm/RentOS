@@ -7,16 +7,18 @@ designed to support any asset type, any country, any language, subscription
 billing, and future mobile clients through an API-first architecture.
 
 > **Status:** Production infrastructure, authentication, multi-tenant RBAC,
-> and the Customers, Assets, and Rentals business modules are complete.
-> Registration, login/logout, rotating refresh tokens, tenant onboarding,
-> tenant-isolated access control, full customer CRUD, a universal Assets
-> module (categories, tenant-configurable statuses, category-scoped custom
-> fields, images/documents, status/location history, and a unified
-> timeline), and a universal Rentals module (booking wizard, lifecycle
-> state machine, real availability/double-booking prevention, automatic
-> pricing) are all implemented and tested end-to-end. Remaining business
-> modules (billing, invoicing) are still out of scope until explicitly
-> requested.
+> and the Customers, Assets, Rentals, and Quotes business modules are
+> complete. Registration, login/logout, rotating refresh tokens, tenant
+> onboarding, tenant-isolated access control, full customer CRUD, a
+> universal Assets module (categories, tenant-configurable statuses,
+> category-scoped custom fields, images/documents, status/location
+> history, and a unified timeline), a universal Rentals module (booking
+> wizard, lifecycle state machine, real availability/double-booking
+> prevention, automatic pricing), and a Quotes and Commercial Offers
+> module (quote wizard, PDF generation, public customer acceptance,
+> quote-to-rental conversion) are all implemented and tested end-to-end.
+> Remaining business modules (invoicing, payments) are still out of scope
+> until explicitly requested.
 
 ## Tech Stack
 
@@ -119,12 +121,54 @@ See [docs/api.md](docs/api.md#rentals) for the full endpoint reference, and
 [ADR 0006](docs/adr/0006-rental-lifecycle-and-availability.md) for the
 lifecycle, availability, and pricing design rationale.
 
+## Quotes
+
+Prepares professional commercial offers before any Rental is created — a
+Quote never reserves an asset by itself. Covers:
+
+- **Lifecycle** — `DRAFT → SENT → VIEWED → ACCEPTED → CONVERTED`, with
+  `REJECTED`/`EXPIRED` reachable from `SENT`/`VIEWED` and `CANCELLED` from
+  `DRAFT`/`SENT`; every transition writes a `QuoteStatusHistory` row.
+  Expiry is evaluated lazily against `validUntil`, not via a scheduled job.
+- **Universal line items** — `ASSET`, `SERVICE`, `PRODUCT`, `FEE`,
+  `DELIVERY`, `COLLECTION`, `LABOR`, `CUSTOM`; daily/weekly/
+  calendar-accurate-monthly/custom/flat pricing, per-line and quote-level
+  percentage or fixed discounts, per-line tax rates, and deposits — all
+  integer minor units and integer basis points, never floating point.
+- **Concurrency-safe numbering** — `Q-2026-000001`, backed by an atomic
+  Postgres upsert-increment sequence (not a count-then-check pattern).
+- **PDF generation** — a localization-aware, A4, multi-page-safe
+  commercial offer (itemized table, totals, terms, acceptance section),
+  rendered via `pdfkit` with an embedded Unicode font, stored through the
+  same storage abstraction Assets uses.
+- **Email preparation** — a swappable `EmailProvider` abstraction (mirrors
+  the Storage adapter pattern); a logging/development provider ships
+  today, a production SMTP/SES/SendGrid provider is a documented future
+  swap.
+- **Public customer acceptance** — a hashed, expiring, token-based public
+  link (no login required) to view, download the PDF, accept, or reject
+  a quote; every action is idempotent and rate-limited.
+- **Quote-to-Rental conversion** — only an `ACCEPTED` quote converts,
+  inside one transaction that revalidates the customer/assets/
+  availability and creates a `RESERVED` Rental permanently linked back to
+  its source Quote.
+- **Duplication** — a fresh `DRAFT` copy with a new number and cleared
+  acceptance/rejection/conversion metadata, in place of a full
+  revision-chain system (see ADR 0007 for why).
+- **Granular permissions** — `quotes.view/create/update/delete/send/
+accept/reject/convert/duplicate/download/manageTemplates`, enforced by
+  the same `PermissionsGuard` as every other module.
+
+See [docs/api.md](docs/api.md#quotes) for the full endpoint reference, and
+[ADR 0007](docs/adr/0007-quotes-and-commercial-offers.md) for the
+numbering, pricing, PDF, email, and public-acceptance design rationale.
+
 ## Monorepo Structure
 
 ```
 apps/
-  web/            Next.js frontend — App Router, Tailwind v4, auth + customers pages, protected /app shell
-  api/            NestJS backend — auth, users, tenants, memberships, customers, assets, rentals, permissions, storage, audit modules
+  web/            Next.js frontend — App Router, Tailwind v4, auth + customers pages, protected /app shell, public quote page
+  api/            NestJS backend — auth, users, tenants, memberships, customers, assets, rentals, quotes, email, permissions, storage, audit modules
 packages/
   ui/             Shared UI component library (Tailwind v4 + shadcn/ui)
   shared/         Shared types, env validation (zod), country config, constants
@@ -200,10 +244,12 @@ Prisma is configured against PostgreSQL in
 `Customer`, `AssetCategory`, `Asset`, `AssetStatusDefinition`,
 `AssetStatusHistory`, `AssetLocationHistory`, `AssetCustomFieldDefinition`,
 `AssetCustomFieldValue`, `AssetImage`, `AssetDocument`, `Rental`,
-`RentalItem`, `RentalStatusHistory`, plus
+`RentalItem`, `RentalStatusHistory`, `Quote`, `QuoteItem`,
+`QuoteStatusHistory`, `QuoteDocument`, `QuoteSequence`, plus
 `MembershipRole`/`MembershipStatus`/`CustomerStatus`/`AssetFieldType`/
-`AssetDocumentType`/`RentalStatus`/`RentalBillingMode` enums. No other
-business schema (billing, invoicing) has been added.
+`AssetDocumentType`/`RentalStatus`/`RentalBillingMode`/`QuoteStatus`/
+`QuoteItemType`/`QuoteBillingMode`/`QuoteDiscountType` enums. No other
+business schema (invoicing, payments) has been added.
 
 ## Environment Variables
 
@@ -215,17 +261,25 @@ via a zod schema in [`packages/shared`](packages/shared/src/env.ts). See
 [docs/architecture.md](docs/architecture.md#required-environment-variables)
 for the auth-specific variables, and
 [docs/architecture.md#asset-file-storage](docs/architecture.md#asset-file-storage)
-for `STORAGE_LOCAL_DIR`.
+for `STORAGE_LOCAL_DIR`. Quotes' email sending requires no environment
+variables today (the shipped `LoggingEmailProvider` takes none) — see
+[docs/architecture.md#email](docs/architecture.md#email) for how a
+production SMTP/SES/SendGrid provider (and its credentials) would be
+wired in later.
 
 ## Roadmap
 
 Deliberately out of scope so far:
 
-- Quotations as a distinct commercial document, invoices, payments,
-  deposits handling, maintenance/repair workflows
+- Invoices, payments, deposit collection/refund workflows,
+  maintenance/repair workflows
 - Branches, warehouses, GPS tracking, customer portal
-- OAuth, email sending, password reset, two-factor authentication
+- OAuth, production email sending (a development/logging provider ships
+  today — see [Quotes](#quotes)), password reset, two-factor
+  authentication
 - Theming, background jobs (BullMQ)
+- Quote PDF/email template customization (`quotes.manageTemplates` is a
+  reserved permission with no template editor behind it yet)
 
 These will be introduced in subsequent, explicitly scoped tasks.
 

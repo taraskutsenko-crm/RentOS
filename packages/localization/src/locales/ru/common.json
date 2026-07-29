@@ -346,5 +346,137 @@
       "booked": "Забронировано",
       "free": "Свободно"
     }
+  },
+  "quote": {
+    "title": "Сметы",
+    "subtitle": "Готовьте и отправляйте коммерческие предложения перед созданием аренды",
+    "newQuote": "Новая смета",
+    "editQuote": "Редактировать смету",
+    "save": "Сохранить",
+    "deleteConfirm": "Вы уверены, что хотите удалить эту смету?",
+    "searchPlaceholder": "Поиск смет…",
+    "allStatuses": "Все статусы",
+    "noQuotes": "Сметы не найдены",
+    "convertConfirm": "Преобразовать эту смету в аренду?",
+    "convertedNotice": "Эта смета была преобразована в аренду",
+    "availabilityWarningTitle": "Один или несколько активов могут быть недоступны на плановые даты",
+    "statuses": {
+      "DRAFT": "Черновик",
+      "SENT": "Отправлена",
+      "VIEWED": "Просмотрена",
+      "ACCEPTED": "Принята",
+      "REJECTED": "Отклонена",
+      "EXPIRED": "Истекла",
+      "CONVERTED": "Преобразована",
+      "CANCELLED": "Отменена"
+    },
+    "itemTypes": {
+      "ASSET": "Актив",
+      "SERVICE": "Услуга",
+      "PRODUCT": "Товар",
+      "FEE": "Сбор",
+      "DELIVERY": "Доставка",
+      "COLLECTION": "Забор",
+      "LABOR": "Работа",
+      "CUSTOM": "Другое"
+    },
+    "billingModes": {
+      "DAILY": "Посуточно",
+      "WEEKLY": "Понедельно",
+      "MONTHLY": "Помесячно",
+      "CUSTOM": "Индивидуально",
+      "FLAT": "Фиксированно"
+    },
+    "discountTypes": {
+      "FIXED": "Фиксированная сумма",
+      "PERCENTAGE": "Процент"
+    },
+    "fields": {
+      "quoteNumber": "Номер сметы",
+      "status": "Статус",
+      "issueDate": "Дата выдачи",
+      "validUntil": "Действительна до",
+      "name": "Название",
+      "description": "Описание",
+      "itemType": "Тип позиции",
+      "unit": "Единица",
+      "unitPlaceholder": "напр. день, час, штука",
+      "billingMode": "Режим тарификации",
+      "quantity": "Количество",
+      "unitPrice": "Цена за единицу",
+      "dailyPrice": "Цена за день",
+      "weeklyPrice": "Цена за неделю",
+      "monthlyPrice": "Цена за месяц",
+      "customPrice": "Индивидуальная цена",
+      "deposit": "Залог",
+      "discountType": "Тип скидки",
+      "noDiscount": "Без скидки",
+      "discountPercent": "Скидка (%)",
+      "discountAmount": "Сумма скидки",
+      "taxRatePercent": "Ставка налога (%)",
+      "taxTotal": "Налог",
+      "depositTotal": "Залог",
+      "customerNotes": "Заметки для клиента",
+      "termsAndConditions": "Условия"
+    },
+    "actions": {
+      "send": "Отправить смету",
+      "accept": "Принять",
+      "reject": "Отклонить",
+      "rejectPrompt": "Причина отклонения (необязательно)",
+      "cancel": "Отменить смету",
+      "duplicate": "Дублировать",
+      "convert": "Преобразовать в аренду",
+      "removeItem": "Удалить",
+      "addServiceItem": "Добавить товар или услугу",
+      "viewPdf": "Просмотреть PDF",
+      "regeneratePdf": "Перегенерировать PDF",
+      "downloadPdf": "Скачать PDF"
+    },
+    "timeline": {
+      "created": "Смета создана",
+      "updated": "Смета обновлена",
+      "status_changed": "Статус изменён",
+      "sent": "Смета отправлена",
+      "viewed": "Просмотрена клиентом",
+      "accepted": "Принята",
+      "rejected": "Отклонена",
+      "duplicated": "Продублирована",
+      "converted": "Преобразована в аренду",
+      "pdf_generated": "PDF сформирован"
+    },
+    "errors": {
+      "customerRequired": "Выберите клиента",
+      "validUntilRequired": "Требуется дата окончания действия",
+      "datesRequired": "Требуются плановые даты начала и окончания",
+      "endBeforeStart": "Плановое окончание должно быть позже планового начала",
+      "validUntilBeforeIssueDate": "Дата окончания действия не может быть в прошлом",
+      "itemNameRequired": "Введите название позиции",
+      "quantityMustBePositive": "Количество должно быть не менее 1",
+      "noItems": "Добавьте хотя бы одну позицию",
+      "onlyDraftEditable": "Редактировать можно только черновики — вместо этого продублируйте смету"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Клиент",
+        "dates": "Даты",
+        "assets": "Активы",
+        "services": "Товары и услуги",
+        "pricing": "Цены",
+        "terms": "Условия",
+        "review": "Проверка"
+      },
+      "saving": "Сохранение сметы…",
+      "createQuote": "Создать смету",
+      "noServiceItems": "Товары или услуги ещё не добавлены"
+    },
+    "public": {
+      "notFound": "Эта ссылка на смету недействительна или истекла",
+      "acceptedNotice": "Принято: {{name}}",
+      "rejectedNotice": "Эта смета была отклонена",
+      "acceptanceDisclaimer": "Принятие ниже фиксирует ваше согласие с этой сметой. Это не является квалифицированной электронной подписью.",
+      "rejectReasonPlaceholder": "Сообщите нам причину (необязательно)",
+      "confirmReject": "Подтвердить отклонение"
+    }
   }
 }

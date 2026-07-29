@@ -346,5 +346,137 @@
       "booked": "Reservado",
       "free": "Libre"
     }
+  },
+  "quote": {
+    "title": "Presupuestos",
+    "subtitle": "Prepara y envía ofertas comerciales antes de crear un alquiler",
+    "newQuote": "Nuevo presupuesto",
+    "editQuote": "Editar presupuesto",
+    "save": "Guardar",
+    "deleteConfirm": "¿Seguro que quieres eliminar este presupuesto?",
+    "searchPlaceholder": "Buscar presupuestos…",
+    "allStatuses": "Todos los estados",
+    "noQuotes": "No se encontraron presupuestos",
+    "convertConfirm": "¿Convertir este presupuesto en un alquiler?",
+    "convertedNotice": "Este presupuesto se convirtió en el alquiler",
+    "availabilityWarningTitle": "Uno o más activos podrían no estar disponibles en las fechas previstas",
+    "statuses": {
+      "DRAFT": "Borrador",
+      "SENT": "Enviado",
+      "VIEWED": "Visto",
+      "ACCEPTED": "Aceptado",
+      "REJECTED": "Rechazado",
+      "EXPIRED": "Caducado",
+      "CONVERTED": "Convertido",
+      "CANCELLED": "Cancelado"
+    },
+    "itemTypes": {
+      "ASSET": "Activo",
+      "SERVICE": "Servicio",
+      "PRODUCT": "Producto",
+      "FEE": "Tarifa",
+      "DELIVERY": "Entrega",
+      "COLLECTION": "Recogida",
+      "LABOR": "Mano de obra",
+      "CUSTOM": "Otro"
+    },
+    "billingModes": {
+      "DAILY": "Diario",
+      "WEEKLY": "Semanal",
+      "MONTHLY": "Mensual",
+      "CUSTOM": "Personalizado",
+      "FLAT": "Precio fijo"
+    },
+    "discountTypes": {
+      "FIXED": "Importe fijo",
+      "PERCENTAGE": "Porcentaje"
+    },
+    "fields": {
+      "quoteNumber": "Número de presupuesto",
+      "status": "Estado",
+      "issueDate": "Fecha de emisión",
+      "validUntil": "Válido hasta",
+      "name": "Nombre",
+      "description": "Descripción",
+      "itemType": "Tipo de línea",
+      "unit": "Unidad",
+      "unitPlaceholder": "p. ej. día, hora, unidad",
+      "billingMode": "Modo de facturación",
+      "quantity": "Cantidad",
+      "unitPrice": "Precio unitario",
+      "dailyPrice": "Precio diario",
+      "weeklyPrice": "Precio semanal",
+      "monthlyPrice": "Precio mensual",
+      "customPrice": "Precio personalizado",
+      "deposit": "Depósito",
+      "discountType": "Tipo de descuento",
+      "noDiscount": "Sin descuento",
+      "discountPercent": "Descuento (%)",
+      "discountAmount": "Importe del descuento",
+      "taxRatePercent": "Tipo de impuesto (%)",
+      "taxTotal": "Impuesto",
+      "depositTotal": "Depósito",
+      "customerNotes": "Notas para el cliente",
+      "termsAndConditions": "Términos y condiciones"
+    },
+    "actions": {
+      "send": "Enviar presupuesto",
+      "accept": "Aceptar",
+      "reject": "Rechazar",
+      "rejectPrompt": "Motivo del rechazo (opcional)",
+      "cancel": "Cancelar presupuesto",
+      "duplicate": "Duplicar",
+      "convert": "Convertir en alquiler",
+      "removeItem": "Eliminar",
+      "addServiceItem": "Añadir producto o servicio",
+      "viewPdf": "Ver PDF",
+      "regeneratePdf": "Regenerar PDF",
+      "downloadPdf": "Descargar PDF"
+    },
+    "timeline": {
+      "created": "Presupuesto creado",
+      "updated": "Presupuesto actualizado",
+      "status_changed": "Estado cambiado",
+      "sent": "Presupuesto enviado",
+      "viewed": "Visto por el cliente",
+      "accepted": "Aceptado",
+      "rejected": "Rechazado",
+      "duplicated": "Duplicado",
+      "converted": "Convertido en alquiler",
+      "pdf_generated": "PDF generado"
+    },
+    "errors": {
+      "customerRequired": "Selecciona un cliente",
+      "validUntilRequired": "La fecha de validez es obligatoria",
+      "datesRequired": "Se requieren las fechas previstas de inicio y fin",
+      "endBeforeStart": "El fin previsto debe ser posterior al inicio previsto",
+      "validUntilBeforeIssueDate": "La fecha de validez no puede estar en el pasado",
+      "itemNameRequired": "Introduce un nombre para esta línea",
+      "quantityMustBePositive": "La cantidad debe ser al menos 1",
+      "noItems": "Añade al menos una línea",
+      "onlyDraftEditable": "Solo se pueden editar los borradores — duplica este presupuesto en su lugar"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Cliente",
+        "dates": "Fechas",
+        "assets": "Activos",
+        "services": "Productos y servicios",
+        "pricing": "Precios",
+        "terms": "Términos",
+        "review": "Revisión"
+      },
+      "saving": "Guardando presupuesto…",
+      "createQuote": "Crear presupuesto",
+      "noServiceItems": "Aún no se han añadido productos ni servicios"
+    },
+    "public": {
+      "notFound": "Este enlace de presupuesto no es válido o ha caducado",
+      "acceptedNotice": "Aceptado por {{name}}",
+      "rejectedNotice": "Este presupuesto ha sido rechazado",
+      "acceptanceDisclaimer": "Al aceptar a continuación se registra tu aceptación de este presupuesto. Esto no es una firma electrónica cualificada.",
+      "rejectReasonPlaceholder": "Cuéntanos por qué (opcional)",
+      "confirmReject": "Confirmar rechazo"
+    }
   }
 }

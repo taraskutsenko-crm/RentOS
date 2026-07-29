@@ -27,7 +27,25 @@ export const RENTAL_PERMISSIONS = [
   "rentals.cancel",
 ] as const;
 
-export const ALL_PERMISSIONS = [...ASSET_PERMISSIONS, ...RENTAL_PERMISSIONS] as const;
+export const QUOTE_PERMISSIONS = [
+  "quotes.view",
+  "quotes.create",
+  "quotes.update",
+  "quotes.delete",
+  "quotes.send",
+  "quotes.accept",
+  "quotes.reject",
+  "quotes.convert",
+  "quotes.duplicate",
+  "quotes.download",
+  "quotes.manageTemplates",
+] as const;
+
+export const ALL_PERMISSIONS = [
+  ...ASSET_PERMISSIONS,
+  ...RENTAL_PERMISSIONS,
+  ...QUOTE_PERMISSIONS,
+] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
 
@@ -39,6 +57,7 @@ const ASSET_READ_ONLY: Permission[] = [
   "asset_statuses.read",
 ];
 const RENTAL_READ_ONLY: Permission[] = ["rentals.view"];
+const QUOTE_READ_ONLY: Permission[] = ["quotes.view", "quotes.download"];
 
 /**
  * Mirrors apps/api/src/permissions/permission.ts. This is a UX convenience
@@ -65,6 +84,15 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "rentals.start",
     "rentals.return",
     "rentals.cancel",
+    "quotes.view",
+    "quotes.create",
+    "quotes.update",
+    "quotes.send",
+    "quotes.accept",
+    "quotes.reject",
+    "quotes.convert",
+    "quotes.duplicate",
+    "quotes.download",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -79,8 +107,8 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "rentals.start",
     "rentals.return",
   ],
-  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY],
-  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY],
+  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY],
+  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY],
 };
 
 export function roleHasPermission(

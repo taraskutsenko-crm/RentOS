@@ -1,5 +1,19 @@
 # Documentation
 
+- [`VISION.md`](VISION.md) — the long-term product vision: what RentOS
+  is, the problem it solves, and what's implemented vs. planned vs.
+  long-term direction.
+- [`ROADMAP.md`](ROADMAP.md) — structured, status-tagged roadmap:
+  completed modules, current stabilization work, the next planned major
+  task, later phases, and technical debt.
+- [`HANDOVER.md`](HANDOVER.md) — the practical resume-work reference: repo
+  structure, conventions, latest verified commit/CI state, and the exact
+  commands to run.
+- [`PRODUCT_PRINCIPLES.md`](PRODUCT_PRINCIPLES.md) — the practical
+  principles this codebase follows, each grounded in a real decision
+  already made in the repository.
+- [`DECISIONS.md`](DECISIONS.md) — a concise decision register linking to
+  the full ADRs below.
 - [`architecture.md`](architecture.md) — authentication flow, tenant
   resolution, RBAC, cookie security, local dev commands, required env vars,
   and the practical "how it works" reference for the Assets and Rentals

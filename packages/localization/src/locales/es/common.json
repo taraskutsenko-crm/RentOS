@@ -285,6 +285,7 @@
       "billingMode": "Modo de facturación",
       "quantity": "Cantidad",
       "dailyPrice": "Precio diario",
+      "dailyPriceForRemainder": "Precio diario (para los días restantes)",
       "weeklyPrice": "Precio semanal",
       "monthlyPrice": "Precio mensual",
       "customPrice": "Precio personalizado",
@@ -319,7 +320,8 @@
       "datesRequired": "Se requieren las fechas previstas de inicio y fin",
       "endBeforeStart": "El fin previsto debe ser posterior al inicio previsto",
       "assetRequired": "Selecciona un activo",
-      "selectAtLeastOneAsset": "Selecciona al menos un activo"
+      "selectAtLeastOneAsset": "Selecciona al menos un activo",
+      "customMonthLengthRequired": "Introduce un número de días entre 1 y 365"
     },
     "wizard": {
       "steps": {
@@ -335,7 +337,14 @@
       "createRental": "Crear alquiler",
       "availabilityCheck": "Comprobación de disponibilidad",
       "available": "Disponible",
-      "unavailable": "No disponible para estas fechas"
+      "unavailable": "No disponible para estas fechas",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}} meses naturales × {{price}}",
+        "FIXED_30_DAYS": "{{count}} períodos fijos de 30 días × {{price}}",
+        "CUSTOM": "{{count}} períodos personalizados de {{length}} días × {{price}}",
+        "days": "{{count}} días × {{price}}",
+        "pending": "Introduce fechas y precios válidos para ver el desglose de precios"
+      }
     },
     "availabilityCalendar": {
       "title": "Calendario de disponibilidad",
@@ -345,6 +354,30 @@
       "selectAssetsHint": "Selecciona uno o más activos para ver su disponibilidad",
       "booked": "Reservado",
       "free": "Libre"
+    },
+    "billingSettings": {
+      "navLabel": "Ajustes de facturación",
+      "title": "Ajustes de facturación de alquileres",
+      "subtitle": "Configura cómo se facturan los alquileres mensuales para este inquilino",
+      "monthlyMethod": "Método de facturación mensual",
+      "customMonthLengthDays": "Número de días en un mes de facturación personalizado",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "saved": "Ajustes de facturación guardados",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "Mes natural",
+          "description": "Factura desde una fecha hasta la fecha correspondiente del siguiente mes natural, con gestión de fin de mes."
+        },
+        "FIXED_30_DAYS": {
+          "label": "30 días fijos",
+          "description": "Cada 30 días facturables se trata como una unidad de facturación mensual."
+        },
+        "CUSTOM": {
+          "label": "Período personalizado",
+          "description": "Define cuántos días facturables componen una unidad de facturación mensual."
+        }
+      }
     }
   },
   "quote": {

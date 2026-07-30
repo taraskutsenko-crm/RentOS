@@ -74,6 +74,21 @@ enum RentalBillingMode {
   CUSTOM
 }
 
+/// How a tenant defines "one month" for MONTHLY-billed rental items. See
+/// docs/adr/0008-configurable-monthly-billing-strategies.md.
+///  - CALENDAR_MONTH: real calendar-month arithmetic (default for every
+///    tenant, including ones that existed before this enum was added).
+///  - FIXED_30_DAYS: every 30 billable days is one monthly unit.
+///  - CUSTOM: every `RentalBillingSettings.customMonthLengthDays` billable
+///    days is one monthly unit.
+/// In every strategy, days left over after the last complete unit are
+/// billed at the item's own dailyPriceMinor rate (see rental-pricing.util.ts).
+enum MonthlyBillingStrategy {
+  CALENDAR_MONTH
+  FIXED_30_DAYS
+  CUSTOM
+}
+
 /// Quote lifecycle: DRAFT -> SENT -> VIEWED -> ACCEPTED -> CONVERTED, with
 /// REJECTED/EXPIRED reachable from SENT/VIEWED and CANCELLED reachable from
 /// DRAFT/SENT. See docs/adr/0007-quotes-and-commercial-offers.md.
@@ -195,9 +210,10 @@ model Tenant {
   assetImages                 AssetImage[]
   assetDocuments              AssetDocument[]
 
-  rentals             Rental[]
-  rentalItems         RentalItem[]
-  rentalStatusHistory RentalStatusHistory[]
+  rentals               Rental[]
+  rentalItems           RentalItem[]
+  rentalStatusHistory   RentalStatusHistory[]
+  rentalBillingSettings RentalBillingSettings?
 
   quotes             Quote[]
   quoteItems         QuoteItem[]
@@ -643,22 +659,31 @@ model Rental {
 /// never divided by quantity. Exactly one of dailyPriceMinor/weeklyPriceMinor/
 /// monthlyPriceMinor/customPriceMinor is meaningful, selected by billingMode.
 model RentalItem {
-  id                String            @id @default(uuid())
-  tenantId          String
-  rentalId          String
-  assetId           String
-  quantity          Int               @default(1)
-  billingMode       RentalBillingMode
-  dailyPriceMinor   Int?
-  weeklyPriceMinor  Int?
-  monthlyPriceMinor Int?
-  customPriceMinor  Int?
-  depositMinor      Int               @default(0)
-  discountMinor     Int               @default(0)
-  notes             String?
-  returnedAt        DateTime?
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  id                     String                  @id @default(uuid())
+  tenantId               String
+  rentalId               String
+  assetId                String
+  quantity               Int                     @default(1)
+  billingMode            RentalBillingMode
+  dailyPriceMinor        Int?
+  weeklyPriceMinor       Int?
+  monthlyPriceMinor      Int?
+  customPriceMinor       Int?
+  /// Snapshot of the tenant's monthly billing settings at the moment this
+  /// item was last written (create, or full item replacement on update) —
+  /// null unless billingMode is MONTHLY. Frozen deliberately: a later change
+  /// to the tenant's RentalBillingSettings must never alter an already-priced
+  /// item's stored totals (see ADR 0008). Combined with plannedStart/
+  /// plannedEnd on the parent Rental, this fully reproduces the original
+  /// monthly-unit/remaining-day split on demand.
+  monthlyBillingStrategy MonthlyBillingStrategy?
+  customMonthLengthDays  Int?
+  depositMinor           Int                     @default(0)
+  discountMinor          Int                     @default(0)
+  notes                  String?
+  returnedAt             DateTime?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   rental Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
@@ -667,6 +692,33 @@ model RentalItem {
   @@index([tenantId, rentalId])
   @@index([tenantId, assetId])
   @@map("rental_items")
+}
+
+/// Tenant-scoped monthly billing configuration for Rentals (TASK-0006
+/// improvement — see ADR 0008). Deliberately a separate one-row-per-tenant
+/// table rather than fields on Tenant itself: it's optional configuration,
+/// not core tenant identity, and a missing row is a valid, meaningful state
+/// (the tenant has never customized billing) rather than an error — see
+/// RentalBillingSettingsService.getEffective, which defaults to
+/// CALENDAR_MONTH/null when no row exists. This means every tenant that
+/// existed before this table was added keeps CALENDAR_MONTH behavior
+/// automatically, with no data migration required.
+model RentalBillingSettings {
+  id                     String                 @id @default(uuid())
+  tenantId               String                 @unique
+  monthlyBillingStrategy MonthlyBillingStrategy @default(CALENDAR_MONTH)
+  /// Required by the service layer only when monthlyBillingStrategy = CUSTOM
+  /// (1-365); ignored/must be null otherwise. Not enforced at the DB level
+  /// since Postgres CHECK constraints referencing another column in the
+  /// same row are more brittle to evolve than application-layer validation
+  /// here, consistent with how QuoteItem's type-dependent fields are handled.
+  customMonthLengthDays  Int?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("rental_billing_settings")
 }
 
 /// Append-only history of Rental.status transitions, written atomically with

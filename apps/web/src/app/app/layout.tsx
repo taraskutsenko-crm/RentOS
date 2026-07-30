@@ -73,6 +73,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             >
               {t("asset.fieldSettings.navLabel")}
             </Link>
+            <Link
+              href="/app/settings/rental-billing"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {t("rental.billingSettings.navLabel")}
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">

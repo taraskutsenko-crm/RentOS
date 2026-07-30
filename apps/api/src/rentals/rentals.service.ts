@@ -4,13 +4,21 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import type { Asset, Prisma, RentalItem, RentalStatus } from "@prisma/client";
+import type {
+  Asset,
+  MonthlyBillingStrategy,
+  Prisma,
+  RentalItem,
+  RentalStatus,
+} from "@prisma/client";
 
 import { AssetStatusesService } from "../asset-statuses/asset-statuses.service";
 import { AssetsService } from "../assets/assets.service";
 import { AuditService } from "../audit/audit.service";
 import type { PaginatedResult } from "../customers/customers.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { RentalBillingSettingsService } from "../rental-billing-settings/rental-billing-settings.service";
+import type { EffectiveRentalBillingSettings } from "../rental-billing-settings/rental-billing-settings.types";
 import { AvailabilityService } from "./availability.service";
 import type { CreateRentalDto } from "./dto/create-rental.dto";
 import type { QueryRentalsDto } from "./dto/query-rentals.dto";
@@ -27,6 +35,19 @@ import {
 } from "./rental.types";
 import type { RentalTimelineEvent } from "./timeline.types";
 
+/**
+ * A RentalItemDto (client input) whose MONTHLY-only billing-strategy
+ * snapshot fields have already been resolved — either freshly stamped from
+ * the tenant's current RentalBillingSettings (new/replaced items) or
+ * carried over unchanged from an already-persisted RentalItem (unedited
+ * items on a partial update). Never accepted directly from a client — see
+ * docs/adr/0008-configurable-monthly-billing-strategies.md.
+ */
+type RentalItemSource = RentalItemDto & {
+  monthlyBillingStrategy?: MonthlyBillingStrategy | null;
+  customMonthLengthDays?: number | null;
+};
+
 /** Statuses in which the item list and planned dates may still be edited. */
 const EDITABLE_STATUSES: RentalStatus[] = ["DRAFT", "QUOTE"];
 /** Statuses whose record may be hard-removed (never RESERVED/ACTIVE/RETURNED/COMPLETED — those are real operational history). */
@@ -41,6 +62,7 @@ export class RentalsService {
     private readonly availabilityService: AvailabilityService,
     private readonly assetStatusesService: AssetStatusesService,
     private readonly assetsService: AssetsService,
+    private readonly rentalBillingSettingsService: RentalBillingSettingsService,
   ) {}
 
   async create(
@@ -64,8 +86,11 @@ export class RentalsService {
       );
     }
 
+    const billingSettings = await this.resolveBillingSettingsIfNeeded(tenantId, items);
+    const pricedItems = withMonthlyBillingSettings(items, billingSettings);
+
     const { subtotalMinor, totalMinor } = computeRentalTotals(
-      items.map(toPricedItemInput),
+      pricedItems.map(toPricedItemInput),
       plannedStart,
       plannedEnd,
       dto.discountMinor ?? 0,
@@ -94,7 +119,7 @@ export class RentalsService {
         },
       });
 
-      for (const item of items) {
+      for (const item of pricedItems) {
         await tx.rentalItem.create({ data: toRentalItemCreateData(tenantId, rental.id, item) });
       }
 
@@ -212,10 +237,23 @@ export class RentalsService {
       );
     }
 
+    // Only a full item replacement re-reads the tenant's *current* billing
+    // settings — an edit that leaves items untouched (e.g. just the notes or
+    // discount) must keep each item's already-frozen strategy, never pick up
+    // a tenant-wide settings change made after the rental was created (see
+    // ADR 0008). `fromExistingItem` below already carries that frozen
+    // snapshot forward for the untouched-items case.
+    const billingSettings =
+      dto.items !== undefined
+        ? await this.resolveBillingSettingsIfNeeded(tenantId, dto.items)
+        : null;
+    const pricedItems: RentalItemSource[] =
+      dto.items !== undefined ? withMonthlyBillingSettings(dto.items, billingSettings) : items;
+
     const effectiveDiscountMinor = dto.discountMinor ?? current.discountMinor;
     const effectiveTaxMinor = dto.taxMinor ?? current.taxMinor;
     const { subtotalMinor, totalMinor } = computeRentalTotals(
-      items.map(toPricedItemInput),
+      pricedItems.map(toPricedItemInput),
       plannedStart,
       plannedEnd,
       effectiveDiscountMinor,
@@ -245,7 +283,7 @@ export class RentalsService {
 
       if (dto.items !== undefined) {
         await tx.rentalItem.deleteMany({ where: { rentalId: id, tenantId } });
-        for (const item of items) {
+        for (const item of pricedItems) {
           await tx.rentalItem.create({ data: toRentalItemCreateData(tenantId, id, item) });
         }
       }
@@ -697,9 +735,42 @@ export class RentalsService {
     }
     return tenant.defaultCurrency;
   }
+
+  /** Only queries RentalBillingSettings when at least one item actually needs it. */
+  private async resolveBillingSettingsIfNeeded(
+    tenantId: string,
+    items: { billingMode: RentalItemDto["billingMode"] }[],
+  ): Promise<EffectiveRentalBillingSettings | null> {
+    if (!items.some((item) => item.billingMode === "MONTHLY")) {
+      return null;
+    }
+    return this.rentalBillingSettingsService.getEffective(tenantId);
+  }
 }
 
-function toPricedItemInput(item: RentalItemDto): PricedRentalItemInput {
+/**
+ * Stamps the tenant's current monthly billing settings onto every MONTHLY
+ * item — this is the one place a fresh (client-submitted) item list picks up
+ * `monthlyBillingStrategy`/`customMonthLengthDays`; the client itself never
+ * sends these fields (see RentalItemSource).
+ */
+function withMonthlyBillingSettings(
+  items: RentalItemDto[],
+  settings: EffectiveRentalBillingSettings | null,
+): RentalItemSource[] {
+  return items.map((item) => {
+    if (item.billingMode !== "MONTHLY") {
+      return item;
+    }
+    return {
+      ...item,
+      monthlyBillingStrategy: settings!.monthlyBillingStrategy,
+      customMonthLengthDays: settings!.customMonthLengthDays,
+    };
+  });
+}
+
+function toPricedItemInput(item: RentalItemSource): PricedRentalItemInput {
   return {
     billingMode: item.billingMode,
     quantity: item.quantity ?? 1,
@@ -708,10 +779,12 @@ function toPricedItemInput(item: RentalItemDto): PricedRentalItemInput {
     monthlyPriceMinor: item.monthlyPriceMinor ?? null,
     customPriceMinor: item.customPriceMinor ?? null,
     discountMinor: item.discountMinor ?? 0,
+    monthlyBillingStrategy: item.monthlyBillingStrategy ?? null,
+    customMonthLengthDays: item.customMonthLengthDays ?? null,
   };
 }
 
-function fromExistingItem(item: RentalItem): RentalItemDto {
+function fromExistingItem(item: RentalItem): RentalItemSource {
   return {
     assetId: item.assetId,
     quantity: item.quantity,
@@ -723,13 +796,15 @@ function fromExistingItem(item: RentalItem): RentalItemDto {
     depositMinor: item.depositMinor,
     discountMinor: item.discountMinor,
     notes: item.notes,
+    monthlyBillingStrategy: item.monthlyBillingStrategy,
+    customMonthLengthDays: item.customMonthLengthDays,
   };
 }
 
 function toRentalItemCreateData(
   tenantId: string,
   rentalId: string,
-  item: RentalItemDto,
+  item: RentalItemSource,
 ): Prisma.RentalItemUncheckedCreateInput {
   return {
     tenantId,
@@ -744,5 +819,9 @@ function toRentalItemCreateData(
     depositMinor: item.depositMinor ?? 0,
     discountMinor: item.discountMinor ?? 0,
     notes: item.notes ?? null,
+    monthlyBillingStrategy:
+      item.billingMode === "MONTHLY" ? (item.monthlyBillingStrategy ?? null) : null,
+    customMonthLengthDays:
+      item.billingMode === "MONTHLY" ? (item.customMonthLengthDays ?? null) : null,
   };
 }

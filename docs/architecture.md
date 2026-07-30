@@ -273,13 +273,49 @@ quotes never claim an asset.
 ### Pricing
 
 `apps/api/src/rentals/rental-pricing.util.ts` computes each `RentalItem`'s
-line total from its `billingMode` (`DAILY`/`WEEKLY`/`MONTHLY` = unit price
-× periods × quantity, minus the item discount; `CUSTOM` = a flat price,
-ignoring duration and quantity), then sums into `Rental.subtotalMinor` and
-applies the rental-level discount/tax to get `Rental.totalMinor` — always
-integer minor units, recomputed and stored on every create/update. The
-frontend wizard mirrors this formula (`apps/web/src/lib/rental-pricing.ts`)
-only for live UI feedback; the API is always the source of truth.
+line total from its `billingMode` (`DAILY`/`WEEKLY` = unit price × periods
+× quantity, minus the item discount; `CUSTOM` = a flat price, ignoring
+duration and quantity), then sums into `Rental.subtotalMinor` and applies
+the rental-level discount/tax to get `Rental.totalMinor` — always integer
+minor units, recomputed and stored on every create/update. The frontend
+wizard mirrors this formula (`apps/web/src/lib/rental-pricing.ts`) only
+for live UI feedback; the API is always the source of truth.
+
+`MONTHLY` billing is tenant-configurable — see
+[ADR 0008](adr/0008-configurable-monthly-billing-strategies.md) for the
+full design. `RentalBillingSettings` (one optional row per tenant,
+defaulting to `CALENDAR_MONTH` when absent) picks one of three
+strategies, and `computeMonthlyBreakdown` splits the item's period into
+complete monthly units (billed at `monthlyPriceMinor`) plus a remainder
+(billed at `dailyPriceMinor`, now required alongside `monthlyPriceMinor`
+for every `MONTHLY` item):
+
+- **CALENDAR_MONTH** (default) — real calendar-month arithmetic (UTC-only,
+  leap-year and end-of-month safe, via `addCalendarMonthsUtc`): the
+  largest number of whole calendar months that fit, plus the exact days
+  left over (e.g. Jan 15 → Mar 20 = 2 months + 5 days). This differs from
+  the plain `monthsInRange` helper (still used unchanged by Quotes, which
+  has no tenant-configurable strategy — see ADR 0007) in that a partial
+  month is billed daily instead of rounded up to a whole extra month.
+- **FIXED_30_DAYS** — every complete 30 billable days is one unit;
+  remainder in days.
+- **CUSTOM** — every complete `customMonthLengthDays` (1-365, tenant-set)
+  billable days is one unit; remainder in days.
+
+Each `RentalItem` snapshots the `monthlyBillingStrategy`/
+`customMonthLengthDays` it was priced under at write time (create, or a
+full item replacement on update) — never re-derived from the tenant's
+_current_ settings on read. This is what guarantees a later settings
+change never silently alters an already-stored rental's total: only an
+explicit item replacement (the user re-submitting `items` on `PATCH`)
+reads the tenant's current settings again; an update that leaves items
+untouched (e.g. just `notes` or `discountMinor`) keeps every item's
+already-frozen strategy. `apps/api/src/rental-billing-settings/` exposes
+this as its own small settings module (`GET`/`PATCH
+/tenants/:tenantId/rental-billing-settings`, gated by
+`rental_settings.view`/`rental_settings.manage`) rather than folding it
+into `TenantsService`, since it's optional per-module configuration, not
+core tenant identity.
 
 ### Timeline
 

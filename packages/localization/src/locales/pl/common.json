@@ -285,6 +285,7 @@
       "billingMode": "Tryb rozliczenia",
       "quantity": "Ilość",
       "dailyPrice": "Cena dzienna",
+      "dailyPriceForRemainder": "Cena dzienna (za pozostałe dni)",
       "weeklyPrice": "Cena tygodniowa",
       "monthlyPrice": "Cena miesięczna",
       "customPrice": "Cena indywidualna",
@@ -319,7 +320,8 @@
       "datesRequired": "Wymagane są planowane daty rozpoczęcia i zakończenia",
       "endBeforeStart": "Planowany koniec musi być późniejszy niż planowany początek",
       "assetRequired": "Wybierz aktywo",
-      "selectAtLeastOneAsset": "Wybierz co najmniej jedno aktywo"
+      "selectAtLeastOneAsset": "Wybierz co najmniej jedno aktywo",
+      "customMonthLengthRequired": "Wprowadź liczbę dni od 1 do 365"
     },
     "wizard": {
       "steps": {
@@ -335,7 +337,14 @@
       "createRental": "Utwórz wynajem",
       "availabilityCheck": "Sprawdzenie dostępności",
       "available": "Dostępne",
-      "unavailable": "Niedostępne w tych terminach"
+      "unavailable": "Niedostępne w tych terminach",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}} miesięcy kalendarzowych × {{price}}",
+        "FIXED_30_DAYS": "{{count}} okresów 30-dniowych × {{price}}",
+        "CUSTOM": "{{count}} okresów {{length}}-dniowych × {{price}}",
+        "days": "{{count}} dni × {{price}}",
+        "pending": "Wprowadź prawidłowe daty i ceny, aby zobaczyć podział cen"
+      }
     },
     "availabilityCalendar": {
       "title": "Kalendarz dostępności",
@@ -345,6 +354,30 @@
       "selectAssetsHint": "Wybierz jedno lub więcej aktywów, aby zobaczyć ich dostępność",
       "booked": "Zarezerwowane",
       "free": "Wolne"
+    },
+    "billingSettings": {
+      "navLabel": "Ustawienia rozliczeń",
+      "title": "Ustawienia rozliczeń wynajmu",
+      "subtitle": "Skonfiguruj sposób rozliczania wynajmów miesięcznych dla tego najemcy",
+      "monthlyMethod": "Metoda rozliczenia miesięcznego",
+      "customMonthLengthDays": "Liczba dni w jednym niestandardowym miesiącu rozliczeniowym",
+      "save": "Zapisz",
+      "saving": "Zapisywanie…",
+      "saved": "Ustawienia rozliczeń zapisane",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "Miesiąc kalendarzowy",
+          "description": "Rozlicza od daty do odpowiadającej daty w następnym miesiącu kalendarzowym, z uwzględnieniem końca miesiąca."
+        },
+        "FIXED_30_DAYS": {
+          "label": "Stałe 30 dni",
+          "description": "Każde 30 rozliczanych dni jest traktowane jako jedna jednostka rozliczeniowa miesiąca."
+        },
+        "CUSTOM": {
+          "label": "Okres niestandardowy",
+          "description": "Określ, ile rozliczanych dni składa się na jedną jednostkę rozliczeniową miesiąca."
+        }
+      }
     }
   },
   "quote": {

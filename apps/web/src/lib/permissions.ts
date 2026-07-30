@@ -25,6 +25,8 @@ export const RENTAL_PERMISSIONS = [
   "rentals.start",
   "rentals.return",
   "rentals.cancel",
+  "rental_settings.view",
+  "rental_settings.manage",
 ] as const;
 
 export const QUOTE_PERMISSIONS = [
@@ -56,7 +58,7 @@ const ASSET_READ_ONLY: Permission[] = [
   "asset_fields.read",
   "asset_statuses.read",
 ];
-const RENTAL_READ_ONLY: Permission[] = ["rentals.view"];
+const RENTAL_READ_ONLY: Permission[] = ["rentals.view", "rental_settings.view"];
 const QUOTE_READ_ONLY: Permission[] = ["quotes.view", "quotes.download"];
 
 /**
@@ -84,6 +86,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "rentals.start",
     "rentals.return",
     "rentals.cancel",
+    "rental_settings.view",
     "quotes.view",
     "quotes.create",
     "quotes.update",

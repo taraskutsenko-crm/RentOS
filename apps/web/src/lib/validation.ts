@@ -154,6 +154,25 @@ export const rentalItemFormSchema = z.object({
   notes: z.string().max(2000),
 });
 
+export const rentalBillingSettingsSchema = z
+  .object({
+    monthlyBillingStrategy: z.enum(["CALENDAR_MONTH", "FIXED_30_DAYS", "CUSTOM"]),
+    customMonthLengthDays: z.string(),
+  })
+  .refine(
+    (data) => {
+      if (data.monthlyBillingStrategy !== "CUSTOM") return true;
+      const value = Number(data.customMonthLengthDays);
+      return Number.isInteger(value) && value >= 1 && value <= 365;
+    },
+    {
+      path: ["customMonthLengthDays"],
+      message: "rental.errors.customMonthLengthRequired",
+    },
+  );
+
+export type RentalBillingSettingsFormValues = z.infer<typeof rentalBillingSettingsSchema>;
+
 export type RentalItemFormValues = z.infer<typeof rentalItemFormSchema>;
 
 export const rentalSchema = z

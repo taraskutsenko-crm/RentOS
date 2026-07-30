@@ -14,3 +14,4 @@
   - [0005 — Asset file storage strategy](adr/0005-asset-file-storage-strategy.md)
   - [0006 — Rental lifecycle and availability engine](adr/0006-rental-lifecycle-and-availability.md)
   - [0007 — Quotes and commercial offers](adr/0007-quotes-and-commercial-offers.md)
+  - [0008 — Configurable monthly billing strategies](adr/0008-configurable-monthly-billing-strategies.md)

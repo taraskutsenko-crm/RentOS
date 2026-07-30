@@ -8,10 +8,15 @@ import { useTranslation } from "react-i18next";
 
 import { useAssets } from "../../hooks/use-assets";
 import { useCustomers } from "../../hooks/use-customers";
+import { useRentalBillingSettings } from "../../hooks/use-rental-billing-settings";
 import type { RentalItemInput } from "../../hooks/use-rentals";
 import { useAvailability } from "../../hooks/use-rentals";
 import { formatMoney } from "../../lib/money";
-import { estimateRentalTotals } from "../../lib/rental-pricing";
+import {
+  estimateMonthlyBreakdown,
+  estimateRentalTotals,
+  type EstimatedMonthlyItemInput,
+} from "../../lib/rental-pricing";
 import {
   rentalSchema,
   type RentalFormValues,
@@ -120,9 +125,12 @@ export function RentalWizard({
         }
       : null,
   );
+  const { data: billingSettings } = useRentalBillingSettings(tenantId);
+  const monthlyStrategy = billingSettings?.monthlyBillingStrategy ?? "CALENDAR_MONTH";
+  const customMonthLengthDays = billingSettings?.customMonthLengthDays ?? null;
 
-  const estimatedTotals = estimateRentalTotals(
-    items.map((item) => ({
+  function toEstimatedItem(item: RentalItemFormValues) {
+    return {
       billingMode: item.billingMode,
       quantity: item.quantity,
       dailyPriceMinor: toMinor(item.dailyPriceDisplay),
@@ -130,11 +138,25 @@ export function RentalWizard({
       monthlyPriceMinor: toMinor(item.monthlyPriceDisplay),
       customPriceMinor: toMinor(item.customPriceDisplay),
       discountMinor: toMinor(item.discountDisplay),
-    })),
+      ...(item.billingMode === "MONTHLY"
+        ? { monthlyBillingStrategy: monthlyStrategy, customMonthLengthDays }
+        : {}),
+    } as EstimatedMonthlyItemInput;
+  }
+
+  const estimatedTotals = estimateRentalTotals(
+    items.map(toEstimatedItem),
     values.plannedStart,
     values.plannedEnd,
     toMinor(values.discountDisplay),
     toMinor(values.taxDisplay),
+  );
+
+  const monthlyBreakdown = estimateMonthlyBreakdown(
+    monthlyStrategy,
+    customMonthLengthDays,
+    values.plannedStart,
+    values.plannedEnd,
   );
 
   const selectedCustomer = customersData?.items.find(
@@ -386,17 +408,56 @@ export function RentalWizard({
                       </div>
                     )}
                     {item.billingMode === "MONTHLY" && (
-                      <div className="flex flex-col gap-1.5">
-                        <Label>{t("rental.fields.monthlyPrice")}</Label>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={item.monthlyPriceDisplay}
-                          onChange={(event) =>
-                            updateItem(item.assetId, { monthlyPriceDisplay: event.target.value })
-                          }
-                        />
-                      </div>
+                      <>
+                        <div className="flex flex-col gap-1.5">
+                          <Label>{t("rental.fields.monthlyPrice")}</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={item.monthlyPriceDisplay}
+                            onChange={(event) =>
+                              updateItem(item.assetId, { monthlyPriceDisplay: event.target.value })
+                            }
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <Label>{t("rental.fields.dailyPriceForRemainder")}</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={item.dailyPriceDisplay}
+                            onChange={(event) =>
+                              updateItem(item.assetId, { dailyPriceDisplay: event.target.value })
+                            }
+                          />
+                        </div>
+                        <div className="text-muted-foreground col-span-2 text-sm">
+                          {monthlyBreakdown.completeUnits === 0 &&
+                          monthlyBreakdown.remainingDays === 0
+                            ? t("rental.wizard.monthlyBreakdown.pending")
+                            : [
+                                monthlyBreakdown.completeUnits > 0 &&
+                                  t(`rental.wizard.monthlyBreakdown.${monthlyStrategy}`, {
+                                    count: monthlyBreakdown.completeUnits,
+                                    length: customMonthLengthDays ?? "",
+                                    price: formatMoney(
+                                      toMinor(item.monthlyPriceDisplay),
+                                      values.currency,
+                                    ),
+                                  }),
+                                monthlyBreakdown.remainingDays > 0 &&
+                                  t("rental.wizard.monthlyBreakdown.days", {
+                                    count: monthlyBreakdown.remainingDays,
+                                    price: formatMoney(
+                                      toMinor(item.dailyPriceDisplay),
+                                      values.currency,
+                                    ),
+                                  }),
+                              ]
+                                .filter(Boolean)
+                                .join(" + ")}
+                        </div>
+                      </>
                     )}
                     {item.billingMode === "CUSTOM" && (
                       <div className="flex flex-col gap-1.5">

@@ -130,4 +130,20 @@ describe("ROLE_PERMISSIONS", () => {
       expect(roleHasPermission(role, "quotes.convert")).toBe(false);
     }
   });
+
+  it("only OWNER/ADMIN can manage rental billing settings", () => {
+    expect(roleHasPermission("OWNER", "rental_settings.manage")).toBe(true);
+    expect(roleHasPermission("ADMIN", "rental_settings.manage")).toBe(true);
+    expect(roleHasPermission("MANAGER", "rental_settings.manage")).toBe(false);
+    expect(roleHasPermission("TECHNICIAN", "rental_settings.manage")).toBe(false);
+    expect(roleHasPermission("ACCOUNTANT", "rental_settings.manage")).toBe(false);
+    expect(roleHasPermission("VIEWER", "rental_settings.manage")).toBe(false);
+  });
+
+  it("grants everyone except TECHNICIAN rental_settings.view", () => {
+    for (const role of ["OWNER", "ADMIN", "MANAGER", "ACCOUNTANT", "VIEWER"] as const) {
+      expect(roleHasPermission(role, "rental_settings.view")).toBe(true);
+    }
+    expect(roleHasPermission("TECHNICIAN", "rental_settings.view")).toBe(false);
+  });
 });

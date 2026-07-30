@@ -285,6 +285,7 @@
       "billingMode": "Abrechnungsmodus",
       "quantity": "Menge",
       "dailyPrice": "Tagespreis",
+      "dailyPriceForRemainder": "Tagespreis (für Restzeitraum)",
       "weeklyPrice": "Wochenpreis",
       "monthlyPrice": "Monatspreis",
       "customPrice": "Individueller Preis",
@@ -319,7 +320,8 @@
       "datesRequired": "Geplanter Beginn und geplantes Ende sind erforderlich",
       "endBeforeStart": "Das geplante Ende muss nach dem geplanten Beginn liegen",
       "assetRequired": "Wählen Sie eine Anlage",
-      "selectAtLeastOneAsset": "Wählen Sie mindestens eine Anlage"
+      "selectAtLeastOneAsset": "Wählen Sie mindestens eine Anlage",
+      "customMonthLengthRequired": "Geben Sie eine Anzahl Tage zwischen 1 und 365 ein"
     },
     "wizard": {
       "steps": {
@@ -335,7 +337,14 @@
       "createRental": "Vermietung erstellen",
       "availabilityCheck": "Verfügbarkeitsprüfung",
       "available": "Verfügbar",
-      "unavailable": "Für diese Termine nicht verfügbar"
+      "unavailable": "Für diese Termine nicht verfügbar",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}} Kalendermonate × {{price}}",
+        "FIXED_30_DAYS": "{{count}} feste 30-Tage-Zeiträume × {{price}}",
+        "CUSTOM": "{{count}} individuelle {{length}}-Tage-Zeiträume × {{price}}",
+        "days": "{{count}} Tage × {{price}}",
+        "pending": "Geben Sie gültige Termine und Preise ein, um die Preisaufschlüsselung zu sehen"
+      }
     },
     "availabilityCalendar": {
       "title": "Verfügbarkeitskalender",
@@ -345,6 +354,30 @@
       "selectAssetsHint": "Wählen Sie eine oder mehrere Anlagen, um deren Verfügbarkeit zu sehen",
       "booked": "Gebucht",
       "free": "Frei"
+    },
+    "billingSettings": {
+      "navLabel": "Abrechnungseinstellungen",
+      "title": "Abrechnungseinstellungen für Vermietungen",
+      "subtitle": "Legen Sie fest, wie MONATLICH abgerechnete Vermietungen für diesen Mandanten berechnet werden",
+      "monthlyMethod": "Monatliche Abrechnungsmethode",
+      "customMonthLengthDays": "Anzahl der Tage in einem individuellen Abrechnungsmonat",
+      "save": "Speichern",
+      "saving": "Wird gespeichert…",
+      "saved": "Abrechnungseinstellungen gespeichert",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "Kalendermonat",
+          "description": "Rechnet von einem Datum bis zum entsprechenden Datum des nächsten Kalendermonats ab, mit Behandlung des Monatsendes."
+        },
+        "FIXED_30_DAYS": {
+          "label": "Feste 30 Tage",
+          "description": "Je 30 abrechenbare Tage gelten als eine monatliche Abrechnungseinheit."
+        },
+        "CUSTOM": {
+          "label": "Individueller Zeitraum",
+          "description": "Legen Sie fest, wie viele abrechenbare Tage eine monatliche Abrechnungseinheit ergeben."
+        }
+      }
     }
   },
   "quote": {

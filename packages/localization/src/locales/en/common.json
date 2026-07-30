@@ -285,6 +285,7 @@
       "billingMode": "Billing mode",
       "quantity": "Quantity",
       "dailyPrice": "Daily price",
+      "dailyPriceForRemainder": "Daily price (for remaining days)",
       "weeklyPrice": "Weekly price",
       "monthlyPrice": "Monthly price",
       "customPrice": "Custom price",
@@ -319,7 +320,8 @@
       "datesRequired": "Planned start and end dates are required",
       "endBeforeStart": "Planned end must be after planned start",
       "assetRequired": "Select an asset",
-      "selectAtLeastOneAsset": "Select at least one asset"
+      "selectAtLeastOneAsset": "Select at least one asset",
+      "customMonthLengthRequired": "Enter a number of days between 1 and 365"
     },
     "wizard": {
       "steps": {
@@ -335,7 +337,14 @@
       "createRental": "Create rental",
       "availabilityCheck": "Availability check",
       "available": "Available",
-      "unavailable": "Not available for these dates"
+      "unavailable": "Not available for these dates",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}} calendar months × {{price}}",
+        "FIXED_30_DAYS": "{{count}} fixed 30-day periods × {{price}}",
+        "CUSTOM": "{{count}} custom {{length}}-day periods × {{price}}",
+        "days": "{{count}} days × {{price}}",
+        "pending": "Enter valid dates and prices to see the pricing breakdown"
+      }
     },
     "availabilityCalendar": {
       "title": "Availability calendar",
@@ -345,6 +354,30 @@
       "selectAssetsHint": "Select one or more assets to see their availability",
       "booked": "Booked",
       "free": "Free"
+    },
+    "billingSettings": {
+      "navLabel": "Billing settings",
+      "title": "Rental billing settings",
+      "subtitle": "Configure how MONTHLY-priced rentals are billed for this tenant",
+      "monthlyMethod": "Monthly billing method",
+      "customMonthLengthDays": "Number of days in one custom billing month",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Billing settings saved",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "Calendar month",
+          "description": "Bills from a date to the corresponding date in the next calendar month, with end-of-month handling."
+        },
+        "FIXED_30_DAYS": {
+          "label": "Fixed 30 days",
+          "description": "Every 30 billable days is treated as one monthly billing unit."
+        },
+        "CUSTOM": {
+          "label": "Custom period",
+          "description": "Define how many billable days make up one monthly billing unit."
+        }
+      }
     }
   },
   "quote": {

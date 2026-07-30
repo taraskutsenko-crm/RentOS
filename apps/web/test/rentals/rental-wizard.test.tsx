@@ -22,6 +22,11 @@ vi.mock("../../src/hooks/use-rentals", async () => {
   return { ...actual, useAvailability: (...args: unknown[]) => useAvailabilityMock(...args) };
 });
 
+const useRentalBillingSettingsMock = vi.fn();
+vi.mock("../../src/hooks/use-rental-billing-settings", () => ({
+  useRentalBillingSettings: (...args: unknown[]) => useRentalBillingSettingsMock(...args),
+}));
+
 function setup() {
   useCustomersMock.mockReturnValue({
     data: { items: [{ id: "cust-1", firstName: "Jane", lastName: "Doe", company: null }] },
@@ -30,6 +35,9 @@ function setup() {
     data: { items: [{ id: "asset-1", name: "Generator A", internalNumber: "GEN-0001" }] },
   });
   useAvailabilityMock.mockReturnValue({ data: undefined });
+  useRentalBillingSettingsMock.mockReturnValue({
+    data: { monthlyBillingStrategy: "CALENDAR_MONTH", customMonthLengthDays: null },
+  });
 }
 
 describe("RentalWizard", () => {
@@ -88,6 +96,45 @@ describe("RentalWizard", () => {
     );
 
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
+  });
+
+  it("shows a daily-price field and the CALENDAR_MONTH breakdown for a MONTHLY item", async () => {
+    setup();
+    const user = userEvent.setup();
+    renderWithProviders(
+      <RentalWizard
+        tenantId="tenant-1"
+        initialValues={{
+          customerId: "cust-1",
+          plannedStart: "2026-01-15T00:00",
+          plannedEnd: "2026-03-20T00:00",
+        }}
+        initialItems={[
+          {
+            assetId: "asset-1",
+            billingMode: "MONTHLY",
+            quantity: 1,
+            dailyPriceDisplay: "10.00",
+            weeklyPriceDisplay: "",
+            monthlyPriceDisplay: "500.00",
+            customPriceDisplay: "",
+            depositDisplay: "",
+            discountDisplay: "",
+            notes: "",
+          },
+        ]}
+        onSubmit={vi.fn()}
+        isPending={false}
+      />,
+    );
+
+    // customer -> assets -> dates -> pricing
+    await user.click(screen.getByRole("button", { name: /next/i }));
+    await user.click(screen.getByRole("button", { name: /next/i }));
+    await user.click(screen.getByRole("button", { name: /next/i }));
+
+    expect(screen.getByText(/daily price \(for remaining days\)/i)).toBeInTheDocument();
+    expect(await screen.findByText(/2 calendar months × .*5 days ×/i)).toBeInTheDocument();
   });
 
   it("pre-fills from initialValues and initialItems for edit mode", () => {

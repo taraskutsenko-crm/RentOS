@@ -175,6 +175,8 @@ truth.
 | `rentals.start`           |  ✅   |  ✅   |   ✅    |     ✅     |            |        |
 | `rentals.return`          |  ✅   |  ✅   |   ✅    |     ✅     |            |        |
 | `rentals.cancel`          |  ✅   |  ✅   |   ✅    |            |            |        |
+| `rental_settings.view`    |  ✅   |  ✅   |   ✅    |            |     ✅     |   ✅   |
+| `rental_settings.manage`  |  ✅   |  ✅   |         |            |            |        |
 
 `rentals.update` also covers location-independent edits (dates/items are
 only editable in `DRAFT`/`QUOTE` — see [ADR 0006](adr/0006-rental-lifecycle-and-availability.md)).
@@ -470,15 +472,26 @@ automatically-generated `rentalNumber` (`RNT-000001`, unique per tenant).
 
 **`RentalItem` body shape** (each entry in `items`):
 
-| Field                                                                       | Type   | Notes                                                         |
-| --------------------------------------------------------------------------- | ------ | ------------------------------------------------------------- |
-| `assetId`                                                                   | string | Required, must belong to the tenant, be active and rentable   |
-| `quantity`                                                                  | number | Optional, default 1 — a pricing multiplier only, see ADR 0006 |
-| `billingMode`                                                               | enum   | `DAILY` \| `WEEKLY` \| `MONTHLY` \| `CUSTOM`                  |
-| `dailyPriceMinor`/`weeklyPriceMinor`/`monthlyPriceMinor`/`customPriceMinor` | number | Exactly the one matching `billingMode` is required            |
-| `depositMinor`                                                              | number | Optional, default 0, ≥ 0                                      |
-| `discountMinor`                                                             | number | Optional, default 0, ≥ 0 — this item's own discount           |
-| `notes`                                                                     | string | Optional                                                      |
+| Field                                                                       | Type   | Notes                                                                                                                                      |
+| --------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `assetId`                                                                   | string | Required, must belong to the tenant, be active and rentable                                                                                |
+| `quantity`                                                                  | number | Optional, default 1 — a pricing multiplier only, see ADR 0006                                                                              |
+| `billingMode`                                                               | enum   | `DAILY` \| `WEEKLY` \| `MONTHLY` \| `CUSTOM`                                                                                               |
+| `dailyPriceMinor`/`weeklyPriceMinor`/`monthlyPriceMinor`/`customPriceMinor` | number | Exactly the one(s) matching `billingMode` are required — `MONTHLY` requires **both** `monthlyPriceMinor` and `dailyPriceMinor` (see below) |
+| `depositMinor`                                                              | number | Optional, default 0, ≥ 0                                                                                                                   |
+| `discountMinor`                                                             | number | Optional, default 0, ≥ 0 — this item's own discount                                                                                        |
+| `notes`                                                                     | string | Optional                                                                                                                                   |
+
+**`MONTHLY` billing** (see [ADR 0008](adr/0008-configurable-monthly-billing-strategies.md)):
+the line splits into complete monthly units (billed at `monthlyPriceMinor`)
+plus any remaining days (billed at `dailyPriceMinor`), per the tenant's
+current `monthlyBillingStrategy` — see the "Rental Billing Settings"
+endpoints below. The server resolves and freezes this strategy (plus
+`customMonthLengthDays` when applicable) onto the item at write time;
+these are returned as `monthlyBillingStrategy`/`customMonthLengthDays` on
+each `RentalItem` in the response and are never accepted directly from the
+client. A later change to the tenant's settings never alters an
+already-created rental's stored totals.
 
 **201** → the created rental (see response shape below)
 **400** → validation failure (missing customer/dates, end before start,
@@ -515,12 +528,17 @@ lifecycle action):
       "assetId": "...",
       "billingMode": "DAILY",
       "dailyPriceMinor": 1000,
+      "monthlyBillingStrategy": null,
+      "customMonthLengthDays": null,
       "returnedAt": null,
       "asset": { "...": "..." }
     }
   ]
 }
 ```
+
+`monthlyBillingStrategy`/`customMonthLengthDays` are non-null only on
+`MONTHLY` items — see the note above.
 
 ### `GET /tenants/:tenantId/rentals`
 
@@ -599,6 +617,53 @@ already `RETURNED`, `COMPLETED`, or `CANCELLED`.
 
 Requires `rentals.view`. Returns a normalized, chronologically-sorted
 array combining creation, updates, status changes, and return events.
+
+---
+
+## Rental Billing Settings
+
+Tenant-wide configuration for how `MONTHLY` rental items are priced — see
+[ADR 0008](adr/0008-configurable-monthly-billing-strategies.md). Lives
+under `/tenants/:tenantId/rental-billing-settings` (`TenantGuard` +
+`PermissionsGuard`). At most one row per tenant; a tenant that has never
+customized this has no row at all and is reported as the default.
+
+### `GET /tenants/:tenantId/rental-billing-settings`
+
+Requires `rental_settings.view`.
+
+**200**
+
+```json
+{
+  "tenantId": "...",
+  "monthlyBillingStrategy": "CALENDAR_MONTH",
+  "customMonthLengthDays": null,
+  "isDefault": true,
+  "updatedAt": null
+}
+```
+
+`isDefault: true` means no row exists yet and this is the CALENDAR_MONTH
+fallback — every tenant, including every one that existed before this
+feature shipped, reads this way until explicitly configured.
+
+### `PATCH /tenants/:tenantId/rental-billing-settings`
+
+Requires `rental_settings.manage`. Upserts the tenant's row.
+
+| Field                    | Type   | Notes                                                                                                                              |
+| ------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `monthlyBillingStrategy` | enum   | Required: `CALENDAR_MONTH` \| `FIXED_30_DAYS` \| `CUSTOM`                                                                          |
+| `customMonthLengthDays`  | number | Required (integer, 1-365) only when `monthlyBillingStrategy` is `CUSTOM` — ignored (stored as `null`) for the other two strategies |
+
+**200** → the updated settings (same shape as `GET`, `isDefault: false`).
+**400** → unsupported strategy value, or a missing/out-of-range
+`customMonthLengthDays` when `monthlyBillingStrategy` is `CUSTOM`.
+
+Every update is audited as `rental_billing_settings.updated` with the
+previous and new values in `metadata`. Changing this setting **never**
+recalculates any existing rental — see ADR 0008.
 
 ---
 

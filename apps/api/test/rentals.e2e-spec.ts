@@ -139,6 +139,167 @@ describe("Rentals E2E", () => {
     expect(response.body.totalMinor).toBe(50000 - 5000 + 1000);
   });
 
+  function isoDaysAfter(base: string, days: number): string {
+    const date = new Date(base);
+    date.setUTCDate(date.getUTCDate() + days);
+    return date.toISOString();
+  }
+
+  describe("MONTHLY billing strategy (ADR 0008)", () => {
+    it("defaults to CALENDAR_MONTH: splits complete calendar months plus remaining days", async () => {
+      // Jan 15 -> Mar 20: 2 complete months (Jan15->Mar15) + 5 remaining days
+      const response = await createRental({
+        plannedStart: "2030-01-15T00:00:00.000Z",
+        plannedEnd: "2030-03-20T00:00:00.000Z",
+        items: [
+          {
+            assetId: assetAId,
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 20000,
+            dailyPriceMinor: 1000,
+          },
+        ],
+      }).expect(201);
+
+      expect(response.body.subtotalMinor).toBe(20000 * 2 + 1000 * 5);
+    });
+
+    it("rejects a MONTHLY item missing dailyPriceMinor (needed for any remainder)", async () => {
+      await createRental({
+        plannedStart: "2030-01-15T00:00:00.000Z",
+        plannedEnd: "2030-03-20T00:00:00.000Z",
+        items: [{ assetId: assetAId, billingMode: "MONTHLY", monthlyPriceMinor: 20000 }],
+      }).expect(400);
+    });
+
+    it("uses FIXED_30_DAYS once configured on tenant settings", async () => {
+      await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/rental-billing-settings`)
+        .set("Cookie", accessCookie)
+        .send({ monthlyBillingStrategy: "FIXED_30_DAYS" })
+        .expect(200);
+
+      const start = "2030-01-01T00:00:00.000Z";
+      const response = await createRental({
+        plannedStart: start,
+        plannedEnd: isoDaysAfter(start, 65), // 65 days -> 2 x 30-day units + 5 remaining
+        items: [
+          {
+            assetId: assetAId,
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 30000,
+            dailyPriceMinor: 900,
+          },
+        ],
+      }).expect(201);
+
+      expect(response.body.subtotalMinor).toBe(30000 * 2 + 900 * 5);
+    });
+
+    it("uses CUSTOM with customMonthLengthDays once configured on tenant settings", async () => {
+      await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/rental-billing-settings`)
+        .set("Cookie", accessCookie)
+        .send({ monthlyBillingStrategy: "CUSTOM", customMonthLengthDays: 28 })
+        .expect(200);
+
+      const start = "2030-01-01T00:00:00.000Z";
+      const response = await createRental({
+        plannedStart: start,
+        plannedEnd: isoDaysAfter(start, 60), // 60 days, length 28 -> 2 units + 4 remaining
+        items: [
+          {
+            assetId: assetAId,
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 28000,
+            dailyPriceMinor: 800,
+          },
+        ],
+      }).expect(201);
+
+      expect(response.body.subtotalMinor).toBe(28000 * 2 + 800 * 4);
+    });
+
+    it("snapshots the strategy at creation time — a later tenant settings change never alters the stored total", async () => {
+      const created = await createRental({
+        plannedStart: "2030-01-15T00:00:00.000Z",
+        plannedEnd: "2030-03-20T00:00:00.000Z",
+        items: [
+          {
+            assetId: assetAId,
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 20000,
+            dailyPriceMinor: 1000,
+          },
+        ],
+      }).expect(201);
+      const originalTotal = created.body.totalMinor as number;
+      expect(originalTotal).toBe(20000 * 2 + 1000 * 5);
+
+      await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/rental-billing-settings`)
+        .set("Cookie", accessCookie)
+        .send({ monthlyBillingStrategy: "FIXED_30_DAYS" })
+        .expect(200);
+
+      const refetched = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${created.body.id}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(refetched.body.totalMinor).toBe(originalTotal);
+      expect(refetched.body.items[0].monthlyBillingStrategy).toBe("CALENDAR_MONTH");
+
+      // An unrelated edit that doesn't touch items must also keep the frozen strategy.
+      const updated = await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/rentals/${created.body.id}`)
+        .set("Cookie", accessCookie)
+        .send({ notes: "updated notes" })
+        .expect(200);
+      expect(updated.body.totalMinor).toBe(originalTotal);
+      expect(updated.body.items[0].monthlyBillingStrategy).toBe("CALENDAR_MONTH");
+    });
+
+    it("an explicit item replacement picks up the tenant's current settings (intentional reprice)", async () => {
+      const created = await createRental({
+        plannedStart: "2030-01-15T00:00:00.000Z",
+        plannedEnd: "2030-03-20T00:00:00.000Z",
+        items: [
+          {
+            assetId: assetAId,
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 20000,
+            dailyPriceMinor: 1000,
+          },
+        ],
+      }).expect(201);
+
+      await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/rental-billing-settings`)
+        .set("Cookie", accessCookie)
+        .send({ monthlyBillingStrategy: "FIXED_30_DAYS" })
+        .expect(200);
+
+      // Jan 15 -> Mar 20 is 64 days -> under FIXED_30_DAYS: 2 x 30-day units + 4 remaining.
+      const repriced = await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/rentals/${created.body.id}`)
+        .set("Cookie", accessCookie)
+        .send({
+          items: [
+            {
+              assetId: assetAId,
+              billingMode: "MONTHLY",
+              monthlyPriceMinor: 20000,
+              dailyPriceMinor: 1000,
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(repriced.body.items[0].monthlyBillingStrategy).toBe("FIXED_30_DAYS");
+      expect(repriced.body.subtotalMinor).toBe(20000 * 2 + 1000 * 4);
+    });
+  });
+
   // 4. Validation: end date before start date
   it("rejects an end date before the start date", async () => {
     await createRental({ plannedStart: dateOffset(5), plannedEnd: dateOffset(1) }).expect(400);

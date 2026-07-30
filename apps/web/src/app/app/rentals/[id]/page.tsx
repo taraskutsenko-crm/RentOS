@@ -19,6 +19,7 @@ import {
 } from "../../../../hooks/use-rentals";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatMoney } from "../../../../lib/money";
+import { estimateMonthlyBreakdown } from "../../../../lib/rental-pricing";
 
 const EDITABLE_STATUSES = new Set(["DRAFT", "QUOTE"]);
 const DELETABLE_STATUSES = new Set(["DRAFT", "QUOTE", "CANCELLED"]);
@@ -176,16 +177,54 @@ export default function RentalDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rental.items.map((item) => (
-                    <tr key={item.id} className="border-b last:border-0">
-                      <td className="p-3">{item.asset.name}</td>
-                      <td className="p-3">{t(`rental.billingModes.${item.billingMode}`)}</td>
-                      <td className="p-3">{item.quantity}</td>
-                      <td className="p-3">
-                        {item.returnedAt ? new Date(item.returnedAt).toLocaleString() : "—"}
-                      </td>
-                    </tr>
-                  ))}
+                  {rental.items.map((item) => {
+                    const breakdown =
+                      item.billingMode === "MONTHLY" && item.monthlyBillingStrategy
+                        ? estimateMonthlyBreakdown(
+                            item.monthlyBillingStrategy,
+                            item.customMonthLengthDays,
+                            rental.plannedStart,
+                            rental.plannedEnd,
+                          )
+                        : null;
+                    return (
+                      <tr key={item.id} className="border-b last:border-0">
+                        <td className="p-3">{item.asset.name}</td>
+                        <td className="p-3">
+                          {t(`rental.billingModes.${item.billingMode}`)}
+                          {breakdown && (
+                            <p className="text-muted-foreground text-xs">
+                              {[
+                                breakdown.completeUnits > 0 &&
+                                  t(
+                                    `rental.wizard.monthlyBreakdown.${item.monthlyBillingStrategy}`,
+                                    {
+                                      count: breakdown.completeUnits,
+                                      length: item.customMonthLengthDays ?? "",
+                                      price: formatMoney(
+                                        item.monthlyPriceMinor ?? 0,
+                                        rental.currency,
+                                      ),
+                                    },
+                                  ),
+                                breakdown.remainingDays > 0 &&
+                                  t("rental.wizard.monthlyBreakdown.days", {
+                                    count: breakdown.remainingDays,
+                                    price: formatMoney(item.dailyPriceMinor ?? 0, rental.currency),
+                                  }),
+                              ]
+                                .filter(Boolean)
+                                .join(" + ")}
+                            </p>
+                          )}
+                        </td>
+                        <td className="p-3">{item.quantity}</td>
+                        <td className="p-3">
+                          {item.returnedAt ? new Date(item.returnedAt).toLocaleString() : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </CardContent>

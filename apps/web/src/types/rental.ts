@@ -6,6 +6,9 @@ export type RentalStatus =
 
 export type RentalBillingMode = "DAILY" | "WEEKLY" | "MONTHLY" | "CUSTOM";
 
+/** See docs/adr/0008-configurable-monthly-billing-strategies.md. */
+export type MonthlyBillingStrategy = "CALENDAR_MONTH" | "FIXED_30_DAYS" | "CUSTOM";
+
 export interface RentalItem {
   id: string;
   tenantId: string;
@@ -17,6 +20,9 @@ export interface RentalItem {
   weeklyPriceMinor: number | null;
   monthlyPriceMinor: number | null;
   customPriceMinor: number | null;
+  /** Snapshot of the monthly billing settings used when this item was last priced — null unless billingMode is MONTHLY. */
+  monthlyBillingStrategy: MonthlyBillingStrategy | null;
+  customMonthLengthDays: number | null;
   depositMinor: number;
   discountMinor: number;
   notes: string | null;
@@ -24,6 +30,14 @@ export interface RentalItem {
   createdAt: string;
   updatedAt: string;
   asset: Asset;
+}
+
+export interface RentalBillingSettings {
+  tenantId: string;
+  monthlyBillingStrategy: MonthlyBillingStrategy;
+  customMonthLengthDays: number | null;
+  isDefault: boolean;
+  updatedAt: string | null;
 }
 
 export interface Rental {

@@ -110,16 +110,25 @@ Covers:
 - **Automatic pricing** — daily/weekly/monthly/custom billing modes,
   item- and rental-level discounts plus tax, money always in integer minor
   units, recomputed and stored on every create/update.
+- **Configurable monthly billing** — a tenant-level
+  `CALENDAR_MONTH` (default) / `FIXED_30_DAYS` / `CUSTOM` strategy splits
+  a `MONTHLY` item's period into complete monthly units plus a
+  daily-priced remainder (e.g. Jan 15 → Mar 20 = 2 calendar months + 5
+  days); each rental snapshots the strategy it was priced under, so a
+  later settings change never alters an existing rental's stored total.
 - **Partial returns** — return some items while a rental stays `ACTIVE`;
   each returned asset is immediately available for a new booking.
 - **Booking wizard** — a 6-step guided flow (customer → assets → dates →
   pricing → review → create) plus a visual availability calendar.
 - **Granular permissions** — `rentals.view/create/update/delete/reserve/
-start/return/cancel`, enforced by the same `PermissionsGuard` as Assets.
+start/return/cancel` plus `rental_settings.view/manage` for the billing
+  strategy settings, enforced by the same `PermissionsGuard` as Assets.
 
-See [docs/api.md](docs/api.md#rentals) for the full endpoint reference, and
+See [docs/api.md](docs/api.md#rentals) for the full endpoint reference,
 [ADR 0006](docs/adr/0006-rental-lifecycle-and-availability.md) for the
-lifecycle, availability, and pricing design rationale.
+lifecycle, availability, and pricing design rationale, and
+[ADR 0008](docs/adr/0008-configurable-monthly-billing-strategies.md) for
+the configurable monthly billing strategy design.
 
 ## Quotes
 

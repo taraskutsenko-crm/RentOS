@@ -39,4 +39,12 @@ describe("roleHasPermission", () => {
     expect(roleHasPermission("VIEWER", "quotes.download")).toBe(true);
     expect(roleHasPermission("VIEWER", "quotes.send")).toBe(false);
   });
+
+  it("only OWNER/ADMIN can manage rental billing settings, but MANAGER/VIEWER can view", () => {
+    expect(roleHasPermission("OWNER", "rental_settings.manage")).toBe(true);
+    expect(roleHasPermission("MANAGER", "rental_settings.manage")).toBe(false);
+    expect(roleHasPermission("MANAGER", "rental_settings.view")).toBe(true);
+    expect(roleHasPermission("VIEWER", "rental_settings.view")).toBe(true);
+    expect(roleHasPermission("TECHNICIAN", "rental_settings.view")).toBe(false);
+  });
 });

@@ -79,7 +79,9 @@ serialized by Postgres — never racing. The counter only ever increases, so
 a cancelled or deleted quote's number is never reused. Format:
 `Q-<year>-######` (year = `issueDate`'s **UTC** year, timezone-safe).
 `generateRentalNumber`'s existing race is deliberately left unfixed —
-out of scope for this task.
+out of scope for this task. **Superseded:** fixed with the same atomic
+sequence pattern in
+[ADR 0009](0009-shared-monthly-pricing-and-atomic-rental-numbering.md).
 
 ### Decimal-safe arithmetic: integer minor units + integer basis points, no new library
 

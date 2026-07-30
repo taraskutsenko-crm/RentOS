@@ -205,25 +205,25 @@ commitment.
 
 ## Implemented vs. planned vs. long-term — summary
 
-| Capability                                                                                | Status                                        |
-| ----------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Auth, multi-tenancy, RBAC                                                                 | **Implemented**                               |
-| Customers module                                                                          | **Implemented**                               |
-| Universal Assets module (categories, statuses, custom fields, images/documents, timeline) | **Implemented**                               |
-| Rentals module (lifecycle, availability engine, pricing)                                  | **Implemented**                               |
-| Configurable monthly billing strategies (Rentals)                                         | **Implemented**                               |
-| Quotes and commercial offers (wizard, PDF, public acceptance, conversion)                 | **Implemented**                               |
-| Configurable monthly billing strategies (Quotes)                                          | **In progress** (pre-TASK-0008 stabilization) |
-| Race-safe rental-number generation                                                        | **In progress** (pre-TASK-0008 stabilization) |
-| Contracts, handover/return protocols, generated documents, signatures                     | **Planned — TASK-0008**                       |
-| Payments, invoicing, deposit collection/refund                                            | **Planned, later phase**                      |
-| Background jobs / scheduled automation                                                    | **Planned, later phase**                      |
-| Customer portal                                                                           | **Long-term direction**                       |
-| Mobile application                                                                        | **Long-term direction**                       |
-| Public API / third-party integrations                                                     | **Long-term direction**                       |
-| AI-performed workflows (beyond conversational assistance)                                 | **Long-term direction**                       |
-| Predictive maintenance / asset intelligence                                               | **Long-term direction**                       |
-| Marketplace/platform                                                                      | **Long-term, unscoped direction**             |
+| Capability                                                                                | Status                            |
+| ----------------------------------------------------------------------------------------- | --------------------------------- |
+| Auth, multi-tenancy, RBAC                                                                 | **Implemented**                   |
+| Customers module                                                                          | **Implemented**                   |
+| Universal Assets module (categories, statuses, custom fields, images/documents, timeline) | **Implemented**                   |
+| Rentals module (lifecycle, availability engine, pricing)                                  | **Implemented**                   |
+| Configurable monthly billing strategies (Rentals)                                         | **Implemented**                   |
+| Quotes and commercial offers (wizard, PDF, public acceptance, conversion)                 | **Implemented**                   |
+| Configurable monthly billing strategies (Quotes, shared with Rentals)                     | **Implemented**                   |
+| Race-safe rental-number generation                                                        | **Implemented**                   |
+| Contracts, handover/return protocols, generated documents, signatures                     | **Planned — TASK-0008**           |
+| Payments, invoicing, deposit collection/refund                                            | **Planned, later phase**          |
+| Background jobs / scheduled automation                                                    | **Planned, later phase**          |
+| Customer portal                                                                           | **Long-term direction**           |
+| Mobile application                                                                        | **Long-term direction**           |
+| Public API / third-party integrations                                                     | **Long-term direction**           |
+| AI-performed workflows (beyond conversational assistance)                                 | **Long-term direction**           |
+| Predictive maintenance / asset intelligence                                               | **Long-term direction**           |
+| Marketplace/platform                                                                      | **Long-term, unscoped direction** |
 
 See [ROADMAP.md](ROADMAP.md) for the phase-by-phase breakdown and
 [HANDOVER.md](HANDOVER.md) for the current verified technical state.

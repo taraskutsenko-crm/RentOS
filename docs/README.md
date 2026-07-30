@@ -29,3 +29,4 @@
   - [0006 — Rental lifecycle and availability engine](adr/0006-rental-lifecycle-and-availability.md)
   - [0007 — Quotes and commercial offers](adr/0007-quotes-and-commercial-offers.md)
   - [0008 — Configurable monthly billing strategies](adr/0008-configurable-monthly-billing-strategies.md)
+  - [0009 — Shared monthly pricing and atomic rental numbering](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)

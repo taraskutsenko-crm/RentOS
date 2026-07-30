@@ -416,17 +416,21 @@ partial-success state to rely on.
 
 ## Known limitations (as of the last verified commit above)
 
-- Quotes' `MONTHLY` pricing still used the old whole-month rounding
-  (`monthsInRange`) rather than the tenant-configurable strategies
-  Rentals gained in commit `744aec8` — **this is one of the three things
-  the current stabilization task fixes; check the top of this file and
-  [ROADMAP.md](ROADMAP.md) for its current status.**
-- `generateRentalNumber` used a count-then-check pattern with a
-  theoretical race under concurrent requests — **also being fixed by
-  this stabilization task; check current status the same way.**
+- Public quote page and the generated PDF don't render the itemized
+  monthly-billing breakdown (only the authenticated wizard/detail page
+  do) — the underlying data is already in the API response, so this is
+  additive UI work, not a data gap. See
+  [ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md).
 - Public quote page doesn't show the tenant's company name (PDF does).
 - No production email provider is wired in (`LoggingEmailProvider` only).
 - No localization-key-parity lint check (verified manually per task).
+
+Resolved by the pre-TASK-0008 stabilization task (see
+[ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)):
+Quotes' `MONTHLY` pricing now shares Rentals' tenant-configurable
+strategy engine instead of the old whole-month rounding, and
+`generateRentalNumber`'s count-then-check race has been replaced with an
+atomic, tenant-scoped Postgres sequence.
 
 ## Technical debt
 

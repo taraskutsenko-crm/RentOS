@@ -143,6 +143,10 @@ rule guarantees is never 0 in practice).
   rental has no frozen strategy yet).
 - `generateRentalNumber`'s existing count-then-check race (documented as a
   known limitation in ADR 0007) remains unfixed; unrelated to this task.
+  **Superseded:** fixed in
+  [ADR 0009](0009-shared-monthly-pricing-and-atomic-rental-numbering.md).
 - The Quotes module's `MONTHLY` pricing is intentionally left on the older
   whole-month-rounding behavior (`monthsInRange`), since tenant-configurable
   billing strategies for Quotes were not part of this task's scope.
+  **Superseded:** unified with Rentals' engine in
+  [ADR 0009](0009-shared-monthly-pricing-and-atomic-rental-numbering.md).

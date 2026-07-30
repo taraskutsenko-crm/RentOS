@@ -22,17 +22,19 @@ repository doesn't record a completion date, none is invented.
 | Quotes and Commercial Offers module (TASK-0007)                          | COMPLETED | Commit `934cdeb`. Quote wizard, universal line items, PDF generation, email abstraction, public token-based acceptance, quote-to-rental conversion, duplication. See [ADR 0007](adr/0007-quotes-and-commercial-offers.md). |
 | Configurable monthly billing strategies — Rentals                        | COMPLETED | Commit `744aec8`. `CALENDAR_MONTH` (default) / `FIXED_30_DAYS` / `CUSTOM`, tenant-scoped settings, per-item historical snapshot. See [ADR 0008](adr/0008-configurable-monthly-billing-strategies.md).                      |
 
-## Current stabilization work (this task, pre-TASK-0008)
+## Pre-TASK-0008 stabilization (completed)
 
-| Item                                                                                                                                        | Status      |
-| ------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| Core project documentation (this file and its siblings)                                                                                     | IN PROGRESS |
-| Quote monthly-pricing consistency (share the Rentals pricing engine, tenant billing settings, and historical snapshot behavior with Quotes) | IN PROGRESS |
-| Race-safe `generateRentalNumber` (replace count-then-check with an atomic, tenant-scoped sequence)                                          | IN PROGRESS |
+| Item                                                                                                                                        | Status    |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Core project documentation (this file and its siblings)                                                                                     | COMPLETED |
+| Quote monthly-pricing consistency (share the Rentals pricing engine, tenant billing settings, and historical snapshot behavior with Quotes) | COMPLETED |
+| Race-safe `generateRentalNumber` (replace count-then-check with an atomic, tenant-scoped sequence)                                          | COMPLETED |
 
-This work is explicitly scoped to _stabilize and unify_ what TASK-0006/
-0007/0008 already shipped — it does not add a new business module, and
-TASK-0008 (the next major task) has not been started as part of it.
+This work was explicitly scoped to _stabilize and unify_ what
+TASK-0006/0007/0008 already shipped — see
+[ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md).
+It did not add a new business module, and TASK-0008 (the next major
+task) was not started as part of it.
 
 ## Next planned major task
 

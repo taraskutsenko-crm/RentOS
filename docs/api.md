@@ -702,22 +702,37 @@ tenant, concurrency-safe — see ADR 0007's numbering section).
 
 **`QuoteItem` body shape** (each entry in `items`):
 
-| Field                                                                       | Type        | Notes                                                                             |
-| --------------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------- |
-| `itemType`                                                                  | enum        | `ASSET`\|`SERVICE`\|`PRODUCT`\|`FEE`\|`DELIVERY`\|`COLLECTION`\|`LABOR`\|`CUSTOM` |
-| `assetId`                                                                   | string      | Required (and only allowed) when `itemType` is `ASSET`                            |
-| `name`                                                                      | string      | Required                                                                          |
-| `description`                                                               | string      | Optional                                                                          |
-| `quantity`                                                                  | number      | Optional, default 1                                                               |
-| `unit`                                                                      | string      | Optional, free-text display label (e.g. "day", "hour") — never priced             |
-| `billingMode`                                                               | enum        | `DAILY`\|`WEEKLY`\|`MONTHLY`\|`CUSTOM`\|`FLAT` — `ASSET` items may not use `FLAT` |
-| `unitPriceMinor`                                                            | number      | Required when `billingMode` is `FLAT` (= unitPrice × quantity)                    |
-| `dailyPriceMinor`/`weeklyPriceMinor`/`monthlyPriceMinor`/`customPriceMinor` | number      | Exactly the one matching `billingMode` is required                                |
-| `discountType`/`discountValue`                                              | enum/number | Optional, this line's own discount, same interpretation as above                  |
-| `taxRateBp`                                                                 | number      | Optional, default 0, integer basis points (2000 = 20.00%)                         |
-| `depositMinor`                                                              | number      | Optional, default 0                                                               |
-| `sortOrder`                                                                 | number      | Optional, display order                                                           |
-| `notes`                                                                     | string      | Optional                                                                          |
+| Field                                                                       | Type        | Notes                                                                                                                                      |
+| --------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `itemType`                                                                  | enum        | `ASSET`\|`SERVICE`\|`PRODUCT`\|`FEE`\|`DELIVERY`\|`COLLECTION`\|`LABOR`\|`CUSTOM`                                                          |
+| `assetId`                                                                   | string      | Required (and only allowed) when `itemType` is `ASSET`                                                                                     |
+| `name`                                                                      | string      | Required                                                                                                                                   |
+| `description`                                                               | string      | Optional                                                                                                                                   |
+| `quantity`                                                                  | number      | Optional, default 1                                                                                                                        |
+| `unit`                                                                      | string      | Optional, free-text display label (e.g. "day", "hour") — never priced                                                                      |
+| `billingMode`                                                               | enum        | `DAILY`\|`WEEKLY`\|`MONTHLY`\|`CUSTOM`\|`FLAT` — `ASSET` items may not use `FLAT`                                                          |
+| `unitPriceMinor`                                                            | number      | Required when `billingMode` is `FLAT` (= unitPrice × quantity)                                                                             |
+| `dailyPriceMinor`/`weeklyPriceMinor`/`monthlyPriceMinor`/`customPriceMinor` | number      | Exactly the one(s) matching `billingMode` are required — `MONTHLY` requires **both** `monthlyPriceMinor` and `dailyPriceMinor` (see below) |
+| `discountType`/`discountValue`                                              | enum/number | Optional, this line's own discount, same interpretation as above                                                                           |
+| `taxRateBp`                                                                 | number      | Optional, default 0, integer basis points (2000 = 20.00%)                                                                                  |
+| `depositMinor`                                                              | number      | Optional, default 0                                                                                                                        |
+| `sortOrder`                                                                 | number      | Optional, display order                                                                                                                    |
+| `notes`                                                                     | string      | Optional                                                                                                                                   |
+
+**`MONTHLY` billing** (see
+[ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)):
+Quotes share the exact same tenant-configurable strategy engine as
+Rentals — see the Rentals section's "`MONTHLY` billing" note above. The
+server resolves and freezes the tenant's current
+`monthlyBillingStrategy`/`customMonthLengthDays` (from the shared
+`GET/PATCH /tenants/:tenantId/rental-billing-settings`, documented under
+Rentals) onto each `MONTHLY` `QuoteItem` at write time; these are
+returned as `monthlyBillingStrategy`/`customMonthLengthDays` on each item
+in the response and are never accepted directly from the client. A
+`QuoteItem` written before this existed has both fields `null` and is
+priced using the original whole-month-rounding formula it was actually
+priced under, never silently recalculated. Quote-to-rental conversion
+and duplication both carry an item's frozen snapshot forward verbatim.
 
 **201** → the created quote (response shape below), with a live
 `availabilityWarnings` array (never blocking — see below)
@@ -764,6 +779,9 @@ lifecycle action except the public ones):
       "id": "...",
       "itemType": "ASSET",
       "assetId": "...",
+      "billingMode": "MONTHLY",
+      "monthlyBillingStrategy": "CALENDAR_MONTH",
+      "customMonthLengthDays": null,
       "lineTotalMinor": 10800,
       "asset": { "...": "..." }
     }

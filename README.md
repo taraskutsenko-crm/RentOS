@@ -118,6 +118,9 @@ Covers:
   later settings change never alters an existing rental's stored total.
 - **Partial returns** — return some items while a rental stays `ACTIVE`;
   each returned asset is immediately available for a new booking.
+- **Concurrency-safe numbering** — `RNT-000001`, backed by an atomic
+  Postgres upsert-increment sequence, same pattern as Quotes' numbering
+  (see [ADR 0009](docs/adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)).
 - **Booking wizard** — a 6-step guided flow (customer → assets → dates →
   pricing → review → create) plus a visual availability calendar.
 - **Granular permissions** — `rentals.view/create/update/delete/reserve/
@@ -126,9 +129,11 @@ start/return/cancel` plus `rental_settings.view/manage` for the billing
 
 See [docs/api.md](docs/api.md#rentals) for the full endpoint reference,
 [ADR 0006](docs/adr/0006-rental-lifecycle-and-availability.md) for the
-lifecycle, availability, and pricing design rationale, and
+lifecycle, availability, and pricing design rationale,
 [ADR 0008](docs/adr/0008-configurable-monthly-billing-strategies.md) for
-the configurable monthly billing strategy design.
+the configurable monthly billing strategy design, and
+[ADR 0009](docs/adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)
+for the shared-with-Quotes pricing engine and the race-safe numbering fix.
 
 ## Quotes
 
@@ -140,12 +145,21 @@ Quote never reserves an asset by itself. Covers:
   `DRAFT`/`SENT`; every transition writes a `QuoteStatusHistory` row.
   Expiry is evaluated lazily against `validUntil`, not via a scheduled job.
 - **Universal line items** — `ASSET`, `SERVICE`, `PRODUCT`, `FEE`,
-  `DELIVERY`, `COLLECTION`, `LABOR`, `CUSTOM`; daily/weekly/
-  calendar-accurate-monthly/custom/flat pricing, per-line and quote-level
-  percentage or fixed discounts, per-line tax rates, and deposits — all
-  integer minor units and integer basis points, never floating point.
+  `DELIVERY`, `COLLECTION`, `LABOR`, `CUSTOM`; daily/weekly/monthly/
+  custom/flat pricing, per-line and quote-level percentage or fixed
+  discounts, per-line tax rates, and deposits — all integer minor units
+  and integer basis points, never floating point.
+- **Configurable monthly billing, shared with Rentals** — `MONTHLY`
+  quote items use the exact same tenant-level `CALENDAR_MONTH` (default)
+  / `FIXED_30_DAYS` / `CUSTOM` strategy as Rentals (see
+  [ADR 0008](docs/adr/0008-configurable-monthly-billing-strategies.md)),
+  never a separate calculation; each item snapshots the strategy it was
+  priced under, and quote-to-rental conversion carries that snapshot
+  onto the resulting rental item.
 - **Concurrency-safe numbering** — `Q-2026-000001`, backed by an atomic
-  Postgres upsert-increment sequence (not a count-then-check pattern).
+  Postgres upsert-increment sequence (not a count-then-check pattern) —
+  the same pattern Rentals' own numbering now uses too (see
+  [ADR 0009](docs/adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)).
 - **PDF generation** — a localization-aware, A4, multi-page-safe
   commercial offer (itemized table, totals, terms, acceptance section),
   rendered via `pdfkit` with an embedded Unicode font, stored through the

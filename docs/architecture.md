@@ -379,19 +379,37 @@ decrements, so a cancelled or deleted quote's number is never reused.
 
 ### Pricing
 
-`apps/api/src/quotes/quote-pricing.util.ts` reuses
-`durationInDays`/`monthsInRange` from `rental-pricing.util.ts` unchanged
-for `DAILY`/`WEEKLY`/`MONTHLY`/`CUSTOM` items, adding a `FLAT` branch
-(`unitPriceMinor × quantity`, no duration factor) for non-time-based
-lines. Discounts/tax are integer basis points (`discountValue` when
-`discountType=PERCENTAGE`, `taxRateBp`), resolved with exactly one
-`Math.round` per line — see ADR 0007's decimal-safe-arithmetic section.
-Each item's `lineTotalMinor` already nets its own discount and tax; the
-Quote's `subtotalMinor` sums those, then the quote-level discount applies
-as one more flat layer on top (mirroring `Rental.discountMinor`).
-`taxTotalMinor`/`depositTotalMinor` on the Quote are display aggregates
-only — already folded into `subtotalMinor`/excluded from `totalMinor`
-respectively, never double-counted.
+`apps/api/src/quotes/quote-pricing.util.ts` reuses `durationInDays` from
+`rental-pricing.util.ts` unchanged for `DAILY`/`WEEKLY` items, adding a
+`FLAT` branch (`unitPriceMinor × quantity`, no duration factor) for
+non-time-based lines. Discounts/tax are integer basis points
+(`discountValue` when `discountType=PERCENTAGE`, `taxRateBp`), resolved
+with exactly one `Math.round` per line — see ADR 0007's
+decimal-safe-arithmetic section. Each item's `lineTotalMinor` already
+nets its own discount and tax; the Quote's `subtotalMinor` sums those,
+then the quote-level discount applies as one more flat layer on top
+(mirroring `Rental.discountMinor`). `taxTotalMinor`/`depositTotalMinor`
+on the Quote are display aggregates only — already folded into
+`subtotalMinor`/excluded from `totalMinor` respectively, never
+double-counted.
+
+`MONTHLY` items share Rentals' own tenant-configurable strategy engine
+exactly (`computeMonthlyBreakdown` — see the Rentals module's "Pricing"
+section above and
+[ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)),
+rather than a separate Quotes-specific calculation: `QuoteItem` gets the
+same `monthlyBillingStrategy`/`customMonthLengthDays` snapshot columns
+`RentalItem` has, `QuotesService` reads the same
+`RentalBillingSettings` Rentals reads, and a `MONTHLY` item requires
+both `monthlyPriceMinor` and `dailyPriceMinor` under the new engine. A
+`QuoteItem` written before this existed (`monthlyBillingStrategy` is
+`null`) falls back to the original `monthsInRange`-based whole-month
+rounding it was actually priced under, reproducing its historical total
+exactly rather than silently recalculating it — see ADR 0009 for why
+this matters and why it's the item's _absence_ of a strategy that
+selects this fallback, not a default strategy value. Quote-to-rental
+conversion carries each `ASSET` item's frozen snapshot onto the
+resulting `RentalItem` verbatim; duplication does the same.
 
 ### Asset availability
 
@@ -484,6 +502,15 @@ same normalized shape as the Assets/Rentals timelines.
 - `LoggingEmailProvider` is the only implementation shipped — a
   production SMTP/SES/SendGrid provider must be added before quotes can
   actually be emailed to real customers (see "Email" above for how).
-- `generateRentalNumber`'s existing count-then-check race (pre-dating
-  this task) was deliberately left unfixed; `quote-numbering.util.ts`'s
-  atomic sequence pattern is a natural template if it's ever addressed.
+- The public quote page and the generated PDF do not render the itemized
+  monthly breakdown (only the authenticated wizard and detail page do) —
+  the underlying data is already in the public API response shape, so
+  this is additive UI work, not a data gap (see ADR 0009).
+
+Resolved by
+[ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)
+(no longer limitations): Quotes' `MONTHLY` pricing now shares Rentals'
+configurable strategy engine instead of a fixed whole-month-rounding
+rule, and `generateRentalNumber`'s count-then-check race has been
+replaced with the same atomic sequence pattern `quote-numbering.util.ts`
+already used.

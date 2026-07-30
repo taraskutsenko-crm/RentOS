@@ -214,6 +214,7 @@ model Tenant {
   rentalItems           RentalItem[]
   rentalStatusHistory   RentalStatusHistory[]
   rentalBillingSettings RentalBillingSettings?
+  rentalSequence        RentalSequence?
 
   quotes             Quote[]
   quoteItems         QuoteItem[]
@@ -719,6 +720,23 @@ model RentalBillingSettings {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("rental_billing_settings")
+}
+
+/// Backs concurrency-safe RNT-###### rental number generation — one
+/// counter row per tenant (never year-based, matching the existing
+/// documented format), incremented atomically via a single
+/// `INSERT ... ON CONFLICT ("tenantId") DO UPDATE ... RETURNING` (see
+/// rental-numbering.util.ts). Mirrors QuoteSequence's proven pattern; the
+/// counter never decrements, so a deleted/cancelled rental's number is
+/// never reused.
+model RentalSequence {
+  id         String @id @default(uuid())
+  tenantId   String @unique
+  lastNumber Int    @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("rental_sequences")
 }
 
 /// Append-only history of Rental.status transitions, written atomically with

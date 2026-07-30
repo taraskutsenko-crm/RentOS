@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { AuditModule } from "../audit/audit.module";
 import { EmailModule } from "../email/email.module";
 import { PermissionsModule } from "../permissions/permissions.module";
+import { RentalBillingSettingsModule } from "../rental-billing-settings/rental-billing-settings.module";
 import { RentalsModule } from "../rentals/rentals.module";
 import { StorageModule } from "../storage/storage.module";
 import { TenantsModule } from "../tenants/tenants.module";
@@ -17,6 +18,7 @@ import { QuotesService } from "./quotes.service";
     AuditModule,
     PermissionsModule,
     RentalsModule,
+    RentalBillingSettingsModule,
     StorageModule,
     EmailModule,
   ],

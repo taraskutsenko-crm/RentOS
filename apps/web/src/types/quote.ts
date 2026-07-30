@@ -1,5 +1,6 @@
 import type { Asset } from "./asset";
 import type { Customer } from "./customer";
+import type { MonthlyBillingStrategy } from "./rental";
 
 export type QuoteStatus =
   "DRAFT" | "SENT" | "VIEWED" | "ACCEPTED" | "REJECTED" | "EXPIRED" | "CONVERTED" | "CANCELLED";
@@ -39,6 +40,9 @@ export interface QuoteItem {
   weeklyPriceMinor: number | null;
   monthlyPriceMinor: number | null;
   customPriceMinor: number | null;
+  /** Snapshot of the monthly billing settings used when this item was last priced — null unless billingMode is MONTHLY, or the item pre-dates this feature. */
+  monthlyBillingStrategy: MonthlyBillingStrategy | null;
+  customMonthLengthDays: number | null;
   discountType: QuoteDiscountType | null;
   discountValue: number;
   discountTotalMinor: number;
@@ -157,6 +161,8 @@ export interface PublicQuoteItem {
   weeklyPriceMinor: number | null;
   monthlyPriceMinor: number | null;
   customPriceMinor: number | null;
+  monthlyBillingStrategy: MonthlyBillingStrategy | null;
+  customMonthLengthDays: number | null;
   discountTotalMinor: number;
   taxTotalMinor: number;
   depositMinor: number;

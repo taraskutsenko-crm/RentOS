@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import { useAssets } from "../../hooks/use-assets";
 import { useCustomers } from "../../hooks/use-customers";
+import { useRentalBillingSettings } from "../../hooks/use-rental-billing-settings";
 import { useAvailability } from "../../hooks/use-rentals";
 import type { QuoteInput, QuoteItemInput } from "../../hooks/use-quotes";
 import { formatMoney } from "../../lib/money";
@@ -152,6 +153,10 @@ export function QuoteWizard({
       : null,
   );
 
+  const { data: billingSettings } = useRentalBillingSettings(tenantId);
+  const monthlyStrategy = billingSettings?.monthlyBillingStrategy ?? "CALENDAR_MONTH";
+  const customMonthLengthDays = billingSettings?.customMonthLengthDays ?? null;
+
   const estimatedTotals = estimateQuoteTotals(
     items.map((item) => ({
       billingMode: item.billingMode,
@@ -165,6 +170,9 @@ export function QuoteWizard({
       discountValue: toMinor(item.discountValueDisplay),
       taxRateBp: toMinor(item.taxRateDisplay),
       depositMinor: toMinor(item.depositDisplay),
+      ...(item.billingMode === "MONTHLY"
+        ? { monthlyBillingStrategy: monthlyStrategy, customMonthLengthDays }
+        : {}),
     })),
     values.plannedStart,
     values.plannedEnd,
@@ -443,6 +451,11 @@ export function QuoteWizard({
                 }
                 onChange={(patch) => updateItemAt(index, patch)}
                 onRemove={() => removeItemAt(index)}
+                plannedStart={values.plannedStart}
+                plannedEnd={values.plannedEnd}
+                currency={values.currency}
+                monthlyBillingStrategy={monthlyStrategy}
+                customMonthLengthDays={customMonthLengthDays}
               />
             ))}
 

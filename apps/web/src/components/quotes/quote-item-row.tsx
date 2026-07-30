@@ -3,8 +3,11 @@
 import { Input, Label } from "@rentos/ui";
 import { useTranslation } from "react-i18next";
 
+import { formatMoney } from "../../lib/money";
+import { estimateMonthlyBreakdown } from "../../lib/rental-pricing";
 import type { QuoteItemFormValues } from "../../lib/validation";
 import type { QuoteBillingMode, QuoteDiscountType, QuoteItemType } from "../../types/quote";
+import type { MonthlyBillingStrategy } from "../../types/rental";
 
 const NON_ASSET_ITEM_TYPES: QuoteItemType[] = [
   "SERVICE",
@@ -16,11 +19,22 @@ const NON_ASSET_ITEM_TYPES: QuoteItemType[] = [
   "CUSTOM",
 ];
 
+function toMinor(display: string): number {
+  const value = Number(display.trim() || "0");
+  return Number.isFinite(value) ? Math.round(value * 100) : 0;
+}
+
 export interface QuoteItemRowProps {
   item: QuoteItemFormValues;
   assetLabel?: string | undefined;
   onChange: (patch: Partial<QuoteItemFormValues>) => void;
   onRemove: () => void;
+  plannedStart: string;
+  plannedEnd: string;
+  currency: string;
+  /** The tenant's current monthly billing strategy — see use-rental-billing-settings.ts. */
+  monthlyBillingStrategy: MonthlyBillingStrategy;
+  customMonthLengthDays: number | null;
 }
 
 /**
@@ -30,10 +44,32 @@ export interface QuoteItemRowProps {
  * Field visibility mirrors the server's billing-mode rules exactly: FLAT is
  * only offered for non-asset items (ASSET items must use DAILY/WEEKLY/
  * MONTHLY/CUSTOM — see QuotesService.assertItemsValid).
+ *
+ * MONTHLY items also expose a daily price (for any partial-unit remainder)
+ * and a live breakdown, reusing the exact same tenant-configurable
+ * strategy engine as Rentals (see
+ * docs/adr/0008-configurable-monthly-billing-strategies.md) — never a
+ * separate Quotes-specific calculation.
  */
-export function QuoteItemRow({ item, assetLabel, onChange, onRemove }: QuoteItemRowProps) {
+export function QuoteItemRow({
+  item,
+  assetLabel,
+  onChange,
+  onRemove,
+  plannedStart,
+  plannedEnd,
+  currency,
+  monthlyBillingStrategy,
+  customMonthLengthDays,
+}: QuoteItemRowProps) {
   const { t } = useTranslation();
   const isAsset = item.itemType === "ASSET";
+  const monthlyBreakdown = estimateMonthlyBreakdown(
+    monthlyBillingStrategy,
+    customMonthLengthDays,
+    plannedStart,
+    plannedEnd,
+  );
 
   return (
     <div className="flex flex-col gap-3 rounded-md border p-3">
@@ -137,15 +173,45 @@ export function QuoteItemRow({ item, assetLabel, onChange, onRemove }: QuoteItem
           </div>
         )}
         {item.billingMode === "MONTHLY" && (
-          <div className="flex flex-col gap-1.5">
-            <Label>{t("quote.fields.monthlyPrice")}</Label>
-            <Input
-              type="number"
-              step="0.01"
-              value={item.monthlyPriceDisplay}
-              onChange={(event) => onChange({ monthlyPriceDisplay: event.target.value })}
-            />
-          </div>
+          <>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t("quote.fields.monthlyPrice")}</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={item.monthlyPriceDisplay}
+                onChange={(event) => onChange({ monthlyPriceDisplay: event.target.value })}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t("rental.fields.dailyPriceForRemainder")}</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={item.dailyPriceDisplay}
+                onChange={(event) => onChange({ dailyPriceDisplay: event.target.value })}
+              />
+            </div>
+            <div className="text-muted-foreground col-span-2 text-sm">
+              {monthlyBreakdown.completeUnits === 0 && monthlyBreakdown.remainingDays === 0
+                ? t("rental.wizard.monthlyBreakdown.pending")
+                : [
+                    monthlyBreakdown.completeUnits > 0 &&
+                      t(`rental.wizard.monthlyBreakdown.${monthlyBillingStrategy}`, {
+                        count: monthlyBreakdown.completeUnits,
+                        length: customMonthLengthDays ?? "",
+                        price: formatMoney(toMinor(item.monthlyPriceDisplay), currency),
+                      }),
+                    monthlyBreakdown.remainingDays > 0 &&
+                      t("rental.wizard.monthlyBreakdown.days", {
+                        count: monthlyBreakdown.remainingDays,
+                        price: formatMoney(toMinor(item.dailyPriceDisplay), currency),
+                      }),
+                  ]
+                    .filter(Boolean)
+                    .join(" + ")}
+            </div>
+          </>
         )}
         {item.billingMode === "CUSTOM" && (
           <div className="flex flex-col gap-1.5">

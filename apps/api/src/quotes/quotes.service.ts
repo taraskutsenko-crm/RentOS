@@ -5,12 +5,14 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import type { Asset, Prisma, QuoteItem, QuoteStatus } from "@prisma/client";
+import type { Asset, MonthlyBillingStrategy, Prisma, QuoteItem, QuoteStatus } from "@prisma/client";
 import type { ApiEnv } from "@rentos/shared";
 
 import { AuditService } from "../audit/audit.service";
 import type { PaginatedResult } from "../customers/customers.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { RentalBillingSettingsService } from "../rental-billing-settings/rental-billing-settings.service";
+import type { EffectiveRentalBillingSettings } from "../rental-billing-settings/rental-billing-settings.types";
 import { AvailabilityService } from "../rentals/availability.service";
 import { generateRentalNumber } from "../rentals/rental-numbering.util";
 import type { AcceptQuoteDto } from "./dto/accept-quote.dto";
@@ -40,6 +42,20 @@ import {
   type QuoteListItemView,
 } from "./quote.types";
 import type { QuoteTimelineEvent, QuoteTimelineEventType } from "./timeline.types";
+
+/**
+ * A QuoteItemDto (client input) whose MONTHLY-only billing-strategy
+ * snapshot fields have already been resolved — either freshly stamped from
+ * the tenant's current RentalBillingSettings (new/replaced items) or
+ * carried over unchanged from an already-persisted QuoteItem (unedited
+ * items on a partial update, or a duplicated item). Never accepted
+ * directly from a client — mirrors RentalItemSource in rentals.service.ts.
+ * See docs/adr/0008-configurable-monthly-billing-strategies.md.
+ */
+type QuoteItemSource = QuoteItemDto & {
+  monthlyBillingStrategy?: MonthlyBillingStrategy | null;
+  customMonthLengthDays?: number | null;
+};
 
 /** Items and dates are editable only while DRAFT — mirrors Rentals' EDITABLE_STATUSES intent. */
 const DRAFT_ONLY: QuoteStatus[] = ["DRAFT"];
@@ -101,6 +117,7 @@ export class QuotesService {
     private readonly emailService: EmailService,
     private readonly pdfService: QuotePdfService,
     private readonly configService: ConfigService<ApiEnv, true>,
+    private readonly rentalBillingSettingsService: RentalBillingSettingsService,
   ) {}
 
   async create(
@@ -121,8 +138,11 @@ export class QuotesService {
     const items = dto.items ?? [];
     await this.assertItemsValid(tenantId, items);
 
+    const billingSettings = await this.resolveBillingSettingsIfNeeded(tenantId, items);
+    const pricedItems = withMonthlyBillingSettings(items, billingSettings);
+
     const totals = computeQuoteTotals(
-      items.map(toPricedItemInput),
+      pricedItems.map(toPricedItemInput),
       plannedStart,
       plannedEnd,
       dto.discountType ?? null,
@@ -157,9 +177,9 @@ export class QuotesService {
         },
       });
 
-      for (let i = 0; i < items.length; i += 1) {
+      for (let i = 0; i < pricedItems.length; i += 1) {
         await tx.quoteItem.create({
-          data: toQuoteItemCreateData(tenantId, quote.id, items[i]!, totals.items[i]!),
+          data: toQuoteItemCreateData(tenantId, quote.id, pricedItems[i]!, totals.items[i]!),
         });
       }
 
@@ -330,12 +350,25 @@ export class QuotesService {
       await this.assertItemsValid(tenantId, items);
     }
 
+    // Only a full item replacement re-reads the tenant's *current* billing
+    // settings — an edit that leaves items untouched (e.g. just notes or
+    // discount) must keep each item's already-frozen strategy, never pick
+    // up a tenant-wide settings change made after the quote was created
+    // (see ADR 0008). `fromExistingItem` below already carries that frozen
+    // snapshot forward for the untouched-items case.
+    const billingSettings =
+      dto.items !== undefined
+        ? await this.resolveBillingSettingsIfNeeded(tenantId, dto.items)
+        : null;
+    const pricedItems: QuoteItemSource[] =
+      dto.items !== undefined ? withMonthlyBillingSettings(dto.items, billingSettings) : items;
+
     const discountType = dto.discountType !== undefined ? dto.discountType : current.discountType;
     const discountValue =
       dto.discountValue !== undefined ? dto.discountValue : current.discountValue;
 
     const totals = computeQuoteTotals(
-      items.map(toPricedItemInput),
+      pricedItems.map(toPricedItemInput),
       plannedStart,
       plannedEnd,
       discountType,
@@ -372,9 +405,9 @@ export class QuotesService {
 
       if (dto.items !== undefined) {
         await tx.quoteItem.deleteMany({ where: { quoteId: id, tenantId } });
-        for (let i = 0; i < items.length; i += 1) {
+        for (let i = 0; i < pricedItems.length; i += 1) {
           await tx.quoteItem.create({
-            data: toQuoteItemCreateData(tenantId, id, items[i]!, totals.items[i]!),
+            data: toQuoteItemCreateData(tenantId, id, pricedItems[i]!, totals.items[i]!),
           });
         }
       }
@@ -764,6 +797,12 @@ export class QuotesService {
             weeklyPriceMinor: item.weeklyPriceMinor,
             monthlyPriceMinor: item.monthlyPriceMinor,
             customPriceMinor: item.customPriceMinor,
+            // Carried over verbatim, never re-resolved from the tenant's
+            // current settings — duplication is a faithful copy in a fresh
+            // DRAFT shell, not a re-quote (see ADR 0007's duplication
+            // section and ADR 0008's note on this decision).
+            monthlyBillingStrategy: item.monthlyBillingStrategy,
+            customMonthLengthDays: item.customMonthLengthDays,
             discountType: item.discountType,
             discountValue: item.discountValue,
             discountTotalMinor: pricing.discountTotalMinor,
@@ -963,6 +1002,13 @@ export class QuotesService {
             weeklyPriceMinor: item.weeklyPriceMinor,
             monthlyPriceMinor: item.monthlyPriceMinor,
             customPriceMinor: item.customPriceMinor,
+            // Preserves the exact monthly-billing snapshot the customer's
+            // quote was priced under — the Rental's own totals are still
+            // copied verbatim from the Quote's totals above, never
+            // recomputed from this item, but the item-level breakdown
+            // must still be reproducible post-conversion (see ADR 0008).
+            monthlyBillingStrategy: item.monthlyBillingStrategy,
+            customMonthLengthDays: item.customMonthLengthDays,
             depositMinor: item.depositMinor,
             discountMinor: item.discountTotalMinor,
             notes: item.notes,
@@ -1348,6 +1394,8 @@ export class QuotesService {
           weeklyPriceMinor: item.weeklyPriceMinor,
           monthlyPriceMinor: item.monthlyPriceMinor,
           customPriceMinor: item.customPriceMinor,
+          monthlyBillingStrategy: item.monthlyBillingStrategy,
+          customMonthLengthDays: item.customMonthLengthDays,
           discountTotalMinor: item.discountTotalMinor,
           taxTotalMinor: item.taxTotalMinor,
           depositMinor: item.depositMinor,
@@ -1455,6 +1503,21 @@ export class QuotesService {
     }
     return tenant;
   }
+
+  /**
+   * Only queries RentalBillingSettings when at least one item actually
+   * needs it — shared with Rentals (see rentals.service.ts's identically
+   * named method) rather than a separate Quote-specific settings model.
+   */
+  private async resolveBillingSettingsIfNeeded(
+    tenantId: string,
+    items: { billingMode: QuoteItemDto["billingMode"] }[],
+  ): Promise<EffectiveRentalBillingSettings | null> {
+    if (!items.some((item) => item.billingMode === "MONTHLY")) {
+      return null;
+    }
+    return this.rentalBillingSettingsService.getEffective(tenantId);
+  }
 }
 
 function assertAssetCompatibleBillingMode(
@@ -1468,7 +1531,30 @@ function assertAssetCompatibleBillingMode(
   return mode;
 }
 
-function toPricedItemInput(item: QuoteItemDto): PricedQuoteItemInput {
+/**
+ * Stamps the tenant's current monthly billing settings onto every MONTHLY
+ * item — this is the one place a fresh (client-submitted) item list picks
+ * up `monthlyBillingStrategy`/`customMonthLengthDays`; the client itself
+ * never sends these fields (see QuoteItemSource). Mirrors
+ * rentals.service.ts's identically named function exactly.
+ */
+function withMonthlyBillingSettings(
+  items: QuoteItemDto[],
+  settings: EffectiveRentalBillingSettings | null,
+): QuoteItemSource[] {
+  return items.map((item) => {
+    if (item.billingMode !== "MONTHLY") {
+      return item;
+    }
+    return {
+      ...item,
+      monthlyBillingStrategy: settings!.monthlyBillingStrategy,
+      customMonthLengthDays: settings!.customMonthLengthDays,
+    };
+  });
+}
+
+function toPricedItemInput(item: QuoteItemSource): PricedQuoteItemInput {
   return {
     billingMode: item.billingMode,
     quantity: item.quantity ?? 1,
@@ -1481,6 +1567,8 @@ function toPricedItemInput(item: QuoteItemDto): PricedQuoteItemInput {
     discountValue: item.discountValue ?? 0,
     taxRateBp: item.taxRateBp ?? 0,
     depositMinor: item.depositMinor ?? 0,
+    monthlyBillingStrategy: item.monthlyBillingStrategy ?? null,
+    customMonthLengthDays: item.customMonthLengthDays ?? null,
   };
 }
 
@@ -1497,10 +1585,12 @@ function toPricedItemInputFromExisting(item: QuoteItem): PricedQuoteItemInput {
     discountValue: item.discountValue,
     taxRateBp: item.taxRateBp,
     depositMinor: item.depositMinor,
+    monthlyBillingStrategy: item.monthlyBillingStrategy,
+    customMonthLengthDays: item.customMonthLengthDays,
   };
 }
 
-function fromExistingItem(item: QuoteItem): QuoteItemDto {
+function fromExistingItem(item: QuoteItem): QuoteItemSource {
   return {
     itemType: item.itemType,
     ...(item.assetId ? { assetId: item.assetId } : {}),
@@ -1520,13 +1610,15 @@ function fromExistingItem(item: QuoteItem): QuoteItemDto {
     depositMinor: item.depositMinor,
     sortOrder: item.sortOrder,
     ...(item.notes !== null ? { notes: item.notes } : {}),
+    monthlyBillingStrategy: item.monthlyBillingStrategy,
+    customMonthLengthDays: item.customMonthLengthDays,
   };
 }
 
 function toQuoteItemCreateData(
   tenantId: string,
   quoteId: string,
-  item: QuoteItemDto,
+  item: QuoteItemSource,
   pricing: QuoteItemPricingResult,
 ): Prisma.QuoteItemUncheckedCreateInput {
   return {
@@ -1544,6 +1636,10 @@ function toQuoteItemCreateData(
     weeklyPriceMinor: item.weeklyPriceMinor ?? null,
     monthlyPriceMinor: item.monthlyPriceMinor ?? null,
     customPriceMinor: item.customPriceMinor ?? null,
+    monthlyBillingStrategy:
+      item.billingMode === "MONTHLY" ? (item.monthlyBillingStrategy ?? null) : null,
+    customMonthLengthDays:
+      item.billingMode === "MONTHLY" ? (item.customMonthLengthDays ?? null) : null,
     discountType: item.discountType ?? null,
     discountValue: item.discountValue ?? 0,
     discountTotalMinor: pricing.discountTotalMinor,

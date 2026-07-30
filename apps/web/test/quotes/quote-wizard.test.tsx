@@ -22,6 +22,11 @@ vi.mock("../../src/hooks/use-rentals", async () => {
   return { ...actual, useAvailability: (...args: unknown[]) => useAvailabilityMock(...args) };
 });
 
+const useRentalBillingSettingsMock = vi.fn();
+vi.mock("../../src/hooks/use-rental-billing-settings", () => ({
+  useRentalBillingSettings: (...args: unknown[]) => useRentalBillingSettingsMock(...args),
+}));
+
 function setup() {
   useCustomersMock.mockReturnValue({
     data: { items: [{ id: "cust-1", firstName: "Jane", lastName: "Doe", company: null }] },
@@ -30,6 +35,9 @@ function setup() {
     data: { items: [{ id: "asset-1", name: "Generator A", internalNumber: "GEN-0001" }] },
   });
   useAvailabilityMock.mockReturnValue({ data: undefined });
+  useRentalBillingSettingsMock.mockReturnValue({
+    data: { monthlyBillingStrategy: "CALENDAR_MONTH", customMonthLengthDays: null },
+  });
 }
 
 async function goToStep(user: ReturnType<typeof userEvent.setup>, times: number): Promise<void> {
@@ -88,5 +96,27 @@ describe("QuoteWizard", () => {
     await user.click(screen.getByRole("button", { name: /add product or service/i }));
 
     expect(screen.queryByText(/no products or services added yet/i)).not.toBeInTheDocument();
+  });
+
+  it("shows a daily-price field and the CALENDAR_MONTH breakdown for a MONTHLY asset item", async () => {
+    setup();
+    const user = userEvent.setup();
+    renderWithProviders(<QuoteWizard tenantId="tenant-1" onSubmit={vi.fn()} isPending={false} />);
+
+    await user.click(screen.getByLabelText("Jane Doe"));
+    await goToStep(user, 1); // -> dates
+    await user.type(screen.getByLabelText(/planned start/i), "2031-01-15T00:00");
+    await user.type(screen.getByLabelText(/planned end/i), "2031-03-20T00:00");
+    await user.type(screen.getByLabelText(/valid until/i), "2031-04-01T00:00");
+    await goToStep(user, 1); // -> assets
+
+    await user.click(await screen.findByRole("checkbox"));
+    await goToStep(user, 2); // -> services -> pricing
+
+    const billingModeSelect = screen.getByDisplayValue(/daily/i);
+    await user.selectOptions(billingModeSelect, "MONTHLY");
+
+    expect(screen.getByText(/daily price \(for remaining days\)/i)).toBeInTheDocument();
+    expect(await screen.findByText(/2 calendar months × .*5 days ×/i)).toBeInTheDocument();
   });
 });

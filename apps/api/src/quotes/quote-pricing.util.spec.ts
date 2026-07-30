@@ -131,6 +131,118 @@ describe("computeQuoteItemPricing", () => {
     expect(result.lineSubtotalMinor).toBe(12_000);
   });
 
+  describe("MONTHLY with a tenant-configurable strategy (shared with Rentals)", () => {
+    it("CALENDAR_MONTH: splits into complete months plus a daily-priced remainder", () => {
+      // Jan 15 -> Mar 20: 2 complete months (Jan15->Mar15) + 5 remaining days
+      const monthlyStart = new Date("2026-01-15T00:00:00Z");
+      const end = new Date("2026-03-20T00:00:00Z");
+      const result = computeQuoteItemPricing(
+        item({
+          billingMode: "MONTHLY",
+          monthlyPriceMinor: 20_000,
+          dailyPriceMinor: 1_000,
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+        }),
+        monthlyStart,
+        end,
+      );
+      expect(result.lineSubtotalMinor).toBe(20_000 * 2 + 1_000 * 5);
+    });
+
+    it("FIXED_30_DAYS: 65 billable days -> 2 monthly units + 5 daily units", () => {
+      const monthlyStart = new Date("2026-01-01T00:00:00Z");
+      const end = new Date("2026-03-07T00:00:00Z"); // 65 days
+      const result = computeQuoteItemPricing(
+        item({
+          billingMode: "MONTHLY",
+          monthlyPriceMinor: 30_000,
+          dailyPriceMinor: 900,
+          monthlyBillingStrategy: "FIXED_30_DAYS",
+        }),
+        monthlyStart,
+        end,
+      );
+      expect(result.lineSubtotalMinor).toBe(30_000 * 2 + 900 * 5);
+    });
+
+    it("CUSTOM with 28 days: 60 billable days -> 2 custom units + 4 daily units", () => {
+      const monthlyStart = new Date("2026-01-01T00:00:00Z");
+      const end = new Date("2026-03-02T00:00:00Z"); // 60 days
+      const result = computeQuoteItemPricing(
+        item({
+          billingMode: "MONTHLY",
+          monthlyPriceMinor: 28_000,
+          dailyPriceMinor: 800,
+          monthlyBillingStrategy: "CUSTOM",
+          customMonthLengthDays: 28,
+        }),
+        monthlyStart,
+        end,
+      );
+      expect(result.lineSubtotalMinor).toBe(28_000 * 2 + 800 * 4);
+    });
+
+    it("applies quantity to both the monthly and daily portions", () => {
+      const monthlyStart = new Date("2026-01-15T00:00:00Z");
+      const end = new Date("2026-03-20T00:00:00Z");
+      const result = computeQuoteItemPricing(
+        item({
+          billingMode: "MONTHLY",
+          monthlyPriceMinor: 20_000,
+          dailyPriceMinor: 1_000,
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          quantity: 2,
+        }),
+        monthlyStart,
+        end,
+      );
+      expect(result.lineSubtotalMinor).toBe((20_000 * 2 + 1_000 * 5) * 2);
+    });
+
+    it("throws when a strategy-priced MONTHLY item is missing dailyPriceMinor", () => {
+      const end = new Date("2026-03-20T00:00:00Z");
+      expect(() =>
+        computeQuoteItemPricing(
+          item({
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 20_000,
+            monthlyBillingStrategy: "CALENDAR_MONTH",
+          }),
+          new Date("2026-01-15T00:00:00Z"),
+          end,
+        ),
+      ).toThrow(BadRequestException);
+    });
+
+    it("does not require dailyPriceMinor for a legacy item with no strategy (backward compatible)", () => {
+      // Same 3 legacy tests above already cover this; this asserts the
+      // absence of dailyPriceMinor specifically does not throw.
+      const monthlyStart = new Date("2027-01-31T00:00:00Z");
+      const end = new Date("2027-02-28T00:00:00Z");
+      expect(() =>
+        computeQuoteItemPricing(
+          item({ billingMode: "MONTHLY", monthlyPriceMinor: 15_000 }),
+          monthlyStart,
+          end,
+        ),
+      ).not.toThrow();
+    });
+
+    it("a legacy (null-strategy) item reproduces the original whole-month-rounding total, not the new split", () => {
+      // Jan 15 -> Mar 20 under the OLD whole-month rounding rule rounds the
+      // partial month up to a full extra month (3 months), unlike the new
+      // engine's 2 months + 5 days split above.
+      const monthlyStart = new Date("2026-01-15T00:00:00Z");
+      const end = new Date("2026-03-20T00:00:00Z");
+      const result = computeQuoteItemPricing(
+        item({ billingMode: "MONTHLY", monthlyPriceMinor: 20_000 }),
+        monthlyStart,
+        end,
+      );
+      expect(result.lineSubtotalMinor).toBe(20_000 * 3);
+    });
+  });
+
   it("computes a CUSTOM line as a flat price, ignoring duration and quantity", () => {
     const end = new Date("2026-12-01T00:00:00Z");
     const result = computeQuoteItemPricing(

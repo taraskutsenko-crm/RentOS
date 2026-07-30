@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { estimateMonthsInRange } from "../../src/lib/rental-pricing";
 import {
   estimateDurationInDays,
-  estimateMonthsInRange,
   estimateQuoteItemPricing,
   estimateQuoteTotals,
   type EstimatedQuoteItemInput,
@@ -57,6 +57,62 @@ describe("estimateQuoteItemPricing", () => {
       "2026-08-04T00:00:00Z",
     );
     expect(result.lineSubtotalMinor).toBe(3000);
+  });
+
+  it("computes MONTHLY pricing under CALENDAR_MONTH: complete months plus a daily-priced remainder", () => {
+    const result = estimateQuoteItemPricing(
+      item({
+        billingMode: "MONTHLY",
+        monthlyPriceMinor: 20000,
+        dailyPriceMinor: 1000,
+        monthlyBillingStrategy: "CALENDAR_MONTH",
+      }),
+      "2026-01-15T00:00:00Z",
+      "2026-03-20T00:00:00Z",
+    );
+    expect(result.lineSubtotalMinor).toBe(20000 * 2 + 1000 * 5);
+  });
+
+  it("computes MONTHLY pricing under FIXED_30_DAYS", () => {
+    const result = estimateQuoteItemPricing(
+      item({
+        billingMode: "MONTHLY",
+        monthlyPriceMinor: 30000,
+        dailyPriceMinor: 900,
+        monthlyBillingStrategy: "FIXED_30_DAYS",
+      }),
+      "2026-01-01T00:00:00Z",
+      "2026-03-07T00:00:00Z", // 65 days
+    );
+    expect(result.lineSubtotalMinor).toBe(30000 * 2 + 900 * 5);
+  });
+
+  it("computes MONTHLY pricing under CUSTOM", () => {
+    const result = estimateQuoteItemPricing(
+      item({
+        billingMode: "MONTHLY",
+        monthlyPriceMinor: 28000,
+        dailyPriceMinor: 800,
+        monthlyBillingStrategy: "CUSTOM",
+        customMonthLengthDays: 28,
+      }),
+      "2026-01-01T00:00:00Z",
+      "2026-03-02T00:00:00Z", // 60 days
+    );
+    expect(result.lineSubtotalMinor).toBe(28000 * 2 + 800 * 4);
+  });
+
+  it("defaults to CALENDAR_MONTH when no strategy is provided (matches the tenant-wide default)", () => {
+    const result = estimateQuoteItemPricing(
+      item({
+        billingMode: "MONTHLY",
+        monthlyPriceMinor: 15000,
+        dailyPriceMinor: 500,
+      }),
+      "2027-01-31T00:00:00Z",
+      "2027-02-28T00:00:00Z",
+    );
+    expect(result.lineSubtotalMinor).toBe(15000);
   });
 
   it("applies a percentage discount before tax", () => {

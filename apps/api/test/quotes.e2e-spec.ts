@@ -152,11 +152,307 @@ describe("Quotes E2E", () => {
           name: "Generator A",
           billingMode: "MONTHLY",
           monthlyPriceMinor: 15000,
+          dailyPriceMinor: 500,
         },
       ],
     }).expect(201);
 
     expect(response.body.subtotalMinor).toBe(15000);
+    expect(response.body.items[0].monthlyBillingStrategy).toBe("CALENDAR_MONTH");
+  });
+
+  // ---------------------------------------------------------------------
+  // Configurable monthly billing strategies — shared with Rentals (ADR 0008)
+  // ---------------------------------------------------------------------
+
+  describe("MONTHLY billing strategy consistency with Rentals", () => {
+    function isoDaysAfter(base: string, days: number): string {
+      const date = new Date(base);
+      date.setUTCDate(date.getUTCDate() + days);
+      return date.toISOString();
+    }
+
+    async function setTenantStrategy(
+      strategy: string,
+      customMonthLengthDays?: number,
+    ): Promise<void> {
+      await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/rental-billing-settings`)
+        .set("Cookie", accessCookie)
+        .send({
+          monthlyBillingStrategy: strategy,
+          ...(customMonthLengthDays !== undefined ? { customMonthLengthDays } : {}),
+        })
+        .expect(200);
+    }
+
+    it("defaults to CALENDAR_MONTH and splits complete months plus remaining days (Jan 15 -> Mar 20)", async () => {
+      const response = await createQuote({
+        plannedStart: "2030-01-15T00:00:00.000Z",
+        plannedEnd: "2030-03-20T00:00:00.000Z",
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 20000,
+            dailyPriceMinor: 1000,
+          },
+        ],
+      }).expect(201);
+
+      expect(response.body.subtotalMinor).toBe(20000 * 2 + 1000 * 5);
+      expect(response.body.items[0].monthlyBillingStrategy).toBe("CALENDAR_MONTH");
+    });
+
+    it("rejects a MONTHLY quote item missing dailyPriceMinor", async () => {
+      await createQuote({
+        plannedStart: "2030-01-15T00:00:00.000Z",
+        plannedEnd: "2030-03-20T00:00:00.000Z",
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 20000,
+          },
+        ],
+      }).expect(400);
+    });
+
+    it("uses FIXED_30_DAYS once configured on tenant settings", async () => {
+      await setTenantStrategy("FIXED_30_DAYS");
+
+      const start = "2030-01-01T00:00:00.000Z";
+      const response = await createQuote({
+        plannedStart: start,
+        plannedEnd: isoDaysAfter(start, 65),
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 30000,
+            dailyPriceMinor: 900,
+          },
+        ],
+      }).expect(201);
+
+      expect(response.body.subtotalMinor).toBe(30000 * 2 + 900 * 5);
+      expect(response.body.items[0].monthlyBillingStrategy).toBe("FIXED_30_DAYS");
+    });
+
+    it("uses CUSTOM with customMonthLengthDays once configured on tenant settings", async () => {
+      await setTenantStrategy("CUSTOM", 28);
+
+      const start = "2030-01-01T00:00:00.000Z";
+      const response = await createQuote({
+        plannedStart: start,
+        plannedEnd: isoDaysAfter(start, 60),
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 28000,
+            dailyPriceMinor: 800,
+          },
+        ],
+      }).expect(201);
+
+      expect(response.body.subtotalMinor).toBe(28000 * 2 + 800 * 4);
+      expect(response.body.items[0].monthlyBillingStrategy).toBe("CUSTOM");
+      expect(response.body.items[0].customMonthLengthDays).toBe(28);
+    });
+
+    it("snapshots the strategy at creation time — a later tenant settings change never alters the stored total", async () => {
+      const created = await createQuote({
+        plannedStart: "2030-01-15T00:00:00.000Z",
+        plannedEnd: "2030-03-20T00:00:00.000Z",
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 20000,
+            dailyPriceMinor: 1000,
+          },
+        ],
+      }).expect(201);
+      const originalTotal = created.body.totalMinor as number;
+      expect(originalTotal).toBe(20000 * 2 + 1000 * 5);
+
+      await setTenantStrategy("FIXED_30_DAYS");
+
+      const refetched = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/quotes/${created.body.id}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(refetched.body.totalMinor).toBe(originalTotal);
+      expect(refetched.body.items[0].monthlyBillingStrategy).toBe("CALENDAR_MONTH");
+
+      // An unrelated edit that doesn't touch items must also keep the frozen strategy.
+      const updated = await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/quotes/${created.body.id}`)
+        .set("Cookie", accessCookie)
+        .send({ internalNotes: "updated notes" })
+        .expect(200);
+      expect(updated.body.totalMinor).toBe(originalTotal);
+      expect(updated.body.items[0].monthlyBillingStrategy).toBe("CALENDAR_MONTH");
+    });
+
+    it("an explicit item replacement picks up the tenant's current settings (intentional reprice)", async () => {
+      const created = await createQuote({
+        plannedStart: "2030-01-15T00:00:00.000Z",
+        plannedEnd: "2030-03-20T00:00:00.000Z",
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 20000,
+            dailyPriceMinor: 1000,
+          },
+        ],
+      }).expect(201);
+
+      await setTenantStrategy("FIXED_30_DAYS");
+
+      // Jan 15 -> Mar 20 is 64 days -> under FIXED_30_DAYS: 2 x 30-day units + 4 remaining.
+      const repriced = await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/quotes/${created.body.id}`)
+        .set("Cookie", accessCookie)
+        .send({
+          items: [
+            {
+              itemType: "ASSET",
+              assetId: assetAId,
+              name: "Generator A",
+              billingMode: "MONTHLY",
+              monthlyPriceMinor: 20000,
+              dailyPriceMinor: 1000,
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(repriced.body.items[0].monthlyBillingStrategy).toBe("FIXED_30_DAYS");
+      expect(repriced.body.subtotalMinor).toBe(20000 * 2 + 1000 * 4);
+    });
+
+    it("duplication carries over the exact frozen strategy, never re-reading current tenant settings", async () => {
+      const created = await createQuote({
+        plannedStart: "2030-01-15T00:00:00.000Z",
+        plannedEnd: "2030-03-20T00:00:00.000Z",
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 20000,
+            dailyPriceMinor: 1000,
+          },
+        ],
+      }).expect(201);
+      expect(created.body.items[0].monthlyBillingStrategy).toBe("CALENDAR_MONTH");
+
+      await setTenantStrategy("FIXED_30_DAYS");
+
+      const duplicate = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/quotes/${created.body.id}/duplicate`)
+        .set("Cookie", accessCookie)
+        .expect(201);
+
+      expect(duplicate.body.items[0].monthlyBillingStrategy).toBe("CALENDAR_MONTH");
+      expect(duplicate.body.totalMinor).toBe(created.body.totalMinor);
+    });
+
+    it("quote-to-rental conversion carries the frozen strategy onto the RentalItem, while the Rental's total matches the accepted quote verbatim", async () => {
+      const quoteId = (
+        await createAndSendQuote({
+          plannedStart: "2030-01-15T00:00:00.000Z",
+          plannedEnd: "2030-03-20T00:00:00.000Z",
+          items: [
+            {
+              itemType: "ASSET",
+              assetId: assetAId,
+              name: "Generator A",
+              billingMode: "MONTHLY",
+              monthlyPriceMinor: 20000,
+              dailyPriceMinor: 1000,
+            },
+          ],
+        })
+      ).quoteId;
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/quotes/${quoteId}/accept`)
+        .set("Cookie", accessCookie)
+        .send({ acceptedBy: "Jane" })
+        .expect(201);
+
+      const quote = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/quotes/${quoteId}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+
+      // Change tenant settings between acceptance and conversion — must not
+      // affect the resulting rental.
+      await setTenantStrategy("FIXED_30_DAYS");
+
+      const converted = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/quotes/${quoteId}/convert-to-rental`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      expect(converted.body.rental.totalMinor).toBe(quote.body.totalMinor);
+      expect(converted.body.rental.items[0].monthlyBillingStrategy).toBe("CALENDAR_MONTH");
+    });
+
+    it("a legacy MONTHLY item with no stored strategy (pre-dating this feature) is still readable and reproduces its original whole-month-rounding total on an unrelated edit", async () => {
+      // Jan 31 -> Feb 28: under the OLD whole-month-rounding rule this is
+      // exactly 1 month with 0 remainder, same total either engine would
+      // produce for this particular boundary-exact span — the real
+      // assertion here is that a null-strategy item never throws and never
+      // requires a dailyPriceMinor it was never priced with.
+      const created = await createQuote({
+        plannedStart: "2027-01-31T00:00:00.000Z",
+        plannedEnd: "2027-02-28T00:00:00.000Z",
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 15000,
+            dailyPriceMinor: 500,
+          },
+        ],
+      }).expect(201);
+
+      // Simulate a row written before this feature existed: no snapshot fields.
+      await prisma.quoteItem.updateMany({
+        where: { quoteId: created.body.id },
+        data: { monthlyBillingStrategy: null, customMonthLengthDays: null, dailyPriceMinor: null },
+      });
+
+      const updated = await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/quotes/${created.body.id}`)
+        .set("Cookie", accessCookie)
+        .send({ internalNotes: "legacy row edit" })
+        .expect(200);
+
+      expect(updated.body.items[0].monthlyBillingStrategy).toBeNull();
+      expect(updated.body.subtotalMinor).toBe(15000);
+      expect(updated.body.totalMinor).toBe(15000);
+    });
   });
 
   it("computes FLAT pricing for a non-asset item (quantity * unitPrice, no duration factor)", async () => {

@@ -1,6 +1,7 @@
+import { estimateMonthlyBreakdown } from "./rental-pricing";
+import type { MonthlyBillingStrategy } from "../types/rental";
 import type { QuoteBillingMode, QuoteDiscountType } from "../types/quote";
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const BASIS_POINTS_DENOMINATOR = 10_000;
 
 export interface EstimatedQuoteItemInput {
@@ -15,6 +16,14 @@ export interface EstimatedQuoteItemInput {
   discountValue?: number | undefined;
   taxRateBp?: number | undefined;
   depositMinor?: number | undefined;
+  /**
+   * Present only for a MONTHLY item — reuses the same tenant-configurable
+   * strategy engine as Rentals (`estimateMonthlyBreakdown` from
+   * lib/rental-pricing.ts) rather than a separate Quotes-specific
+   * implementation. See docs/adr/0008-configurable-monthly-billing-strategies.md.
+   */
+  monthlyBillingStrategy?: MonthlyBillingStrategy | undefined;
+  customMonthLengthDays?: number | null | undefined;
 }
 
 /**
@@ -24,44 +33,13 @@ export interface EstimatedQuoteItemInput {
  * never trusted or submitted directly.
  */
 export function estimateDurationInDays(plannedStart: string, plannedEnd: string): number {
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
   const start = new Date(plannedStart).getTime();
   const end = new Date(plannedEnd).getTime();
   if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
     return 0;
   }
   return Math.max(1, Math.ceil((end - start) / MS_PER_DAY));
-}
-
-function addCalendarMonthsUtc(date: Date, months: number): Date {
-  const targetMonthIndex = date.getUTCMonth() + months;
-  const daysInTargetMonth = new Date(
-    Date.UTC(date.getUTCFullYear(), targetMonthIndex + 1, 0),
-  ).getUTCDate();
-  const clampedDay = Math.min(date.getUTCDate(), daysInTargetMonth);
-  return new Date(
-    Date.UTC(
-      date.getUTCFullYear(),
-      targetMonthIndex,
-      clampedDay,
-      date.getUTCHours(),
-      date.getUTCMinutes(),
-      date.getUTCSeconds(),
-      date.getUTCMilliseconds(),
-    ),
-  );
-}
-
-export function estimateMonthsInRange(plannedStart: string, plannedEnd: string): number {
-  const start = new Date(plannedStart);
-  const end = new Date(plannedEnd);
-  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) {
-    return 0;
-  }
-  let months = 1;
-  while (addCalendarMonthsUtc(start, months).getTime() < end.getTime()) {
-    months++;
-  }
-  return months;
 }
 
 function resolveDiscountMinor(
@@ -103,6 +81,17 @@ export function estimateQuoteItemPricing(
     lineSubtotalMinor = item.customPriceMinor ?? 0;
   } else if (item.billingMode === "FLAT") {
     lineSubtotalMinor = (item.unitPriceMinor ?? 0) * item.quantity;
+  } else if (item.billingMode === "MONTHLY") {
+    const { completeUnits, remainingDays } = estimateMonthlyBreakdown(
+      item.monthlyBillingStrategy ?? "CALENDAR_MONTH",
+      item.customMonthLengthDays,
+      plannedStart,
+      plannedEnd,
+    );
+    lineSubtotalMinor =
+      ((item.monthlyPriceMinor ?? 0) * completeUnits +
+        (item.dailyPriceMinor ?? 0) * remainingDays) *
+      item.quantity;
   } else {
     const days = estimateDurationInDays(plannedStart, plannedEnd);
     let unitPriceMinor = 0;
@@ -113,9 +102,6 @@ export function estimateQuoteItemPricing(
     } else if (item.billingMode === "WEEKLY") {
       unitPriceMinor = item.weeklyPriceMinor ?? 0;
       units = Math.ceil(days / 7);
-    } else if (item.billingMode === "MONTHLY") {
-      unitPriceMinor = item.monthlyPriceMinor ?? 0;
-      units = estimateMonthsInRange(plannedStart, plannedEnd);
     }
     lineSubtotalMinor = unitPriceMinor * units * item.quantity;
   }

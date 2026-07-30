@@ -1,4 +1,4 @@
-import type { Customer, Prisma, Quote, Rental } from "@prisma/client";
+import type { Customer, MonthlyBillingStrategy, Prisma, Quote, Rental } from "@prisma/client";
 
 export const QUOTE_ITEM_INCLUDE = {
   asset: { include: { category: true, currentStatus: true } },
@@ -61,6 +61,8 @@ export interface PublicQuoteItemView {
   weeklyPriceMinor: number | null;
   monthlyPriceMinor: number | null;
   customPriceMinor: number | null;
+  monthlyBillingStrategy: MonthlyBillingStrategy | null;
+  customMonthLengthDays: number | null;
   discountTotalMinor: number;
   taxTotalMinor: number;
   depositMinor: number;

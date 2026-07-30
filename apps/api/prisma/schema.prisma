@@ -822,36 +822,50 @@ model Quote {
 /// selected by billingMode (FLAT uses unitPriceMinor * quantity, the other
 /// four modes mirror RentalItem's pricing exactly — see quote-pricing.util.ts).
 model QuoteItem {
-  id                 String             @id @default(uuid())
-  tenantId           String
-  quoteId            String
-  itemType           QuoteItemType
-  assetId            String?
-  name               String
-  description        String?
-  quantity           Int                @default(1)
+  id                     String                  @id @default(uuid())
+  tenantId               String
+  quoteId                String
+  itemType               QuoteItemType
+  assetId                String?
+  name                   String
+  description            String?
+  quantity               Int                     @default(1)
   /// Free-text unit label for display only (e.g. "day", "hour", "piece") —
   /// never used in price computation, which is driven by billingMode.
-  unit               String?
-  billingMode        QuoteBillingMode
-  unitPriceMinor     Int?
-  dailyPriceMinor    Int?
-  weeklyPriceMinor   Int?
-  monthlyPriceMinor  Int?
-  customPriceMinor   Int?
-  discountType       QuoteDiscountType?
-  discountValue      Int                @default(0)
-  discountTotalMinor Int                @default(0)
+  unit                   String?
+  billingMode            QuoteBillingMode
+  unitPriceMinor         Int?
+  dailyPriceMinor        Int?
+  weeklyPriceMinor       Int?
+  monthlyPriceMinor      Int?
+  customPriceMinor       Int?
+  /// Snapshot of the tenant's monthly billing settings (RentalBillingSettings
+  /// — shared with Rentals, see ADR 0008) at the moment this item was last
+  /// written (create, or full item replacement on update, or the exact
+  /// value copied verbatim on duplicate) — null unless billingMode is
+  /// MONTHLY. A row created before this column existed has both fields
+  /// null even though billingMode may be MONTHLY; QuotesService treats a
+  /// null strategy on an existing MONTHLY item as "legacy — display and
+  /// reproduce using the whole-month rounding it was actually priced
+  /// with" rather than silently recalculating it under a strategy it was
+  /// never priced under. Frozen deliberately: a later change to the
+  /// tenant's RentalBillingSettings must never alter an already-priced
+  /// item's stored totals.
+  monthlyBillingStrategy MonthlyBillingStrategy?
+  customMonthLengthDays  Int?
+  discountType           QuoteDiscountType?
+  discountValue          Int                     @default(0)
+  discountTotalMinor     Int                     @default(0)
   /// Integer basis points (2000 = 20.00%) — never a float rate.
-  taxRateBp          Int                @default(0)
-  taxTotalMinor      Int                @default(0)
-  depositMinor       Int                @default(0)
-  lineSubtotalMinor  Int                @default(0)
-  lineTotalMinor     Int                @default(0)
-  sortOrder          Int                @default(0)
-  notes              String?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  taxRateBp              Int                     @default(0)
+  taxTotalMinor          Int                     @default(0)
+  depositMinor           Int                     @default(0)
+  lineSubtotalMinor      Int                     @default(0)
+  lineTotalMinor         Int                     @default(0)
+  sortOrder              Int                     @default(0)
+  notes                  String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   quote  Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)

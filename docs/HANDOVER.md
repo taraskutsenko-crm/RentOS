@@ -8,13 +8,15 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit before TASK-0008 Part 1:** `3f66570` (docs: add
-  ADR 0009 and remove resolved known limitations — the pre-TASK-0008
-  stabilization task)
-- This document is updated again once TASK-0008 Part 1 (Document
-  Management Platform — architecture & domain model) is committed,
-  pushed, and green on CI — if you're reading this after that update,
-  trust the newer values recorded below over the ones above.
+- **Latest verified commit:** `5a4ffb8` (feat: add Document Management
+  Platform foundation — TASK-0008 Part 1)
+- **Quality gates:** format/lint/typecheck/build green; 391 backend + 141
+  frontend tests passing (532 total). Migration verified against a fresh
+  Dockerized Postgres; a live 20-way concurrent document-creation check
+  against the running Docker stack produced 20 unique document numbers.
+- **GitHub Actions:** pending at commit time — this line is updated once
+  the pushed run completes; if you're reading this before that update,
+  check the Actions tab for the current status of this commit.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

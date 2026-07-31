@@ -43,10 +43,24 @@ export const QUOTE_PERMISSIONS = [
   "quotes.manageTemplates",
 ] as const;
 
+export const DOCUMENT_PERMISSIONS = [
+  "documents.view",
+  "documents.create",
+  "documents.update",
+  "documents.delete",
+  "documents.send",
+  "documents.sign",
+  "documents.void",
+  "documents.archive",
+  "documents.download",
+  "documents.manageTemplates",
+] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
   ...QUOTE_PERMISSIONS,
+  ...DOCUMENT_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
@@ -60,6 +74,7 @@ const ASSET_READ_ONLY: Permission[] = [
 ];
 const RENTAL_READ_ONLY: Permission[] = ["rentals.view", "rental_settings.view"];
 const QUOTE_READ_ONLY: Permission[] = ["quotes.view", "quotes.download"];
+const DOCUMENT_READ_ONLY: Permission[] = ["documents.view", "documents.download"];
 
 /**
  * Mirrors apps/api/src/permissions/permission.ts. This is a UX convenience
@@ -96,6 +111,14 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "quotes.convert",
     "quotes.duplicate",
     "quotes.download",
+    "documents.view",
+    "documents.create",
+    "documents.update",
+    "documents.send",
+    "documents.sign",
+    "documents.void",
+    "documents.archive",
+    "documents.download",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -109,9 +132,13 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "rentals.view",
     "rentals.start",
     "rentals.return",
+    "documents.view",
+    "documents.create",
+    "documents.update",
+    "documents.download",
   ],
-  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY],
-  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY],
+  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY, ...DOCUMENT_READ_ONLY],
+  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY, ...DOCUMENT_READ_ONLY],
 };
 
 export function roleHasPermission(

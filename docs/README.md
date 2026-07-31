@@ -19,7 +19,7 @@
   and the practical "how it works" reference for the Assets and Rentals
   modules.
 - [`api.md`](api.md) — REST API reference for auth/tenancy, Customers,
-  Assets, Rentals, and Quotes endpoints.
+  Assets, Rentals, Quotes, and the Document Management Platform endpoints.
 - [`adr/`](adr/) — architecture decision records.
   - [0001 — Authentication and tenant-context strategy](adr/0001-authentication-and-tenant-context.md)
   - [0002 — Universal asset model](adr/0002-universal-asset-model.md)
@@ -30,3 +30,4 @@
   - [0007 — Quotes and commercial offers](adr/0007-quotes-and-commercial-offers.md)
   - [0008 — Configurable monthly billing strategies](adr/0008-configurable-monthly-billing-strategies.md)
   - [0009 — Shared monthly pricing and atomic rental numbering](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)
+  - [0010 — Document Management Platform (Part 1)](adr/0010-document-management-platform.md)

@@ -8,14 +8,13 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit at the start of this stabilization task:**
-  `744aec8` (configurable monthly billing strategies for Rentals)
-- **GitHub Actions:** run `30573721524`, all steps green (format check,
-  lint, typecheck, migrations, test, build)
-- This document is updated again at the end of the current stabilization
-  task with the newer verified commit/CI run once that work lands — if
-  you're reading this after that update, trust the newer values recorded
-  below over the ones above.
+- **Latest verified commit before TASK-0008 Part 1:** `3f66570` (docs: add
+  ADR 0009 and remove resolved known limitations — the pre-TASK-0008
+  stabilization task)
+- This document is updated again once TASK-0008 Part 1 (Document
+  Management Platform — architecture & domain model) is committed,
+  pushed, and green on CI — if you're reading this after that update,
+  trust the newer values recorded below over the ones above.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let
@@ -72,8 +71,9 @@ not `^typecheck` — a deliberate fix, see commit `6b739f1`).
   by it server-side. No schema-per-tenant or database-per-tenant.
 - **NestJS module-per-domain**: `auth`, `tenants`, `customers`, `assets`
   (+ `asset-categories`, `asset-statuses`, `asset-custom-fields`,
-  `asset-files`), `rentals`, `rental-billing-settings`, `quotes`, `email`,
-  `permissions`, `audit`, `storage`, `prisma`, `health`.
+  `asset-files`), `rentals`, `rental-billing-settings`, `quotes`,
+  `documents`, `email`, `permissions`, `audit`, `storage`, `prisma`,
+  `health`.
 
 ## Backend structure (`apps/api/src`)
 
@@ -317,6 +317,49 @@ already-`CONVERTED` quote return the same Rental) and copies only
 copied verbatim from the Quote's own authoritative totals, never
 recomputed from just the asset items.
 
+## Document Management Platform (TASK-0008 Part 1 — architecture only)
+
+`apps/api/src/documents/` — a generic `Document` model (tagged by
+`DocumentType`: `CONTRACT`/`HANDOVER_PROTOCOL`/`RETURN_PROTOCOL`/
+`DAMAGE_REPORT`/`CONTRACT_AMENDMENT`/`CUSTOM`, plus a reserved, unused
+`QUOTE` value) covering every document type with no type-specific
+columns — type-specific content lives entirely in untyped JSON
+(`DocumentVersion.businessDataSnapshot`, `DocumentItem.dataJson`). See
+[ADR 0010](adr/0010-document-management-platform.md) for the full
+rationale; this section is the short practical summary.
+
+**Versioning/immutability**: a `DocumentVersion` is mutable only while its
+document is `DRAFT`; leaving `DRAFT` (`POST .../ready`) finalizes it
+forever (`isFinal`, `finalizedAt`). A later correction
+(`POST .../versions`, `reason` required) creates a new parent-linked
+version and resets the document to `DRAFT`. This is genuinely new
+architecture in this codebase — Rentals/Quotes only freeze pricing at the
+_item_ level (ADR 0008/0009), never the whole record.
+
+**Lifecycle**: `DRAFT → READY → SENT → (VIEWED →)
+PARTIALLY_SIGNED/SIGNED/REJECTED → ARCHIVED`, `VOIDED` from any
+non-terminal state. `VIEWED` is optional, not a mandatory gate before
+signing/rejecting. No real e-signature integration exists —
+`sign`/`reject`/`viewed` only record a staff-asserted outcome, same
+"logging placeholder now, real provider later" shape as `EmailProvider`.
+
+**Numbering**: `document-numbering.util.ts` mirrors
+`quote-numbering.util.ts`/`rental-numbering.util.ts`'s atomic upsert
+exactly — one counter per `(tenantId, documentType, year)`, non-year-
+scoped for named types (`CON-######`, `HD-######`, `RT-######`,
+`DMG-######`, `AMD-######`), year-scoped only for `CUSTOM`
+(`DOC-2026-######`). `year` uses a `0` sentinel, never `NULL`, for
+non-year-scoped types — see D-024 in DECISIONS.md for why.
+
+**Storage**: `DocumentFile` reuses `StorageService` as-is (ADR 0005) —
+no new storage code. `format` is `PDF`/`HTML`/`JSON_SNAPSHOT` (reserved,
+nothing generates these yet) or `ATTACHMENT`/`PHOTO` (staff-uploaded,
+`POST .../:id/files`, mirrors `AssetFilesController`'s multipart pattern).
+
+**Not built yet** (see ADR 0010): template authoring/rendering, real
+e-signature, any public/customer-facing endpoint, frontend UI, and the
+existing `Quote` module is not migrated/duplicated into `Document` rows.
+
 ## Important API conventions
 
 - Every list endpoint returns `{ items, total, page, pageSize }`.
@@ -424,6 +467,10 @@ partial-success state to rely on.
 - Public quote page doesn't show the tenant's company name (PDF does).
 - No production email provider is wired in (`LoggingEmailProvider` only).
 - No localization-key-parity lint check (verified manually per task).
+- Document Management Platform (TASK-0008 Part 1) has no template
+  rendering, e-signature integration, public endpoint, or frontend UI yet
+  — all deliberately deferred to a later part, see
+  [ADR 0010](adr/0010-document-management-platform.md).
 
 Resolved by the pre-TASK-0008 stabilization task (see
 [ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)):
@@ -439,11 +486,14 @@ maintained list.
 
 ## Next recommended task
 
-TASK-0008 (Contracts, handover/return protocols, templates, generated
-documents, signatures, document lifecycle) — **only after** this
-stabilization task is fully committed, pushed, and green on CI. Do not
-start TASK-0008 work in the same session/branch as this stabilization
-task unless explicitly instructed to.
+TASK-0008 Part 2+ (real template rendering — turning a
+`DocumentVersion.businessDataSnapshot` into an actual PDF/HTML
+`DocumentFile`, reusing the `pdfkit` pattern proven for Quotes; template
+authoring against `DocumentTemplate`; a real e-signature workflow; a
+public/customer-facing view-and-sign flow; frontend UI) — **only after**
+this Part 1 work is fully committed, pushed, and green on CI. Do not start
+Part 2 in the same session/branch as Part 1 unless explicitly instructed
+to.
 
 ## Important commands
 

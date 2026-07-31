@@ -68,10 +68,31 @@ export const QUOTE_PERMISSIONS = [
   "quotes.manageTemplates",
 ] as const;
 
+/**
+ * Granular permissions for the Document Management Platform (TASK-0008 Part
+ * 1). `documents.sign`/`documents.void`/`documents.archive` gate the
+ * corresponding lifecycle status transitions; `documents.manageTemplates`
+ * is a reserved extension point for a future template editor, same
+ * convention as `quotes.manageTemplates` — no such editor exists yet.
+ */
+export const DOCUMENT_PERMISSIONS = [
+  "documents.view",
+  "documents.create",
+  "documents.update",
+  "documents.delete",
+  "documents.send",
+  "documents.sign",
+  "documents.void",
+  "documents.archive",
+  "documents.download",
+  "documents.manageTemplates",
+] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
   ...QUOTE_PERMISSIONS,
+  ...DOCUMENT_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
@@ -88,6 +109,8 @@ const ASSET_READ_ONLY: Permission[] = [
 const RENTAL_READ_ONLY: Permission[] = ["rentals.view", "rental_settings.view"];
 
 const QUOTE_READ_ONLY: Permission[] = ["quotes.view", "quotes.download"];
+
+const DOCUMENT_READ_ONLY: Permission[] = ["documents.view", "documents.download"];
 
 /**
  * Default role -> permission mapping. OWNER and ADMIN get every permission.
@@ -116,6 +139,15 @@ const QUOTE_READ_ONLY: Permission[] = ["quotes.view", "quotes.download"];
  * ACCOUNTANT and VIEWER are read-only across all three modules (Quotes:
  * `view`+`download` only — they can retrieve the PDF for bookkeeping but
  * never send/accept/reject/convert).
+ *
+ * Documents (TASK-0008 Part 1): MANAGER gets full lifecycle control
+ * (create/update/send/sign/void/archive/download) except `documents.delete`
+ * and `documents.manageTemplates`, mirroring Quotes exactly. TECHNICIAN gets
+ * `view`/`create`/`update`/`download` — the physical-handling role produces
+ * handover/return/damage-report documents, same rationale as its Rentals
+ * `start`/`return` grants — but not `send`/`sign`/`void`/`archive`, which
+ * are commercial/legal lifecycle decisions. ACCOUNTANT/VIEWER are
+ * `view`+`download` only, same as Quotes.
  *
  * Known limitation: the permission model is resource-level, not field- or
  * value-level (e.g. TECHNICIAN's asset `update` isn't restricted to only
@@ -152,6 +184,14 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "quotes.convert",
     "quotes.duplicate",
     "quotes.download",
+    "documents.view",
+    "documents.create",
+    "documents.update",
+    "documents.send",
+    "documents.sign",
+    "documents.void",
+    "documents.archive",
+    "documents.download",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -165,9 +205,13 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "rentals.view",
     "rentals.start",
     "rentals.return",
+    "documents.view",
+    "documents.create",
+    "documents.update",
+    "documents.download",
   ],
-  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY],
-  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY],
+  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY, ...DOCUMENT_READ_ONLY],
+  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY, ...DOCUMENT_READ_ONLY],
 };
 
 export function roleHasPermission(role: MembershipRole, permission: Permission): boolean {

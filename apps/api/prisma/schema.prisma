@@ -141,6 +141,55 @@ enum QuoteDiscountType {
   FIXED
 }
 
+/// The kind of business document a Document row represents. Deliberately a
+/// fixed, small set — never an industry-specific vocabulary — mirroring
+/// QuoteItemType's convention of a CUSTOM escape hatch for anything not
+/// covered by a built-in type (see Document.customTypeName). QUOTE is
+/// included here for taxonomic completeness and future unification only —
+/// TASK-0008 Part 1 does not migrate the existing Quote module into Document
+/// rows (see docs/adr/0010-document-management-platform.md).
+enum DocumentType {
+  QUOTE
+  CONTRACT
+  HANDOVER_PROTOCOL
+  RETURN_PROTOCOL
+  DAMAGE_REPORT
+  CONTRACT_AMENDMENT
+  CUSTOM
+}
+
+/// Document lifecycle: DRAFT -> READY -> SENT -> VIEWED -> (PARTIALLY_SIGNED
+/// ->) SIGNED, with REJECTED reachable from VIEWED and VOIDED reachable from
+/// every non-terminal state; every terminal state (SIGNED/REJECTED/VOIDED)
+/// can additionally move to ARCHIVED. See
+/// docs/adr/0010-document-management-platform.md.
+enum DocumentStatus {
+  DRAFT
+  READY
+  SENT
+  VIEWED
+  PARTIALLY_SIGNED
+  SIGNED
+  REJECTED
+  VOIDED
+  ARCHIVED
+}
+
+/// The rendering/storage format of one DocumentFile. PDF/HTML/JSON_SNAPSHOT
+/// are system-generated renderings of a DocumentVersion's business data;
+/// ATTACHMENT/PHOTO are staff-uploaded supporting files (e.g. a damage
+/// photo); DOCX/XML are named now as documented future formats (no
+/// generator exists yet) rather than requiring a schema change later.
+enum DocumentFileFormat {
+  PDF
+  HTML
+  JSON_SNAPSHOT
+  DOCX
+  XML
+  ATTACHMENT
+  PHOTO
+}
+
 /// Platform user identity. Not tenant-scoped — a user may belong to
 /// multiple tenants via TenantMembership.
 model User {
@@ -175,6 +224,13 @@ model User {
   updatedQuotes           Quote[]              @relation("QuoteUpdatedBy")
   quoteStatusChanges      QuoteStatusHistory[] @relation("QuoteStatusHistoryChangedBy")
   generatedQuoteDocuments QuoteDocument[]      @relation("QuoteDocumentGeneratedBy")
+
+  createdDocuments        Document[]              @relation("DocumentCreatedBy")
+  updatedDocuments        Document[]              @relation("DocumentUpdatedBy")
+  employeeOnDocuments     Document[]              @relation("DocumentEmployee")
+  createdDocumentVersions DocumentVersion[]       @relation("DocumentVersionCreatedBy")
+  uploadedDocumentFiles   DocumentFile[]          @relation("DocumentFileUploadedBy")
+  documentStatusChanges   DocumentStatusHistory[] @relation("DocumentStatusHistoryChangedBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -221,6 +277,14 @@ model Tenant {
   quoteStatusHistory QuoteStatusHistory[]
   quoteDocuments     QuoteDocument[]
   quoteSequences     QuoteSequence[]
+
+  documents             Document[]
+  documentVersions      DocumentVersion[]
+  documentFiles         DocumentFile[]
+  documentTemplates     DocumentTemplate[]
+  documentStatusHistory DocumentStatusHistory[]
+  documentItems         DocumentItem[]
+  documentSequences     DocumentSequence[]
 
   @@index([deletedAt])
   @@map("tenants")
@@ -312,9 +376,10 @@ model Customer {
   updatedAt DateTime       @updatedAt
   deletedAt DateTime?
 
-  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  rentals Rental[]
-  quotes  Quote[]
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rentals   Rental[]
+  quotes    Quote[]
+  documents Document[]
 
   @@index([tenantId, status])
   @@index([tenantId, deletedAt])
@@ -425,13 +490,19 @@ model Asset {
   createdByUser User                  @relation("AssetCreatedBy", fields: [createdByUserId], references: [id])
   updatedByUser User?                 @relation("AssetUpdatedBy", fields: [updatedByUserId], references: [id])
 
-  customFieldValues AssetCustomFieldValue[]
-  statusHistory     AssetStatusHistory[]
-  locationHistory   AssetLocationHistory[]
-  images            AssetImage[]
-  documents         AssetDocument[]
-  rentalItems       RentalItem[]
-  quoteItems        QuoteItem[]
+  customFieldValues     AssetCustomFieldValue[]
+  statusHistory         AssetStatusHistory[]
+  locationHistory       AssetLocationHistory[]
+  images                AssetImage[]
+  documents             AssetDocument[]
+  rentalItems           RentalItem[]
+  quoteItems            QuoteItem[]
+  /// Rows in the generic Document platform (contracts, protocols, damage
+  /// reports, ...) that reference this asset — distinct from `documents`
+  /// above (AssetDocument: manuals/certificates/insurance attached directly
+  /// to the asset, unrelated to a rental/quote/document lifecycle).
+  platformDocuments     Document[]
+  platformDocumentItems DocumentItem[]
 
   @@unique([tenantId, internalNumber])
   @@unique([tenantId, sku])
@@ -645,6 +716,7 @@ model Rental {
 
   items         RentalItem[]
   statusHistory RentalStatusHistory[]
+  documents     Document[]
 
   @@unique([tenantId, rentalNumber])
   @@index([tenantId, status])
@@ -689,6 +761,8 @@ model RentalItem {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   rental Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
   asset  Asset  @relation(fields: [assetId], references: [id])
+
+  documentItems DocumentItem[]
 
   @@index([tenantId, rentalId])
   @@index([tenantId, assetId])
@@ -817,9 +891,13 @@ model Quote {
   /// holds the FK (Rental.sourceQuoteId); this is the derived inverse side.
   convertedRental     Rental?  @relation("QuoteConvertedToRental")
 
-  items         QuoteItem[]
-  statusHistory QuoteStatusHistory[]
-  documents     QuoteDocument[]
+  items             QuoteItem[]
+  statusHistory     QuoteStatusHistory[]
+  documents         QuoteDocument[]
+  /// Rows in the generic Document platform (e.g. a CONTRACT generated from
+  /// this accepted quote) — distinct from `documents` above (QuoteDocument:
+  /// this quote's own generated PDF).
+  platformDocuments Document[]
 
   @@unique([tenantId, quoteNumber])
   @@index([tenantId, status])
@@ -957,4 +1035,266 @@ model QuoteSequence {
 
   @@unique([tenantId, year])
   @@map("quote_sequences")
+}
+
+// ===========================================================================
+// Document Management Platform (TASK-0008 Part 1 — Architecture & Domain
+// Model only; no visual layouts/rendering yet). See
+// docs/adr/0010-document-management-platform.md for the full rationale.
+// ===========================================================================
+
+/// A generic business document of any DocumentType — the single model every
+/// document-producing workflow (contracts, handover/return protocols,
+/// damage reports, amendments, future types) is built on, so a new document
+/// type never requires a schema change. Deliberately holds no type-specific
+/// columns: type-specific structured content lives in
+/// DocumentVersion.businessDataSnapshot / DocumentItem.dataJson (see the
+/// "Business Data" separation below), never as columns here.
+///
+/// Every reference is optional except tenant/creator, since not every
+/// document type needs every reference (a DAMAGE_REPORT needs an assetId, a
+/// CONTRACT_AMENDMENT needs none of rental/asset). "Organization" from the
+/// task's reference list is deliberately not a separate field — this
+/// codebase has no Organization entity distinct from Tenant (see ADR 0010);
+/// tenantId already is that reference. "Employee" is employeeUserId: the
+/// staff member who performed the real-world action the document records
+/// (e.g. the technician who ran a handover), distinct from createdByUserId
+/// (who authored the database row — usually the same person, but not
+/// necessarily, e.g. a manager creating a protocol on a technician's behalf).
+model Document {
+  id             String         @id @default(uuid())
+  tenantId       String
+  documentType   DocumentType
+  /// Free-text label only meaningful (and only ever set) when
+  /// documentType = CUSTOM — mirrors QuoteItemType's CUSTOM convention.
+  customTypeName String?
+  documentNumber String
+  status         DocumentStatus @default(DRAFT)
+  title          String?
+
+  customerId     String?
+  rentalId       String?
+  quoteId        String?
+  assetId        String?
+  employeeUserId String?
+
+  /// Denormalized pointer to the highest DocumentVersion.versionNumber for
+  /// this document — a cheap read-side convenience; DocumentVersion rows
+  /// remain the source of truth and this is always kept in sync with them
+  /// in the same transaction that creates a version.
+  currentVersionNumber Int @default(1)
+
+  createdByUserId String
+  updatedByUserId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer      Customer? @relation(fields: [customerId], references: [id])
+  rental        Rental?   @relation(fields: [rentalId], references: [id])
+  quote         Quote?    @relation(fields: [quoteId], references: [id])
+  asset         Asset?    @relation(fields: [assetId], references: [id])
+  employeeUser  User?     @relation("DocumentEmployee", fields: [employeeUserId], references: [id])
+  createdByUser User      @relation("DocumentCreatedBy", fields: [createdByUserId], references: [id])
+  updatedByUser User?     @relation("DocumentUpdatedBy", fields: [updatedByUserId], references: [id])
+
+  versions      DocumentVersion[]
+  items         DocumentItem[]
+  statusHistory DocumentStatusHistory[]
+
+  @@unique([tenantId, documentNumber])
+  @@index([tenantId, documentType])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+  @@index([tenantId, rentalId])
+  @@index([tenantId, quoteId])
+  @@index([tenantId, assetId])
+  @@index([tenantId, deletedAt])
+  @@map("documents")
+}
+
+/// One immutable-once-finalized version of a Document's business data —
+/// the "Version" and "Business Data" layers, deliberately separate from
+/// "Template" (templateId) and "Rendering/Storage" (the DocumentFile rows
+/// below), per the task's explicit "never mix them" instruction.
+///
+/// Version 1 is created alongside the Document itself and starts mutable
+/// (isFinal = false) while the document is DRAFT — DocumentsService.update
+/// edits this version's businessDataSnapshot in place. The moment the
+/// document's status leaves DRAFT, that version is finalized (isFinal =
+/// true, finalizedAt set) and becomes permanently immutable: it is never
+/// edited again, matching "business documents are legal records ... never
+/// edit finalized documents." Any later correction creates a brand new
+/// version (parentVersionId = the version being corrected, reason required)
+/// via DocumentsService.createVersion, which also resets the document to
+/// DRAFT so the new version can itself be reviewed and finalized again.
+/// Every version, finalized or not, is preserved forever — never deleted.
+model DocumentVersion {
+  id              String  @id @default(uuid())
+  tenantId        String
+  documentId      String
+  versionNumber   Int
+  parentVersionId String?
+
+  /// The structured business data this version represents, as JSON —
+  /// deliberately untyped/universal at the schema level (see ADR 0010):
+  /// a CONTRACT's data shape and a DAMAGE_REPORT's data shape are nothing
+  /// alike, and hardcoding either as columns here would violate "everything
+  /// must support every rental business" the moment a new document type is
+  /// added. Server-side DTOs validate shape at the API boundary; this
+  /// column itself accepts any JSON object.
+  businessDataSnapshot Json
+
+  templateId  String?
+  isFinal     Boolean   @default(false)
+  finalizedAt DateTime?
+  /// Why this version was created — required for every version after the
+  /// first (a correction must explain itself); null for the initial version
+  /// created alongside the Document.
+  reason      String?
+
+  createdByUserId String
+  createdAt       DateTime @default(now())
+
+  tenant        Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  document      Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  parentVersion DocumentVersion?  @relation("DocumentVersionParent", fields: [parentVersionId], references: [id])
+  childVersions DocumentVersion[] @relation("DocumentVersionParent")
+  template      DocumentTemplate? @relation(fields: [templateId], references: [id])
+  createdByUser User              @relation("DocumentVersionCreatedBy", fields: [createdByUserId], references: [id])
+
+  files DocumentFile[]
+
+  @@unique([documentId, versionNumber])
+  @@index([tenantId, documentId])
+  @@map("document_versions")
+}
+
+/// One rendered or uploaded file belonging to a specific DocumentVersion —
+/// the "Rendering/Storage" layer. Mirrors QuoteDocument/AssetDocument
+/// exactly (storageKey/originalFileName/mimeType/sizeBytes, StorageService
+/// as the only thing that touches actual bytes — see ADR 0005 — so this
+/// platform is never tied to local-filesystem storage). `format`
+/// distinguishes a system-generated rendering (PDF/HTML/JSON_SNAPSHOT) from
+/// a staff-uploaded supporting file (ATTACHMENT/PHOTO); uploadedByUserId is
+/// null for system-generated renderings and set for staff uploads.
+model DocumentFile {
+  id                String             @id @default(uuid())
+  tenantId          String
+  documentVersionId String
+  format            DocumentFileFormat
+  storageKey        String
+  originalFileName  String
+  mimeType          String
+  sizeBytes         Int
+  uploadedByUserId  String?
+  createdAt         DateTime           @default(now())
+  deletedAt         DateTime?
+
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  documentVersion DocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  uploadedByUser  User?           @relation("DocumentFileUploadedBy", fields: [uploadedByUserId], references: [id])
+
+  @@index([tenantId, documentVersionId, deletedAt])
+  @@map("document_files")
+}
+
+/// A minimal, tenant-scoped template registry — the "Template" layer.
+/// TASK-0008 Part 1 deliberately does not implement template authoring or
+/// a rendering engine (no content/body field exists yet); this table exists
+/// so DocumentVersion.templateId has a real, structural extension point to
+/// reference once template content and rendering are built in a later part,
+/// without a schema change at that point.
+model DocumentTemplate {
+  id           String       @id @default(uuid())
+  tenantId     String
+  documentType DocumentType
+  name         String
+  isDefault    Boolean      @default(false)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  versions DocumentVersion[]
+
+  @@index([tenantId, documentType, isActive])
+  @@map("document_templates")
+}
+
+/// Append-only history of Document.status transitions, mirroring
+/// QuoteStatusHistory exactly — changedByUserId is nullable so a future
+/// customer-facing signature/view flow (no authenticated User) can still
+/// write history, the same reasoning ADR 0007 documents for quotes.
+model DocumentStatusHistory {
+  id              String          @id @default(uuid())
+  tenantId        String
+  documentId      String
+  fromStatus      DocumentStatus?
+  toStatus        DocumentStatus
+  changedByUserId String?
+  reason          String?
+  metadata        Json?
+  createdAt       DateTime        @default(now())
+
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  document      Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  changedByUser User?    @relation("DocumentStatusHistoryChangedBy", fields: [changedByUserId], references: [id])
+
+  @@index([tenantId, documentId, createdAt])
+  @@map("document_status_history")
+}
+
+/// One line of a multi-line/multi-asset Document (e.g. one row per asset on
+/// a Handover Protocol covering a whole rental). Optional and independent of
+/// Document.assetId: a single-asset document (e.g. one Damage Report about
+/// one item) can use Document.assetId alone with no items; a multi-asset
+/// document uses one DocumentItem per asset/line instead. dataJson is the
+/// same deliberately universal, type-agnostic escape hatch as
+/// DocumentVersion.businessDataSnapshot — e.g. per-asset condition/damage
+/// details — never hardcoded columns, for the same "every rental business"
+/// reason.
+model DocumentItem {
+  id           String   @id @default(uuid())
+  tenantId     String
+  documentId   String
+  assetId      String?
+  rentalItemId String?
+  description  String?
+  dataJson     Json?
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  document   Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  asset      Asset?      @relation(fields: [assetId], references: [id])
+  rentalItem RentalItem? @relation(fields: [rentalItemId], references: [id])
+
+  @@index([tenantId, documentId])
+  @@index([tenantId, assetId])
+  @@map("document_items")
+}
+
+/// Backs concurrency-safe document number generation, one counter per
+/// (tenantId, documentType, year) — mirroring QuoteSequence/RentalSequence's
+/// proven atomic-upsert pattern (see document-numbering.util.ts). `year` is
+/// a required Int, not nullable: Postgres unique constraints treat every
+/// NULL as distinct from every other NULL, which would silently break the
+/// `ON CONFLICT` upsert's atomicity for non-year-scoped document types (two
+/// concurrent inserts with year = NULL would never conflict with each
+/// other). Non-year-scoped types instead use the sentinel value 0, which
+/// behaves as a normal, equal-to-itself value in the unique index.
+model DocumentSequence {
+  id           String       @id @default(uuid())
+  tenantId     String
+  documentType DocumentType
+  year         Int
+  lastNumber   Int          @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, documentType, year])
+  @@map("document_sequences")
 }

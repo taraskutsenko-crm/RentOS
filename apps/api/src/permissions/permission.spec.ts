@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   ALL_PERMISSIONS,
+  DOCUMENT_PERMISSIONS,
   QUOTE_PERMISSIONS,
   ROLE_PERMISSIONS,
   roleHasPermission,
@@ -145,5 +146,63 @@ describe("ROLE_PERMISSIONS", () => {
       expect(roleHasPermission(role, "rental_settings.view")).toBe(true);
     }
     expect(roleHasPermission("TECHNICIAN", "rental_settings.view")).toBe(false);
+  });
+
+  it("does not grant MANAGER documents.delete or documents.manageTemplates", () => {
+    expect(roleHasPermission("MANAGER", "documents.delete")).toBe(false);
+    expect(roleHasPermission("MANAGER", "documents.manageTemplates")).toBe(false);
+    expect(roleHasPermission("OWNER", "documents.delete")).toBe(true);
+    expect(roleHasPermission("OWNER", "documents.manageTemplates")).toBe(true);
+  });
+
+  it("grants MANAGER full document lifecycle control except delete/manageTemplates", () => {
+    for (const permission of [
+      "documents.view",
+      "documents.create",
+      "documents.update",
+      "documents.send",
+      "documents.sign",
+      "documents.void",
+      "documents.archive",
+      "documents.download",
+    ] as const) {
+      expect(roleHasPermission("MANAGER", permission)).toBe(true);
+    }
+  });
+
+  it("grants TECHNICIAN view/create/update/download but not send/sign/void/archive", () => {
+    for (const permission of [
+      "documents.view",
+      "documents.create",
+      "documents.update",
+      "documents.download",
+    ] as const) {
+      expect(roleHasPermission("TECHNICIAN", permission)).toBe(true);
+    }
+    for (const permission of [
+      "documents.send",
+      "documents.sign",
+      "documents.void",
+      "documents.archive",
+      "documents.delete",
+      "documents.manageTemplates",
+    ] as const) {
+      expect(roleHasPermission("TECHNICIAN", permission)).toBe(false);
+    }
+  });
+
+  it("restricts ACCOUNTANT and VIEWER to documents.view/documents.download", () => {
+    for (const role of ["ACCOUNTANT", "VIEWER"] as const) {
+      expect(roleHasPermission(role, "documents.view")).toBe(true);
+      expect(roleHasPermission(role, "documents.download")).toBe(true);
+      expect(roleHasPermission(role, "documents.send")).toBe(false);
+      expect(roleHasPermission(role, "documents.create")).toBe(false);
+    }
+  });
+
+  it("every permission in DOCUMENT_PERMISSIONS is included in ALL_PERMISSIONS", () => {
+    for (const permission of DOCUMENT_PERMISSIONS) {
+      expect(ALL_PERMISSIONS).toContain(permission);
+    }
   });
 });

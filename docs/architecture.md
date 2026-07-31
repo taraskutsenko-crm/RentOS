@@ -514,3 +514,108 @@ configurable strategy engine instead of a fixed whole-month-rounding
 rule, and `generateRentalNumber`'s count-then-check race has been
 replaced with the same atomic sequence pattern `quote-numbering.util.ts`
 already used.
+
+## Document Management Platform (TASK-0008 Part 1)
+
+See [ADR 0010](adr/0010-document-management-platform.md) for the full
+design rationale. **This is Part 1 only: architecture and domain model.**
+No visual PDF layouts, template authoring UI, or e-signature integration
+exist yet — those are later parts.
+
+### Domain model
+
+```
+Document (tenant-scoped; documentType CONTRACT|HANDOVER_PROTOCOL|RETURN_PROTOCOL|
+          DAMAGE_REPORT|CONTRACT_AMENDMENT|CUSTOM|QUOTE[reserved, unused in Part 1];
+          customerId/rentalId/quoteId/assetId/employeeUserId all nullable)
+  ├─ DocumentVersion[] (versionNumber, parentVersionId, businessDataSnapshot JSON,
+  │                     templateId nullable, isFinal, finalizedAt, reason)
+  │     └─ DocumentFile[] (format PDF|HTML|JSON_SNAPSHOT|DOCX|XML|ATTACHMENT|PHOTO;
+  │                        storageKey points into StorageService)
+  ├─ DocumentItem[] (per-line/per-asset; assetId/rentalItemId nullable, dataJson JSON)
+  └─ DocumentStatusHistory (append-only, changedByUserId nullable for future public actions)
+
+DocumentTemplate (minimal registry — id/documentType/name/isDefault/isActive; no rendering content yet)
+DocumentSequence (tenantId, documentType, year — backs concurrency-safe documentNumber generation)
+```
+
+`Document` holds no type-specific columns — every document type shares the
+same schema; type-specific structured content lives entirely in
+`businessDataSnapshot`/`dataJson`, the same "universal, not
+industry-hardcoded" principle as `AssetCustomFieldValue.valueJson`.
+
+### Lifecycle and finalization
+
+```
+DRAFT → READY → SENT → (VIEWED →) PARTIALLY_SIGNED/SIGNED/REJECTED → ARCHIVED
+VOIDED reachable from every non-terminal state.
+```
+
+Version 1 is created alongside the `Document` and stays mutable while
+`DRAFT` — `DocumentsService.update` edits its `businessDataSnapshot` in
+place. The moment status leaves `DRAFT` (`markReady`), that version is
+**finalized** (`isFinal = true`, `finalizedAt` set) and never edited
+again. A later correction (`POST .../versions`, requires a `reason`)
+creates a brand-new version with `parentVersionId` pointing at the one
+being corrected, and resets the document to `DRAFT` so the correction can
+itself be reviewed and finalized again. Every version, finalized or not,
+is preserved forever. `VIEWED` is an optional intermediate, not a
+mandatory gate — `SENT` can move directly to
+`PARTIALLY_SIGNED`/`SIGNED`/`REJECTED` too (e.g. a wet-ink signature
+recorded out-of-band).
+
+### Numbering
+
+Each business type gets its own flat, non-year-scoped counter —
+`CON-######` (CONTRACT), `HD-######` (HANDOVER_PROTOCOL), `RT-######`
+(RETURN_PROTOCOL), `DMG-######` (DAMAGE_REPORT), `AMD-######`
+(CONTRACT_AMENDMENT) — matching the existing `RNT-######` convention.
+`CUSTOM` is year-scoped (`DOC-<year>-######`, matching `QuoteSequence`'s
+shape), since it is the catch-all bucket expected to accumulate the most
+volume. `document-numbering.util.ts` mirrors
+`quote-numbering.util.ts`/`rental-numbering.util.ts`'s atomic
+`INSERT ... ON CONFLICT DO UPDATE ... RETURNING` upsert exactly —
+verified race-free under 20 concurrent HTTP requests in
+`test/documents.e2e-spec.ts`.
+
+### Storage
+
+`DocumentFile` reuses `StorageService` as-is (ADR 0005, unmodified) —
+this platform is never tied to local-filesystem storage. `format`
+distinguishes system-generated renderings (`PDF`/`HTML`/`JSON_SNAPSHOT` —
+no generator exists yet in Part 1) from staff-uploaded supporting files
+(`ATTACHMENT`/`PHOTO`, uploaded via `POST .../files`, mirroring
+`AssetFilesController`'s multipart pattern exactly). `DOCX`/`XML` are
+reserved enum values for documented future formats.
+
+### Permissions
+
+`documents.view/create/update/delete/send/sign/void/archive/download/
+manageTemplates`. MANAGER gets full lifecycle control except `delete`/
+`manageTemplates` (mirrors Quotes); TECHNICIAN gets
+`view`/`create`/`update`/`download` (handover/return/damage-report
+documents are within its physical-handling domain) but not
+`send`/`sign`/`void`/`archive`; ACCOUNTANT/VIEWER get `view`+`download`
+only.
+
+### Timeline
+
+`GET /tenants/:tenantId/documents/:id/history` combines creation, edits,
+every status change, sends, views, signatures, downloads, archival, and
+version creation into one chronologically-sorted feed, the same
+normalized shape as Assets/Rentals/Quotes.
+
+### Deliberately not built in Part 1
+
+- Template authoring and any rendering engine (`DocumentTemplate` is a
+  bare registry with no content field).
+- PDF/HTML/JSON_SNAPSHOT generation for a `DocumentVersion` (the format
+  enum values are reserved; nothing produces them yet).
+- E-signature provider integration — `sign`/`reject`/`markViewed` only
+  record staff-asserted outcomes.
+- Any public/customer-facing endpoint (no token-based access like
+  Quotes' `/public/quotes/:token` exists yet).
+- Frontend UI (types, hooks, pages, localization) — backend architecture
+  only, per the task's explicit scope.
+- Migrating the existing `Quote` module into `Document` rows (see ADR
+  0010's rationale for why `DocumentType.QUOTE` exists but is unused).

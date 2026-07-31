@@ -938,6 +938,117 @@ shape (`PublicQuoteView`).
 Acceptance/rejection here is explicitly labeled quote acceptance, not a
 qualified electronic signature (see ADR 0007).
 
+## Document Management Platform (TASK-0008 Part 1)
+
+All endpoints live under `/tenants/:tenantId/documents` (see
+[ADR 0010](adr/0010-document-management-platform.md)). Require
+authentication + active membership (`TenantGuard`) plus the permission
+noted per endpoint. **Part 1 is architecture only — there is no public
+endpoint, no template rendering, and no e-signature integration yet.**
+
+### `POST /tenants/:tenantId/documents`
+
+Requires `documents.create`. Creates a `DRAFT` document with an
+automatically-generated `documentNumber` and version 1 (unfinalized).
+
+**Body**
+
+| Field                                       | Type   | Notes                                                                                                                                          |
+| ------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `documentType`                              | enum   | `CONTRACT`\|`HANDOVER_PROTOCOL`\|`RETURN_PROTOCOL`\|`DAMAGE_REPORT`\|`CONTRACT_AMENDMENT`\|`CUSTOM`\|`QUOTE` (reserved, unused — see ADR 0010) |
+| `customTypeName`                            | string | Required when `documentType` is `CUSTOM`, forbidden otherwise                                                                                  |
+| `title`                                     | string | Optional                                                                                                                                       |
+| `customerId`/`rentalId`/`quoteId`/`assetId` | string | All optional, must belong to the same tenant when provided                                                                                     |
+| `employeeUserId`                            | string | Optional — the staff member who performed the real-world action (distinct from the creator)                                                    |
+| `businessData`                              | object | Optional — becomes version 1's `businessDataSnapshot`, deliberately untyped JSON (see ADR 0010)                                                |
+| `items`                                     | array  | Optional — see `DocumentItem` below                                                                                                            |
+
+**`DocumentItem` body shape** (each entry in `items`): `assetId`/
+`rentalItemId` (both optional, must belong to the tenant), `description`
+(optional string), `data` (optional untyped JSON object — per-item
+structured data, e.g. per-asset condition), `sortOrder` (optional number).
+
+**201** → the created document, including its `versions` (with
+`businessDataSnapshot`, `isFinal`, `finalizedAt`) and `items` arrays.
+**400** → validation failure. **404** → a referenced customer/rental/
+quote/asset/employee doesn't belong to this tenant.
+
+### `GET /tenants/:tenantId/documents`
+
+Requires `documents.view`. Paginated list; filters:
+`documentType`/`status`/`customerId`/`rentalId`/`quoteId`/`assetId`/
+`createdByUserId`/`search` (matches `documentNumber`/`title`); sortable by
+`documentNumber`/`documentType`/`status`/`createdAt`.
+
+### `GET /tenants/:tenantId/documents/:id`
+
+Requires `documents.view`. Full detail, including every `DocumentVersion`
+(each with its non-deleted `DocumentFile`s) and every `DocumentItem`.
+
+### `PATCH /tenants/:tenantId/documents/:id`
+
+Requires `documents.update`. **Only allowed while `status` is `DRAFT`** —
+edits version 1's `businessDataSnapshot` and/or replaces the item list in
+place, without creating a new version. **409** → document has already
+left `DRAFT` (its current version is finalized — use `POST .../versions`
+instead).
+
+### `DELETE /tenants/:tenantId/documents/:id`
+
+Requires `documents.delete`. Only `DRAFT`/`VOIDED` documents may be
+deleted. **409** otherwise — void it first.
+
+### Status transitions
+
+Each returns the updated document. All accept an optional `{ reason? }`
+body and are idempotent (transitioning to the current status is a no-op).
+**409** → the transition isn't valid from the document's current status
+(see ADR 0010's transition table).
+
+| Endpoint                       | Requires            | Transition                                                         |
+| ------------------------------ | ------------------- | ------------------------------------------------------------------ |
+| `POST .../:id/ready`           | `documents.update`  | `DRAFT` → `READY` (finalizes version 1)                            |
+| `POST .../:id/send`            | `documents.send`    | `READY` → `SENT`                                                   |
+| `POST .../:id/viewed`          | `documents.send`    | `SENT` → `VIEWED` (staff-recorded; no public view flow exists yet) |
+| `POST .../:id/sign?full=false` | `documents.sign`    | `SENT`/`VIEWED` → `PARTIALLY_SIGNED`                               |
+| `POST .../:id/sign`            | `documents.sign`    | `SENT`/`VIEWED`/`PARTIALLY_SIGNED` → `SIGNED`                      |
+| `POST .../:id/reject`          | `documents.sign`    | `SENT`/`VIEWED` → `REJECTED`                                       |
+| `POST .../:id/void`            | `documents.void`    | any non-terminal status → `VOIDED`                                 |
+| `POST .../:id/archive`         | `documents.archive` | `SIGNED`/`REJECTED`/`VOIDED` → `ARCHIVED`                          |
+
+No real e-signature provider exists — `sign`/`reject`/`viewed` only
+record a staff-asserted outcome.
+
+### `POST /tenants/:tenantId/documents/:id/versions`
+
+Requires `documents.update`. Creates a correction: only callable once the
+current version is already finalized (status is not `DRAFT`). **Body:**
+`{ reason (required), businessData? }` — omitting `businessData` carries
+the current version's data forward verbatim. Resets the document to
+`DRAFT` (so the correction can itself be reviewed and finalized again)
+and bumps `currentVersionNumber`. **409** → document is still `DRAFT`
+(edit it directly instead).
+
+### `GET /tenants/:tenantId/documents/:id/history`
+
+Requires `documents.view`. Returns a normalized, chronologically-sorted
+array combining creation, edits, every status change, sends, views,
+signatures, downloads, archival, and version creation.
+
+### Document files (Storage layer)
+
+- `POST .../:id/files` — Requires `documents.update`.
+  `multipart/form-data` (`file` field + `format`: `ATTACHMENT` or
+  `PHOTO` — system-generated `PDF`/`HTML`/`JSON_SNAPSHOT` renderings don't
+  exist yet). Attaches to the document's **current** version. Reuses the
+  same MIME/size allow-list as Assets/Quotes (`StorageService`, ADR 0005).
+- `GET .../:id/files/:fileId/file` — Requires `documents.download`.
+  Streams the bytes; each successful download is recorded as a
+  `document.downloaded` audit/timeline entry.
+- `DELETE .../:id/files/:fileId` — Requires `documents.update`.
+  Soft-deletes the metadata row and best-effort deletes the underlying
+  object (same convention as Assets — see ADR 0005).
+
 ---
 
 `PublicUser` is the `User` model with `passwordHash` always stripped —

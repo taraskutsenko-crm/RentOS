@@ -12,6 +12,7 @@ import { AssetStatusesModule } from "./asset-statuses/asset-statuses.module";
 import { AssetsModule } from "./assets/assets.module";
 import { AuthModule } from "./auth/auth.module";
 import { CustomersModule } from "./customers/customers.module";
+import { DocumentsModule } from "./documents/documents.module";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { QuotesModule } from "./quotes/quotes.module";
@@ -45,6 +46,7 @@ import { TenantsModule } from "./tenants/tenants.module";
     RentalsModule,
     RentalBillingSettingsModule,
     QuotesModule,
+    DocumentsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

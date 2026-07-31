@@ -17,8 +17,12 @@ billing, and future mobile clients through an API-first architecture.
 > prevention, automatic pricing), and a Quotes and Commercial Offers
 > module (quote wizard, PDF generation, public customer acceptance,
 > quote-to-rental conversion) are all implemented and tested end-to-end.
-> Remaining business modules (invoicing, payments) are still out of scope
-> until explicitly requested.
+> The foundation of a universal **Document Management Platform** (TASK-0008
+> Part 1 — generic document model, versioning/immutability, concurrency-safe
+> numbering, storage) is also in place at the architecture level; visual
+> layouts, template rendering, and e-signature integration are not built
+> yet. Remaining business modules (invoicing, payments) are still out of
+> scope until explicitly requested.
 
 ## Tech Stack
 
@@ -185,6 +189,41 @@ accept/reject/convert/duplicate/download/manageTemplates`, enforced by
 See [docs/api.md](docs/api.md#quotes) for the full endpoint reference, and
 [ADR 0007](docs/adr/0007-quotes-and-commercial-offers.md) for the
 numbering, pricing, PDF, email, and public-acceptance design rationale.
+
+## Document Management Platform (Part 1 — architecture only)
+
+The foundation of a universal document platform meant to eventually cover
+Contracts, Handover/Return Protocols, Damage Reports, Contract Amendments,
+and future types — **not** a PDF module and **not** a Contract module.
+TASK-0008 Part 1 delivers the schema and service layer only:
+
+- **One generic `Document` model** for every document type — no
+  type-specific columns; type-specific content lives entirely in untyped
+  JSON (`businessDataSnapshot`/`dataJson`), so a new document type never
+  requires a schema change.
+- **Immutable versioning** — a document's current version is mutable only
+  while `DRAFT`; the moment it leaves `DRAFT` it's finalized forever, and
+  any later correction creates a brand-new version (parent-linked,
+  reason required) rather than editing history.
+- **Lifecycle** — `DRAFT → READY → SENT → (VIEWED →)
+PARTIALLY_SIGNED/SIGNED/REJECTED → ARCHIVED`, `VOIDED` reachable from
+  any non-terminal state; every transition is audited and history-tracked.
+- **Concurrency-safe numbering** per document type (`CON-000001`,
+  `HD-000001`, `RT-000001`, `DMG-000001`, `AMD-000001`, and year-scoped
+  `DOC-2026-000001` for `CUSTOM`), the same atomic upsert-increment
+  pattern Rentals/Quotes use — verified under 20 concurrent requests.
+- **Storage** — reuses the existing `StorageService` abstraction
+  (Assets/Quotes) for staff-uploaded attachments/photos; no new storage
+  code, never tied to local disk.
+- **Granular permissions** — `documents.view/create/update/delete/send/
+sign/void/archive/download/manageTemplates`.
+
+**Not built in Part 1**: visual PDF/HTML layouts, template authoring, a
+rendering engine, e-signature integration, any public/customer-facing
+endpoint, and frontend UI — all explicitly deferred. See
+[ADR 0010](docs/adr/0010-document-management-platform.md) and
+[docs/api.md](docs/api.md#document-management-platform-task-0008-part-1)
+for the full design rationale and endpoint reference.
 
 ## Monorepo Structure
 

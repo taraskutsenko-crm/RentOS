@@ -47,4 +47,23 @@ describe("roleHasPermission", () => {
     expect(roleHasPermission("VIEWER", "rental_settings.view")).toBe(true);
     expect(roleHasPermission("TECHNICIAN", "rental_settings.view")).toBe(false);
   });
+
+  it("grants MANAGER document lifecycle actions but not delete/manageTemplates", () => {
+    expect(roleHasPermission("MANAGER", "documents.send")).toBe(true);
+    expect(roleHasPermission("MANAGER", "documents.sign")).toBe(true);
+    expect(roleHasPermission("MANAGER", "documents.delete")).toBe(false);
+    expect(roleHasPermission("MANAGER", "documents.manageTemplates")).toBe(false);
+  });
+
+  it("grants TECHNICIAN view/create/update/download but not send/sign", () => {
+    expect(roleHasPermission("TECHNICIAN", "documents.create")).toBe(true);
+    expect(roleHasPermission("TECHNICIAN", "documents.send")).toBe(false);
+    expect(roleHasPermission("TECHNICIAN", "documents.sign")).toBe(false);
+  });
+
+  it("restricts VIEWER to documents.view/documents.download", () => {
+    expect(roleHasPermission("VIEWER", "documents.view")).toBe(true);
+    expect(roleHasPermission("VIEWER", "documents.download")).toBe(true);
+    expect(roleHasPermission("VIEWER", "documents.create")).toBe(false);
+  });
 });

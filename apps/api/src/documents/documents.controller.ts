@@ -36,6 +36,8 @@ import { StatusActionDto } from "./dto/status-action.dto";
 import { UpdateDocumentDto } from "./dto/update-document.dto";
 import { UploadDocumentFileDto } from "./dto/upload-document-file.dto";
 import { DocumentsService } from "./documents.service";
+import { DocumentPdfService } from "./rendering/document-pdf.service";
+import { DocumentRendererService } from "./rendering/document-renderer.service";
 
 const multerOptions = {
   storage: memoryStorage(),
@@ -54,6 +56,8 @@ export class DocumentsController {
   constructor(
     private readonly documentsService: DocumentsService,
     private readonly documentFilesService: DocumentFilesService,
+    private readonly documentRenderer: DocumentRendererService,
+    private readonly documentPdfService: DocumentPdfService,
   ) {}
 
   @RequirePermissions("documents.create")
@@ -179,6 +183,16 @@ export class DocumentsController {
     return this.documentsService.archive(tenant.id, id, user.id, dto);
   }
 
+  @RequirePermissions("documents.create")
+  @Post(":id/duplicate")
+  duplicate(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @CurrentUser() user: PublicUser,
+    @Param("id") id: string,
+  ) {
+    return this.documentsService.duplicate(tenant.id, id, user.id);
+  }
+
   @RequirePermissions("documents.update")
   @Post(":id/versions")
   createVersion(
@@ -194,6 +208,72 @@ export class DocumentsController {
   @Get(":id/history")
   history(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("id") id: string) {
     return this.documentsService.history(tenant.id, id);
+  }
+
+  /** Live HTML render — never stored (see DocumentRendererService's own doc comment). */
+  @RequirePermissions("documents.render")
+  @Get(":id/preview")
+  async preview(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("id") id: string) {
+    const document = await this.documentsService.findOneRaw(tenant.id, id);
+    const version = document.versions.find(
+      (v) => v.versionNumber === document.currentVersionNumber,
+    )!;
+    return this.documentRenderer.renderHtml(tenant.id, document, version);
+  }
+
+  /** Serves the most recently generated PDF, generating one on first request if none exists yet. */
+  @RequirePermissions("documents.download")
+  @Get(":id/pdf")
+  async getPdf(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @CurrentUser() user: PublicUser,
+    @Param("id") id: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const document = await this.documentsService.findOneRaw(tenant.id, id);
+    const version = document.versions.find(
+      (v) => v.versionNumber === document.currentVersionNumber,
+    )!;
+    const existing = await this.documentPdfService.getLatest(version);
+    const { buffer, file } =
+      existing ??
+      (await this.documentPdfService.generateAndStore(tenant.id, document, version, user.id));
+    if (!existing) {
+      await this.documentsService.recordRender(tenant.id, id, user.id, file.id);
+    }
+    await this.documentsService.recordDownload(tenant.id, id, user.id, file.id);
+    res.set(
+      "Content-Disposition",
+      `inline; filename="${encodeURIComponent(file.originalFileName)}"`,
+    );
+    res.type("application/pdf").send(buffer);
+  }
+
+  /** Forces regeneration — creates a new DocumentFile row tied to the current version and returns the fresh PDF bytes. */
+  @RequirePermissions("documents.render")
+  @Post(":id/pdf")
+  async regeneratePdf(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @CurrentUser() user: PublicUser,
+    @Param("id") id: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const document = await this.documentsService.findOneRaw(tenant.id, id);
+    const version = document.versions.find(
+      (v) => v.versionNumber === document.currentVersionNumber,
+    )!;
+    const { buffer, file } = await this.documentPdfService.generateAndStore(
+      tenant.id,
+      document,
+      version,
+      user.id,
+    );
+    await this.documentsService.recordRender(tenant.id, id, user.id, file.id);
+    res.set(
+      "Content-Disposition",
+      `inline; filename="${encodeURIComponent(file.originalFileName)}"`,
+    );
+    res.type("application/pdf").send(buffer);
   }
 
   @RequirePermissions("documents.update")

@@ -247,3 +247,26 @@ export const quoteSchema = z
   });
 
 export type QuoteFormValues = z.infer<typeof quoteSchema>;
+
+export const documentSchema = z
+  .object({
+    documentType: z.enum([
+      "QUOTE",
+      "CONTRACT",
+      "HANDOVER_PROTOCOL",
+      "RETURN_PROTOCOL",
+      "DAMAGE_REPORT",
+      "CONTRACT_AMENDMENT",
+      "CUSTOM",
+    ]),
+    customTypeName: z.string().max(100),
+    title: z.string().max(200),
+    customerId: z.string(),
+    assetId: z.string(),
+  })
+  .refine((data) => data.documentType !== "CUSTOM" || data.customTypeName.trim().length > 0, {
+    path: ["customTypeName"],
+    message: "document.errors.customTypeNameRequired",
+  });
+
+export type DocumentFormValues = z.infer<typeof documentSchema>;

@@ -31,3 +31,4 @@
   - [0008 — Configurable monthly billing strategies](adr/0008-configurable-monthly-billing-strategies.md)
   - [0009 — Shared monthly pricing and atomic rental numbering](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)
   - [0010 — Document Management Platform (Part 1)](adr/0010-document-management-platform.md)
+  - [0011 — Document rendering, templates, public sharing, email, and e-signature foundation (Part 2)](adr/0011-document-rendering-and-sharing.md)

@@ -3,11 +3,15 @@ import type { PrismaClient } from "@prisma/client";
 /** Deletes all rows in dependency order. Test database only. */
 export async function cleanDatabase(prisma: PrismaClient): Promise<void> {
   await prisma.auditLog.deleteMany();
+  await prisma.documentSignatureRequest.deleteMany();
+  await prisma.documentEmailDelivery.deleteMany();
+  await prisma.documentShareLink.deleteMany();
   await prisma.documentStatusHistory.deleteMany();
   await prisma.documentFile.deleteMany();
   await prisma.documentItem.deleteMany();
   await prisma.documentVersion.deleteMany();
   await prisma.document.deleteMany();
+  await prisma.documentTemplateVersion.deleteMany();
   await prisma.documentTemplate.deleteMany();
   await prisma.documentSequence.deleteMany();
   await prisma.quoteStatusHistory.deleteMany();

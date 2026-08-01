@@ -8,20 +8,21 @@ repository doesn't record a completion date, none is invented.
 
 ## Completed
 
-| Module                                                                         | Status    | Notes                                                                                                                                                                                                                                                   |
-| ------------------------------------------------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Production infrastructure, monorepo, CI                                        | COMPLETED | Turborepo + pnpm workspaces, Docker Compose, GitHub Actions.                                                                                                                                                                                            |
-| Authentication & tenant onboarding                                             | COMPLETED | Commit `c370234`. See [ADR 0001](adr/0001-authentication-and-tenant-context.md).                                                                                                                                                                        |
-| Multitenancy (`TenantGuard`, membership verification)                          | COMPLETED | Part of the same ADR 0001 work.                                                                                                                                                                                                                         |
-| RBAC / granular permissions (`PermissionsGuard`)                               | COMPLETED | Extended with every subsequent module (Assets, Rentals, Quotes, rental billing settings).                                                                                                                                                               |
-| Audit logging infrastructure                                                   | COMPLETED | `AuditService`, used by every mutating action across all modules.                                                                                                                                                                                       |
-| Customers module                                                               | COMPLETED | Commit `0f9c1f8`. Full CRUD, search, soft delete.                                                                                                                                                                                                       |
-| Universal Assets module                                                        | COMPLETED | Commit `a50f3be`. Categories, tenant-configurable statuses, custom fields, images/documents, timeline. See [ADR 0002](adr/0002-universal-asset-model.md)–[ADR 0005](adr/0005-asset-file-storage-strategy.md).                                           |
-| Rentals module (TASK-0006): lifecycle, availability engine, base pricing       | COMPLETED | Commit `aa77fa9`. See [ADR 0006](adr/0006-rental-lifecycle-and-availability.md).                                                                                                                                                                        |
-| MONTHLY billing fix: real calendar-month arithmetic (not flat 30 days)         | COMPLETED | Commit `bb0cbf1`, ahead of TASK-0007.                                                                                                                                                                                                                   |
-| Quotes and Commercial Offers module (TASK-0007)                                | COMPLETED | Commit `934cdeb`. Quote wizard, universal line items, PDF generation, email abstraction, public token-based acceptance, quote-to-rental conversion, duplication. See [ADR 0007](adr/0007-quotes-and-commercial-offers.md).                              |
-| Configurable monthly billing strategies — Rentals                              | COMPLETED | Commit `744aec8`. `CALENDAR_MONTH` (default) / `FIXED_30_DAYS` / `CUSTOM`, tenant-scoped settings, per-item historical snapshot. See [ADR 0008](adr/0008-configurable-monthly-billing-strategies.md).                                                   |
-| Document Management Platform — Part 1 (Architecture & Domain Model, TASK-0008) | COMPLETED | Generic `Document`/`DocumentVersion`/`DocumentFile`/`DocumentItem` model, immutable versioning, per-type atomic numbering, granular permissions. No visual layouts/rendering/e-signature yet. See [ADR 0010](adr/0010-document-management-platform.md). |
+| Module                                                                                                          | Status    | Notes                                                                                                                                                                                                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Production infrastructure, monorepo, CI                                                                         | COMPLETED | Turborepo + pnpm workspaces, Docker Compose, GitHub Actions.                                                                                                                                                                                                                                      |
+| Authentication & tenant onboarding                                                                              | COMPLETED | Commit `c370234`. See [ADR 0001](adr/0001-authentication-and-tenant-context.md).                                                                                                                                                                                                                  |
+| Multitenancy (`TenantGuard`, membership verification)                                                           | COMPLETED | Part of the same ADR 0001 work.                                                                                                                                                                                                                                                                   |
+| RBAC / granular permissions (`PermissionsGuard`)                                                                | COMPLETED | Extended with every subsequent module (Assets, Rentals, Quotes, rental billing settings).                                                                                                                                                                                                         |
+| Audit logging infrastructure                                                                                    | COMPLETED | `AuditService`, used by every mutating action across all modules.                                                                                                                                                                                                                                 |
+| Customers module                                                                                                | COMPLETED | Commit `0f9c1f8`. Full CRUD, search, soft delete.                                                                                                                                                                                                                                                 |
+| Universal Assets module                                                                                         | COMPLETED | Commit `a50f3be`. Categories, tenant-configurable statuses, custom fields, images/documents, timeline. See [ADR 0002](adr/0002-universal-asset-model.md)–[ADR 0005](adr/0005-asset-file-storage-strategy.md).                                                                                     |
+| Rentals module (TASK-0006): lifecycle, availability engine, base pricing                                        | COMPLETED | Commit `aa77fa9`. See [ADR 0006](adr/0006-rental-lifecycle-and-availability.md).                                                                                                                                                                                                                  |
+| MONTHLY billing fix: real calendar-month arithmetic (not flat 30 days)                                          | COMPLETED | Commit `bb0cbf1`, ahead of TASK-0007.                                                                                                                                                                                                                                                             |
+| Quotes and Commercial Offers module (TASK-0007)                                                                 | COMPLETED | Commit `934cdeb`. Quote wizard, universal line items, PDF generation, email abstraction, public token-based acceptance, quote-to-rental conversion, duplication. See [ADR 0007](adr/0007-quotes-and-commercial-offers.md).                                                                        |
+| Configurable monthly billing strategies — Rentals                                                               | COMPLETED | Commit `744aec8`. `CALENDAR_MONTH` (default) / `FIXED_30_DAYS` / `CUSTOM`, tenant-scoped settings, per-item historical snapshot. See [ADR 0008](adr/0008-configurable-monthly-billing-strategies.md).                                                                                             |
+| Document Management Platform — Part 1 (Architecture & Domain Model, TASK-0008)                                  | COMPLETED | Generic `Document`/`DocumentVersion`/`DocumentFile`/`DocumentItem` model, immutable versioning, per-type atomic numbering, granular permissions. See [ADR 0010](adr/0010-document-management-platform.md).                                                                                        |
+| Document Management Platform — Part 2 (Rendering, Templates, Sharing, Email, E-Signature Foundation, TASK-0008) | COMPLETED | Versioned HTML/CSS templates, universal variable resolution, Puppeteer-based HTML/PDF rendering, password-optional public share links, retryable email delivery, swappable `DocumentSignatureProvider` (mock only), full frontend UI. See [ADR 0011](adr/0011-document-rendering-and-sharing.md). |
 
 ## Pre-TASK-0008 stabilization (completed)
 
@@ -37,7 +38,7 @@ TASK-0006/0007/0008 already shipped — see
 It did not add a new business module, and TASK-0008 (the next major
 task) was not started as part of it.
 
-## TASK-0008 — Document Management Platform
+## TASK-0008 — Document Management Platform (COMPLETED)
 
 **Part 1 (Architecture & Domain Model) — COMPLETED.** A generic `Document`
 model covering every document type (`CONTRACT`, `HANDOVER_PROTOCOL`,
@@ -46,23 +47,33 @@ reserved `QUOTE` value — see [ADR 0010](adr/0010-document-management-platform.
 immutable-once-finalized versioning with parent-linked corrections,
 concurrency-safe per-type numbering, `DocumentFile` storage (reusing the
 existing `StorageService`), a full lifecycle/permission/audit/timeline
-layer, and 31 new e2e tests plus unit coverage. **Deliberately not built**:
-visual PDF/HTML layouts, template authoring/rendering, e-signature
-integration, any public/customer-facing endpoint, and frontend UI — see
-ADR 0010's "Deliberately not built in Part 1" section.
+layer, and 31 new e2e tests plus unit coverage.
 
-**Part 2 and beyond — NEXT, not yet started.** Expected direction: a real
-rendering engine turning a `DocumentVersion`'s `businessDataSnapshot` into
-an actual PDF/HTML `DocumentFile` (reusing the `pdfkit` pattern already
-proven for Quotes), template authoring against the existing
-`DocumentTemplate` registry, a document signature workflow (replacing the
-current staff-asserted `sign`/`reject` actions with a real provider), a
-public/customer-facing view-and-sign flow (mirroring Quotes'
-token-based `/public/quotes/:token` pattern), frontend UI (list/detail
-pages, a document wizard), and — once the platform has proven itself on
-these new types — a possible future bridge of the existing Quote module
-into a `Document` row (see ADR 0010's rationale for why that bridge is
-explicitly deferred, not attempted in Part 1).
+**Part 2 (Rendering, Templates, Sharing, Email, E-Signature Foundation) —
+COMPLETED.** Versioned HTML/CSS templates (one `ACTIVE` per
+`(tenant, documentType)`, built-in defaults for zero-setup rendering);
+universal `{{dot.path}}` variable resolution with HTML escaping and no
+hardcoded whitelist; `DocumentRendererService` (live HTML, never
+persisted) and `PdfRendererService` (Puppeteer-based PDF, a scoped
+exception to [ADR 0007](adr/0007-quotes-and-commercial-offers.md)'s "no
+headless browser" — `QuotePdfService`'s `pdfkit` pipeline is untouched);
+password-optional, expiring, `POST`-based public share links with view/
+download tracking; synchronous email delivery with a durable, retryable
+`DocumentEmailDelivery` history; a swappable `DocumentSignatureProvider`
+seam (`LocalMockSignatureProvider` only — DocuSign/Adobe Sign/Autenti/
+eIDAS named, not implemented); new `documents.render`/`documents.share`/
+`documents.templates.view`/`documents.templates.manage` permissions; and
+the full frontend UI (document list/detail/preview, template registry/
+editor, public share page). See
+[ADR 0011](adr/0011-document-rendering-and-sharing.md) for the full
+rationale, including the deliberate decision **not** to build a document
+"edit" page and **not** to migrate the existing `Quote` module into
+`Document` rows.
+
+**Remaining, deliberately deferred work** (candidate TASK-0009 scope): a
+real e-signature provider integration behind the seam built in Part 2, and
+a production email provider behind the existing `EmailProvider` seam
+(ADR 0007) — see [HANDOVER.md](HANDOVER.md)'s "Next recommended task".
 
 ## Later product phases
 
@@ -115,8 +126,10 @@ Rentals' numbering (rental-numbering.util.ts)
   └─ Quotes' quote-to-rental conversion (reuses the same generator)
   └─ Document platform's numbering (document-numbering.util.ts, ADR 0010 — same atomic-upsert pattern, separate counters)
 
-Document Management Platform (ADR 0010, TASK-0008 Part 1)
+Document Management Platform (ADR 0010 Part 1 + ADR 0011 Part 2, TASK-0008)
   ├─ optionally references Customer/Rental/Quote/Asset (all nullable FKs, no hard dependency)
   ├─ reuses StorageService (ADR 0005) for DocumentFile — no new storage code
-  └─ Part 2+ (rendering/templates/signatures/public flow/frontend UI) not yet started
+  ├─ reuses EmailProvider (ADR 0007) for DocumentEmailService — no new email code
+  ├─ reuses PasswordService (argon2) for optional share-link passwords
+  └─ real e-signature provider integration not yet started (seam only, see ADR 0011)
 ```

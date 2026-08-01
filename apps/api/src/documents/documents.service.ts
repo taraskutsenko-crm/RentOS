@@ -66,6 +66,15 @@ const AUDIT_ACTION_TO_TIMELINE_TYPE: Record<string, DocumentTimelineEventType> =
   "document.version_created": "version_created",
   "document.file_uploaded": "file_uploaded",
   "document.file_deleted": "file_deleted",
+  "document.rendered": "rendered",
+  "document.shared": "shared",
+  "document.share_viewed": "share_viewed",
+  "document.share_downloaded": "share_downloaded",
+  "document.share_disabled": "share_disabled",
+  "document.email_sent": "email_sent",
+  "document.email_failed": "email_failed",
+  "document.signature_requested": "signature_requested",
+  "document.signature_status_changed": "signature_status_changed",
 };
 
 @Injectable()
@@ -302,6 +311,89 @@ export class DocumentsService {
     });
   }
 
+  /**
+   * Creates a fresh DRAFT copy with a new document number: businessData,
+   * items, and every reference (customer/rental/quote/asset/employee)
+   * carried over verbatim, acceptance/signature/sharing/email history left
+   * behind (a duplicate is a faithful content copy in a new shell, not a
+   * clone of the original's lifecycle — mirrors Quotes' `duplicate`
+   * exactly, see ADR 0007).
+   */
+  async duplicate(tenantId: string, id: string, actorUserId: string): Promise<DocumentDetailView> {
+    const source = await this.findOneRaw(tenantId, id);
+    const sourceVersion = source.versions.find(
+      (v) => v.versionNumber === source.currentVersionNumber,
+    )!;
+
+    const created = await this.prisma.$transaction(async (tx) => {
+      const documentNumber = await generateDocumentNumber(
+        tx,
+        tenantId,
+        source.documentType,
+        new Date(),
+      );
+
+      const document = await tx.document.create({
+        data: {
+          tenantId,
+          documentType: source.documentType,
+          customTypeName: source.customTypeName,
+          documentNumber,
+          status: "DRAFT",
+          title: source.title,
+          customerId: source.customerId,
+          rentalId: source.rentalId,
+          quoteId: source.quoteId,
+          assetId: source.assetId,
+          employeeUserId: source.employeeUserId,
+          currentVersionNumber: 1,
+          createdByUserId: actorUserId,
+        },
+      });
+
+      await tx.documentVersion.create({
+        data: {
+          tenantId,
+          documentId: document.id,
+          versionNumber: 1,
+          businessDataSnapshot: sourceVersion.businessDataSnapshot as never,
+          isFinal: false,
+          createdByUserId: actorUserId,
+        },
+      });
+
+      for (const item of source.items) {
+        await tx.documentItem.create({
+          data: {
+            tenantId,
+            documentId: document.id,
+            assetId: item.assetId,
+            rentalItemId: item.rentalItemId,
+            description: item.description,
+            dataJson: item.dataJson as never,
+            sortOrder: item.sortOrder,
+          },
+        });
+      }
+
+      await this.auditService.log(
+        {
+          tenantId,
+          userId: actorUserId,
+          action: "document.created",
+          entityType: "Document",
+          entityId: document.id,
+          metadata: { documentNumber, duplicatedFromDocumentId: source.id },
+        },
+        tx,
+      );
+
+      return document;
+    });
+
+    return this.findOne(tenantId, created.id);
+  }
+
   /** DRAFT -> READY. Finalizes version 1 (or the current correction version), making it permanently immutable. */
   async markReady(
     tenantId: string,
@@ -341,6 +433,29 @@ export class DocumentsService {
     dto: StatusActionDto,
   ): Promise<DocumentDetailView> {
     return this.changeStatus(tenantId, id, actorUserId, "VIEWED", dto.reason, "document.viewed");
+  }
+
+  /**
+   * The unauthenticated-public-link equivalent of markViewed — called by
+   * DocumentSharingService when someone opens a public share link. No
+   * actor (null), and idempotent-by-construction: changeStatus already
+   * no-ops when the document isn't in SENT (repeated public views of an
+   * already-VIEWED/SIGNED/etc. document never error). Mirrors
+   * QuotesService's private markViewed, called from findByPublicToken.
+   */
+  async recordPublicView(tenantId: string, id: string): Promise<void> {
+    const current = await this.findOneRaw(tenantId, id);
+    if (current.status !== "SENT") {
+      return;
+    }
+    await this.changeStatus(
+      tenantId,
+      id,
+      null,
+      "VIEWED",
+      "Viewed via public link",
+      "document.viewed",
+    );
   }
 
   /** SENT/VIEWED -> PARTIALLY_SIGNED or SIGNED, depending on `fullySigned`. No real e-signature integration yet — this only records the outcome. */
@@ -560,6 +675,23 @@ export class DocumentsService {
     });
   }
 
+  /** Called whenever a PDF is freshly generated (not served from an existing DocumentFile) — see document.rendered in the timeline. */
+  async recordRender(
+    tenantId: string,
+    id: string,
+    actorUserId: string | null,
+    fileId: string,
+  ): Promise<void> {
+    await this.auditService.log({
+      tenantId,
+      userId: actorUserId,
+      action: "document.rendered",
+      entityType: "Document",
+      entityId: id,
+      metadata: { fileId },
+    });
+  }
+
   // ---------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------
@@ -589,7 +721,7 @@ export class DocumentsService {
   private async changeStatus(
     tenantId: string,
     id: string,
-    actorUserId: string,
+    actorUserId: string | null,
     toStatus: DocumentStatus,
     reason: string | null | undefined,
     auditAction: string,

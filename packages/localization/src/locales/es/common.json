@@ -511,5 +511,199 @@
       "rejectReasonPlaceholder": "Cuéntanos por qué (opcional)",
       "confirmReject": "Confirmar rechazo"
     }
+  },
+  "document": {
+    "title": "Documentos",
+    "subtitle": "Renderiza, comparte, envía y firma cada documento generado desde un solo lugar",
+    "newDocument": "Nuevo documento",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "deleteConfirm": "¿Seguro que quieres eliminar este documento?",
+    "searchPlaceholder": "Buscar documentos…",
+    "allStatuses": "Todos los estados",
+    "allTypes": "Todos los tipos",
+    "noDocuments": "No se encontraron documentos",
+    "backToList": "Volver a documentos",
+    "types": {
+      "QUOTE": "Presupuesto",
+      "CONTRACT": "Contrato de alquiler",
+      "HANDOVER_PROTOCOL": "Protocolo de entrega",
+      "RETURN_PROTOCOL": "Protocolo de devolución",
+      "DAMAGE_REPORT": "Informe de daños",
+      "CONTRACT_AMENDMENT": "Modificación del contrato",
+      "CUSTOM": "Personalizado"
+    },
+    "statuses": {
+      "DRAFT": "Borrador",
+      "READY": "Listo",
+      "SENT": "Enviado",
+      "VIEWED": "Visto",
+      "PARTIALLY_SIGNED": "Parcialmente firmado",
+      "SIGNED": "Firmado",
+      "REJECTED": "Rechazado",
+      "VOIDED": "Anulado",
+      "ARCHIVED": "Archivado"
+    },
+    "fields": {
+      "documentNumber": "Número de documento",
+      "documentType": "Tipo de documento",
+      "status": "Estado",
+      "title": "Título",
+      "customTypeName": "Nombre del tipo personalizado",
+      "none": "Ninguno",
+      "version": "Versión",
+      "createdAt": "Creado"
+    },
+    "actions": {
+      "viewPdf": "Ver PDF",
+      "regeneratePdf": "Regenerar PDF",
+      "markReady": "Marcar como listo",
+      "markSent": "Marcar como enviado",
+      "markViewed": "Marcar como visto",
+      "markSigned": "Marcar como firmado",
+      "markPartiallySigned": "Marcar como parcialmente firmado",
+      "reject": "Rechazar",
+      "rejectPrompt": "Motivo del rechazo (opcional)",
+      "duplicate": "Duplicar",
+      "void": "Anular",
+      "voidPrompt": "Motivo de la anulación (opcional)",
+      "archive": "Archivar"
+    },
+    "sections": {
+      "preview": "Vista previa",
+      "email": "Envío por correo",
+      "signature": "Firma electrónica"
+    },
+    "email": {
+      "recipientType": "Destinatario",
+      "recipientTypes": {
+        "CUSTOMER": "Cliente",
+        "EMPLOYEE": "Empleado",
+        "CUSTOM": "Correo personalizado"
+      },
+      "customEmail": "Dirección de correo",
+      "subject": "Asunto",
+      "message": "Mensaje",
+      "send": "Enviar correo",
+      "retry": "Reintentar",
+      "noDeliveries": "Aún no se han enviado correos",
+      "statuses": {
+        "PENDING": "Pendiente",
+        "SENT": "Enviado",
+        "FAILED": "Fallido"
+      }
+    },
+    "signature": {
+      "signerName": "Nombre del firmante",
+      "signerEmail": "Correo del firmante",
+      "request": "Solicitar firma",
+      "refresh": "Actualizar estado",
+      "cancel": "Cancelar",
+      "noRequests": "Aún no hay solicitudes de firma",
+      "statuses": {
+        "REQUESTED": "Solicitada",
+        "PENDING": "Pendiente",
+        "SIGNED": "Firmada",
+        "REJECTED": "Rechazada",
+        "EXPIRED": "Expirada",
+        "CANCELLED": "Cancelada"
+      },
+      "providers": {
+        "LOCAL_MOCK": "Manual (interno)",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "Documento creado",
+      "updated": "Documento actualizado",
+      "status_changed": "Estado cambiado",
+      "sent": "Documento enviado",
+      "viewed": "Visto",
+      "signed": "Firma registrada",
+      "downloaded": "Descargado",
+      "archived": "Archivado",
+      "version_created": "Nueva versión creada",
+      "file_uploaded": "Archivo subido",
+      "file_deleted": "Archivo eliminado",
+      "rendered": "PDF generado",
+      "shared": "Enlace de compartición creado",
+      "share_viewed": "Visto mediante enlace compartido",
+      "share_downloaded": "Descargado mediante enlace compartido",
+      "share_disabled": "Enlace compartido desactivado",
+      "email_sent": "Correo enviado",
+      "email_failed": "Envío de correo fallido",
+      "signature_requested": "Firma solicitada",
+      "signature_status_changed": "Estado de la firma cambiado"
+    },
+    "errors": {
+      "customTypeNameRequired": "Introduce un nombre para este tipo de documento personalizado"
+    }
+  },
+  "documentTemplate": {
+    "title": "Plantillas de documentos",
+    "subtitle": "Gestiona las plantillas HTML usadas para renderizar cada tipo de documento",
+    "newTemplate": "Nueva plantilla",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "searchPlaceholder": "Buscar plantillas…",
+    "noTemplates": "No se encontraron plantillas",
+    "statuses": {
+      "DRAFT": "Borrador",
+      "ACTIVE": "Activa",
+      "ARCHIVED": "Archivada"
+    },
+    "fields": {
+      "name": "Nombre",
+      "description": "Descripción",
+      "htmlContent": "Contenido HTML",
+      "css": "CSS",
+      "status": "Estado",
+      "versionCount": "Versiones",
+      "current": "actual"
+    },
+    "actions": {
+      "activate": "Activar",
+      "archive": "Archivar",
+      "restore": "Restaurar",
+      "duplicate": "Duplicar",
+      "saveAsNewVersion": "Guardar como nueva versión",
+      "restoreVersion": "Restaurar esta versión"
+    },
+    "sections": {
+      "metadata": "Detalles",
+      "content": "Contenido",
+      "preview": "Vista previa",
+      "versions": "Historial de versiones"
+    }
+  },
+  "share": {
+    "title": "Enlaces públicos",
+    "fields": {
+      "password": "Contraseña",
+      "passwordPlaceholder": "Contraseña de acceso opcional",
+      "views": "Vistas",
+      "downloads": "Descargas",
+      "expiresAt": "Expira"
+    },
+    "status": {
+      "active": "Activo",
+      "disabled": "Desactivado"
+    },
+    "actions": {
+      "create": "Crear enlace",
+      "disable": "Desactivar"
+    },
+    "noLinks": "Aún no hay enlaces compartidos",
+    "linkCreatedPrompt": "Comparte este enlace con tu cliente:",
+    "public": {
+      "passwordRequiredTitle": "Este documento está protegido con contraseña",
+      "wrongPassword": "Contraseña incorrecta",
+      "unlock": "Desbloquear",
+      "notFound": "Este enlace no es válido o ha expirado",
+      "downloadPdf": "Descargar PDF"
+    }
   }
 }

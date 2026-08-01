@@ -511,5 +511,199 @@
       "rejectReasonPlaceholder": "Сообщите нам причину (необязательно)",
       "confirmReject": "Подтвердить отклонение"
     }
+  },
+  "document": {
+    "title": "Документы",
+    "subtitle": "Формируйте, отправляйте, делитесь и подписывайте любой документ в одном месте",
+    "newDocument": "Новый документ",
+    "save": "Сохранить",
+    "saving": "Сохранение…",
+    "deleteConfirm": "Вы уверены, что хотите удалить этот документ?",
+    "searchPlaceholder": "Поиск документов…",
+    "allStatuses": "Все статусы",
+    "allTypes": "Все типы",
+    "noDocuments": "Документы не найдены",
+    "backToList": "Вернуться к документам",
+    "types": {
+      "QUOTE": "Смета",
+      "CONTRACT": "Договор аренды",
+      "HANDOVER_PROTOCOL": "Акт приёма-передачи",
+      "RETURN_PROTOCOL": "Акт возврата",
+      "DAMAGE_REPORT": "Акт о повреждениях",
+      "CONTRACT_AMENDMENT": "Дополнительное соглашение",
+      "CUSTOM": "Произвольный"
+    },
+    "statuses": {
+      "DRAFT": "Черновик",
+      "READY": "Готов",
+      "SENT": "Отправлен",
+      "VIEWED": "Просмотрен",
+      "PARTIALLY_SIGNED": "Частично подписан",
+      "SIGNED": "Подписан",
+      "REJECTED": "Отклонён",
+      "VOIDED": "Аннулирован",
+      "ARCHIVED": "В архиве"
+    },
+    "fields": {
+      "documentNumber": "Номер документа",
+      "documentType": "Тип документа",
+      "status": "Статус",
+      "title": "Название",
+      "customTypeName": "Название произвольного типа",
+      "none": "Нет",
+      "version": "Версия",
+      "createdAt": "Создан"
+    },
+    "actions": {
+      "viewPdf": "Просмотреть PDF",
+      "regeneratePdf": "Перегенерировать PDF",
+      "markReady": "Отметить готовым",
+      "markSent": "Отметить отправленным",
+      "markViewed": "Отметить просмотренным",
+      "markSigned": "Отметить подписанным",
+      "markPartiallySigned": "Отметить частично подписанным",
+      "reject": "Отклонить",
+      "rejectPrompt": "Причина отклонения (необязательно)",
+      "duplicate": "Дублировать",
+      "void": "Аннулировать",
+      "voidPrompt": "Причина аннулирования (необязательно)",
+      "archive": "Архивировать"
+    },
+    "sections": {
+      "preview": "Предпросмотр",
+      "email": "Отправка по email",
+      "signature": "Электронная подпись"
+    },
+    "email": {
+      "recipientType": "Получатель",
+      "recipientTypes": {
+        "CUSTOMER": "Клиент",
+        "EMPLOYEE": "Сотрудник",
+        "CUSTOM": "Произвольный email"
+      },
+      "customEmail": "Адрес email",
+      "subject": "Тема",
+      "message": "Сообщение",
+      "send": "Отправить email",
+      "retry": "Повторить",
+      "noDeliveries": "Письма ещё не отправлялись",
+      "statuses": {
+        "PENDING": "Ожидание",
+        "SENT": "Отправлено",
+        "FAILED": "Ошибка"
+      }
+    },
+    "signature": {
+      "signerName": "Имя подписанта",
+      "signerEmail": "Email подписанта",
+      "request": "Запросить подпись",
+      "refresh": "Обновить статус",
+      "cancel": "Отменить",
+      "noRequests": "Запросов на подпись ещё нет",
+      "statuses": {
+        "REQUESTED": "Запрошена",
+        "PENDING": "Ожидание",
+        "SIGNED": "Подписана",
+        "REJECTED": "Отклонена",
+        "EXPIRED": "Истекла",
+        "CANCELLED": "Отменена"
+      },
+      "providers": {
+        "LOCAL_MOCK": "Вручную (внутренняя)",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "Документ создан",
+      "updated": "Документ обновлён",
+      "status_changed": "Статус изменён",
+      "sent": "Документ отправлен",
+      "viewed": "Просмотрен",
+      "signed": "Подпись зафиксирована",
+      "downloaded": "Скачан",
+      "archived": "В архиве",
+      "version_created": "Создана новая версия",
+      "file_uploaded": "Файл загружен",
+      "file_deleted": "Файл удалён",
+      "rendered": "PDF сформирован",
+      "shared": "Создана ссылка для доступа",
+      "share_viewed": "Просмотрен по публичной ссылке",
+      "share_downloaded": "Скачан по публичной ссылке",
+      "share_disabled": "Публичная ссылка отключена",
+      "email_sent": "Письмо отправлено",
+      "email_failed": "Ошибка отправки письма",
+      "signature_requested": "Запрошена подпись",
+      "signature_status_changed": "Статус подписи изменён"
+    },
+    "errors": {
+      "customTypeNameRequired": "Введите название для этого произвольного типа документа"
+    }
+  },
+  "documentTemplate": {
+    "title": "Шаблоны документов",
+    "subtitle": "Управляйте HTML-шаблонами, используемыми для формирования каждого типа документа",
+    "newTemplate": "Новый шаблон",
+    "save": "Сохранить",
+    "saving": "Сохранение…",
+    "searchPlaceholder": "Поиск шаблонов…",
+    "noTemplates": "Шаблоны не найдены",
+    "statuses": {
+      "DRAFT": "Черновик",
+      "ACTIVE": "Активен",
+      "ARCHIVED": "В архиве"
+    },
+    "fields": {
+      "name": "Название",
+      "description": "Описание",
+      "htmlContent": "HTML-содержимое",
+      "css": "CSS",
+      "status": "Статус",
+      "versionCount": "Версии",
+      "current": "текущая"
+    },
+    "actions": {
+      "activate": "Активировать",
+      "archive": "Архивировать",
+      "restore": "Восстановить",
+      "duplicate": "Дублировать",
+      "saveAsNewVersion": "Сохранить как новую версию",
+      "restoreVersion": "Восстановить эту версию"
+    },
+    "sections": {
+      "metadata": "Детали",
+      "content": "Содержимое",
+      "preview": "Предпросмотр",
+      "versions": "История версий"
+    }
+  },
+  "share": {
+    "title": "Публичные ссылки",
+    "fields": {
+      "password": "Пароль",
+      "passwordPlaceholder": "Необязательный пароль доступа",
+      "views": "Просмотры",
+      "downloads": "Скачивания",
+      "expiresAt": "Истекает"
+    },
+    "status": {
+      "active": "Активна",
+      "disabled": "Отключена"
+    },
+    "actions": {
+      "create": "Создать ссылку",
+      "disable": "Отключить"
+    },
+    "noLinks": "Публичных ссылок ещё нет",
+    "linkCreatedPrompt": "Отправьте эту ссылку клиенту:",
+    "public": {
+      "passwordRequiredTitle": "Этот документ защищён паролем",
+      "wrongPassword": "Неверный пароль",
+      "unlock": "Открыть",
+      "notFound": "Эта ссылка недействительна или срок её действия истёк",
+      "downloadPdf": "Скачать PDF"
+    }
   }
 }

@@ -155,6 +155,29 @@ describe("ROLE_PERMISSIONS", () => {
     expect(roleHasPermission("OWNER", "documents.manageTemplates")).toBe(true);
   });
 
+  it("grants MANAGER render/share/templates.view but not documents.templates.manage (TASK-0008 Part 2)", () => {
+    expect(roleHasPermission("MANAGER", "documents.render")).toBe(true);
+    expect(roleHasPermission("MANAGER", "documents.share")).toBe(true);
+    expect(roleHasPermission("MANAGER", "documents.templates.view")).toBe(true);
+    expect(roleHasPermission("MANAGER", "documents.templates.manage")).toBe(false);
+    expect(roleHasPermission("OWNER", "documents.templates.manage")).toBe(true);
+  });
+
+  it("grants TECHNICIAN documents.render only, not template management or sharing", () => {
+    expect(roleHasPermission("TECHNICIAN", "documents.render")).toBe(true);
+    expect(roleHasPermission("TECHNICIAN", "documents.share")).toBe(false);
+    expect(roleHasPermission("TECHNICIAN", "documents.templates.manage")).toBe(false);
+    expect(roleHasPermission("TECHNICIAN", "documents.templates.view")).toBe(false);
+  });
+
+  it("grants ACCOUNTANT and VIEWER documents.templates.view (read-only) but not render/share", () => {
+    for (const role of ["ACCOUNTANT", "VIEWER"] as const) {
+      expect(roleHasPermission(role, "documents.templates.view")).toBe(true);
+      expect(roleHasPermission(role, "documents.render")).toBe(false);
+      expect(roleHasPermission(role, "documents.share")).toBe(false);
+    }
+  });
+
   it("grants MANAGER full document lifecycle control except delete/manageTemplates", () => {
     for (const permission of [
       "documents.view",

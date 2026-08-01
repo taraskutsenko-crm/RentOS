@@ -511,5 +511,199 @@
       "rejectReasonPlaceholder": "Повідомте причину (необов'язково)",
       "confirmReject": "Підтвердити відхилення"
     }
+  },
+  "document": {
+    "title": "Документи",
+    "subtitle": "Формуйте, відправляйте, діліться та підписуйте будь-який документ в одному місці",
+    "newDocument": "Новий документ",
+    "save": "Зберегти",
+    "saving": "Збереження…",
+    "deleteConfirm": "Ви впевнені, що хочете видалити цей документ?",
+    "searchPlaceholder": "Пошук документів…",
+    "allStatuses": "Усі статуси",
+    "allTypes": "Усі типи",
+    "noDocuments": "Документів не знайдено",
+    "backToList": "Повернутися до документів",
+    "types": {
+      "QUOTE": "Кошторис",
+      "CONTRACT": "Договір оренди",
+      "HANDOVER_PROTOCOL": "Акт приймання-передачі",
+      "RETURN_PROTOCOL": "Акт повернення",
+      "DAMAGE_REPORT": "Акт про пошкодження",
+      "CONTRACT_AMENDMENT": "Додаткова угода",
+      "CUSTOM": "Довільний"
+    },
+    "statuses": {
+      "DRAFT": "Чернетка",
+      "READY": "Готовий",
+      "SENT": "Надіслано",
+      "VIEWED": "Переглянуто",
+      "PARTIALLY_SIGNED": "Частково підписано",
+      "SIGNED": "Підписано",
+      "REJECTED": "Відхилено",
+      "VOIDED": "Анульовано",
+      "ARCHIVED": "В архіві"
+    },
+    "fields": {
+      "documentNumber": "Номер документа",
+      "documentType": "Тип документа",
+      "status": "Статус",
+      "title": "Назва",
+      "customTypeName": "Назва довільного типу",
+      "none": "Немає",
+      "version": "Версія",
+      "createdAt": "Створено"
+    },
+    "actions": {
+      "viewPdf": "Переглянути PDF",
+      "regeneratePdf": "Перегенерувати PDF",
+      "markReady": "Позначити готовим",
+      "markSent": "Позначити надісланим",
+      "markViewed": "Позначити переглянутим",
+      "markSigned": "Позначити підписаним",
+      "markPartiallySigned": "Позначити частково підписаним",
+      "reject": "Відхилити",
+      "rejectPrompt": "Причина відхилення (необов'язково)",
+      "duplicate": "Дублювати",
+      "void": "Анулювати",
+      "voidPrompt": "Причина анулювання (необов'язково)",
+      "archive": "Архівувати"
+    },
+    "sections": {
+      "preview": "Попередній перегляд",
+      "email": "Надсилання електронною поштою",
+      "signature": "Електронний підпис"
+    },
+    "email": {
+      "recipientType": "Отримувач",
+      "recipientTypes": {
+        "CUSTOMER": "Клієнт",
+        "EMPLOYEE": "Співробітник",
+        "CUSTOM": "Довільна пошта"
+      },
+      "customEmail": "Адреса електронної пошти",
+      "subject": "Тема",
+      "message": "Повідомлення",
+      "send": "Надіслати листа",
+      "retry": "Повторити",
+      "noDeliveries": "Листи ще не надсилалися",
+      "statuses": {
+        "PENDING": "Очікування",
+        "SENT": "Надіслано",
+        "FAILED": "Помилка"
+      }
+    },
+    "signature": {
+      "signerName": "Ім'я підписанта",
+      "signerEmail": "Пошта підписанта",
+      "request": "Запросити підпис",
+      "refresh": "Оновити статус",
+      "cancel": "Скасувати",
+      "noRequests": "Запитів на підпис ще немає",
+      "statuses": {
+        "REQUESTED": "Запитано",
+        "PENDING": "Очікування",
+        "SIGNED": "Підписано",
+        "REJECTED": "Відхилено",
+        "EXPIRED": "Термін минув",
+        "CANCELLED": "Скасовано"
+      },
+      "providers": {
+        "LOCAL_MOCK": "Вручну (внутрішній)",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "Документ створено",
+      "updated": "Документ оновлено",
+      "status_changed": "Статус змінено",
+      "sent": "Документ надіслано",
+      "viewed": "Переглянуто",
+      "signed": "Підпис зафіксовано",
+      "downloaded": "Завантажено",
+      "archived": "В архіві",
+      "version_created": "Створено нову версію",
+      "file_uploaded": "Файл завантажено",
+      "file_deleted": "Файл видалено",
+      "rendered": "PDF сформовано",
+      "shared": "Створено посилання для доступу",
+      "share_viewed": "Переглянуто за публічним посиланням",
+      "share_downloaded": "Завантажено за публічним посиланням",
+      "share_disabled": "Публічне посилання вимкнено",
+      "email_sent": "Лист надіслано",
+      "email_failed": "Помилка надсилання листа",
+      "signature_requested": "Запитано підпис",
+      "signature_status_changed": "Статус підпису змінено"
+    },
+    "errors": {
+      "customTypeNameRequired": "Введіть назву для цього довільного типу документа"
+    }
+  },
+  "documentTemplate": {
+    "title": "Шаблони документів",
+    "subtitle": "Керуйте HTML-шаблонами, що використовуються для формування кожного типу документа",
+    "newTemplate": "Новий шаблон",
+    "save": "Зберегти",
+    "saving": "Збереження…",
+    "searchPlaceholder": "Пошук шаблонів…",
+    "noTemplates": "Шаблонів не знайдено",
+    "statuses": {
+      "DRAFT": "Чернетка",
+      "ACTIVE": "Активний",
+      "ARCHIVED": "В архіві"
+    },
+    "fields": {
+      "name": "Назва",
+      "description": "Опис",
+      "htmlContent": "HTML-вміст",
+      "css": "CSS",
+      "status": "Статус",
+      "versionCount": "Версії",
+      "current": "поточна"
+    },
+    "actions": {
+      "activate": "Активувати",
+      "archive": "Архівувати",
+      "restore": "Відновити",
+      "duplicate": "Дублювати",
+      "saveAsNewVersion": "Зберегти як нову версію",
+      "restoreVersion": "Відновити цю версію"
+    },
+    "sections": {
+      "metadata": "Деталі",
+      "content": "Вміст",
+      "preview": "Попередній перегляд",
+      "versions": "Історія версій"
+    }
+  },
+  "share": {
+    "title": "Публічні посилання",
+    "fields": {
+      "password": "Пароль",
+      "passwordPlaceholder": "Необов'язковий пароль доступу",
+      "views": "Перегляди",
+      "downloads": "Завантаження",
+      "expiresAt": "Закінчується"
+    },
+    "status": {
+      "active": "Активне",
+      "disabled": "Вимкнено"
+    },
+    "actions": {
+      "create": "Створити посилання",
+      "disable": "Вимкнути"
+    },
+    "noLinks": "Публічних посилань ще немає",
+    "linkCreatedPrompt": "Надішліть це посилання клієнту:",
+    "public": {
+      "passwordRequiredTitle": "Цей документ захищено паролем",
+      "wrongPassword": "Неправильний пароль",
+      "unlock": "Розблокувати",
+      "notFound": "Це посилання недійсне або термін його дії минув",
+      "downloadPdf": "Завантажити PDF"
+    }
   }
 }

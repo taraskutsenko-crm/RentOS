@@ -9,7 +9,16 @@ export type DocumentTimelineEventType =
   | "archived"
   | "version_created"
   | "file_uploaded"
-  | "file_deleted";
+  | "file_deleted"
+  | "rendered"
+  | "shared"
+  | "share_viewed"
+  | "share_downloaded"
+  | "share_disabled"
+  | "email_sent"
+  | "email_failed"
+  | "signature_requested"
+  | "signature_status_changed";
 
 export interface DocumentTimelineEvent {
   id: string;

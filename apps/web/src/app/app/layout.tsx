@@ -55,6 +55,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link href="/app/quotes" className="text-muted-foreground hover:text-foreground">
               {t("quote.title")}
             </Link>
+            <Link href="/app/documents" className="text-muted-foreground hover:text-foreground">
+              {t("document.title")}
+            </Link>
             <Link
               href="/app/settings/asset-categories"
               className="text-muted-foreground hover:text-foreground"

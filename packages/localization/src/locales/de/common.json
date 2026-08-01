@@ -511,5 +511,199 @@
       "rejectReasonPlaceholder": "Teilen Sie uns den Grund mit (optional)",
       "confirmReject": "Ablehnung bestätigen"
     }
+  },
+  "document": {
+    "title": "Dokumente",
+    "subtitle": "Jedes generierte Dokument an einem Ort rendern, teilen, versenden und signieren",
+    "newDocument": "Neues Dokument",
+    "save": "Speichern",
+    "saving": "Speichern…",
+    "deleteConfirm": "Möchten Sie dieses Dokument wirklich löschen?",
+    "searchPlaceholder": "Dokumente suchen…",
+    "allStatuses": "Alle Status",
+    "allTypes": "Alle Typen",
+    "noDocuments": "Keine Dokumente gefunden",
+    "backToList": "Zurück zu den Dokumenten",
+    "types": {
+      "QUOTE": "Angebot",
+      "CONTRACT": "Mietvertrag",
+      "HANDOVER_PROTOCOL": "Übergabeprotokoll",
+      "RETURN_PROTOCOL": "Rückgabeprotokoll",
+      "DAMAGE_REPORT": "Schadensbericht",
+      "CONTRACT_AMENDMENT": "Vertragsänderung",
+      "CUSTOM": "Benutzerdefiniert"
+    },
+    "statuses": {
+      "DRAFT": "Entwurf",
+      "READY": "Bereit",
+      "SENT": "Gesendet",
+      "VIEWED": "Angesehen",
+      "PARTIALLY_SIGNED": "Teilweise unterschrieben",
+      "SIGNED": "Unterschrieben",
+      "REJECTED": "Abgelehnt",
+      "VOIDED": "Storniert",
+      "ARCHIVED": "Archiviert"
+    },
+    "fields": {
+      "documentNumber": "Dokumentnummer",
+      "documentType": "Dokumenttyp",
+      "status": "Status",
+      "title": "Titel",
+      "customTypeName": "Name des benutzerdefinierten Typs",
+      "none": "Keine",
+      "version": "Version",
+      "createdAt": "Erstellt"
+    },
+    "actions": {
+      "viewPdf": "PDF ansehen",
+      "regeneratePdf": "PDF neu erzeugen",
+      "markReady": "Als bereit markieren",
+      "markSent": "Als gesendet markieren",
+      "markViewed": "Als angesehen markieren",
+      "markSigned": "Als unterschrieben markieren",
+      "markPartiallySigned": "Als teilweise unterschrieben markieren",
+      "reject": "Ablehnen",
+      "rejectPrompt": "Grund der Ablehnung (optional)",
+      "duplicate": "Duplizieren",
+      "void": "Stornieren",
+      "voidPrompt": "Grund der Stornierung (optional)",
+      "archive": "Archivieren"
+    },
+    "sections": {
+      "preview": "Vorschau",
+      "email": "E-Mail-Versand",
+      "signature": "E-Signatur"
+    },
+    "email": {
+      "recipientType": "Empfänger",
+      "recipientTypes": {
+        "CUSTOMER": "Kunde",
+        "EMPLOYEE": "Mitarbeiter",
+        "CUSTOM": "Benutzerdefinierte E-Mail"
+      },
+      "customEmail": "E-Mail-Adresse",
+      "subject": "Betreff",
+      "message": "Nachricht",
+      "send": "E-Mail senden",
+      "retry": "Erneut versuchen",
+      "noDeliveries": "Noch keine E-Mails gesendet",
+      "statuses": {
+        "PENDING": "Ausstehend",
+        "SENT": "Gesendet",
+        "FAILED": "Fehlgeschlagen"
+      }
+    },
+    "signature": {
+      "signerName": "Name des Unterzeichners",
+      "signerEmail": "E-Mail des Unterzeichners",
+      "request": "Unterschrift anfordern",
+      "refresh": "Status aktualisieren",
+      "cancel": "Abbrechen",
+      "noRequests": "Noch keine Signaturanfragen",
+      "statuses": {
+        "REQUESTED": "Angefordert",
+        "PENDING": "Ausstehend",
+        "SIGNED": "Unterschrieben",
+        "REJECTED": "Abgelehnt",
+        "EXPIRED": "Abgelaufen",
+        "CANCELLED": "Storniert"
+      },
+      "providers": {
+        "LOCAL_MOCK": "Manuell (intern)",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "Dokument erstellt",
+      "updated": "Dokument aktualisiert",
+      "status_changed": "Status geändert",
+      "sent": "Dokument gesendet",
+      "viewed": "Angesehen",
+      "signed": "Unterschrift erfasst",
+      "downloaded": "Heruntergeladen",
+      "archived": "Archiviert",
+      "version_created": "Neue Version erstellt",
+      "file_uploaded": "Datei hochgeladen",
+      "file_deleted": "Datei gelöscht",
+      "rendered": "PDF erzeugt",
+      "shared": "Freigabelink erstellt",
+      "share_viewed": "Über Freigabelink angesehen",
+      "share_downloaded": "Über Freigabelink heruntergeladen",
+      "share_disabled": "Freigabelink deaktiviert",
+      "email_sent": "E-Mail gesendet",
+      "email_failed": "E-Mail-Versand fehlgeschlagen",
+      "signature_requested": "Unterschrift angefordert",
+      "signature_status_changed": "Signaturstatus geändert"
+    },
+    "errors": {
+      "customTypeNameRequired": "Geben Sie einen Namen für diesen benutzerdefinierten Dokumenttyp ein"
+    }
+  },
+  "documentTemplate": {
+    "title": "Dokumentvorlagen",
+    "subtitle": "Verwalten Sie die HTML-Vorlagen, die zum Rendern jedes Dokumenttyps verwendet werden",
+    "newTemplate": "Neue Vorlage",
+    "save": "Speichern",
+    "saving": "Speichern…",
+    "searchPlaceholder": "Vorlagen suchen…",
+    "noTemplates": "Keine Vorlagen gefunden",
+    "statuses": {
+      "DRAFT": "Entwurf",
+      "ACTIVE": "Aktiv",
+      "ARCHIVED": "Archiviert"
+    },
+    "fields": {
+      "name": "Name",
+      "description": "Beschreibung",
+      "htmlContent": "HTML-Inhalt",
+      "css": "CSS",
+      "status": "Status",
+      "versionCount": "Versionen",
+      "current": "aktuell"
+    },
+    "actions": {
+      "activate": "Aktivieren",
+      "archive": "Archivieren",
+      "restore": "Wiederherstellen",
+      "duplicate": "Duplizieren",
+      "saveAsNewVersion": "Als neue Version speichern",
+      "restoreVersion": "Diese Version wiederherstellen"
+    },
+    "sections": {
+      "metadata": "Details",
+      "content": "Inhalt",
+      "preview": "Vorschau",
+      "versions": "Versionsverlauf"
+    }
+  },
+  "share": {
+    "title": "Öffentliche Freigabelinks",
+    "fields": {
+      "password": "Passwort",
+      "passwordPlaceholder": "Optionales Zugangspasswort",
+      "views": "Ansichten",
+      "downloads": "Downloads",
+      "expiresAt": "Läuft ab"
+    },
+    "status": {
+      "active": "Aktiv",
+      "disabled": "Deaktiviert"
+    },
+    "actions": {
+      "create": "Link erstellen",
+      "disable": "Deaktivieren"
+    },
+    "noLinks": "Noch keine Freigabelinks",
+    "linkCreatedPrompt": "Teilen Sie diesen Link mit Ihrem Kunden:",
+    "public": {
+      "passwordRequiredTitle": "Dieses Dokument ist passwortgeschützt",
+      "wrongPassword": "Falsches Passwort",
+      "unlock": "Entsperren",
+      "notFound": "Dieser Link ist ungültig oder abgelaufen",
+      "downloadPdf": "PDF herunterladen"
+    }
   }
 }

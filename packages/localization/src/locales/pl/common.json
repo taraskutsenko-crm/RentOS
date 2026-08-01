@@ -511,5 +511,199 @@
       "rejectReasonPlaceholder": "Daj nam znać dlaczego (opcjonalnie)",
       "confirmReject": "Potwierdź odrzucenie"
     }
+  },
+  "document": {
+    "title": "Dokumenty",
+    "subtitle": "Renderuj, udostępniaj, wysyłaj i podpisuj każdy wygenerowany dokument w jednym miejscu",
+    "newDocument": "Nowy dokument",
+    "save": "Zapisz",
+    "saving": "Zapisywanie…",
+    "deleteConfirm": "Czy na pewno chcesz usunąć ten dokument?",
+    "searchPlaceholder": "Szukaj dokumentów…",
+    "allStatuses": "Wszystkie statusy",
+    "allTypes": "Wszystkie typy",
+    "noDocuments": "Nie znaleziono dokumentów",
+    "backToList": "Powrót do dokumentów",
+    "types": {
+      "QUOTE": "Oferta",
+      "CONTRACT": "Umowa najmu",
+      "HANDOVER_PROTOCOL": "Protokół przekazania",
+      "RETURN_PROTOCOL": "Protokół zwrotu",
+      "DAMAGE_REPORT": "Raport szkody",
+      "CONTRACT_AMENDMENT": "Aneks do umowy",
+      "CUSTOM": "Niestandardowy"
+    },
+    "statuses": {
+      "DRAFT": "Szkic",
+      "READY": "Gotowy",
+      "SENT": "Wysłany",
+      "VIEWED": "Wyświetlony",
+      "PARTIALLY_SIGNED": "Częściowo podpisany",
+      "SIGNED": "Podpisany",
+      "REJECTED": "Odrzucony",
+      "VOIDED": "Unieważniony",
+      "ARCHIVED": "Zarchiwizowany"
+    },
+    "fields": {
+      "documentNumber": "Numer dokumentu",
+      "documentType": "Typ dokumentu",
+      "status": "Status",
+      "title": "Tytuł",
+      "customTypeName": "Nazwa niestandardowego typu",
+      "none": "Brak",
+      "version": "Wersja",
+      "createdAt": "Utworzono"
+    },
+    "actions": {
+      "viewPdf": "Zobacz PDF",
+      "regeneratePdf": "Wygeneruj ponownie PDF",
+      "markReady": "Oznacz jako gotowy",
+      "markSent": "Oznacz jako wysłany",
+      "markViewed": "Oznacz jako wyświetlony",
+      "markSigned": "Oznacz jako podpisany",
+      "markPartiallySigned": "Oznacz jako częściowo podpisany",
+      "reject": "Odrzuć",
+      "rejectPrompt": "Powód odrzucenia (opcjonalnie)",
+      "duplicate": "Duplikuj",
+      "void": "Unieważnij",
+      "voidPrompt": "Powód unieważnienia (opcjonalnie)",
+      "archive": "Archiwizuj"
+    },
+    "sections": {
+      "preview": "Podgląd",
+      "email": "Wysyłka e-mail",
+      "signature": "Podpis elektroniczny"
+    },
+    "email": {
+      "recipientType": "Odbiorca",
+      "recipientTypes": {
+        "CUSTOMER": "Klient",
+        "EMPLOYEE": "Pracownik",
+        "CUSTOM": "Niestandardowy e-mail"
+      },
+      "customEmail": "Adres e-mail",
+      "subject": "Temat",
+      "message": "Wiadomość",
+      "send": "Wyślij e-mail",
+      "retry": "Ponów",
+      "noDeliveries": "Nie wysłano jeszcze żadnych e-maili",
+      "statuses": {
+        "PENDING": "Oczekujący",
+        "SENT": "Wysłany",
+        "FAILED": "Nieudany"
+      }
+    },
+    "signature": {
+      "signerName": "Imię i nazwisko podpisującego",
+      "signerEmail": "E-mail podpisującego",
+      "request": "Poproś o podpis",
+      "refresh": "Odśwież status",
+      "cancel": "Anuluj",
+      "noRequests": "Brak jeszcze próśb o podpis",
+      "statuses": {
+        "REQUESTED": "Zażądano",
+        "PENDING": "Oczekujący",
+        "SIGNED": "Podpisany",
+        "REJECTED": "Odrzucony",
+        "EXPIRED": "Wygasły",
+        "CANCELLED": "Anulowany"
+      },
+      "providers": {
+        "LOCAL_MOCK": "Ręczny (wewnętrzny)",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "Dokument utworzony",
+      "updated": "Dokument zaktualizowany",
+      "status_changed": "Status zmieniony",
+      "sent": "Dokument wysłany",
+      "viewed": "Wyświetlony",
+      "signed": "Zarejestrowano podpis",
+      "downloaded": "Pobrany",
+      "archived": "Zarchiwizowany",
+      "version_created": "Utworzono nową wersję",
+      "file_uploaded": "Przesłano plik",
+      "file_deleted": "Usunięto plik",
+      "rendered": "Wygenerowano PDF",
+      "shared": "Utworzono link udostępniania",
+      "share_viewed": "Wyświetlony przez link udostępniania",
+      "share_downloaded": "Pobrany przez link udostępniania",
+      "share_disabled": "Link udostępniania wyłączony",
+      "email_sent": "E-mail wysłany",
+      "email_failed": "Wysyłka e-maila nieudana",
+      "signature_requested": "Poproszono o podpis",
+      "signature_status_changed": "Status podpisu zmieniony"
+    },
+    "errors": {
+      "customTypeNameRequired": "Podaj nazwę tego niestandardowego typu dokumentu"
+    }
+  },
+  "documentTemplate": {
+    "title": "Szablony dokumentów",
+    "subtitle": "Zarządzaj szablonami HTML używanymi do renderowania każdego typu dokumentu",
+    "newTemplate": "Nowy szablon",
+    "save": "Zapisz",
+    "saving": "Zapisywanie…",
+    "searchPlaceholder": "Szukaj szablonów…",
+    "noTemplates": "Nie znaleziono szablonów",
+    "statuses": {
+      "DRAFT": "Szkic",
+      "ACTIVE": "Aktywny",
+      "ARCHIVED": "Zarchiwizowany"
+    },
+    "fields": {
+      "name": "Nazwa",
+      "description": "Opis",
+      "htmlContent": "Zawartość HTML",
+      "css": "CSS",
+      "status": "Status",
+      "versionCount": "Wersje",
+      "current": "bieżąca"
+    },
+    "actions": {
+      "activate": "Aktywuj",
+      "archive": "Archiwizuj",
+      "restore": "Przywróć",
+      "duplicate": "Duplikuj",
+      "saveAsNewVersion": "Zapisz jako nową wersję",
+      "restoreVersion": "Przywróć tę wersję"
+    },
+    "sections": {
+      "metadata": "Szczegóły",
+      "content": "Zawartość",
+      "preview": "Podgląd",
+      "versions": "Historia wersji"
+    }
+  },
+  "share": {
+    "title": "Publiczne linki udostępniania",
+    "fields": {
+      "password": "Hasło",
+      "passwordPlaceholder": "Opcjonalne hasło dostępu",
+      "views": "Wyświetlenia",
+      "downloads": "Pobrania",
+      "expiresAt": "Wygasa"
+    },
+    "status": {
+      "active": "Aktywny",
+      "disabled": "Wyłączony"
+    },
+    "actions": {
+      "create": "Utwórz link",
+      "disable": "Wyłącz"
+    },
+    "noLinks": "Brak jeszcze linków udostępniania",
+    "linkCreatedPrompt": "Udostępnij ten link swojemu klientowi:",
+    "public": {
+      "passwordRequiredTitle": "Ten dokument jest chroniony hasłem",
+      "wrongPassword": "Nieprawidłowe hasło",
+      "unlock": "Odblokuj",
+      "notFound": "Ten link jest nieprawidłowy lub wygasł",
+      "downloadPdf": "Pobierz PDF"
+    }
   }
 }

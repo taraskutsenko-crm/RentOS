@@ -17,12 +17,15 @@ billing, and future mobile clients through an API-first architecture.
 > prevention, automatic pricing), and a Quotes and Commercial Offers
 > module (quote wizard, PDF generation, public customer acceptance,
 > quote-to-rental conversion) are all implemented and tested end-to-end.
-> The foundation of a universal **Document Management Platform** (TASK-0008
-> Part 1 — generic document model, versioning/immutability, concurrency-safe
-> numbering, storage) is also in place at the architecture level; visual
-> layouts, template rendering, and e-signature integration are not built
-> yet. Remaining business modules (invoicing, payments) are still out of
-> scope until explicitly requested.
+> A universal **Document Management Platform** (TASK-0008, Parts 1–2) is
+> also complete: the generic document model, versioning/immutability, and
+> concurrency-safe numbering (Part 1), plus versioned HTML/CSS templates,
+> universal variable resolution, HTML/PDF rendering, password-protectable
+> public share links, email delivery with retry, and an e-signature
+> provider abstraction (Part 2) — real DocuSign/Adobe Sign/Autenti/eIDAS
+> integration is not built yet, only the swappable seam and a local mock
+> provider. Remaining business modules (invoicing, payments) are still out
+> of scope until explicitly requested.
 
 ## Tech Stack
 
@@ -190,12 +193,14 @@ See [docs/api.md](docs/api.md#quotes) for the full endpoint reference, and
 [ADR 0007](docs/adr/0007-quotes-and-commercial-offers.md) for the
 numbering, pricing, PDF, email, and public-acceptance design rationale.
 
-## Document Management Platform (Part 1 — architecture only)
+## Document Management Platform
 
-The foundation of a universal document platform meant to eventually cover
-Contracts, Handover/Return Protocols, Damage Reports, Contract Amendments,
-and future types — **not** a PDF module and **not** a Contract module.
-TASK-0008 Part 1 delivers the schema and service layer only:
+The generic document engine meant to cover Contracts, Handover/Return
+Protocols, Damage Reports, Contract Amendments, and future types —
+**not** a PDF module and **not** a Contract module. TASK-0008 shipped in
+two parts.
+
+**Part 1 — architecture and domain model:**
 
 - **One generic `Document` model** for every document type — no
   type-specific columns; type-specific content lives entirely in untyped
@@ -212,17 +217,35 @@ PARTIALLY_SIGNED/SIGNED/REJECTED → ARCHIVED`, `VOIDED` reachable from
   `HD-000001`, `RT-000001`, `DMG-000001`, `AMD-000001`, and year-scoped
   `DOC-2026-000001` for `CUSTOM`), the same atomic upsert-increment
   pattern Rentals/Quotes use — verified under 20 concurrent requests.
-- **Storage** — reuses the existing `StorageService` abstraction
-  (Assets/Quotes) for staff-uploaded attachments/photos; no new storage
-  code, never tied to local disk.
-- **Granular permissions** — `documents.view/create/update/delete/send/
-sign/void/archive/download/manageTemplates`.
 
-**Not built in Part 1**: visual PDF/HTML layouts, template authoring, a
-rendering engine, e-signature integration, any public/customer-facing
-endpoint, and frontend UI — all explicitly deferred. See
-[ADR 0010](docs/adr/0010-document-management-platform.md) and
-[docs/api.md](docs/api.md#document-management-platform-task-0008-part-1)
+**Part 2 — templates, rendering, sharing, email, e-signature foundation:**
+
+- **Versioned HTML/CSS templates** — one `ACTIVE` template per
+  `(tenant, documentType)`, content edits always create a new version,
+  every document type renders correctly out of the box via a built-in
+  default template even with zero tenant setup.
+- **Universal variable resolution** — `{{company.name}}`-style
+  placeholders resolved against company/customer/employee/asset/rental/
+  quote/signature/notes data, HTML-escaped, with no hardcoded variable
+  whitelist — new variables just work.
+- **HTML/PDF rendering** — HTML is always recomputed live, never stored;
+  PDFs are generated via a reused headless Chromium instance (Puppeteer)
+  and cached per version until a forced regeneration.
+- **Public sharing** — password-optional, expiring, SHA-256-hashed-token
+  share links with view/download tracking, no login required.
+- **Email delivery** — synchronous send with a durable, retryable
+  delivery history, reusing the existing `EmailProvider` abstraction.
+- **E-signature foundation** — a swappable `DocumentSignatureProvider`
+  seam (DocuSign/Adobe Sign/Autenti/eIDAS named as future providers), a
+  local mock provider only for now.
+- **Granular permissions** — `documents.view/create/update/delete/send/
+sign/void/archive/download/render/share/templates.view/templates.manage`.
+- **Full frontend UI** — document list/detail/preview, template registry
+  and editor, and a public share page.
+
+See [ADR 0010](docs/adr/0010-document-management-platform.md),
+[ADR 0011](docs/adr/0011-document-rendering-and-sharing.md), and
+[docs/api.md](docs/api.md#document-management-platform-task-0008-parts-1-2)
 for the full design rationale and endpoint reference.
 
 ## Monorepo Structure

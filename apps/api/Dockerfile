@@ -6,6 +6,11 @@
 FROM node:24-alpine AS base
 RUN corepack enable
 WORKDIR /app
+# Puppeteer's own postinstall download is a glibc build that cannot run on
+# Alpine's musl libc anyway (see ADR 0011) — skip it everywhere in this
+# image and rely on the apk-installed system Chromium in the runner stage
+# instead. Local dev/CI (non-Alpine) are unaffected by this Dockerfile.
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 
 FROM base AS deps
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
@@ -28,6 +33,15 @@ FROM node:24-alpine AS runner
 ENV NODE_ENV=production
 WORKDIR /app
 RUN addgroup -S nodejs && adduser -S nestjs -G nodejs
+
+# System Chromium for DocumentPdfService's Puppeteer-based rendering (see
+# rendering/pdf-renderer.service.ts and ADR 0011) — Puppeteer's own bundled
+# download was skipped above because it's a glibc build incompatible with
+# Alpine's musl libc, so this apk package is the only Chromium the runner
+# image ships. Puppeteer reads PUPPETEER_EXECUTABLE_PATH itself whenever
+# `executablePath` is omitted from `puppeteer.launch()`.
+RUN apk add --no-cache chromium nss freetype harfbuzz ca-certificates ttf-freefont
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json

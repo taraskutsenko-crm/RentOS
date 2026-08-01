@@ -66,4 +66,17 @@ describe("roleHasPermission", () => {
     expect(roleHasPermission("VIEWER", "documents.download")).toBe(true);
     expect(roleHasPermission("VIEWER", "documents.create")).toBe(false);
   });
+
+  it("grants MANAGER render/share but not documents.templates.manage (TASK-0008 Part 2)", () => {
+    expect(roleHasPermission("MANAGER", "documents.render")).toBe(true);
+    expect(roleHasPermission("MANAGER", "documents.share")).toBe(true);
+    expect(roleHasPermission("MANAGER", "documents.templates.manage")).toBe(false);
+    expect(roleHasPermission("OWNER", "documents.templates.manage")).toBe(true);
+  });
+
+  it("grants TECHNICIAN documents.render only, not sharing or template management", () => {
+    expect(roleHasPermission("TECHNICIAN", "documents.render")).toBe(true);
+    expect(roleHasPermission("TECHNICIAN", "documents.share")).toBe(false);
+    expect(roleHasPermission("TECHNICIAN", "documents.templates.manage")).toBe(false);
+  });
 });

@@ -319,7 +319,7 @@ already-`CONVERTED` quote return the same Rental) and copies only
 copied verbatim from the Quote's own authoritative totals, never
 recomputed from just the asset items.
 
-## Document Management Platform (TASK-0008 Part 1 — architecture only)
+## Document Management Platform (TASK-0008 Parts 1–2)
 
 `apps/api/src/documents/` — a generic `Document` model (tagged by
 `DocumentType`: `CONTRACT`/`HANDOVER_PROTOCOL`/`RETURN_PROTOCOL`/
@@ -327,8 +327,9 @@ recomputed from just the asset items.
 `QUOTE` value) covering every document type with no type-specific
 columns — type-specific content lives entirely in untyped JSON
 (`DocumentVersion.businessDataSnapshot`, `DocumentItem.dataJson`). See
-[ADR 0010](adr/0010-document-management-platform.md) for the full
-rationale; this section is the short practical summary.
+[ADR 0010](adr/0010-document-management-platform.md) (Part 1) and
+[ADR 0011](adr/0011-document-rendering-and-sharing.md) (Part 2) for the
+full rationale; this section is the short practical summary.
 
 **Versioning/immutability**: a `DocumentVersion` is mutable only while its
 document is `DRAFT`; leaving `DRAFT` (`POST .../ready`) finalizes it
@@ -358,9 +359,40 @@ no new storage code. `format` is `PDF`/`HTML`/`JSON_SNAPSHOT` (reserved,
 nothing generates these yet) or `ATTACHMENT`/`PHOTO` (staff-uploaded,
 `POST .../:id/files`, mirrors `AssetFilesController`'s multipart pattern).
 
-**Not built yet** (see ADR 0010): template authoring/rendering, real
-e-signature, any public/customer-facing endpoint, frontend UI, and the
-existing `Quote` module is not migrated/duplicated into `Document` rows.
+**Templates/rendering (Part 2)**: `apps/api/src/documents/rendering/` —
+`VariableResolverService` builds a nested context (company/customer/
+employee/asset/rental/quote/today/signature/notes/document/data) that
+`resolveVariables()` substitutes into `{{dot.path}}` placeholders
+(HTML-escaped, no whitelist). `DocumentRendererService.renderHtml()` is
+computed live every call — never persisted. `PdfRendererService` wraps a
+reused headless Chromium instance (Puppeteer — a scoped exception to ADR
+0007's "no headless browser," `QuotePdfService`'s `pdfkit` pipeline is
+untouched); `DocumentPdfService` stores the PDF output as a `DocumentFile`.
+`DocumentTemplatesService` (`apps/api/src/documents/document-templates.
+service.ts`) manages versioned templates, one `ACTIVE` per
+`(tenant, documentType)`.
+
+**Sharing/email/e-signature (Part 2)**: `apps/api/src/documents/sharing/`
+(`DocumentSharingService` + `PublicDocumentsController`, both public
+routes `POST` not `GET` since a password travels in the body),
+`apps/api/src/documents/email/` (`DocumentEmailService`, synchronous send,
+durable `DocumentEmailDelivery` rows, `dispatch()` is the future-queue
+seam), `apps/api/src/documents/signature/` (`DOCUMENT_SIGNATURE_PROVIDER`
+DI token, `LocalMockSignatureProvider` only — third instance of the
+swappable-adapter pattern after `StorageAdapter`/`EmailProvider`).
+`DocumentSignatureRequest.status` is deliberately not auto-synced to
+`Document.status`; staff confirm outcomes via the existing `sign()`/
+`reject()` actions.
+
+**Frontend (Part 2)**: `apps/web/src/app/app/documents/**` (list/detail/
+preview, template registry/editor) and `apps/web/src/app/share/[token]`
+(public, no login) — full UI now exists; there is no document "edit" page
+by design (see ADR 0011).
+
+**Still not built**: real e-signature provider integration (DocuSign/Adobe
+Sign/Autenti/eIDAS are named but not implemented — only the seam and a
+local mock provider exist), and the existing `Quote` module is still not
+migrated/duplicated into `Document` rows (see D-021 in DECISIONS.md).
 
 ## Important API conventions
 
@@ -469,10 +501,18 @@ partial-success state to rely on.
 - Public quote page doesn't show the tenant's company name (PDF does).
 - No production email provider is wired in (`LoggingEmailProvider` only).
 - No localization-key-parity lint check (verified manually per task).
-- Document Management Platform (TASK-0008 Part 1) has no template
-  rendering, e-signature integration, public endpoint, or frontend UI yet
-  — all deliberately deferred to a later part, see
-  [ADR 0010](adr/0010-document-management-platform.md).
+- Document Management Platform (TASK-0008, both parts now complete) has
+  no real e-signature provider integration — only the swappable seam and
+  a `LocalMockSignatureProvider` exist; DocuSign/Adobe Sign/Autenti/eIDAS
+  are named in the enum but not implemented. See
+  [ADR 0011](adr/0011-document-rendering-and-sharing.md).
+- The existing `Quote` module is still not migrated/duplicated into the
+  generic `Document` model — a deliberate, documented scope boundary (see
+  D-021 in DECISIONS.md), not an oversight.
+- No document "edit" page exists in the frontend by design — editing isn't
+  in Part 7's required action set, and document content is normally
+  populated by the originating workflow (rental/quote conversion), not
+  hand-typed by staff.
 
 Resolved by the pre-TASK-0008 stabilization task (see
 [ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)):
@@ -488,14 +528,14 @@ maintained list.
 
 ## Next recommended task
 
-TASK-0008 Part 2+ (real template rendering — turning a
-`DocumentVersion.businessDataSnapshot` into an actual PDF/HTML
-`DocumentFile`, reusing the `pdfkit` pattern proven for Quotes; template
-authoring against `DocumentTemplate`; a real e-signature workflow; a
-public/customer-facing view-and-sign flow; frontend UI) — **only after**
-this Part 1 work is fully committed, pushed, and green on CI. Do not start
-Part 2 in the same session/branch as Part 1 unless explicitly instructed
-to.
+TASK-0008 (Parts 1 and 2) is now complete. **TASK-0009** is the next major
+task on the roadmap — do not start it in the same session/branch as
+TASK-0008 unless explicitly instructed to. Likely candidates for
+TASK-0009 include: a real e-signature provider integration (behind the
+`DocumentSignatureProvider` seam built in Part 2), a production email
+provider (behind the existing `EmailProvider` seam), or a new business
+module (invoicing/payments) — see [ROADMAP.md](ROADMAP.md) for the current
+phase ordering.
 
 ## Important commands
 

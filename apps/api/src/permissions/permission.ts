@@ -75,6 +75,19 @@ export const QUOTE_PERMISSIONS = [
  * is a reserved extension point for a future template editor, same
  * convention as `quotes.manageTemplates` — no such editor exists yet.
  */
+/**
+ * `documents.templates.view`/`documents.templates.manage` (TASK-0008 Part
+ * 2) gate the real template registry (create/edit/version/activate/
+ * archive/restore/duplicate) that `documents.manageTemplates` above was
+ * originally reserved for — kept as a separate, more specific pair rather
+ * than reusing `documents.manageTemplates`, since Part 2 also introduces
+ * `documents.render` (generate a preview/PDF) and `documents.share`
+ * (create/manage a public link), and grouping the whole template surface
+ * under its own `documents.templates.*` namespace reads more clearly than
+ * a single flat permission once there's an entire sub-resource behind it.
+ * `documents.manageTemplates` itself is left in place, unused, rather than
+ * removed — see docs/adr/0011-document-rendering-and-sharing.md.
+ */
 export const DOCUMENT_PERMISSIONS = [
   "documents.view",
   "documents.create",
@@ -86,6 +99,10 @@ export const DOCUMENT_PERMISSIONS = [
   "documents.archive",
   "documents.download",
   "documents.manageTemplates",
+  "documents.templates.view",
+  "documents.templates.manage",
+  "documents.render",
+  "documents.share",
 ] as const;
 
 export const ALL_PERMISSIONS = [
@@ -110,7 +127,11 @@ const RENTAL_READ_ONLY: Permission[] = ["rentals.view", "rental_settings.view"];
 
 const QUOTE_READ_ONLY: Permission[] = ["quotes.view", "quotes.download"];
 
-const DOCUMENT_READ_ONLY: Permission[] = ["documents.view", "documents.download"];
+const DOCUMENT_READ_ONLY: Permission[] = [
+  "documents.view",
+  "documents.download",
+  "documents.templates.view",
+];
 
 /**
  * Default role -> permission mapping. OWNER and ADMIN get every permission.
@@ -148,6 +169,17 @@ const DOCUMENT_READ_ONLY: Permission[] = ["documents.view", "documents.download"
  * `start`/`return` grants — but not `send`/`sign`/`void`/`archive`, which
  * are commercial/legal lifecycle decisions. ACCOUNTANT/VIEWER are
  * `view`+`download` only, same as Quotes.
+ *
+ * Documents Part 2 (rendering/templates/sharing, TASK-0008 Part 2): MANAGER
+ * additionally gets `documents.templates.view`/`documents.render`/
+ * `documents.share` but not `documents.templates.manage` (template
+ * authoring is tenant-wide configuration, reserved for OWNER/ADMIN, same
+ * reasoning as `asset_categories.manage`/`rental_settings.manage`).
+ * TECHNICIAN additionally gets `documents.render` only (it can generate a
+ * fresh PDF of a document it created, e.g. a handover protocol) but not
+ * template management or public sharing. ACCOUNTANT/VIEWER additionally
+ * get `documents.templates.view` (read-only visibility into what templates
+ * exist), same read-only-everywhere pattern as the rest of this file.
  *
  * Known limitation: the permission model is resource-level, not field- or
  * value-level (e.g. TECHNICIAN's asset `update` isn't restricted to only
@@ -192,6 +224,9 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "documents.void",
     "documents.archive",
     "documents.download",
+    "documents.templates.view",
+    "documents.render",
+    "documents.share",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -209,6 +244,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "documents.create",
     "documents.update",
     "documents.download",
+    "documents.render",
   ],
   ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY, ...DOCUMENT_READ_ONLY],
   VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY, ...DOCUMENT_READ_ONLY],

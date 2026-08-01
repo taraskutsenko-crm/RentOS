@@ -190,6 +190,52 @@ enum DocumentFileFormat {
   PHOTO
 }
 
+/// A DocumentTemplate's lifecycle — see docs/adr/0011-document-rendering-and-sharing.md.
+enum DocumentTemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+/// The e-signature provider a DocumentSignatureRequest was sent through.
+/// LOCAL_MOCK is the only implementation shipped in TASK-0008 Part 2 (see
+/// DocumentSignatureProvider); the rest are reserved values for future
+/// providers, the same "name the enum value now, build the integration
+/// later" convention already used for DocumentFileFormat.DOCX/XML.
+enum DocumentSignatureProviderType {
+  LOCAL_MOCK
+  DOCUSIGN
+  ADOBE_SIGN
+  AUTENTI
+  EIDAS
+}
+
+/// DocumentSignatureRequest lifecycle, matching the task's exact
+/// requirement list: REQUESTED (just sent to the provider) -> PENDING
+/// (provider acknowledged, awaiting the signer) -> SIGNED/REJECTED/EXPIRED,
+/// with CANCELLED reachable from REQUESTED/PENDING.
+enum DocumentSignatureStatus {
+  REQUESTED
+  PENDING
+  SIGNED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+/// Who a DocumentEmailDelivery was addressed to.
+enum DocumentEmailRecipientType {
+  CUSTOMER
+  EMPLOYEE
+  CUSTOM
+}
+
+enum DocumentEmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 /// Platform user identity. Not tenant-scoped — a user may belong to
 /// multiple tenants via TenantMembership.
 model User {
@@ -225,12 +271,17 @@ model User {
   quoteStatusChanges      QuoteStatusHistory[] @relation("QuoteStatusHistoryChangedBy")
   generatedQuoteDocuments QuoteDocument[]      @relation("QuoteDocumentGeneratedBy")
 
-  createdDocuments        Document[]              @relation("DocumentCreatedBy")
-  updatedDocuments        Document[]              @relation("DocumentUpdatedBy")
-  employeeOnDocuments     Document[]              @relation("DocumentEmployee")
-  createdDocumentVersions DocumentVersion[]       @relation("DocumentVersionCreatedBy")
-  uploadedDocumentFiles   DocumentFile[]          @relation("DocumentFileUploadedBy")
-  documentStatusChanges   DocumentStatusHistory[] @relation("DocumentStatusHistoryChangedBy")
+  createdDocuments                Document[]                 @relation("DocumentCreatedBy")
+  updatedDocuments                Document[]                 @relation("DocumentUpdatedBy")
+  employeeOnDocuments             Document[]                 @relation("DocumentEmployee")
+  createdDocumentVersions         DocumentVersion[]          @relation("DocumentVersionCreatedBy")
+  uploadedDocumentFiles           DocumentFile[]             @relation("DocumentFileUploadedBy")
+  documentStatusChanges           DocumentStatusHistory[]    @relation("DocumentStatusHistoryChangedBy")
+  createdDocumentTemplates        DocumentTemplate[]         @relation("DocumentTemplateCreatedBy")
+  createdDocumentTemplateVersions DocumentTemplateVersion[]  @relation("DocumentTemplateVersionCreatedBy")
+  createdDocumentShareLinks       DocumentShareLink[]        @relation("DocumentShareLinkCreatedBy")
+  sentDocumentEmailDeliveries     DocumentEmailDelivery[]    @relation("DocumentEmailDeliverySentBy")
+  requestedDocumentSignatures     DocumentSignatureRequest[] @relation("DocumentSignatureRequestedBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -278,13 +329,17 @@ model Tenant {
   quoteDocuments     QuoteDocument[]
   quoteSequences     QuoteSequence[]
 
-  documents             Document[]
-  documentVersions      DocumentVersion[]
-  documentFiles         DocumentFile[]
-  documentTemplates     DocumentTemplate[]
-  documentStatusHistory DocumentStatusHistory[]
-  documentItems         DocumentItem[]
-  documentSequences     DocumentSequence[]
+  documents                 Document[]
+  documentVersions          DocumentVersion[]
+  documentFiles             DocumentFile[]
+  documentTemplates         DocumentTemplate[]
+  documentTemplateVersions  DocumentTemplateVersion[]
+  documentStatusHistory     DocumentStatusHistory[]
+  documentItems             DocumentItem[]
+  documentSequences         DocumentSequence[]
+  documentShareLinks        DocumentShareLink[]
+  documentEmailDeliveries   DocumentEmailDelivery[]
+  documentSignatureRequests DocumentSignatureRequest[]
 
   @@index([deletedAt])
   @@map("tenants")
@@ -1099,9 +1154,11 @@ model Document {
   createdByUser User      @relation("DocumentCreatedBy", fields: [createdByUserId], references: [id])
   updatedByUser User?     @relation("DocumentUpdatedBy", fields: [updatedByUserId], references: [id])
 
-  versions      DocumentVersion[]
-  items         DocumentItem[]
-  statusHistory DocumentStatusHistory[]
+  versions          DocumentVersion[]
+  items             DocumentItem[]
+  statusHistory     DocumentStatusHistory[]
+  emailDeliveries   DocumentEmailDelivery[]
+  signatureRequests DocumentSignatureRequest[]
 
   @@unique([tenantId, documentNumber])
   @@index([tenantId, documentType])
@@ -1164,7 +1221,10 @@ model DocumentVersion {
   template      DocumentTemplate? @relation(fields: [templateId], references: [id])
   createdByUser User              @relation("DocumentVersionCreatedBy", fields: [createdByUserId], references: [id])
 
-  files DocumentFile[]
+  files             DocumentFile[]
+  shareLinks        DocumentShareLink[]
+  emailDeliveries   DocumentEmailDelivery[]
+  signatureRequests DocumentSignatureRequest[]
 
   @@unique([documentId, versionNumber])
   @@index([tenantId, documentId])
@@ -1207,20 +1267,74 @@ model DocumentFile {
 /// reference once template content and rendering are built in a later part,
 /// without a schema change at that point.
 model DocumentTemplate {
-  id           String       @id @default(uuid())
-  tenantId     String
-  documentType DocumentType
-  name         String
-  isDefault    Boolean      @default(false)
-  isActive     Boolean      @default(true)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id                   String                 @id @default(uuid())
+  tenantId             String
+  documentType         DocumentType
+  name                 String
+  description          String?
+  /// Draft while being authored; at most one ACTIVE template per
+  /// (tenantId, documentType) — enforced transactionally in
+  /// DocumentTemplatesService.activate (mirrors AssetFilesService's
+  /// isPrimary-image enforcement) and by a partial unique index for
+  /// defense in depth. Archived templates are retained for history but
+  /// can no longer be activated or used to render new documents.
+  status               DocumentTemplateStatus @default(DRAFT)
+  /// Denormalized pointer to the highest DocumentTemplateVersion.versionNumber
+  /// — same cached-pointer convention as Document.currentVersionNumber.
+  currentVersionNumber Int                    @default(1)
+  createdByUserId      String
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
 
-  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  versions DocumentVersion[]
+  tenant                   Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdByUser            User                      @relation("DocumentTemplateCreatedBy", fields: [createdByUserId], references: [id])
+  /// This template's own versioned HTML/CSS content (see
+  /// DocumentTemplateVersion) — distinct from `renderedDocumentVersions`
+  /// below, which are Document versions that were rendered *using* this
+  /// template.
+  versions                 DocumentTemplateVersion[]
+  renderedDocumentVersions DocumentVersion[]
 
-  @@index([tenantId, documentType, isActive])
+  @@index([tenantId, documentType, status])
   @@map("document_templates")
+}
+
+/// One immutable version of a DocumentTemplate's own HTML/CSS content —
+/// mirrors DocumentVersion's shape exactly (versionNumber, immutable once
+/// created, never edited). Editing a template's content always creates a
+/// new version; "Restore previous version" (see TASK-0008 Part 2) simply
+/// creates a fresh version copying an older one's content, the same
+/// "correction" pattern DocumentsService.createVersion already uses.
+model DocumentTemplateVersion {
+  id            String @id @default(uuid())
+  tenantId      String
+  templateId    String
+  versionNumber Int
+
+  /// The raw HTML body, containing `{{variable.path}}` placeholders
+  /// resolved by VariableResolverService/renderTemplate at render time —
+  /// see docs/adr/0011-document-rendering-and-sharing.md.
+  htmlContent     String
+  /// Optional additional CSS layered on top of the shared base stylesheet
+  /// (see apps/api/src/documents/rendering/base-document.css) — null uses
+  /// the base styling unmodified.
+  css             String?
+  /// Declarative list of variable paths this template references, purely
+  /// for the template editor UI (shows which placeholders are in use /
+  /// available) — never validated against at render time, since the
+  /// variable system is deliberately open-ended (see Part 2 of ADR 0011).
+  variablesSchema Json?
+
+  createdByUserId String
+  createdAt       DateTime @default(now())
+
+  tenant        Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  template      DocumentTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  createdByUser User             @relation("DocumentTemplateVersionCreatedBy", fields: [createdByUserId], references: [id])
+
+  @@unique([templateId, versionNumber])
+  @@index([tenantId, templateId])
+  @@map("document_template_versions")
 }
 
 /// Append-only history of Document.status transitions, mirroring
@@ -1297,4 +1411,114 @@ model DocumentSequence {
 
   @@unique([tenantId, documentType, year])
   @@map("document_sequences")
+}
+
+// ===========================================================================
+// TASK-0008 Part 2 — Rendering, Templates, Public Sharing, Email, E-Signature
+// See docs/adr/0011-document-rendering-and-sharing.md.
+// ===========================================================================
+
+/// A public, unauthenticated access link for one Document — mirrors
+/// Quote.publicTokenHash's hashed-opaque-token convention exactly, but as
+/// its own table (not a column on Document) since a document can have a
+/// history of links (old ones disabled, not overwritten) and needs its own
+/// counters. At most one ACTIVE (non-disabled, non-expired) link per
+/// Document is enforced in DocumentSharingService — "regenerate" disables
+/// the previous link and creates a new one, never mutates the old row's
+/// token.
+model DocumentShareLink {
+  id                String @id @default(uuid())
+  tenantId          String
+  /// Which specific version was shared — a link always serves the version
+  /// that was active when it was created, never silently upgrading to a
+  /// later correction (consistent with historical-immutability elsewhere
+  /// in this codebase).
+  documentVersionId String
+
+  /// SHA-256 hash of the opaque token embedded in the public URL — the
+  /// plaintext token is never stored, same reasoning as
+  /// quote-public-token.util.ts.
+  tokenHash    String   @unique
+  /// Optional extra protection: an argon2 hash of a short access password,
+  /// reusing PasswordService (the same hashing this codebase already uses
+  /// for User.passwordHash) rather than inventing a second scheme.
+  passwordHash String?
+  expiresAt    DateTime
+
+  viewCount      Int       @default(0)
+  downloadCount  Int       @default(0)
+  lastAccessedAt DateTime?
+  lastAccessedIp String?
+  /// Set when explicitly disabled (or superseded by a regenerated link);
+  /// null means still potentially usable (still subject to expiresAt).
+  disabledAt     DateTime?
+
+  createdByUserId String
+  createdAt       DateTime @default(now())
+
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  documentVersion DocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  createdByUser   User            @relation("DocumentShareLinkCreatedBy", fields: [createdByUserId], references: [id])
+
+  @@index([tenantId, documentVersionId])
+  @@map("document_share_links")
+}
+
+/// One email send attempt for a Document — kept as its own row (rather than
+/// only an AuditLog entry, unlike Quotes' send-email logging) because
+/// "retry" needs a concrete, re-sendable resource: the original recipient/
+/// subject/message/attachment choice, looked up by id after the fact.
+model DocumentEmailDelivery {
+  id                String                     @id @default(uuid())
+  tenantId          String
+  documentId        String
+  documentVersionId String
+  recipientType     DocumentEmailRecipientType
+  recipientEmail    String
+  subject           String
+  message           String?
+  status            DocumentEmailStatus        @default(PENDING)
+  errorMessage      String?
+  sentByUserId      String
+  createdAt         DateTime                   @default(now())
+  sentAt            DateTime?
+
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  document        Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentVersion DocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  sentByUser      User            @relation("DocumentEmailDeliverySentBy", fields: [sentByUserId], references: [id])
+
+  @@index([tenantId, documentId, createdAt])
+  @@map("document_email_deliveries")
+}
+
+/// Tracks one e-signature request for a specific DocumentVersion, decoupled
+/// from Document.status (which stays a coarse business-lifecycle field) —
+/// see DocumentSignatureProvider/DocumentSignatureService and ADR 0011.
+/// `provider` is LOCAL_MOCK for every request in Part 2 (no real provider
+/// integration yet); `externalReference` is null until a real provider
+/// exists to populate it.
+model DocumentSignatureRequest {
+  id                String                        @id @default(uuid())
+  tenantId          String
+  documentId        String
+  documentVersionId String
+  provider          DocumentSignatureProviderType @default(LOCAL_MOCK)
+  status            DocumentSignatureStatus       @default(REQUESTED)
+  signerName        String?
+  signerEmail       String?
+  externalReference String?
+  requestedByUserId String
+  requestedAt       DateTime                      @default(now())
+  respondedAt       DateTime?
+  expiresAt         DateTime?
+  updatedAt         DateTime                      @updatedAt
+
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  document        Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentVersion DocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  requestedByUser User            @relation("DocumentSignatureRequestedBy", fields: [requestedByUserId], references: [id])
+
+  @@index([tenantId, documentId, requestedAt])
+  @@map("document_signature_requests")
 }

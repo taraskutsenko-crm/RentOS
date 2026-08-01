@@ -1,0 +1,141 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Alert, AlertDescription, Button, Input, Label } from "@rentos/ui";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+
+import { useAssets } from "../../hooks/use-assets";
+import { useCustomers } from "../../hooks/use-customers";
+import { useCurrentTenantId } from "../../hooks/use-current-tenant";
+import { documentSchema, type DocumentFormValues } from "../../lib/validation";
+import type { DocumentType } from "../../types/document";
+
+const DOCUMENT_TYPES: DocumentType[] = [
+  "QUOTE",
+  "CONTRACT",
+  "HANDOVER_PROTOCOL",
+  "RETURN_PROTOCOL",
+  "DAMAGE_REPORT",
+  "CONTRACT_AMENDMENT",
+  "CUSTOM",
+];
+
+export interface DocumentFormProps {
+  onSubmit: (values: DocumentFormValues) => Promise<void>;
+  isPending: boolean;
+  errorMessage?: string | null;
+  submitLabel: string;
+  submittingLabel: string;
+}
+
+export function DocumentForm({
+  onSubmit,
+  isPending,
+  errorMessage,
+  submitLabel,
+  submittingLabel,
+}: DocumentFormProps) {
+  const { t } = useTranslation();
+  const [tenantId] = useCurrentTenantId();
+  const { data: customers } = useCustomers(tenantId, { pageSize: 100 });
+  const { data: assets } = useAssets(tenantId, { pageSize: 100 });
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<DocumentFormValues>({
+    resolver: zodResolver(documentSchema),
+    defaultValues: {
+      documentType: "CONTRACT",
+      customTypeName: "",
+      title: "",
+      customerId: "",
+      assetId: "",
+    },
+  });
+
+  const documentType = watch("documentType");
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+      {errorMessage && (
+        <Alert variant="destructive">
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="documentType">{t("document.fields.documentType")}</Label>
+        <select
+          id="documentType"
+          className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+          {...register("documentType")}
+        >
+          {DOCUMENT_TYPES.map((value) => (
+            <option key={value} value={value}>
+              {t(`document.types.${value}`)}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {documentType === "CUSTOM" && (
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="customTypeName">{t("document.fields.customTypeName")}</Label>
+          <Input
+            id="customTypeName"
+            aria-invalid={!!errors.customTypeName}
+            {...register("customTypeName")}
+          />
+          {errors.customTypeName && (
+            <p className="text-destructive text-xs">{t(errors.customTypeName.message!)}</p>
+          )}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="title">{t("document.fields.title")}</Label>
+        <Input id="title" {...register("title")} />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="customerId">{t("customer.title")}</Label>
+        <select
+          id="customerId"
+          className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+          {...register("customerId")}
+        >
+          <option value="">{t("document.fields.none")}</option>
+          {customers?.items.map((customer) => (
+            <option key={customer.id} value={customer.id}>
+              {customer.firstName} {customer.lastName}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="assetId">{t("asset.title")}</Label>
+        <select
+          id="assetId"
+          className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+          {...register("assetId")}
+        >
+          <option value="">{t("document.fields.none")}</option>
+          {assets?.items.map((asset) => (
+            <option key={asset.id} value={asset.id}>
+              {asset.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <Button type="submit" disabled={isPending || isSubmitting}>
+        {isPending || isSubmitting ? submittingLabel : submitLabel}
+      </Button>
+    </form>
+  );
+}

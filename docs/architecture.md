@@ -515,12 +515,12 @@ rule, and `generateRentalNumber`'s count-then-check race has been
 replaced with the same atomic sequence pattern `quote-numbering.util.ts`
 already used.
 
-## Document Management Platform (TASK-0008 Part 1)
+## Document Management Platform (TASK-0008 Parts 1–2)
 
-See [ADR 0010](adr/0010-document-management-platform.md) for the full
-design rationale. **This is Part 1 only: architecture and domain model.**
-No visual PDF layouts, template authoring UI, or e-signature integration
-exist yet — those are later parts.
+See [ADR 0010](adr/0010-document-management-platform.md) (Part 1: domain
+model) and [ADR 0011](adr/0011-document-rendering-and-sharing.md) (Part 2:
+templates, rendering, public sharing, email, e-signature foundation) for the
+full design rationale.
 
 ### Domain model
 
@@ -535,8 +535,12 @@ Document (tenant-scoped; documentType CONTRACT|HANDOVER_PROTOCOL|RETURN_PROTOCOL
   ├─ DocumentItem[] (per-line/per-asset; assetId/rentalItemId nullable, dataJson JSON)
   └─ DocumentStatusHistory (append-only, changedByUserId nullable for future public actions)
 
-DocumentTemplate (minimal registry — id/documentType/name/isDefault/isActive; no rendering content yet)
+DocumentTemplate (id/documentType/name/description/status DRAFT|ACTIVE|ARCHIVED/currentVersionNumber)
+  └─ DocumentTemplateVersion[] (versionNumber, htmlContent, css, variablesSchema — immutable once created)
 DocumentSequence (tenantId, documentType, year — backs concurrency-safe documentNumber generation)
+DocumentShareLink (per DocumentVersion; tokenHash, passwordHash?, expiresAt, viewCount, downloadCount, disabledAt?)
+DocumentEmailDelivery (per Document; recipientType, recipientEmail, subject, status, errorMessage?, sentAt?)
+DocumentSignatureRequest (per Document; provider, status REQUESTED|PENDING|SIGNED|REJECTED|EXPIRED|CANCELLED)
 ```
 
 `Document` holds no type-specific columns — every document type shares the
@@ -605,16 +609,64 @@ every status change, sends, views, signatures, downloads, archival, and
 version creation into one chronologically-sorted feed, the same
 normalized shape as Assets/Rentals/Quotes.
 
-### Deliberately not built in Part 1
+### Part 2: templates, rendering, public sharing, email, e-signature
 
-- Template authoring and any rendering engine (`DocumentTemplate` is a
-  bare registry with no content field).
-- PDF/HTML/JSON_SNAPSHOT generation for a `DocumentVersion` (the format
-  enum values are reserved; nothing produces them yet).
-- E-signature provider integration — `sign`/`reject`/`markViewed` only
-  record staff-asserted outcomes.
-- Any public/customer-facing endpoint (no token-based access like
-  Quotes' `/public/quotes/:token` exists yet).
+See [ADR 0011](adr/0011-document-rendering-and-sharing.md) for full
+rationale.
+
+- **Templates** (`documents/document-templates.service.ts`) — versioned,
+  one `ACTIVE` per `(tenant, documentType)` (transactional demotion +
+  partial unique index). Template resolution at render time: explicit
+  `DocumentVersion.templateId` → tenant's `ACTIVE` template for that type →
+  built-in `DEFAULT_TEMPLATES` (never a DB row), so every document type
+  renders correctly with zero tenant setup.
+- **Rendering** (`documents/rendering/`) — `DocumentRendererService.
+renderHtml()` resolves `{{dot.path}}` variables (company/customer/
+  employee/asset/rental/quote/today/signature/notes/document/data) against
+  a `VariableResolverService`-built context, HTML-escaping every
+  substituted value. **HTML is never persisted** — always recomputed from
+  the immutable `DocumentVersion` snapshot. `PdfRendererService` converts
+  the resolved HTML to a PDF buffer via a reused headless Chromium instance
+  (Puppeteer — a scoped exception to ADR 0007's "no headless browser" for
+  Quotes; `QuotePdfService`'s `pdfkit` pipeline is untouched).
+  `DocumentPdfService` stores the PDF as a new `DocumentFile` and caches it
+  per version until a forced regeneration.
+- **Public sharing** (`documents/sharing/`) — `DocumentShareLink` per
+  version, opaque SHA-256-hashed token, optional argon2-hashed password, at
+  most one active link per document (creating a new one disables the old
+  one). Both `POST /public/documents/:token/view` and `.../pdf` are `POST`
+  (password travels in the body, never a query string) — no `GET` variant.
+  View/download counts, last-access IP, and disable/regenerate history are
+  tracked; a public view also advances `Document.status` `SENT → VIEWED`
+  the same way an authenticated `markViewed` does.
+- **Email** (`documents/email/`) — `DocumentEmailDelivery` is a durable row
+  per send attempt (not just an audit-log entry, unlike Quotes), reusing the
+  existing `EmailProvider` abstraction (ADR 0007). Sending is synchronous in
+  Part 2; `dispatch()` is the documented future-queue seam. Failed sends are
+  retryable via `POST .../email/:id/retry`.
+- **E-signature** (`documents/signature/`) — `DOCUMENT_SIGNATURE_PROVIDER`
+  DI token (third instance of the swappable-adapter pattern, after
+  `StorageAdapter` and `EmailProvider`), bound to `LocalMockSignatureProvider`
+  only. `DocumentSignatureRequest`'s own status machine is deliberately
+  **not** auto-synced to `Document.status` — no real provider/webhook exists
+  yet, so staff confirm outcomes via the existing `sign()`/`reject()`
+  actions.
+- **Frontend** — full UI now exists: document list/detail/preview
+  (`app/app/documents/**`), template registry/editor
+  (`app/app/documents/templates/**`), and a standalone public share page
+  (`app/share/[token]`, no login, handles the password-required flow).
+  There is no document "edit" page — editing isn't in Part 7's required
+  action set, and a document's content is normally populated by the
+  originating workflow, not hand-typed.
+
+### New `documents.*` permissions in Part 2
+
+`documents.templates.view`, `documents.templates.manage`, `documents.render`,
+`documents.share` were added alongside Part 1's set. MANAGER gets
+`render`/`share`/`templates.view` but not `templates.manage`; TECHNICIAN gets
+`render` only; ACCOUNTANT/VIEWER get `templates.view` (read-only) but not
+`render`/`share`.
+
 - Frontend UI (types, hooks, pages, localization) — backend architecture
   only, per the task's explicit scope.
 - Migrating the existing `Quote` module into `Document` rows (see ADR

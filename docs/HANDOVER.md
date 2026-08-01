@@ -8,15 +8,19 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `5a4ffb8` (feat: add Document Management
-  Platform foundation — TASK-0008 Part 1)
-- **Quality gates:** format/lint/typecheck/build green; 391 backend + 141
-  frontend tests passing (532 total). Migration verified against a fresh
-  Dockerized Postgres; a live 20-way concurrent document-creation check
-  against the running Docker stack produced 20 unique document numbers.
-- **GitHub Actions:** pending at commit time — this line is updated once
-  the pushed run completes; if you're reading this before that update,
-  check the Actions tab for the current status of this commit.
+- **Latest verified commit:** `4560727` (feat: add document rendering,
+  templates, public sharing, email, and e-signature foundation — TASK-0008
+  Part 2)
+- **Quality gates:** format/lint/typecheck/build green; 430 backend + 163
+  frontend tests passing (593 total). Migration verified against a fresh
+  Dockerized Postgres. A real PDF was generated from inside the built
+  Alpine API container (Puppeteer + apk `chromium`, `%PDF-1.4` magic bytes
+  confirmed), and the full template/rendering/sharing/email/signature
+  flow was walked manually against the running Docker stack via both the
+  API directly and the browser UI (login → tenant select →
+  `/app/documents` → create/preview/share/email/sign → public
+  `/share/:token` page → PDF download).
+- **GitHub Actions:** green — [run 30696039123](https://github.com/taraskutsenko-crm/RentOS/actions/runs/30696039123).
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

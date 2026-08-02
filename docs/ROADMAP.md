@@ -132,6 +132,15 @@ built feature yet.
 
 **Status: NEXT**
 
+> The brand and design-token foundation this task builds on is already
+> in place: [`BRAND_GUIDELINES.md`](BRAND_GUIDELINES.md) (colors,
+> typography, spacing, radius, shadows, motion, icons, voice),
+> [`UI_PATTERNS.md`](UI_PATTERNS.md) (every reusable component pattern
+> and its states), and [`UX_PRINCIPLES.md`](UX_PRINCIPLES.md) (30
+> permanent behavioral rules) — see D-041 in `DECISIONS.md`. TASK-0010
+> is where these get _applied_ across every existing page; it does not
+> redefine them.
+
 - Premium modern staff interface, built on the existing `@rentos/ui`
   (shadcn/ui-based) component set and Tailwind conventions — not a new
   design system from scratch.

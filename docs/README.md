@@ -5,6 +5,18 @@
   principles, extensible areas, changes that require a new ADR before
   implementation, forbidden shortcuts, and the verification contract
   every task must satisfy. Read this before starting any task.
+- [`BRAND_GUIDELINES.md`](BRAND_GUIDELINES.md) — Havelio's permanent
+  visual identity: color system, typography, spacing, radius, shadows,
+  icons, illustrations, chart style, logo/app-icon guidelines, motion,
+  product voice, empty states, and document style. Every visual value
+  used anywhere in the product traces back to this file.
+- [`UI_PATTERNS.md`](UI_PATTERNS.md) — every reusable interface pattern
+  (navigation, tables, forms, dialogs, dropdowns, empty/loading/error
+  states, and more), each with its purpose, when (not) to use it, and
+  its visual/keyboard/loading/empty/error/disabled/mobile behavior.
+- [`UX_PRINCIPLES.md`](UX_PRINCIPLES.md) — 30 permanent behavioral
+  rules for how the product acts, each grounded in a real decision or
+  the stated brand personality.
 - [`VISION.md`](VISION.md) — the long-term product vision: what RentOS
   is, the problem it solves, and what's implemented vs. planned vs.
   long-term direction.

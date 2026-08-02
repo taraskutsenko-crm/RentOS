@@ -8,9 +8,9 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `PENDING` (feat: add customer portal and
-  Havelio rebrand — TASK-0009) — updated in a follow-up docs commit once
-  pushed; see that commit's message for the exact hash.
+- **Latest verified commit:** `ee34903` (fix: remove eslint no-explicit-any
+  violation in portal ZIP test helper, on top of `cfb22a2` — feat: add
+  customer portal and Havelio rebrand — TASK-0009)
 - **Quality gates:** format/lint/typecheck/build green; 465 backend + 190
   frontend tests passing (655 total). Migration applied and verified
   against a rebuilt Docker Compose stack (both `api` and `web` images
@@ -38,8 +38,11 @@ prior conversations.
   code defect, given the exhaustive API-level verification above and the
   27 new frontend component tests covering exactly these pages' render
   logic.
-- **GitHub Actions:** `PENDING` — updated in the same follow-up docs
-  commit once confirmed green.
+- **GitHub Actions:** green — [run 30746156322](https://github.com/taraskutsenko-crm/RentOS/actions/runs/30746156322)
+  (the immediately preceding run on `cfb22a2` failed `lint` on a stray
+  `no-explicit-any` in the new ZIP-download test helper — a stale local
+  lint result, since the fix was made after the last local `pnpm lint`
+  pass; caught and fixed in `ee34903` above).
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

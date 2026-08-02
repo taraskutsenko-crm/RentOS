@@ -27,16 +27,21 @@ function tokenFromInviteLink(inviteLink: string): string {
 
 // supertest/superagent only auto-buffers response.body for content-types it
 // recognizes as binary; "application/zip" isn't one of them, so requests for
-// the ZIP endpoint need an explicit raw-buffer parser. Typed loosely against
-// `any` because superagent's own `Parser` type is a two-overload union
-// (string-body vs. stream-body) that a single concretely-typed function
-// cannot satisfy structurally.
+// the ZIP endpoint need an explicit raw-buffer parser. Typed loosely because
+// superagent's own `Parser` type is a two-overload union (string-body vs.
+// stream-body) that a single concretely-typed function cannot satisfy
+// structurally.
+interface BinaryParserSource {
+  on(event: "data", listener: (chunk: Buffer) => void): void;
+  on(event: "end", listener: () => void): void;
+}
+
 function binaryParser(
-  res: { on: (event: string, listener: (...args: any[]) => void) => void },
+  res: BinaryParserSource,
   callback: (err: Error | null, body: Buffer) => void,
 ): void {
   const chunks: Buffer[] = [];
-  res.on("data", (chunk: Buffer) => chunks.push(chunk));
+  res.on("data", (chunk) => chunks.push(chunk));
   res.on("end", () => callback(null, Buffer.concat(chunks)));
 }
 

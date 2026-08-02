@@ -145,13 +145,19 @@ automation layer in mind, without speculatively building that layer now.
 
 ## Customer portal direction
 
-**Not yet implemented**, beyond the narrow, already-shipped public
-quote-acceptance page (a token-authenticated, read-mostly view — see
-[ADR 0007](adr/0007-quotes-and-commercial-offers.md)'s public-token
-section). The long-term direction is a proper customer-facing portal:
-authenticated customer accounts, self-service booking requests, rental
-history, document/contract access, and online payment — none of which
-exists today.
+**Implemented (TASK-0009).** A full, premium self-service portal now
+exists — its own authenticated customer accounts (a fully separate auth
+stack from staff login, see [ADR 0012](adr/0012-customer-portal.md)),
+dashboard, rental history and a calendar view, document access with
+preview/download/e-signature, extension requests, damage reports, a
+message center, notifications, and equipment/QR-code lookup. **Not yet
+implemented**: online payment (blocked on the still-`Planned` Payments/
+Invoicing phase) and self-service _booking_ (a customer can request an
+extension to an existing rental, but cannot yet create a brand-new
+booking from the portal — that remains a staff-initiated action). The
+narrow, token-authenticated public quote-acceptance page from ADR 0007
+continues to exist as a separate, simpler flow for prospects who aren't
+yet portal customers.
 
 ## Mobile application direction
 
@@ -205,26 +211,28 @@ commitment.
 
 ## Implemented vs. planned vs. long-term — summary
 
-| Capability                                                                                                            | Status                            |
-| --------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| Auth, multi-tenancy, RBAC                                                                                             | **Implemented**                   |
-| Customers module                                                                                                      | **Implemented**                   |
-| Universal Assets module (categories, statuses, custom fields, images/documents, timeline)                             | **Implemented**                   |
-| Rentals module (lifecycle, availability engine, pricing)                                                              | **Implemented**                   |
-| Configurable monthly billing strategies (Rentals)                                                                     | **Implemented**                   |
-| Quotes and commercial offers (wizard, PDF, public acceptance, conversion)                                             | **Implemented**                   |
-| Configurable monthly billing strategies (Quotes, shared with Rentals)                                                 | **Implemented**                   |
-| Race-safe rental-number generation                                                                                    | **Implemented**                   |
-| Document Management Platform — domain model, templates, rendering, sharing, email, e-signature foundation (TASK-0008) | **Implemented**                   |
-| Real e-signature provider integration (DocuSign/Adobe Sign/Autenti/eIDAS)                                             | **Planned**                       |
-| Payments, invoicing, deposit collection/refund                                                                        | **Planned, later phase**          |
-| Background jobs / scheduled automation                                                                                | **Planned, later phase**          |
-| Customer portal                                                                                                       | **Long-term direction**           |
-| Mobile application                                                                                                    | **Long-term direction**           |
-| Public API / third-party integrations                                                                                 | **Long-term direction**           |
-| AI-performed workflows (beyond conversational assistance)                                                             | **Long-term direction**           |
-| Predictive maintenance / asset intelligence                                                                           | **Long-term direction**           |
-| Marketplace/platform                                                                                                  | **Long-term, unscoped direction** |
+| Capability                                                                                                                                                   | Status                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
+| Auth, multi-tenancy, RBAC                                                                                                                                    | **Implemented**                   |
+| Customers module                                                                                                                                             | **Implemented**                   |
+| Universal Assets module (categories, statuses, custom fields, images/documents, timeline)                                                                    | **Implemented**                   |
+| Rentals module (lifecycle, availability engine, pricing)                                                                                                     | **Implemented**                   |
+| Configurable monthly billing strategies (Rentals)                                                                                                            | **Implemented**                   |
+| Quotes and commercial offers (wizard, PDF, public acceptance, conversion)                                                                                    | **Implemented**                   |
+| Configurable monthly billing strategies (Quotes, shared with Rentals)                                                                                        | **Implemented**                   |
+| Race-safe rental-number generation                                                                                                                           | **Implemented**                   |
+| Document Management Platform — domain model, templates, rendering, sharing, email, e-signature foundation (TASK-0008)                                        | **Implemented**                   |
+| Customer Portal — auth, dashboard, rentals/calendar, documents, extension requests, damage reports, messages, notifications, equipment/QR lookup (TASK-0009) | **Implemented**                   |
+| Havelio rebrand (visible UI strings)                                                                                                                         | **Implemented**                   |
+| Real e-signature provider integration (DocuSign/Adobe Sign/Autenti/eIDAS)                                                                                    | **Planned**                       |
+| Payments, invoicing, deposit collection/refund                                                                                                               | **Planned, later phase**          |
+| Background jobs / scheduled automation                                                                                                                       | **Planned, later phase**          |
+| Portal notification emails/push, self-service booking, online payment                                                                                        | **Planned**                       |
+| Mobile application                                                                                                                                           | **Long-term direction**           |
+| Public API / third-party integrations                                                                                                                        | **Long-term direction**           |
+| AI-performed workflows (beyond conversational assistance)                                                                                                    | **Long-term direction**           |
+| Predictive maintenance / asset intelligence                                                                                                                  | **Long-term direction**           |
+| Marketplace/platform                                                                                                                                         | **Long-term, unscoped direction** |
 
 See [ROADMAP.md](ROADMAP.md) for the phase-by-phase breakdown and
 [HANDOVER.md](HANDOVER.md) for the current verified technical state.

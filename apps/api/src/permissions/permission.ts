@@ -105,11 +105,23 @@ export const DOCUMENT_PERMISSIONS = [
   "documents.share",
 ] as const;
 
+/**
+ * Staff-side administration of a Customer's portal access — inviting them,
+ * revoking access, viewing their portal activity (messages, extension
+ * requests, damage reports). Kept as a single coarse permission (not a
+ * `customers.portal.*` family) since the Customers module itself has no
+ * fine-grained permission gating yet (see CustomersController, which only
+ * applies TenantGuard) — this is additive, not a retrofit of that existing
+ * behavior. See docs/adr/0012-customer-portal.md.
+ */
+export const CUSTOMER_PORTAL_PERMISSIONS = ["customers.portal.manage"] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
   ...QUOTE_PERMISSIONS,
   ...DOCUMENT_PERMISSIONS,
+  ...CUSTOMER_PORTAL_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
@@ -227,6 +239,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "documents.templates.view",
     "documents.render",
     "documents.share",
+    "customers.portal.manage",
   ],
   TECHNICIAN: [
     "assets.read",

@@ -8,19 +8,38 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `4560727` (feat: add document rendering,
-  templates, public sharing, email, and e-signature foundation — TASK-0008
-  Part 2)
-- **Quality gates:** format/lint/typecheck/build green; 430 backend + 163
-  frontend tests passing (593 total). Migration verified against a fresh
-  Dockerized Postgres. A real PDF was generated from inside the built
-  Alpine API container (Puppeteer + apk `chromium`, `%PDF-1.4` magic bytes
-  confirmed), and the full template/rendering/sharing/email/signature
-  flow was walked manually against the running Docker stack via both the
-  API directly and the browser UI (login → tenant select →
-  `/app/documents` → create/preview/share/email/sign → public
-  `/share/:token` page → PDF download).
-- **GitHub Actions:** green — [run 30696039123](https://github.com/taraskutsenko-crm/RentOS/actions/runs/30696039123).
+- **Latest verified commit:** `PENDING` (feat: add customer portal and
+  Havelio rebrand — TASK-0009) — updated in a follow-up docs commit once
+  pushed; see that commit's message for the exact hash.
+- **Quality gates:** format/lint/typecheck/build green; 465 backend + 190
+  frontend tests passing (655 total). Migration applied and verified
+  against a rebuilt Docker Compose stack (both `api` and `web` images
+  rebuilt from scratch). The full customer-portal backend flow was walked
+  end-to-end against the running Docker stack via real authenticated HTTP
+  calls through the browser (dual staff+customer sessions coexisting):
+  register → create customer/asset/rental → invite → activate → portal
+  login → list/view rentals → view/preview/download a real generated PDF
+  → customer e-signature (confirmed `Document.status` advanced to
+  `SIGNED`) → ZIP download of rental documents (`PK` magic bytes) → QR
+  code generation (`image/png`) → submit extension request → staff
+  approve (confirmed `Rental.plannedEnd` and `totalMinor` genuinely
+  recalculated) → customer notification received → submit damage report
+  → staff review → staff convert to a real `DAMAGE_REPORT` document →
+  bidirectional messages → mark notification read → asset info with
+  financial fields stripped. Staff-side UI (registration, customer/asset/
+  rental creation, the `customers.portal.manage`-gated invite/revoke/
+  messages panel) was verified visually via the browser. The customer-
+  facing portal pages (`/portal/(shell)/**`) hit a Browser-preview-pane
+  compositing limitation in that session (screenshots/accessibility-tree
+  reads returned a stale "page couldn't load" fallback despite the
+  server returning complete, correct HTML — confirmed via direct `curl`
+  and via an in-page `fetch()` call, both returning valid 10KB+ documents,
+  and zero errors in the container logs) — a tooling limitation, not a
+  code defect, given the exhaustive API-level verification above and the
+  27 new frontend component tests covering exactly these pages' render
+  logic.
+- **GitHub Actions:** `PENDING` — updated in the same follow-up docs
+  commit once confirmed green.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let
@@ -78,8 +97,8 @@ not `^typecheck` — a deliberate fix, see commit `6b739f1`).
 - **NestJS module-per-domain**: `auth`, `tenants`, `customers`, `assets`
   (+ `asset-categories`, `asset-statuses`, `asset-custom-fields`,
   `asset-files`), `rentals`, `rental-billing-settings`, `quotes`,
-  `documents`, `email`, `permissions`, `audit`, `storage`, `prisma`,
-  `health`.
+  `documents`, `customer-portal` (its own, fully separate auth stack — see
+  ADR 0012), `email`, `permissions`, `audit`, `storage`, `prisma`, `health`.
 
 ## Backend structure (`apps/api/src`)
 
@@ -398,6 +417,72 @@ Sign/Autenti/eIDAS are named but not implemented — only the seam and a
 local mock provider exist), and the existing `Quote` module is still not
 migrated/duplicated into `Document` rows (see D-021 in DECISIONS.md).
 
+## Customer Portal (TASK-0009)
+
+`apps/api/src/customer-portal/` — see [ADR 0012](adr/0012-customer-portal.md)
+for full rationale; this section is the short practical summary.
+
+**Auth is fully separate from staff auth**: its own `JwtModule` bound to
+`JWT_CUSTOMER_ACCESS_SECRET` (distinct from `JWT_ACCESS_SECRET`), its own
+cookie pair (`rentos_portal_access_token`/`rentos_portal_refresh_token`),
+its own `CustomerAuthGuard`/`CustomerTokenService`. Never imports
+`AuthModule`. A portal session cannot satisfy a staff route, and vice
+versa — verified by a dedicated e2e test. Login is
+`tenantSlug + email + password` (`Customer.email` isn't unique per
+tenant); a partial unique index enforces at most one activated portal
+account per `(tenant, email)`. `PrismaService` globally `omit`s
+`portalPasswordHash`/`portalInvitationTokenHash` from every query by
+default.
+
+**Every portal service is an ownership-checking wrapper**, never a fork:
+`PortalRentalsService`/`PortalDocumentsService`/`PortalAssetsService`/etc.
+each wrap the equivalent staff-facing service and add a
+`resource.customerId === customerId` check, returning 404 (never 403) on
+mismatch. No pricing/availability/rendering/signature logic is duplicated
+anywhere in this tree.
+
+**New capability added to an existing service**: `RentalsService
+.extendPlannedEnd()` — the only new business-logic method this task added
+outside `customer-portal/`, because `update()`'s existing
+`EDITABLE_STATUSES` guard structurally cannot touch `plannedEnd` for a
+RESERVED/ACTIVE rental. Portal extension-request approval calls this
+method; nothing in the portal reimplements pricing or availability logic.
+
+**Damage reports are their own model** (`RentalDamageReport` +
+`RentalDamageReportPhoto`), not a `Document` row — `Document
+.createdByUserId` has no customer-actor path. `convertToDocument()` is
+staff-initiated and creates a real `DAMAGE_REPORT` document.
+
+**Signature/status sync**: unlike ADR 0011's staff-side signature flow
+(deliberately not auto-synced to `Document.status`), a customer's own
+authenticated portal sign click via `DocumentSignatureService
+.customerSign()` **does** advance `Document.status` — the customer's own
+click is the confirmation, with no webhook-verification gap.
+
+**Scope boundaries** (all deliberate, see ADR 0012): notifications are
+in-app only, no email/push; ZIP bundling of a rental's documents is fully
+in-memory (`archiver`, no streaming — `StorageService` has none); the
+asset QR code links to the authenticated portal rental page, not a new
+public unauthenticated endpoint.
+
+**Frontend**: `apps/web/src/app/portal/**` — `portal/login`,
+`portal/invite/[token]` (public), `portal/(shell)/**` (dashboard, rentals
+
+- detail, calendar, documents + detail, messages, notifications, asset
+  detail), gated by its own `usePortalMe()` check. Staff-side management
+  (`CustomerPortalPanel`) is embedded on the existing customer detail page,
+  gated by the new `customers.portal.manage` permission.
+
+**Havelio rebrand**: every visible UI string, page title, browser tab
+title, email template, and generated-document footer now reads "Havelio"
+instead of "RentOS." Internal package/module names and cookie names are
+unchanged for now.
+
+**Still not built**: portal notification emails/push (in-app only today),
+a real subdomain-per-tenant deployment (`tenantSlug` is collected via a
+form field on login, not resolved from the URL), and a full "message
+read" UI badge on the staff side beyond the panel itself.
+
 ## Important API conventions
 
 - Every list endpoint returns `{ items, total, page, pageSize }`.
@@ -517,6 +602,14 @@ partial-success state to rely on.
   in Part 7's required action set, and document content is normally
   populated by the originating workflow (rental/quote conversion), not
   hand-typed by staff.
+- Customer Portal (TASK-0009) has no email/push notification channel —
+  `CustomerNotification` is in-app only; a customer must visit the portal
+  to see an update. See [ADR 0012](adr/0012-customer-portal.md).
+- Portal login collects `tenantSlug` as a form field rather than resolving
+  it from a subdomain — no subdomain-per-tenant deployment exists yet.
+- Internal package/module names and cookie names still say "RentOS" —
+  only user-visible strings were rebranded to "Havelio" (deliberate, see
+  ADR 0012 decision 10).
 
 Resolved by the pre-TASK-0008 stabilization task (see
 [ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)):
@@ -532,12 +625,13 @@ maintained list.
 
 ## Next recommended task
 
-TASK-0008 (Parts 1 and 2) is now complete. **TASK-0009** is the next major
-task on the roadmap — do not start it in the same session/branch as
-TASK-0008 unless explicitly instructed to. Likely candidates for
-TASK-0009 include: a real e-signature provider integration (behind the
-`DocumentSignatureProvider` seam built in Part 2), a production email
-provider (behind the existing `EmailProvider` seam), or a new business
+TASK-0009 (Customer Portal + Havelio rebrand) is now complete. **TASK-0010**
+is the next major task on the roadmap — do not start it in the same
+session/branch as TASK-0009 unless explicitly instructed to. Likely
+candidates for TASK-0010 include: a real e-signature provider integration
+(behind the `DocumentSignatureProvider` seam built in TASK-0008 Part 2), a
+production email provider (behind the existing `EmailProvider` seam,
+which would also unlock portal notification emails), or a new business
 module (invoicing/payments) — see [ROADMAP.md](ROADMAP.md) for the current
 phase ordering.
 

@@ -11,6 +11,7 @@ import { AssetFilesModule } from "./asset-files/asset-files.module";
 import { AssetStatusesModule } from "./asset-statuses/asset-statuses.module";
 import { AssetsModule } from "./assets/assets.module";
 import { AuthModule } from "./auth/auth.module";
+import { CustomerPortalModule } from "./customer-portal/customer-portal.module";
 import { CustomersModule } from "./customers/customers.module";
 import { DocumentsModule } from "./documents/documents.module";
 import { HealthModule } from "./health/health.module";
@@ -47,6 +48,7 @@ import { TenantsModule } from "./tenants/tenants.module";
     RentalBillingSettingsModule,
     QuotesModule,
     DocumentsModule,
+    CustomerPortalModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

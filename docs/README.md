@@ -19,7 +19,8 @@
   and the practical "how it works" reference for the Assets and Rentals
   modules.
 - [`api.md`](api.md) — REST API reference for auth/tenancy, Customers,
-  Assets, Rentals, Quotes, and the Document Management Platform endpoints.
+  Assets, Rentals, Quotes, the Document Management Platform, and the
+  Customer Portal endpoints.
 - [`adr/`](adr/) — architecture decision records.
   - [0001 — Authentication and tenant-context strategy](adr/0001-authentication-and-tenant-context.md)
   - [0002 — Universal asset model](adr/0002-universal-asset-model.md)
@@ -32,3 +33,4 @@
   - [0009 — Shared monthly pricing and atomic rental numbering](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)
   - [0010 — Document Management Platform (Part 1)](adr/0010-document-management-platform.md)
   - [0011 — Document rendering, templates, public sharing, email, and e-signature foundation (Part 2)](adr/0011-document-rendering-and-sharing.md)
+  - [0012 — Customer portal and Havelio rebrand](adr/0012-customer-portal.md)

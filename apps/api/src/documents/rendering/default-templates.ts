@@ -50,7 +50,7 @@ function documentShell(titleLine: string, subtitleLine: string, body: string): s
   </div>
 
   <div class="doc-footer">
-    <span>{{company.name}}</span>
+    <span>{{company.name}} · Generated with Havelio</span>
     <span>{{document.number}} · {{today}}</span>
   </div>
 </div>`.trim();

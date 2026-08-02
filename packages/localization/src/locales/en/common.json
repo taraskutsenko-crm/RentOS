@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "RentOS",
+    "name": "Havelio",
     "tagline": "One Platform. Every Asset."
   },
   "common": {
@@ -95,7 +95,35 @@
     "noCustomers": "No customers found",
     "backToList": "Back to customers",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "portal": {
+      "title": "Customer portal access",
+      "notInvited": "Not invited yet",
+      "invited": "Invitation sent",
+      "activated": "Portal active",
+      "invitationExpired": "Invitation expired",
+      "lastLogin": "Last login",
+      "invite": "Invite to portal",
+      "reinvite": "Resend invitation",
+      "revoke": "Revoke access",
+      "revokeConfirm": "This will sign the customer out of the portal and disable their access until re-invited. Continue?",
+      "inviteLinkCreated": "Invitation link created — share it with your customer:",
+      "noEmailOnFile": "This customer has no email on file. Add one to send an invitation.",
+      "extensionRequests": "Extension requests",
+      "damageReports": "Damage reports",
+      "messages": "Portal messages",
+      "noExtensionRequests": "No extension requests",
+      "noDamageReports": "No damage reports",
+      "noMessages": "No messages yet",
+      "approve": "Approve",
+      "reject": "Decline",
+      "responseMessagePlaceholder": "Optional note to the customer…",
+      "markReviewed": "Mark reviewed",
+      "markResolved": "Mark resolved",
+      "convertToDocument": "Convert to document",
+      "sendMessage": "Send",
+      "messagePlaceholder": "Reply to this customer…"
+    }
   },
   "asset": {
     "title": "Assets",
@@ -704,6 +732,167 @@
       "unlock": "Unlock",
       "notFound": "This link is invalid or has expired",
       "downloadPdf": "Download PDF"
+    }
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "rentals": "Rentals",
+      "calendar": "Calendar",
+      "documents": "Documents",
+      "messages": "Messages",
+      "notifications": "Notifications",
+      "logout": "Log out"
+    },
+    "auth": {
+      "login": {
+        "title": "Customer portal",
+        "subtitle": "Sign in to manage your rentals",
+        "company": "Company",
+        "companyPlaceholder": "your-company",
+        "email": "Email",
+        "password": "Password",
+        "submit": "Sign in",
+        "submitting": "Signing in…"
+      },
+      "activate": {
+        "title": "Activate your account",
+        "subtitle": "Set a password to access your customer portal",
+        "password": "Password",
+        "submit": "Activate account",
+        "submitting": "Activating…",
+        "invalidToken": "This invitation link is invalid or has expired."
+      },
+      "errors": {
+        "invalidCredentials": "Invalid email, password, or company.",
+        "invalidToken": "Invalid or expired invitation.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome back, {{name}}",
+      "currentRentals": "Current rentals",
+      "upcomingRentals": "Upcoming rentals",
+      "unreadMessages": "Unread messages",
+      "pendingSignatures": "Pending signatures",
+      "pendingExtensions": "Pending extension requests",
+      "recentRentals": "Recent rentals",
+      "viewAll": "View all",
+      "noRentals": "You have no rentals yet"
+    },
+    "rentals": {
+      "title": "Rentals",
+      "backToList": "Back to rentals",
+      "searchPlaceholder": "Search rentals…",
+      "filterStatus": "Status",
+      "allStatuses": "All statuses",
+      "detailTitle": "Rental {{number}}",
+      "period": "Rental period",
+      "items": "Equipment",
+      "timeline": "Timeline",
+      "documents": "Documents",
+      "downloadAllDocuments": "Download all documents (.zip)",
+      "qrCode": "QR code",
+      "showQrCode": "Show QR code",
+      "requestExtension": "Request extension",
+      "reportDamage": "Report damage",
+      "extensionRequests": "Extension requests",
+      "damageReports": "Damage reports",
+      "noRentals": "No rentals found",
+      "quantity": "Qty",
+      "statuses": {
+        "DRAFT": "Draft",
+        "QUOTE": "Quote",
+        "RESERVED": "Reserved",
+        "ACTIVE": "Active",
+        "RETURNED": "Returned",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      }
+    },
+    "calendar": {
+      "title": "Rental calendar",
+      "empty": "No rentals in this period"
+    },
+    "extensionRequests": {
+      "title": "Request an extension",
+      "currentEnd": "Current end date",
+      "newEndDate": "New end date",
+      "message": "Message (optional)",
+      "submit": "Submit request",
+      "submitting": "Submitting…",
+      "submitted": "Your extension request has been submitted.",
+      "responseFrom": "Response",
+      "statuses": {
+        "PENDING": "Pending",
+        "APPROVED": "Approved",
+        "REJECTED": "Declined",
+        "CANCELLED": "Cancelled"
+      }
+    },
+    "damageReports": {
+      "title": "Report damage",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe what happened…",
+      "asset": "Equipment (optional)",
+      "anyEquipment": "Not sure / general",
+      "photos": "Photos",
+      "addPhoto": "Add photo",
+      "uploading": "Uploading…",
+      "submit": "Submit report",
+      "submitting": "Submitting…",
+      "submitted": "Your damage report has been submitted.",
+      "statuses": {
+        "SUBMITTED": "Submitted",
+        "REVIEWED": "Reviewed",
+        "RESOLVED": "Resolved",
+        "CONVERTED_TO_DOCUMENT": "Documented"
+      }
+    },
+    "documents": {
+      "title": "Documents",
+      "backToList": "Back to documents",
+      "filterStatus": "Status",
+      "allStatuses": "All statuses",
+      "preview": "Preview",
+      "download": "Download PDF",
+      "sign": "Sign document",
+      "signing": "Signing…",
+      "signed": "You signed this document.",
+      "pendingSignature": "Awaiting your signature",
+      "noDocuments": "No documents found",
+      "signatureRequests": "Signature requests"
+    },
+    "messages": {
+      "title": "Messages",
+      "placeholder": "Write a message…",
+      "send": "Send",
+      "sending": "Sending…",
+      "empty": "No messages yet",
+      "generalThread": "General"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAllRead": "Mark all as read",
+      "empty": "You're all caught up",
+      "types": {
+        "MESSAGE": "New message",
+        "DOCUMENT_SHARED": "Document shared",
+        "SIGNATURE_REQUESTED": "Signature requested",
+        "EXTENSION_RESPONSE": "Extension request update",
+        "RENTAL_UPDATE": "Rental update",
+        "DAMAGE_REPORT_UPDATE": "Damage report update"
+      }
+    },
+    "assets": {
+      "title": "Equipment",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "condition": "Condition notes"
+    },
+    "darkMode": {
+      "toggle": "Toggle dark mode"
     }
   }
 }

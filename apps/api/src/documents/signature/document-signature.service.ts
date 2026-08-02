@@ -120,6 +120,51 @@ export class DocumentSignatureService {
     return this.updateStatus(current, "CANCELLED", actorUserId);
   }
 
+  /**
+   * The customer-portal completion action (TASK-0009) — the customer
+   * clicking "Sign" in their own portal IS the real-world signing event
+   * for LOCAL_MOCK, so this is the one place Part 2's deliberately-deferred
+   * DocumentSignatureRequest/Document.status bridge (see this class's own
+   * doc comment and ADR 0011) is actually wired: it both completes the
+   * signature request AND advances the parent Document to SIGNED, since a
+   * customer action (unlike a staff-side refreshStatus poll) is a genuine,
+   * authenticated confirmation of the outcome, not a status check.
+   */
+  async customerSign(
+    tenantId: string,
+    documentId: string,
+    signatureRequestId: string,
+    customerId: string,
+  ): Promise<DocumentSignatureRequest> {
+    const current = await this.findOrThrow(tenantId, documentId, signatureRequestId);
+    if (!OPEN_STATUSES.includes(current.status as (typeof OPEN_STATUSES)[number])) {
+      throw new ConflictException(`Cannot sign a signature request in ${current.status} status`);
+    }
+
+    // Advance the Document first — changeStatus validates the transition
+    // and throws before writing anything if it's invalid. Only once that
+    // has genuinely succeeded (or was already a no-op) do we mark the
+    // signature request itself SIGNED, so a rejected transition never
+    // leaves the two records in an inconsistent state.
+    await this.documentsService.sign(tenantId, documentId, null, true, {});
+
+    const updated = await this.prisma.documentSignatureRequest.update({
+      where: { id: current.id },
+      data: { status: "SIGNED", respondedAt: new Date() },
+    });
+
+    await this.auditService.log({
+      tenantId,
+      userId: null,
+      action: "document.signature_status_changed",
+      entityType: "Document",
+      entityId: documentId,
+      metadata: { signatureRequestId: current.id, from: current.status, to: "SIGNED", customerId },
+    });
+
+    return updated;
+  }
+
   private async findOrThrow(
     tenantId: string,
     documentId: string,

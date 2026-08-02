@@ -55,6 +55,8 @@ import { LocalMockSignatureProvider } from "./signature/local-mock-signature.pro
     DocumentTemplatesService,
     DocumentRendererService,
     DocumentPdfService,
+    DocumentSharingService,
+    DocumentSignatureService,
   ],
 })
 export class DocumentsModule {}

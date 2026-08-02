@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "RentOS",
+    "name": "Havelio",
     "tagline": "Jedna platforma. Każdy zasób."
   },
   "common": {
@@ -95,7 +95,35 @@
     "noCustomers": "Nie znaleziono klientów",
     "backToList": "Powrót do klientów",
     "previous": "Poprzednia",
-    "next": "Następna"
+    "next": "Następna",
+    "portal": {
+      "title": "Dostęp do portalu klienta",
+      "notInvited": "Jeszcze nie zaproszono",
+      "invited": "Zaproszenie wysłane",
+      "activated": "Portal aktywny",
+      "invitationExpired": "Zaproszenie wygasło",
+      "lastLogin": "Ostatnie logowanie",
+      "invite": "Zaproś do portalu",
+      "reinvite": "Wyślij zaproszenie ponownie",
+      "revoke": "Odbierz dostęp",
+      "revokeConfirm": "Spowoduje to wylogowanie klienta z portalu i wyłączenie dostępu do czasu ponownego zaproszenia. Kontynuować?",
+      "inviteLinkCreated": "Link zaproszenia utworzony — udostępnij go klientowi:",
+      "noEmailOnFile": "Ten klient nie ma zapisanego adresu e-mail. Dodaj go, aby wysłać zaproszenie.",
+      "extensionRequests": "Wnioski o przedłużenie",
+      "damageReports": "Zgłoszenia uszkodzeń",
+      "messages": "Wiadomości portalu",
+      "noExtensionRequests": "Brak wniosków o przedłużenie",
+      "noDamageReports": "Brak zgłoszeń uszkodzeń",
+      "noMessages": "Brak wiadomości",
+      "approve": "Zatwierdź",
+      "reject": "Odrzuć",
+      "responseMessagePlaceholder": "Opcjonalna notatka do klienta…",
+      "markReviewed": "Oznacz jako sprawdzone",
+      "markResolved": "Oznacz jako rozwiązane",
+      "convertToDocument": "Przekształć w dokument",
+      "sendMessage": "Wyślij",
+      "messagePlaceholder": "Odpowiedz temu klientowi…"
+    }
   },
   "asset": {
     "title": "Aktywa",
@@ -704,6 +732,167 @@
       "unlock": "Odblokuj",
       "notFound": "Ten link jest nieprawidłowy lub wygasł",
       "downloadPdf": "Pobierz PDF"
+    }
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Panel",
+      "rentals": "Wynajmy",
+      "calendar": "Kalendarz",
+      "documents": "Dokumenty",
+      "messages": "Wiadomości",
+      "notifications": "Powiadomienia",
+      "logout": "Wyloguj się"
+    },
+    "auth": {
+      "login": {
+        "title": "Portal klienta",
+        "subtitle": "Zaloguj się, aby zarządzać swoimi wynajmami",
+        "company": "Firma",
+        "companyPlaceholder": "twoja-firma",
+        "email": "E-mail",
+        "password": "Hasło",
+        "submit": "Zaloguj się",
+        "submitting": "Logowanie…"
+      },
+      "activate": {
+        "title": "Aktywuj konto",
+        "subtitle": "Ustaw hasło, aby uzyskać dostęp do portalu klienta",
+        "password": "Hasło",
+        "submit": "Aktywuj konto",
+        "submitting": "Aktywowanie…",
+        "invalidToken": "Ten link zaproszenia jest nieprawidłowy lub wygasł."
+      },
+      "errors": {
+        "invalidCredentials": "Nieprawidłowy e-mail, hasło lub firma.",
+        "invalidToken": "Nieprawidłowe lub wygasłe zaproszenie.",
+        "generic": "Coś poszło nie tak. Spróbuj ponownie."
+      }
+    },
+    "dashboard": {
+      "title": "Panel",
+      "welcome": "Witaj ponownie, {{name}}",
+      "currentRentals": "Aktualne wynajmy",
+      "upcomingRentals": "Nadchodzące wynajmy",
+      "unreadMessages": "Nieprzeczytane wiadomości",
+      "pendingSignatures": "Oczekujące podpisy",
+      "pendingExtensions": "Oczekujące wnioski o przedłużenie",
+      "recentRentals": "Ostatnie wynajmy",
+      "viewAll": "Zobacz wszystkie",
+      "noRentals": "Nie masz jeszcze żadnych wynajmów"
+    },
+    "rentals": {
+      "title": "Wynajmy",
+      "backToList": "Powrót do wynajmów",
+      "searchPlaceholder": "Szukaj wynajmów…",
+      "filterStatus": "Status",
+      "allStatuses": "Wszystkie statusy",
+      "detailTitle": "Wynajem {{number}}",
+      "period": "Okres wynajmu",
+      "items": "Sprzęt",
+      "timeline": "Oś czasu",
+      "documents": "Dokumenty",
+      "downloadAllDocuments": "Pobierz wszystkie dokumenty (.zip)",
+      "qrCode": "Kod QR",
+      "showQrCode": "Pokaż kod QR",
+      "requestExtension": "Poproś o przedłużenie",
+      "reportDamage": "Zgłoś uszkodzenie",
+      "extensionRequests": "Wnioski o przedłużenie",
+      "damageReports": "Zgłoszenia uszkodzeń",
+      "noRentals": "Nie znaleziono wynajmów",
+      "quantity": "Ilość",
+      "statuses": {
+        "DRAFT": "Wersja robocza",
+        "QUOTE": "Wycena",
+        "RESERVED": "Zarezerwowany",
+        "ACTIVE": "Aktywny",
+        "RETURNED": "Zwrócony",
+        "COMPLETED": "Zakończony",
+        "CANCELLED": "Anulowany"
+      }
+    },
+    "calendar": {
+      "title": "Kalendarz wynajmów",
+      "empty": "Brak wynajmów w tym okresie"
+    },
+    "extensionRequests": {
+      "title": "Poproś o przedłużenie",
+      "currentEnd": "Aktualna data zakończenia",
+      "newEndDate": "Nowa data zakończenia",
+      "message": "Wiadomość (opcjonalnie)",
+      "submit": "Wyślij wniosek",
+      "submitting": "Wysyłanie…",
+      "submitted": "Twój wniosek o przedłużenie został wysłany.",
+      "responseFrom": "Odpowiedź",
+      "statuses": {
+        "PENDING": "Oczekujący",
+        "APPROVED": "Zatwierdzony",
+        "REJECTED": "Odrzucony",
+        "CANCELLED": "Anulowany"
+      }
+    },
+    "damageReports": {
+      "title": "Zgłoś uszkodzenie",
+      "description": "Opis",
+      "descriptionPlaceholder": "Opisz, co się stało…",
+      "asset": "Sprzęt (opcjonalnie)",
+      "anyEquipment": "Nie jestem pewien / ogólne",
+      "photos": "Zdjęcia",
+      "addPhoto": "Dodaj zdjęcie",
+      "uploading": "Przesyłanie…",
+      "submit": "Wyślij zgłoszenie",
+      "submitting": "Wysyłanie…",
+      "submitted": "Twoje zgłoszenie uszkodzenia zostało wysłane.",
+      "statuses": {
+        "SUBMITTED": "Zgłoszone",
+        "REVIEWED": "Sprawdzone",
+        "RESOLVED": "Rozwiązane",
+        "CONVERTED_TO_DOCUMENT": "Udokumentowane"
+      }
+    },
+    "documents": {
+      "title": "Dokumenty",
+      "backToList": "Powrót do dokumentów",
+      "filterStatus": "Status",
+      "allStatuses": "Wszystkie statusy",
+      "preview": "Podgląd",
+      "download": "Pobierz PDF",
+      "sign": "Podpisz dokument",
+      "signing": "Podpisywanie…",
+      "signed": "Podpisano ten dokument.",
+      "pendingSignature": "Oczekuje na Twój podpis",
+      "noDocuments": "Nie znaleziono dokumentów",
+      "signatureRequests": "Wnioski o podpis"
+    },
+    "messages": {
+      "title": "Wiadomości",
+      "placeholder": "Napisz wiadomość…",
+      "send": "Wyślij",
+      "sending": "Wysyłanie…",
+      "empty": "Brak wiadomości",
+      "generalThread": "Ogólne"
+    },
+    "notifications": {
+      "title": "Powiadomienia",
+      "markAllRead": "Oznacz wszystkie jako przeczytane",
+      "empty": "Wszystko na bieżąco",
+      "types": {
+        "MESSAGE": "Nowa wiadomość",
+        "DOCUMENT_SHARED": "Udostępniono dokument",
+        "SIGNATURE_REQUESTED": "Poproszono o podpis",
+        "EXTENSION_RESPONSE": "Aktualizacja wniosku o przedłużenie",
+        "RENTAL_UPDATE": "Aktualizacja wynajmu",
+        "DAMAGE_REPORT_UPDATE": "Aktualizacja zgłoszenia uszkodzenia"
+      }
+    },
+    "assets": {
+      "title": "Sprzęt",
+      "manufacturer": "Producent",
+      "model": "Model",
+      "condition": "Uwagi dotyczące stanu"
+    },
+    "darkMode": {
+      "toggle": "Przełącz tryb ciemny"
     }
   }
 }

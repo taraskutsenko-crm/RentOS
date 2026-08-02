@@ -444,25 +444,27 @@ export class DocumentsService {
    * QuotesService's private markViewed, called from findByPublicToken.
    */
   async recordPublicView(tenantId: string, id: string): Promise<void> {
+    await this.recordView(tenantId, id, "Viewed via public link");
+  }
+
+  /** Same SENT -> VIEWED advancement as recordPublicView, distinguished only by its timeline reason text (TASK-0009). */
+  async recordPortalView(tenantId: string, id: string): Promise<void> {
+    await this.recordView(tenantId, id, "Viewed via customer portal");
+  }
+
+  private async recordView(tenantId: string, id: string, reason: string): Promise<void> {
     const current = await this.findOneRaw(tenantId, id);
     if (current.status !== "SENT") {
       return;
     }
-    await this.changeStatus(
-      tenantId,
-      id,
-      null,
-      "VIEWED",
-      "Viewed via public link",
-      "document.viewed",
-    );
+    await this.changeStatus(tenantId, id, null, "VIEWED", reason, "document.viewed");
   }
 
   /** SENT/VIEWED -> PARTIALLY_SIGNED or SIGNED, depending on `fullySigned`. No real e-signature integration yet — this only records the outcome. */
   async sign(
     tenantId: string,
     id: string,
-    actorUserId: string,
+    actorUserId: string | null,
     fullySigned: boolean,
     dto: StatusActionDto,
   ): Promise<DocumentDetailView> {
@@ -662,7 +664,7 @@ export class DocumentsService {
   async recordDownload(
     tenantId: string,
     id: string,
-    actorUserId: string,
+    actorUserId: string | null,
     fileId: string,
   ): Promise<void> {
     await this.auditService.log({

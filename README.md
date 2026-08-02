@@ -24,8 +24,15 @@ billing, and future mobile clients through an API-first architecture.
 > public share links, email delivery with retry, and an e-signature
 > provider abstraction (Part 2) — real DocuSign/Adobe Sign/Autenti/eIDAS
 > integration is not built yet, only the swappable seam and a local mock
-> provider. Remaining business modules (invoicing, payments) are still out
-> of scope until explicitly requested.
+> provider. A **Customer Portal** (TASK-0009) is also complete: secure
+> customer self-service with its own auth stack, a dashboard, rentals with
+> a calendar view, document preview/download/e-signature/ZIP-download,
+> extension requests, damage reports with photos, a message center,
+> notifications, and equipment/QR-code lookup — plus a staff-facing
+> invite/manage panel. The product's visible branding is now **Havelio**
+> (internal package/module names are unchanged for now). Remaining
+> business modules (invoicing, payments) are still out of scope until
+> explicitly requested.
 
 ## Tech Stack
 
@@ -248,6 +255,42 @@ See [ADR 0010](docs/adr/0010-document-management-platform.md),
 [docs/api.md](docs/api.md#document-management-platform-task-0008-parts-1-2)
 for the full design rationale and endpoint reference.
 
+## Customer Portal
+
+A premium, enterprise-grade self-service experience for end customers —
+its own auth stack, entirely separate from staff login (see
+[ADR 0012](docs/adr/0012-customer-portal.md)):
+
+- **Secure invitation-based onboarding** — staff invite a customer by
+  email; the customer sets their own password to activate the account.
+- **Dashboard** — current/upcoming rentals, unread messages, pending
+  signatures, pending extension requests, recent rentals at a glance.
+- **Rentals** — list, detail, rental timeline, and a lightweight calendar
+  view; internal-only fields are never exposed to the customer.
+- **Documents** — HTML preview, PDF download, e-signature (reuses the
+  Document Management Platform's signature abstraction), and a one-click
+  ZIP download of every document for a rental.
+- **Extension requests** — customer-submitted, staff approve/decline;
+  approval genuinely extends the rental (availability-checked, re-priced)
+  via a new `RentalsService.extendPlannedEnd()` capability.
+- **Damage reports** — customer-submitted with photo uploads; staff
+  review and can convert a report into a real, signable Document.
+- **Message center & notifications** — a threaded conversation per
+  customer, and an in-app notification feed for messages, extension
+  responses, and damage-report updates.
+- **Equipment info & QR codes** — read-only asset details (no financial
+  fields) and a scannable QR code linking back to the authenticated
+  rental page.
+- **Staff-side management** — an invite/revoke panel plus extension
+  request, damage report, and message management embedded on the
+  existing customer detail page, gated by a new
+  `customers.portal.manage` permission.
+- **Dark mode, full localization (6 languages), responsive layout.**
+
+See [ADR 0012](docs/adr/0012-customer-portal.md) and
+[docs/api.md](docs/api.md#customer-portal-task-0009) for the full design
+rationale and endpoint reference.
+
 ## Monorepo Structure
 
 ```
@@ -358,10 +401,11 @@ Deliberately out of scope so far:
 
 - Invoices, payments, deposit collection/refund workflows,
   maintenance/repair workflows
-- Branches, warehouses, GPS tracking, customer portal
+- Branches, warehouses, GPS tracking
 - OAuth, production email sending (a development/logging provider ships
   today — see [Quotes](#quotes)), password reset, two-factor
-  authentication
+  authentication, portal notification emails (in-app only today — see
+  [Customer Portal](#customer-portal))
 - Theming, background jobs (BullMQ)
 - Quote PDF/email template customization (`quotes.manageTemplates` is a
   reserved permission with no template editor behind it yet)

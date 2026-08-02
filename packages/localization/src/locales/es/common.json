@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "RentOS",
+    "name": "Havelio",
     "tagline": "Una plataforma. Cualquier activo."
   },
   "common": {
@@ -95,7 +95,35 @@
     "noCustomers": "No se encontraron clientes",
     "backToList": "Volver a clientes",
     "previous": "Anterior",
-    "next": "Siguiente"
+    "next": "Siguiente",
+    "portal": {
+      "title": "Acceso al portal del cliente",
+      "notInvited": "Aún no invitado",
+      "invited": "Invitación enviada",
+      "activated": "Portal activo",
+      "invitationExpired": "Invitación caducada",
+      "lastLogin": "Último acceso",
+      "invite": "Invitar al portal",
+      "reinvite": "Reenviar invitación",
+      "revoke": "Revocar acceso",
+      "revokeConfirm": "Esto cerrará la sesión del cliente en el portal y desactivará su acceso hasta que se le vuelva a invitar. ¿Continuar?",
+      "inviteLinkCreated": "Enlace de invitación creado — compártelo con tu cliente:",
+      "noEmailOnFile": "Este cliente no tiene un correo electrónico registrado. Añade uno para enviar una invitación.",
+      "extensionRequests": "Solicitudes de prórroga",
+      "damageReports": "Informes de daños",
+      "messages": "Mensajes del portal",
+      "noExtensionRequests": "Sin solicitudes de prórroga",
+      "noDamageReports": "Sin informes de daños",
+      "noMessages": "Aún no hay mensajes",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "responseMessagePlaceholder": "Nota opcional para el cliente…",
+      "markReviewed": "Marcar como revisado",
+      "markResolved": "Marcar como resuelto",
+      "convertToDocument": "Convertir en documento",
+      "sendMessage": "Enviar",
+      "messagePlaceholder": "Responder a este cliente…"
+    }
   },
   "asset": {
     "title": "Activos",
@@ -704,6 +732,167 @@
       "unlock": "Desbloquear",
       "notFound": "Este enlace no es válido o ha expirado",
       "downloadPdf": "Descargar PDF"
+    }
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Panel",
+      "rentals": "Alquileres",
+      "calendar": "Calendario",
+      "documents": "Documentos",
+      "messages": "Mensajes",
+      "notifications": "Notificaciones",
+      "logout": "Cerrar sesión"
+    },
+    "auth": {
+      "login": {
+        "title": "Portal del cliente",
+        "subtitle": "Inicia sesión para gestionar tus alquileres",
+        "company": "Empresa",
+        "companyPlaceholder": "tu-empresa",
+        "email": "Correo electrónico",
+        "password": "Contraseña",
+        "submit": "Iniciar sesión",
+        "submitting": "Iniciando sesión…"
+      },
+      "activate": {
+        "title": "Activa tu cuenta",
+        "subtitle": "Establece una contraseña para acceder a tu portal del cliente",
+        "password": "Contraseña",
+        "submit": "Activar cuenta",
+        "submitting": "Activando…",
+        "invalidToken": "Este enlace de invitación no es válido o ha caducado."
+      },
+      "errors": {
+        "invalidCredentials": "Correo electrónico, contraseña o empresa incorrectos.",
+        "invalidToken": "Invitación no válida o caducada.",
+        "generic": "Algo salió mal. Inténtalo de nuevo."
+      }
+    },
+    "dashboard": {
+      "title": "Panel",
+      "welcome": "Hola de nuevo, {{name}}",
+      "currentRentals": "Alquileres actuales",
+      "upcomingRentals": "Próximos alquileres",
+      "unreadMessages": "Mensajes sin leer",
+      "pendingSignatures": "Firmas pendientes",
+      "pendingExtensions": "Solicitudes de prórroga pendientes",
+      "recentRentals": "Alquileres recientes",
+      "viewAll": "Ver todos",
+      "noRentals": "Aún no tienes alquileres"
+    },
+    "rentals": {
+      "title": "Alquileres",
+      "backToList": "Volver a alquileres",
+      "searchPlaceholder": "Buscar alquileres…",
+      "filterStatus": "Estado",
+      "allStatuses": "Todos los estados",
+      "detailTitle": "Alquiler {{number}}",
+      "period": "Periodo de alquiler",
+      "items": "Equipo",
+      "timeline": "Cronología",
+      "documents": "Documentos",
+      "downloadAllDocuments": "Descargar todos los documentos (.zip)",
+      "qrCode": "Código QR",
+      "showQrCode": "Mostrar código QR",
+      "requestExtension": "Solicitar prórroga",
+      "reportDamage": "Reportar daño",
+      "extensionRequests": "Solicitudes de prórroga",
+      "damageReports": "Informes de daños",
+      "noRentals": "No se encontraron alquileres",
+      "quantity": "Cant.",
+      "statuses": {
+        "DRAFT": "Borrador",
+        "QUOTE": "Presupuesto",
+        "RESERVED": "Reservado",
+        "ACTIVE": "Activo",
+        "RETURNED": "Devuelto",
+        "COMPLETED": "Completado",
+        "CANCELLED": "Cancelado"
+      }
+    },
+    "calendar": {
+      "title": "Calendario de alquileres",
+      "empty": "No hay alquileres en este periodo"
+    },
+    "extensionRequests": {
+      "title": "Solicitar una prórroga",
+      "currentEnd": "Fecha de fin actual",
+      "newEndDate": "Nueva fecha de fin",
+      "message": "Mensaje (opcional)",
+      "submit": "Enviar solicitud",
+      "submitting": "Enviando…",
+      "submitted": "Tu solicitud de prórroga ha sido enviada.",
+      "responseFrom": "Respuesta",
+      "statuses": {
+        "PENDING": "Pendiente",
+        "APPROVED": "Aprobada",
+        "REJECTED": "Rechazada",
+        "CANCELLED": "Cancelada"
+      }
+    },
+    "damageReports": {
+      "title": "Reportar daño",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Describe lo ocurrido…",
+      "asset": "Equipo (opcional)",
+      "anyEquipment": "No estoy seguro / general",
+      "photos": "Fotos",
+      "addPhoto": "Añadir foto",
+      "uploading": "Subiendo…",
+      "submit": "Enviar informe",
+      "submitting": "Enviando…",
+      "submitted": "Tu informe de daños ha sido enviado.",
+      "statuses": {
+        "SUBMITTED": "Enviado",
+        "REVIEWED": "Revisado",
+        "RESOLVED": "Resuelto",
+        "CONVERTED_TO_DOCUMENT": "Documentado"
+      }
+    },
+    "documents": {
+      "title": "Documentos",
+      "backToList": "Volver a documentos",
+      "filterStatus": "Estado",
+      "allStatuses": "Todos los estados",
+      "preview": "Vista previa",
+      "download": "Descargar PDF",
+      "sign": "Firmar documento",
+      "signing": "Firmando…",
+      "signed": "Has firmado este documento.",
+      "pendingSignature": "Se requiere tu firma",
+      "noDocuments": "No se encontraron documentos",
+      "signatureRequests": "Solicitudes de firma"
+    },
+    "messages": {
+      "title": "Mensajes",
+      "placeholder": "Escribe un mensaje…",
+      "send": "Enviar",
+      "sending": "Enviando…",
+      "empty": "Aún no hay mensajes",
+      "generalThread": "General"
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "markAllRead": "Marcar todas como leídas",
+      "empty": "Estás al día",
+      "types": {
+        "MESSAGE": "Nuevo mensaje",
+        "DOCUMENT_SHARED": "Documento compartido",
+        "SIGNATURE_REQUESTED": "Firma solicitada",
+        "EXTENSION_RESPONSE": "Actualización de solicitud de prórroga",
+        "RENTAL_UPDATE": "Actualización de alquiler",
+        "DAMAGE_REPORT_UPDATE": "Actualización de informe de daños"
+      }
+    },
+    "assets": {
+      "title": "Equipo",
+      "manufacturer": "Fabricante",
+      "model": "Modelo",
+      "condition": "Notas de estado"
+    },
+    "darkMode": {
+      "toggle": "Alternar modo oscuro"
     }
   }
 }

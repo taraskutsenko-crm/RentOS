@@ -1149,3 +1149,127 @@ No real signature provider is integrated — every request is served by
 `PublicUser` is the `User` model with `passwordHash` always stripped —
 verified by an automated test that no response body ever contains
 `passwordHash` or `tokenHash`.
+
+## Customer Portal (TASK-0009)
+
+See [ADR 0012](adr/0012-customer-portal.md) for full design rationale. The
+portal has its own auth stack (`rentos_portal_access_token`/
+`rentos_portal_refresh_token` cookies) — a portal session never satisfies a
+staff-only route (`TenantGuard`/`AuthGuard`) and vice versa. Routes below
+are grouped by who calls them.
+
+### Staff-side: inviting and administering portal access
+
+Require authentication + `customers.portal.manage`.
+
+- `POST /tenants/:tenantId/customers/:customerId/portal/invite` — Body:
+  `{ email? }` (defaults to the customer's own `email`). Generates an
+  invitation token (14-day expiry), emails it via the shared `EmailProvider`,
+  and returns `{ invited, email, expiresAt, emailSent, inviteLink }` — the
+  plaintext link is returned directly since no real email provider is
+  configured yet (same precedent as `DocumentSharingService`). **400** if
+  the customer has no email on file and none was provided.
+- `POST /tenants/:tenantId/customers/:customerId/portal/revoke` — Cancels a
+  pending invitation or disables an already-activated account (clears the
+  password hash, revokes every active refresh token).
+- `GET /tenants/:tenantId/customers/:customerId/portal/status` — Returns
+  `{ invited, activated, invitedAt, activatedAt, lastLoginAt,
+invitationExpired }`.
+- `GET /tenants/:tenantId/extension-requests?rentalId?` — Every extension
+  request for the tenant, optionally scoped to one rental.
+- `POST /tenants/:tenantId/extension-requests/:id/respond` — Body:
+  `{ approve: boolean, responseMessage? }`. Approving calls
+  `RentalsService.extendPlannedEnd()` (validates status is
+  RESERVED/ACTIVE, revalidates availability for the new tail window,
+  recomputes totals) before marking the request `APPROVED`. Always
+  notifies the customer. **409** if the request is not `PENDING`.
+- `GET /tenants/:tenantId/damage-reports?rentalId?` — Every damage report
+  for the tenant, with photos.
+- `POST /tenants/:tenantId/damage-reports/:id/review` — Body:
+  `{ status: "REVIEWED" | "RESOLVED" }`.
+- `POST /tenants/:tenantId/damage-reports/:id/convert` — Creates a real
+  `DAMAGE_REPORT` document (via `DocumentsService.create()`, authored by
+  the calling staff member) from the report's description/photos, and
+  marks the report `CONVERTED_TO_DOCUMENT`. **409** if already converted.
+- `GET /tenants/:tenantId/damage-reports/:id/photos/:photoId` — Streams a
+  photo.
+- `GET /tenants/:tenantId/customers/:customerId/portal/messages?rentalId?` —
+  The message thread with this customer; marks the customer's unread
+  messages read as a side effect.
+- `POST /tenants/:tenantId/customers/:customerId/portal/messages` — Body:
+  `{ body, rentalId? }`. Notifies the customer.
+
+### Portal auth — `/portal/auth`
+
+Public (no `TenantGuard`), rate-limited.
+
+- `POST /portal/auth/login` — Body: `{ tenantSlug, email, password }`.
+  **200** → `{ customer, tenant }` + sets portal session cookies. **401**
+  on any mismatch (never distinguishing wrong tenant/email/password).
+- `POST /portal/auth/activate-invitation` — Body: `{ token, password }`
+  (same password strength rule as staff registration). Sets the account's
+  password, marks it activated, and logs the customer in.
+- `POST /portal/auth/refresh` — Reads the refresh cookie; rotates both
+  cookies. **401** if missing/invalid/revoked.
+- `POST /portal/auth/logout` — Requires a portal session. Revokes the
+  presented refresh token and clears both cookies.
+- `GET /portal/auth/me` — Requires a portal session. Returns
+  `{ customer }` (a `PublicCustomer` — password/invitation-token hashes
+  always stripped).
+
+### Portal self-service — `/portal/*`
+
+All require a portal session (`CustomerAuthGuard`). Every route is scoped
+to the authenticated customer; a resource belonging to a different
+customer returns **404**, never 403.
+
+- `GET /portal/rentals` — Paginated list (`RentalListItem` minus
+  `internalNotes`).
+- `GET /portal/rentals/:id` — Full detail.
+- `GET /portal/rentals/:id/timeline`
+- `GET /portal/rentals/:id/documents/zip` — Streams a ZIP
+  (`Content-Type: application/zip`) of the current PDF of every document
+  tied to the rental, generating any missing PDF on the fly. **404** if
+  the rental has no documents.
+- `GET /portal/rentals/:id/qr-code` — Streams a PNG QR code
+  (`Content-Type: image/png`) encoding a link to this rental's
+  authenticated portal page.
+- `GET /portal/documents` — Paginated list, filterable by `rentalId`/
+  `status`/`documentType`.
+- `GET /portal/documents/:id`
+- `GET /portal/documents/:id/preview` — `{ html }`; also advances
+  `Document.status` `SENT → VIEWED` (same as the staff/public equivalents).
+- `GET /portal/documents/:id/pdf` — Streams the PDF; records a download.
+- `GET /portal/documents/:id/signature-requests`
+- `POST /portal/documents/:id/signature-requests/:signatureRequestId/sign` —
+  Marks the request `SIGNED` **and** advances `Document.status` (the one
+  place a customer-portal action auto-syncs the two — see ADR 0012
+  decision 6). **409** if the request isn't in an open status.
+- `GET /portal/extension-requests?rentalId?`
+- `POST /portal/extension-requests/rentals/:rentalId` — Body:
+  `{ requestedEnd, message? }`. **409** if the rental isn't
+  RESERVED/ACTIVE, or a `PENDING` request already exists for it. **400**
+  if `requestedEnd` is not after the rental's current `plannedEnd`.
+- `GET /portal/damage-reports?rentalId?`
+- `GET /portal/damage-reports/:id`
+- `POST /portal/damage-reports/rentals/:rentalId` — Body:
+  `{ description, assetId? }`.
+- `POST /portal/damage-reports/:id/photos` — Multipart `file` field
+  (image), validated the same way asset image uploads are.
+- `GET /portal/damage-reports/:id/photos/:photoId`
+- `GET /portal/messages?rentalId?` — Marks the staff's unread messages
+  read as a side effect.
+- `POST /portal/messages` — Body: `{ body, rentalId? }`. Notifies staff
+  is not sent by email today (in-app only — see ADR 0012 decision 7);
+  visible on the customer's portal panel on the staff side.
+- `GET /portal/notifications?unreadOnly?`
+- `GET /portal/notifications/unread-count` — `{ count }`.
+- `POST /portal/notifications/:id/read`
+- `POST /portal/notifications/read-all`
+- `GET /portal/assets/:id` — Equipment info, financial/internal fields
+  stripped (`purchasePriceMinor`, `internalNumber`, etc.). **404** unless
+  the customer has rented this asset (checked via a `RentalItem` join).
+- `GET /portal/assets/:id/images/:imageId`
+- `GET /portal/dashboard` — `{ currentRentalsCount, upcomingRentalsCount,
+recentRentals, unreadMessagesCount, unreadNotificationsCount,
+pendingSignatureRequestsCount, pendingExtensionRequestsCount }`.

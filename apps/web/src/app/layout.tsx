@@ -5,7 +5,7 @@ import { QueryProvider } from "../lib/query-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RentOS",
+  title: "Havelio",
   description: "One Platform. Every Asset.",
 };
 

@@ -16,6 +16,14 @@ export const apiEnvSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32, "JWT_ACCESS_SECRET must be at least 32 characters"),
   ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(900),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
+  // Customer Portal (TASK-0009) — deliberately a separate secret from
+  // JWT_ACCESS_SECRET so a customer-portal session token can never be
+  // confused with, or accidentally verified as, a staff session token,
+  // even if a bug caused the wrong verifier to be used. See
+  // docs/adr/0012-customer-portal.md.
+  JWT_CUSTOMER_ACCESS_SECRET: z
+    .string()
+    .min(32, "JWT_CUSTOMER_ACCESS_SECRET must be at least 32 characters"),
   COOKIE_DOMAIN: z.string().optional(),
   // File storage (asset images/documents). Only a local-filesystem adapter
   // is implemented today — see docs/adr/0007-asset-file-storage-strategy.md

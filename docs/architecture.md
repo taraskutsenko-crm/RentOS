@@ -102,13 +102,14 @@ pnpm --filter @rentos/web test
 See [`.env.example`](../.env.example) at the repo root for the full,
 current list with defaults. The auth-specific ones:
 
-| Variable                   | Purpose                                                        |
-| -------------------------- | -------------------------------------------------------------- |
-| `WEB_ORIGIN`               | Exact origin allowed to call the API with credentials (CORS)   |
-| `JWT_ACCESS_SECRET`        | HMAC secret for signing access tokens (≥32 chars)              |
-| `ACCESS_TOKEN_TTL_SECONDS` | Access token lifetime (default 900 = 15 min)                   |
-| `REFRESH_TOKEN_TTL_DAYS`   | Refresh token lifetime (default 30)                            |
-| `COOKIE_DOMAIN`            | Optional; set in production to share cookies across subdomains |
+| Variable                     | Purpose                                                                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `WEB_ORIGIN`                 | Exact origin allowed to call the API with credentials (CORS)                                                        |
+| `JWT_ACCESS_SECRET`          | HMAC secret for signing staff access tokens (≥32 chars)                                                             |
+| `JWT_CUSTOMER_ACCESS_SECRET` | HMAC secret for signing customer portal access tokens (≥32 chars) — distinct from `JWT_ACCESS_SECRET`, see ADR 0012 |
+| `ACCESS_TOKEN_TTL_SECONDS`   | Access token lifetime (default 900 = 15 min)                                                                        |
+| `REFRESH_TOKEN_TTL_DAYS`     | Refresh token lifetime (default 30)                                                                                 |
+| `COOKIE_DOMAIN`              | Optional; set in production to share cookies across subdomains                                                      |
 
 ### Asset file storage
 
@@ -671,3 +672,104 @@ renderHtml()` resolves `{{dot.path}}` variables (company/customer/
   only, per the task's explicit scope.
 - Migrating the existing `Quote` module into `Document` rows (see ADR
   0010's rationale for why `DocumentType.QUOTE` exists but is unused).
+
+## Customer Portal (TASK-0009)
+
+See [ADR 0012](adr/0012-customer-portal.md) for full design rationale,
+including why the portal has its own, fully separate auth stack.
+
+### Auth
+
+A `Customer` who accepts a staff-generated invitation
+(`POST /tenants/:tenantId/customers/:customerId/portal/invite`) sets a
+password and gets a portal session — cookies `rentos_portal_access_token`
+/ `rentos_portal_refresh_token`, signed with `JWT_CUSTOMER_ACCESS_SECRET`
+(a secret distinct from staff's `JWT_ACCESS_SECRET`), verified by
+`CustomerAuthGuard`, never by the staff `AuthGuard` or vice versa. Login is
+`tenantSlug + email + password` (`Customer.email` is optional and not
+unique per tenant, so email alone can't resolve an account). At most one
+**activated** portal account may exist per `(tenant, email)` — enforced by
+a partial unique index. `PrismaService` globally `omit`s
+`portalPasswordHash`/`portalInvitationTokenHash` from every query by
+default; only the portal auth service's own login/activation lookups opt
+back in.
+
+### Modules (`apps/api/src/customer-portal/`)
+
+Every module below is a thin, ownership-checking wrapper around an
+existing staff-facing service — no pricing, availability, rendering, or
+signature logic is duplicated anywhere in this tree:
+
+- **`auth/`** — `PortalAuthService` (login/activate/refresh/logout),
+  `CustomerAuthGuard`, `CustomerTokenService`.
+- **`invitations/`** — `CustomerPortalInvitationsService` (staff-side
+  invite/revoke/status). `invite()` returns the plaintext `inviteLink`
+  directly in its response, the same precedent `DocumentSharingService`
+  already set for share tokens, since no real email provider is wired in
+  yet.
+- **`rentals/`** — `PortalRentalsService` wraps `RentalsService`;
+  `PortalRentalListItem`/`PortalRentalDetail` omit `internalNotes`.
+- **`documents/`** — `PortalDocumentsService` wraps `DocumentsService` +
+  `DocumentRendererService` + `DocumentPdfService` +
+  `DocumentSignatureService`. `sign()` delegates to
+  `DocumentSignatureService.customerSign()`, the one place a customer's own
+  authenticated signature click also advances `Document.status` (ADR
+  0011's staff-side signature/status desync does not apply here — see ADR
+  0012 decision 6). `zipRentalDocuments()` bundles every document's current
+  PDF for a rental into an in-memory ZIP via `archiver`.
+- **`extension-requests/`** — `PortalExtensionRequestsService`. Approval
+  calls the new, additive `RentalsService.extendPlannedEnd()` (see ADR
+  0012 decision 4) — the only new business-logic method this task added to
+  an existing staff-facing service.
+- **`damage-reports/`** — `PortalDamageReportsService`. `RentalDamageReport`
+  is its own model (not a `Document` row — see ADR 0012 decision 5);
+  `convertToDocument()` is staff-initiated and creates a real
+  `DAMAGE_REPORT` document via `DocumentsService.create()`.
+- **`messages/`** — `PortalMessagesService`. One `CustomerPortalMessage`
+  table serves both directions (`senderType CUSTOMER|STAFF`), optionally
+  scoped to a rental. Fetching a thread as one party marks the other
+  party's unread messages read as a side effect.
+- **`notifications/`** — `PortalNotificationsService`. In-app only
+  (`CustomerNotification`), no email/push delivery — created by the other
+  portal services (message sent, extension responded, damage report
+  reviewed, etc.).
+- **`assets/`** — `PortalAssetsService` (equipment info minus financial/
+  internal fields, images, QR code). The QR code encodes a link to the
+  authenticated portal rental page — no new unauthenticated public
+  asset-lookup surface was built.
+- **`dashboard/`** — `PortalDashboardService.summary()`, a single
+  `Promise.all` of counts already derivable from the modules above.
+- **`staff/`** — `StaffPortalController`, one controller consolidating
+  every staff-facing portal-administration action (respond to extension
+  requests, review/convert damage reports, reply to portal messages, view
+  a customer's portal access status), gated by one new permission,
+  `customers.portal.manage`.
+
+### Permissions
+
+One new permission, `customers.portal.manage` (OWNER/ADMIN/MANAGER by
+default), gates every staff-facing portal-administration route in
+`StaffPortalController` and `CustomerPortalInvitationsController`.
+
+### Frontend
+
+`apps/web/src/app/portal/**` — a fully separate, unauthenticated-by-default
+route tree outside `app/app/**`: `portal/login`, `portal/invite/[token]`
+(public), and a route group `portal/(shell)` (dashboard, rentals + detail,
+calendar, documents + detail, messages, notifications, asset detail) gated
+by its own `usePortalMe()` check, mirroring `app/app/layout.tsx`'s pattern
+but against the portal session instead of the staff one. Dark mode is a
+client-only preference (`useDarkMode`, toggles `<html class="dark">`,
+persisted in `localStorage`), independent of the staff app. Staff-side
+portal management (invite/revoke, extension requests, damage reports,
+messages) is a `CustomerPortalPanel` embedded on the existing customer
+detail page, gated by `customers.portal.manage`.
+
+### Havelio rebrand
+
+Every user-facing string, page title, browser tab title, email template,
+and generated-document footer now reads "Havelio" instead of "RentOS" —
+`packages/shared/APP_NAME`, the root `<title>`, all six locale files'
+`app.name`, and the document footer template. Package names, internal
+module/class names, and cookie names are deliberately untouched (see ADR
+0012 decision 10).

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "RentOS",
+    "name": "Havelio",
     "tagline": "Одна платформа. Будь-який актив."
   },
   "common": {
@@ -95,7 +95,35 @@
     "noCustomers": "Клієнтів не знайдено",
     "backToList": "Назад до клієнтів",
     "previous": "Назад",
-    "next": "Далі"
+    "next": "Далі",
+    "portal": {
+      "title": "Доступ до клієнтського порталу",
+      "notInvited": "Ще не запрошено",
+      "invited": "Запрошення надіслано",
+      "activated": "Портал активний",
+      "invitationExpired": "Термін запрошення сплив",
+      "lastLogin": "Останній вхід",
+      "invite": "Запросити до порталу",
+      "reinvite": "Надіслати запрошення повторно",
+      "revoke": "Скасувати доступ",
+      "revokeConfirm": "Це завершить сеанс клієнта в порталі та вимкне доступ до повторного запрошення. Продовжити?",
+      "inviteLinkCreated": "Посилання-запрошення створено — надішліть його клієнту:",
+      "noEmailOnFile": "У цього клієнта немає вказаної електронної пошти. Додайте її, щоб надіслати запрошення.",
+      "extensionRequests": "Запити на продовження",
+      "damageReports": "Звіти про пошкодження",
+      "messages": "Повідомлення порталу",
+      "noExtensionRequests": "Немає запитів на продовження",
+      "noDamageReports": "Немає звітів про пошкодження",
+      "noMessages": "Повідомлень поки немає",
+      "approve": "Схвалити",
+      "reject": "Відхилити",
+      "responseMessagePlaceholder": "Необов'язкова примітка для клієнта…",
+      "markReviewed": "Позначити як розглянуто",
+      "markResolved": "Позначити як вирішено",
+      "convertToDocument": "Перетворити на документ",
+      "sendMessage": "Надіслати",
+      "messagePlaceholder": "Відповісти цьому клієнту…"
+    }
   },
   "asset": {
     "title": "Активи",
@@ -704,6 +732,167 @@
       "unlock": "Розблокувати",
       "notFound": "Це посилання недійсне або термін його дії минув",
       "downloadPdf": "Завантажити PDF"
+    }
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Панель",
+      "rentals": "Оренди",
+      "calendar": "Календар",
+      "documents": "Документи",
+      "messages": "Повідомлення",
+      "notifications": "Сповіщення",
+      "logout": "Вийти"
+    },
+    "auth": {
+      "login": {
+        "title": "Портал клієнта",
+        "subtitle": "Увійдіть, щоб керувати своїми орендами",
+        "company": "Компанія",
+        "companyPlaceholder": "ваша-компанія",
+        "email": "Електронна пошта",
+        "password": "Пароль",
+        "submit": "Увійти",
+        "submitting": "Вхід…"
+      },
+      "activate": {
+        "title": "Активуйте обліковий запис",
+        "subtitle": "Встановіть пароль для доступу до порталу клієнта",
+        "password": "Пароль",
+        "submit": "Активувати обліковий запис",
+        "submitting": "Активація…",
+        "invalidToken": "Це посилання-запрошення недійсне або термін його дії минув."
+      },
+      "errors": {
+        "invalidCredentials": "Неправильна електронна пошта, пароль або компанія.",
+        "invalidToken": "Недійсне або прострочене запрошення.",
+        "generic": "Щось пішло не так. Спробуйте ще раз."
+      }
+    },
+    "dashboard": {
+      "title": "Панель",
+      "welcome": "З поверненням, {{name}}",
+      "currentRentals": "Поточні оренди",
+      "upcomingRentals": "Майбутні оренди",
+      "unreadMessages": "Непрочитані повідомлення",
+      "pendingSignatures": "Очікувані підписи",
+      "pendingExtensions": "Очікувані запити на продовження",
+      "recentRentals": "Останні оренди",
+      "viewAll": "Переглянути всі",
+      "noRentals": "У вас поки немає оренд"
+    },
+    "rentals": {
+      "title": "Оренди",
+      "backToList": "Назад до оренд",
+      "searchPlaceholder": "Пошук оренд…",
+      "filterStatus": "Статус",
+      "allStatuses": "Усі статуси",
+      "detailTitle": "Оренда {{number}}",
+      "period": "Період оренди",
+      "items": "Обладнання",
+      "timeline": "Хронологія",
+      "documents": "Документи",
+      "downloadAllDocuments": "Завантажити всі документи (.zip)",
+      "qrCode": "QR-код",
+      "showQrCode": "Показати QR-код",
+      "requestExtension": "Запросити продовження",
+      "reportDamage": "Повідомити про пошкодження",
+      "extensionRequests": "Запити на продовження",
+      "damageReports": "Звіти про пошкодження",
+      "noRentals": "Оренд не знайдено",
+      "quantity": "Кількість",
+      "statuses": {
+        "DRAFT": "Чернетка",
+        "QUOTE": "Комерційна пропозиція",
+        "RESERVED": "Заброньовано",
+        "ACTIVE": "Активна",
+        "RETURNED": "Повернено",
+        "COMPLETED": "Завершена",
+        "CANCELLED": "Скасована"
+      }
+    },
+    "calendar": {
+      "title": "Календар оренд",
+      "empty": "Немає оренд у цьому періоді"
+    },
+    "extensionRequests": {
+      "title": "Запросити продовження",
+      "currentEnd": "Поточна дата завершення",
+      "newEndDate": "Нова дата завершення",
+      "message": "Повідомлення (необов'язково)",
+      "submit": "Надіслати запит",
+      "submitting": "Надсилання…",
+      "submitted": "Ваш запит на продовження надіслано.",
+      "responseFrom": "Відповідь",
+      "statuses": {
+        "PENDING": "Очікує",
+        "APPROVED": "Схвалено",
+        "REJECTED": "Відхилено",
+        "CANCELLED": "Скасовано"
+      }
+    },
+    "damageReports": {
+      "title": "Повідомити про пошкодження",
+      "description": "Опис",
+      "descriptionPlaceholder": "Опишіть, що сталося…",
+      "asset": "Обладнання (необов'язково)",
+      "anyEquipment": "Не впевнений / загальне",
+      "photos": "Фотографії",
+      "addPhoto": "Додати фото",
+      "uploading": "Завантаження…",
+      "submit": "Надіслати звіт",
+      "submitting": "Надсилання…",
+      "submitted": "Ваш звіт про пошкодження надіслано.",
+      "statuses": {
+        "SUBMITTED": "Надіслано",
+        "REVIEWED": "Розглянуто",
+        "RESOLVED": "Вирішено",
+        "CONVERTED_TO_DOCUMENT": "Оформлено документом"
+      }
+    },
+    "documents": {
+      "title": "Документи",
+      "backToList": "Назад до документів",
+      "filterStatus": "Статус",
+      "allStatuses": "Усі статуси",
+      "preview": "Перегляд",
+      "download": "Завантажити PDF",
+      "sign": "Підписати документ",
+      "signing": "Підписання…",
+      "signed": "Ви підписали цей документ.",
+      "pendingSignature": "Очікується ваш підпис",
+      "noDocuments": "Документів не знайдено",
+      "signatureRequests": "Запити на підпис"
+    },
+    "messages": {
+      "title": "Повідомлення",
+      "placeholder": "Напишіть повідомлення…",
+      "send": "Надіслати",
+      "sending": "Надсилання…",
+      "empty": "Повідомлень поки немає",
+      "generalThread": "Загальне"
+    },
+    "notifications": {
+      "title": "Сповіщення",
+      "markAllRead": "Позначити всі як прочитані",
+      "empty": "Ви переглянули все",
+      "types": {
+        "MESSAGE": "Нове повідомлення",
+        "DOCUMENT_SHARED": "Документ надіслано",
+        "SIGNATURE_REQUESTED": "Запитано підпис",
+        "EXTENSION_RESPONSE": "Оновлення запиту на продовження",
+        "RENTAL_UPDATE": "Оновлення оренди",
+        "DAMAGE_REPORT_UPDATE": "Оновлення звіту про пошкодження"
+      }
+    },
+    "assets": {
+      "title": "Обладнання",
+      "manufacturer": "Виробник",
+      "model": "Модель",
+      "condition": "Примітки щодо стану"
+    },
+    "darkMode": {
+      "toggle": "Перемкнути темний режим"
     }
   }
 }

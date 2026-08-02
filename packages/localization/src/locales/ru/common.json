@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "RentOS",
+    "name": "Havelio",
     "tagline": "Одна платформа. Любой актив."
   },
   "common": {
@@ -95,7 +95,35 @@
     "noCustomers": "Клиенты не найдены",
     "backToList": "Назад к клиентам",
     "previous": "Назад",
-    "next": "Далее"
+    "next": "Далее",
+    "portal": {
+      "title": "Доступ к клиентскому порталу",
+      "notInvited": "Ещё не приглашён",
+      "invited": "Приглашение отправлено",
+      "activated": "Портал активен",
+      "invitationExpired": "Срок приглашения истёк",
+      "lastLogin": "Последний вход",
+      "invite": "Пригласить в портал",
+      "reinvite": "Отправить приглашение повторно",
+      "revoke": "Отозвать доступ",
+      "revokeConfirm": "Это завершит сеанс клиента в портале и отключит доступ до повторного приглашения. Продолжить?",
+      "inviteLinkCreated": "Ссылка-приглашение создана — отправьте её клиенту:",
+      "noEmailOnFile": "У этого клиента нет указанного email. Добавьте его, чтобы отправить приглашение.",
+      "extensionRequests": "Заявки на продление",
+      "damageReports": "Отчёты о повреждениях",
+      "messages": "Сообщения портала",
+      "noExtensionRequests": "Нет заявок на продление",
+      "noDamageReports": "Нет отчётов о повреждениях",
+      "noMessages": "Сообщений пока нет",
+      "approve": "Одобрить",
+      "reject": "Отклонить",
+      "responseMessagePlaceholder": "Необязательное примечание клиенту…",
+      "markReviewed": "Отметить как рассмотрено",
+      "markResolved": "Отметить как решено",
+      "convertToDocument": "Преобразовать в документ",
+      "sendMessage": "Отправить",
+      "messagePlaceholder": "Ответить этому клиенту…"
+    }
   },
   "asset": {
     "title": "Активы",
@@ -704,6 +732,167 @@
       "unlock": "Открыть",
       "notFound": "Эта ссылка недействительна или срок её действия истёк",
       "downloadPdf": "Скачать PDF"
+    }
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Панель",
+      "rentals": "Аренды",
+      "calendar": "Календарь",
+      "documents": "Документы",
+      "messages": "Сообщения",
+      "notifications": "Уведомления",
+      "logout": "Выйти"
+    },
+    "auth": {
+      "login": {
+        "title": "Портал клиента",
+        "subtitle": "Войдите, чтобы управлять своими арендами",
+        "company": "Компания",
+        "companyPlaceholder": "ваша-компания",
+        "email": "Email",
+        "password": "Пароль",
+        "submit": "Войти",
+        "submitting": "Вход…"
+      },
+      "activate": {
+        "title": "Активируйте аккаунт",
+        "subtitle": "Установите пароль для доступа к порталу клиента",
+        "password": "Пароль",
+        "submit": "Активировать аккаунт",
+        "submitting": "Активация…",
+        "invalidToken": "Эта ссылка-приглашение недействительна или срок её действия истёк."
+      },
+      "errors": {
+        "invalidCredentials": "Неверный email, пароль или компания.",
+        "invalidToken": "Недействительное или просроченное приглашение.",
+        "generic": "Что-то пошло не так. Попробуйте ещё раз."
+      }
+    },
+    "dashboard": {
+      "title": "Панель",
+      "welcome": "С возвращением, {{name}}",
+      "currentRentals": "Текущие аренды",
+      "upcomingRentals": "Предстоящие аренды",
+      "unreadMessages": "Непрочитанные сообщения",
+      "pendingSignatures": "Ожидающие подписи",
+      "pendingExtensions": "Ожидающие заявки на продление",
+      "recentRentals": "Недавние аренды",
+      "viewAll": "Смотреть все",
+      "noRentals": "У вас пока нет аренд"
+    },
+    "rentals": {
+      "title": "Аренды",
+      "backToList": "Назад к арендам",
+      "searchPlaceholder": "Поиск аренд…",
+      "filterStatus": "Статус",
+      "allStatuses": "Все статусы",
+      "detailTitle": "Аренда {{number}}",
+      "period": "Период аренды",
+      "items": "Оборудование",
+      "timeline": "Хронология",
+      "documents": "Документы",
+      "downloadAllDocuments": "Скачать все документы (.zip)",
+      "qrCode": "QR-код",
+      "showQrCode": "Показать QR-код",
+      "requestExtension": "Запросить продление",
+      "reportDamage": "Сообщить о повреждении",
+      "extensionRequests": "Заявки на продление",
+      "damageReports": "Отчёты о повреждениях",
+      "noRentals": "Аренды не найдены",
+      "quantity": "Кол-во",
+      "statuses": {
+        "DRAFT": "Черновик",
+        "QUOTE": "Коммерческое предложение",
+        "RESERVED": "Забронировано",
+        "ACTIVE": "Активна",
+        "RETURNED": "Возвращено",
+        "COMPLETED": "Завершена",
+        "CANCELLED": "Отменена"
+      }
+    },
+    "calendar": {
+      "title": "Календарь аренд",
+      "empty": "Нет аренд в этом периоде"
+    },
+    "extensionRequests": {
+      "title": "Запросить продление",
+      "currentEnd": "Текущая дата окончания",
+      "newEndDate": "Новая дата окончания",
+      "message": "Сообщение (необязательно)",
+      "submit": "Отправить заявку",
+      "submitting": "Отправка…",
+      "submitted": "Ваша заявка на продление отправлена.",
+      "responseFrom": "Ответ",
+      "statuses": {
+        "PENDING": "Ожидает",
+        "APPROVED": "Одобрено",
+        "REJECTED": "Отклонено",
+        "CANCELLED": "Отменено"
+      }
+    },
+    "damageReports": {
+      "title": "Сообщить о повреждении",
+      "description": "Описание",
+      "descriptionPlaceholder": "Опишите, что произошло…",
+      "asset": "Оборудование (необязательно)",
+      "anyEquipment": "Не уверен / общее",
+      "photos": "Фотографии",
+      "addPhoto": "Добавить фото",
+      "uploading": "Загрузка…",
+      "submit": "Отправить отчёт",
+      "submitting": "Отправка…",
+      "submitted": "Ваш отчёт о повреждении отправлен.",
+      "statuses": {
+        "SUBMITTED": "Отправлен",
+        "REVIEWED": "Рассмотрен",
+        "RESOLVED": "Решён",
+        "CONVERTED_TO_DOCUMENT": "Оформлен документом"
+      }
+    },
+    "documents": {
+      "title": "Документы",
+      "backToList": "Назад к документам",
+      "filterStatus": "Статус",
+      "allStatuses": "Все статусы",
+      "preview": "Просмотр",
+      "download": "Скачать PDF",
+      "sign": "Подписать документ",
+      "signing": "Подписание…",
+      "signed": "Вы подписали этот документ.",
+      "pendingSignature": "Ожидается ваша подпись",
+      "noDocuments": "Документы не найдены",
+      "signatureRequests": "Запросы на подпись"
+    },
+    "messages": {
+      "title": "Сообщения",
+      "placeholder": "Напишите сообщение…",
+      "send": "Отправить",
+      "sending": "Отправка…",
+      "empty": "Сообщений пока нет",
+      "generalThread": "Общее"
+    },
+    "notifications": {
+      "title": "Уведомления",
+      "markAllRead": "Отметить все как прочитанные",
+      "empty": "Вы всё просмотрели",
+      "types": {
+        "MESSAGE": "Новое сообщение",
+        "DOCUMENT_SHARED": "Документ отправлен",
+        "SIGNATURE_REQUESTED": "Запрошена подпись",
+        "EXTENSION_RESPONSE": "Обновление заявки на продление",
+        "RENTAL_UPDATE": "Обновление аренды",
+        "DAMAGE_REPORT_UPDATE": "Обновление отчёта о повреждении"
+      }
+    },
+    "assets": {
+      "title": "Оборудование",
+      "manufacturer": "Производитель",
+      "model": "Модель",
+      "condition": "Примечания о состоянии"
+    },
+    "darkMode": {
+      "toggle": "Переключить тёмный режим"
     }
   }
 }

@@ -38,6 +38,20 @@ export const loginSchema = z.object({
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
 
+export const portalLoginSchema = z.object({
+  tenantSlug: z.string().min(1, "auth.errors.required"),
+  email: z.string().min(1, "auth.errors.required").email("auth.errors.invalidEmail"),
+  password: z.string().min(1, "auth.errors.required"),
+});
+
+export type PortalLoginFormValues = z.infer<typeof portalLoginSchema>;
+
+export const portalActivateInvitationSchema = z.object({
+  password: passwordSchema,
+});
+
+export type PortalActivateInvitationFormValues = z.infer<typeof portalActivateInvitationSchema>;
+
 export const customerSchema = z.object({
   firstName: z.string().min(1, "auth.errors.required").max(100),
   lastName: z.string().min(1, "auth.errors.required").max(100),

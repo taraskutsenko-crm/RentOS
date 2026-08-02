@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "RentOS",
+    "name": "Havelio",
     "tagline": "Eine Plattform. Jedes Asset."
   },
   "common": {
@@ -95,7 +95,35 @@
     "noCustomers": "Keine Kunden gefunden",
     "backToList": "Zurück zu den Kunden",
     "previous": "Zurück",
-    "next": "Weiter"
+    "next": "Weiter",
+    "portal": {
+      "title": "Kundenportal-Zugang",
+      "notInvited": "Noch nicht eingeladen",
+      "invited": "Einladung gesendet",
+      "activated": "Portal aktiv",
+      "invitationExpired": "Einladung abgelaufen",
+      "lastLogin": "Letzte Anmeldung",
+      "invite": "Zum Portal einladen",
+      "reinvite": "Einladung erneut senden",
+      "revoke": "Zugang widerrufen",
+      "revokeConfirm": "Dadurch wird der Kunde vom Portal abgemeldet und der Zugang bis zur erneuten Einladung deaktiviert. Fortfahren?",
+      "inviteLinkCreated": "Einladungslink erstellt — teilen Sie ihn mit Ihrem Kunden:",
+      "noEmailOnFile": "Für diesen Kunden ist keine E-Mail-Adresse hinterlegt. Fügen Sie eine hinzu, um eine Einladung zu senden.",
+      "extensionRequests": "Verlängerungsanfragen",
+      "damageReports": "Schadensmeldungen",
+      "messages": "Portal-Nachrichten",
+      "noExtensionRequests": "Keine Verlängerungsanfragen",
+      "noDamageReports": "Keine Schadensmeldungen",
+      "noMessages": "Noch keine Nachrichten",
+      "approve": "Genehmigen",
+      "reject": "Ablehnen",
+      "responseMessagePlaceholder": "Optionale Notiz an den Kunden…",
+      "markReviewed": "Als geprüft markieren",
+      "markResolved": "Als gelöst markieren",
+      "convertToDocument": "In Dokument umwandeln",
+      "sendMessage": "Senden",
+      "messagePlaceholder": "Diesem Kunden antworten…"
+    }
   },
   "asset": {
     "title": "Anlagen",
@@ -704,6 +732,167 @@
       "unlock": "Entsperren",
       "notFound": "Dieser Link ist ungültig oder abgelaufen",
       "downloadPdf": "PDF herunterladen"
+    }
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "rentals": "Mietungen",
+      "calendar": "Kalender",
+      "documents": "Dokumente",
+      "messages": "Nachrichten",
+      "notifications": "Benachrichtigungen",
+      "logout": "Abmelden"
+    },
+    "auth": {
+      "login": {
+        "title": "Kundenportal",
+        "subtitle": "Melden Sie sich an, um Ihre Mietungen zu verwalten",
+        "company": "Unternehmen",
+        "companyPlaceholder": "ihr-unternehmen",
+        "email": "E-Mail",
+        "password": "Passwort",
+        "submit": "Anmelden",
+        "submitting": "Anmeldung läuft…"
+      },
+      "activate": {
+        "title": "Konto aktivieren",
+        "subtitle": "Legen Sie ein Passwort fest, um auf Ihr Kundenportal zuzugreifen",
+        "password": "Passwort",
+        "submit": "Konto aktivieren",
+        "submitting": "Aktivierung läuft…",
+        "invalidToken": "Dieser Einladungslink ist ungültig oder abgelaufen."
+      },
+      "errors": {
+        "invalidCredentials": "Ungültige E-Mail-Adresse, Passwort oder Unternehmen.",
+        "invalidToken": "Ungültige oder abgelaufene Einladung.",
+        "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Willkommen zurück, {{name}}",
+      "currentRentals": "Aktuelle Mietungen",
+      "upcomingRentals": "Bevorstehende Mietungen",
+      "unreadMessages": "Ungelesene Nachrichten",
+      "pendingSignatures": "Ausstehende Unterschriften",
+      "pendingExtensions": "Ausstehende Verlängerungsanfragen",
+      "recentRentals": "Letzte Mietungen",
+      "viewAll": "Alle anzeigen",
+      "noRentals": "Sie haben noch keine Mietungen"
+    },
+    "rentals": {
+      "title": "Mietungen",
+      "backToList": "Zurück zu den Mietungen",
+      "searchPlaceholder": "Mietungen suchen…",
+      "filterStatus": "Status",
+      "allStatuses": "Alle Status",
+      "detailTitle": "Mietung {{number}}",
+      "period": "Mietzeitraum",
+      "items": "Ausrüstung",
+      "timeline": "Verlauf",
+      "documents": "Dokumente",
+      "downloadAllDocuments": "Alle Dokumente herunterladen (.zip)",
+      "qrCode": "QR-Code",
+      "showQrCode": "QR-Code anzeigen",
+      "requestExtension": "Verlängerung anfragen",
+      "reportDamage": "Schaden melden",
+      "extensionRequests": "Verlängerungsanfragen",
+      "damageReports": "Schadensmeldungen",
+      "noRentals": "Keine Mietungen gefunden",
+      "quantity": "Menge",
+      "statuses": {
+        "DRAFT": "Entwurf",
+        "QUOTE": "Angebot",
+        "RESERVED": "Reserviert",
+        "ACTIVE": "Aktiv",
+        "RETURNED": "Zurückgegeben",
+        "COMPLETED": "Abgeschlossen",
+        "CANCELLED": "Storniert"
+      }
+    },
+    "calendar": {
+      "title": "Mietkalender",
+      "empty": "Keine Mietungen in diesem Zeitraum"
+    },
+    "extensionRequests": {
+      "title": "Verlängerung anfragen",
+      "currentEnd": "Aktuelles Enddatum",
+      "newEndDate": "Neues Enddatum",
+      "message": "Nachricht (optional)",
+      "submit": "Anfrage senden",
+      "submitting": "Wird gesendet…",
+      "submitted": "Ihre Verlängerungsanfrage wurde übermittelt.",
+      "responseFrom": "Antwort",
+      "statuses": {
+        "PENDING": "Ausstehend",
+        "APPROVED": "Genehmigt",
+        "REJECTED": "Abgelehnt",
+        "CANCELLED": "Storniert"
+      }
+    },
+    "damageReports": {
+      "title": "Schaden melden",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Beschreiben Sie, was passiert ist…",
+      "asset": "Ausrüstung (optional)",
+      "anyEquipment": "Nicht sicher / allgemein",
+      "photos": "Fotos",
+      "addPhoto": "Foto hinzufügen",
+      "uploading": "Wird hochgeladen…",
+      "submit": "Meldung senden",
+      "submitting": "Wird gesendet…",
+      "submitted": "Ihre Schadensmeldung wurde übermittelt.",
+      "statuses": {
+        "SUBMITTED": "Eingereicht",
+        "REVIEWED": "Geprüft",
+        "RESOLVED": "Gelöst",
+        "CONVERTED_TO_DOCUMENT": "Dokumentiert"
+      }
+    },
+    "documents": {
+      "title": "Dokumente",
+      "backToList": "Zurück zu den Dokumenten",
+      "filterStatus": "Status",
+      "allStatuses": "Alle Status",
+      "preview": "Vorschau",
+      "download": "PDF herunterladen",
+      "sign": "Dokument unterschreiben",
+      "signing": "Wird unterschrieben…",
+      "signed": "Sie haben dieses Dokument unterschrieben.",
+      "pendingSignature": "Ihre Unterschrift ist erforderlich",
+      "noDocuments": "Keine Dokumente gefunden",
+      "signatureRequests": "Unterschriftsanfragen"
+    },
+    "messages": {
+      "title": "Nachrichten",
+      "placeholder": "Nachricht schreiben…",
+      "send": "Senden",
+      "sending": "Wird gesendet…",
+      "empty": "Noch keine Nachrichten",
+      "generalThread": "Allgemein"
+    },
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "markAllRead": "Alle als gelesen markieren",
+      "empty": "Sie haben alles erledigt",
+      "types": {
+        "MESSAGE": "Neue Nachricht",
+        "DOCUMENT_SHARED": "Dokument geteilt",
+        "SIGNATURE_REQUESTED": "Unterschrift angefragt",
+        "EXTENSION_RESPONSE": "Update zur Verlängerungsanfrage",
+        "RENTAL_UPDATE": "Update zur Mietung",
+        "DAMAGE_REPORT_UPDATE": "Update zur Schadensmeldung"
+      }
+    },
+    "assets": {
+      "title": "Ausrüstung",
+      "manufacturer": "Hersteller",
+      "model": "Modell",
+      "condition": "Zustandshinweise"
+    },
+    "darkMode": {
+      "toggle": "Dunkelmodus umschalten"
     }
   }
 }

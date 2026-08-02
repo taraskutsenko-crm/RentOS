@@ -60,11 +60,14 @@ export const DOCUMENT_PERMISSIONS = [
   "documents.share",
 ] as const;
 
+export const CUSTOMER_PORTAL_PERMISSIONS = ["customers.portal.manage"] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
   ...QUOTE_PERMISSIONS,
   ...DOCUMENT_PERMISSIONS,
+  ...CUSTOMER_PORTAL_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
@@ -130,6 +133,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "documents.templates.view",
     "documents.render",
     "documents.share",
+    "customers.portal.manage",
   ],
   TECHNICIAN: [
     "assets.read",

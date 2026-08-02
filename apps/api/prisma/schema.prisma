@@ -283,6 +283,10 @@ model User {
   sentDocumentEmailDeliveries     DocumentEmailDelivery[]    @relation("DocumentEmailDeliverySentBy")
   requestedDocumentSignatures     DocumentSignatureRequest[] @relation("DocumentSignatureRequestedBy")
 
+  sentPortalMessages         CustomerPortalMessage[]  @relation("CustomerPortalMessageSentBy")
+  respondedExtensionRequests RentalExtensionRequest[] @relation("RentalExtensionRequestRespondedBy")
+  reviewedDamageReports      RentalDamageReport[]     @relation("RentalDamageReportReviewedBy")
+
   @@index([deletedAt])
   @@map("users")
 }
@@ -340,6 +344,13 @@ model Tenant {
   documentShareLinks        DocumentShareLink[]
   documentEmailDeliveries   DocumentEmailDelivery[]
   documentSignatureRequests DocumentSignatureRequest[]
+
+  customerPortalRefreshTokens CustomerRefreshToken[]
+  customerPortalMessages      CustomerPortalMessage[]
+  customerNotifications       CustomerNotification[]
+  rentalExtensionRequests     RentalExtensionRequest[]
+  rentalDamageReports         RentalDamageReport[]
+  rentalDamageReportPhotos    RentalDamageReportPhoto[]
 
   @@index([deletedAt])
   @@map("tenants")
@@ -431,10 +442,28 @@ model Customer {
   updatedAt DateTime       @updatedAt
   deletedAt DateTime?
 
+  /// Customer Portal (TASK-0009) — self-service auth, entirely separate
+  /// from User/TenantMembership. A Customer has no login by default;
+  /// staff must explicitly invite them (see docs/adr/0012-customer-portal.md).
+  /// Only the SHA-256 hash of the invitation token is ever persisted, same
+  /// convention as every other opaque token in this codebase.
+  portalPasswordHash        String?
+  portalInvitationTokenHash String?   @unique
+  portalInvitationExpiresAt DateTime?
+  portalInvitedAt           DateTime?
+  portalActivatedAt         DateTime?
+  portalLastLoginAt         DateTime?
+
   tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   rentals   Rental[]
   quotes    Quote[]
   documents Document[]
+
+  portalRefreshTokens CustomerRefreshToken[]
+  portalMessages      CustomerPortalMessage[]
+  notifications       CustomerNotification[]
+  extensionRequests   RentalExtensionRequest[]
+  damageReports       RentalDamageReport[]
 
   @@index([tenantId, status])
   @@index([tenantId, deletedAt])
@@ -558,6 +587,7 @@ model Asset {
   /// to the asset, unrelated to a rental/quote/document lifecycle).
   platformDocuments     Document[]
   platformDocumentItems DocumentItem[]
+  damageReports         RentalDamageReport[]
 
   @@unique([tenantId, internalNumber])
   @@unique([tenantId, sku])
@@ -772,6 +802,10 @@ model Rental {
   items         RentalItem[]
   statusHistory RentalStatusHistory[]
   documents     Document[]
+
+  portalMessages    CustomerPortalMessage[]
+  extensionRequests RentalExtensionRequest[]
+  damageReports     RentalDamageReport[]
 
   @@unique([tenantId, rentalNumber])
   @@index([tenantId, status])
@@ -1160,6 +1194,11 @@ model Document {
   emailDeliveries   DocumentEmailDelivery[]
   signatureRequests DocumentSignatureRequest[]
 
+  /// Set on the RentalDamageReport this Document formalizes, when a
+  /// customer-submitted report was converted by staff (see
+  /// RentalDamageReport.convertedDocumentId).
+  damageReportSource RentalDamageReport?
+
   @@unique([tenantId, documentNumber])
   @@index([tenantId, documentType])
   @@index([tenantId, status])
@@ -1521,4 +1560,202 @@ model DocumentSignatureRequest {
 
   @@index([tenantId, documentId, requestedAt])
   @@map("document_signature_requests")
+}
+
+// ---------------------------------------------------------------------
+// Customer Portal (TASK-0009) — see docs/adr/0012-customer-portal.md
+// ---------------------------------------------------------------------
+
+enum CustomerPortalMessageSender {
+  CUSTOMER
+  STAFF
+}
+
+enum CustomerNotificationType {
+  MESSAGE
+  DOCUMENT_SHARED
+  SIGNATURE_REQUESTED
+  EXTENSION_RESPONSE
+  RENTAL_UPDATE
+  DAMAGE_REPORT_UPDATE
+}
+
+enum RentalExtensionRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum RentalDamageReportStatus {
+  SUBMITTED
+  REVIEWED
+  RESOLVED
+  CONVERTED_TO_DOCUMENT
+}
+
+/// Rotating refresh tokens for the customer portal session — mirrors
+/// RefreshToken exactly (opaque random value, only its SHA-256 hash
+/// persisted, see customer-invitation-token.util.ts/customer-token.service.ts)
+/// but keyed to Customer, not User, and always tenant-scoped (a customer's
+/// portal access is inherently single-tenant, unlike a staff User who may
+/// belong to several). Kept as a fully separate table — never a nullable
+/// customerId column bolted onto RefreshToken — so a customer session can
+/// never be confused with, or accidentally satisfy, a staff auth check.
+model CustomerRefreshToken {
+  id         String    @id @default(uuid())
+  customerId String
+  tenantId   String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  userAgent  String?
+  ipAddress  String?
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([expiresAt])
+  @@map("customer_refresh_tokens")
+}
+
+/// A threaded message between a customer and tenant staff, optionally
+/// scoped to a specific Rental (a general question has rentalId = null).
+/// senderUserId is set only when senderType = STAFF — both nullable so one
+/// table serves both directions without a discriminated pair of tables.
+model CustomerPortalMessage {
+  id               String                      @id @default(uuid())
+  tenantId         String
+  customerId       String
+  rentalId         String?
+  senderType       CustomerPortalMessageSender
+  senderUserId     String?
+  body             String
+  createdAt        DateTime                    @default(now())
+  readByCustomerAt DateTime?
+  readByStaffAt    DateTime?
+
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  rental     Rental?  @relation(fields: [rentalId], references: [id], onDelete: SetNull)
+  senderUser User?    @relation("CustomerPortalMessageSentBy", fields: [senderUserId], references: [id])
+
+  @@index([tenantId, customerId, createdAt])
+  @@index([tenantId, rentalId])
+  @@map("customer_portal_messages")
+}
+
+/// In-app-only notification — no email/push delivery pipeline exists yet.
+/// A deliberate, documented scope boundary (see docs/adr/0012-customer-portal.md),
+/// the same "logging placeholder now, real provider later" shape already
+/// used for EmailProvider (ADR 0007). Created by whichever portal service
+/// performs the triggering action (a new message, a shared document, a
+/// signature request, an extension-request response, ...).
+model CustomerNotification {
+  id         String                   @id @default(uuid())
+  tenantId   String
+  customerId String
+  type       CustomerNotificationType
+  title      String
+  body       String
+  link       String?
+  readAt     DateTime?
+  createdAt  DateTime                 @default(now())
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, customerId, createdAt])
+  @@index([tenantId, customerId, readAt])
+  @@map("customer_notifications")
+}
+
+/// A customer-submitted request to extend a Rental's plannedEnd. Approving
+/// a request does not itself change the Rental — PortalExtensionRequestsService
+/// calls the existing RentalsService.update() to perform the actual change,
+/// so availability/pricing revalidation logic is never duplicated.
+model RentalExtensionRequest {
+  id                String                       @id @default(uuid())
+  tenantId          String
+  rentalId          String
+  customerId        String
+  currentEnd        DateTime
+  requestedEnd      DateTime
+  message           String?
+  status            RentalExtensionRequestStatus @default(PENDING)
+  responseMessage   String?
+  createdAt         DateTime                     @default(now())
+  respondedAt       DateTime?
+  respondedByUserId String?
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rental          Rental   @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  respondedByUser User?    @relation("RentalExtensionRequestRespondedBy", fields: [respondedByUserId], references: [id])
+
+  @@index([tenantId, rentalId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, status])
+  @@map("rental_extension_requests")
+}
+
+/// A customer-submitted damage report — deliberately its own lightweight
+/// model, not a Document row: Document.createdByUserId is a required FK to
+/// User (every existing Document is staff-authored today), and widening
+/// that to accept a customer actor would touch a completed module's core
+/// schema far beyond this task's blast radius (see
+/// docs/adr/0012-customer-portal.md). A report can later be formalized by
+/// staff into a real DAMAGE_REPORT Document via DocumentsService.create
+/// (staff as the author of record, using the report's own data as the
+/// starting businessData) — convertedDocumentId records that link once it
+/// happens.
+model RentalDamageReport {
+  id                  String                   @id @default(uuid())
+  tenantId            String
+  rentalId            String
+  customerId          String
+  assetId             String?
+  description         String
+  status              RentalDamageReportStatus @default(SUBMITTED)
+  convertedDocumentId String?                  @unique
+  createdAt           DateTime                 @default(now())
+  reviewedAt          DateTime?
+  reviewedByUserId    String?
+
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rental            Rental    @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  customer          Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  asset             Asset?    @relation(fields: [assetId], references: [id])
+  convertedDocument Document? @relation(fields: [convertedDocumentId], references: [id])
+  reviewedByUser    User?     @relation("RentalDamageReportReviewedBy", fields: [reviewedByUserId], references: [id])
+
+  photos RentalDamageReportPhoto[]
+
+  @@index([tenantId, rentalId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, status])
+  @@map("rental_damage_reports")
+}
+
+/// A photo attached to a RentalDamageReport, reusing the same
+/// storageKey/mimeType/sizeBytes shape as AssetImage/DocumentFile and
+/// StorageService directly, rather than routing through DocumentFile,
+/// since the parent report is not itself a Document.
+model RentalDamageReportPhoto {
+  id               String   @id @default(uuid())
+  tenantId         String
+  damageReportId   String
+  storageKey       String
+  originalFileName String
+  mimeType         String
+  sizeBytes        Int
+  createdAt        DateTime @default(now())
+
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  damageReport RentalDamageReport @relation(fields: [damageReportId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, damageReportId])
+  @@map("rental_damage_report_photos")
 }

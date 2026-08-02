@@ -1,2 +1,2 @@
-export const APP_NAME = "RentOS";
+export const APP_NAME = "Havelio";
 export const APP_TAGLINE = "One Platform. Every Asset.";

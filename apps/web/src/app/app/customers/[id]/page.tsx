@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { CustomerForm } from "../../../../components/customers/customer-form";
+import { CustomerPortalPanel } from "../../../../components/customers/customer-portal-panel";
 import { useCustomer, useUpdateCustomer } from "../../../../hooks/use-customers";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { apiErrorKey } from "../../../../lib/api-error-i18n";
@@ -28,8 +29,8 @@ export default function EditCustomerPage() {
   }
 
   return (
-    <div className="flex justify-center">
-      <Card className="w-full max-w-2xl">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <Card>
         <CardHeader>
           <CardTitle>{t("customer.editCustomer")}</CardTitle>
         </CardHeader>
@@ -54,6 +55,8 @@ export default function EditCustomerPage() {
           />
         </CardContent>
       </Card>
+
+      {tenantId && <CustomerPortalPanel tenantId={tenantId} customerId={params.id} />}
     </div>
   );
 }

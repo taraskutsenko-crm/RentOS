@@ -50,6 +50,8 @@ type RentalItemSource = RentalItemDto & {
 
 /** Statuses in which the item list and planned dates may still be edited. */
 const EDITABLE_STATUSES: RentalStatus[] = ["DRAFT", "QUOTE"];
+/** Statuses in which a rental's plannedEnd may be pushed further out via extendPlannedEnd (TASK-0009). */
+const EXTENDABLE_STATUSES: RentalStatus[] = ["RESERVED", "ACTIVE"];
 /** Statuses whose record may be hard-removed (never RESERVED/ACTIVE/RETURNED/COMPLETED — those are real operational history). */
 const DELETABLE_STATUSES: RentalStatus[] = ["DRAFT", "QUOTE", "CANCELLED"];
 const CANCELLABLE_STATUSES: RentalStatus[] = ["DRAFT", "QUOTE", "RESERVED", "ACTIVE"];
@@ -296,6 +298,82 @@ export class RentalsService {
           entityType: "Rental",
           entityId: id,
           metadata: { changedFields: Object.keys(dto) },
+        },
+        tx,
+      );
+    });
+
+    return this.findOne(tenantId, id);
+  }
+
+  /**
+   * Extends a RESERVED/ACTIVE rental's plannedEnd — genuinely distinct from
+   * `update()`, which only permits editing dates while the rental is still
+   * DRAFT/QUOTE (see EDITABLE_STATUSES). Introduced for TASK-0009's
+   * customer-portal extension-request flow: PortalExtensionRequestsService
+   * calls this when staff approves a request, so the actual date/pricing
+   * change goes through the same pricing engine as every other rental
+   * mutation rather than a duplicated calculation. Re-validates availability
+   * for the newly-added tail window only (excluding this rental's own
+   * claim) — the already-elapsed portion of the rental needs no re-check.
+   */
+  async extendPlannedEnd(
+    tenantId: string,
+    id: string,
+    actorUserId: string | null,
+    newPlannedEnd: Date,
+  ): Promise<RentalDetailView> {
+    const current = await this.findOne(tenantId, id);
+    if (!EXTENDABLE_STATUSES.includes(current.status)) {
+      throw new ConflictException(`Cannot extend a rental in ${current.status} status`);
+    }
+    if (newPlannedEnd <= current.plannedEnd) {
+      throw new BadRequestException("The new planned end must be after the current planned end");
+    }
+
+    const assetIds = current.items.map((item) => item.assetId);
+    await this.availabilityService.assertAvailable(
+      tenantId,
+      assetIds,
+      current.plannedEnd,
+      newPlannedEnd,
+      id,
+    );
+
+    const items = current.items.map(fromExistingItem);
+    const { subtotalMinor, totalMinor } = computeRentalTotals(
+      items.map(toPricedItemInput),
+      current.plannedStart,
+      newPlannedEnd,
+      current.discountMinor,
+      current.taxMinor,
+    );
+
+    await this.prisma.$transaction(async (tx) => {
+      const result = await tx.rental.updateMany({
+        where: { id, tenantId, deletedAt: null },
+        data: {
+          plannedEnd: newPlannedEnd,
+          subtotalMinor,
+          totalMinor,
+          updatedByUserId: actorUserId,
+        },
+      });
+      if (result.count === 0) {
+        throw new NotFoundException("Rental not found");
+      }
+
+      await this.auditService.log(
+        {
+          tenantId,
+          userId: actorUserId,
+          action: "rental.extended",
+          entityType: "Rental",
+          entityId: id,
+          metadata: {
+            previousPlannedEnd: current.plannedEnd.toISOString(),
+            newPlannedEnd: newPlannedEnd.toISOString(),
+          },
         },
         tx,
       );

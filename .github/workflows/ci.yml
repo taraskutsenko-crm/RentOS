@@ -57,6 +57,12 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Architecture governance checks (i18n parity, permission sync, doc links)
+        run: pnpm check:governance
+
+      - name: Governance checks unit tests
+        run: pnpm test:governance-checks
+
       - name: Apply test database migrations
         run: pnpm --filter @rentos/api exec prisma migrate deploy
 

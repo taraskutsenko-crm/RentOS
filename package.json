@@ -16,7 +16,12 @@
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "check:i18n-parity": "node scripts/check-i18n-parity.mjs",
+    "check:permission-sync": "node scripts/check-permission-sync.mjs",
+    "check:doc-links": "node scripts/check-doc-links.mjs",
+    "check:governance": "pnpm check:i18n-parity && pnpm check:permission-sync && pnpm check:doc-links",
+    "test:governance-checks": "node --test scripts/governance-checks.test.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

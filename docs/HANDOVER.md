@@ -16,13 +16,27 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `ee34903` (fix: remove eslint no-explicit-any
-  violation in portal ZIP test helper, on top of `cfb22a2` — feat: add
-  customer portal and Havelio rebrand — TASK-0009)
+- **Latest verified commit:** `1c2ebc4` (ci: add architecture governance
+  safeguards, on top of `15e59c0`/`f2fa3d2`/`20c9873` — docs: architecture
+  governance policy + roadmap/handover/vision alignment — the PRE-TASK-0010
+  governance task; no product code changed). Sits on top of `09fc7c8`
+  (TASK-0009 — Customer Portal + Havelio rebrand), which remains the
+  last commit with product/application code changes and the Docker/
+  browser walkthrough described below.
 - **Quality gates:** format/lint/typecheck/build green; 465 backend + 190
-  frontend tests passing (655 total). Migration applied and verified
+  frontend tests passing (655 total), plus 13 new governance-safeguard
+  unit tests (`pnpm test:governance-checks`) and the three governance
+  checks themselves (`pnpm check:governance` — i18n key parity,
+  backend/frontend permission-registry sync, documentation-link
+  validity) all green. This governance task changed only documentation
+  and repo-level static-analysis scripts (no schema, no runtime
+  application code) — see [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md)
+  for what it added; no new Docker/browser walkthrough was needed for it
+  (nothing it changed is exercised by the running application). The most
+  recent full Docker Compose + browser verification remains the one
+  performed for TASK-0009 (`09fc7c8`): migration applied and verified
   against a rebuilt Docker Compose stack (both `api` and `web` images
-  rebuilt from scratch). The full customer-portal backend flow was walked
+  rebuilt from scratch); the full customer-portal backend flow was walked
   end-to-end against the running Docker stack via real authenticated HTTP
   calls through the browser (dual staff+customer sessions coexisting):
   register → create customer/asset/rental → invite → activate → portal
@@ -44,13 +58,9 @@ prior conversations.
   and via an in-page `fetch()` call, both returning valid 10KB+ documents,
   and zero errors in the container logs) — a tooling limitation, not a
   code defect, given the exhaustive API-level verification above and the
-  27 new frontend component tests covering exactly these pages' render
-  logic.
-- **GitHub Actions:** green — [run 30746156322](https://github.com/taraskutsenko-crm/RentOS/actions/runs/30746156322)
-  (the immediately preceding run on `cfb22a2` failed `lint` on a stray
-  `no-explicit-any` in the new ZIP-download test helper — a stale local
-  lint result, since the fix was made after the last local `pnpm lint`
-  pass; caught and fixed in `ee34903` above).
+  27 frontend component tests covering exactly these pages' render logic.
+- **GitHub Actions:** green — [run 30759027095](https://github.com/taraskutsenko-crm/RentOS/actions/runs/30759027095)
+  on `1c2ebc4`, including the two new governance-check steps.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

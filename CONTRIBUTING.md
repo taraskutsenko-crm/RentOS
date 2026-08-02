@@ -20,6 +20,14 @@ RentOS is a pnpm workspace managed with Turborepo. Application code lives
 under `apps/*`, shared and reusable code lives under `packages/*`. See
 [README.md](README.md) for the full layout.
 
+## Architecture governance
+
+Before starting any non-trivial change, read
+[`docs/ARCHITECTURE_LOCK.md`](docs/ARCHITECTURE_LOCK.md). It defines
+which architectural principles are locked, which areas are safe to
+extend freely, which changes require a new ADR before implementation,
+and which shortcuts are forbidden outright.
+
 ## Development Workflow
 
 ```bash

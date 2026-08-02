@@ -1,5 +1,10 @@
 # Documentation
 
+- [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md) — mandatory governance
+  reference for every future task and AI session: locked architectural
+  principles, extensible areas, changes that require a new ADR before
+  implementation, forbidden shortcuts, and the verification contract
+  every task must satisfy. Read this before starting any task.
 - [`VISION.md`](VISION.md) — the long-term product vision: what RentOS
   is, the problem it solves, and what's implemented vs. planned vs.
   long-term direction.

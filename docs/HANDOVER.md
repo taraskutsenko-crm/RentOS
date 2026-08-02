@@ -5,6 +5,14 @@ history, can resume work immediately by reading this file plus the
 linked docs — without needing to reconstruct context from git log or
 prior conversations.
 
+> **Read [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md) before starting
+> any task.** It is mandatory guidance for every future development
+> task and AI session in this repository: which architectural
+> principles are locked, which areas are extensible, which changes
+> require a new ADR before implementation, which shortcuts are
+> forbidden outright, and the verification contract every task must
+> satisfy before it's considered done.
+
 ## Latest verified state
 
 - **Branch:** `main`
@@ -628,15 +636,22 @@ maintained list.
 
 ## Next recommended task
 
-TASK-0009 (Customer Portal + Havelio rebrand) is now complete. **TASK-0010**
-is the next major task on the roadmap — do not start it in the same
-session/branch as TASK-0009 unless explicitly instructed to. Likely
-candidates for TASK-0010 include: a real e-signature provider integration
-(behind the `DocumentSignatureProvider` seam built in TASK-0008 Part 2), a
-production email provider (behind the existing `EmailProvider` seam,
-which would also unlock portal notification emails), or a new business
-module (invoicing/payments) — see [ROADMAP.md](ROADMAP.md) for the current
-phase ordering.
+TASK-0009 (Customer Portal + Havelio rebrand) is complete, and a
+governance/roadmap task (PRE-TASK-0010 — architecture lock + roadmap
+alignment, no product code changed) has since landed on top of it —
+see [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md) and this file's
+"Latest verified state" above for the exact commit.
+
+**TASK-0010 (Complete UI/UX Redesign) is the next major task** — see
+[ROADMAP.md](ROADMAP.md#task-0010--complete-uiux-redesign) for its full
+scope. Do not start it in the same session/branch as this governance
+task unless explicitly instructed to. The agreed sequence after
+TASK-0010 is TASK-0011 (SaaS plans/subscription billing) through
+TASK-0020 (AI assistant/workflow automation) — see
+[ROADMAP.md](ROADMAP.md#planned-major-tasks-task-0010-onward) for the
+full list and each task's scope. Read
+[`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md) before starting any of
+them.
 
 ## Important commands
 

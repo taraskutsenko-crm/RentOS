@@ -191,6 +191,19 @@ named integration (accounting software, payment processors, calendar
 sync). Planned as a distinct future phase once the core operational
 modules (contracts/handover, payments) are further along.
 
+## SaaS commercialization direction
+
+**Not yet implemented.** RentOS/Havelio itself is a SaaS product, and
+today has no subscription-plan, billing, or feature-entitlement layer
+of its own — every tenant currently has unrestricted access to every
+implemented capability. The planned direction (TASK-0011) introduces
+tiered plans (Basic/Classic/Professional), monthly and annual billing,
+and plan-gated limits and features (customer/employee counts,
+branches/warehouses on Professional only). This is deliberately a
+distinct concern from rental customer invoicing (what a tenant's own
+customers pay them) — see [PRODUCT_PRINCIPLES.md](PRODUCT_PRINCIPLES.md)
+and [ROADMAP.md](ROADMAP.md) for why the two must not be conflated.
+
 ## Predictive maintenance and asset intelligence direction
 
 **Not yet implemented.** `Asset` already carries the structural
@@ -211,28 +224,34 @@ commitment.
 
 ## Implemented vs. planned vs. long-term — summary
 
-| Capability                                                                                                                                                   | Status                            |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
-| Auth, multi-tenancy, RBAC                                                                                                                                    | **Implemented**                   |
-| Customers module                                                                                                                                             | **Implemented**                   |
-| Universal Assets module (categories, statuses, custom fields, images/documents, timeline)                                                                    | **Implemented**                   |
-| Rentals module (lifecycle, availability engine, pricing)                                                                                                     | **Implemented**                   |
-| Configurable monthly billing strategies (Rentals)                                                                                                            | **Implemented**                   |
-| Quotes and commercial offers (wizard, PDF, public acceptance, conversion)                                                                                    | **Implemented**                   |
-| Configurable monthly billing strategies (Quotes, shared with Rentals)                                                                                        | **Implemented**                   |
-| Race-safe rental-number generation                                                                                                                           | **Implemented**                   |
-| Document Management Platform — domain model, templates, rendering, sharing, email, e-signature foundation (TASK-0008)                                        | **Implemented**                   |
-| Customer Portal — auth, dashboard, rentals/calendar, documents, extension requests, damage reports, messages, notifications, equipment/QR lookup (TASK-0009) | **Implemented**                   |
-| Havelio rebrand (visible UI strings)                                                                                                                         | **Implemented**                   |
-| Real e-signature provider integration (DocuSign/Adobe Sign/Autenti/eIDAS)                                                                                    | **Planned**                       |
-| Payments, invoicing, deposit collection/refund                                                                                                               | **Planned, later phase**          |
-| Background jobs / scheduled automation                                                                                                                       | **Planned, later phase**          |
-| Portal notification emails/push, self-service booking, online payment                                                                                        | **Planned**                       |
-| Mobile application                                                                                                                                           | **Long-term direction**           |
-| Public API / third-party integrations                                                                                                                        | **Long-term direction**           |
-| AI-performed workflows (beyond conversational assistance)                                                                                                    | **Long-term direction**           |
-| Predictive maintenance / asset intelligence                                                                                                                  | **Long-term direction**           |
-| Marketplace/platform                                                                                                                                         | **Long-term, unscoped direction** |
+| Capability                                                                                                                                                   | Status                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| Auth, multi-tenancy, RBAC                                                                                                                                    | **Implemented**           |
+| Customers module                                                                                                                                             | **Implemented**           |
+| Universal Assets module (categories, statuses, custom fields, images/documents, timeline)                                                                    | **Implemented**           |
+| Rentals module (lifecycle, availability engine, pricing)                                                                                                     | **Implemented**           |
+| Configurable monthly billing strategies (Rentals)                                                                                                            | **Implemented**           |
+| Quotes and commercial offers (wizard, PDF, public acceptance, conversion)                                                                                    | **Implemented**           |
+| Configurable monthly billing strategies (Quotes, shared with Rentals)                                                                                        | **Implemented**           |
+| Race-safe rental-number generation                                                                                                                           | **Implemented**           |
+| Document Management Platform — domain model, templates, rendering, sharing, email, e-signature foundation (TASK-0008)                                        | **Implemented**           |
+| Customer Portal — auth, dashboard, rentals/calendar, documents, extension requests, damage reports, messages, notifications, equipment/QR lookup (TASK-0009) | **Implemented**           |
+| Havelio rebrand (visible UI strings)                                                                                                                         | **Implemented**           |
+| Real e-signature provider integration (DocuSign/Adobe Sign/Autenti/eIDAS)                                                                                    | **Planned**               |
+| Rental customer invoicing, deposit collection/refund                                                                                                         | **Planned, later phase**  |
+| SaaS plans, subscription billing & entitlements (TASK-0011)                                                                                                  | **Planned**               |
+| Public booking website (TASK-0012)                                                                                                                           | **Planned**               |
+| Advanced operations calendar (TASK-0013)                                                                                                                     | **Planned**               |
+| Mobile PWA & field operations (TASK-0014)                                                                                                                    | **Planned**               |
+| Background jobs / scheduled automation (TASK-0015)                                                                                                           | **Planned, ADR required** |
+| Portal notification emails/push, self-service booking, online payment                                                                                        | **Planned**               |
+| Analytics & business intelligence (TASK-0016)                                                                                                                | **Planned**               |
+| Mobile application (native)                                                                                                                                  | **Long-term direction**   |
+| Accounting & external integrations (TASK-0017)                                                                                                               | **Planned**               |
+| Public API v1, webhooks & SDK (TASK-0018)                                                                                                                    | **Planned**               |
+| AI-performed workflows (beyond conversational assistance) (TASK-0020)                                                                                        | **Future direction**      |
+| Predictive maintenance / asset intelligence                                                                                                                  | **Long-term direction**   |
+| Platform extensions — plugins/marketplace (TASK-0019)                                                                                                        | **Future direction**      |
 
 See [ROADMAP.md](ROADMAP.md) for the phase-by-phase breakdown and
 [HANDOVER.md](HANDOVER.md) for the current verified technical state.

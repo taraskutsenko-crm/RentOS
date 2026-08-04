@@ -1,0 +1,131 @@
+# UI Research — Premium SaaS Application Shells
+
+Reference research for TASK-0010 (Complete UI/UX Redesign). This
+document analyzes the well-known, publicly observable interaction
+patterns of six premium SaaS products — Linear, Stripe Dashboard,
+Vercel, Figma, GitHub, and Notion — to extract _principles_, not
+pixels. **The goal is to reach the same product quality these tools
+have, never to copy their specific visual design** — see
+[`BRAND_GUIDELINES.md`](BRAND_GUIDELINES.md) for Havelio's own,
+deliberately distinct color/typography identity, which this research
+does not touch.
+
+This is a synthesis of these products' generally known, widely
+documented interaction conventions (the kind discussed in design
+communities and visible to anyone who has used the products), not a
+pixel-level teardown from live inspection — appropriate for
+establishing _architecture and interaction principles_, which is what
+this document exists to inform.
+
+## What these six products have in common
+
+Despite very different visual identities, all six share a small set
+of structural conventions that read as "premium" regardless of color
+palette:
+
+1. **A persistent, collapsible left sidebar is the primary
+   navigation surface**, not a top nav bar. Top bars are reserved for
+   page-level context (breadcrumbs, search, account) — never
+   duplicated as a second navigation system. Havelio's current staff
+   shell only has a top bar (see `UI_AUDIT.md`) — this is the single
+   biggest structural gap this chapter closes.
+2. **A single global "go anywhere, do anything" surface**, opened by
+   a keyboard shortcut (`Cmd/Ctrl+K` in Linear/Vercel/GitHub, `Cmd+K`
+   in Notion, `/` in some), that unifies search and command execution
+   rather than shipping them as two separate, competing surfaces.
+   This is exactly the unification Havelio's own `UI_PATTERNS.md`
+   independently arrived at for Search + Command Palette — this
+   research confirms it's the right call, not a shortcut taken to
+   save work.
+3. **Breadcrumbs are minimal and never redundant with the page
+   title** — they show _path_, the page header shows _what this page
+   is_, and the two are never the same string repeated twice.
+4. **The sidebar collapses to icons-only, never fully disappears on
+   desktop** — collapsing trades label width for content width; it
+   never hides navigation entirely on a screen large enough to show
+   it.
+5. **Active-state indication is a single, consistent visual signal**
+   (a colored icon/text plus a left accent bar or filled background),
+   never color alone, and never different between sections of the
+   same product.
+6. **The account/workspace switcher and the user-profile menu are two
+   separate controls**, not one — "which company am I acting as" and
+   "who am I, what are my personal settings" are different questions
+   answered by different menus, typically the workspace switcher near
+   the top of the sidebar and the profile menu at the bottom of the
+   sidebar or top-right of the header.
+7. **Empty/loading states use skeletons that mirror real content
+   shape**, not generic spinners, keeping layout stable as data
+   arrives — already a documented Havelio principle
+   (`UI_PATTERNS.md`'s Skeletons pattern); this research confirms it
+   against real precedent rather than inventing it in isolation.
+8. **Motion is fast and purposeful** — sidebar collapse, dropdown
+   open/close, and command-palette open all animate in well under
+   250ms with no bounce/spring easing, matching
+   `BRAND_GUIDELINES.md`'s existing Motion System exactly.
+9. **Notifications live in their own bell-triggered panel**, distinct
+   from toast-style transient confirmations — a persistent,
+   revisitable list, not a place where the user's own just-completed
+   action is announced (that's a toast's job).
+10. **Keyboard accessibility is a first-class citizen**, not a
+    retrofit — every one of these products supports full keyboard
+    navigation of its sidebar, command palette, and menus, with
+    visible focus rings that are never suppressed.
+
+## Per-product notes (principles extracted, not visuals copied)
+
+- **Linear:** the clearest example of sidebar + unified command
+  palette (`Cmd+K`) as the entire navigation model — almost no
+  breadcrumbs needed because the sidebar's hierarchy _is_ the
+  breadcrumb. Extremely restrained use of color — one accent color,
+  everything else neutral. Havelio's own one-accent-plus-neutrals
+  palette (`BRAND_GUIDELINES.md`) already follows this discipline.
+- **Stripe Dashboard:** a sidebar with icon+label rows, clear section
+  grouping (with subtle group headers), and a persistent top bar
+  carrying breadcrumbs, a global search trigger, and account
+  controls. Notably dense but never cluttered — spacing discipline
+  (Havelio's own fixed Spacing System exists for exactly this reason)
+  is what keeps a data-dense financial product feeling calm rather
+  than overwhelming.
+- **Vercel:** a workspace/team switcher at the very top of the
+  sidebar (above the nav items), reinforcing that "which
+  workspace/tenant am I in" is answered before "where in the product
+  am I" — directly informs this chapter's Tenant Switcher placement
+  decision below.
+- **Figma:** demonstrates that a sidebar can adapt its density
+  (collapsed icon rail vs. expanded panel) without changing its
+  underlying information architecture — the same items, just more or
+  less label-visible.
+- **GitHub:** breadcrumbs that are genuinely useful because they
+  encode a real hierarchy (org → repo → section) rather than a
+  cosmetic trail; global search doubles as a command surface (typing
+  `>` before a query switches to command mode) — direct precedent for
+  Havelio's own unified search/command surface.
+- **Notion:** the strongest example of a "recent pages" and
+  "favorites" architecture living directly in the sidebar, and of a
+  command palette (`Cmd+K`) that mixes navigation, search, and
+  action execution in one ranked list — the direct model for this
+  chapter's Command Palette _foundation_ (see the architecture section
+  in `UI_REDESIGN_PLAN.md`).
+
+## What Havelio deliberately does not adopt
+
+- **No dense multi-level flyout mega-menus** (some enterprise tools
+  have these) — Havelio's information architecture is shallow enough
+  (7 top-level areas today) that a flat sidebar with light grouping is
+  sufficient; adding flyouts would be complexity the product doesn't
+  need yet.
+- **No colored per-section sidebar theming** (some tools tint each
+  workspace a different color) — Havelio has one brand color and one
+  accent, applied consistently everywhere, per `BRAND_GUIDELINES.md`'s
+  explicit "never mix" rules.
+- **No AI-suggested/algorithmic navigation ordering** — the nav order
+  is fixed and predictable, matching `UX_PRINCIPLES.md` rule 30
+  ("consistency beats local optimization").
+
+## How this informs Chapter 1
+
+See [`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md) for the concrete
+Chapter 1 scope this research feeds into, and
+[`UI_AUDIT.md`](UI_AUDIT.md) for exactly what in today's Havelio shell
+falls short of the principles above.

@@ -622,11 +622,20 @@ as CSS custom properties, grouped by category:
 - **Breakpoints** — reuses Tailwind v4's default breakpoint scale
   (`sm`/`md`/`lg`/`xl`/`2xl`) unmodified; no custom breakpoints exist
   in this product today.
-- **Z-index** — not yet tokenized (see `ROADMAP.md`'s technical debt
-  — today's five components don't have a stacking-context conflict to
-  solve; a `--z-*` scale should be added the first time
-  `UI_PATTERNS.md`'s dialog/dropdown/toast/tooltip patterns are
-  actually implemented as components, per TASK-0010).
+- **Z-index** — `--z-sticky` (20) / `--z-overlay` (30) / `--z-drawer`
+  (40) / `--z-dropdown` (50) / `--z-modal` (60) / `--z-toast` (70,
+  reserved — no toast component exists yet) / `--z-tooltip` (80,
+  reserved — no tooltip component exists yet), exposed as the
+  `z-sticky`/`z-overlay`/`z-drawer`/`z-dropdown`/`z-modal`/`z-toast`/
+  `z-tooltip` Tailwind utilities. Added in TASK-0010 Chapter 1, the
+  first time dialog/dropdown/drawer patterns existed as real
+  components and a genuine stacking order (header → mobile nav scrim
+  → mobile nav drawer → dropdown menus/command palette → dialogs) needed
+  one source of truth instead of ad hoc `z-30`/`z-40`/`z-50` values
+  guessed per component. Ordering is independent of the Shadow
+  System's elevation depth above — a tooltip has the lightest shadow
+  (it sits close to its anchor) but the highest z-index, since it must
+  still paint above a modal.
 
 No component may define a color, spacing, radius, shadow, or
 duration value that doesn't resolve to one of the tokens above.

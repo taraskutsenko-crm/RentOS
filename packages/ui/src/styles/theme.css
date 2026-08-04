@@ -117,6 +117,20 @@
   --shadow-popover: 0 4px 12px -2px rgb(20 27 29 / 0.12);
   --shadow-tooltip: 0 2px 6px -1px rgb(20 27 29 / 0.16);
   --shadow-modal: 0 16px 48px -8px rgb(20 27 29 / 0.24);
+
+  /* Z-index scale — see docs/BRAND_GUIDELINES.md "Design tokens" (the
+     scale was deliberately deferred until dialog/dropdown/drawer patterns
+     existed as real components; TASK-0010 Chapter 1 is that trigger).
+     Ordered by stacking priority, independent of the Shadow System's
+     elevation-depth ordering above — a tooltip has the lightest shadow
+     (it sits close to its anchor) but must still paint above a modal. */
+  --z-sticky: 20; /* the header's sticky top bar */
+  --z-overlay: 30; /* backdrop/scrim behind a drawer or dialog */
+  --z-drawer: 40; /* the mobile sidebar drawer */
+  --z-dropdown: 50; /* dropdown menus, popovers, the command palette */
+  --z-modal: 60; /* dialog/confirmation-modal content */
+  --z-toast: 70; /* toasts (reserved — no toast component exists yet) */
+  --z-tooltip: 80; /* tooltips — always above everything else, including modals */
 }
 
 .dark {
@@ -226,6 +240,14 @@
   --duration-moderate: var(--duration-moderate);
   --duration-slow: var(--duration-slow);
   --ease-standard: var(--ease-standard);
+
+  --z-index-sticky: var(--z-sticky);
+  --z-index-overlay: var(--z-overlay);
+  --z-index-drawer: var(--z-drawer);
+  --z-index-dropdown: var(--z-dropdown);
+  --z-index-modal: var(--z-modal);
+  --z-index-toast: var(--z-toast);
+  --z-index-tooltip: var(--z-tooltip);
 }
 
 @layer base {
@@ -234,5 +256,74 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/**
+ * Floating-surface open/close motion (dropdowns, popovers, the command
+ * palette dialog) — uses this file's own Motion System tokens directly
+ * rather than pulling in a third-party animation-utility plugin, per
+ * BRAND_GUIDELINES.md's "one curve, used everywhere" rule. Applied via
+ * the `havelio-pop`/`havelio-fade` classes, driven by Radix's
+ * `data-state` attribute.
+ */
+@layer components {
+  .havelio-pop[data-state="open"] {
+    animation: havelio-pop-in var(--duration-moderate) var(--ease-standard);
+  }
+  .havelio-pop[data-state="closed"] {
+    animation: havelio-pop-out var(--duration-fast) var(--ease-standard);
+  }
+  .havelio-fade[data-state="open"] {
+    animation: havelio-fade-in var(--duration-slow) var(--ease-standard);
+  }
+  .havelio-fade[data-state="closed"] {
+    animation: havelio-fade-out var(--duration-base) var(--ease-standard);
+  }
+}
+
+@keyframes havelio-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes havelio-pop-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(-2px);
+  }
+}
+@keyframes havelio-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes havelio-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .havelio-pop[data-state="open"],
+  .havelio-pop[data-state="closed"],
+  .havelio-fade[data-state="open"],
+  .havelio-fade[data-state="closed"] {
+    animation: none;
   }
 }

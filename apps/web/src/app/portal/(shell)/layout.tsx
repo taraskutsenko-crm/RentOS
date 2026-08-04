@@ -24,7 +24,7 @@ export default function PortalShellLayout({ children }: { children: React.ReactN
   const pathname = usePathname();
   const { data, isLoading, isError } = usePortalMe();
   const logoutMutation = usePortalLogout();
-  const [isDark, setDarkMode] = useDarkMode();
+  const [isDark, setDarkMode] = useDarkMode("rentos_portal_dark_mode");
   const { data: unread } = usePortalUnreadNotificationCount();
 
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import AppLayout from "../../src/app/app/layout";
@@ -7,6 +8,7 @@ import { renderWithProviders } from "../test-utils";
 const replaceMock = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: replaceMock }),
+  usePathname: () => "/app",
 }));
 
 const useMeMock = vi.fn();
@@ -14,6 +16,13 @@ const useLogoutMock = vi.fn();
 vi.mock("../../src/hooks/use-auth", () => ({
   useMe: () => useMeMock(),
   useLogout: () => useLogoutMock(),
+  useTenants: () => ({ data: { tenants: [] } }),
+  useSelectTenant: () => ({ mutateAsync: vi.fn() }),
+}));
+
+vi.mock("../../src/hooks/use-current-tenant-role", () => ({
+  useCurrentTenantRole: () => ({ data: undefined }),
+  usePermission: () => false,
 }));
 
 describe("AppLayout", () => {
@@ -24,7 +33,7 @@ describe("AppLayout", () => {
     useLogoutMock.mockReturnValue({ mutateAsync: vi.fn() });
   });
 
-  it("renders the authenticated shell and children when the session is valid", () => {
+  it("renders the authenticated shell and children when the session is valid", async () => {
     useMeMock.mockReturnValue({
       data: { user: { firstName: "Ada", lastName: "Lovelace", email: "ada@example.com" } },
       isLoading: false,
@@ -38,8 +47,11 @@ describe("AppLayout", () => {
     );
 
     expect(screen.getByText("Protected content")).toBeInTheDocument();
-    expect(screen.getByText(/ada lovelace/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /account menu/i }));
+    expect(await screen.findByText(/ada lovelace/i)).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: /log out/i })).toBeInTheDocument();
     expect(replaceMock).not.toHaveBeenCalled();
   });
 

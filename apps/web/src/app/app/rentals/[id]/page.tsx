@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { usePageBreadcrumbs } from "../../../../components/shell/breadcrumb-context";
+import { PageHeader } from "../../../../components/shell/page-header";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
 import {
@@ -47,6 +49,16 @@ export default function RentalDetailPage() {
   const canReturnAction = usePermission("rentals.return");
   const canCancel = usePermission("rentals.cancel");
 
+  usePageBreadcrumbs(
+    rental
+      ? [
+          { label: t("app.nav.dashboard"), href: "/app" },
+          { label: t("rental.title"), href: "/app/rentals" },
+          { label: rental.rentalNumber },
+        ]
+      : null,
+  );
+
   if (isLoading) {
     return <p className="text-muted-foreground text-sm">{t("common.loading")}</p>;
   }
@@ -74,60 +86,57 @@ export default function RentalDetailPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{rental.rentalNumber}</h1>
-          <p className="text-muted-foreground text-sm">
-            {rental.customer.firstName} {rental.customer.lastName} ·{" "}
-            {t(`rental.statuses.${rental.status}`)}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {canUpdate && EDITABLE_STATUSES.has(rental.status) && (
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/app/rentals/${rental.id}/edit`}>{t("rental.editRental")}</Link>
-            </Button>
-          )}
-          {canReserve && EDITABLE_STATUSES.has(rental.status) && (
-            <Button
-              size="sm"
-              onClick={() => void runAction(() => reserveRental.mutateAsync({ id: rental.id }))}
-            >
-              {t("rental.actions.reserve")}
-            </Button>
-          )}
-          {canStart && rental.status === "RESERVED" && (
-            <Button
-              size="sm"
-              onClick={() => void runAction(() => startRental.mutateAsync({ id: rental.id }))}
-            >
-              {t("rental.actions.start")}
-            </Button>
-          )}
-          {canReturnAction && rental.status === "ACTIVE" && (
-            <Button
-              size="sm"
-              onClick={() => void runAction(() => returnRental.mutateAsync({ id: rental.id }))}
-            >
-              {t("rental.actions.returnAll")}
-            </Button>
-          )}
-          {canCancel && CANCELLABLE_STATUSES.has(rental.status) && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => void runAction(() => cancelRental.mutateAsync({ id: rental.id }))}
-            >
-              {t("rental.actions.cancel")}
-            </Button>
-          )}
-          {canDelete && DELETABLE_STATUSES.has(rental.status) && (
-            <Button size="sm" variant="outline" onClick={() => void handleDelete()}>
-              {t("customer.delete")}
-            </Button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title={rental.rentalNumber}
+        subtitle={`${rental.customer.firstName} ${rental.customer.lastName} · ${t(`rental.statuses.${rental.status}`)}`}
+        secondaryActions={
+          <>
+            {canUpdate && EDITABLE_STATUSES.has(rental.status) && (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/app/rentals/${rental.id}/edit`}>{t("rental.editRental")}</Link>
+              </Button>
+            )}
+            {canReserve && EDITABLE_STATUSES.has(rental.status) && (
+              <Button
+                size="sm"
+                onClick={() => void runAction(() => reserveRental.mutateAsync({ id: rental.id }))}
+              >
+                {t("rental.actions.reserve")}
+              </Button>
+            )}
+            {canStart && rental.status === "RESERVED" && (
+              <Button
+                size="sm"
+                onClick={() => void runAction(() => startRental.mutateAsync({ id: rental.id }))}
+              >
+                {t("rental.actions.start")}
+              </Button>
+            )}
+            {canReturnAction && rental.status === "ACTIVE" && (
+              <Button
+                size="sm"
+                onClick={() => void runAction(() => returnRental.mutateAsync({ id: rental.id }))}
+              >
+                {t("rental.actions.returnAll")}
+              </Button>
+            )}
+            {canCancel && CANCELLABLE_STATUSES.has(rental.status) && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => void runAction(() => cancelRental.mutateAsync({ id: rental.id }))}
+              >
+                {t("rental.actions.cancel")}
+              </Button>
+            )}
+            {canDelete && DELETABLE_STATUSES.has(rental.status) && (
+              <Button size="sm" variant="outline" onClick={() => void handleDelete()}>
+                {t("customer.delete")}
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {actionError && <p className="text-destructive text-sm">{actionError}</p>}
 

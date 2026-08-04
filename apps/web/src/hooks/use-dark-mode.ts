@@ -2,33 +2,40 @@
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 
-const STORAGE_KEY = "rentos_portal_dark_mode";
-
 function subscribe(callback: () => void): () => void {
   window.addEventListener("storage", callback);
   return () => window.removeEventListener("storage", callback);
 }
 
-function getSnapshot(): boolean {
-  return window.localStorage.getItem(STORAGE_KEY) === "true";
+function makeGetSnapshot(storageKey: string) {
+  return () => window.localStorage.getItem(storageKey) === "true";
 }
 
 function getServerSnapshot(): boolean {
   return false;
 }
 
-/** Persists the customer portal's dark-mode preference and keeps <html class="dark"> in sync. */
-export function useDarkMode(): [boolean, (enabled: boolean) => void] {
-  const isDark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+/**
+ * Persists a dark-mode preference under `storageKey` and keeps
+ * <html class="dark"> in sync. Callers pass their own key (staff shell vs.
+ * customer portal) so the same physical person can hold independent
+ * preferences across the two — see docs/UI_REDESIGN_PLAN.md Chapter 1,
+ * decision 5.
+ */
+export function useDarkMode(storageKey: string): [boolean, (enabled: boolean) => void] {
+  const isDark = useSyncExternalStore(subscribe, makeGetSnapshot(storageKey), getServerSnapshot);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
 
-  const setDarkMode = useCallback((enabled: boolean) => {
-    window.localStorage.setItem(STORAGE_KEY, String(enabled));
-    window.dispatchEvent(new StorageEvent("storage"));
-  }, []);
+  const setDarkMode = useCallback(
+    (enabled: boolean) => {
+      window.localStorage.setItem(storageKey, String(enabled));
+      window.dispatchEvent(new StorageEvent("storage"));
+    },
+    [storageKey],
+  );
 
   return [isDark, setDarkMode];
 }

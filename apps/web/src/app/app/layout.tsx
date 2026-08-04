@@ -1,18 +1,21 @@
 "use client";
 
-import { Button } from "@rentos/ui";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useLogout, useMe } from "../../hooks/use-auth";
+import { BreadcrumbProvider } from "../../components/shell/breadcrumb-context";
+import { CommandPalette } from "../../components/shell/command-palette";
+import { Header } from "../../components/shell/header";
+import { Sidebar } from "../../components/shell/sidebar";
+import { useMe } from "../../hooks/use-auth";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const router = useRouter();
   const { data, isLoading, isError } = useMe();
-  const logoutMutation = useLogout();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   useEffect(() => {
     if (isError) {
@@ -20,10 +23,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [isError, router]);
 
-  async function handleLogout(): Promise<void> {
-    await logoutMutation.mutateAsync();
-    router.replace("/login");
-  }
+  // Cmd/Ctrl+K opens the unified global-search + command palette from
+  // anywhere in the shell — see docs/UI_REDESIGN_PLAN.md Chapter 1.
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent): void {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setCommandPaletteOpen((current) => !current);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   if (isLoading) {
     return (
@@ -38,62 +49,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between border-b p-4">
-        <div className="flex items-center gap-6">
-          <span className="font-semibold">{t("app.name")}</span>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/app/customers" className="text-muted-foreground hover:text-foreground">
-              {t("customer.title")}
-            </Link>
-            <Link href="/app/assets" className="text-muted-foreground hover:text-foreground">
-              {t("asset.title")}
-            </Link>
-            <Link href="/app/rentals" className="text-muted-foreground hover:text-foreground">
-              {t("rental.title")}
-            </Link>
-            <Link href="/app/quotes" className="text-muted-foreground hover:text-foreground">
-              {t("quote.title")}
-            </Link>
-            <Link href="/app/documents" className="text-muted-foreground hover:text-foreground">
-              {t("document.title")}
-            </Link>
-            <Link
-              href="/app/settings/asset-categories"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {t("asset.categorySettings.navLabel")}
-            </Link>
-            <Link
-              href="/app/settings/asset-statuses"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {t("asset.statusSettings.navLabel")}
-            </Link>
-            <Link
-              href="/app/settings/asset-fields"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {t("asset.fieldSettings.navLabel")}
-            </Link>
-            <Link
-              href="/app/settings/rental-billing"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {t("rental.billingSettings.navLabel")}
-            </Link>
-          </nav>
+    <BreadcrumbProvider>
+      <div className="flex min-h-screen">
+        <Sidebar
+          mobileOpen={mobileNavOpen}
+          onCloseMobile={() => setMobileNavOpen(false)}
+          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+        />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Header
+            onOpenMobileNav={() => setMobileNavOpen(true)}
+            onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+          />
+          <main className="flex-1 p-6 sm:p-8">{children}</main>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-muted-foreground text-sm">
-            {data.user.firstName} {data.user.lastName}
-          </span>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
-            {t("nav.logout")}
-          </Button>
-        </div>
-      </header>
-      <main className="flex-1 p-8">{children}</main>
-    </div>
+        <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
+      </div>
+    </BreadcrumbProvider>
   );
 }

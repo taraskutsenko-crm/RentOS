@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PageHeader } from "../../../components/shell/page-header";
 import { useCurrentTenantId } from "../../../hooks/use-current-tenant";
 import { usePermission } from "../../../hooks/use-current-tenant-role";
 import { useRentals } from "../../../hooks/use-rentals";
@@ -46,22 +47,22 @@ export default function RentalsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{t("rental.title")}</h1>
-          <p className="text-muted-foreground text-sm">{t("rental.subtitle")}</p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+        title={t("rental.title")}
+        subtitle={t("rental.subtitle")}
+        secondaryActions={
           <Button asChild variant="outline">
             <Link href="/app/rentals/availability">{t("rental.availabilityCalendar.title")}</Link>
           </Button>
-          {canCreate && (
+        }
+        primaryAction={
+          canCreate && (
             <Button asChild>
               <Link href="/app/rentals/new">{t("rental.newRental")}</Link>
             </Button>
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       <div className="flex flex-wrap gap-3">
         <Input

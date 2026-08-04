@@ -10,15 +10,17 @@ values referenced throughout, and
 apply across all of these.
 
 **Implementation status:** this document specifies the target pattern
-set for TASK-0010 (Complete UI/UX Redesign) and beyond. As of this
-writing, `@rentos/ui` implements five primitives — `Button`, `Input`,
-`Label`, `Card`, `Alert` — and every page composes them directly with
-Tailwind utility classes rather than a dedicated pattern component
-(e.g. today's tables are hand-written `<table>` markup per page, not
-a shared `Table` component). Nothing below should be read as already
-built; each pattern names its current state where relevant. Building
-these as real, shared components (rather than the current
-copy-pasted-per-page markup) is explicitly in TASK-0010's scope.
+set for TASK-0010 (Complete UI/UX Redesign) and beyond. As of TASK-0010
+Part 2 Chapter 1 (Application Shell), `@rentos/ui` implements `Button`,
+`Input`, `Label`, `Card`, `Alert`, `Skeleton`, `DropdownMenu`, and
+`Dialog`; the staff shell additionally has real `Sidebar`,
+`Breadcrumbs`, `PageHeader`, and `CommandPalette` components under
+`apps/web/src/components/shell/` — see
+[`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md) Chapter 1 for exactly
+what shipped and what's deferred. Every other pattern below (Table,
+Tabs, DatePicker, Toast, Tooltip, Confirmation dialog as a real
+component) is still per-page hand-written markup, not yet a shared
+component; each pattern names its current state where relevant.
 
 For every pattern: **Purpose**, **When to use**, **When NOT to use**,
 **Visual behavior**, **Keyboard behavior**, **Loading state**,
@@ -77,10 +79,11 @@ on navigation or on an outside tap.
 **Purpose:** the staff app's primary navigation surface, persistently
 visible on desktop.
 
-**When to use:** the one staff-app shell layout only
-(`apps/web/src/app/app/layout.tsx` today uses a top header bar
-instead — migrating to a left sidebar is TASK-0010 scope, consistent
-with the density a data-heavy operator tool needs at scale).
+**When to use:** the one staff-app shell layout only — implemented as
+of TASK-0010 Part 2 Chapter 1
+(`apps/web/src/components/shell/sidebar.tsx`, wired into
+`apps/web/src/app/app/layout.tsx`), replacing the previous flat
+top-bar link list.
 
 **When NOT to use:** the Customer Portal, which has few enough
 top-level areas that a top nav bar (already implemented) remains
@@ -1124,6 +1127,10 @@ minimum, per `UX_PRINCIPLES.md`.
   meaningful `alt` text or `alt=""` if purely decorative.
 - Motion respects `prefers-reduced-motion` — every transition in the
   Motion System is a candidate for being skipped entirely (opacity/
-  position set instantly) when that media query is active; this isn't
-  implemented yet anywhere in the product and is called out here as
-  TASK-0010 scope, not claimed as done.
+  position set instantly) when that media query is active. Implemented
+  for the `havelio-pop`/`havelio-fade` CSS utilities
+  (`packages/ui/src/styles/theme.css`) that drive every dropdown/
+  dialog/command-palette open-close transition as of TASK-0010 Part 2
+  Chapter 1; plain Tailwind `transition-colors` hover states (sidebar
+  links, buttons) do not yet check this media query — a small,
+  low-risk follow-up for a later chapter.

@@ -130,7 +130,8 @@ built feature yet.
 
 ### TASK-0010 — Complete UI/UX Redesign
 
-**Status: NEXT**
+**Status: IN PROGRESS** (Part 2 Chapter 1 of 5 complete — see
+[`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md))
 
 > The brand and design-token foundation this task builds on is already
 > in place: [`BRAND_GUIDELINES.md`](BRAND_GUIDELINES.md) (colors,
@@ -139,7 +140,32 @@ built feature yet.
 > and its states), and [`UX_PRINCIPLES.md`](UX_PRINCIPLES.md) (30
 > permanent behavioral rules) — see D-041 in `DECISIONS.md`. TASK-0010
 > is where these get _applied_ across every existing page; it does not
-> redefine them.
+> redefine them. Part 2 additionally produced
+> [`UI_RESEARCH.md`](UI_RESEARCH.md), [`UI_AUDIT.md`](UI_AUDIT.md),
+> [`UI_COMPONENT_INVENTORY.md`](UI_COMPONENT_INVENTORY.md), and
+> [`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md) as the required
+> research/audit/inventory/plan before any shell code changed.
+
+**Chapter 1 — Application Shell: COMPLETE.** A real, permission-aware
+`Sidebar` (fixing a genuine bug — `UI_AUDIT.md` finding #4, a
+`TECHNICIAN` role could click a visible "Quotes" nav link straight into
+a `403`), `Breadcrumbs`, a shared `PageHeader` component, a unified
+`Cmd/Ctrl+K` Command Palette (global-search foundation), an in-header
+`TenantSwitcher`, `UserMenu` (theme + language + logout), `QuickCreate`,
+and an honestly-empty staff `NotificationsMenu` placeholder (no backend
+exists yet — see finding #7) all shipped, replacing the previous flat
+top-bar nav. `UserMenu` also added runtime language switching
+(`i18n.changeLanguage`) as a staff-shell control for the first time —
+previously the app language was only set once at init. New
+`@rentos/ui` primitives: `DropdownMenu`, `Dialog`, `Skeleton`. A
+`--z-*` token scale (`sticky`/`overlay`/`drawer`/`dropdown`/`modal`/
+`toast`/`tooltip`, see D-042 in `DECISIONS.md`) was also added, since
+this chapter is the first time dialog/dropdown/drawer patterns existed
+as real components — replacing ad hoc `z-30`/`z-40`/`z-50` guesses with
+one ordered source of truth. See `UI_REDESIGN_PLAN.md` Chapter 1 for
+the full design rationale and what was deliberately deferred
+(retrofitting `PageHeader` to every page, a real dashboard, a real
+notifications backend).
 
 - Premium modern staff interface, built on the existing `@rentos/ui`
   (shadcn/ui-based) component set and Tailwind conventions — not a new

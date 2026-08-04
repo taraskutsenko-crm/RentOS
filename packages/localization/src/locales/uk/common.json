@@ -1,7 +1,38 @@
 {
   "app": {
     "name": "Havelio",
-    "tagline": "Одна платформа. Будь-який актив."
+    "tagline": "Одна платформа. Будь-який актив.",
+    "nav": {
+      "dashboard": "Панель керування",
+      "settingsGroup": "Налаштування"
+    },
+    "shell": {
+      "sidebarLabel": "Основна навігація",
+      "openNav": "Відкрити навігацію",
+      "closeNav": "Закрити навігацію",
+      "expandSidebar": "Розгорнути бічну панель",
+      "collapseSidebar": "Згорнути бічну панель",
+      "searchPlaceholder": "Пошук…",
+      "userMenu": "Меню акаунту",
+      "lightMode": "Світла тема",
+      "darkMode": "Темна тема",
+      "language": "Мова",
+      "create": "Створити",
+      "breadcrumbs": {
+        "new": "Новий",
+        "edit": "Редагувати"
+      },
+      "notifications": {
+        "title": "Сповіщення",
+        "empty": "Усе актуально"
+      },
+      "commandPalette": {
+        "title": "Палітра команд",
+        "placeholder": "Пошук або перехід…",
+        "noResults": "Нічого не знайдено",
+        "pagesGroup": "Сторінки"
+      }
+    }
   },
   "common": {
     "loading": "Завантаження…",

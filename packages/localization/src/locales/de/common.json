@@ -1,7 +1,38 @@
 {
   "app": {
     "name": "Havelio",
-    "tagline": "Eine Plattform. Jedes Asset."
+    "tagline": "Eine Plattform. Jedes Asset.",
+    "nav": {
+      "dashboard": "Übersicht",
+      "settingsGroup": "Einstellungen"
+    },
+    "shell": {
+      "sidebarLabel": "Hauptnavigation",
+      "openNav": "Navigation öffnen",
+      "closeNav": "Navigation schließen",
+      "expandSidebar": "Seitenleiste erweitern",
+      "collapseSidebar": "Seitenleiste einklappen",
+      "searchPlaceholder": "Suchen…",
+      "userMenu": "Kontomenü",
+      "lightMode": "Heller Modus",
+      "darkMode": "Dunkler Modus",
+      "language": "Sprache",
+      "create": "Erstellen",
+      "breadcrumbs": {
+        "new": "Neu",
+        "edit": "Bearbeiten"
+      },
+      "notifications": {
+        "title": "Benachrichtigungen",
+        "empty": "Alles erledigt"
+      },
+      "commandPalette": {
+        "title": "Befehlspalette",
+        "placeholder": "Suchen oder springen zu…",
+        "noResults": "Keine Treffer gefunden",
+        "pagesGroup": "Seiten"
+      }
+    }
   },
   "common": {
     "loading": "Wird geladen…",

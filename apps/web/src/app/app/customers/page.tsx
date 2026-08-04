@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PageHeader } from "../../../components/shell/page-header";
 import { useCurrentTenantId } from "../../../hooks/use-current-tenant";
 import { useCustomers, useDeleteCustomer } from "../../../hooks/use-customers";
 import type { CustomerStatus } from "../../../types/customer";
@@ -46,15 +47,15 @@ export default function CustomersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{t("customer.title")}</h1>
-          <p className="text-muted-foreground text-sm">{t("customer.subtitle")}</p>
-        </div>
-        <Button asChild>
-          <Link href="/app/customers/new">{t("customer.newCustomer")}</Link>
-        </Button>
-      </div>
+      <PageHeader
+        title={t("customer.title")}
+        subtitle={t("customer.subtitle")}
+        primaryAction={
+          <Button asChild>
+            <Link href="/app/customers/new">{t("customer.newCustomer")}</Link>
+          </Button>
+        }
+      />
 
       <div className="flex gap-3">
         <Input

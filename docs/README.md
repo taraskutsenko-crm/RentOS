@@ -17,6 +17,19 @@
 - [`UX_PRINCIPLES.md`](UX_PRINCIPLES.md) — 30 permanent behavioral
   rules for how the product acts, each grounded in a real decision or
   the stated brand personality.
+- [`UI_RESEARCH.md`](UI_RESEARCH.md) — the premium-SaaS interaction
+  principles (Linear, Stripe Dashboard, Vercel, Figma, GitHub, Notion)
+  that inform TASK-0010's redesign — principles only, never Havelio's
+  own visual identity, which stays governed by `BRAND_GUIDELINES.md`.
+- [`UI_AUDIT.md`](UI_AUDIT.md) — an evidence-based audit of the
+  current staff app shell against the three docs above, including a
+  concrete permission-gating bug found by direct code inspection.
+- [`UI_COMPONENT_INVENTORY.md`](UI_COMPONENT_INVENTORY.md) — a catalog
+  of every existing UI building block, shared and per-page, as of the
+  start of TASK-0010 Part 2.
+- [`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md) — the phased TASK-0010
+  plan; each chapter's scope, design decisions, and what it explicitly
+  defers.
 - [`VISION.md`](VISION.md) — the long-term product vision: what RentOS
   is, the problem it solves, and what's implemented vs. planned vs.
   long-term direction.

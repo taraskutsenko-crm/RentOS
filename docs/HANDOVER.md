@@ -16,38 +16,42 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `ec06729` (feat: TASK-0010 Part 2 Chapter
-  1 — application shell redesign), on top of `594a6e0` (brand/design-token
-  foundation). This is the first commit with product/application code
-  changes since TASK-0009 (`09fc7c8`) — the intervening `88ba3ca`/
-  `1c2ebc4`/`594a6e0` commits were docs/governance/token-only.
-- **Quality gates:** format/lint/typecheck/build green; 465 backend + 193
-  frontend tests passing (658 total, including the new
-  `test/shell/sidebar.test.tsx` permission-gating regression tests), plus
-  all three governance checks (`pnpm check:governance` — i18n key parity,
-  backend/frontend permission-registry sync, documentation-link validity)
-  green.
+- **Latest verified commit:** `4b1ddda` (docs: document TASK-0010 Part
+  2 Chapter 2 authentication UX patterns), on top of `2990a80` (feat:
+  redesign staff and customer-portal authentication experience) and
+  `886f515` (feat: add reusable Havelio authentication UI primitives)
+  — TASK-0010 Part 2 Chapter 2. Sits on top of `ec06729`/`5157e2c`
+  (Chapter 1 — application shell redesign).
+- **Quality gates:** format/lint/typecheck/build green; 465 backend +
+  203 frontend tests passing (668 total, including 10 new tests:
+  password-visibility toggles on all three password-bearing forms,
+  `select-tenant-page.test.tsx`, and `portal-activate-form.test.tsx`),
+  plus all three governance checks and the 13 governance-safeguard
+  unit tests (`pnpm test:governance-checks`) green.
 - **Docker/browser verification:** the `web` image was rebuilt from
-  scratch against the new shell code and redeployed into the running
-  Docker Compose stack; verified end-to-end via a real browser session
-  (registered a fresh staff account, OWNER role): mobile nav drawer +
-  scrim overlay + close-on-navigate; persistent desktop sidebar +
-  collapse-to-icons-only; breadcrumbs and `PageHeader` on Rentals/
-  Customers with no duplicated titles; `Cmd/Ctrl+K` Command Palette
-  open/fuzzy-filter/navigate; permission-filtered Quick Create dropdown;
-  `TenantSwitcher` (correctly renders as a plain label, not a dropdown,
-  for this single-tenant account — the documented behavior); `UserMenu`
-  dark-mode toggle (verified both directions, full-shell contrast checked
-  visually) and all 6 languages (runtime `i18n.changeLanguage` verified
-  functional end-to-end — a Radix dropdown-animation click-timing quirk
-  in the browser-automation tool itself initially looked like a bug but
-  was disproven by a direct DOM-level click, which switched the entire
-  shell's text correctly); honestly-empty `NotificationsMenu`; the new
-  `--z-*` token stacking order (sticky header → mobile scrim → mobile
-  drawer → dropdown/command-palette → dialog) confirmed correct with no
-  visual overlap across all of the above.
-- **GitHub Actions:** green — [run 30934347665](https://github.com/taraskutsenko-crm/RentOS/actions/runs/30934347665)
-  on `ec06729`.
+  scratch against the new auth code and redeployed into the running
+  Docker Compose stack; verified end-to-end via real browser sessions
+  against all five real account-entry pages (`/login`, `/register`,
+  `/app/select-tenant`, `/portal/login`, `/portal/invite/[token]`):
+  light mode, dark mode (both `AuthShell` tones — `primary` for staff,
+  `sidebar` for the portal), desktop/tablet/mobile viewports (confirmed
+  the register page's field rows now genuinely collapse to one column
+  below `sm`, fixing a real pre-existing bug), 200% zoom (scrolls
+  correctly, no clipping), password-visibility toggling, client-side
+  validation styling, a full real customer-invitation flow (created via
+  direct API calls against the running stack, then activated through
+  the browser) showing the genuine "Welcome to {tenant name}" success
+  state before redirecting, and the invalid-token error state. No
+  console errors or failed network requests on any of the five pages.
+  Non-English live-render confirmation hit the same Radix
+  dropdown-animation click-timing quirk in the browser-automation tool
+  documented for Chapter 1; relied instead on the i18n parity check
+  (all six locales, structurally verified), genuinely-authored
+  per-language translations for every new string, and Chapter 1's own
+  already-conclusive proof that this codebase's `i18n.changeLanguage`
+  mechanism works end-to-end once triggered.
+- **GitHub Actions:** green — [run 30941028398](https://github.com/taraskutsenko-crm/RentOS/actions/runs/30941028398)
+  on `4b1ddda`.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

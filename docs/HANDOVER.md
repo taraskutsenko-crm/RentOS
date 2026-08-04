@@ -16,51 +16,38 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `1c2ebc4` (ci: add architecture governance
-  safeguards, on top of `15e59c0`/`f2fa3d2`/`20c9873` — docs: architecture
-  governance policy + roadmap/handover/vision alignment — the PRE-TASK-0010
-  governance task; no product code changed). Sits on top of `09fc7c8`
-  (TASK-0009 — Customer Portal + Havelio rebrand), which remains the
-  last commit with product/application code changes and the Docker/
-  browser walkthrough described below.
-- **Quality gates:** format/lint/typecheck/build green; 465 backend + 190
-  frontend tests passing (655 total), plus 13 new governance-safeguard
-  unit tests (`pnpm test:governance-checks`) and the three governance
-  checks themselves (`pnpm check:governance` — i18n key parity,
-  backend/frontend permission-registry sync, documentation-link
-  validity) all green. This governance task changed only documentation
-  and repo-level static-analysis scripts (no schema, no runtime
-  application code) — see [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md)
-  for what it added; no new Docker/browser walkthrough was needed for it
-  (nothing it changed is exercised by the running application). The most
-  recent full Docker Compose + browser verification remains the one
-  performed for TASK-0009 (`09fc7c8`): migration applied and verified
-  against a rebuilt Docker Compose stack (both `api` and `web` images
-  rebuilt from scratch); the full customer-portal backend flow was walked
-  end-to-end against the running Docker stack via real authenticated HTTP
-  calls through the browser (dual staff+customer sessions coexisting):
-  register → create customer/asset/rental → invite → activate → portal
-  login → list/view rentals → view/preview/download a real generated PDF
-  → customer e-signature (confirmed `Document.status` advanced to
-  `SIGNED`) → ZIP download of rental documents (`PK` magic bytes) → QR
-  code generation (`image/png`) → submit extension request → staff
-  approve (confirmed `Rental.plannedEnd` and `totalMinor` genuinely
-  recalculated) → customer notification received → submit damage report
-  → staff review → staff convert to a real `DAMAGE_REPORT` document →
-  bidirectional messages → mark notification read → asset info with
-  financial fields stripped. Staff-side UI (registration, customer/asset/
-  rental creation, the `customers.portal.manage`-gated invite/revoke/
-  messages panel) was verified visually via the browser. The customer-
-  facing portal pages (`/portal/(shell)/**`) hit a Browser-preview-pane
-  compositing limitation in that session (screenshots/accessibility-tree
-  reads returned a stale "page couldn't load" fallback despite the
-  server returning complete, correct HTML — confirmed via direct `curl`
-  and via an in-page `fetch()` call, both returning valid 10KB+ documents,
-  and zero errors in the container logs) — a tooling limitation, not a
-  code defect, given the exhaustive API-level verification above and the
-  27 frontend component tests covering exactly these pages' render logic.
-- **GitHub Actions:** green — [run 30759027095](https://github.com/taraskutsenko-crm/RentOS/actions/runs/30759027095)
-  on `1c2ebc4`, including the two new governance-check steps.
+- **Latest verified commit:** `ec06729` (feat: TASK-0010 Part 2 Chapter
+  1 — application shell redesign), on top of `594a6e0` (brand/design-token
+  foundation). This is the first commit with product/application code
+  changes since TASK-0009 (`09fc7c8`) — the intervening `88ba3ca`/
+  `1c2ebc4`/`594a6e0` commits were docs/governance/token-only.
+- **Quality gates:** format/lint/typecheck/build green; 465 backend + 193
+  frontend tests passing (658 total, including the new
+  `test/shell/sidebar.test.tsx` permission-gating regression tests), plus
+  all three governance checks (`pnpm check:governance` — i18n key parity,
+  backend/frontend permission-registry sync, documentation-link validity)
+  green.
+- **Docker/browser verification:** the `web` image was rebuilt from
+  scratch against the new shell code and redeployed into the running
+  Docker Compose stack; verified end-to-end via a real browser session
+  (registered a fresh staff account, OWNER role): mobile nav drawer +
+  scrim overlay + close-on-navigate; persistent desktop sidebar +
+  collapse-to-icons-only; breadcrumbs and `PageHeader` on Rentals/
+  Customers with no duplicated titles; `Cmd/Ctrl+K` Command Palette
+  open/fuzzy-filter/navigate; permission-filtered Quick Create dropdown;
+  `TenantSwitcher` (correctly renders as a plain label, not a dropdown,
+  for this single-tenant account — the documented behavior); `UserMenu`
+  dark-mode toggle (verified both directions, full-shell contrast checked
+  visually) and all 6 languages (runtime `i18n.changeLanguage` verified
+  functional end-to-end — a Radix dropdown-animation click-timing quirk
+  in the browser-automation tool itself initially looked like a bug but
+  was disproven by a direct DOM-level click, which switched the entire
+  shell's text correctly); honestly-empty `NotificationsMenu`; the new
+  `--z-*` token stacking order (sticky header → mobile scrim → mobile
+  drawer → dropdown/command-palette → dialog) confirmed correct with no
+  visual overlap across all of the above.
+- **GitHub Actions:** green — [run 30934347665](https://github.com/taraskutsenko-crm/RentOS/actions/runs/30934347665)
+  on `ec06729`.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

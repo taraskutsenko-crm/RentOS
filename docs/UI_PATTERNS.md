@@ -17,10 +17,15 @@ Part 2 Chapter 1 (Application Shell), `@rentos/ui` implements `Button`,
 `Breadcrumbs`, `PageHeader`, and `CommandPalette` components under
 `apps/web/src/components/shell/` — see
 [`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md) Chapter 1 for exactly
-what shipped and what's deferred. Every other pattern below (Table,
-Tabs, DatePicker, Toast, Tooltip, Confirmation dialog as a real
-component) is still per-page hand-written markup, not yet a shared
-component; each pattern names its current state where relevant.
+what shipped and what's deferred. As of Chapter 2 (Premium
+Authentication Experience), `Alert` additionally has `success`/
+`warning`/`info` variants (previously only `default`/`destructive`),
+and every real account-entry screen shares the `Authentication`
+pattern below, under `apps/web/src/components/auth/`. Every other
+pattern below (Table, Tabs, DatePicker, Toast, Tooltip, Confirmation
+dialog as a real component) is still per-page hand-written markup, not
+yet a shared component; each pattern names its current state where
+relevant.
 
 For every pattern: **Purpose**, **When to use**, **When NOT to use**,
 **Visual behavior**, **Keyboard behavior**, **Loading state**,
@@ -143,6 +148,100 @@ pattern in both `apps/app/layout.tsx` and the portal shell).
 
 **Mobile behavior:** collapses non-essential actions (e.g. tenant
 name) behind the account menu to keep the header to a single row.
+
+---
+
+## Authentication
+
+**Purpose:** the presentation layer for every real account-entry
+screen — staff login, staff registration/tenant onboarding, tenant
+selection, customer-portal login, customer-portal invitation
+activation — unified so a fix to spacing, branding, or error-alert
+style is made once, not five times. Implemented as of TASK-0010 Part 2
+Chapter 2 under `apps/web/src/components/auth/`:
+`AuthShell`/`AuthBrandPanel` (the two-region page layout),
+`AuthCard`/`AuthHeader`/`AuthFooter` (the card and its title/subtitle/
+link-row slots), `AuthField`/`PasswordField` (label + input + error,
+the latter adding a visibility toggle), `AuthAlert` (the top-of-form
+error banner), `AuthSuccessState` (the one genuine new-account welcome
+moment, used by customer-portal activation only). See
+[`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md) Chapter 2 for the full
+design rationale, including the two flows this chapter deliberately
+does **not** build (staff invitation into an existing tenant, password
+recovery) because no backend capability exists for either — see
+`UI_AUDIT.md` findings #13–14.
+
+**When to use:** exactly the five real pages named above, plus any
+future real auth screen (password reset, once a backend exists) —
+`AuthShell`/`AuthCard`/`AuthField` are the ready-made foundation for
+it.
+
+**When NOT to use:** never for authenticated in-app content — this
+pattern is exclusively for the pre-session, public account-entry
+surface. Don't add a sixth independent `<main className="flex
+min-h-screen items-center justify-center p-8">` block; extend this
+pattern instead.
+
+**Staff/customer visual distinction:** one shared component tree, two
+tones. `<AuthShell tone="primary">` (staff: `/login`, `/register`,
+`/app/select-tenant`) uses a saturated `Primary`-filled brand panel;
+`<AuthShell tone="sidebar">` (customer portal: `/portal/login`,
+`/portal/invite/[token]`) uses the softer `Sidebar` surface tone,
+consistent with `BRAND_GUIDELINES.md`'s "Customer Portal is slightly
+warmer, never less precise" voice rule. This is a tone/copy
+difference only — `portal.auth.*` keys already read second-person and
+warmer than `auth.*`'s staff copy; no second component tree exists.
+
+**Validation pattern:** identical to Forms above — Zod schemas
+(`lib/validation.ts`), `react-hook-form`, field-level errors rendered
+beneath their field via `AuthField`'s `error` prop, validated on
+submit (client-side rules mirror the server's, e.g. the 12-character
+minimum password), never only after a failed API round-trip when the
+client already had enough information.
+
+**Security-safe error pattern:** the top-of-form `AuthAlert` renders
+whichever message the existing, unmodified error-mapping helpers
+return — `apiErrorKey()` (staff: maps known backend messages to
+translation keys) or `apiErrorMessage()` (portal: shows the backend's
+own already-generic message, e.g. "Invalid email, password, or
+company," with a translated fallback for non-`ApiError` failures).
+Neither helper's logic changed in Chapter 2 — only the visual
+presentation was unified. No screen in this pattern ever reveals
+whether a specific account exists, an invitation token's underlying
+tenant/customer identity before a successful activation, or any raw
+token value.
+
+**Loading/success pattern:** the submit button's label swaps to its
+pending-label variant and disables (matching Forms' existing
+convention) — no full-page spinner. The one true success moment
+(customer-portal activation) replaces the form with `AuthSuccessState`
+showing the actual tenant name returned by the successful API
+response, then redirects after a short, real pause (not instant) so
+the confirmation is genuinely perceived — see `UX_PRINCIPLES.md` rule 20. Login and registration redirect immediately on success, unchanged
+from prior behavior, since they have no comparable "first time"
+moment to mark.
+
+**Responsive behavior:** the brand panel is a full-height left column
+at `lg` and above, collapsing to a compact top strip (wordmark only,
+tagline hidden) below `lg` — brand presence never disappears, per
+`BRAND_GUIDELINES.md`'s "no giant empty panel" rule applied to small
+screens. `AuthField` rows that were two/three columns on desktop
+(register's name and language/currency/timezone rows) collapse to one
+column below `sm`, per Forms' existing mobile rule (this fixed a real
+pre-Chapter-2 bug — see `UI_AUDIT.md`).
+
+**Accessibility:** every field uses real `<label htmlFor>`/`id`
+pairing (via `AuthField`), `aria-invalid` and `aria-describedby` wired
+to the field's own error id, the password-visibility toggle is a real
+focusable button with a translated `aria-label` ("Show password"/"Hide
+password," `common.showPassword`/`common.hidePassword`) that updates
+as its state changes, and the error alert is a `role="alert"` region
+(via the shared `Alert` primitive) so it's announced without a
+separate `aria-live` region.
+
+**Mobile behavior:** covered under Responsive behavior above; every
+screen was verified at 375×812 with no horizontal overflow and the
+primary action remaining reachable.
 
 ---
 

@@ -164,6 +164,55 @@ system to reconcile against.
   pattern) even though they're not yet extracted into shared
   components — see `UI_COMPONENT_INVENTORY.md`.
 
+## Addendum — Authentication screens (TASK-0010 Part 2 Chapter 2)
+
+Scope extended for Chapter 2: the five real account-entry pages
+(`/login`, `/register`, `/app/select-tenant`, `/portal/login`,
+`/portal/invite/[token]`) plus two capabilities named in Chapter 2's
+brief that were checked against the actual codebase, not assumed.
+
+### 11. No shared auth layout — five independently duplicated pages
+
+Every one of the five pages above independently wraps its content in
+`<main className="flex min-h-screen items-center justify-center
+p-8">` plus a `Card`/`CardHeader`/`CardTitle`/`CardDescription`
+directly imported from `@rentos/ui` — verbatim-duplicated boilerplate,
+zero shared `AuthShell`/`AuthCard` component, confirmed by reading all
+five files directly. See `UI_REDESIGN_PLAN.md` Chapter 2 for what
+replaces this.
+
+### 12. No password-visibility toggle anywhere
+
+Every password `Input` across all five pages is hardcoded
+`type="password"` with no way to verify what was typed before
+submitting — a real error-prevention gap per `UX_PRINCIPLES.md` rule
+26, not present in any auth form today (`grep -rn "showPassword\|Eye"
+apps/web/src/components/{auth,portal}` returns zero matches).
+
+### 13. Staff invitation into an existing tenant — does not exist (product gap, not a UI gap)
+
+Confirmed via exhaustive grep across `apps/api/src` (`inviteStaff`,
+`invite-staff`, `MembershipInvitation`, `StaffInvitation`) and
+`apps/web/src`: zero matches. Staff can only join a tenant via
+`POST /auth/register`, which always creates a **brand-new** tenant
+with the registering user as `OWNER` — there is no mechanism today for
+an existing `OWNER`/`ADMIN` to invite a colleague into their own
+tenant. This is a genuine backend/business-logic gap, out of Chapter
+2's presentation-only scope (`ARCHITECTURE_LOCK.md` §3 — building it
+would mean new endpoints, a new model, and permission wiring, not a UI
+change). Not fabricated in Chapter 2; documented here for whichever
+future task adds it.
+
+### 14. Password recovery — does not exist on either auth stack
+
+Confirmed via exhaustive grep for `reset`/`forgot`/`PasswordReset`
+(case-insensitive) across `apps/api/src`, `apps/web/src`, and
+`packages/localization`: zero matches on staff or customer-portal
+auth. No `forgot-password` link, no reset endpoint, no i18n
+scaffolding exists anywhere. Same reasoning as finding #13 — a real
+backend capability gap, not built in Chapter 2, and not silently
+faked as frontend-only behavior.
+
 ## Summary table
 
 | Area                      | Current state                                     | Target (see `UI_REDESIGN_PLAN.md`)                     |

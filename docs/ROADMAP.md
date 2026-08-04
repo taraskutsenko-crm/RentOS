@@ -130,7 +130,7 @@ built feature yet.
 
 ### TASK-0010 — Complete UI/UX Redesign
 
-**Status: IN PROGRESS** (Part 2 Chapter 1 of 5 complete — see
+**Status: IN PROGRESS** (Part 2 Chapter 2 of 6 complete — see
 [`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md))
 
 > The brand and design-token foundation this task builds on is already
@@ -166,6 +166,22 @@ one ordered source of truth. See `UI_REDESIGN_PLAN.md` Chapter 1 for
 the full design rationale and what was deliberately deferred
 (retrofitting `PageHeader` to every page, a real dashboard, a real
 notifications backend).
+
+**Chapter 2 — Premium Authentication Experience: COMPLETE.** Every
+real account-entry screen (`/login`, `/register`, `/app/select-tenant`,
+`/portal/login`, `/portal/invite/[token]`) rebuilt on shared
+`apps/web/src/components/auth/` primitives (`AuthShell`, `AuthCard`,
+`AuthField`/`PasswordField`, `AuthAlert`, `AuthSuccessState`) — see
+D-043 in `DECISIONS.md`. Fixes two real gaps: no password-visibility
+toggle anywhere (`UI_AUDIT.md` finding #12), and `register`'s two-/
+three-column field rows not collapsing on mobile. `Alert` gained
+`success`/`warning`/`info` variants. Two flows named in the chapter's
+own brief — staff invitation into an existing tenant, and password
+recovery on either auth stack — do not exist anywhere in the codebase
+(confirmed by exhaustive grep, not assumed) and were **not** built;
+see `UI_AUDIT.md` findings #13–14 for what a future task adding either
+backend capability would need. See `UI_REDESIGN_PLAN.md` Chapter 2 for
+the full design rationale.
 
 - Premium modern staff interface, built on the existing `@rentos/ui`
   (shadcn/ui-based) component set and Tailwind conventions — not a new

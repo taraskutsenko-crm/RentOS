@@ -66,4 +66,15 @@ describe("PortalLoginPage", () => {
 
     expect(await screen.findByText(/invalid email, password, or company/i)).toBeInTheDocument();
   });
+
+  it("toggles password visibility", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<PortalLoginPage />);
+
+    const passwordInput = screen.getByLabelText(/^password$/i);
+    expect(passwordInput).toHaveAttribute("type", "password");
+
+    await user.click(screen.getByRole("button", { name: /show password/i }));
+    expect(passwordInput).toHaveAttribute("type", "text");
+  });
 });

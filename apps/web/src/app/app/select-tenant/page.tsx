@@ -1,11 +1,14 @@
 "use client";
 
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rentos/ui";
+import { Button } from "@rentos/ui";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { useSelectTenant, useTenants } from "../../../hooks/use-auth";
 import { useCurrentTenantId } from "../../../hooks/use-current-tenant";
+import { AuthAlert } from "../../../components/auth/auth-alert";
+import { AuthCard, AuthHeader } from "../../../components/auth/auth-card";
+import { AuthShell } from "../../../components/auth/auth-shell";
 
 export default function SelectTenantPage() {
   const { t } = useTranslation();
@@ -15,19 +18,23 @@ export default function SelectTenantPage() {
   const [, setCurrentTenantId] = useCurrentTenantId();
 
   async function handleSelect(tenantId: string): Promise<void> {
-    await selectTenant.mutateAsync(tenantId);
-    setCurrentTenantId(tenantId);
-    router.push("/app");
+    try {
+      await selectTenant.mutateAsync(tenantId);
+      setCurrentTenantId(tenantId);
+      router.push("/app");
+    } catch {
+      // Surfaced below via selectTenant.error.
+    }
   }
 
   return (
-    <div className="flex justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{t("tenant.selectTitle")}</CardTitle>
-          <CardDescription>{t("tenant.selectSubtitle")}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
+    <AuthShell tone="primary" tagline={t("app.tagline")}>
+      <AuthCard>
+        <AuthHeader title={t("tenant.selectTitle")} subtitle={t("tenant.selectSubtitle")} />
+
+        {selectTenant.isError && <AuthAlert>{t("auth.errors.generic")}</AuthAlert>}
+
+        <div className="flex flex-col gap-3">
           {isLoading && <p className="text-muted-foreground text-sm">{t("common.loading")}</p>}
           {!isLoading && data?.tenants.length === 0 && (
             <p className="text-muted-foreground text-sm">{t("tenant.noTenants")}</p>
@@ -43,8 +50,8 @@ export default function SelectTenantPage() {
               {tenant.name}
             </Button>
           ))}
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </AuthCard>
+    </AuthShell>
   );
 }

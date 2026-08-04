@@ -36,7 +36,9 @@
   },
   "common": {
     "loading": "Ładowanie…",
-    "error": "Coś poszło nie tak. Spróbuj ponownie."
+    "error": "Coś poszło nie tak. Spróbuj ponownie.",
+    "showPassword": "Pokaż hasło",
+    "hidePassword": "Ukryj hasło"
   },
   "nav": {
     "logout": "Wyloguj się",
@@ -59,7 +61,8 @@
       "submit": "Utwórz konto",
       "submitting": "Tworzenie konta…",
       "haveAccount": "Masz już konto?",
-      "signIn": "Zaloguj się"
+      "signIn": "Zaloguj się",
+      "companySection": "Firma"
     },
     "login": {
       "title": "Zaloguj się",
@@ -792,13 +795,16 @@
         "password": "Hasło",
         "submit": "Aktywuj konto",
         "submitting": "Aktywowanie…",
-        "invalidToken": "Ten link zaproszenia jest nieprawidłowy lub wygasł."
+        "invalidToken": "Ten link zaproszenia jest nieprawidłowy lub wygasł.",
+        "successTitle": "Witamy w {{company}}!",
+        "successDescription": "Twoje konto jest gotowe. Przenosimy Cię do panelu…"
       },
       "errors": {
         "invalidCredentials": "Nieprawidłowy e-mail, hasło lub firma.",
         "invalidToken": "Nieprawidłowe lub wygasłe zaproszenie.",
         "generic": "Coś poszło nie tak. Spróbuj ponownie."
-      }
+      },
+      "tagline": "Zarządzaj wynajmem, dokumentami i wnioskami w jednym miejscu."
     },
     "dashboard": {
       "title": "Panel",

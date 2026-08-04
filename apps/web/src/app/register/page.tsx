@@ -1,24 +1,20 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rentos/ui";
 import { useTranslation } from "react-i18next";
 
 import { RegisterForm } from "../../components/auth/register-form";
+import { AuthCard, AuthHeader } from "../../components/auth/auth-card";
+import { AuthShell } from "../../components/auth/auth-shell";
 
 export default function RegisterPage() {
   const { t } = useTranslation();
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-8">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <CardTitle>{t("auth.register.title")}</CardTitle>
-          <CardDescription>{t("auth.register.subtitle")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <RegisterForm />
-        </CardContent>
-      </Card>
-    </main>
+    <AuthShell tone="primary" tagline={t("app.tagline")}>
+      <AuthCard className="max-w-lg">
+        <AuthHeader title={t("auth.register.title")} subtitle={t("auth.register.subtitle")} />
+        <RegisterForm />
+      </AuthCard>
+    </AuthShell>
   );
 }

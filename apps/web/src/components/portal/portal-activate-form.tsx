@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, AlertDescription, Button, Input, Label } from "@rentos/ui";
+import { Button } from "@rentos/ui";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -12,11 +13,17 @@ import {
   portalActivateInvitationSchema,
   type PortalActivateInvitationFormValues,
 } from "../../lib/validation";
+import { AuthAlert } from "../auth/auth-alert";
+import { PasswordField } from "../auth/auth-field";
+import { AuthSuccessState } from "../auth/auth-success";
+
+const REDIRECT_DELAY_MS = 1200;
 
 export function PortalActivateForm({ token }: { token: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const activateMutation = usePortalActivateInvitation();
+  const [tenantName, setTenantName] = useState<string | null>(null);
 
   const {
     register,
@@ -26,43 +33,56 @@ export function PortalActivateForm({ token }: { token: string }) {
     resolver: zodResolver(portalActivateInvitationSchema),
   });
 
+  // A brief, real confirmation before redirecting — not an instant jump —
+  // per UX_PRINCIPLES.md rule 20; still resolves to the same destination
+  // this flow always used, and respects prefers-reduced-motion since it's
+  // a plain timed state change, not an animation.
+  useEffect(() => {
+    if (!tenantName) return undefined;
+    const id = window.setTimeout(() => router.push("/portal/dashboard"), REDIRECT_DELAY_MS);
+    return () => window.clearTimeout(id);
+  }, [tenantName, router]);
+
   async function onSubmit(values: PortalActivateInvitationFormValues): Promise<void> {
     try {
-      await activateMutation.mutateAsync({ token, password: values.password });
-      router.push("/portal/dashboard");
+      const result = await activateMutation.mutateAsync({ token, password: values.password });
+      setTenantName(result.tenant.name);
     } catch {
       // Surfaced below via activateMutation.error.
     }
   }
 
+  if (tenantName) {
+    return (
+      <AuthSuccessState
+        title={t("portal.auth.activate.successTitle", { company: tenantName })}
+        description={t("portal.auth.activate.successDescription")}
+      />
+    );
+  }
+
+  const pending = isSubmitting || activateMutation.isPending;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
       {activateMutation.isError && (
-        <Alert variant="destructive">
-          <AlertDescription>
-            {apiErrorMessage(activateMutation.error, t("portal.auth.errors.invalidToken"))}
-          </AlertDescription>
-        </Alert>
+        <AuthAlert>
+          {apiErrorMessage(activateMutation.error, t("portal.auth.errors.invalidToken"))}
+        </AuthAlert>
       )}
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="password">{t("portal.auth.activate.password")}</Label>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="new-password"
-          aria-invalid={!!errors.password}
-          {...register("password")}
-        />
-        {errors.password && (
-          <p className="text-destructive text-sm">{t(errors.password.message ?? "")}</p>
-        )}
-      </div>
+      <PasswordField
+        id="password"
+        label={t("portal.auth.activate.password")}
+        autoComplete="new-password"
+        error={errors.password && t(errors.password.message ?? "")}
+        showLabel={t("common.showPassword")}
+        hideLabel={t("common.hidePassword")}
+        {...register("password")}
+      />
 
-      <Button type="submit" disabled={isSubmitting || activateMutation.isPending}>
-        {activateMutation.isPending
-          ? t("portal.auth.activate.submitting")
-          : t("portal.auth.activate.submit")}
+      <Button type="submit" disabled={pending}>
+        {pending ? t("portal.auth.activate.submitting") : t("portal.auth.activate.submit")}
       </Button>
     </form>
   );

@@ -35,7 +35,7 @@ describe("LoginForm", () => {
     renderWithProviders(<LoginForm />);
 
     await user.type(screen.getByLabelText(/email/i), "not-an-email");
-    await user.type(screen.getByLabelText(/password/i), "whatever");
+    await user.type(screen.getByLabelText(/^password$/i), "whatever");
     await user.click(screen.getByRole("button", { name: /^sign in$/i }));
 
     expect(await screen.findByText(/enter a valid email address/i)).toBeInTheDocument();
@@ -59,7 +59,7 @@ describe("LoginForm", () => {
     expect(screen.getByText(/invalid email or password/i)).toBeInTheDocument();
 
     await user.type(screen.getByLabelText(/email/i), "ada@example.com");
-    await user.type(screen.getByLabelText(/password/i), "WrongPassword1");
+    await user.type(screen.getByLabelText(/^password$/i), "WrongPassword1");
     await user.click(screen.getByRole("button", { name: /^sign in$/i }));
 
     await waitFor(() => expect(mutateAsyncMock).toHaveBeenCalledTimes(1));
@@ -79,9 +79,30 @@ describe("LoginForm", () => {
     renderWithProviders(<LoginForm />);
 
     await user.type(screen.getByLabelText(/email/i), "ada@example.com");
-    await user.type(screen.getByLabelText(/password/i), "SuperSecret123");
+    await user.type(screen.getByLabelText(/^password$/i), "SuperSecret123");
     await user.click(screen.getByRole("button", { name: /^sign in$/i }));
 
     await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/app"));
+  });
+
+  it("toggles password visibility without changing the submitted value", async () => {
+    useLoginMock.mockReturnValue({
+      mutateAsync: vi.fn(),
+      isPending: false,
+      isError: false,
+      error: null,
+    });
+
+    const user = userEvent.setup();
+    renderWithProviders(<LoginForm />);
+
+    const passwordInput = screen.getByLabelText(/^password$/i);
+    expect(passwordInput).toHaveAttribute("type", "password");
+
+    await user.click(screen.getByRole("button", { name: /show password/i }));
+    expect(passwordInput).toHaveAttribute("type", "text");
+
+    await user.click(screen.getByRole("button", { name: /hide password/i }));
+    expect(passwordInput).toHaveAttribute("type", "password");
   });
 });

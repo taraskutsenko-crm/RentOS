@@ -36,7 +36,9 @@
   },
   "common": {
     "loading": "Cargando…",
-    "error": "Algo salió mal. Inténtalo de nuevo."
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña"
   },
   "nav": {
     "logout": "Cerrar sesión",
@@ -59,7 +61,8 @@
       "submit": "Crear cuenta",
       "submitting": "Creando cuenta…",
       "haveAccount": "¿Ya tienes una cuenta?",
-      "signIn": "Iniciar sesión"
+      "signIn": "Iniciar sesión",
+      "companySection": "Empresa"
     },
     "login": {
       "title": "Iniciar sesión",
@@ -792,13 +795,16 @@
         "password": "Contraseña",
         "submit": "Activar cuenta",
         "submitting": "Activando…",
-        "invalidToken": "Este enlace de invitación no es válido o ha caducado."
+        "invalidToken": "Este enlace de invitación no es válido o ha caducado.",
+        "successTitle": "¡Bienvenido a {{company}}!",
+        "successDescription": "Tu cuenta está lista. Te llevamos a tu panel…"
       },
       "errors": {
         "invalidCredentials": "Correo electrónico, contraseña o empresa incorrectos.",
         "invalidToken": "Invitación no válida o caducada.",
         "generic": "Algo salió mal. Inténtalo de nuevo."
-      }
+      },
+      "tagline": "Gestiona tus alquileres, documentos y solicitudes en un solo lugar."
     },
     "dashboard": {
       "title": "Panel",

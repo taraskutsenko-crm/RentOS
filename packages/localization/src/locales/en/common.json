@@ -36,7 +36,9 @@
   },
   "common": {
     "loading": "Loading…",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "logout": "Log out",
@@ -59,7 +61,8 @@
       "submit": "Create account",
       "submitting": "Creating account…",
       "haveAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "companySection": "Company"
     },
     "login": {
       "title": "Sign in",
@@ -792,13 +795,16 @@
         "password": "Password",
         "submit": "Activate account",
         "submitting": "Activating…",
-        "invalidToken": "This invitation link is invalid or has expired."
+        "invalidToken": "This invitation link is invalid or has expired.",
+        "successTitle": "Welcome to {{company}}!",
+        "successDescription": "Your account is ready. Taking you to your dashboard…"
       },
       "errors": {
         "invalidCredentials": "Invalid email, password, or company.",
         "invalidToken": "Invalid or expired invitation.",
         "generic": "Something went wrong. Please try again."
-      }
+      },
+      "tagline": "Manage your rentals, documents, and requests in one place."
     },
     "dashboard": {
       "title": "Dashboard",

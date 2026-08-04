@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, AlertDescription, Button, Input, Label } from "@rentos/ui";
+import { Button } from "@rentos/ui";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,8 @@ import { useTranslation } from "react-i18next";
 import { usePortalLogin } from "../../hooks/use-portal-auth";
 import { apiErrorMessage } from "../../lib/api-error-i18n";
 import { portalLoginSchema, type PortalLoginFormValues } from "../../lib/validation";
+import { AuthAlert } from "../auth/auth-alert";
+import { AuthField, PasswordField } from "../auth/auth-field";
 
 export function PortalLoginForm() {
   const { t } = useTranslation();
@@ -32,63 +34,47 @@ export function PortalLoginForm() {
     }
   }
 
+  const pending = isSubmitting || loginMutation.isPending;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
       {loginMutation.isError && (
-        <Alert variant="destructive">
-          <AlertDescription>
-            {apiErrorMessage(loginMutation.error, t("portal.auth.errors.invalidCredentials"))}
-          </AlertDescription>
-        </Alert>
+        <AuthAlert>
+          {apiErrorMessage(loginMutation.error, t("portal.auth.errors.invalidCredentials"))}
+        </AuthAlert>
       )}
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="tenantSlug">{t("portal.auth.login.company")}</Label>
-        <Input
-          id="tenantSlug"
-          type="text"
-          autoComplete="organization"
-          placeholder={t("portal.auth.login.companyPlaceholder")}
-          aria-invalid={!!errors.tenantSlug}
-          {...register("tenantSlug")}
-        />
-        {errors.tenantSlug && (
-          <p className="text-destructive text-sm">{t(errors.tenantSlug.message ?? "")}</p>
-        )}
-      </div>
+      <AuthField
+        id="tenantSlug"
+        label={t("portal.auth.login.company")}
+        type="text"
+        autoComplete="organization"
+        placeholder={t("portal.auth.login.companyPlaceholder")}
+        error={errors.tenantSlug && t(errors.tenantSlug.message ?? "")}
+        {...register("tenantSlug")}
+      />
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="email">{t("portal.auth.login.email")}</Label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          aria-invalid={!!errors.email}
-          {...register("email")}
-        />
-        {errors.email && (
-          <p className="text-destructive text-sm">{t(errors.email.message ?? "")}</p>
-        )}
-      </div>
+      <AuthField
+        id="email"
+        label={t("portal.auth.login.email")}
+        type="email"
+        autoComplete="email"
+        error={errors.email && t(errors.email.message ?? "")}
+        {...register("email")}
+      />
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="password">{t("portal.auth.login.password")}</Label>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          aria-invalid={!!errors.password}
-          {...register("password")}
-        />
-        {errors.password && (
-          <p className="text-destructive text-sm">{t(errors.password.message ?? "")}</p>
-        )}
-      </div>
+      <PasswordField
+        id="password"
+        label={t("portal.auth.login.password")}
+        autoComplete="current-password"
+        error={errors.password && t(errors.password.message ?? "")}
+        showLabel={t("common.showPassword")}
+        hideLabel={t("common.hidePassword")}
+        {...register("password")}
+      />
 
-      <Button type="submit" disabled={isSubmitting || loginMutation.isPending}>
-        {loginMutation.isPending
-          ? t("portal.auth.login.submitting")
-          : t("portal.auth.login.submit")}
+      <Button type="submit" disabled={pending} className="mt-1">
+        {pending ? t("portal.auth.login.submitting") : t("portal.auth.login.submit")}
       </Button>
     </form>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, AlertDescription, Button, Input, Label } from "@rentos/ui";
+import { Button, Label } from "@rentos/ui";
 import { countries } from "@rentos/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,9 @@ import { useRegister } from "../../hooks/use-auth";
 import { useCurrentTenantId } from "../../hooks/use-current-tenant";
 import { apiErrorKey } from "../../lib/api-error-i18n";
 import { registerSchema, type RegisterFormValues } from "../../lib/validation";
+import { AuthAlert } from "./auth-alert";
+import { AuthField, PasswordField } from "./auth-field";
+import { AuthFooter } from "./auth-card";
 
 export function RegisterForm() {
   const { t } = useTranslation();
@@ -54,150 +57,124 @@ export function RegisterForm() {
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
-      {registerMutation.isError && (
-        <Alert variant="destructive">
-          <AlertDescription>{t(apiErrorKey(registerMutation.error))}</AlertDescription>
-        </Alert>
-      )}
+  const pending = isSubmitting || registerMutation.isPending;
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="firstName">{t("auth.register.firstName")}</Label>
-          <Input
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
+      {registerMutation.isError && <AuthAlert>{t(apiErrorKey(registerMutation.error))}</AuthAlert>}
+
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <AuthField
             id="firstName"
+            label={t("auth.register.firstName")}
             autoComplete="given-name"
-            aria-invalid={!!errors.firstName}
+            error={errors.firstName && t(errors.firstName.message ?? "")}
             {...register("firstName")}
           />
-          {errors.firstName && (
-            <p className="text-destructive text-sm">{t(errors.firstName.message ?? "")}</p>
-          )}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="lastName">{t("auth.register.lastName")}</Label>
-          <Input
+          <AuthField
             id="lastName"
+            label={t("auth.register.lastName")}
             autoComplete="family-name"
-            aria-invalid={!!errors.lastName}
+            error={errors.lastName && t(errors.lastName.message ?? "")}
             {...register("lastName")}
           />
-          {errors.lastName && (
-            <p className="text-destructive text-sm">{t(errors.lastName.message ?? "")}</p>
-          )}
         </div>
-      </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="email">{t("auth.register.email")}</Label>
-        <Input
+        <AuthField
           id="email"
+          label={t("auth.register.email")}
           type="email"
           autoComplete="email"
-          aria-invalid={!!errors.email}
+          error={errors.email && t(errors.email.message ?? "")}
           {...register("email")}
         />
-        {errors.email && (
-          <p className="text-destructive text-sm">{t(errors.email.message ?? "")}</p>
-        )}
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="password">{t("auth.register.password")}</Label>
-          <Input
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <PasswordField
             id="password"
-            type="password"
+            label={t("auth.register.password")}
             autoComplete="new-password"
-            aria-invalid={!!errors.password}
+            error={errors.password && t(errors.password.message ?? "")}
+            showLabel={t("common.showPassword")}
+            hideLabel={t("common.hidePassword")}
             {...register("password")}
           />
-          {errors.password && (
-            <p className="text-destructive text-sm">{t(errors.password.message ?? "")}</p>
-          )}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="passwordConfirmation">{t("auth.register.passwordConfirmation")}</Label>
-          <Input
+          <PasswordField
             id="passwordConfirmation"
-            type="password"
+            label={t("auth.register.passwordConfirmation")}
             autoComplete="new-password"
-            aria-invalid={!!errors.passwordConfirmation}
+            error={errors.passwordConfirmation && t(errors.passwordConfirmation.message ?? "")}
+            showLabel={t("common.showPassword")}
+            hideLabel={t("common.hidePassword")}
             {...register("passwordConfirmation")}
           />
-          {errors.passwordConfirmation && (
-            <p className="text-destructive text-sm">
-              {t(errors.passwordConfirmation.message ?? "")}
-            </p>
-          )}
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="companyName">{t("auth.register.companyName")}</Label>
-        <Input
+      <div className="border-border flex flex-col gap-4 border-t pt-5">
+        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+          {t("auth.register.companySection")}
+        </p>
+
+        <AuthField
           id="companyName"
+          label={t("auth.register.companyName")}
           autoComplete="organization"
-          aria-invalid={!!errors.companyName}
+          error={errors.companyName && t(errors.companyName.message ?? "")}
           {...register("companyName")}
         />
-        {errors.companyName && (
-          <p className="text-destructive text-sm">{t(errors.companyName.message ?? "")}</p>
-        )}
-      </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="countryCode">{t("auth.register.country")}</Label>
-        <select
-          id="countryCode"
-          className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
-          {...register("countryCode", {
-            onChange: (event: React.ChangeEvent<HTMLSelectElement>) =>
-              handleCountryChange(event.target.value),
-          })}
-        >
-          {countries.map((country) => (
-            <option key={country.code} value={country.code}>
-              {t(country.displayNameKey)}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="defaultLanguage">{t("auth.register.language")}</Label>
-          <Input
+          <Label htmlFor="countryCode">{t("auth.register.country")}</Label>
+          <select
+            id="countryCode"
+            className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+            {...register("countryCode", {
+              onChange: (event: React.ChangeEvent<HTMLSelectElement>) =>
+                handleCountryChange(event.target.value),
+            })}
+          >
+            {countries.map((country) => (
+              <option key={country.code} value={country.code}>
+                {t(country.displayNameKey)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <AuthField
             id="defaultLanguage"
-            aria-invalid={!!errors.defaultLanguage}
+            label={t("auth.register.language")}
+            error={errors.defaultLanguage && t(errors.defaultLanguage.message ?? "")}
             {...register("defaultLanguage")}
           />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="defaultCurrency">{t("auth.register.currency")}</Label>
-          <Input
+          <AuthField
             id="defaultCurrency"
-            aria-invalid={!!errors.defaultCurrency}
+            label={t("auth.register.currency")}
+            error={errors.defaultCurrency && t(errors.defaultCurrency.message ?? "")}
             {...register("defaultCurrency")}
           />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="timezone">{t("auth.register.timezone")}</Label>
-          <Input id="timezone" aria-invalid={!!errors.timezone} {...register("timezone")} />
+          <AuthField
+            id="timezone"
+            label={t("auth.register.timezone")}
+            error={errors.timezone && t(errors.timezone.message ?? "")}
+            {...register("timezone")}
+          />
         </div>
       </div>
 
-      <Button type="submit" disabled={isSubmitting || registerMutation.isPending}>
-        {registerMutation.isPending ? t("auth.register.submitting") : t("auth.register.submit")}
+      <Button type="submit" disabled={pending}>
+        {pending ? t("auth.register.submitting") : t("auth.register.submit")}
       </Button>
 
-      <p className="text-muted-foreground text-center text-sm">
+      <AuthFooter>
         {t("auth.register.haveAccount")}{" "}
         <Link href="/login" className="text-primary underline underline-offset-4">
           {t("auth.register.signIn")}
         </Link>
-      </p>
+      </AuthFooter>
     </form>
   );
 }

@@ -76,4 +76,31 @@ describe("RegisterForm", () => {
     expect(submittedPayload).not.toHaveProperty("passwordConfirmation");
     expect(submittedPayload.email).toBe("ada@example.com");
   });
+
+  it("toggles visibility independently for the password and confirmation fields", async () => {
+    useRegisterMock.mockReturnValue({
+      mutateAsync: vi.fn(),
+      isPending: false,
+      isError: false,
+      error: null,
+    });
+
+    const user = userEvent.setup();
+    renderWithProviders(<RegisterForm />);
+
+    const passwordInput = screen.getByLabelText(/^password$/i);
+    const confirmationInput = screen.getByLabelText(/confirm password/i);
+    expect(passwordInput).toHaveAttribute("type", "password");
+    expect(confirmationInput).toHaveAttribute("type", "password");
+
+    const toggles = screen.getAllByRole("button", { name: /show password/i });
+    expect(toggles).toHaveLength(2);
+    const [showPassword, showConfirmation] = toggles as [HTMLElement, HTMLElement];
+    await user.click(showPassword);
+    expect(passwordInput).toHaveAttribute("type", "text");
+    expect(confirmationInput).toHaveAttribute("type", "password");
+
+    await user.click(showConfirmation);
+    expect(confirmationInput).toHaveAttribute("type", "text");
+  });
 });

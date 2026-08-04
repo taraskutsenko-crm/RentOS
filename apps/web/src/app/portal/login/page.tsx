@@ -1,9 +1,10 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@rentos/ui";
 import { useTranslation } from "react-i18next";
 
 import { PortalLoginForm } from "../../../components/portal/portal-login-form";
+import { AuthCard, AuthHeader } from "../../../components/auth/auth-card";
+import { AuthShell } from "../../../components/auth/auth-shell";
 
 /**
  * Public, unauthenticated — sibling to /login, outside app/portal/(shell)/
@@ -13,16 +14,14 @@ export default function PortalLoginPage() {
   const { t } = useTranslation();
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-8">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>{t("portal.auth.login.title")}</CardTitle>
-          <CardDescription>{t("portal.auth.login.subtitle")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <PortalLoginForm />
-        </CardContent>
-      </Card>
-    </main>
+    <AuthShell tone="sidebar" tagline={t("portal.auth.tagline")}>
+      <AuthCard>
+        <AuthHeader
+          title={t("portal.auth.login.title")}
+          subtitle={t("portal.auth.login.subtitle")}
+        />
+        <PortalLoginForm />
+      </AuthCard>
+    </AuthShell>
   );
 }

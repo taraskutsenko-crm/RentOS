@@ -36,7 +36,9 @@
   },
   "common": {
     "loading": "Wird geladen…",
-    "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+    "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen"
   },
   "nav": {
     "logout": "Abmelden",
@@ -59,7 +61,8 @@
       "submit": "Konto erstellen",
       "submitting": "Konto wird erstellt…",
       "haveAccount": "Sie haben bereits ein Konto?",
-      "signIn": "Anmelden"
+      "signIn": "Anmelden",
+      "companySection": "Unternehmen"
     },
     "login": {
       "title": "Anmelden",
@@ -792,13 +795,16 @@
         "password": "Passwort",
         "submit": "Konto aktivieren",
         "submitting": "Aktivierung läuft…",
-        "invalidToken": "Dieser Einladungslink ist ungültig oder abgelaufen."
+        "invalidToken": "Dieser Einladungslink ist ungültig oder abgelaufen.",
+        "successTitle": "Willkommen bei {{company}}!",
+        "successDescription": "Ihr Konto ist bereit. Sie werden zu Ihrem Dashboard weitergeleitet…"
       },
       "errors": {
         "invalidCredentials": "Ungültige E-Mail-Adresse, Passwort oder Unternehmen.",
         "invalidToken": "Ungültige oder abgelaufene Einladung.",
         "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
-      }
+      },
+      "tagline": "Verwalten Sie Ihre Mietverträge, Dokumente und Anfragen an einem Ort."
     },
     "dashboard": {
       "title": "Dashboard",

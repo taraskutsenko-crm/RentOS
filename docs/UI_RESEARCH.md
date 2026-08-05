@@ -186,3 +186,69 @@ verbatim into Havelio's own visual language.
 See `UI_REDESIGN_PLAN.md` Chapter 3 for the concrete scope this
 research feeds into, and `UI_AUDIT.md`'s addendum for exactly what in
 today's list pages falls short of the principles above.
+
+## Dashboard patterns — Chapter 4 addendum
+
+New findings specific to dashboard/home screens, gathered for
+TASK-0010 Part 2 Chapter 4 (Dashboard Experience). Same discipline as
+above: principles observed across Linear/Stripe/Vercel/GitHub/Notion/
+Clerk's generally known, publicly documented conventions, cross-checked
+against what Havelio's own backend can actually produce today — a
+dashboard pattern is only "adopted" here if a real, already-existing
+API can feed it.
+
+17. **A dashboard's stat-card row is a fixed, non-configurable
+    top-of-page summary**, never a placeholder for arbitrary future
+    metrics — Linear/Stripe/Vercel all ship a small number (4-6) of
+    deliberately chosen KPIs rather than a generic "add a widget"
+    surface. This matches `UI_PATTERNS.md`'s existing Statistics cards
+    spec (already written, never implemented) and rules out an
+    over-engineered configurable-widget dashboard for this chapter.
+18. **"Recent X" list widgets are read-only previews of an existing
+    list page, not a new feature** — every reference product's
+    dashboard "Recent activity"/"Recent deploys"/"Recent issues" panel
+    is the same list-page data, just the newest N rows with a "View
+    all" link to the real list page. This directly confirms Chapter
+    4's Recent Rentals/Recent Documents widgets should call the exact
+    same list hooks (`useRentals`, `useDocuments`) the migrated
+    `DataTable` pages already use, with `pageSize: 5` and no new query
+    logic.
+19. **A true cross-entity "activity feed" (mixing rentals, documents,
+    quotes, customer actions into one chronological stream) requires a
+    dedicated audit/event-log read path** — Linear and GitHub both
+    back this with an events/audit table designed for that exact
+    query. Havelio's `AuditService` (`apps/api/src/audit/`) is
+    write-only today with no read endpoint anywhere (confirmed by
+    grep) — so a genuine unified activity feed is **not** a
+    reasonable same-chapter build without a new endpoint, which
+    `ARCHITECTURE_LOCK.md` and this chapter's own scope forbid. This
+    is the direct reason Chapter 4 ships two separate "Recent Rentals"
+    / "Recent Documents" panels (finding #18) instead of one merged
+    feed — documented as a gap, not fabricated as a merged stream.
+20. **Empty and loading states are per-widget, not whole-page** — every
+    reference dashboard renders its stat cards, its recent-items
+    panels, and its quick-actions independently, each with its own
+    skeleton/empty/error state, so one slow widget never blocks the
+    rest of the page from rendering. This confirms the existing
+    per-card loading discipline already specified in `UI_PATTERNS.md`'s
+    Statistics cards section (loading/empty/error states listed
+    per-card, not per-page) is the correct model for Chapter 4, and
+    rules out a single page-level `isLoading` gate around the whole
+    dashboard.
+21. **Quick Actions are a small, fixed set of primary create-flows**,
+    permission-gated per action, never a dynamically generated list —
+    Linear's "New issue", Stripe's "Create payment", GitHub's "New
+    repository" are each a single, well-known destination. This
+    confirms Chapter 4's Quick Actions widget should link directly to
+    the five existing `/app/*/new` create routes already gated by
+    `usePermission()` on their own pages (see the route/permission
+    table in `UI_REDESIGN_PLAN.md` Chapter 4), not invent a new
+    action-selection UI.
+
+## How this informs Chapter 4
+
+See `UI_REDESIGN_PLAN.md` Chapter 4 for the concrete scope this
+research feeds into, and `UI_AUDIT.md`'s addendum for exactly what in
+today's two dashboard pages (`apps/web/src/app/app/page.tsx` and
+`apps/web/src/app/portal/(shell)/dashboard/page.tsx`) falls short of
+the principles above.

@@ -6,7 +6,8 @@ primitives table below is kept current through each chapter (Chapter
 1 added `Skeleton`/`DropdownMenu`/`Dialog`; Chapter 2 added `Alert`'s
 `success`/`warning`/`info` variants; Chapter 3 added `Checkbox`,
 `Select`, `DialogHeader`/`DialogFooter`, and the entire
-`apps/web/src/components/data-table/` system) rather than left as a
+`apps/web/src/components/data-table/` system; Chapter 4 adds the
+`apps/web/src/components/dashboard/` system) rather than left as a
 stale snapshot. Read directly from source — see
 [`UI_AUDIT.md`](UI_AUDIT.md) for the findings this inventory feeds
 into and [`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md) for what gets
@@ -163,6 +164,59 @@ already solve several problems this chapter needs solved for staff:
 - `apps/web/src/lib/permissions.ts`'s `ALL_PERMISSIONS`/
   `ROLE_PERMISSIONS` — used to build the nav registry's per-item
   permission requirement in code, not duplicated as a second list.
+
+## The dashboard component system (`apps/web/src/components/dashboard/`) — added Chapter 4
+
+The one shared widget system for both dashboard pages — see
+`UI_REDESIGN_PLAN.md` Chapter 4 for the full design rationale.
+
+| File                        | Purpose                                                                                                                                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `dashboard-grid.tsx`        | `DashboardGrid` — the responsive stat-card grid (`grid-cols-2 sm:grid-cols-3 lg:grid-cols-5`), the same breakpoints the portal dashboard already used.                                                                   |
+| `dashboard-metric.tsx`      | `DashboardMetric` — the stat-card primitive: value/label, optional `href`, per-card loading (skeleton)/error (`—` + tooltip)/genuine-zero (`0`) states, per `UI_PATTERNS.md`'s Statistics cards spec.                    |
+| `dashboard-card.tsx`        | `DashboardCard` — thin titled container (`Card`+`CardHeader`+`CardTitle`) with an optional "View all" link, replacing hand-written header boilerplate.                                                                   |
+| `dashboard-section.tsx`     | `DashboardSection` — one consistent heading + spacing wrapper for page sections ("Overview," "Quick actions," "Recent activity").                                                                                        |
+| `dashboard-skeleton.tsx`    | `DashboardSkeleton` — one configurable skeleton (`variant: "metric" \| "rows"`), reused by `DashboardMetric` and `RecentActivity`.                                                                                       |
+| `empty-dashboard-state.tsx` | `EmptyDashboardState` — shared empty-state (icon + message) for widgets with genuinely no data.                                                                                                                          |
+| `quick-actions.tsx`         | `QuickActions` — renders a permission-filtered `QuickAction[]` as a button row; hides (never disables) actions the user lacks permission for.                                                                            |
+| `recent-activity.tsx`       | `RecentActivity<T>` — generic "recent items" list widget (loading/error/empty/row states) driven by a caller-provided row renderer; instantiated for Recent Rentals and Recent Documents, not a fabricated unified feed. |
+| `index.ts`                  | Barrel export, matching the `data-table/index.ts` convention.                                                                                                                                                            |
+
+`apps/web/src/hooks/use-dashboard-stats.ts` composes existing staff
+list-endpoint hooks (`useCustomers`, `useRentals`, `useAssetStatuses`+
+`useAssets`, `useQuotes` ×2, `useStaffExtensionRequests`+
+`useStaffDamageReports`) into one aggregated KPI object — no new
+backend endpoint, the frontend equivalent of the "pageSize:1, read
+`.total`" technique.
+
+`apps/web/src/lib/quick-actions.ts` is the single source of truth for
+the five existing, permission-gated create routes — shared by the
+header's `QuickCreate` dropdown (Chapter 1) and the dashboard's
+`QuickActions` widget, fixing a real drift bug found during this
+chapter's research: `QuickCreate` had never been updated with the
+Documents create action added in Chapter 3.
+
+Both dashboard pages consume this system: the staff dashboard
+(`apps/web/src/app/app/page.tsx`, previously a stub) and the portal
+dashboard (`apps/web/src/app/portal/(shell)/dashboard/page.tsx`,
+refactored off its previous ad hoc `Card`/table markup — its data
+source, `usePortalDashboard()`, is unchanged).
+
+### What Chapter 4 does not build (documented gaps, not fabricated)
+
+- **A true cross-entity "recent activity" feed** — no audit-log read
+  endpoint exists. Two separate, real "Recent Rentals"/"Recent
+  Documents" panels are built instead (`RecentActivity` reused twice).
+- **A "documents awaiting signature" KPI** — only a per-document
+  signature-requests endpoint exists, no tenant-wide list.
+- **Charts of any kind** — no charting library installed, no
+  chart-shaped data exists; matches `UI_PATTERNS.md`'s pre-existing
+  TASK-0016 note.
+- **A full extension-request/damage-report triage UI** — the "Needs
+  attention" metric surfaces only a permission-gated count; building
+  the list-and-approve workflow for those two features (real,
+  existing endpoints with zero UI consumers before this chapter) is a
+  separable follow-up task.
 
 ## Icons
 

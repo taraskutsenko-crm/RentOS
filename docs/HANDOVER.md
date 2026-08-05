@@ -16,75 +16,57 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `1a251fe` (docs: document TASK-0010
-  Part 2 Chapter 3), on top of `06d39ae` (fix: portal `/auth/me`
-  tenant bug), `b64fec4` (feat: migrate list pages to shared
-  DataTable), and `a8fda7e` (feat: add shared DataTable system) —
-  TASK-0010 Part 2 Chapter 3 (Universal Data Views). Sits on top of
-  `1ba4fc4` (Chapter 2 — premium authentication experience) and
-  `ec06729`/`5157e2c` (Chapter 1 — application shell redesign).
-- **What shipped:** one shared `DataTable<T>` system
-  (`apps/web/src/components/data-table/` — sorting, row selection,
-  bulk actions, column visibility, sticky header, loading/skeleton/
-  empty/error/permission-denied states, responsive mobile-card
-  fallback) plus two new `@rentos/ui` primitives (`Checkbox`,
-  `Select`) and `Dialog`'s `Header`/`Footer` subcomponents. Migrated
-  all 8 real paginated list pages (Customers, Assets, Rentals, Quotes,
-  Documents, Document Templates, Portal Rentals, Portal Documents) —
-  see `UI_COMPONENT_INVENTORY.md`'s `DataTable` system section for the
-  full file list and `UI_REDESIGN_PLAN.md` Chapter 3 for the design
-  rationale, including what was deliberately not migrated (three
-  settings tables, portal notifications/dashboard mini-table) and why.
+- **Latest verified commit:** _pending — commit/push/CI in progress for
+  TASK-0010 Part 2 Chapter 4 (Dashboard Experience)._
+- **What shipped:** one shared `apps/web/src/components/dashboard/`
+  system (`DashboardGrid`, `DashboardMetric`, `DashboardCard`,
+  `DashboardSection`, `DashboardSkeleton`, `EmptyDashboardState`,
+  `QuickActions`, `RecentActivity`) plus
+  `apps/web/src/hooks/use-dashboard-stats.ts`, which composes existing
+  staff list endpoints (no new backend) into a real KPI set. The staff
+  dashboard (`apps/web/src/app/app/page.tsx`, previously a stub) is
+  rebuilt into a real dashboard: 5 permission-gated KPI cards
+  (Customers, Active rentals, Available assets, Pending quotes, Needs
+  attention), Quick Actions, and Recent Rentals/Recent Documents. The
+  portal dashboard (`apps/web/src/app/portal/(shell)/dashboard/page.tsx`)
+  is refactored onto the same shared components (its data source,
+  `usePortalDashboard()`, is unchanged). A latent bug in the header's
+  `QuickCreate` dropdown was also fixed: it was missing the "New
+  document" action added in Chapter 3, now sourced from one shared
+  `apps/web/src/lib/quick-actions.ts` list instead of two independently
+  hand-written ones. See `UI_REDESIGN_PLAN.md` Chapter 4 for the full
+  design rationale, including the documented gaps (no cross-entity
+  activity feed, no "documents awaiting signature" KPI, no charts —
+  none buildable without a new backend endpoint, which this chapter's
+  scope forbids).
 - **Quality gates:** format/lint/typecheck/build green across all 6
-  packages; 465 backend + 220 frontend tests passing (685 total,
-  including 8 new/updated test files: a new `data-table.test.tsx`
-  covering the shared component's loading/error/permission-denied/
-  sort-cycle/selection/row-actions behavior once, two new portal
-  list-page test files, and updates to the six existing staff list-page
-  test files to account for the debounced search and the dual
-  desktop-table/mobile-card render.
-- **Two real bugs found and fixed during this chapter's own
-  verification** (both are pre-existing-codebase or self-introduced
-  defects caught by actually reloading the app in a browser, not
-  Chapter 3 features):
-  - `DataTable`'s sticky header was first built page-relative
-    (`position: sticky` on the `<thead>`), which is not reliably
-    supported across browsers for `display: table-header-group` — it
-    silently painted over and hid the first data row. Fixed by
-    switching to a bounded `overflow-auto` scroll container with
-    `sticky top-0` scoped to that container.
-  - `GET /portal/auth/me` never returned `tenant`, only `{ customer }`
-    — a pre-existing bug from the earlier customer-portal task that
-    silently crashes the entire portal shell on any page reload, since
-    `login`/`activate-invitation` correctly return
-    `{ customer, tenant }` and seed the client cache, but the very next
-    background refetch of `usePortalMe()` hits the broken endpoint and
-    overwrites it. Fixed in `PortalAuthController`/`PortalAuthService`;
-    covered by a new assertion in `customer-portal-auth.e2e-spec.ts`.
-- **Docker/browser verification:** the `web` image was rebuilt from
-  scratch (twice — once for the DataTable system, once more after the
-  toolbar-bar and portal-auth fixes) and redeployed into the running
-  Docker Compose stack. Verified all 8 migrated pages end-to-end with
-  real data through a real customer/rental/asset created via the UI:
-  desktop (1024px, 1440px)/tablet (768px)/mobile (375px) viewports,
-  light mode and dark mode, keyboard tab-order reachability and
-  visible focus (confirmed disabled pagination buttons are correctly
-  excluded from tab order), sorting (column-header click cycling
-  through the network request params), search debounce, status
-  filtering, row selection → contextual bulk-actions bar → real
-  bulk-delete via `ConfirmDialog` (not `window.confirm`) → confirmed
-  against the actual customers list afterward, row-level overflow-menu
-  actions, and empty/loading/error states. No console errors on any
-  page. The account-menu language switcher hit the same Radix
-  dropdown click-timing quirk in the browser-automation tool
-  documented for Chapters 1 and 2; relied on the automated
-  `check-i18n-parity.mjs` script (100% key-structure parity across all
-  6 locales) plus genuinely-authored per-language translations for
-  every new `common.table.*`/`common.pagination.*`/`common.filters.*`/
-  `common.bulkActions.*` key as the verification evidence, per the same
-  precedent.
-- **GitHub Actions:** green — [run 31007596468](https://github.com/taraskutsenko-crm/RentOS/actions/runs/31007596468)
-  on `1a251fe`.
+  packages; 465 backend + 234 frontend tests passing (699 total,
+  including 4 new dashboard test files — `dashboard-metric.test.tsx`,
+  `recent-activity.test.tsx`, `quick-actions.test.tsx`,
+  `app-dashboard-page.test.tsx` — and updated assertions in
+  `portal-dashboard-page.test.tsx` for the new skeleton-based loading
+  state).
+- **Docker/browser verification:** the `web` image was rebuilt and
+  redeployed into the running Docker Compose stack. Verified end-to-end
+  with a real tenant/customer/asset/rental/quote/document created live
+  through the UI (not fabricated): every KPI reflects genuine live
+  data — including "Available assets" correctly dropping from 1 to 0
+  the moment the asset's rental started, proving the metric reads real
+  state, not a cached/static number. Verified: permission-gated widgets
+  (OWNER role sees all five KPI cards, Quick Actions, and both Recent
+  Rentals/Recent Documents panels), empty states (inbox icon + message
+  before any data existed), loading states (accessible
+  `role="status"`/`aria-label` skeletons, confirmed via component
+  tests), dark mode (staff and portal dashboards), responsive layout at
+  375px/768px/1024px/1440px plus 200% browser zoom, keyboard tab order
+  and visible focus (KPI cards with an `href` are reachable and
+  skipped correctly when they have none, e.g. "Needs attention"), and
+  zero console errors on any page. The portal dashboard was verified
+  through a real invite → activate → login flow, confirming the
+  refactored `RecentActivity`/`DashboardCard`/`DashboardMetric`
+  components render its existing `usePortalDashboard()` data
+  identically to before, just without the old ad hoc markup.
+- **GitHub Actions:** _pending — will be updated once pushed and green._
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

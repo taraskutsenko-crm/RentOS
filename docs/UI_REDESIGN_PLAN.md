@@ -616,13 +616,257 @@ thing I'm verifying actually work," not a Chapter 3 feature:
   present on `GET /portal/auth/me`; full 465-test API suite still
   green.
 
+## Chapter 4 — Dashboard Experience
+
+**A note on chapter numbering:** the "Later chapters" list below
+(written when Chapter 3 closed) had originally named Dashboard as
+"Chapter 5" and "Forms & Wizards" as "Chapter 4." The user's own
+instruction opening this chapter explicitly frames it as "Chapter 4 —
+Dashboard Experience." That instruction is authoritative — this is a
+deliberate, user-directed reprioritization, not an inconsistency being
+papered over. Dashboard is Chapter 4; Forms & Wizards moves later (see
+the renumbered list at the end of this section).
+
+**Scope:** redesign both existing dashboard-adjacent screens — the
+staff dashboard (`apps/web/src/app/app/page.tsx`, today a stub) and
+the customer portal dashboard
+(`apps/web/src/app/portal/(shell)/dashboard/page.tsx`, today real but
+ad hoc) — into one consistent, premium Havelio experience built on a
+shared, reusable component system. Presentation-layer only, per
+`ARCHITECTURE_LOCK.md` §3: no new backend endpoints, no schema
+changes, no API contract changes, no fabricated analytics. **Not in
+scope:** Forms & Wizards, Settings & Account, or any other later
+chapter.
+
+### Step 1 — Current implementation, read directly from source
+
+The staff dashboard (`apps/web/src/app/app/page.tsx`, 26 lines) is a
+genuine stub: a `PageHeader` and one "Select tenant" link, with
+`useMe()` as its only data fetch. There is nothing to migrate, only to
+build (`UI_AUDIT.md` finding #22).
+
+The portal dashboard (`apps/web/src/app/portal/(shell)/dashboard/page.tsx`,
+102 lines) is real and functional — `usePortalDashboard()` backs a
+5-card stat grid (current/upcoming rentals, unread messages, pending
+signatures, pending extensions) and a "Recent rentals" panel with a
+raw `<table>` — but hand-writes its `Card`/grid markup inline, uses a
+raw `<table>` rather than anything shared, and its loading/error
+states are single page-level `<p>` tags with no `Skeleton` usage
+anywhere (`UI_AUDIT.md` finding #24). It is the closest existing
+design precedent in the product for dashboard layout, but has the
+exact duplication and missing-skeleton gaps this chapter's shared
+components are meant to eliminate.
+
+No staff-side dashboard backend exists anywhere — `PortalDashboardController`/
+`PortalDashboardService` are customer-portal-only, gated by
+`CustomerAuthGuard`, and scoped to one customer's own data
+(`UI_AUDIT.md` finding #23). Every staff KPI in this chapter is
+therefore derived client-side from existing staff list endpoints, each
+of which already returns `{ items, total, page, pageSize }`:
+
+| Source hook                                           | Params used                                                                         | What it feeds                                                                                                    |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `useCustomers`                                        | `{ pageSize: 1 }`                                                                   | Total customers (no permission family exists for Customers — ungated, matching every other Customers UI element) |
+| `useRentals`                                          | `{ pageSize: 1, status: "ACTIVE" }`                                                 | Active rentals — gated `rentals.view`                                                                            |
+| `useAssetStatuses` + `useAssets`                      | resolve the real `"AVAILABLE"` system status code, then `{ pageSize: 1, statusId }` | Available assets — gated `assets.read`                                                                           |
+| `useQuotes` (×2, summed)                              | `{ pageSize: 1, status: "SENT" }` + `{ pageSize: 1, status: "VIEWED" }`             | Pending quotes (awaiting customer response) — gated `quotes.view`                                                |
+| `useStaffExtensionRequests` + `useStaffDamageReports` | unfiltered arrays, counted client-side for `status === "PENDING"` / `"SUBMITTED"`   | Needs attention — gated `customers.portal.manage` (matches the API's own guard on both endpoints)                |
+| `useRentals`                                          | `{ pageSize: 5 }` (default `createdAt desc` sort)                                   | Recent Rentals — gated `rentals.view`                                                                            |
+| `useDocuments`                                        | `{ pageSize: 5 }` (default `createdAt desc` sort)                                   | Recent Documents — gated `documents.view`                                                                        |
+
+`"AVAILABLE"` is a confirmed real, hardcoded system asset-status
+`code` (`apps/api/src/asset-statuses/system-statuses.ts`), resolved by
+calling the already-used `useAssetStatuses(tenantId)` hook and finding
+the entry whose `code === "AVAILABLE"`, not guessed or hardcoded as an
+ID. `useStaffExtensionRequests`/`useStaffDamageReports`
+(`apps/web/src/hooks/use-customer-portal.ts`) are real, tested hooks
+backing real endpoints that are wired into zero pages today
+(`UI_AUDIT.md` finding #25) — this chapter is their first UI consumer,
+count-only.
+
+### Step 2 — Compared against the governing docs
+
+- `UI_PATTERNS.md`'s existing "Statistics cards" entry (Purpose/When
+  to use/Loading/Empty/Error/Mobile states) was written in the brand
+  system task with no implementation to point to — this chapter is
+  where it finally gets one. Its rules are followed exactly: a genuine
+  zero renders as `"0"`, never blank; an error renders `"—"` with a
+  Danger-toned tooltip rather than breaking the page; loading shows a
+  skeleton block at the number's approximate width.
+- `UI_PATTERNS.md`'s "Charts" entry is already explicitly marked "Not
+  yet implemented anywhere in the product... TASK-0016" — confirmed
+  still true (`UI_AUDIT.md` finding #28: no charting library, no
+  chart-shaped data). This chapter does not change that.
+- `BRAND_GUIDELINES.md`'s "Metric cards" rule (number in `Text`
+  Semibold, label in `Muted` beneath) is the direct visual spec for
+  the new `DashboardMetric` component.
+- `UI_RESEARCH.md`'s new Chapter 4 addendum (findings #17-21) directly
+  shapes: a fixed, small set of stat cards rather than a configurable
+  widget surface; "Recent X" widgets as read-only previews of existing
+  list pages, not new features; per-widget (not page-level)
+  loading/empty/error states; and Quick Actions as a small, fixed,
+  permission-gated set of links to already-existing create routes.
+- `UX_PRINCIPLES.md` rule 24 ("a record's status renders consistently
+  everywhere, including a dashboard card") governs the Recent Rentals
+  status display — it reuses the exact same status-label translation
+  keys the Rentals list/detail pages already use, not a new label set.
+- `ARCHITECTURE_LOCK.md` §3 forbids new backend endpoints — the direct
+  reason the "documents awaiting signature" KPI and a unified
+  cross-entity "recent activity" feed are documented as gaps
+  (`UI_AUDIT.md` findings #26-27) rather than built.
+
+### Step 3 — Design Rationale
+
+1. **One shared `apps/web/src/components/dashboard/` system, used by
+   both the staff and portal dashboards — not two separate
+   implementations.** The portal dashboard already has real,
+   functional content; rather than leaving it as a second,
+   inconsistent pattern while the staff dashboard gets the new shared
+   components, this chapter refactors the portal dashboard onto the
+   same primitives. This is what "no duplicated dashboard cards, no
+   duplicated metric components, no duplicated section headers" (this
+   chapter's own instruction) requires system-wide, not just within
+   the staff app.
+2. **`DashboardMetric` is the stat-card primitive**, implementing
+   `UI_PATTERNS.md`'s Statistics cards spec exactly: value, label,
+   optional `href` (stat cards that link to their source list page,
+   e.g. "Active rentals" → `/app/rentals?status=ACTIVE`), and
+   loading/empty/error sub-states per card, not per page. It replaces
+   both the staff dashboard's future stat cards and the portal
+   dashboard's five hand-written `Card`/`CardContent` blocks.
+3. **`DashboardCard` is a thin, titled container** (composing the
+   existing `Card`/`CardHeader`/`CardTitle` primitives from
+   `@rentos/ui` with an optional "View all" link in the header),
+   replacing the portal dashboard's inline
+   `Card`+`CardHeader`+`CardTitle`+link boilerplate and giving Recent
+   Rentals, Recent Documents, and Quick Actions one consistent header
+   treatment.
+4. **`RecentActivity` is a generic "recent items" list widget, not a
+   fabricated unified feed.** Since no audit-log read endpoint exists
+   (`UI_AUDIT.md` finding #26), a true cross-entity activity stream is
+   not buildable this chapter. `RecentActivity` is instead a reusable
+   component generic over a caller-provided row renderer and "view
+   all" href — instantiated twice (Recent Rentals, Recent Documents)
+   against two real, already-existing data sources. This satisfies the
+   "widgets must be reusable" requirement honestly: one component
+   shape, two real real instantiations, not one fake merged feed.
+5. **`DashboardGrid` and `DashboardSection` are layout-only wrappers**
+   — `DashboardGrid` is the responsive stat-card grid
+   (`grid-cols-2 sm:grid-cols-3 lg:grid-cols-5`, the exact breakpoints
+   the portal dashboard already uses and validated), and
+   `DashboardSection` provides one consistent heading+spacing pattern
+   for grouping "Overview," "Quick actions," and "Recent activity" —
+   satisfying "no duplicated section headers."
+6. **`DashboardSkeleton` is one configurable skeleton, reused by both
+   `DashboardMetric` (a number-width block) and `RecentActivity` (N
+   placeholder rows)**, rather than a bespoke skeleton per widget —
+   this is what replaces the portal dashboard's current page-level
+   `<p>{t("common.loading")}</p>` with the real, already-specified
+   per-card skeleton behavior from `UI_PATTERNS.md`.
+7. **`EmptyDashboardState` is one shared empty-state component**, used
+   wherever a widget's real data is genuinely empty (zero recent
+   rentals, zero recent documents) — replacing the portal dashboard's
+   one-off `<p>{t("portal.dashboard.noRentals")}</p>` with a shared,
+   consistently-styled component, per "no duplicated empty-state
+   implementations."
+8. **`QuickActions` links to five existing, already-permission-gated
+   create routes — it invents no new workflow.** Reusing the exact
+   gates each route's own page already enforces:
+
+   | Action       | Route                | Gate                        |
+   | ------------ | -------------------- | --------------------------- |
+   | New customer | `/app/customers/new` | none (no permission family) |
+   | New asset    | `/app/assets/new`    | `assets.create`             |
+   | New rental   | `/app/rentals/new`   | `rentals.create`            |
+   | New quote    | `/app/quotes/new`    | `quotes.create`             |
+   | New document | `/app/documents/new` | `documents.create`          |
+
+   An action is hidden entirely (not disabled) when the current user
+   lacks its permission, matching `UX_PRINCIPLES.md`'s existing
+   "enforced by omission" principle already applied to nav items and
+   row actions in Chapters 1 and 3.
+
+9. **"Upcoming tasks" is answered by a single, permission-gated "Needs
+   attention" `DashboardMetric`, not a new task-list feature.** No
+   Task/Todo model exists anywhere in the schema. The closest real
+   equivalent — pending customer-submitted extension requests and
+   submitted-but-unreviewed damage reports — is a count, not a list,
+   surfaced behind `customers.portal.manage` (the same guard the
+   underlying endpoints already enforce) since building a full
+   list-and-triage UI for two features that already have zero UI
+   consumers today (`UI_AUDIT.md` finding #25) would be a
+   disproportionate new workflow surface for a presentation-only
+   dashboard chapter, not a bug fix to an existing screen.
+10. **Charts are not built.** No charting library is installed and no
+    chart-shaped time-series data exists (`UI_AUDIT.md` finding #28,
+    already flagged in `UI_PATTERNS.md` as TASK-0016). Per this
+    chapter's own instruction ("if no chart data exists, do not invent
+    new endpoints — document the limitation"), this is recorded as a
+    gap, not built.
+11. **A new `apps/web/src/hooks/use-dashboard-stats.ts` composes
+    existing hooks into one aggregated object the dashboard page
+    consumes** — it calls `useCustomers`/`useRentals`/
+    `useAssetStatuses`+`useAssets`/`useQuotes` (×2)/
+    `useStaffExtensionRequests`/`useStaffDamageReports` in parallel and
+    exposes a stable `{ metric: { value, isLoading, isError, href } }`
+    shape per card. This is client-side composition over already-real
+    endpoints, not a new backend aggregation endpoint — the frontend
+    equivalent of the "pageSize:1, read `.total`" technique already
+    used per-hook.
+
+### What Chapter 4 builds
+
+- `apps/web/src/components/dashboard/`: `dashboard-grid.tsx`,
+  `dashboard-metric.tsx`, `dashboard-card.tsx`, `dashboard-section.tsx`,
+  `dashboard-skeleton.tsx`, `empty-dashboard-state.tsx`,
+  `quick-actions.tsx`, `recent-activity.tsx`.
+- `apps/web/src/hooks/use-dashboard-stats.ts` — aggregates existing
+  staff list-endpoint hooks into the KPI set in Step 1's table.
+- Staff dashboard (`apps/web/src/app/app/page.tsx`) rebuilt as a real
+  dashboard: KPI grid, Quick Actions, Recent Rentals, Recent
+  Documents, permission-gated "Needs attention" card — all built on
+  the shared components above.
+- Portal dashboard
+  (`apps/web/src/app/portal/(shell)/dashboard/page.tsx`) refactored
+  onto the same shared components (its data source, `usePortalDashboard()`,
+  is unchanged — only its presentation layer moves onto
+  `DashboardMetric`/`DashboardCard`/`DashboardGrid`/`RecentActivity`/
+  `DashboardSkeleton`/`EmptyDashboardState`).
+- New `dashboard.*` localization keys across all six locales.
+- Component tests for the new shared components; regression tests for
+  both dashboard pages.
+
+### What Chapter 4 does not build (documented gaps, not fabricated)
+
+- **A true cross-entity "recent activity" feed** (one merged
+  chronological stream of rentals + documents + quotes + customer
+  changes) — no audit-log read endpoint exists (`UI_AUDIT.md` finding
+  #26). Two separate, real "Recent Rentals"/"Recent Documents" panels
+  are built instead.
+- **A "documents awaiting signature" KPI** — only a per-document
+  signature-requests endpoint exists, no tenant-wide list
+  (`UI_AUDIT.md` finding #27).
+- **Charts of any kind** — no charting library installed, no
+  chart-shaped data exists (`UI_AUDIT.md` finding #28); matches
+  `UI_PATTERNS.md`'s pre-existing TASK-0016 note.
+- **A configurable/customizable widget dashboard** (drag-and-drop,
+  add/remove cards) — every reference product's dashboard is a fixed,
+  deliberately chosen set of KPIs, not a generic widget surface
+  (`UI_RESEARCH.md` finding #17); building configurability here would
+  be a disproportionate new feature for a presentation-layer chapter.
+- **A full extension-request/damage-report triage UI** — surfaced only
+  as a count (design decision 9); building the list-and-approve
+  workflow for those two features is a real, separable follow-up task,
+  not something to fold into a dashboard chapter.
+- **New backend endpoints, schema changes, or API contract changes of
+  any kind** — every widget in this chapter is fed by an
+  already-existing endpoint, confirmed per data source in Step 1's
+  table.
+
 ## Later chapters (named, not detailed — scoped when reached)
 
-- **Chapter 4 — Forms & Wizards:** reconcile `RentalWizard`/
+- **Chapter 5 — Forms & Wizards:** reconcile `RentalWizard`/
   `QuoteWizard` against `UI_PATTERNS.md`'s Wizard/Stepper/Forms specs.
-- **Chapter 5 — Dashboard:** a real staff dashboard (stat cards,
-  recent activity), reusing the Customer Portal dashboard's proven
-  shape.
 - **Chapter 6 — Settings & Account:** profile/account pages, the
   language-switcher's live wiring, notification preferences once a
   backend exists.

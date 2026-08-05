@@ -302,17 +302,121 @@ empty-state copy are each independently duplicated per module
 `document.searchPlaceholder`, …) rather than sharing one parameterized
 key.
 
+## Addendum — Dashboard (TASK-0010 Part 2 Chapter 4)
+
+Scope extended for Chapter 4: the staff dashboard
+(`apps/web/src/app/app/page.tsx`) and the customer portal dashboard
+(`apps/web/src/app/portal/(shell)/dashboard/page.tsx`), plus every
+backend data source either page could legitimately draw on. Findings
+below are evidence-based (full reads of both page files, the only
+dashboard backend that exists anywhere, every candidate hook, and a
+repo-wide grep for "Dashboard"/audit/signature-request read paths),
+not assumed.
+
+### 22. The staff dashboard is a genuine stub — one link, no widgets
+
+`apps/web/src/app/app/page.tsx` (26 lines) renders a `PageHeader` and
+a single "Select tenant" link. Its only data fetch is `useMe()`
+(identity only). No stat cards, no recent-activity panel, no quick
+actions, no loading/skeleton/empty states — there is nothing to
+migrate, only to build. This is the direct target of Chapter 4's
+biggest single change.
+
+### 23. No staff-side dashboard backend exists at all
+
+A repo-wide grep for `Dashboard` under `apps/api/src` returns exactly
+3 files, all inside `apps/api/src/customer-portal/dashboard/` — there
+is no staff-facing dashboard controller, service, or aggregation
+endpoint anywhere. `PortalDashboardController`/`PortalDashboardService`
+(`GET /portal/dashboard`) exist only for authenticated customers via
+`CustomerAuthGuard`; staff sessions (`TenantGuard`) cannot call it and
+it is scoped to a single customer's own data (`customer.id`) even if
+they could. Every staff-dashboard metric in this chapter must
+therefore be derived client-side from existing staff list endpoints
+(`useCustomers`/`useAssets`/`useRentals`/`useQuotes`/`useDocuments`,
+each already returning `{ items, total, page, pageSize }`) rather than
+from any single aggregation call — confirmed as the only
+architecturally sound option that adds no new endpoint.
+
+### 24. The portal dashboard duplicates ad hoc `Card`/table markup with no shared component and no skeleton
+
+`apps/web/src/app/portal/(shell)/dashboard/page.tsx` is real and
+functional (five stat cards + a recent-rentals table sourced from
+`usePortalDashboard()`), but: its stat-card grid
+(`grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5`) and each
+`Card`/`CardContent` stat block are hand-written inline, matching no
+shared component; its "Recent rentals" panel is a raw `<table>`
+(never the shared `DataTable` built in Chapter 3, and not expected to
+be — a 5-row preview isn't a paginated list); and its loading/error
+states are a single page-level `<p>{t("common.loading")}</p>` /
+`<p>{t("common.error")}</p>` — no `Skeleton` usage anywhere, unlike
+`DataTable`'s per-column skeleton rows from Chapter 3. This is the
+closest existing precedent for dashboard layout in the product, but
+itself has the exact duplication and missing-skeleton gaps Chapter 4's
+shared components are meant to eliminate — see `UI_RESEARCH.md`
+finding #20 for why per-widget (not page-level) loading states are the
+correct target.
+
+### 25. Two real staff-side portal-management endpoints exist with working hooks but are wired into zero UI
+
+`GET /tenants/:tenantId/extension-requests` and
+`GET /tenants/:tenantId/damage-reports` (both
+`StaffPortalController`, gated `customers.portal.manage`) are real,
+tested endpoints with working frontend hooks
+(`useStaffExtensionRequests`, `useStaffDamageReports` in
+`apps/web/src/hooks/use-customer-portal.ts`) — confirmed via
+`grep -rln "useStaffExtensionRequests\|useStaffDamageReports"
+apps/web/src/app`, which returns zero matches. No page anywhere
+surfaces these. Chapter 4 can legitimately surface their real counts
+(pending extension requests, submitted-but-unreviewed damage reports)
+as a permission-gated dashboard stat without inventing anything —
+documented as the chapter's answer to "upcoming tasks (only if real
+data exists)" in `UI_REDESIGN_PLAN.md`.
+
+### 26. No audit-log read endpoint — a unified "recent activity" feed cannot be built
+
+`AuditService` (`apps/api/src/audit/`) only exposes a write path
+(`log()`, called by other services) — no controller, no `find`/`list`
+method, confirmed by grep. There is no way to query "everything that
+changed recently across rentals/quotes/documents/customers" without a
+new endpoint, which this chapter's own scope forbids
+(`ARCHITECTURE_LOCK.md` §3). Chapter 4 documents this as a limitation
+rather than fabricating a merged feed — see `UI_RESEARCH.md` finding
+#19.
+
+### 27. No tenant-wide "documents awaiting signature" list endpoint
+
+`DocumentSignatureController` (`apps/api/src/documents/signature/`) is
+scoped per-document only — `GET
+/tenants/:tenantId/documents/:id/signature-requests` requires a
+specific document `id`; there is no
+`GET /tenants/:tenantId/documents/signature-requests` (or equivalent)
+that lists pending signatures across every document. A "documents
+awaiting signature" KPI is therefore not buildable without a new
+endpoint and is documented as a gap in `UI_REDESIGN_PLAN.md`, not
+built.
+
+### 28. No charting library installed; no chart-shaped data exists
+
+`apps/web/package.json`'s dependency list has no charting library
+(no recharts/chart.js/visx/d3/nivo/victory — confirmed by direct
+read). This matches `UI_PATTERNS.md`'s own pre-existing "Charts"
+pattern entry, already marked "Not yet implemented anywhere in the
+product... TASK-0016." Chapter 4 does not add a charting dependency or
+invent chart data, per its own explicit "if no chart data exists,
+document the limitation" instruction.
+
 ## Summary table
 
-| Area                      | Current state                                     | Target (see `UI_REDESIGN_PLAN.md`)                     |
-| ------------------------- | ------------------------------------------------- | ------------------------------------------------------ |
-| Navigation                | Flat top-bar link list, no icons, no active state | Collapsible sidebar, icons, active indicator           |
-| Breadcrumbs               | None                                              | Route-registry-driven, responsive                      |
-| Page headers              | Hand-written per page, inconsistent               | Shared `PageHeader` component                          |
-| Search                    | Per-list only                                     | Unified global search + command palette (foundation)   |
-| Permission-aware nav      | Not implemented (real 403 bug for TECHNICIAN)     | Every nav item gated on its `.view`/`.read` permission |
-| Dark mode (staff)         | Not available                                     | Reuses portal's `use-dark-mode.ts`                     |
-| Language switcher (staff) | Not available                                     | Foundation added to user menu                          |
-| Notifications (staff)     | Not available (no backend either)                 | UI architecture only, honestly empty                   |
-| Dashboard                 | Stub                                              | Out of scope for Chapter 1 (shell only) — see plan     |
-| Tenant switcher           | Full-page navigation                              | In-header dropdown, reusing existing hooks             |
+| Area                      | Current state                                                           | Target (see `UI_REDESIGN_PLAN.md`)                                                                                                 |
+| ------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Navigation                | Flat top-bar link list, no icons, no active state                       | Collapsible sidebar, icons, active indicator                                                                                       |
+| Breadcrumbs               | None                                                                    | Route-registry-driven, responsive                                                                                                  |
+| Page headers              | Hand-written per page, inconsistent                                     | Shared `PageHeader` component                                                                                                      |
+| Search                    | Per-list only                                                           | Unified global search + command palette (foundation)                                                                               |
+| Permission-aware nav      | Not implemented (real 403 bug for TECHNICIAN)                           | Every nav item gated on its `.view`/`.read` permission                                                                             |
+| Dark mode (staff)         | Not available                                                           | Reuses portal's `use-dark-mode.ts`                                                                                                 |
+| Language switcher (staff) | Not available                                                           | Foundation added to user menu                                                                                                      |
+| Notifications (staff)     | Not available (no backend either)                                       | UI architecture only, honestly empty                                                                                               |
+| Dashboard                 | Staff: stub. Portal: real but ad hoc, no shared components, no skeleton | Chapter 4 — shared `DashboardCard`/`DashboardMetric`/etc., real KPIs from existing endpoints, both pages reuse the same components |
+| Tenant switcher           | Full-page navigation                                                    | In-header dropdown, reusing existing hooks                                                                                         |

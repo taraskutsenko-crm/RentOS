@@ -16,10 +16,13 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** pending — TASK-0010 Part 2 Chapter 3
-  (Universal Data Views). Sits on top of `1ba4fc4` (Chapter 2 —
-  premium authentication experience) and `ec06729`/`5157e2c` (Chapter
-  1 — application shell redesign).
+- **Latest verified commit:** `1a251fe` (docs: document TASK-0010
+  Part 2 Chapter 3), on top of `06d39ae` (fix: portal `/auth/me`
+  tenant bug), `b64fec4` (feat: migrate list pages to shared
+  DataTable), and `a8fda7e` (feat: add shared DataTable system) —
+  TASK-0010 Part 2 Chapter 3 (Universal Data Views). Sits on top of
+  `1ba4fc4` (Chapter 2 — premium authentication experience) and
+  `ec06729`/`5157e2c` (Chapter 1 — application shell redesign).
 - **What shipped:** one shared `DataTable<T>` system
   (`apps/web/src/components/data-table/` — sorting, row selection,
   bulk actions, column visibility, sticky header, loading/skeleton/
@@ -80,8 +83,8 @@ prior conversations.
   every new `common.table.*`/`common.pagination.*`/`common.filters.*`/
   `common.bulkActions.*` key as the verification evidence, per the same
   precedent.
-- **GitHub Actions:** pending — will be updated once pushed and
-  confirmed green.
+- **GitHub Actions:** green — [run 31007596468](https://github.com/taraskutsenko-crm/RentOS/actions/runs/31007596468)
+  on `1a251fe`.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

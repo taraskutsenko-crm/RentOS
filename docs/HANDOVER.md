@@ -16,8 +16,14 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** _pending — commit/push/CI in progress for
-  TASK-0010 Part 2 Chapter 4 (Dashboard Experience)._
+- **Latest verified commit:** `e177d14` (docs: document TASK-0010 Part 2
+  Chapter 4), on top of `79c5980` (test: add dashboard component and
+  page tests), `c9d1b5a` (feat: rebuild staff dashboard, refactor portal
+  dashboard onto shared components), and `be4f6ee` (feat: add shared
+  dashboard component system) — TASK-0010 Part 2 Chapter 4 (Dashboard
+  Experience). Sits on top of `1a251fe` (Chapter 3 — universal data
+  views), `1ba4fc4` (Chapter 2 — premium authentication experience), and
+  `ec06729`/`5157e2c` (Chapter 1 — application shell redesign).
 - **What shipped:** one shared `apps/web/src/components/dashboard/`
   system (`DashboardGrid`, `DashboardMetric`, `DashboardCard`,
   `DashboardSection`, `DashboardSkeleton`, `EmptyDashboardState`,
@@ -66,7 +72,8 @@ prior conversations.
   refactored `RecentActivity`/`DashboardCard`/`DashboardMetric`
   components render its existing `usePortalDashboard()` data
   identically to before, just without the old ad hoc markup.
-- **GitHub Actions:** _pending — will be updated once pushed and green._
+- **GitHub Actions:** green — [run 31026794370](https://github.com/taraskutsenko-crm/RentOS/actions/runs/31026794370)
+  on `e177d14`.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

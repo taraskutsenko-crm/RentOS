@@ -799,6 +799,26 @@
       "downloadPdf": "Pobierz PDF"
     }
   },
+  "dashboard": {
+    "welcome": "Witaj ponownie, {{name}}",
+    "sections": {
+      "overview": "Przegląd",
+      "quickActions": "Szybkie akcje",
+      "recentActivity": "Ostatnia aktywność"
+    },
+    "metrics": {
+      "customers": "Klienci",
+      "activeRentals": "Aktywne wynajmy",
+      "availableAssets": "Dostępne aktywa",
+      "pendingQuotes": "Oczekujące oferty",
+      "needsAttention": "Wymaga uwagi"
+    },
+    "recentRentals": "Ostatnie wynajmy",
+    "recentDocuments": "Ostatnie dokumenty",
+    "viewAll": "Zobacz wszystkie",
+    "emptyRecentRentals": "Brak wynajmów",
+    "emptyRecentDocuments": "Brak dokumentów"
+  },
   "portal": {
     "nav": {
       "dashboard": "Panel",

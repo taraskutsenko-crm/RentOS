@@ -799,6 +799,26 @@
       "downloadPdf": "Скачать PDF"
     }
   },
+  "dashboard": {
+    "welcome": "С возвращением, {{name}}",
+    "sections": {
+      "overview": "Обзор",
+      "quickActions": "Быстрые действия",
+      "recentActivity": "Недавняя активность"
+    },
+    "metrics": {
+      "customers": "Клиенты",
+      "activeRentals": "Активные аренды",
+      "availableAssets": "Доступные активы",
+      "pendingQuotes": "Ожидающие сметы",
+      "needsAttention": "Требует внимания"
+    },
+    "recentRentals": "Недавние аренды",
+    "recentDocuments": "Недавние документы",
+    "viewAll": "Смотреть все",
+    "emptyRecentRentals": "Пока нет аренд",
+    "emptyRecentDocuments": "Пока нет документов"
+  },
   "portal": {
     "nav": {
       "dashboard": "Панель",

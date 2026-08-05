@@ -799,6 +799,26 @@
       "downloadPdf": "Завантажити PDF"
     }
   },
+  "dashboard": {
+    "welcome": "З поверненням, {{name}}",
+    "sections": {
+      "overview": "Огляд",
+      "quickActions": "Швидкі дії",
+      "recentActivity": "Остання активність"
+    },
+    "metrics": {
+      "customers": "Клієнти",
+      "activeRentals": "Активні оренди",
+      "availableAssets": "Доступні активи",
+      "pendingQuotes": "Кошториси в очікуванні",
+      "needsAttention": "Потребує уваги"
+    },
+    "recentRentals": "Останні оренди",
+    "recentDocuments": "Останні документи",
+    "viewAll": "Переглянути всі",
+    "emptyRecentRentals": "Поки немає оренд",
+    "emptyRecentDocuments": "Поки немає документів"
+  },
   "portal": {
     "nav": {
       "dashboard": "Панель",

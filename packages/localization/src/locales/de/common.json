@@ -799,6 +799,26 @@
       "downloadPdf": "PDF herunterladen"
     }
   },
+  "dashboard": {
+    "welcome": "Willkommen zurück, {{name}}",
+    "sections": {
+      "overview": "Überblick",
+      "quickActions": "Schnellaktionen",
+      "recentActivity": "Letzte Aktivität"
+    },
+    "metrics": {
+      "customers": "Kunden",
+      "activeRentals": "Aktive Vermietungen",
+      "availableAssets": "Verfügbare Anlagen",
+      "pendingQuotes": "Ausstehende Angebote",
+      "needsAttention": "Erfordert Aufmerksamkeit"
+    },
+    "recentRentals": "Letzte Vermietungen",
+    "recentDocuments": "Letzte Dokumente",
+    "viewAll": "Alle anzeigen",
+    "emptyRecentRentals": "Noch keine Vermietungen",
+    "emptyRecentDocuments": "Noch keine Dokumente"
+  },
   "portal": {
     "nav": {
       "dashboard": "Dashboard",

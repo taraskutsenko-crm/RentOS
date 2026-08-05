@@ -799,6 +799,26 @@
       "downloadPdf": "Descargar PDF"
     }
   },
+  "dashboard": {
+    "welcome": "Bienvenido de nuevo, {{name}}",
+    "sections": {
+      "overview": "Resumen",
+      "quickActions": "Acciones rápidas",
+      "recentActivity": "Actividad reciente"
+    },
+    "metrics": {
+      "customers": "Clientes",
+      "activeRentals": "Alquileres activos",
+      "availableAssets": "Activos disponibles",
+      "pendingQuotes": "Presupuestos pendientes",
+      "needsAttention": "Requiere atención"
+    },
+    "recentRentals": "Alquileres recientes",
+    "recentDocuments": "Documentos recientes",
+    "viewAll": "Ver todos",
+    "emptyRecentRentals": "Aún no hay alquileres",
+    "emptyRecentDocuments": "Aún no hay documentos"
+  },
   "portal": {
     "nav": {
       "dashboard": "Panel",

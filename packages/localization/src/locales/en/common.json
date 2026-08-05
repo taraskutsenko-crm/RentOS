@@ -799,6 +799,26 @@
       "downloadPdf": "Download PDF"
     }
   },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}",
+    "sections": {
+      "overview": "Overview",
+      "quickActions": "Quick actions",
+      "recentActivity": "Recent activity"
+    },
+    "metrics": {
+      "customers": "Customers",
+      "activeRentals": "Active rentals",
+      "availableAssets": "Available assets",
+      "pendingQuotes": "Pending quotes",
+      "needsAttention": "Needs attention"
+    },
+    "recentRentals": "Recent rentals",
+    "recentDocuments": "Recent documents",
+    "viewAll": "View all",
+    "emptyRecentRentals": "No rentals yet",
+    "emptyRecentDocuments": "No documents yet"
+  },
   "portal": {
     "nav": {
       "dashboard": "Dashboard",

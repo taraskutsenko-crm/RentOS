@@ -21,7 +21,8 @@ describe("PortalDashboardPage", () => {
 
     renderWithProviders(<PortalDashboardPage />);
 
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getAllByLabelText(/loading/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText("RNT-000001")).not.toBeInTheDocument();
   });
 
   it("renders the welcome message and summary counts", () => {
@@ -47,7 +48,7 @@ describe("PortalDashboardPage", () => {
     expect(screen.getByText("4")).toBeInTheDocument();
   });
 
-  it("renders recent rentals in the table", () => {
+  it("renders recent rentals in the recent-activity list", () => {
     usePortalMeMock.mockReturnValue({ data: { customer: { firstName: "Jane" } } });
     usePortalDashboardMock.mockReturnValue({
       data: {

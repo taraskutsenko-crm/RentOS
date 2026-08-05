@@ -1,49 +1,119 @@
 "use client";
 
-import { Button, Card, CardContent, Input } from "@rentos/ui";
+import { Button } from "@rentos/ui";
 import Link from "next/link";
 import { useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PageHeader } from "../../../components/shell/page-header";
+import {
+  ConfirmDialog,
+  DataTable,
+  DataTablePagination,
+  FilterBar,
+  RowActionsMenu,
+  SearchInput,
+  useDataTableState,
+  type ActiveFilter,
+  type BulkAction,
+  type DataTableColumn,
+} from "../../../components/data-table";
 import { useCurrentTenantId } from "../../../hooks/use-current-tenant";
 import { useCustomers, useDeleteCustomer } from "../../../hooks/use-customers";
-import type { CustomerStatus } from "../../../types/customer";
-
-const PAGE_SIZE = 20;
+import type { Customer, CustomerStatus } from "../../../types/customer";
 
 export default function CustomersPage() {
   const { t } = useTranslation();
   const [tenantId] = useCurrentTenantId();
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
   const [status, setStatus] = useState<CustomerStatus | "">("");
+  const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleteError, setBulkDeleteError] = useState<string | null>(null);
 
-  const { data, isLoading } = useCustomers(tenantId, {
-    page,
-    pageSize: PAGE_SIZE,
-    search: search || undefined,
+  const table = useDataTableState();
+  const { data, isLoading, isError, refetch } = useCustomers(tenantId, {
+    page: table.page,
+    pageSize: table.pageSize,
+    search: table.search || undefined,
     status: status || undefined,
   });
   const deleteCustomer = useDeleteCustomer(tenantId);
 
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
-
-  function handleSearchChange(event: ChangeEvent<HTMLInputElement>): void {
-    setSearch(event.target.value);
-    setPage(1);
-  }
-
   function handleStatusChange(event: ChangeEvent<HTMLSelectElement>): void {
     setStatus(event.target.value as CustomerStatus | "");
-    setPage(1);
+    table.resetToFirstPage();
   }
 
-  async function handleDelete(id: string): Promise<void> {
-    if (window.confirm(t("customer.deleteConfirm"))) {
-      await deleteCustomer.mutateAsync(id);
-    }
+  async function handleDeleteConfirm(): Promise<void> {
+    if (!deleteTarget) return;
+    await deleteCustomer.mutateAsync(deleteTarget.id);
+    setDeleteTarget(null);
   }
+
+  async function handleBulkDeleteConfirm(): Promise<void> {
+    setBulkDeleteError(null);
+    const ids = Array.from(table.selectedIds);
+    const results = await Promise.allSettled(ids.map((id) => deleteCustomer.mutateAsync(id)));
+    const failed = results.filter((result) => result.status === "rejected").length;
+    if (failed > 0) {
+      setBulkDeleteError(
+        t("common.bulkActions.deletePartialFailure", { failed, total: ids.length }),
+      );
+    } else {
+      setBulkDeleteOpen(false);
+    }
+    table.setSelectedIds(new Set());
+  }
+
+  const activeFilters: ActiveFilter[] = status
+    ? [
+        {
+          id: "status",
+          label: status === "ACTIVE" ? t("customer.statusActive") : t("customer.statusInactive"),
+          onRemove: () => {
+            setStatus("");
+            table.resetToFirstPage();
+          },
+        },
+      ]
+    : [];
+
+  const columns: DataTableColumn<Customer>[] = [
+    {
+      id: "name",
+      header: t("customer.firstName"),
+      cell: (customer) => `${customer.firstName} ${customer.lastName}`,
+      mobileRole: "primary",
+    },
+    {
+      id: "company",
+      header: t("customer.company"),
+      cell: (customer) => customer.company ?? "—",
+      mobileRole: "secondary",
+    },
+    {
+      id: "email",
+      header: t("customer.email"),
+      cell: (customer) => customer.email ?? "—",
+      mobileRole: "secondary",
+    },
+    {
+      id: "status",
+      header: t("customer.status"),
+      cell: (customer) =>
+        customer.status === "ACTIVE" ? t("customer.statusActive") : t("customer.statusInactive"),
+      mobileRole: "secondary",
+    },
+  ];
+
+  const bulkActions: BulkAction[] = [
+    {
+      id: "delete",
+      label: t("common.bulkActions.delete"),
+      variant: "destructive",
+      onClick: () => setBulkDeleteOpen(true),
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-6">
@@ -57,12 +127,12 @@ export default function CustomersPage() {
         }
       />
 
-      <div className="flex gap-3">
-        <Input
+      <FilterBar activeFilters={activeFilters}>
+        <SearchInput
+          value={table.searchInput}
+          onChange={table.setSearchInput}
           placeholder={t("customer.searchPlaceholder")}
-          value={search}
-          onChange={handleSearchChange}
-          className="max-w-sm"
+          className="max-w-sm flex-1"
         />
         <select
           className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
@@ -73,85 +143,66 @@ export default function CustomersPage() {
           <option value="ACTIVE">{t("customer.statusActive")}</option>
           <option value="INACTIVE">{t("customer.statusInactive")}</option>
         </select>
-      </div>
+      </FilterBar>
 
-      <Card>
-        <CardContent className="p-0">
-          {isLoading && <p className="text-muted-foreground p-6 text-sm">{t("common.loading")}</p>}
-          {!isLoading && data?.items.length === 0 && (
-            <p className="text-muted-foreground p-6 text-sm">{t("customer.noCustomers")}</p>
-          )}
-          {!isLoading && data && data.items.length > 0 && (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left">
-                  <th className="p-3 font-medium">{t("customer.firstName")}</th>
-                  <th className="p-3 font-medium">{t("customer.lastName")}</th>
-                  <th className="p-3 font-medium">{t("customer.company")}</th>
-                  <th className="p-3 font-medium">{t("customer.email")}</th>
-                  <th className="p-3 font-medium">{t("customer.status")}</th>
-                  <th className="p-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {data.items.map((customer) => (
-                  <tr key={customer.id} className="border-b last:border-0">
-                    <td className="p-3">{customer.firstName}</td>
-                    <td className="p-3">{customer.lastName}</td>
-                    <td className="p-3">{customer.company ?? "—"}</td>
-                    <td className="p-3">{customer.email ?? "—"}</td>
-                    <td className="p-3">
-                      {customer.status === "ACTIVE"
-                        ? t("customer.statusActive")
-                        : t("customer.statusInactive")}
-                    </td>
-                    <td className="p-3 text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button asChild variant="outline" size="sm">
-                          <Link href={`/app/customers/${customer.id}`}>
-                            {t("customer.editCustomer")}
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => void handleDelete(customer.id)}
-                        >
-                          {t("customer.delete")}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
+      <DataTable
+        columns={columns}
+        data={data?.items}
+        getRowId={(customer) => customer.id}
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={() => void refetch()}
+        emptyState={<p className="text-muted-foreground text-sm">{t("customer.noCustomers")}</p>}
+        rowHref={(customer) => `/app/customers/${customer.id}`}
+        selection={{ selectedIds: table.selectedIds, onSelectionChange: table.setSelectedIds }}
+        bulkActions={bulkActions}
+        rowActions={(customer) => (
+          <RowActionsMenu
+            actions={[
+              {
+                id: "delete",
+                label: t("customer.delete"),
+                destructive: true,
+                onClick: () => setDeleteTarget(customer),
+              },
+            ]}
+          />
+        )}
+      />
 
-      {data && data.total > 0 && (
-        <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page <= 1}
-            onClick={() => setPage((current) => Math.max(1, current - 1))}
-          >
-            {t("customer.previous")}
-          </Button>
-          <span className="text-muted-foreground text-sm">
-            {page} / {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= totalPages}
-            onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-          >
-            {t("customer.next")}
-          </Button>
-        </div>
+      {data && (
+        <DataTablePagination
+          page={table.page}
+          pageSize={table.pageSize}
+          total={data.total}
+          onPageChange={table.goToPage}
+        />
       )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title={t("customer.delete")}
+        description={t("customer.deleteConfirm")}
+        confirmLabel={t("customer.delete")}
+        destructive
+        isLoading={deleteCustomer.isPending}
+        onConfirm={() => void handleDeleteConfirm()}
+      />
+
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        onOpenChange={(open) => {
+          setBulkDeleteOpen(open);
+          if (!open) setBulkDeleteError(null);
+        }}
+        title={t("common.bulkActions.deleteConfirmTitle", { count: table.selectedIds.size })}
+        description={bulkDeleteError ?? t("common.bulkActions.deleteConfirmDescription")}
+        confirmLabel={t("common.bulkActions.delete")}
+        destructive
+        isLoading={deleteCustomer.isPending}
+        onConfirm={() => void handleBulkDeleteConfirm()}
+      />
     </div>
   );
 }

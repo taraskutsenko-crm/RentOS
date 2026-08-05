@@ -38,7 +38,38 @@
     "loading": "Завантаження…",
     "error": "Щось пішло не так. Спробуйте ще раз.",
     "showPassword": "Показати пароль",
-    "hidePassword": "Приховати пароль"
+    "hidePassword": "Приховати пароль",
+    "saving": "Збереження…",
+    "cancel": "Скасувати",
+    "confirm": "Підтвердити",
+    "table": {
+      "columns": "Стовпці",
+      "permissionDenied": "У вас немає прав для перегляду цих даних.",
+      "retry": "Повторити",
+      "selectAll": "Вибрати всі рядки",
+      "selectRow": "Вибрати рядок",
+      "rowActions": "Дії з рядком",
+      "searchPlaceholder": "Пошук…",
+      "clearSearch": "Очистити пошук",
+      "clearSelection": "Очистити вибір",
+      "selectedCount": "Вибрано: {{count}}"
+    },
+    "pagination": {
+      "range": "{{start}}–{{end}} із {{total}}",
+      "previous": "Назад",
+      "next": "Далі",
+      "pageOf": "Сторінка {{page}} із {{totalPages}}"
+    },
+    "filters": {
+      "remove": "Прибрати фільтр «{{filter}}»",
+      "resetAll": "Скинути всі фільтри"
+    },
+    "bulkActions": {
+      "delete": "Видалити",
+      "deleteConfirmTitle": "Видалити клієнтів ({{count}})?",
+      "deleteConfirmDescription": "Це остаточно видалить вибраних клієнтів. Цю дію не можна скасувати.",
+      "deletePartialFailure": "Не вдалося видалити {{failed}} із {{total}}."
+    }
   },
   "nav": {
     "logout": "Вийти",

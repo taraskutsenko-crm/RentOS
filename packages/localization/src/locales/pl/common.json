@@ -38,7 +38,38 @@
     "loading": "Ładowanie…",
     "error": "Coś poszło nie tak. Spróbuj ponownie.",
     "showPassword": "Pokaż hasło",
-    "hidePassword": "Ukryj hasło"
+    "hidePassword": "Ukryj hasło",
+    "saving": "Zapisywanie…",
+    "cancel": "Anuluj",
+    "confirm": "Potwierdź",
+    "table": {
+      "columns": "Kolumny",
+      "permissionDenied": "Nie masz uprawnień do wyświetlenia tych danych.",
+      "retry": "Ponów",
+      "selectAll": "Zaznacz wszystkie wiersze",
+      "selectRow": "Zaznacz wiersz",
+      "rowActions": "Akcje wiersza",
+      "searchPlaceholder": "Szukaj…",
+      "clearSearch": "Wyczyść wyszukiwanie",
+      "clearSelection": "Wyczyść zaznaczenie",
+      "selectedCount": "Zaznaczono: {{count}}"
+    },
+    "pagination": {
+      "range": "{{start}}–{{end}} z {{total}}",
+      "previous": "Poprzednia",
+      "next": "Następna",
+      "pageOf": "Strona {{page}} z {{totalPages}}"
+    },
+    "filters": {
+      "remove": "Usuń filtr {{filter}}",
+      "resetAll": "Wyczyść wszystkie filtry"
+    },
+    "bulkActions": {
+      "delete": "Usuń",
+      "deleteConfirmTitle": "Usunąć {{count}} klientów?",
+      "deleteConfirmDescription": "Spowoduje to trwałe usunięcie wybranych klientów. Tej czynności nie można cofnąć.",
+      "deletePartialFailure": "Nie udało się usunąć {{failed}} z {{total}}."
+    }
   },
   "nav": {
     "logout": "Wyloguj się",

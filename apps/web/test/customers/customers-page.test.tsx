@@ -1,4 +1,5 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import CustomersPage from "../../src/app/app/customers/page";
@@ -54,12 +55,12 @@ describe("CustomersPage", () => {
     });
 
     renderWithProviders(<CustomersPage />);
+    const table = within(screen.getByRole("table"));
 
-    expect(screen.getByText("Jane")).toBeInTheDocument();
-    expect(screen.getByText("Smith")).toBeInTheDocument();
-    expect(screen.getByText("Acme Corp")).toBeInTheDocument();
-    expect(screen.getByText("jane@acme.com")).toBeInTheDocument();
-    expect(screen.getByRole("cell", { name: "Active" })).toBeInTheDocument();
+    expect(table.getByText("Jane Smith")).toBeInTheDocument();
+    expect(table.getByText("Acme Corp")).toBeInTheDocument();
+    expect(table.getByText("jane@acme.com")).toBeInTheDocument();
+    expect(table.getByText("Active")).toBeInTheDocument();
   });
 
   it("shows a loading state", () => {
@@ -67,7 +68,7 @@ describe("CustomersPage", () => {
 
     renderWithProviders(<CustomersPage />);
 
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: /loading/i })).toBeInTheDocument();
   });
 
   it("passes the current tenant id and query params to useCustomers", () => {
@@ -82,5 +83,37 @@ describe("CustomersPage", () => {
       "tenant-1",
       expect.objectContaining({ page: 1, pageSize: 20 }),
     );
+  });
+
+  it("selects a row, then bulk-deletes it via the confirm dialog", async () => {
+    const deleteMutateAsync = vi.fn().mockResolvedValue(undefined);
+    useDeleteCustomerMock.mockReturnValue({ mutateAsync: deleteMutateAsync, isPending: false });
+    useCustomersMock.mockReturnValue({
+      data: {
+        items: [
+          {
+            id: "c1",
+            firstName: "Jane",
+            lastName: "Smith",
+            company: "Acme Corp",
+            email: "jane@acme.com",
+            status: "ACTIVE",
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      },
+      isLoading: false,
+    });
+
+    const user = userEvent.setup();
+    renderWithProviders(<CustomersPage />);
+
+    await user.click(screen.getByRole("checkbox", { name: /select row/i }));
+    await user.click(screen.getByRole("button", { name: /^delete$/i }));
+    await user.click(screen.getByRole("button", { name: /^delete$/i }));
+
+    expect(deleteMutateAsync).toHaveBeenCalledWith("c1");
   });
 });

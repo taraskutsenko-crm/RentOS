@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import DocumentTemplatesPage from "../../src/app/app/documents/templates/page";
@@ -41,10 +41,11 @@ describe("DocumentTemplatesPage", () => {
     });
 
     renderWithProviders(<DocumentTemplatesPage />);
+    const table = within(screen.getByRole("table"));
 
-    expect(screen.getByText("Standard rental contract")).toBeInTheDocument();
-    expect(screen.getByRole("cell", { name: "Active" })).toBeInTheDocument();
-    expect(screen.getByRole("cell", { name: "2" })).toBeInTheDocument();
+    expect(table.getByText("Standard rental contract")).toBeInTheDocument();
+    expect(table.getByRole("cell", { name: "Active" })).toBeInTheDocument();
+    expect(table.getByRole("cell", { name: "2" })).toBeInTheDocument();
   });
 
   it("renders the empty state when there are no templates", () => {

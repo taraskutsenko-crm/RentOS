@@ -38,7 +38,38 @@
     "loading": "Wird geladen…",
     "error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "showPassword": "Passwort anzeigen",
-    "hidePassword": "Passwort verbergen"
+    "hidePassword": "Passwort verbergen",
+    "saving": "Wird gespeichert…",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "table": {
+      "columns": "Spalten",
+      "permissionDenied": "Sie haben keine Berechtigung, diese Daten anzuzeigen.",
+      "retry": "Erneut versuchen",
+      "selectAll": "Alle Zeilen auswählen",
+      "selectRow": "Zeile auswählen",
+      "rowActions": "Zeilenaktionen",
+      "searchPlaceholder": "Suchen…",
+      "clearSearch": "Suche löschen",
+      "clearSelection": "Auswahl aufheben",
+      "selectedCount": "{{count}} ausgewählt"
+    },
+    "pagination": {
+      "range": "{{start}}–{{end}} von {{total}}",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "pageOf": "Seite {{page}} von {{totalPages}}"
+    },
+    "filters": {
+      "remove": "Filter „{{filter}}“ entfernen",
+      "resetAll": "Alle Filter zurücksetzen"
+    },
+    "bulkActions": {
+      "delete": "Löschen",
+      "deleteConfirmTitle": "{{count}} Kunden löschen?",
+      "deleteConfirmDescription": "Dadurch werden die ausgewählten Kunden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deletePartialFailure": "{{failed}} von {{total}} konnten nicht gelöscht werden."
+    }
   },
   "nav": {
     "logout": "Abmelden",

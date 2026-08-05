@@ -38,7 +38,38 @@
     "loading": "Loading…",
     "error": "Something went wrong. Please try again.",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "table": {
+      "columns": "Columns",
+      "permissionDenied": "You don't have permission to view this data.",
+      "retry": "Retry",
+      "selectAll": "Select all rows",
+      "selectRow": "Select row",
+      "rowActions": "Row actions",
+      "searchPlaceholder": "Search…",
+      "clearSearch": "Clear search",
+      "clearSelection": "Clear selection",
+      "selectedCount": "{{count}} selected"
+    },
+    "pagination": {
+      "range": "{{start}}–{{end}} of {{total}}",
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {{page}} of {{totalPages}}"
+    },
+    "filters": {
+      "remove": "Remove {{filter}} filter",
+      "resetAll": "Reset all filters"
+    },
+    "bulkActions": {
+      "delete": "Delete",
+      "deleteConfirmTitle": "Delete {{count}} customers?",
+      "deleteConfirmDescription": "This permanently deletes the selected customers. This action cannot be undone.",
+      "deletePartialFailure": "{{failed}} of {{total}} could not be deleted."
+    }
   },
   "nav": {
     "logout": "Log out",

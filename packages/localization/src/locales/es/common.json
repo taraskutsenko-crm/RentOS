@@ -38,7 +38,38 @@
     "loading": "Cargando…",
     "error": "Algo salió mal. Inténtalo de nuevo.",
     "showPassword": "Mostrar contraseña",
-    "hidePassword": "Ocultar contraseña"
+    "hidePassword": "Ocultar contraseña",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "table": {
+      "columns": "Columnas",
+      "permissionDenied": "No tienes permiso para ver estos datos.",
+      "retry": "Reintentar",
+      "selectAll": "Seleccionar todas las filas",
+      "selectRow": "Seleccionar fila",
+      "rowActions": "Acciones de fila",
+      "searchPlaceholder": "Buscar…",
+      "clearSearch": "Borrar búsqueda",
+      "clearSelection": "Borrar selección",
+      "selectedCount": "{{count}} seleccionados"
+    },
+    "pagination": {
+      "range": "{{start}}–{{end}} de {{total}}",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "pageOf": "Página {{page}} de {{totalPages}}"
+    },
+    "filters": {
+      "remove": "Quitar filtro de {{filter}}",
+      "resetAll": "Restablecer todos los filtros"
+    },
+    "bulkActions": {
+      "delete": "Eliminar",
+      "deleteConfirmTitle": "¿Eliminar {{count}} clientes?",
+      "deleteConfirmDescription": "Esto elimina permanentemente los clientes seleccionados. Esta acción no se puede deshacer.",
+      "deletePartialFailure": "No se pudieron eliminar {{failed}} de {{total}}."
+    }
   },
   "nav": {
     "logout": "Cerrar sesión",

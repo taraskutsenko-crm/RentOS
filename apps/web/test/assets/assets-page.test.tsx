@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -116,10 +116,12 @@ describe("AssetsPage", () => {
     renderWithProviders(<AssetsPage />);
     await user.type(screen.getByPlaceholderText(/search assets/i), "Ford");
 
-    expect(useAssetsMock).toHaveBeenLastCalledWith(
-      "tenant-1",
-      expect.objectContaining({ search: "Ford" }),
-    );
+    await waitFor(() => {
+      expect(useAssetsMock).toHaveBeenLastCalledWith(
+        "tenant-1",
+        expect.objectContaining({ search: "Ford" }),
+      );
+    });
   });
 
   it("filters by category when a category is selected", async () => {

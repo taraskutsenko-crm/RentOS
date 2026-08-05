@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -46,10 +46,11 @@ describe("RentalsPage", () => {
     });
 
     renderWithProviders(<RentalsPage />);
+    const table = within(screen.getByRole("table"));
 
-    expect(screen.getByText("RNT-000001")).toBeInTheDocument();
-    expect(screen.getByText("Jane Doe")).toBeInTheDocument();
-    expect(screen.getByRole("cell", { name: "Draft" })).toBeInTheDocument();
+    expect(table.getByText("RNT-000001")).toBeInTheDocument();
+    expect(table.getByText("Jane Doe")).toBeInTheDocument();
+    expect(table.getByRole("cell", { name: "Draft" })).toBeInTheDocument();
   });
 
   it("renders the empty state when there are no rentals", () => {
@@ -87,10 +88,12 @@ describe("RentalsPage", () => {
     renderWithProviders(<RentalsPage />);
     await user.type(screen.getByPlaceholderText(/search rentals/i), "RNT-1");
 
-    expect(useRentalsMock).toHaveBeenLastCalledWith(
-      "tenant-1",
-      expect.objectContaining({ search: "RNT-1" }),
-    );
+    await waitFor(() => {
+      expect(useRentalsMock).toHaveBeenLastCalledWith(
+        "tenant-1",
+        expect.objectContaining({ search: "RNT-1" }),
+      );
+    });
   });
 
   it("filters by status", async () => {

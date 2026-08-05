@@ -38,7 +38,38 @@
     "loading": "Загрузка…",
     "error": "Что-то пошло не так. Попробуйте ещё раз.",
     "showPassword": "Показать пароль",
-    "hidePassword": "Скрыть пароль"
+    "hidePassword": "Скрыть пароль",
+    "saving": "Сохранение…",
+    "cancel": "Отмена",
+    "confirm": "Подтвердить",
+    "table": {
+      "columns": "Столбцы",
+      "permissionDenied": "У вас нет прав для просмотра этих данных.",
+      "retry": "Повторить",
+      "selectAll": "Выбрать все строки",
+      "selectRow": "Выбрать строку",
+      "rowActions": "Действия со строкой",
+      "searchPlaceholder": "Поиск…",
+      "clearSearch": "Очистить поиск",
+      "clearSelection": "Очистить выбор",
+      "selectedCount": "Выбрано: {{count}}"
+    },
+    "pagination": {
+      "range": "{{start}}–{{end}} из {{total}}",
+      "previous": "Назад",
+      "next": "Далее",
+      "pageOf": "Страница {{page}} из {{totalPages}}"
+    },
+    "filters": {
+      "remove": "Убрать фильтр «{{filter}}»",
+      "resetAll": "Сбросить все фильтры"
+    },
+    "bulkActions": {
+      "delete": "Удалить",
+      "deleteConfirmTitle": "Удалить клиентов ({{count}})?",
+      "deleteConfirmDescription": "Выбранные клиенты будут удалены без возможности восстановления.",
+      "deletePartialFailure": "Не удалось удалить {{failed}} из {{total}}."
+    }
   },
   "nav": {
     "logout": "Выйти",

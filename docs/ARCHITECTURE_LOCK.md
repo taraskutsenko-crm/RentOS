@@ -11,9 +11,18 @@ If a future task's instructions conflict with this document, the
 conflict must be surfaced to the requester before writing code, not
 silently resolved either way.
 
+> **Read [`PRODUCT_BIBLE.md`](PRODUCT_BIBLE.md) first.** It is the
+> highest-level product document in this repository — product vision,
+> philosophy, and the decision framework every feature is checked
+> against before this document's architectural rules are consulted
+> for how to build it correctly. This document remains the binding,
+> detailed architectural reference; `PRODUCT_BIBLE.md` does not
+> replace it.
+
 ## How to use this document
 
-1. Read this file in full before starting any task.
+1. Read [`PRODUCT_BIBLE.md`](PRODUCT_BIBLE.md) first, then this file
+   in full, before starting any task.
 2. Read the ADRs (`docs/adr/`) relevant to the module you're touching.
 3. Classify your change: does it fit an **extensible area** (Part 2)
    below, or does it touch a **locked principle** (Part 1)? If it's

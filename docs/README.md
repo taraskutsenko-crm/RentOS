@@ -1,5 +1,9 @@
 # Documentation
 
+- [`PRODUCT_BIBLE.md`](PRODUCT_BIBLE.md) — the highest-level product
+  document: product vision, philosophy, and the decision framework
+  every future feature is checked against. **Read this before every
+  other document below**, including `ARCHITECTURE_LOCK.md`.
 - [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md) — mandatory governance
   reference for every future task and AI session: locked architectural
   principles, extensible areas, changes that require a new ADR before

@@ -5,13 +5,16 @@ history, can resume work immediately by reading this file plus the
 linked docs — without needing to reconstruct context from git log or
 prior conversations.
 
-> **Read [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md) before starting
-> any task.** It is mandatory guidance for every future development
-> task and AI session in this repository: which architectural
-> principles are locked, which areas are extensible, which changes
-> require a new ADR before implementation, which shortcuts are
-> forbidden outright, and the verification contract every task must
-> satisfy before it's considered done.
+> **Read [`PRODUCT_BIBLE.md`](PRODUCT_BIBLE.md) first, then
+> [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md), before starting any
+> task.** `PRODUCT_BIBLE.md` is the highest-level product document —
+> vision, philosophy, and the decision framework every feature is
+> checked against. `ARCHITECTURE_LOCK.md` is mandatory guidance for
+> every future development task and AI session in this repository:
+> which architectural principles are locked, which areas are
+> extensible, which changes require a new ADR before implementation,
+> which shortcuts are forbidden outright, and the verification
+> contract every task must satisfy before it's considered done.
 
 ## Latest verified state
 

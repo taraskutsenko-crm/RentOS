@@ -141,6 +141,14 @@ export class PortalAuthService {
     };
   }
 
+  /** Backs GET /portal/auth/me — mirrors login/activateInvitation's `{ customer, tenant }` shape exactly. */
+  async getSession(
+    customer: PublicCustomer,
+  ): Promise<{ customer: PublicCustomer; tenant: Tenant }> {
+    const tenant = await this.prisma.tenant.findUniqueOrThrow({ where: { id: customer.tenantId } });
+    return { customer, tenant };
+  }
+
   async refresh(
     presentedToken: string,
     meta: RequestMeta,

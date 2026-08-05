@@ -91,6 +91,7 @@ describe("Customer Portal Auth E2E (TASK-0009)", () => {
       .expect(200);
     expect(meResponse.body.customer.id).toBe(customerId);
     expect(meResponse.body.customer.portalPasswordHash).toBeUndefined();
+    expect(meResponse.body.tenant.name).toBeTruthy();
 
     const loginResponse = await request(app.getHttpServer())
       .post("/portal/auth/login")

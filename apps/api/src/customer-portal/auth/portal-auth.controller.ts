@@ -121,8 +121,12 @@ export class PortalAuthController {
 
   @UseGuards(CustomerAuthGuard)
   @Get("me")
-  me(@CurrentCustomer() customer: PublicCustomer): { customer: PublicCustomer } {
-    return { customer };
+  async me(@CurrentCustomer() customer: PublicCustomer) {
+    const session = await this.portalAuthService.getSession(customer);
+    return {
+      customer: session.customer,
+      tenant: { id: session.tenant.id, name: session.tenant.name },
+    };
   }
 
   private setSessionCookies(res: Response, result: PortalSessionResult): void {

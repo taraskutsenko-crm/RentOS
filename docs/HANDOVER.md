@@ -16,42 +16,72 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `4b1ddda` (docs: document TASK-0010 Part
-  2 Chapter 2 authentication UX patterns), on top of `2990a80` (feat:
-  redesign staff and customer-portal authentication experience) and
-  `886f515` (feat: add reusable Havelio authentication UI primitives)
-  — TASK-0010 Part 2 Chapter 2. Sits on top of `ec06729`/`5157e2c`
-  (Chapter 1 — application shell redesign).
-- **Quality gates:** format/lint/typecheck/build green; 465 backend +
-  203 frontend tests passing (668 total, including 10 new tests:
-  password-visibility toggles on all three password-bearing forms,
-  `select-tenant-page.test.tsx`, and `portal-activate-form.test.tsx`),
-  plus all three governance checks and the 13 governance-safeguard
-  unit tests (`pnpm test:governance-checks`) green.
+- **Latest verified commit:** pending — TASK-0010 Part 2 Chapter 3
+  (Universal Data Views). Sits on top of `1ba4fc4` (Chapter 2 —
+  premium authentication experience) and `ec06729`/`5157e2c` (Chapter
+  1 — application shell redesign).
+- **What shipped:** one shared `DataTable<T>` system
+  (`apps/web/src/components/data-table/` — sorting, row selection,
+  bulk actions, column visibility, sticky header, loading/skeleton/
+  empty/error/permission-denied states, responsive mobile-card
+  fallback) plus two new `@rentos/ui` primitives (`Checkbox`,
+  `Select`) and `Dialog`'s `Header`/`Footer` subcomponents. Migrated
+  all 8 real paginated list pages (Customers, Assets, Rentals, Quotes,
+  Documents, Document Templates, Portal Rentals, Portal Documents) —
+  see `UI_COMPONENT_INVENTORY.md`'s `DataTable` system section for the
+  full file list and `UI_REDESIGN_PLAN.md` Chapter 3 for the design
+  rationale, including what was deliberately not migrated (three
+  settings tables, portal notifications/dashboard mini-table) and why.
+- **Quality gates:** format/lint/typecheck/build green across all 6
+  packages; 465 backend + 220 frontend tests passing (685 total,
+  including 8 new/updated test files: a new `data-table.test.tsx`
+  covering the shared component's loading/error/permission-denied/
+  sort-cycle/selection/row-actions behavior once, two new portal
+  list-page test files, and updates to the six existing staff list-page
+  test files to account for the debounced search and the dual
+  desktop-table/mobile-card render.
+- **Two real bugs found and fixed during this chapter's own
+  verification** (both are pre-existing-codebase or self-introduced
+  defects caught by actually reloading the app in a browser, not
+  Chapter 3 features):
+  - `DataTable`'s sticky header was first built page-relative
+    (`position: sticky` on the `<thead>`), which is not reliably
+    supported across browsers for `display: table-header-group` — it
+    silently painted over and hid the first data row. Fixed by
+    switching to a bounded `overflow-auto` scroll container with
+    `sticky top-0` scoped to that container.
+  - `GET /portal/auth/me` never returned `tenant`, only `{ customer }`
+    — a pre-existing bug from the earlier customer-portal task that
+    silently crashes the entire portal shell on any page reload, since
+    `login`/`activate-invitation` correctly return
+    `{ customer, tenant }` and seed the client cache, but the very next
+    background refetch of `usePortalMe()` hits the broken endpoint and
+    overwrites it. Fixed in `PortalAuthController`/`PortalAuthService`;
+    covered by a new assertion in `customer-portal-auth.e2e-spec.ts`.
 - **Docker/browser verification:** the `web` image was rebuilt from
-  scratch against the new auth code and redeployed into the running
-  Docker Compose stack; verified end-to-end via real browser sessions
-  against all five real account-entry pages (`/login`, `/register`,
-  `/app/select-tenant`, `/portal/login`, `/portal/invite/[token]`):
-  light mode, dark mode (both `AuthShell` tones — `primary` for staff,
-  `sidebar` for the portal), desktop/tablet/mobile viewports (confirmed
-  the register page's field rows now genuinely collapse to one column
-  below `sm`, fixing a real pre-existing bug), 200% zoom (scrolls
-  correctly, no clipping), password-visibility toggling, client-side
-  validation styling, a full real customer-invitation flow (created via
-  direct API calls against the running stack, then activated through
-  the browser) showing the genuine "Welcome to {tenant name}" success
-  state before redirecting, and the invalid-token error state. No
-  console errors or failed network requests on any of the five pages.
-  Non-English live-render confirmation hit the same Radix
-  dropdown-animation click-timing quirk in the browser-automation tool
-  documented for Chapter 1; relied instead on the i18n parity check
-  (all six locales, structurally verified), genuinely-authored
-  per-language translations for every new string, and Chapter 1's own
-  already-conclusive proof that this codebase's `i18n.changeLanguage`
-  mechanism works end-to-end once triggered.
-- **GitHub Actions:** green — [run 30941028398](https://github.com/taraskutsenko-crm/RentOS/actions/runs/30941028398)
-  on `4b1ddda`.
+  scratch (twice — once for the DataTable system, once more after the
+  toolbar-bar and portal-auth fixes) and redeployed into the running
+  Docker Compose stack. Verified all 8 migrated pages end-to-end with
+  real data through a real customer/rental/asset created via the UI:
+  desktop (1024px, 1440px)/tablet (768px)/mobile (375px) viewports,
+  light mode and dark mode, keyboard tab-order reachability and
+  visible focus (confirmed disabled pagination buttons are correctly
+  excluded from tab order), sorting (column-header click cycling
+  through the network request params), search debounce, status
+  filtering, row selection → contextual bulk-actions bar → real
+  bulk-delete via `ConfirmDialog` (not `window.confirm`) → confirmed
+  against the actual customers list afterward, row-level overflow-menu
+  actions, and empty/loading/error states. No console errors on any
+  page. The account-menu language switcher hit the same Radix
+  dropdown click-timing quirk in the browser-automation tool
+  documented for Chapters 1 and 2; relied on the automated
+  `check-i18n-parity.mjs` script (100% key-structure parity across all
+  6 locales) plus genuinely-authored per-language translations for
+  every new `common.table.*`/`common.pagination.*`/`common.filters.*`/
+  `common.bulkActions.*` key as the verification evidence, per the same
+  precedent.
+- **GitHub Actions:** pending — will be updated once pushed and
+  confirmed green.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

@@ -213,6 +213,95 @@ scaffolding exists anywhere. Same reasoning as finding #13 — a real
 backend capability gap, not built in Chapter 2, and not silently
 faked as frontend-only behavior.
 
+## Addendum — Data views (TASK-0010 Part 2 Chapter 3)
+
+Scope extended for Chapter 3: every list/table page in
+`apps/web/src/app/app/**` and `apps/web/src/app/portal/(shell)/**`.
+Findings below are evidence-based (a full read of the five biggest
+list pages plus a repo-wide grep for table-adjacent components),
+not assumed.
+
+### 15. Seven list pages are ~95% copy-pasted boilerplate
+
+`rentals/page.tsx`, `quotes/page.tsx`, `documents/page.tsx`,
+`documents/templates/page.tsx`, `customers/page.tsx`,
+`portal/(shell)/rentals/page.tsx`, and `portal/(shell)/documents/page.tsx`
+each independently hand-roll the identical shape: a local
+`useState(1)` page counter, a local search/status `useState` pair, a
+native `&lt;table&gt;` inside `Card`/`CardContent`, three fake skeleton
+`&lt;div&gt;`s for loading, a `&lt;p&gt;` for the empty state, and a
+hand-rolled Previous/Next pagination footer. No shared `Table`,
+`Pagination`, `SearchInput`, or `FilterBar` component exists anywhere
+in `packages/ui` or `apps/web/src/components` — confirmed by a direct
+search of both directories. `assets/page.tsx` (229 lines) is the one
+outlier with a more advanced pattern (see finding #17).
+
+### 16. No sorting UI exists anywhere except one non-standard case
+
+`rentals`' list hook (`use-rentals.ts`) already accepts and forwards
+`sortBy`/`sortDirection` params to the API, but `rentals/page.tsx`
+never sets them — the capability is wired end-to-end at the data
+layer and simply unused by the UI. `assets/page.tsx` is the only page
+with any sort control at all, and it's a combined
+`sortBy:sortDirection` `&lt;select&gt;` (e.g. "Name A→Z"), not
+click-to-sort column headers. No page anywhere has the
+click-a-column-header-to-sort pattern `UI_RESEARCH.md`'s new finding
+#14 identifies as the clearer standard.
+
+### 17. No row selection, no bulk actions, anywhere
+
+Zero checkboxes, zero "select all," zero bulk-action toolbar exist in
+any list page today (`app/**` or `portal/**`) — this is a genuinely
+new capability for Chapter 3 to add, not a migration of existing
+behavior. Consequently, no bulk-delete/bulk-status-change/bulk-export
+API usage pattern exists to preserve either; Chapter 3's bulk actions
+must be built as client-side orchestration over each entity's
+existing single-record endpoint (e.g. N sequential `DELETE` calls for
+N selected rows), never a new bulk endpoint — `ARCHITECTURE_LOCK.md`
+forbids new backend surface area for a presentation-layer chapter.
+
+### 18. Row actions are inline buttons, never an overflow menu
+
+Every list page renders 1-2 inline `Button`/link elements in the last
+table column (customers is the only page with two: Edit + Delete).
+`DropdownMenu` (built in Chapter 1) is never used for row actions
+anywhere — confirmed by grep. This is the direct gap
+`UI_RESEARCH.md` finding #12 addresses.
+
+### 19. Only Assets has any responsive/mobile table treatment
+
+`assets/page.tsx` is the sole list page with a real mobile layout: a
+desktop-only `&lt;table className="hidden ... sm:table"&gt;` paired with a
+separate `sm:hidden` stacked-card list. Every other list page
+(rentals, quotes, documents, templates, customers, portal rentals,
+portal documents, and all three settings tables) renders one
+unguarded `&lt;table&gt;` with no responsive breakpoint and no
+`overflow-x-auto` wrapper — it will visibly overflow on a narrow
+viewport today.
+
+### 20. `window.confirm`/`window.alert` remain the only confirmation mechanism
+
+10 call sites across 9 files (customers, rentals, quotes, documents,
+assets, and all three asset-settings pages) still use
+`window.confirm(...)` for destructive actions and `window.alert(...)`
+for failure feedback, even though a real `Dialog` component has
+existed in `@rentos/ui` since Chapter 1 — this was already noted as a
+stopgap in `HANDOVER.md`'s "Important frontend conventions" and
+remains unaddressed until Chapter 3.
+
+### 21. No shared pagination/table i18n namespace — a misplaced "shared" key in active use today
+
+There is no `common.pagination.*` or `common.table.*` key namespace.
+Instead, every non-customer list page calls `t("customer.previous")`/
+`t("customer.next")` for its own Previous/Next buttons — a
+`customer`-namespaced key pressed into service as a de facto shared
+one, confirmed by direct inspection of `en/common.json` and every
+list page's JSX. Search placeholder, status-filter option labels, and
+empty-state copy are each independently duplicated per module
+(`rental.searchPlaceholder`, `quote.searchPlaceholder`,
+`document.searchPlaceholder`, …) rather than sharing one parameterized
+key.
+
 ## Summary table
 
 | Area                      | Current state                                     | Target (see `UI_REDESIGN_PLAN.md`)                     |

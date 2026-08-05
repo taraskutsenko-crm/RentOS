@@ -130,7 +130,7 @@ built feature yet.
 
 ### TASK-0010 — Complete UI/UX Redesign
 
-**Status: IN PROGRESS** (Part 2 Chapter 2 of 6 complete — see
+**Status: IN PROGRESS** (Part 2 Chapter 3 of 6 complete — see
 [`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md))
 
 > The brand and design-token foundation this task builds on is already
@@ -182,6 +182,29 @@ recovery on either auth stack — do not exist anywhere in the codebase
 see `UI_AUDIT.md` findings #13–14 for what a future task adding either
 backend capability would need. See `UI_REDESIGN_PLAN.md` Chapter 2 for
 the full design rationale.
+
+**Chapter 3 — Universal Data Views: COMPLETE.** One shared
+`DataTable<T>` system (`apps/web/src/components/data-table/` —
+sorting, row selection, contextual bulk-actions bar, column
+visibility, sticky header, loading/skeleton/empty/error/
+permission-denied states, responsive mobile-card fallback) replaced 8
+independently hand-written list pages (Customers, Assets, Rentals,
+Quotes, Documents, Document Templates, Portal Rentals, Portal
+Documents) — see D-044 in `DECISIONS.md`. Real bulk-delete wired
+end-to-end on Customers as the reference implementation; bulk
+archive/export/status-change remain unbuilt for every entity since no
+bulk endpoint exists on the backend and adding one was out of this
+chapter's presentation-only scope. New `@rentos/ui` primitives:
+`Checkbox`, `Select`, `Dialog`'s `Header`/`Footer`. Two real bugs
+found and fixed during this chapter's own Docker/browser verification
+— `DataTable`'s sticky header (a cross-browser `position: sticky` on
+`<thead>` reliability issue) and `GET /portal/auth/me` (a pre-existing
+customer-portal bug that crashed the whole portal shell on page
+reload, unrelated to this chapter's own diff) — see D-045 in
+`DECISIONS.md`. Three settings tables and two non-paginated portal
+surfaces were deliberately not migrated; see `UI_REDESIGN_PLAN.md`
+Chapter 3 for the full design rationale and documented scope
+boundaries.
 
 - Premium modern staff interface, built on the existing `@rentos/ui`
   (shadcn/ui-based) component set and Tailwind conventions — not a new

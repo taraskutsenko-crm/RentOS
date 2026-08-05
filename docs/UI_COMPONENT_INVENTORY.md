@@ -1,30 +1,102 @@
 # UI Component Inventory
 
-A catalog of every existing UI building block as of commit `594a6e0`,
-before TASK-0010 Part 2's shell redesign. Read directly from source —
-see [`UI_AUDIT.md`](UI_AUDIT.md) for the findings this inventory feeds
+A catalog of every existing UI building block. Originally written as
+of commit `594a6e0`, before TASK-0010 Part 2's shell redesign; the
+primitives table below is kept current through each chapter (Chapter
+1 added `Skeleton`/`DropdownMenu`/`Dialog`; Chapter 2 added `Alert`'s
+`success`/`warning`/`info` variants; Chapter 3 added `Checkbox`,
+`Select`, `DialogHeader`/`DialogFooter`, and the entire
+`apps/web/src/components/data-table/` system) rather than left as a
+stale snapshot. Read directly from source — see
+[`UI_AUDIT.md`](UI_AUDIT.md) for the findings this inventory feeds
 into and [`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md) for what gets
 built on top of it.
 
-## Shared primitives (`packages/ui/src/components/`)
+## Shared primitives (`packages/ui/src/components/`) — current as of Chapter 3
 
-| Component                                                                              | File         | Notes                                                                                                                                                    |
-| -------------------------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Button`                                                                               | `button.tsx` | `cva`-based variants (`default`/`destructive`/`outline`/`secondary`/`ghost`/`link`) × sizes (`default`/`sm`/`lg`/`icon`). Token-correct after `594a6e0`. |
-| `Input`                                                                                | `input.tsx`  | Native `<input>` wrapper, `aria-invalid` styling, disabled state.                                                                                        |
-| `Label`                                                                                | `label.tsx`  | Native `<label>` wrapper.                                                                                                                                |
-| `Card` / `CardHeader` / `CardTitle` / `CardDescription` / `CardContent` / `CardFooter` | `card.tsx`   | Plain composable div wrappers.                                                                                                                           |
-| `Alert` / `AlertDescription`                                                           | `alert.tsx`  | `default`/`destructive` variants only — no `success`/`warning`/`info` variant exists yet despite those tokens existing in `theme.css` since `594a6e0`.   |
+| Component                                                                                           | File                | Notes                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Button`                                                                                            | `button.tsx`        | `cva`-based variants (`default`/`destructive`/`outline`/`secondary`/`ghost`/`link`) x sizes (`default`/`sm`/`lg`/`icon`).                                                                                                                                                                                                      |
+| `Input`                                                                                             | `input.tsx`         | Native `<input>` wrapper, `aria-invalid` styling, disabled state.                                                                                                                                                                                                                                                              |
+| `Label`                                                                                             | `label.tsx`         | Native `<label>` wrapper.                                                                                                                                                                                                                                                                                                      |
+| `Card`/`CardHeader`/`CardTitle`/`CardDescription`/`CardContent`/`CardFooter`                        | `card.tsx`          | Plain composable div wrappers.                                                                                                                                                                                                                                                                                                 |
+| `Alert`/`AlertDescription`                                                                          | `alert.tsx`         | `default`/`destructive`/`success`/`warning`/`info` variants (Chapter 2 added the last three).                                                                                                                                                                                                                                  |
+| `Skeleton`                                                                                          | `skeleton.tsx`      | Added Chapter 1. **Now used by `DataTable`'s loading state** (Chapter 3) — real per-column-width skeleton rows, replacing every list page's hand-rolled `bg-muted` div.                                                                                                                                                        |
+| `DropdownMenu` (+ `Trigger`/`Content`/`Item`/`Label`/`Separator`/`Group`)                           | `dropdown-menu.tsx` | Added Chapter 1. **Now used for row-level table actions** (Chapter 3's `RowActionsMenu` + `DataTable`'s column-visibility menu) — see `UI_AUDIT.md` finding #18.                                                                                                                                                               |
+| `Dialog` (+ `Trigger`/`Portal`/`Close`/`Overlay`/`Content`/`Header`/`Footer`/`Title`/`Description`) | `dialog.tsx`        | Added Chapter 1; `Header`/`Footer` + default `p-6` padding added Chapter 3 for `ConfirmDialog`, its first "standard content dialog" consumer (`command-palette.tsx` stays a bespoke `p-0` layout). **Now used for destructive-action confirmation** — see `UI_AUDIT.md` finding #20 and the "Bugs found and fixed" note below. |
+| `Checkbox`                                                                                          | `checkbox.tsx`      | Added Chapter 3. Radix-based, indeterminate-state support, for row selection.                                                                                                                                                                                                                                                  |
+| `Select`                                                                                            | `select.tsx`        | Added Chapter 3. Styled native `<select>` wrapper — kept native (not a Radix combobox) since no filter needs custom option rendering.                                                                                                                                                                                          |
 
-**Not yet built in `@rentos/ui`**, despite being specified in
-`UI_PATTERNS.md`: `Table`, `Dialog`, `DropdownMenu`, `Tabs`,
-`DatePicker`, `Skeleton`, `Toast`, `Tooltip`, `Sidebar`,
-`Breadcrumbs`, `PageHeader`, `CommandPalette`. This chapter builds the
-subset the Application Shell needs (`Sidebar`, `Breadcrumbs`,
-`PageHeader`, a minimal `DropdownMenu`, `CommandPalette`) as real,
-shared `@rentos/ui` components — not page-local one-offs — per
-`ARCHITECTURE_LOCK.md`'s "no duplicated logic" and this document's own
-"never create one-off UI" instruction.
+**Still not built in `@rentos/ui`**, despite being specified in
+`UI_PATTERNS.md`: `Tabs`, `DatePicker`, `Toast`, `Tooltip`. `Table`
+was deliberately built at the `apps/web` app layer instead
+(`components/data-table/`, see below) rather than as a generic
+`packages/ui` primitive, since every real consumer needed
+tenant/permission-aware business logic (row hrefs, permission-gated
+actions) that doesn't belong in a presentation-only shared package.
+
+## The `DataTable` system (`apps/web/src/components/data-table/`) — added Chapter 3
+
+The one shared table for every data-heavy staff and portal screen —
+see `UI_REDESIGN_PLAN.md` Chapter 3 for the full design rationale.
+
+| File                        | Purpose                                                                                                                                                                                                                                                                       |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-table.tsx`            | The generic `DataTable<T>`: sorting (3-state column-header cycle), row selection, sticky header inside a bounded scroll region, column visibility, loading/skeleton/empty/error/permission-denied states, `rowHref`/`rowActions`, responsive mobile-card fallback below `sm`. |
+| `data-table-pagination.tsx` | Shared Previous/Next + range footer, using `common.pagination.*` i18n keys.                                                                                                                                                                                                   |
+| `search-input.tsx`          | Debounced (via `useDataTableState`) search box with a clear button.                                                                                                                                                                                                           |
+| `filter-bar.tsx`            | Layout wrapper for a page's search + filter controls, plus active-filter badges and a reset-all action.                                                                                                                                                                       |
+| `bulk-actions-bar.tsx`      | Contextual toolbar shown once at least one row is selected; every action is client-side orchestration over an existing single-record endpoint — no bulk endpoint exists on the backend for any entity.                                                                        |
+| `row-actions-menu.tsx`      | Declarative `RowAction[]` list rendered as consistent `DropdownMenuItem`s (regular then destructive, separated), for `DataTable`'s row-actions overflow menu.                                                                                                                 |
+| `confirm-dialog.tsx`        | `Dialog`-based replacement for `window.confirm`, with a real loading state during the async action.                                                                                                                                                                           |
+| `use-data-table-state.ts`   | Consolidated page/search(debounced)/sort/selection state hook, shared by every migrated page.                                                                                                                                                                                 |
+| `types.ts`                  | `DataTableColumn<T>`, `SortState` shared types.                                                                                                                                                                                                                               |
+
+Migrated to this system: Customers, Assets (also its first-ever
+`PageHeader` adoption), Rentals, Quotes, Documents, Document
+Templates, and the Customer Portal's Rentals and Documents lists — 8
+pages total. Real bulk-delete is wired end-to-end on Customers as the
+reference implementation. Not migrated (documented gaps, not an
+oversight): the three settings tables (`asset-categories` is a tree,
+not a flat list; `asset-statuses`/`asset-fields` are small unpaginated
+config tables where a full `DataTable` is disproportionate), and the
+portal notifications list / dashboard mini-table (neither is a genuine
+paginated data view) — see `UI_REDESIGN_PLAN.md` Chapter 3, "What
+Chapter 3 does not build."
+
+### Bugs found and fixed during Chapter 3
+
+- **`DataTable`'s sticky header** was first built page-relative
+  (`position: sticky` on the `<thead>`), which browsers do not
+  reliably support for `display: table-header-group` — it caused the
+  header to paint over the first data row, hiding it. Fixed by
+  switching to a bounded `overflow-auto` scroll container with
+  `sticky top-0` scoped to that container. See `UI_REDESIGN_PLAN.md`
+  Chapter 3, design decision 8, for the full investigation.
+- **`GET /portal/auth/me`** never returned `tenant`, only
+  `{ customer }`, silently breaking the entire customer portal on any
+  page reload (a pre-existing bug from the customer-portal task,
+  unrelated to Chapter 3's own diff, but blocking this chapter's own
+  manual verification of the two migrated portal pages). Fixed in
+  `PortalAuthController`/`PortalAuthService`; see
+  `UI_REDESIGN_PLAN.md` Chapter 3 for the full root-cause writeup.
+
+## List-page duplication — resolved in Chapter 3
+
+Seven list pages (`rentals`, `quotes`, `documents`,
+`documents/templates`, `customers`, `portal/(shell)/rentals`,
+`portal/(shell)/documents`) used to independently hand-write the same
+pattern: a local `useState(1)` page counter, a local search/status
+`useState` pair, a native `<table>` inside `Card`/`CardContent`, three
+fake skeleton `<div>`s, a `<p>` empty state, and a hand-rolled
+Previous/Next footer reusing the `customer.previous`/`customer.next`
+i18n keys regardless of the page's actual entity (`UI_AUDIT.md`
+finding #21). All eight list pages (the seven above plus `assets`,
+which already had the most advanced pre-Chapter-3 pattern: a combined
+sort `<select>`, 3 filters, and the only responsive mobile-card
+fallback) now share the `DataTable` system described above. Three
+settings tables remain intentionally un-migrated — see "Not migrated"
+above.
 
 ## Per-page patterns (not yet shared components)
 

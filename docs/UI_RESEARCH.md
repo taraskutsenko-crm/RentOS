@@ -129,3 +129,60 @@ See [`UI_REDESIGN_PLAN.md`](UI_REDESIGN_PLAN.md) for the concrete
 Chapter 1 scope this research feeds into, and
 [`UI_AUDIT.md`](UI_AUDIT.md) for exactly what in today's Havelio shell
 falls short of the principles above.
+
+## Data-table and filtering patterns — Chapter 3 addendum
+
+New findings specific to data-heavy screens (tables, filters, bulk
+actions), gathered for TASK-0010 Part 2 Chapter 3 (Universal Data
+Views). Same discipline as above: principles observed across
+Linear/Stripe/Vercel/Figma/GitHub/Notion's generally known, publicly
+documented conventions — not a pixel-level teardown, and never copied
+verbatim into Havelio's own visual language.
+
+11. **A bulk-action toolbar appears contextually, replacing the normal
+    toolbar, only once at least one row is selected** — it is never
+    permanently visible with disabled buttons (per
+    `UX_PRINCIPLES.md` rule 17's "enforced by omission" principle
+    applied to selection state, not just permissions). Selecting zero
+    rows shows the normal search/filter toolbar; selecting one or more
+    swaps it for a count + actions.
+12. **Row actions live in one overflow menu, not a row of icon
+    buttons** — Linear, GitHub, and Notion all converge on a single
+    "⋯" trigger per row (keyboard- and touch-friendly, and it scales
+    to more actions without widening every row) rather than 3-4
+    separate icon buttons competing for a narrow column. Havelio
+    already has the primitive for this (`DropdownMenu`, built in
+    Chapter 1) — Chapter 3 is its first use for row actions.
+13. **Active filters render as removable badges/chips near the
+    toolbar**, not just inside a filter panel — so a user scanning the
+    page can see at a glance that the list is currently narrowed,
+    matching `UX_PRINCIPLES.md` rule 11 ("filtering is always
+    additive and always visibly reversible") and `UI_PATTERNS.md`'s
+    existing Filters pattern, which already specified this but had no
+    implementation to point to before Chapter 3.
+14. **Column-header sort is a toggle among three states** (unsorted →
+    ascending → descending → unsorted), indicated by a small arrow
+    glyph next to the header label, never a separate sort control
+    disconnected from the column itself — the pattern GitHub/Linear
+    both use, and a clearer signal than Havelio's current one-off
+    "sort by" `&lt;select&gt;` (used only on the Assets list today).
+15. **A table's loading skeleton mirrors the real column count and
+    approximate row height exactly**, including placeholder blocks
+    sized per column type (a short block for a status badge column, a
+    long block for a name column) — already Havelio's stated principle
+    (`UI_PATTERNS.md`'s Skeletons pattern), this addendum only adds
+    that the placeholder widths should vary per column, not be
+    uniform, which reads as more deliberate and less like a generic
+    loading spinner in table form.
+16. **Sticky table headers are a scroll-container property, not a
+    page property** — the header stays pinned while only the table's
+    own row area scrolls, never the whole page; this requires the
+    table to own a bounded, internally-scrolling region rather than
+    growing to the page's natural height, a structural decision this
+    chapter's `DataTable` component makes once, centrally.
+
+## How this informs Chapter 3
+
+See `UI_REDESIGN_PLAN.md` Chapter 3 for the concrete scope this
+research feeds into, and `UI_AUDIT.md`'s addendum for exactly what in
+today's list pages falls short of the principles above.

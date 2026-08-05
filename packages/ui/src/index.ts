@@ -1,5 +1,6 @@
 export { Alert, AlertDescription } from "./components/alert";
 export { Button, buttonVariants, type ButtonProps } from "./components/button";
+export { Checkbox } from "./components/checkbox";
 export {
   Card,
   CardContent,
@@ -15,6 +16,8 @@ export {
   DialogClose,
   DialogOverlay,
   DialogContent,
+  DialogHeader,
+  DialogFooter,
   DialogTitle,
   DialogDescription,
 } from "./components/dialog";
@@ -29,5 +32,6 @@ export {
 } from "./components/dropdown-menu";
 export { Input } from "./components/input";
 export { Label } from "./components/label";
+export { Select } from "./components/select";
 export { Skeleton } from "./components/skeleton";
 export { cn } from "./lib/utils";

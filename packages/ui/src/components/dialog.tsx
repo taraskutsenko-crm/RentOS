@@ -35,7 +35,7 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         className={cn(
-          "bg-card shadow-modal havelio-pop fixed top-1/2 left-1/2 z-modal w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg",
+          "bg-card shadow-modal havelio-pop fixed top-1/2 left-1/2 z-modal flex w-full max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col gap-4 rounded-lg p-6",
           className,
         )}
         {...props}
@@ -51,6 +51,19 @@ function DialogContent({
   );
 }
 
+function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return <div className={cn("flex flex-col gap-1.5", className)} {...props} />;
+}
+
+function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
+      {...props}
+    />
+  );
+}
+
 export {
   Dialog,
   DialogTrigger,
@@ -58,6 +71,8 @@ export {
   DialogClose,
   DialogOverlay,
   DialogContent,
+  DialogHeader,
+  DialogFooter,
   DialogTitle,
   DialogDescription,
 };

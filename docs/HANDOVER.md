@@ -19,7 +19,7 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** pending (docs: document TASK-0010 Part 2
+- **Latest verified commit:** `6443da4` (docs: document TASK-0010 Part 2
   Chapter 6) — TASK-0010 Part 2 Chapter 6 (Smart Timeline & Entity
   Summary). Sits on top of `952bddf` (PRODUCT_BIBLE.md expanded into
   the platform constitution), `00a410a` (Chapter 5 — Productivity
@@ -79,8 +79,20 @@ prior conversations.
   light mode and mobile (375px) both verified correctly on the
   Customer detail page; Russian localization spot-checked in context
   (Хронология/Сегодня/Клиент создан — genuinely translated).
-- **GitHub Actions:** pending — see the follow-up "docs: record
-  verified commit hash" commit for the confirmed run link.
+- **GitHub Actions:** unresolved, platform-level scheduling issue —
+  as of this chapter's push, none of the 6 Chapter 6 commits
+  (`c449029`…`6443da4`) had a run scheduled at all (checked
+  repeatedly over several minutes; `queued`/`in_progress` both `0`).
+  The two most recent runs that did eventually fire, for the prior
+  Task A/B commits `952bddf` and `5e425f0`, both came back
+  `cancelled`/`failure` at the job level with no logged test output —
+  consistent with a runner-availability or scheduling problem on this
+  repository, not a real code failure: locally,
+  `pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build`
+  are all green (483 backend + 288 frontend tests passing). This is
+  reported honestly rather than assumed-fixed; it needs the repository
+  owner's attention (GitHub Actions runner/billing/concurrency
+  settings), not another retry from here.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

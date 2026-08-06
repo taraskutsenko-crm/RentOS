@@ -218,6 +218,46 @@ source, `usePortalDashboard()`, is unchanged).
   existing endpoints with zero UI consumers before this chapter) is a
   separable follow-up task.
 
+## The productivity layer — added Chapter 5
+
+One reusable layer on top of the existing `CommandItem`/
+`QuickActionDefinition` seams from Chapter 1, rather than a second,
+competing system — see `UI_REDESIGN_PLAN.md` Chapter 5 for the full
+design rationale behind every decision below.
+
+| File                                                                      | Purpose                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/keyboard-shortcuts.ts`                                               | `KeyboardShortcut` type, `isEditableTarget()` (suppresses shortcuts while any text field/contenteditable has focus), `matchShortcut()` — pure, chord-aware (`G` then `C/R/A/D/Q`), fully unit-tested.                                                |
+| `hooks/use-keyboard-shortcuts.ts`                                         | `useKeyboardShortcuts(shortcuts)` — one global `keydown` listener, chord state via `useRef` with a 1s timeout.                                                                                                                                       |
+| `hooks/use-app-shortcuts.ts`                                              | Builds the app's real 9-shortcut set (`Cmd/Ctrl+K`, `/`, `N`, `Shift+?`, `G C/R/A/D/Q`) — the one place shortcuts are registered; adding a new one never touches the dialogs/pages that consume them.                                                |
+| `lib/search-providers.ts`                                                 | `SearchProvider` interface (pluggable, permission-aware) + `SEARCH_PROVIDERS`, five real, working providers (Customers, Assets, Rentals, Quotes, Documents), each calling the exact endpoint its own list page already uses.                         |
+| `lib/recent-items.ts` / `hooks/use-recent-items.ts`                       | `localStorage`-backed, namespaced per user+tenant (`useSyncExternalStore`, matching `use-dark-mode.ts`'s established pattern). Tracks both `"page"` and `"entity"` views, capped and deduplicated.                                                   |
+| `lib/pinned-items.ts` / `hooks/use-pinned-items.ts`                       | One generic store serving both "Favorites" and "Pinned Items" from the spec — deliberately not two parallel implementations (see design decision 6).                                                                                                 |
+| `components/shell/pin-button.tsx`                                         | `PinButton` — generic, entity-type-agnostic; instantiated on the 5 entity detail pages (Customers, Assets, Rentals, Quotes, Documents).                                                                                                              |
+| `components/shell/command-palette.tsx`                                    | Rebuilt — never opens empty (Recent → Pinned → Quick Actions → Commands → Navigation when idle; Quick Actions → Pinned → Commands → Navigation → live Search results while typing), debounced multi-provider search, permission-filtered throughout. |
+| `components/shell/shortcuts-help-dialog.tsx`                              | `Shift+?` surface — groups every registered shortcut by `groupKey`, platform-aware key rendering (`⌘` vs `Ctrl`).                                                                                                                                    |
+| `hooks/use-dismissible-hint.ts` / `components/shell/dismissible-hint.tsx` | Generic, reusable "dismissed once, remembered forever, never blocking" primitive — not a coaching/onboarding engine (`PRODUCT_BIBLE.md` §5 names that as a separate, larger, un-built gap).                                                          |
+| `components/shell/command-palette-hint.tsx`                               | The one real hint instance built on the primitive above: the `Cmd/Ctrl+K` tip in the sidebar.                                                                                                                                                        |
+| `lib/platform.ts`                                                         | `isMacPlatform()` / `formatShortcutKeys()` — also fixed a real pre-existing bug where the sidebar's `⌘K` badge was hardcoded regardless of platform.                                                                                                 |
+| `lib/command-types.ts`                                                    | Rewritten `CommandItem` (kinds: `navigate`/`action`/`recent`/`pinned`/`search-result`) — every kind already carries a plain `href` or `run()` closure a future AI agent could call without DOM interaction (design decision 9; no AI code written).  |
+
+`lib/quick-actions.ts` (Chapter 4) gained a 6th entry (Create
+Category) and is otherwise unchanged — still the single source of
+truth shared by `QuickCreate`, the dashboard's `QuickActions` widget,
+and the palette's Quick Actions section.
+
+### What Chapter 5 does not build (documented gaps, not fabricated)
+
+- **Search providers for Users or Invoices** — no such pages/modules
+  exist in the product yet (`VISION.md`'s "Planned, later phase"); a
+  future provider implements the exact same `SearchProvider`
+  interface, no palette changes required.
+- **A real AI agent** — only the extension points named above (design
+  decision 9).
+- **A general onboarding/coaching engine** — `DismissibleHint` is one
+  reusable primitive with one real instance, not a tour/tooltip
+  system; `PRODUCT_BIBLE.md` §5 already names that as a separate gap.
+
 ## Icons
 
 `lucide-react` is an existing `@rentos/ui` dependency, zero current

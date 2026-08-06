@@ -252,3 +252,74 @@ research feeds into, and `UI_AUDIT.md`'s addendum for exactly what in
 today's two dashboard pages (`apps/web/src/app/app/page.tsx` and
 `apps/web/src/app/portal/(shell)/dashboard/page.tsx`) falls short of
 the principles above.
+
+## Productivity-layer patterns — Chapter 5 addendum
+
+New findings for TASK-0010 Part 2 Chapter 5 (Productivity Layer),
+gathered against `docs/PRODUCT_BIBLE.md` §5–7 (Productivity
+Philosophy, Power User Experience, AI Readiness) — the first chapter
+whose research is checked against `PRODUCT_BIBLE.md` before the
+brand/pattern/UX documents, per that document's own reading order.
+
+22. **A command palette's data model is a small, closed set of typed
+    "kinds" composed together at render time** — Linear/GitHub/Notion/
+    Vercel all converge on the same shape: recent items, pinned/
+    favorite items, quick actions, and search results are different
+    _sources_ feeding one _list_ component, not four different UI
+    surfaces. Havelio's own `CommandItem`/`CommandKind` type
+    (`apps/web/src/lib/command-types.ts`, added Chapter 1) already
+    anticipates this — `"navigate" | "action" | "search-result" |
+"recent-page"` — confirming the existing architecture is the
+    correct seam to extend, not replace.
+23. **Search providers are pluggable, not hardcoded per entity** — a
+    palette that special-cases "if query looks like a customer, call
+    the customers endpoint" doesn't scale past 2-3 entity types and
+    can't be extended by a future module (or a future AI agent, see
+    finding #25) without editing the palette itself. Every reference
+    product instead registers a provider object per searchable
+    category (label, icon, permission, a `search(query)` function)
+    and the palette iterates the registry — the same "registry over
+    hardcoding" shape Havelio already uses for `nav-registry.ts` and
+    `lib/quick-actions.ts`.
+24. **Keyboard shortcuts are declared, not scattered `keydown`
+    listeners** — a single global listener dispatches to a registry of
+    `{ keys, handler }` entries, so adding a shortcut never means
+    editing the listener itself. Multi-key "chord" shortcuts (`G` then
+    a second key, the "go to" pattern GitHub/Linear/Superhuman all use)
+    require the registry to track a short-lived "awaiting second key"
+    state, and — critically, confirmed by inspecting Havelio's one
+    existing shortcut — every letter-key shortcut must be suppressed
+    while focus is inside an `<input>`/`<textarea>`/
+    `[contenteditable]`, or every text field in the product breaks the
+    moment a second shortcut is added. Havelio's existing Cmd/Ctrl+K
+    listener (`apps/web/src/app/app/layout.tsx`) has no such guard
+    today — harmless only because `k` combined with a modifier key is
+    never typed as plain text, which stops being true the moment a
+    bare-letter shortcut (`N`, `G`, `/`) is added.
+25. **AI-agent readiness means the same imperative surface a human
+    interaction already calls, not a parallel "AI mode."** Every
+    reference product's own copilot/AI-assist features (Notion AI,
+    Linear's agents, GitHub Copilot Workspace) call the identical
+    command/action/search objects the human command palette already
+    exposes — this is the concrete shape behind `PRODUCT_BIBLE.md` §7's
+    "without rewriting UI architecture" requirement, not a separate
+    research finding: a well-typed `CommandItem`/`SearchProvider`/
+    `QuickActionDefinition` registry _is_ the AI extension point,
+    provided nothing about it assumes a human is the only caller (no
+    DOM-only side effects, no assumption that "the active element" is
+    meaningful).
+26. **Discoverability hints are dismissed once, remembered forever, and
+    never block interaction** — every reference product's onboarding
+    coach-mark pattern is a small, non-modal callout anchored to the
+    real control it's teaching (never a full-screen takeover), with a
+    persisted per-user dismissal so it never reappears once seen. This
+    is the concrete shape `PRODUCT_BIBLE.md` §5's "teach through usage,
+    never a blocking tutorial" principle already commits to — Chapter 5
+    is the first chapter to build any part of it.
+
+## How this informs Chapter 5
+
+See `UI_REDESIGN_PLAN.md` Chapter 5 for the concrete scope this
+research feeds into, and `UI_AUDIT.md`'s addendum for exactly what
+gaps exist in today's Command Palette, Quick Create, and keyboard
+handling.

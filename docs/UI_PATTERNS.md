@@ -451,6 +451,103 @@ full-width-friendly.
 
 ---
 
+## Command Palette
+
+**Purpose:** one unified surface for global search, navigation, quick
+actions, and commands — reachable from anywhere in the product without
+using the mouse. See docs/UI_REDESIGN_PLAN.md Chapter 5 for the full
+design rationale and docs/PRODUCT_BIBLE.md §6 (Power User Experience).
+
+**When to use:** the single global instance mounted once in
+`AppLayout` — never a second, page-scoped palette instance.
+
+**When NOT to use:** a list page's own scoped search box (see Search
+above) — the palette is for jumping anywhere, not filtering the
+current table.
+
+**Visual behavior:** a centered modal dialog, `Search` icon plus input
+plus `Esc` badge in the header, results grouped under uppercase section
+labels (Recent, Pinned, Quick actions, Commands, Pages, and one group
+per search provider), each row showing an optional leading icon, a
+label, and an optional muted description.
+
+**Keyboard behavior:** opens via `Cmd/Ctrl+K` or `/` (see Keyboard
+shortcuts below); `↑`/`↓` moves the active row; `Enter` executes the
+active row; `Esc` closes (Radix `Dialog`'s built-in behavior). An empty
+query never renders an empty list — it composes Recent + Pinned + Quick
+Actions + Commands + Navigation, each permission-filtered.
+
+**Loading state:** a small spinner replaces nothing in the header
+input (the input stays interactive) while a debounced (300ms) search
+provider query is in flight — matching Search's own inline-spinner
+convention above.
+
+**Empty state:** only reachable with a non-empty query that matches
+nothing anywhere (no page, quick action, pinned item, or provider
+result) — shown as "No matches found," never a blank list.
+
+**Error state:** a provider whose request fails is silently excluded
+from that query's results (caught per-provider) rather than breaking
+the whole palette — one slow or failing entity search never blocks
+Navigation/Quick Actions/Commands from still working.
+
+**Disabled state:** N/A — the palette itself has no disabled state;
+individual rows are simply omitted when the current user lacks the
+underlying permission (per docs/UX_PRINCIPLES.md rule 17).
+
+**Mobile behavior:** opened via the header's search icon button below
+the `lg` breakpoint (the sidebar's own search trigger, and its
+`Cmd/Ctrl+K` badge, are `lg`-and-up only); the dialog itself is already
+responsive at any width.
+
+---
+
+## Keyboard shortcuts
+
+**Purpose:** let a returning user complete any common action without
+reaching for the mouse — see docs/PRODUCT_BIBLE.md §4 (One Click Rule)
+and §6 (Power User Experience).
+
+**When to use:** any action reachable from the global shell (open the
+palette, create something, jump to a top-level page). Registered once
+in `apps/web/src/hooks/use-app-shortcuts.ts` — adding a shortcut means
+adding a registry entry, never touching the listener.
+
+**When NOT to use:** a shortcut scoped to one specific page/form's own
+interaction (e.g. a wizard step's own `Enter`-to-advance) stays local
+to that component, not the global registry — the global registry is
+for shell-level, product-wide actions only.
+
+**Visual behavior:** every bound shortcut is discoverable two ways —
+inline `kbd`-styled badges next to the control it replaces (the
+sidebar's search trigger, the Command Palette's header), and the full
+list in the Shortcuts Help dialog (`Shift+?`).
+
+**Keyboard behavior:** single-key shortcuts (`N`, `/`) and the
+Cmd/Ctrl-modified `K` fire immediately; two-key "go to" chords (`G`
+then `C`/`R`/`A`/`D`/`Q`) wait up to one second for the second key
+before resetting. Every non-modifier shortcut is suppressed while
+focus is inside an `<input>`/`<textarea>`/`[contenteditable]`/
+`role="textbox"` element, so normal typing is never intercepted.
+
+**Loading state:** N/A.
+
+**Empty state:** N/A.
+
+**Error state:** N/A — an unbound key combination is simply not
+handled; nothing is shown.
+
+**Disabled state:** N/A — a shortcut's handler is always safe to fire
+regardless of current page (e.g. a "go to Rentals" chord navigates
+even if the destination page will itself show a Permission Denied
+state — see Permission denied below).
+
+**Mobile behavior:** not applicable — no on-screen keyboard exposes
+these chords usefully, so shortcuts are a desktop-only affordance; the
+Command Palette and Quick Create remain reachable by tap regardless.
+
+---
+
 ## Pagination
 
 **Purpose:** move through a list too long for one page, matching the

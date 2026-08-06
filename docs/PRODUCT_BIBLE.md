@@ -178,34 +178,38 @@ of becoming a fourth click.
 Havelio should gradually teach users. Users should become faster over
 time, without ever being required to read documentation.
 
-**What exists today**, as the seams this philosophy will build on:
+**What exists today** (built through Chapter 5 — see
+`UI_REDESIGN_PLAN.md` Chapter 5 for the full design rationale):
 
 - The **Command Palette** (`Cmd`/`Ctrl`+`K`, wired globally in
-  `apps/app/layout.tsx`) is real and navigates to any permitted page
-  by typed search — the honest current shape is `kind: "navigate"`
-  only; `apps/web/src/lib/command-types.ts` already types `"action"`,
-  `"search-result"`, and `"recent-page"` kinds as unpopulated
-  extension points, not implemented features (see Section 6).
+  `apps/app/layout.tsx`) never opens empty: an idle open composes
+  Recent → Pinned → Quick Actions → Commands → Navigation; typing
+  composes Quick Actions → Pinned → Commands → Navigation → live
+  cross-entity search results, each permission-filtered.
+  `apps/web/src/lib/command-types.ts`'s `CommandItem` now has real
+  `"action"`, `"recent"`, `"pinned"`, and `"search-result"` kinds, all
+  populated by working features, not unpopulated extension points.
+- A `⌘K`/`Ctrl+K` **shortcut badge** sits in the sidebar's search
+  trigger (platform-aware via `lib/platform.ts`), plus one real,
+  dismissible **contextual hint** ("Press ⌘K to search or jump
+  anywhere") shown until the user dismisses it once, per
+  `use-dismissible-hint.ts` — this is the first real instance of
+  Section 9's discoverability pattern, not a general coaching engine.
+- A `Shift+?` **Shortcuts Help dialog** lists every registered
+  keyboard shortcut, grouped and platform-aware.
 
 **What this philosophy still needs, and is not yet built** — these
 are real gaps to close through future chapters, not capabilities to
 assume:
 
-- **Discoverability**: no in-product hint system, tooltip coaching, or
-  "did you know" surface exists anywhere yet.
 - **Progressive onboarding**: no first-run tour, checklist, or guided
   setup exists for a new tenant beyond the registration form itself.
-- **Contextual hints**: no inline suggestion ("you could do this
-  faster with Cmd+K") exists on any screen.
-- **Shortcut badges**: no UI surfaces a keyboard shortcut next to the
-  mouse action it replaces (e.g. a `⌘K` badge next to a search box)
-  outside the Command Palette's own `Esc` hint.
-- **Command Palette education**: nothing currently teaches a new user
-  that the palette exists, beyond it being reachable via the header's
-  search button.
 - **Adaptive coaching** and **power-user mode**: no concept of a
   user's experience level exists in the product today; every user
-  sees the identical UI regardless of tenure.
+  sees the identical UI regardless of tenure. The one dismissible hint
+  built in Chapter 5 is a single, generic, reusable primitive
+  (`DismissibleHint`) — not a multi-step coaching system, and Chapter
+  5 deliberately did not build one (see Section 6).
 
 When one of these is built, it must teach through usage (surfacing
 the faster path at the moment the slower path is used), never through
@@ -224,21 +228,40 @@ for future AI workflows (Section 7).
 
 **Built today:**
 
-- **Command Palette** — `Cmd`/`Ctrl`+`K` opens a searchable list of
-  every page the current user has permission to reach, with
-  arrow-key/`Enter` navigation and a visible `Esc` hint. See
+- **Command Palette** — `Cmd`/`Ctrl`+`K` (also `/`) opens the unified
+  palette described in Section 5, with arrow-key/`Enter` navigation
+  and a visible `Esc` hint. See
   `apps/web/src/components/shell/command-palette.tsx`.
+- **Keyboard shortcut registry** — one single source of truth
+  (`lib/keyboard-shortcuts.ts`, wired via
+  `hooks/use-keyboard-shortcuts.ts`) covers `Cmd/Ctrl+K`, `/`, `N`
+  (Quick Create), `Shift+?` (help), and `G` chords (`G C/R/A/D/Q`) for
+  one-key navigation to Customers/Rentals/Assets/Documents/Quotes.
+  Every shortcut is suppressed while focus is inside a text field.
+  Adding a shortcut means adding one registry entry — no other file
+  changes.
 - **Quick Actions / Quick Create** — one shared, permission-filtered
   list of the product's create routes (`lib/quick-actions.ts`),
-  surfaced both as the header's `QuickCreate` dropdown and the
-  Dashboard's `QuickActions` widget.
-- **Global Search (foundation only)** — the Command Palette's search
-  input today filters navigable pages by name; it is explicitly
-  documented (in the component's own header comment) as the seam for
-  real cross-entity search (customers, rentals, assets, quotes,
-  documents) once that's wired to a real API — not yet implemented,
-  and not to be assumed implemented by a future feature that reads
-  "the search bar" and expects entity results back.
+  surfaced as the header's `QuickCreate` dropdown, the Dashboard's
+  `QuickActions` widget, and the palette's Quick Actions section.
+- **Global Search** — five real, permission-aware providers
+  (`lib/search-providers.ts`): Customers, Assets, Rentals, Quotes,
+  Documents. Each calls the exact `search`-accepting endpoint its own
+  list page already uses — debounced, multi-provider, one failing
+  provider never breaks the others. Users and Invoices are
+  deliberately **not** built as providers (no such pages/backend exist
+  yet, per `VISION.md`'s "Planned, later phase"); a future provider
+  implements the same `SearchProvider` interface, no palette changes
+  needed.
+- **Recently Viewed** — `lib/recent-items.ts` / `hooks/use-recent-items.ts`,
+  `localStorage`-backed per user+tenant, tracks both page views and
+  entity detail views (deduplicated, capped, most-recent-first).
+- **Favorites and Pinned Items** — deliberately **one** generic store
+  (`lib/pinned-items.ts` / `hooks/use-pinned-items.ts` /
+  `components/shell/pin-button.tsx`), not two parallel systems, since
+  both concepts are structurally identical (toggle a record on/off a
+  list). Live on the 5 entity detail pages today (Customers, Assets,
+  Rentals, Quotes, Documents).
 - **Rapid navigation** — the collapsible Sidebar plus breadcrumbs give
   every page a consistent, always-visible path back to any other area
   (`UI_REDESIGN_PLAN.md` Chapter 1).
@@ -246,18 +269,14 @@ for future AI workflows (Section 7).
 **Not yet built — real, named gaps for future chapters, not silent
 omissions:**
 
-- **Favorites** — no mechanism exists to mark any record as a
-  favorite anywhere in the product.
-- **Recently Viewed** — `command-types.ts` types a `"recent-page"`
-  `CommandKind` for exactly this, but nothing populates it today; no
-  view-history is tracked client- or server-side.
-- **Pinned Items** — no pinning concept exists on any list or detail
-  page.
+- **Search providers for Users, Invoices, or a future global/AI
+  provider** — no backend/page exists for the first two yet; the
+  third is intentionally unbuilt (see Section 7).
 
-A future implementation of any of these three must extend the
-existing Command Palette/`CommandItem` shape rather than invent a
-second, competing "quick access" surface — see Section 10's rule
-against duplicate UI for parallel purposes.
+A future search provider or productivity feature must extend the
+existing `SearchProvider`/`CommandItem`/pinned-items shape rather than
+invent a second, competing "quick access" surface — see Section 10's
+rule against duplicate UI for parallel purposes.
 
 ---
 
@@ -277,9 +296,17 @@ parallel, AI-specific code path.
 **Where the seams already exist:**
 
 - `CommandItem`/`CommandKind` (`lib/command-types.ts`) is a typed,
-  serializable command shape already designed to add `"action"` and
-  `"search-result"` kinds without reshaping the palette component
-  itself.
+  serializable command shape: every `"navigate"`/`"recent"`/`"pinned"`/
+  `"search-result"` kind carries a plain `href`, and every `"action"`
+  kind carries a plain `run: () => void` closure — a future AI agent
+  invokes either identically to a human `Enter` keypress, no DOM
+  interaction required. Two real `"action"` commands (toggle dark
+  mode, log out) already exercise this, not just an untested type.
+- `SearchProvider` (`lib/search-providers.ts`) is the same interface a
+  future `AiSearchProvider` would implement — `search(query, tenantId)`
+  returning `SearchResult[]` — so an AI agent calls the identical
+  method the Command Palette already calls, no separate AI-only search
+  path.
 - `QuickActionDefinition` (`lib/quick-actions.ts`) is a plain,
   declarative list (`id`, `href`, `labelKey`, `icon`, `permission`) —
   trivially inspectable and invokable by anything that can read an

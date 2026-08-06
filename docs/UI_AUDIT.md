@@ -406,17 +406,128 @@ product... TASK-0016." Chapter 4 does not add a charting dependency or
 invent chart data, per its own explicit "if no chart data exists,
 document the limitation" instruction.
 
+## Addendum — Productivity layer (TASK-0010 Part 2 Chapter 5)
+
+Scope extended for Chapter 5: the Command Palette
+(`apps/web/src/components/shell/command-palette.tsx`), Quick Create
+(`apps/web/src/components/shell/quick-create.tsx`), the global
+keyboard listener (`apps/web/src/app/app/layout.tsx`), and every
+seam a "productivity layer" (recent items, favorites/pinned,
+discoverability hints, AI extension points) would need to attach to.
+Findings below are evidence-based (full reads of the Command Palette,
+Quick Create, layout, sidebar, nav-registry, permission hooks, and a
+repo-wide grep for "recent", "favorite", "pinned", "shortcut", and any
+existing Users/Invoices UI), not assumed.
+
+### 29. The Command Palette is real but navigate-only, and opens empty of anything but nav items
+
+`command-palette.tsx`'s own header comment already states this
+honestly: "every command today is `kind: \"navigate\"`... this stays
+honest about what's implemented rather than faking results with local
+dummy data." Confirmed by reading the component in full — with an
+empty query it lists every permitted nav item; with a query it
+substring-filters those same nav items. There is no Recent, no
+Pinned/Favorites, no Quick Actions, and no real search-result section
+— violating the "never open empty of anything useful" UX this
+chapter's own instruction names, and confirming
+`command-types.ts`'s `"action" | "search-result" | "recent-page"`
+kinds are typed but genuinely unpopulated, not partially wired.
+
+### 30. The global keyboard listener has no input-focus guard — a real risk for any future letter-key shortcut
+
+`apps/app/layout.tsx`'s one `keydown` listener only handles
+`(metaKey || ctrlKey) + "k"`, with no check for whether focus is
+currently inside an `<input>`/`<textarea>`/`[contenteditable]`. This
+is harmless today only because a modifier+letter combo is never
+produced by normal typing. It is not safe to add a bare-letter
+shortcut (`N`, `G`, `/`) on top of this listener without first adding
+that guard — every text field in the product would otherwise
+intercept those keystrokes.
+
+### 31. Quick Create and Dashboard Quick Actions already share one list — the extension point exists, two of the prompt's named actions don't have a page to link to
+
+`apps/web/src/lib/quick-actions.ts` (added Chapter 4) is already the
+single source of truth for `QuickCreate` and the Dashboard's
+`QuickActions` widget — confirmed via direct read, five entries
+(Customer/Asset/Rental/Quote/Document), each permission-gated. A
+"Create Category" destination exists and is real
+(`/app/settings/asset-categories`, gated `asset_categories.manage`)
+but is not in the list. A "New Invoice" action has no destination —
+confirmed via `find apps/web/src/app/app -maxdepth 1 -type d`, which
+lists no `invoices` route anywhere, matching `VISION.md`'s own
+"Rental customer invoicing... **Planned, later phase**" entry. This
+chapter can add the former; the latter must be documented as a gap,
+not fabricated as a link to a page that doesn't exist.
+
+### 32. No "Users"/team-management surface exists to search or navigate to
+
+A repo-wide check for a staff/team-member management page
+(`find apps/web/src/app/app -maxdepth 1 -type d`) confirms no
+`users`/`team`/`members` route exists — matching `UI_AUDIT.md` finding
+#13 from Chapter 2 ("staff invitation into an existing tenant — does
+not exist"). A "Users" search-provider category, named as an example
+in this chapter's own instructions, has nothing real to search or
+link to yet and must be documented as a gap.
+
+### 33. No Recent Items, Favorites, or Pinned Items concept exists anywhere
+
+Confirmed by grep across `apps/web/src` for "recent"/"favorite"/
+"pinned" — the only matches are `command-types.ts`'s unpopulated
+`"recent-page"` kind (finding #29) and CSS/date-formatting false
+positives. No localStorage key, no hook, no UI surfaces any of these
+three concepts today. `use-sidebar-state.ts`/`use-dark-mode.ts`
+(Chapter 1) establish the proven `useSyncExternalStore` +
+`localStorage` + `StorageEvent` pattern this chapter's new stores
+should reuse — but both existing stores are deliberately
+browser-global, not per-user (a collapsed-sidebar or dark-mode
+preference is reasonably shared across whoever uses that browser).
+Recent Items/Pinned Items are workflow state tied to a specific
+person's activity and must be namespaced per user (and per tenant,
+since the same person's Rentals-team pinned items shouldn't bleed
+into their Assets-team tenant) — a deliberate difference from the two
+existing precedents, not an oversight.
+
+### 34. No discoverability/hint system exists anywhere
+
+Confirmed by grep for "hint"/"coach"/"tooltip"/"onboarding" across
+`apps/web/src` (excluding third-party Radix internals) — zero matches
+for any in-product teaching surface. This matches
+`PRODUCT_BIBLE.md`'s own Section 5 finding, restated here as a UI
+finding: Havelio has no mechanism today to teach a user the Command
+Palette exists, or that a keyboard shortcut replaces a click they just
+made with the mouse.
+
+### 35. The `⌘K` badge is hardcoded to the Mac symbol regardless of platform
+
+`sidebar.tsx`'s search-trigger button renders a literal `⌘K` `<kbd>`
+unconditionally — a real, small, honest UX gap for any Windows/Linux
+user, who has no `⌘` key and would need to read this as "Ctrl+K" by
+convention rather than by what's shown. Confirmed by direct read; no
+platform detection exists anywhere in the shell.
+
+### 36. `UI_PATTERNS.md`'s Search section already references a "Command Palette" entry that doesn't exist
+
+`UI_PATTERNS.md` line 436 reads "global search additionally opens via
+a keyboard shortcut (see Command Palette)" — but no `## Command
+Palette` section exists anywhere in that file (confirmed via
+`grep -n "^## "`), nor does a `## Keyboard shortcuts` section. Both
+are real, load-bearing UI patterns this chapter substantially builds
+or extends and should document with the same rigor as every other
+pattern in that file (Purpose/When to use/Visual/Keyboard/Loading/
+Empty/Error/Disabled/Mobile behavior, where applicable).
+
 ## Summary table
 
-| Area                      | Current state                                                           | Target (see `UI_REDESIGN_PLAN.md`)                                                                                                 |
-| ------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Navigation                | Flat top-bar link list, no icons, no active state                       | Collapsible sidebar, icons, active indicator                                                                                       |
-| Breadcrumbs               | None                                                                    | Route-registry-driven, responsive                                                                                                  |
-| Page headers              | Hand-written per page, inconsistent                                     | Shared `PageHeader` component                                                                                                      |
-| Search                    | Per-list only                                                           | Unified global search + command palette (foundation)                                                                               |
-| Permission-aware nav      | Not implemented (real 403 bug for TECHNICIAN)                           | Every nav item gated on its `.view`/`.read` permission                                                                             |
-| Dark mode (staff)         | Not available                                                           | Reuses portal's `use-dark-mode.ts`                                                                                                 |
-| Language switcher (staff) | Not available                                                           | Foundation added to user menu                                                                                                      |
-| Notifications (staff)     | Not available (no backend either)                                       | UI architecture only, honestly empty                                                                                               |
-| Dashboard                 | Staff: stub. Portal: real but ad hoc, no shared components, no skeleton | Chapter 4 — shared `DashboardCard`/`DashboardMetric`/etc., real KPIs from existing endpoints, both pages reuse the same components |
-| Tenant switcher           | Full-page navigation                                                    | In-header dropdown, reusing existing hooks                                                                                         |
+| Area                      | Current state                                                                      | Target (see `UI_REDESIGN_PLAN.md`)                                                                                                 |
+| ------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Navigation                | Flat top-bar link list, no icons, no active state                                  | Collapsible sidebar, icons, active indicator                                                                                       |
+| Breadcrumbs               | None                                                                               | Route-registry-driven, responsive                                                                                                  |
+| Page headers              | Hand-written per page, inconsistent                                                | Shared `PageHeader` component                                                                                                      |
+| Search                    | Per-list only                                                                      | Unified global search + command palette (foundation)                                                                               |
+| Permission-aware nav      | Not implemented (real 403 bug for TECHNICIAN)                                      | Every nav item gated on its `.view`/`.read` permission                                                                             |
+| Dark mode (staff)         | Not available                                                                      | Reuses portal's `use-dark-mode.ts`                                                                                                 |
+| Language switcher (staff) | Not available                                                                      | Foundation added to user menu                                                                                                      |
+| Notifications (staff)     | Not available (no backend either)                                                  | UI architecture only, honestly empty                                                                                               |
+| Dashboard                 | Staff: stub. Portal: real but ad hoc, no shared components, no skeleton            | Chapter 4 — shared `DashboardCard`/`DashboardMetric`/etc., real KPIs from existing endpoints, both pages reuse the same components |
+| Tenant switcher           | Full-page navigation                                                               | In-header dropdown, reusing existing hooks                                                                                         |
+| Productivity layer        | Command Palette is navigate-only, opens empty; no recent/pinned/shortcuts registry | Chapter 5 — unified palette (recent, pinned, quick actions, search providers), keyboard shortcut registry, discoverability hints   |

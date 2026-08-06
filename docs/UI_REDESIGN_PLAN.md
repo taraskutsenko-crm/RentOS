@@ -863,14 +863,283 @@ count-only.
   already-existing endpoint, confirmed per data source in Step 1's
   table.
 
+## Chapter 5 — Productivity Layer
+
+**A note on chapter numbering:** the "Later chapters" list below
+(written when Chapter 3 closed, before `docs/PRODUCT_BIBLE.md`
+existed) had named "Forms & Wizards" as Chapter 5. The user's own
+instruction opening this chapter explicitly frames it as "Chapter 5 —
+Productivity Layer," the same kind of deliberate, user-directed
+reprioritization Chapter 4 already made for Dashboard. Productivity
+Layer is Chapter 5; Forms & Wizards moves later (see the renumbered
+list at the end of this section).
+
+**Scope:** one unified, reusable productivity layer — not "a Command
+Palette feature" — spanning global search, quick actions, keyboard
+shortcuts, recent items, favorites/pinned items, and discoverability
+hints, built on the existing `CommandItem`/`QuickActionDefinition`
+seams rather than a second, parallel system. Presentation-layer only,
+per `ARCHITECTURE_LOCK.md` §3: no new backend endpoints, no schema
+changes. Checked against `PRODUCT_BIBLE.md` first, per that
+document's own reading order — this is the first chapter whose Step 2
+below cites it before the brand/pattern/UX documents.
+
+### Step 1 — Current implementation, read directly from source
+
+The Command Palette (`apps/web/src/components/shell/command-palette.tsx`,
+added Chapter 1) is real but honestly incomplete by its own header
+comment: every command is `kind: "navigate"`, filtering the same
+permission-gated nav list whether the query is empty or not — no
+Recent, no Pinned/Favorites, no Quick Actions, no real search results
+(`UI_AUDIT.md` finding #29). `Cmd/Ctrl+K` (`apps/app/layout.tsx`) is
+the only global keyboard shortcut in the product, and its listener has
+no guard against focus being inside a text field — safe today only
+because no bare-letter shortcut exists yet to collide with normal
+typing (finding #30). `lib/quick-actions.ts` (Chapter 4) is already
+the single shared source of the five real create routes, consumed by
+both `QuickCreate` and the Dashboard's `QuickActions` widget — a
+"Create Category" destination exists and isn't in that list yet; a
+"New Invoice" destination doesn't exist anywhere in the product
+(finding #31). No Users/team-management page exists to search or link
+to (finding #32). No Recent Items, Favorites, or Pinned Items concept
+exists anywhere (finding #33) — `use-sidebar-state.ts`/
+`use-dark-mode.ts` (Chapter 1) are the proven, reusable
+`useSyncExternalStore` + `localStorage` pattern for whatever this
+chapter builds, though both existing stores are deliberately
+browser-global rather than per-user. No discoverability/hint system
+exists anywhere (finding #34, matching `PRODUCT_BIBLE.md` §5's own
+gap list). The sidebar's `⌘K` badge is hardcoded to the Mac symbol
+regardless of platform (finding #35). `UI_PATTERNS.md` already
+references a "Command Palette" pattern entry that doesn't exist
+(finding #36).
+
+### Step 2 — Compared against the governing docs
+
+- `PRODUCT_BIBLE.md` §3 (Zero Friction), §4 (One Click Rule), §5
+  (Productivity Philosophy), §6 (Power User Experience), §7 (AI
+  Readiness), and §9 (Discoverability) are, collectively, this
+  chapter's entire brief — every numbered build item in the user's own
+  instruction maps onto one of these sections, and §7 in particular is
+  the direct source of this chapter's "extend existing typed seams,
+  never build a parallel AI-only code path" constraint.
+- `PRODUCT_BIBLE.md` §10 (Anti-Patterns) — "no duplicated UI," "no
+  duplicated implementations" — is the direct reason Favorites and
+  Pinned Items (design decision 7 below) share one underlying store
+  instead of two nearly-identical ones, and the reason the Command
+  Palette's Quick Actions section reads from the _existing_
+  `lib/quick-actions.ts` list rather than a second copy.
+- `UX_PRINCIPLES.md` rule 6 (max 3 clicks/taps to any common action)
+  and rule 8 ("keyboard shortcuts are consistent across the whole
+  product, never redefined per page... this rule governs TASK-0010's
+  Command Palette/shortcut work so it ships consistent from the first
+  shortcut, not retrofitted later") are the direct, already-written
+  mandate for this chapter's keyboard-shortcut registry.
+- `UI_RESEARCH.md`'s new Chapter 5 addendum (findings #22-26) directly
+  shapes: the palette's composed-sections data model (finding #22),
+  the pluggable search-provider registry (finding #23), the
+  declarative shortcut registry with mandatory input-focus guarding
+  (finding #24), the "same seam a human uses" AI-readiness shape
+  (finding #25), and the dismiss-once/anchor-to-the-real-control hint
+  pattern (finding #26).
+- `ARCHITECTURE_LOCK.md` §3 forbids new backend endpoints — the direct
+  reason Recent Items/Pinned Items/dismissed-hints are client-side
+  (`localStorage`) rather than a new per-tenant preferences table, and
+  the reason search providers reuse each entity's existing `search`
+  list-endpoint parameter rather than a new dedicated search endpoint.
+
+### Step 3 — Design Rationale
+
+1. **One `CommandItem`-driven palette, not a palette plus three
+   separate "recent/pinned/search" widgets.** The palette already
+   composes a flat list from one typed shape (Chapter 1); this chapter
+   adds new `CommandItem` sources (recent, pinned, search results,
+   quick actions) that all render through the exact same list/keyboard-
+   navigation code already in `command-palette.tsx`, rather than four
+   different rendering paths bolted together. This is the direct
+   answer to build item 9 ("never open empty" — an empty query now
+   composes Recent + Pinned + Quick Actions + Navigation sections in
+   one pass).
+2. **`SearchProvider` is a typed, pluggable registry
+   (`lib/search-providers.ts`), never a hardcoded per-entity branch
+   inside the palette.** Each provider declares `{ id, labelKey, icon,
+permission, search(query, tenantId) }`; the palette iterates the
+   registry and merges results, permission-filtering exactly like
+   `nav-registry.ts`/`lib/quick-actions.ts` already do. **Five real
+   providers are built** — Customers, Assets, Rentals, Quotes,
+   Documents — each calling the exact same `search`-accepting list
+   endpoint its own list page already uses (`apiClient.get` with the
+   identical URL/params shape as `useCustomers`/`useAssets`/etc.), so
+   this is genuine, working cross-entity search with **zero new
+   backend endpoints** — not the inert "architecture only" stub the
+   user's own instruction explicitly allows for this item, upgraded to
+   real because the underlying capability already existed and needed
+   no new API surface to reach. **Users and Invoices are not built as
+   providers** — no team-management page and no Invoices module exist
+   anywhere in the product (findings #31-32) — documented as gaps
+   below, never a provider that searches nothing or 404s.
+3. **The keyboard shortcut registry (`lib/keyboard-shortcuts.ts`) is
+   declarative data, checked once by one global listener** — adding a
+   shortcut is adding an array entry, never touching the listener
+   itself, per this chapter's own "must allow adding shortcuts without
+   touching existing code" requirement. The listener replaces
+   `apps/app/layout.tsx`'s ad hoc `Cmd/Ctrl+K`-only handler and adds
+   the input-focus guard `UI_AUDIT.md` finding #30 identifies as
+   missing — every bare-letter shortcut is suppressed while focus is
+   inside `input`/`textarea`/`[contenteditable]` or any element with
+   `role="textbox"`. **Chords (`G` then a second key)** are supported
+   via a short-lived "awaiting second key" state with a timeout
+   (matching GitHub/Linear's own "go to" pattern, `UI_RESEARCH.md`
+   finding #24) — `G C`/`G R`/`G A`/`G D`/`G Q` navigate to the five
+   primary entities, mirroring `nav-registry.ts`'s existing five
+   workspace items exactly (no sixth destination invented). `N` opens
+   Quick Create (the existing dropdown, not a new surface); `/` opens
+   the Command Palette in search mode (same target as `Cmd/Ctrl+K` —
+   two entry points to one surface, not two surfaces); `Shift+?` opens
+   a new, real Shortcuts Help dialog listing every registered shortcut
+   read live from the same registry (so it can never drift out of
+   sync with what's actually bound); `Esc` closes whatever's open
+   (already Radix `Dialog`'s built-in behavior, not new code).
+4. **Recent Items is one generic service
+   (`hooks/use-recent-items.ts`), not per-entity tracking code.** A
+   single `useTrackRecentItem({ entityType, entityId, label, href })`
+   hook, called once on mount by each of the five entity detail pages
+   (Customer/Asset/Rental/Quote/Document), writes to one shared,
+   capped (configurable, default 8), most-recent-first, de-duplicated
+   `localStorage` list. Namespaced per **user and tenant**
+   (`rentos_recent_items:<userId>:<tenantId>`) — a deliberate,
+   documented difference from `use-sidebar-state.ts`/`use-dark-mode.ts`'s
+   browser-global keys (`UI_AUDIT.md` finding #33), since recent
+   activity is workflow state tied to a specific person in a specific
+   tenant, not a display preference reasonably shared by whoever uses
+   the browser.
+5. **Recent Items also tracks page-level navigation** (matching
+   `command-types.ts`'s existing `"recent-page"` kind) via a small
+   route-change listener in `AppLayout` resolving a label from
+   `nav-registry.ts` — reusing the registry that already maps every
+   top-level route to a translated label, rather than a second,
+   competing route→label map.
+6. **One generic `usePinnedItems()` store serves both "Favorites" and
+   "Pinned Items"** from the user's own build list (items 6 and 7) —
+   read together, their descriptions are structurally identical
+   (`{ entityType, entityId, label, href, pinnedAt }`, "do not hardcode
+   entity types," "support customers/assets/rentals/documents/future
+   entities"). Building two parallel, nearly-identical localStorage
+   stores under two names would directly violate this chapter's own
+   "no duplicated implementations" rule and `PRODUCT_BIBLE.md` §10.
+   The single store is exposed as `usePinnedItems()`
+   (`hooks/use-pinned-items.ts`), and the Command Palette surfaces it
+   under one "Pinned" section (starred) — the product-facing "Favorite"
+   and "Pin" language both resolve to the identical underlying action
+   (`togglePinned(ref)`), documented here as a deliberate consolidation
+   decision, not a dropped requirement. A pin toggle button is added to
+   the five entity detail pages (Customer/Asset/Rental/Quote/Document),
+   generic over `entityType`, satisfying "do not hardcode entity types"
+   and "support... future entities" (any future detail page adds one
+   `<PinButton entityType="..." .../>` call, no new store code).
+7. **Discoverability hints are one reusable, generic primitive
+   (`useDismissibleHint(hintId)` + `<DismissibleHint>`), instantiated
+   for exactly one real hint** — a small, non-modal callout near the
+   header's search trigger ("Press `Ctrl+K` (or `⌘K`) to search or
+   jump anywhere"), dismissible, remembered per user
+   (`localStorage`, `rentos_dismissed_hints:<userId>`), never shown
+   again once dismissed, never blocking interaction with anything
+   underneath it — the exact shape `PRODUCT_BIBLE.md` §5's "teach
+   through usage, never a blocking tutorial" and `UI_RESEARCH.md`
+   finding #26 require. This chapter does not build a general
+   onboarding/coaching engine, adaptive difficulty, or a checklist
+   flow — `PRODUCT_BIBLE.md` §5 already names those as real, separate,
+   larger gaps for a future chapter, and building a full coaching
+   system to justify one hint would be exactly the kind of
+   disproportionate scope `ARCHITECTURE_LOCK.md`'s "no broad rewrite...
+   without a specific, stated necessity" principle warns against,
+   applied here to net-new feature scope instead of a rewrite.
+8. **The `⌘K`/`Ctrl+K` badge is now platform-aware.** A small
+   `isMacPlatform()` check (`navigator.userAgent`, no new dependency)
+   picks the symbol shown in the sidebar's search trigger, the header's
+   shortcut badge, and the new Shortcuts Help dialog — one shared
+   helper, not three separate platform checks (`UI_AUDIT.md` finding
+   #35).
+9. **AI readiness is documentation and typing discipline, not a new
+   code path.** `SearchProvider`, `CommandItem`, and
+   `QuickActionDefinition` are written so a future AI agent calls the
+   identical functions/objects a human interaction already calls (no
+   provider reads `document.activeElement`, no handler assumes a mouse
+   event exists) — verified per-file during implementation, not just
+   asserted. A short, explicit comment block in
+   `lib/search-providers.ts` and `command-types.ts` documents the
+   intended future extension points (`AiSearchProvider`, an
+   AI-invocable `executeCommand(id)`) without implementing either —
+   per this chapter's explicit "do NOT build AI" instruction.
+10. **New `UI_PATTERNS.md` entries: "Command Palette" and "Keyboard
+    shortcuts."** `UI_AUDIT.md` finding #36 found the Search pattern
+    already references a Command Palette entry that was never written;
+    this chapter is substantially building/extending both patterns and
+    documents them with the same Purpose/When to use/Visual/Keyboard/
+    Loading/Empty/Error/Mobile rigor as every other entry in that file.
+
+### What Chapter 5 builds
+
+- `apps/web/src/lib/`: `keyboard-shortcuts.ts` (typed registry +
+  chord support), `search-providers.ts` (pluggable registry, five real
+  providers: Customers/Assets/Rentals/Quotes/Documents),
+  `recent-items.ts` + `hooks/use-recent-items.ts`
+  (`useTrackRecentItem`, `useRecentItems`), `pinned-items.ts` +
+  `hooks/use-pinned-items.ts` (`usePinnedItems`, `togglePinned`),
+  `platform.ts` (`isMacPlatform`), extended `command-types.ts`
+  (`"action"` kind populated, AI extension-point comments).
+- `lib/quick-actions.ts`: adds "Create Category"
+  (`asset_categories.manage`); documents the Invoice gap inline rather
+  than adding a dead link.
+- `apps/web/src/components/shell/`: `command-palette.tsx` rewritten
+  around composed sections (Recent, Pinned, Quick Actions, Search,
+  Navigation); new `shortcuts-help-dialog.tsx`; new
+  `command-palette-hint.tsx` (the one real discoverability hint,
+  built on a new generic `dismissible-hint.tsx` primitive); a
+  `pin-button.tsx` added to the five entity detail pages.
+- `apps/app/layout.tsx`: the ad hoc `Cmd/Ctrl+K` listener replaced by
+  the shortcut registry's single global listener (input-focus-guarded)
+  plus a route-change recent-page tracker.
+- New `productivity.*` localization keys across all six locales.
+- `UI_PATTERNS.md`: new "Command Palette" and "Keyboard shortcuts"
+  entries.
+- Component/hook tests for every new piece; no skipped tests.
+
+### What Chapter 5 does not build (documented gaps, not fabricated)
+
+- **A "Users" search provider or Quick Action** — no team-management
+  page exists anywhere in the product yet (`UI_AUDIT.md` finding #32);
+  building one is a real, separate feature (the Chapter 2 audit
+  already named "staff invitation into an existing tenant" as a gap),
+  not something to retrofit into a productivity-layer chapter.
+- **A "New Invoice" Quick Action** — no Invoices module exists;
+  `VISION.md` already lists rental customer invoicing as "Planned,
+  later phase." No dead link is added.
+- **Any real AI provider or AI-invoked command execution** — per this
+  chapter's explicit instruction, only the typed extension points and
+  a documentation comment are added (design decision 9); no AI code
+  runs anywhere in this chapter's diff.
+- **A general onboarding/coaching engine, adaptive difficulty, or
+  first-run checklist** — `PRODUCT_BIBLE.md` §5 already names these as
+  real, larger gaps; this chapter builds the one reusable hint
+  primitive and one real, honest instance of it, not a coaching system
+  built to justify itself.
+- **Server-synced Recent Items/Pinned Items** (available across
+  devices, surviving a cleared browser) — today's implementation is
+  `localStorage`-only, per `ARCHITECTURE_LOCK.md` §3's "no new backend
+  endpoints" boundary for this chapter; a future chapter can add a
+  real per-tenant preferences table and swap the storage layer behind
+  the same `usePinnedItems()`/`useRecentItems()` hook signatures
+  without touching any consumer.
+
 ## Later chapters (named, not detailed — scoped when reached)
 
-- **Chapter 5 — Forms & Wizards:** reconcile `RentalWizard`/
+- **Chapter 6 — Forms & Wizards:** reconcile `RentalWizard`/
   `QuoteWizard` against `UI_PATTERNS.md`'s Wizard/Stepper/Forms specs.
-- **Chapter 6 — Settings & Account:** profile/account pages, the
+- **Chapter 7 — Settings & Account:** profile/account pages, the
   language-switcher's live wiring, notification preferences once a
   backend exists.
 
 Each future chapter follows the same process this one does: read the
-implementation, audit against the four governing docs, write a Design
-Rationale, implement, verify, document, commit.
+implementation, audit against `PRODUCT_BIBLE.md` and the other
+governing docs, write a Design Rationale, implement, verify, document,
+commit.

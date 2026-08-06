@@ -22,12 +22,14 @@ vi.mock("../../src/hooks/use-current-tenant-role", () => ({
 
 const useAssetMock = vi.fn();
 const useAssetTimelineMock = vi.fn();
+const useAssetSummaryMock = vi.fn();
 const useDeleteAssetMock = vi.fn();
 const useChangeAssetStatusMock = vi.fn();
 const useChangeAssetLocationMock = vi.fn();
 vi.mock("../../src/hooks/use-assets", () => ({
   useAsset: (...args: unknown[]) => useAssetMock(...args),
   useAssetTimeline: (...args: unknown[]) => useAssetTimelineMock(...args),
+  useAssetSummary: (...args: unknown[]) => useAssetSummaryMock(...args),
   useDeleteAsset: () => useDeleteAssetMock(),
   useChangeAssetStatus: () => useChangeAssetStatusMock(),
   useChangeAssetLocation: () => useChangeAssetLocationMock(),
@@ -73,6 +75,7 @@ describe("AssetDetailPage", () => {
   beforeEach(() => {
     useCurrentTenantIdMock.mockReturnValue(["tenant-1", vi.fn()]);
     useAssetTimelineMock.mockReturnValue({ data: [] });
+    useAssetSummaryMock.mockReturnValue({ data: undefined });
     useDeleteAssetMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useAssetStatusesMock.mockReturnValue({
       data: [

@@ -38,6 +38,9 @@ export default function RentalDetailPage() {
   const params = useParams<{ id: string }>();
   const [tenantId] = useCurrentTenantId();
   const [actionError, setActionError] = useState<string | null>(null);
+  // Date.now() cannot be called during render (impure) — a lazy useState
+  // initializer is the sanctioned one-time-impure-computation escape hatch.
+  const [nowMs] = useState<number>(() => Date.now());
 
   const { data: rental, isLoading, isError } = useRental(tenantId, params.id);
   const { data: timeline } = useRentalTimeline(tenantId, params.id);
@@ -166,7 +169,9 @@ export default function RentalDetailPage() {
       {actionError && <p className="text-destructive text-sm">{actionError}</p>}
 
       <DashboardGrid
-        className={rental.status === "ACTIVE" ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-2" : "grid-cols-1"}
+        className={
+          rental.status === "ACTIVE" ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-2" : "grid-cols-1"
+        }
       >
         <Card>
           <CardContent className="p-4">
@@ -184,7 +189,7 @@ export default function RentalDetailPage() {
             label={t("rental.summary.daysRemaining")}
             value={Math.max(
               0,
-              Math.ceil((new Date(rental.plannedEnd).getTime() - Date.now()) / (24 * 60 * 60 * 1000)),
+              Math.ceil((new Date(rental.plannedEnd).getTime() - nowMs) / (24 * 60 * 60 * 1000)),
             )}
           />
         )}

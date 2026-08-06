@@ -13,6 +13,15 @@ vi.mock("../../src/hooks/use-current-tenant-role", () => ({
   usePermission: (permission: string) => usePermissionMock(permission),
 }));
 
+// CommandPaletteHint (Chapter 5) reads the current user to namespace its
+// per-user dismissal — mock it so the sidebar test never hits a real
+// network request and the hint deterministically resolves to "dismissed"
+// (no user known yet), matching docs/UI_REDESIGN_PLAN.md Chapter 5,
+// design decision 7's "hidden until the current user is known" rule.
+vi.mock("../../src/hooks/use-auth", () => ({
+  useMe: () => ({ data: undefined }),
+}));
+
 /**
  * Regression coverage for docs/UI_AUDIT.md finding #4: the previous flat
  * top-bar nav rendered every link unconditionally, so a role lacking

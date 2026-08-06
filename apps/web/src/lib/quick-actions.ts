@@ -1,4 +1,12 @@
-import { CalendarRange, FilePlus, FileText, Package, Users, type LucideIcon } from "lucide-react";
+import {
+  CalendarRange,
+  FilePlus,
+  FileText,
+  Package,
+  Tags,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 
 import type { Permission } from "./permissions";
 
@@ -54,5 +62,12 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     labelKey: "document.newDocument",
     icon: FilePlus,
     permission: "documents.create",
+  },
+  {
+    id: "category",
+    href: "/app/settings/asset-categories",
+    labelKey: "asset.categorySettings.create",
+    icon: Tags,
+    permission: "asset_categories.manage",
   },
 ];

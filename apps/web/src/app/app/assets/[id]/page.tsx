@@ -3,10 +3,11 @@
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { AssetFilesManager } from "../../../../components/assets/asset-files-manager";
+import { PinButton } from "../../../../components/shell/pin-button";
 import { useAssetStatuses } from "../../../../hooks/use-asset-statuses";
 import {
   useAsset,
@@ -17,6 +18,7 @@ import {
 } from "../../../../hooks/use-assets";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
+import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import { formatMoney } from "../../../../lib/money";
 
 export default function AssetDetailPage() {
@@ -27,6 +29,19 @@ export default function AssetDetailPage() {
 
   const { data: asset, isLoading } = useAsset(tenantId, params.id);
   const { data: timeline } = useAssetTimeline(tenantId, params.id);
+  const trackRecentItem = useTrackRecentItem();
+
+  useEffect(() => {
+    if (!asset) return;
+    trackRecentItem({
+      id: `asset:${asset.id}`,
+      kind: "entity",
+      entityType: "asset",
+      label: asset.name,
+      href: `/app/assets/${asset.id}`,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-runs when the loaded asset changes
+  }, [asset?.id]);
   const { data: statuses } = useAssetStatuses(tenantId);
   const deleteAsset = useDeleteAsset(tenantId);
   const changeStatus = useChangeAssetStatus(tenantId);
@@ -85,6 +100,12 @@ export default function AssetDetailPage() {
           <p className="text-muted-foreground text-sm">{asset.internalNumber}</p>
         </div>
         <div className="flex gap-2">
+          <PinButton
+            entityType="asset"
+            entityId={asset.id}
+            label={asset.name}
+            href={`/app/assets/${asset.id}`}
+          />
           {canUpdate && (
             <Button asChild variant="outline" size="sm">
               <Link href={`/app/assets/${asset.id}/edit`}>{t("asset.editAsset")}</Link>

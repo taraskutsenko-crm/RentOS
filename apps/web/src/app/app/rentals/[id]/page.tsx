@@ -3,13 +3,15 @@
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { usePageBreadcrumbs } from "../../../../components/shell/breadcrumb-context";
 import { PageHeader } from "../../../../components/shell/page-header";
+import { PinButton } from "../../../../components/shell/pin-button";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
+import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
   useCancelRental,
   useDeleteRental,
@@ -36,6 +38,20 @@ export default function RentalDetailPage() {
 
   const { data: rental, isLoading, isError } = useRental(tenantId, params.id);
   const { data: timeline } = useRentalTimeline(tenantId, params.id);
+  const trackRecentItem = useTrackRecentItem();
+
+  useEffect(() => {
+    if (!rental) return;
+    trackRecentItem({
+      id: `rental:${rental.id}`,
+      kind: "entity",
+      entityType: "rental",
+      label: rental.rentalNumber,
+      href: `/app/rentals/${rental.id}`,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-runs when the loaded rental changes
+  }, [rental?.id]);
+
   const deleteRental = useDeleteRental(tenantId);
   const reserveRental = useReserveRental(tenantId);
   const startRental = useStartRental(tenantId);
@@ -91,6 +107,12 @@ export default function RentalDetailPage() {
         subtitle={`${rental.customer.firstName} ${rental.customer.lastName} · ${t(`rental.statuses.${rental.status}`)}`}
         secondaryActions={
           <>
+            <PinButton
+              entityType="rental"
+              entityId={rental.id}
+              label={rental.rentalNumber}
+              href={`/app/rentals/${rental.id}`}
+            />
             {canUpdate && EDITABLE_STATUSES.has(rental.status) && (
               <Button asChild variant="outline" size="sm">
                 <Link href={`/app/rentals/${rental.id}/edit`}>{t("rental.editRental")}</Link>

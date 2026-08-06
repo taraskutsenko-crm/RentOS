@@ -3,9 +3,11 @@
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PinButton } from "../../../../components/shell/pin-button";
+import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
   documentPdfUrl,
   useArchiveDocument,
@@ -64,6 +66,19 @@ export default function DocumentDetailPage() {
 
   const { data: document, isLoading, isError } = useDocument(tenantId, params.id);
   const { data: timeline } = useDocumentTimeline(tenantId, params.id);
+  const trackRecentItem = useTrackRecentItem();
+
+  useEffect(() => {
+    if (!document) return;
+    trackRecentItem({
+      id: `document:${document.id}`,
+      kind: "entity",
+      entityType: "document",
+      label: document.documentNumber,
+      href: `/app/documents/${document.id}`,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-runs when the loaded document changes
+  }, [document?.id]);
   const { data: preview } = useDocumentPreview(tenantId, params.id);
   const { data: shareLinks } = useDocumentShareLinks(tenantId, params.id);
   const { data: emailDeliveries } = useDocumentEmailDeliveries(tenantId, params.id);
@@ -197,6 +212,12 @@ export default function DocumentDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <PinButton
+            entityType="document"
+            entityId={document.id}
+            label={document.documentNumber}
+            href={`/app/documents/${document.id}`}
+          />
           {canDownload && (
             <Button asChild variant="outline" size="sm">
               <a href={documentPdfUrl(tenantId, document.id)} target="_blank" rel="noreferrer">

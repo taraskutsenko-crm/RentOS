@@ -30,8 +30,28 @@
         "title": "Command palette",
         "placeholder": "Search or jump to…",
         "noResults": "No matches found",
-        "pagesGroup": "Pages"
-      }
+        "pagesGroup": "Pages",
+        "quickActionsGroup": "Quick actions",
+        "commandsGroup": "Commands",
+        "pinnedGroup": "Pinned",
+        "recentGroup": "Recent",
+        "hint": "Press {{keys}} to search or jump anywhere"
+      },
+      "shortcuts": {
+        "title": "Keyboard shortcuts",
+        "openPalette": "Open command palette",
+        "newItem": "New item",
+        "help": "Show keyboard shortcuts",
+        "goCustomers": "Go to Customers",
+        "goRentals": "Go to Rentals",
+        "goAssets": "Go to Assets",
+        "goDocuments": "Go to Documents",
+        "goQuotes": "Go to Quotes",
+        "groupGeneral": "General",
+        "groupNavigation": "Navigation"
+      },
+      "pin": "Pin",
+      "unpin": "Unpin"
     }
   },
   "common": {
@@ -42,6 +62,7 @@
     "saving": "Saving…",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "dismiss": "Dismiss",
     "table": {
       "columns": "Columns",
       "permissionDenied": "You don't have permission to view this data.",

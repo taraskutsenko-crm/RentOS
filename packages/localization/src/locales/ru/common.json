@@ -30,8 +30,28 @@
         "title": "Палитра команд",
         "placeholder": "Поиск или переход…",
         "noResults": "Ничего не найдено",
-        "pagesGroup": "Страницы"
-      }
+        "pagesGroup": "Страницы",
+        "quickActionsGroup": "Быстрые действия",
+        "commandsGroup": "Команды",
+        "pinnedGroup": "Закреплённые",
+        "recentGroup": "Недавние",
+        "hint": "Нажмите {{keys}}, чтобы искать или перейти куда угодно"
+      },
+      "shortcuts": {
+        "title": "Горячие клавиши",
+        "openPalette": "Открыть командную панель",
+        "newItem": "Новый элемент",
+        "help": "Показать горячие клавиши",
+        "goCustomers": "Перейти к клиентам",
+        "goRentals": "Перейти к арендам",
+        "goAssets": "Перейти к активам",
+        "goDocuments": "Перейти к документам",
+        "goQuotes": "Перейти к сметам",
+        "groupGeneral": "Общие",
+        "groupNavigation": "Навигация"
+      },
+      "pin": "Закрепить",
+      "unpin": "Открепить"
     }
   },
   "common": {
@@ -42,6 +62,7 @@
     "saving": "Сохранение…",
     "cancel": "Отмена",
     "confirm": "Подтвердить",
+    "dismiss": "Скрыть",
     "table": {
       "columns": "Столбцы",
       "permissionDenied": "У вас нет прав для просмотра этих данных.",

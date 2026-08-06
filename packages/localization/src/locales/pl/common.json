@@ -30,8 +30,28 @@
         "title": "Paleta poleceń",
         "placeholder": "Szukaj lub przejdź do…",
         "noResults": "Brak wyników",
-        "pagesGroup": "Strony"
-      }
+        "pagesGroup": "Strony",
+        "quickActionsGroup": "Szybkie akcje",
+        "commandsGroup": "Polecenia",
+        "pinnedGroup": "Przypięte",
+        "recentGroup": "Ostatnie",
+        "hint": "Naciśnij {{keys}}, aby wyszukać lub przejść gdziekolwiek"
+      },
+      "shortcuts": {
+        "title": "Skróty klawiszowe",
+        "openPalette": "Otwórz paletę poleceń",
+        "newItem": "Nowy element",
+        "help": "Pokaż skróty klawiszowe",
+        "goCustomers": "Przejdź do klientów",
+        "goRentals": "Przejdź do wynajmów",
+        "goAssets": "Przejdź do aktywów",
+        "goDocuments": "Przejdź do dokumentów",
+        "goQuotes": "Przejdź do ofert",
+        "groupGeneral": "Ogólne",
+        "groupNavigation": "Nawigacja"
+      },
+      "pin": "Przypnij",
+      "unpin": "Odepnij"
     }
   },
   "common": {
@@ -42,6 +62,7 @@
     "saving": "Zapisywanie…",
     "cancel": "Anuluj",
     "confirm": "Potwierdź",
+    "dismiss": "Odrzuć",
     "table": {
       "columns": "Kolumny",
       "permissionDenied": "Nie masz uprawnień do wyświetlenia tych danych.",

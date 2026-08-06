@@ -3,11 +3,13 @@
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PinButton } from "../../../../components/shell/pin-button";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
+import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
   quotePdfUrl,
   useAcceptQuote,
@@ -40,6 +42,20 @@ export default function QuoteDetailPage() {
 
   const { data: quote, isLoading, isError } = useQuote(tenantId, params.id);
   const { data: timeline } = useQuoteTimeline(tenantId, params.id);
+  const trackRecentItem = useTrackRecentItem();
+
+  useEffect(() => {
+    if (!quote) return;
+    trackRecentItem({
+      id: `quote:${quote.id}`,
+      kind: "entity",
+      entityType: "quote",
+      label: quote.quoteNumber,
+      href: `/app/quotes/${quote.id}`,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-runs when the loaded quote changes
+  }, [quote?.id]);
+
   const deleteQuote = useDeleteQuote(tenantId);
   const sendQuote = useSendQuote(tenantId);
   const acceptQuote = useAcceptQuote(tenantId);
@@ -118,6 +134,12 @@ export default function QuoteDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <PinButton
+            entityType="quote"
+            entityId={quote.id}
+            label={quote.quoteNumber}
+            href={`/app/quotes/${quote.id}`}
+          />
           {canUpdate && EDITABLE_STATUSES.has(quote.status) && (
             <Button asChild variant="outline" size="sm">
               <Link href={`/app/quotes/${quote.id}/edit`}>{t("quote.editQuote")}</Link>

@@ -30,8 +30,28 @@
         "title": "Палітра команд",
         "placeholder": "Пошук або перехід…",
         "noResults": "Нічого не знайдено",
-        "pagesGroup": "Сторінки"
-      }
+        "pagesGroup": "Сторінки",
+        "quickActionsGroup": "Швидкі дії",
+        "commandsGroup": "Команди",
+        "pinnedGroup": "Закріплені",
+        "recentGroup": "Останні",
+        "hint": "Натисніть {{keys}}, щоб шукати або перейти будь-куди"
+      },
+      "shortcuts": {
+        "title": "Гарячі клавіші",
+        "openPalette": "Відкрити командну панель",
+        "newItem": "Новий елемент",
+        "help": "Показати гарячі клавіші",
+        "goCustomers": "Перейти до клієнтів",
+        "goRentals": "Перейти до оренд",
+        "goAssets": "Перейти до активів",
+        "goDocuments": "Перейти до документів",
+        "goQuotes": "Перейти до кошторисів",
+        "groupGeneral": "Загальні",
+        "groupNavigation": "Навігація"
+      },
+      "pin": "Закріпити",
+      "unpin": "Відкріпити"
     }
   },
   "common": {
@@ -42,6 +62,7 @@
     "saving": "Збереження…",
     "cancel": "Скасувати",
     "confirm": "Підтвердити",
+    "dismiss": "Приховати",
     "table": {
       "columns": "Стовпці",
       "permissionDenied": "У вас немає прав для перегляду цих даних.",

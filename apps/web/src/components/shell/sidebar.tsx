@@ -4,11 +4,14 @@ import { cn } from "@rentos/ui";
 import { ChevronsLeft, ChevronsRight, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { usePermission } from "../../hooks/use-current-tenant-role";
 import { useSidebarCollapsed } from "../../hooks/use-sidebar-state";
 import { findNavItemForPath, NAV_GROUPS, type NavItem } from "../../lib/nav-registry";
+import { formatShortcutKeys, isMacPlatform } from "../../lib/platform";
+import { CommandPaletteHint } from "./command-palette-hint";
 
 /**
  * The staff app's primary navigation surface — see
@@ -30,6 +33,7 @@ export function Sidebar({
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useSidebarCollapsed();
   const activeItem = findNavItemForPath(pathname);
+  const isMac = useMemo(() => isMacPlatform(), []);
 
   return (
     <>
@@ -79,10 +83,12 @@ export function Sidebar({
           </span>
           {!collapsed && (
             <kbd className="border-border bg-background rounded border px-1.5 py-0.5 text-xs">
-              ⌘K
+              {formatShortcutKeys(["mod"], isMac)}K
             </kbd>
           )}
         </button>
+
+        {!collapsed && <CommandPaletteHint className="mx-2 mb-2" />}
 
         <nav className="flex-1 overflow-y-auto px-2 pb-2" aria-label={t("app.shell.sidebarLabel")}>
           {NAV_GROUPS.map((group) => (

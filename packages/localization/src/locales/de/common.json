@@ -30,8 +30,28 @@
         "title": "Befehlspalette",
         "placeholder": "Suchen oder springen zu…",
         "noResults": "Keine Treffer gefunden",
-        "pagesGroup": "Seiten"
-      }
+        "pagesGroup": "Seiten",
+        "quickActionsGroup": "Schnellaktionen",
+        "commandsGroup": "Befehle",
+        "pinnedGroup": "Angeheftet",
+        "recentGroup": "Zuletzt verwendet",
+        "hint": "Drücken Sie {{keys}}, um zu suchen oder zu springen"
+      },
+      "shortcuts": {
+        "title": "Tastenkombinationen",
+        "openPalette": "Befehlspalette öffnen",
+        "newItem": "Neuer Eintrag",
+        "help": "Tastenkombinationen anzeigen",
+        "goCustomers": "Zu Kunden",
+        "goRentals": "Zu Vermietungen",
+        "goAssets": "Zu Anlagen",
+        "goDocuments": "Zu Dokumenten",
+        "goQuotes": "Zu Angeboten",
+        "groupGeneral": "Allgemein",
+        "groupNavigation": "Navigation"
+      },
+      "pin": "Anheften",
+      "unpin": "Lösen"
     }
   },
   "common": {
@@ -42,6 +62,7 @@
     "saving": "Wird gespeichert…",
     "cancel": "Abbrechen",
     "confirm": "Bestätigen",
+    "dismiss": "Ausblenden",
     "table": {
       "columns": "Spalten",
       "permissionDenied": "Sie haben keine Berechtigung, diese Daten anzuzeigen.",

@@ -21,9 +21,13 @@ import { UserMenu } from "./user-menu";
 export function Header({
   onOpenMobileNav,
   onOpenCommandPalette,
+  quickCreateOpen,
+  onQuickCreateOpenChange,
 }: {
   onOpenMobileNav: () => void;
   onOpenCommandPalette: () => void;
+  quickCreateOpen: boolean;
+  onQuickCreateOpenChange: (open: boolean) => void;
 }) {
   const { t } = useTranslation();
   const pathname = usePathname();
@@ -61,7 +65,7 @@ export function Header({
       </div>
 
       <div className="flex items-center gap-1">
-        <QuickCreate />
+        <QuickCreate open={quickCreateOpen} onOpenChange={onQuickCreateOpenChange} />
         <NotificationsMenu />
         <UserMenu />
       </div>

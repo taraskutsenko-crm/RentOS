@@ -30,8 +30,28 @@
         "title": "Paleta de comandos",
         "placeholder": "Buscar o ir a…",
         "noResults": "No se encontraron resultados",
-        "pagesGroup": "Páginas"
-      }
+        "pagesGroup": "Páginas",
+        "quickActionsGroup": "Acciones rápidas",
+        "commandsGroup": "Comandos",
+        "pinnedGroup": "Fijados",
+        "recentGroup": "Recientes",
+        "hint": "Pulsa {{keys}} para buscar o ir a cualquier lugar"
+      },
+      "shortcuts": {
+        "title": "Atajos de teclado",
+        "openPalette": "Abrir paleta de comandos",
+        "newItem": "Nuevo elemento",
+        "help": "Mostrar atajos de teclado",
+        "goCustomers": "Ir a Clientes",
+        "goRentals": "Ir a Alquileres",
+        "goAssets": "Ir a Activos",
+        "goDocuments": "Ir a Documentos",
+        "goQuotes": "Ir a Presupuestos",
+        "groupGeneral": "General",
+        "groupNavigation": "Navegación"
+      },
+      "pin": "Fijar",
+      "unpin": "Desfijar"
     }
   },
   "common": {
@@ -42,6 +62,7 @@
     "saving": "Guardando…",
     "cancel": "Cancelar",
     "confirm": "Confirmar",
+    "dismiss": "Descartar",
     "table": {
       "columns": "Columnas",
       "permissionDenied": "No tienes permiso para ver estos datos.",

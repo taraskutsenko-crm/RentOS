@@ -1,3 +1,5 @@
+import type { TimelineEvent } from "@rentos/shared";
+
 export type DocumentTimelineEventType =
   | "created"
   | "updated"
@@ -20,10 +22,4 @@ export type DocumentTimelineEventType =
   | "signature_requested"
   | "signature_status_changed";
 
-export interface DocumentTimelineEvent {
-  id: string;
-  type: DocumentTimelineEventType;
-  occurredAt: string;
-  actorUserId: string | null;
-  data: Record<string, unknown>;
-}
+export type DocumentTimelineEvent = TimelineEvent<DocumentTimelineEventType>;

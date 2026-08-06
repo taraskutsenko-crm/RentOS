@@ -104,4 +104,10 @@ export class AssetsController {
   timeline(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("assetId") assetId: string) {
     return this.assetsService.timeline(tenant.id, assetId);
   }
+
+  @RequirePermissions("assets.read")
+  @Get(":assetId/summary")
+  summary(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("assetId") assetId: string) {
+    return this.assetsService.summary(tenant.id, assetId);
+  }
 }

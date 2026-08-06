@@ -48,6 +48,16 @@ export class CustomersController {
     return this.customersService.findOne(tenant.id, id);
   }
 
+  @Get(":id/timeline")
+  timeline(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("id") id: string) {
+    return this.customersService.timeline(tenant.id, id);
+  }
+
+  @Get(":id/summary")
+  summary(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("id") id: string) {
+    return this.customersService.summary(tenant.id, id);
+  }
+
   @Patch(":id")
   update(
     @CurrentTenant() { tenant }: CurrentTenantContext,

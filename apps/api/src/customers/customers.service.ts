@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import type { Customer, Prisma } from "@prisma/client";
+import type { Customer, Prisma, RentalStatus } from "@prisma/client";
 
 import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../prisma/prisma.service";
 import type { CreateCustomerDto } from "./dto/create-customer.dto";
 import type { QueryCustomersDto } from "./dto/query-customers.dto";
 import type { UpdateCustomerDto } from "./dto/update-customer.dto";
+import type { CustomerSummary } from "./summary.types";
+import type { CustomerTimelineEvent, CustomerTimelineEventType } from "./timeline.types";
 
 export interface PaginatedResult<T> {
   items: T[];
@@ -13,6 +15,15 @@ export interface PaginatedResult<T> {
   page: number;
   pageSize: number;
 }
+
+const AUDIT_ACTION_TO_TIMELINE_TYPE: Record<string, CustomerTimelineEventType> = {
+  "customer.created": "created",
+  "customer.updated": "updated",
+  "customer.deleted": "deleted",
+};
+
+/** Rentals that represent real, counted business activity — DRAFT and CANCELLED are excluded. */
+const COUNTED_RENTAL_STATUSES: RentalStatus[] = ["RESERVED", "ACTIVE", "RETURNED", "COMPLETED"];
 
 @Injectable()
 export class CustomersService {
@@ -124,5 +135,71 @@ export class CustomersService {
       entityType: "Customer",
       entityId: id,
     });
+  }
+
+  /**
+   * The customer's business history — created/updated/deleted, sourced
+   * entirely from AuditLog. There is no CustomerStatusHistory model, so
+   * unlike Assets/Rentals there is no status_changed event type here.
+   */
+  async timeline(tenantId: string, id: string): Promise<CustomerTimelineEvent[]> {
+    await this.findOne(tenantId, id);
+
+    const logs = await this.prisma.auditLog.findMany({
+      where: {
+        tenantId,
+        entityType: "Customer",
+        entityId: id,
+        action: { in: Object.keys(AUDIT_ACTION_TO_TIMELINE_TYPE) },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    const events: CustomerTimelineEvent[] = logs.map((log) => ({
+      id: log.id,
+      type: AUDIT_ACTION_TO_TIMELINE_TYPE[log.action]!,
+      occurredAt: log.createdAt.toISOString(),
+      actorUserId: log.userId,
+      data: (log.metadata as Record<string, unknown> | null) ?? {},
+    }));
+
+    return events.sort((a, b) => a.occurredAt.localeCompare(b.occurredAt));
+  }
+
+  /**
+   * Generated summary shown at the top of the customer's Timeline page —
+   * see docs/PRODUCT_BIBLE.md §12. totalRevenueMinor sums Rental.totalMinor
+   * (the canonical stored total per ARCHITECTURE_LOCK §1.5) — never
+   * recomputed. Fields with no real data source are simply omitted.
+   */
+  async summary(tenantId: string, id: string): Promise<CustomerSummary> {
+    const customer = await this.findOne(tenantId, id);
+
+    const [rentals, damageReportsCount, lastAuditLog] = await Promise.all([
+      this.prisma.rental.findMany({
+        where: {
+          tenantId,
+          customerId: id,
+          deletedAt: null,
+          status: { in: COUNTED_RENTAL_STATUSES },
+        },
+        select: { status: true, totalMinor: true, currency: true },
+      }),
+      this.prisma.rentalDamageReport.count({ where: { tenantId, customerId: id } }),
+      this.prisma.auditLog.findFirst({
+        where: { tenantId, entityType: "Customer", entityId: id },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
+
+    return {
+      customerSince: customer.createdAt.toISOString(),
+      totalRentals: rentals.length,
+      activeRentals: rentals.filter((rental) => rental.status === "ACTIVE").length,
+      totalRevenueMinor: rentals.reduce((sum, rental) => sum + rental.totalMinor, 0),
+      currency: rentals[0]?.currency ?? null,
+      lastActivityAt: lastAuditLog?.createdAt.toISOString() ?? null,
+      damageReportsCount,
+    };
   }
 }

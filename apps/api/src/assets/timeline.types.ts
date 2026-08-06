@@ -1,3 +1,5 @@
+import type { TimelineEvent } from "@rentos/shared";
+
 export type AssetTimelineEventType =
   | "created"
   | "updated"
@@ -7,10 +9,4 @@ export type AssetTimelineEventType =
   | "document_uploaded";
 
 /** A single normalized, chronologically-orderable event for an asset's timeline. */
-export interface AssetTimelineEvent {
-  id: string;
-  type: AssetTimelineEventType;
-  occurredAt: string;
-  actorUserId: string | null;
-  data: Record<string, unknown>;
-}
+export type AssetTimelineEvent = TimelineEvent<AssetTimelineEventType>;

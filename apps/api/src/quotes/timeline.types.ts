@@ -1,3 +1,5 @@
+import type { TimelineEvent } from "@rentos/shared";
+
 export type QuoteTimelineEventType =
   | "created"
   | "updated"
@@ -10,10 +12,4 @@ export type QuoteTimelineEventType =
   | "converted"
   | "pdf_generated";
 
-export interface QuoteTimelineEvent {
-  id: string;
-  type: QuoteTimelineEventType;
-  occurredAt: string;
-  actorUserId: string | null;
-  data: Record<string, unknown>;
-}
+export type QuoteTimelineEvent = TimelineEvent<QuoteTimelineEventType>;

@@ -4,12 +4,19 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import type { AssetCustomFieldDefinition, AssetDocument, AssetImage, Prisma } from "@prisma/client";
+import type {
+  AssetCustomFieldDefinition,
+  AssetDocument,
+  AssetImage,
+  Prisma,
+  RentalStatus,
+} from "@prisma/client";
 
 import { AssetStatusesService } from "../asset-statuses/asset-statuses.service";
 import { AuditService } from "../audit/audit.service";
 import type { PaginatedResult } from "../customers/customers.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { computeItemLineTotalMinor } from "../rentals/rental-pricing.util";
 import { AssetFieldValuesService, type AssetWithCustomFields } from "./asset-field-values.service";
 import { buildAssetWhere, parseCustomFieldsFilter } from "./asset-query.util";
 import type { ChangeAssetLocationDto } from "./dto/change-asset-location.dto";
@@ -17,12 +24,16 @@ import type { ChangeAssetStatusDto } from "./dto/change-asset-status.dto";
 import type { CreateAssetDto } from "./dto/create-asset.dto";
 import type { QueryAssetsDto } from "./dto/query-assets.dto";
 import type { UpdateAssetDto } from "./dto/update-asset.dto";
+import type { AssetSummary } from "./summary.types";
 import type { AssetTimelineEvent } from "./timeline.types";
 
 const ASSET_INCLUDE = {
   category: true,
   currentStatus: true,
 } satisfies Prisma.AssetInclude;
+
+/** Rentals that represent real, counted business activity — DRAFT and CANCELLED are excluded. */
+const COUNTED_RENTAL_STATUSES: RentalStatus[] = ["RESERVED", "ACTIVE", "RETURNED", "COMPLETED"];
 
 type AssetWithRelations = Prisma.AssetGetPayload<{ include: typeof ASSET_INCLUDE }>;
 
@@ -495,6 +506,54 @@ export class AssetsService {
     ];
 
     return events.sort((a, b) => a.occurredAt.localeCompare(b.occurredAt));
+  }
+
+  /**
+   * Generated summary shown at the top of the asset's Timeline page — see
+   * docs/PRODUCT_BIBLE.md §12. revenueGeneratedMinor is computed read-time
+   * via computeItemLineTotalMinor, the same pure pricing function Rentals
+   * uses to price each line — never a separately stored/recomputed total.
+   */
+  async summary(tenantId: string, id: string): Promise<AssetSummary> {
+    const asset = await this.findOne(tenantId, id);
+
+    const rentalItems = await this.prisma.rentalItem.findMany({
+      where: {
+        tenantId,
+        assetId: id,
+        rental: { deletedAt: null, status: { in: COUNTED_RENTAL_STATUSES } },
+      },
+      select: {
+        quantity: true,
+        billingMode: true,
+        dailyPriceMinor: true,
+        weeklyPriceMinor: true,
+        monthlyPriceMinor: true,
+        customPriceMinor: true,
+        discountMinor: true,
+        monthlyBillingStrategy: true,
+        customMonthLengthDays: true,
+        rental: { select: { plannedStart: true, plannedEnd: true, currency: true } },
+      },
+    });
+
+    const revenueGeneratedMinor = rentalItems.reduce(
+      (sum, item) =>
+        sum + computeItemLineTotalMinor(item, item.rental.plannedStart, item.rental.plannedEnd),
+      0,
+    );
+
+    return {
+      totalRentals: rentalItems.length,
+      revenueGeneratedMinor,
+      currency: rentalItems[0]?.rental.currency ?? null,
+      currentStatus: {
+        id: asset.currentStatus.id,
+        code: asset.currentStatus.code,
+        name: asset.currentStatus.name,
+      },
+      currentLocation: asset.currentLocationText,
+    };
   }
 
   private async resolveDefaultStatusId(tenantId: string): Promise<string> {

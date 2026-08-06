@@ -258,6 +258,45 @@ and the palette's Quick Actions section.
   reusable primitive with one real instance, not a tour/tooltip
   system; `PRODUCT_BIBLE.md` §8 already names that as a separate gap.
 
+## Smart Timeline and Entity Summary — added Chapter 6
+
+Replaces the four independently hand-rolled `<ol>` blocks (Assets,
+Rentals, Quotes, Documents — `UI_AUDIT.md` findings #37-38) with one
+registry-driven component, and gives Customers a timeline/summary for
+the first time (it never had one — `UI_AUDIT.md` finding #39). See
+`UI_REDESIGN_PLAN.md` Chapter 6 for the full design rationale.
+
+| File                                                           | Purpose                                                                                                                                                                                                                                        |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `types/timeline.ts`                                            | `TimelineEvent<TType extends string>` — the one frontend envelope generic; deliberately declared separately from `@rentos/shared`'s backend equivalent, preserving the established mirror-type convention (`HANDOVER.md`).                     |
+| `lib/timeline-registries.ts`                                   | `TimelineEventConfig` (icon + i18n label key + optional tone) and one `Record<Type, Config>` registry per entity (Asset/Rental/Quote/Document/Customer) — the single source of truth `<Timeline>` reads, never entity-`if` branches.           |
+| `components/timeline/timeline.tsx`                             | `<Timeline>` — client-side search (shown past 5 events) + day grouping ("Today"/"Yesterday"/date) + arrow-key navigation between items + optional `getHref` for one-click navigation to a related entity + a `DismissibleHint` on first use.   |
+| Backend: `packages/shared/src/timeline.ts`                     | `TimelineEvent<TType>` generic backend envelope — Asset/Rental/Quote/Document `timeline.types.ts` now alias it instead of independently redeclaring the same 4 fields.                                                                         |
+| Backend: `customers/timeline.types.ts`, `.../summary.types.ts` | New `CustomerTimelineEvent`/`CustomerSummary` types; `CustomersService.timeline()`/`.summary()` — the timeline is sourced entirely from `AuditLog` (no synthetic events needed, since `customer.created/updated/deleted` are already audited). |
+| Backend: `assets/summary.types.ts`                             | New `AssetSummary`; `AssetsService.summary()` computes `revenueGeneratedMinor` read-time via the existing `computeItemLineTotalMinor` pricing function — never a separately stored/recomputed total.                                           |
+
+Entity Summary strips reuse Chapter 4's `DashboardGrid`/`DashboardMetric`
+as-is (plus a bare `Card`+`CardContent` for money fields, since
+`DashboardMetric.value` is `number`-only) — no new parallel component
+family. Customer detail page also gained a real `PageHeader` (it had
+none before; the whole page was just an inline edit form).
+
+### What Chapter 6 does not build (documented gaps, not fabricated)
+
+- **Overdue invoices, payment reliability, maintenance cost,
+  utilization%** — no underlying data source exists for any of these
+  (no invoicing/maintenance-cost model) — omitted from the summary
+  types entirely rather than approximated.
+- **Inline PDF/image/email preview inside Timeline items** — no such
+  preview widget exists anywhere in the codebase yet; Timeline items
+  navigate to the related entity in one click instead (`getHref`).
+- **Quote Summary and Document Summary** — a deliberate scope
+  decision, not an oversight; the reusable Entity Summary pattern
+  makes adding them later straightforward.
+- **Real email implementation, apartment/room/etc. rental object
+  types, any AI implementation** — architecture-only per the task
+  spec; nothing built this chapter.
+
 ## Icons
 
 `lucide-react` is an existing `@rentos/ui` dependency, zero current

@@ -19,69 +19,68 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `00a410a` (docs: document TASK-0010 Part 2
-  Chapter 5), on top of `de636dc` (test: add tests for productivity
-  layer components and hooks), `10c0448` (feat: rebuild command palette
-  as unified productivity layer), and `c0804d2` (feat: add productivity
-  layer primitives) — TASK-0010 Part 2 Chapter 5 (Productivity Layer).
-  Sits on top of `80f1ea7` (PRODUCT_BIBLE.md), `e177d14` (Chapter 4 —
-  dashboard experience), `1a251fe` (Chapter 3 — universal data views),
-  `1ba4fc4` (Chapter 2 — premium authentication experience), and
-  `ec06729`/`5157e2c` (Chapter 1 — application shell redesign).
-- **What shipped:** one unified productivity layer, not just a rebuilt
-  Command Palette. `lib/keyboard-shortcuts.ts` is the single shortcut
-  registry (`Cmd/Ctrl+K`, `/`, `N`, `Shift+?`, `G`-chords for
-  navigation), input-focus-guarded and chord-aware, wired via one
-  global listener (`hooks/use-keyboard-shortcuts.ts`,
-  `hooks/use-app-shortcuts.ts`). `lib/search-providers.ts` is a
-  pluggable registry with five real, working providers (Customers,
-  Assets, Rentals, Quotes, Documents), each calling the exact endpoint
-  its own list page already uses. `lib/recent-items.ts` and
-  `lib/pinned-items.ts` are `localStorage`-backed stores namespaced per
-  user+tenant; Favorites and Pinned Items deliberately share the one
-  pinned-items store rather than duplicating it. The rebuilt Command
-  Palette (`components/shell/command-palette.tsx`) never opens empty —
-  idle composes Recent → Pinned → Quick Actions → Commands →
-  Navigation; typing composes live search alongside filtered sections.
-  A `PinButton` was added to the 5 entity detail pages, a
-  `ShortcutsHelpDialog` for `Shift+?`, and one real dismissible
-  discoverability hint (`⌘K` tip in the sidebar) built on a generic,
-  reusable `DismissibleHint` primitive. `CommandItem`'s `"action"` kind
-  carries a plain `run()` closure and every other kind a plain `href` —
-  a documented AI extension point, no AI code written. See
-  `UI_REDESIGN_PLAN.md` Chapter 5 for the full design rationale,
-  including the documented gaps (no Users/Invoices search providers —
-  no backend/page exists yet; no general onboarding/coaching engine).
-- **A real bug was found and fixed during manual verification:**
-  `matchShortcut` required a modifier when a shortcut declared one, but
-  never rejected the match when an _undeclared_ modifier was held —
-  `Shift+/` could fire the plain `/` shortcut (open palette) instead of
-  correctly being rejected in favor of `Shift+?` (help), on keyboard
-  layouts where `Shift+/` reports `key: "/"` rather than `"?"`. Fixed
-  to require an exact modifier match; see D-048.
+- **Latest verified commit:** pending (docs: document TASK-0010 Part 2
+  Chapter 6) — TASK-0010 Part 2 Chapter 6 (Smart Timeline & Entity
+  Summary). Sits on top of `952bddf` (PRODUCT_BIBLE.md expanded into
+  the platform constitution), `00a410a` (Chapter 5 — Productivity
+  Layer), `e177d14` (Chapter 4 — dashboard experience), `1a251fe`
+  (Chapter 3 — universal data views), `1ba4fc4` (Chapter 2 — premium
+  authentication experience), and `ec06729`/`5157e2c` (Chapter 1 —
+  application shell redesign).
+- **What shipped:** a shared, registry-driven `<Timeline>` component
+  (`components/timeline/timeline.tsx`) replacing four independently
+  hand-rolled `<ol>` blocks (Asset/Rental/Quote/Document) — client-side
+  search shown past 5 events (also serves as an implicit kind filter),
+  day-grouping ("Today"/"Yesterday"/date), arrow-key navigation between
+  items, one-click navigation to a related entity via `getHref`.
+  Customers gets a Timeline for the first time — it never had one,
+  despite already writing the audit trail it needed
+  (`CustomersService.timeline()`, sourced entirely from real
+  `AuditLog` rows, no synthetic events). Customer/Rental/Asset detail
+  pages each gained an Entity Summary strip reusing Chapter 4's
+  `DashboardGrid`/`DashboardMetric` as-is; Customer detail page also
+  got a real `PageHeader` for the first time (it was previously just a
+  bare edit form). `AssetsService.summary()` computes revenue
+  read-time via the existing `computeItemLineTotalMinor` pricing
+  function — never a separately stored/recomputed total. A new
+  `packages/shared/src/timeline.ts` `TimelineEvent<TType>` generic
+  backend envelope replaces 5 independently-declared-but-identical
+  interfaces; the frontend keeps its own separately-declared mirror
+  generic (`types/timeline.ts`), preserving the established
+  never-cross-import convention between the two layers. A new
+  `/app/settings/shortcuts` page gives every registered keyboard
+  shortcut a permanent, discoverable home (reads the same
+  `useAppShortcuts()` registry as the Chapter 5 `Shift+?` modal, so the
+  two can never drift apart), plus a "N" keyboard badge on the Quick
+  Create button and a dismissible hint on the Timeline's search
+  affordance. See `UI_REDESIGN_PLAN.md` Chapter 6 for the full design
+  rationale, including the documented gaps (no overdue-invoice/
+  payment-reliability/maintenance-cost/utilization data source; no
+  inline PDF/image/email preview; Quote/Document Summary deferred).
 - **Quality gates:** format/lint/typecheck/build green across all 6
-  packages; 465 backend + 270 frontend tests passing (735 total,
-  including 8 new productivity-layer test files and 4 new
-  `matchShortcut` regression tests for the modifier-exactness fix).
-- **Docker/browser verification:** the `web` image was rebuilt twice
-  (once for the feature, once after the modifier-match bug fix) and
-  redeployed into the running Docker Compose stack. Verified with a
-  real tenant/customer created live through the UI: `Ctrl+K` opens the
-  palette showing Recent/Pinned/Quick Actions/Commands/Navigation;
-  typing a real customer's name returns a live search result from the
-  actual API and navigates correctly; pinning/unpinning persists across
-  reload with correct `aria-pressed`; `N` opens Quick Create; typing
-  `n` inside a text field types the literal character (input-focus
-  guard confirmed); `G R` chord navigates to Rentals; `Shift+?` opens
-  the Shortcuts Help dialog with platform-correct key labels; the
-  palette's "Light mode"/"Dark mode" command toggles and persists
-  across reload; localization spot-checked in Ukrainian and German
-  (genuinely translated, not copy-pasted English) plus a full 6-locale
-  parity check; responsive behavior confirmed at 375px (off-canvas
-  drawer, correctly `inert` while closed), 768px (off-canvas), and
-  desktop (persistent sidebar).
-- **GitHub Actions:** green — [run 31113471353](https://github.com/taraskutsenko-crm/RentOS/actions/runs/31113471353)
-  on `00a410a`.
+  packages; 483 backend + 288 frontend tests passing (771 total,
+  including 14 new backend tests for the Customer/Asset timeline and
+  summary endpoints and 9 new frontend tests for `<Timeline>`, the
+  Customer detail page, and the shortcuts settings page). A real React
+  Compiler purity violation was caught by lint during this chapter —
+  `Date.now()` was being called directly during render for the
+  Rental's "days remaining" metric; fixed with a `useState` lazy
+  initializer, the sanctioned one-time-impure-computation pattern
+  (see D-049).
+- **Docker/browser verification:** the `web` and `api` images were
+  rebuilt and redeployed into the running Docker Compose stack.
+  Verified with a real tenant/customer/asset created live through the
+  UI: Customer detail page shows a real `PageHeader`, a 4-metric
+  Summary strip (honest `0`/`—` states, no fake data), and a Timeline
+  with a real `customer.created` event grouped under "Today"; Asset
+  detail page shows the same pattern; `/app/settings/shortcuts` lists
+  every shortcut grouped with platform-correct `kbd` badges, matching
+  the `Shift+?` modal; the Quick Create button shows an "N" badge;
+  light mode and mobile (375px) both verified correctly on the
+  Customer detail page; Russian localization spot-checked in context
+  (Хронология/Сегодня/Клиент создан — genuinely translated).
+- **GitHub Actions:** pending — see the follow-up "docs: record
+  verified commit hash" commit for the confirmed run link.
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let
@@ -654,6 +653,11 @@ partial-success state to rely on.
 - Internal package/module names and cookie names still say "RentOS" —
   only user-visible strings were rebranded to "Havelio" (deliberate, see
   ADR 0012 decision 10).
+- Timeline items never render an inline PDF/image/email preview — no
+  such widget exists anywhere in the product; items with a related
+  record navigate to it in one click instead. Quote and Document
+  Summary are not built — a deliberate, documented Chapter 6 scope
+  boundary, not an oversight (see `UI_REDESIGN_PLAN.md` Chapter 6).
 
 Resolved by the pre-TASK-0008 stabilization task (see
 [ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md)):

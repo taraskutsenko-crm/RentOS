@@ -323,3 +323,122 @@ See `UI_REDESIGN_PLAN.md` Chapter 5 for the concrete scope this
 research feeds into, and `UI_AUDIT.md`'s addendum for exactly what
 gaps exist in today's Command Palette, Quick Create, and keyboard
 handling.
+
+## Timeline and Summary patterns — Chapter 6 addendum
+
+New findings for TASK-0010 Part 2 Chapter 6 (Smart Timeline, Smart
+Summary), gathered by direct inspection of every backend timeline/
+history method, every frontend timeline rendering block, and the
+Chapter 4 dashboard-summary components — cross-checked against
+`PRODUCT_BIBLE.md` §12 (Timeline First) before design work began.
+
+27. **Four of five entities already have a timeline/history backend
+    method — Customers has none.** Assets and Rentals name theirs
+    `timeline()`; Quotes and Documents name theirs `history()`
+    (`apps/api/src/{assets,rentals}/*.service.ts` vs.
+    `apps/api/src/{quotes,documents}/*.service.ts`) — a real, existing
+    naming inconsistency this chapter does not need to resolve (see
+    Step 3 below for why). All four return the identical envelope
+    shape independently declared four times: `{ id, type, occurredAt,
+actorUserId, data: Record<string, unknown> }` — exactly the
+    "independently implemented per module but never independently
+    designed" gap `PRODUCT_BIBLE.md` §12 already names.
+28. **Quotes and Documents already use the more scalable
+    audit-to-timeline mapping shape; Assets and Rentals don't.**
+    `quotes.service.ts`/`documents.service.ts` each declare one
+    `AUDIT_ACTION_TO_TIMELINE_TYPE: Record<string, XTimelineEventType>`
+    lookup table and query `AuditLog` with `action: { in:
+Object.keys(...) }` — one query covers every audit-sourced event
+    kind. Assets/Rentals instead run one separate `AuditLog` query per
+    action string. The lookup-table shape is the correct one to
+    standardize on: adding a new event kind is a one-line map entry,
+    never a new query.
+29. **Every frontend timeline rendering block is hand-rolled,
+    line-for-line identical, and renders zero information beyond a
+    translated label and a timestamp.** All four entity detail pages
+    with timeline data (`apps/web/src/app/app/{assets,rentals,quotes,
+documents}/[id]/page.tsx`) render the exact same `<ol>`/`<li>`
+    markup independently. None of the four reads `event.data` at all
+    — no icon, no color, no kind-based branching, no click-through to
+    a related record. Reference products (Linear's issue activity
+    feed, Stripe's event log, GitHub's PR timeline) all converge on
+    the opposite shape: a kind-driven icon + color + one-line summary
+    that reads `event.data`, grouped by day, with every item
+    click-through-navigable to whatever it references.
+30. **Customers has zero timeline UI and zero timeline endpoint, but
+    already writes exactly the audit trail a timeline needs.**
+    `customers.service.ts` already calls
+    `AuditService.log({ action: "customer.created" | "customer.updated"
+| "customer.deleted", ... })` on every mutation — the data a
+    Customer timeline needs already exists, unused. This is the
+    clearest "flagship feature with a real, fixable gap" finding of
+    this chapter, not a hypothetical.
+31. **No entity detail page shows any summary/stats block today** —
+    confirmed by grep: `DashboardMetric`/`DashboardGrid`/
+    `DashboardCard`/`DashboardSection` (Chapter 4) are used only on
+    `apps/app/page.tsx`. Every detail page goes straight from a header
+    (or, for three of five pages, no header component at all — see
+    finding #32) into content cards. The Chapter 4 dashboard component
+    family's props (`label`, `value`, `isLoading`, `isError`, `href`)
+    are already entity-agnostic — nothing about them assumes
+    tenant-wide scope. Reusing them for a per-entity summary strip is
+    an extension of an existing seam, not a new component family
+    (`PRODUCT_BIBLE.md` §16, Platform Extensibility).
+32. **`PageHeader` (Chapter 1) is used by exactly one of five entity
+    detail pages.** Only Rentals' detail page uses it
+    (`apps/web/src/app/app/rentals/[id]/page.tsx`); Assets, Quotes, and
+    Documents hand-roll a plain `<h1>`; Customers has no heading
+    component at all. A Summary strip's natural position — directly
+    below the page header — cannot be made consistent across entities
+    while the headers themselves are inconsistent; this is a real,
+    pre-existing gap Chapter 6 must close for the entities it touches,
+    not a new problem it introduces.
+33. **Money aggregation across many rentals must reuse the frozen,
+    already-computed line-total function, never a fresh recomputation
+    that risks disagreeing with a stored total.** `Rental.totalMinor`
+    is already the canonical, stored, per-rental total (never
+    recomputed after creation, per `ARCHITECTURE_LOCK.md` §1.5).
+    `RentalItem` has no per-item stored total, only frozen unit-price/
+    billing-mode/monthly-strategy snapshot fields — an asset-level
+    revenue figure (a number that has never existed anywhere before)
+    is only safely derivable by calling the existing, pure
+    `computeItemLineTotalMinor(item, plannedStart, plannedEnd)`
+    (`apps/api/src/rentals/rental-pricing.util.ts`) read-time over each
+    of the asset's frozen `RentalItem` rows — the canonical function,
+    not a second implementation, and not a mutation of any stored
+    value.
+34. **No document type has an inline binary PDF/image preview widget
+    today.** The only preview UI in the codebase is the Documents
+    detail page's HTML-in-`<iframe srcDoc>` render of server-generated
+    HTML (`apps/web/src/app/app/documents/[id]/page.tsx`) — genuinely
+    different from an embedded PDF/image viewer. Building one is a
+    real, separate undertaking; Chapter 6's Timeline treats
+    attachment/document/email events as one-click-navigate-to-the-
+    entity (which already has its own preview, where one exists), not
+    as inline-rendered media — matching the spec's literal
+    "must open its related entity with one click," not "must render
+    inline."
+35. **`DocumentEmailDelivery` is the one and only per-entity email
+    delivery model that exists** (`apps/api/prisma/schema.prisma`) —
+    no `CustomerEmailDelivery`/`RentalEmailDelivery`/etc. exists.
+    `EmailProvider`/`EmailService` (`apps/api/src/email/`) are already
+    fully generic (`send(message: EmailMessage): Promise<EmailSendResult>`,
+    one `LoggingEmailProvider` implementation) — a future
+    per-entity delivery-history model would be a structural copy of
+    `DocumentEmailDelivery`, not a new interface. This is the concrete
+    shape behind this chapter's Email Foundation requirement (no new
+    implementation, confirmed-ready seam).
+36. **No settings page lists keyboard shortcuts — only a modal
+    (`ShortcutsHelpDialog`, Chapter 5) does.** `apps/app/settings/`
+    has exactly four subpages today (asset categories/fields/statuses,
+    rental billing), none shortcut-related. A settings page is a
+    genuinely different, complementary discoverability surface from a
+    `Shift+?` modal — reachable via normal navigation/bookmarking, not
+    only a keypress a user must already know exists.
+
+## How this informs Chapter 6
+
+See `UI_REDESIGN_PLAN.md` Chapter 6 for the concrete scope this
+research feeds into, and `UI_AUDIT.md`'s addendum for exactly what
+gaps exist in today's per-entity timeline/summary/discoverability
+surfaces.

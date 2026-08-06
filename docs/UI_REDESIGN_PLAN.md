@@ -1131,11 +1131,267 @@ permission, search(query, tenantId) }`; the palette iterates the
   the same `usePinnedItems()`/`useRecentItems()` hook signatures
   without touching any consumer.
 
+## Chapter 6 — Smart Timeline & Entity Summary
+
+**A note on chapter numbering:** the "Later chapters" list below (written
+when Chapter 3 closed) had named "Forms & Wizards" as Chapter 6. The
+user's own instruction opening this chapter explicitly frames it as
+"Chapter 6," the same deliberate, user-directed reprioritization
+Chapters 4 and 5 already made. Smart Timeline & Entity Summary is
+Chapter 6; Forms & Wizards moves later (see the renumbered list at the
+end of this section).
+
+**Scope:** one shared, reusable Timeline component reused by every
+entity that has lifecycle history (Customers, Assets, Rentals, Quotes,
+Documents today — designed so a future entity is a registry entry, not
+a redesign), plus a shared Entity Summary component reused on Customer/
+Rental/Asset detail pages, plus a Settings page listing every keyboard
+shortcut. Checked against `PRODUCT_BIBLE.md` first, per that document's
+own reading order, with §12 (Timeline First) as this chapter's direct
+mandate.
+
+### Step 1 — Current implementation, read directly from source
+
+Four of five entities (Assets, Rentals, Quotes, Documents) already have
+a backend timeline/history method — `AssetsService.timeline()`,
+`RentalsService.timeline()`, `QuotesService.history()`,
+`DocumentsService.history()` — each independently returning the
+identical envelope `{ id, type, occurredAt, actorUserId, data }`
+(`UI_RESEARCH.md` finding #27). Quotes/Documents already use a scalable
+`AUDIT_ACTION_TO_TIMELINE_TYPE` lookup-table shape; Assets/Rentals run
+one separate `AuditLog` query per action (finding #28). Every frontend
+rendering of these is a hand-rolled, line-for-line-identical `<ol>`/
+`<li>` block reading only `event.type` for a translated label — never
+`event.data`, never an icon, never a click-through (finding #29).
+Customers has zero timeline endpoint and zero timeline UI, despite
+`customers.service.ts` already logging `customer.created`/`.updated`/
+`.deleted` via `AuditService` on every mutation (finding #30). No
+detail page shows any summary/stats block; the Chapter 4 dashboard
+component family (`DashboardMetric`/`DashboardGrid`/`DashboardCard`) is
+used only on the main dashboard despite already being entity-agnostic
+(finding #31). `PageHeader` (Chapter 1) is used by exactly one of five
+entity detail pages (finding #32).
+
+### Step 2 — Compared against the governing docs
+
+- `PRODUCT_BIBLE.md` §12 (Timeline First) is this chapter's direct,
+  literal mandate: "every entity with meaningful lifecycle state
+  exposes a timeline... reusing the one pattern already proven... never
+  a bespoke per-module history view" — and names the exact gap this
+  chapter closes.
+- `PRODUCT_BIBLE.md` §16 (Platform Extensibility) and §22 (Anti-Patterns,
+  "no duplicated UI") are why this chapter builds one `<Timeline>`
+  component consumed via a per-entity registry, not five separate
+  implementations improved in place.
+- `ARCHITECTURE_LOCK.md` §1.4 (no duplicated business logic) is the
+  direct reason Asset revenue is computed by calling the existing
+  `computeItemLineTotalMinor()` read-time, never a second pricing
+  implementation; §1.5 (historical financial immutability) is why this
+  read-time computation is safe — it derives a number that has never
+  been stored anywhere, rather than recomputing or overriding one that
+  has.
+- `ARCHITECTURE_LOCK.md` Part 2's "new reports/analytics built by
+  reading existing data... reuse canonical computed values" is the
+  explicit permission for the two new summary endpoints this chapter
+  adds (Customer, Asset) — extensions of an existing seam, not new
+  backend architecture.
+- `PRODUCT_BIBLE.md` §7 (Simplicity Rule) and §23/§24 (Customer Value
+  Rule, Decision Filter) are why every named example metric with no
+  real underlying data (overdue invoices, payment reliability,
+  maintenance cost, utilization) is a documented gap, not an
+  approximated or fabricated number.
+- `PRODUCT_BIBLE.md` §17/§18 (Plugin-First, Marketplace Readiness) and
+  §3 (Universal Rental Philosophy) are the direct reason the Timeline
+  event-kind registry and Summary stat definitions are per-entity
+  configuration objects the shared components consume, never hardcoded
+  branches inside the components — the same test as every other
+  chapter: would this design still work for an apartment, a boat, or a
+  medical device the product doesn't support yet?
+- `UX_PRINCIPLES.md` rule 13 (debounced search), rule 14 (pagination
+  disappears at zero), and rule 24 (a record's status renders
+  identically everywhere) all apply directly to the Timeline's
+  search/filter UI and status badges.
+
+### Step 3 — Design Rationale
+
+1. **One generic `TimelineEvent<TType extends string>` type, shared by
+   backend and frontend, replacing five independently-declared but
+   structurally identical interfaces.** `packages/shared/src/timeline.ts`
+   exports the generic; every entity's existing `*TimelineEvent`
+   interface becomes a one-line alias (`export type
+AssetTimelineEvent = TimelineEvent<AssetTimelineEventType>`) instead
+   of a duplicated four-field declaration — a pure type-level
+   refactor, zero runtime behavior change, matching
+   `ARCHITECTURE_LOCK.md` §1.4.
+2. **Backend method/route names are not renamed.** `timeline()`/
+   `history()` and their routes stay exactly as shipped — renaming a
+   tested, working, already-public API surface with no functional
+   necessity would violate `ARCHITECTURE_LOCK.md`'s "no broad rewrite
+   without a specific, stated reason." The frontend's `<Timeline>`
+   component is what unifies the _experience_; it doesn't require the
+   _routes_ to match.
+3. **Customers gets a real, working `timeline()` method and endpoint —
+   not a stub.** `CustomersService.timeline()` uses an
+   `AUDIT_ACTION_TO_TIMELINE_TYPE` map, same as Quotes/Documents — but
+   unlike those, no synthetic `created` event is needed: `customer.created`
+   is already an audited action (logged since `CustomersService.create()`
+   shipped), so all three event types (`created`/`updated`/`deleted`)
+   come from real `AuditLog` rows with a real `actorUserId`, which is
+   strictly more accurate than a synthetic event. No `CustomerStatusHistory`
+   exists (Customer has no status-transition lifecycle worth a history
+   table), so unlike Asset/Rental/Quote/Document, Customer's timeline
+   has no `status_changed` source — an honest, documented asymmetry,
+   not an oversight.
+4. **`<Timeline>` is registry-driven, not a component with five
+   `if (entityType === ...)` branches.** Each entity supplies a small
+   `TimelineEventRegistry<TType>` (`Record<TType, { icon: LucideIcon;
+labelKey: string; tone?: "success" | "warning" | "destructive" }>`)
+   — the same "registry over hardcoding" shape already established for
+   `QuickActionDefinition`/`SearchProvider` in Chapter 5. Adding a
+   sixth entity (or a sixth event kind to an existing entity) means
+   adding a registry entry, never touching `<Timeline>` itself — the
+   literal "nothing should require redesign later" instruction.
+5. **Search, filter, and grouping are client-side, not new backend
+   query parameters.** Every timeline array is bounded by one entity's
+   real lifecycle (dozens of events at most, not thousands) — adding
+   `?search=`/`?type=`/pagination to four-plus backend endpoints for
+   client-side-sized data would be new backend surface area with no
+   real correctness benefit, and `ARCHITECTURE_LOCK.md` Part 2 already
+   favors reading existing data over new endpoints where it's
+   sufficient.
+6. **Timeline items with a related record navigate to it in one click;
+   they do not render inline PDF/image/email previews.** No inline
+   binary preview widget exists anywhere in the product today
+   (`UI_RESEARCH.md` finding #34) — building one would be a
+   substantially larger, separate undertaking. The spec's literal
+   requirement ("must open its related entity with one click") is
+   satisfied by navigation, honestly, without fabricating a preview
+   capability that doesn't exist.
+7. **Entity Summary reuses Chapter 4's `DashboardMetric`/`DashboardGrid`/
+   `DashboardCard` as-is — no new, parallel "summary" component
+   family.** Their props were already entity-agnostic; the only thing
+   missing was a second consumer. Reusing them on Customer/Rental/Asset
+   detail pages is `PRODUCT_BIBLE.md` §16's extension-of-an-existing-
+   seam, applied literally.
+8. **Only Customer and Asset get a new backend `summary` endpoint;
+   Rental's summary is computed entirely client-side from data the
+   detail page already fetches.** Rental Summary shows total deposit
+   (summed from `Rental.items`, not shown anywhere else on the page)
+   and days remaining (derived, ACTIVE rentals only) — both properties
+   of the one already-loaded `Rental` + `Rental.items` record, not
+   aggregates across many records, so a new endpoint would be pure
+   overhead. Planned start/end and status are deliberately _not_
+   duplicated into the summary strip — they're already shown in the
+   page's existing detail card. Customer/Asset summaries genuinely
+   aggregate across many other records (rentals, rental items), which
+   is what a new, tightly-scoped endpoint is for.
+9. **Every named example metric with no real underlying data is a
+   documented gap, never approximated.** "Overdue invoices," "Invoice
+   paid," "Payment reliability" (no Invoices/Payments module — `VISION.md`:
+   "Planned, later phase"), "Maintenance cost," "Utilization %" (no
+   maintenance-cost tracking on `Asset`) are named in "What Chapter 6
+   does not build" below, not silently dropped or faked with a
+   placeholder number.
+10. **A new Settings page lists every registered shortcut, complementing
+    — not replacing — the `Shift+?` modal.** Both read from the same
+    `useAppShortcuts()` registry (Chapter 5); the page is reachable via
+    normal navigation for a user who doesn't already know the modal's
+    shortcut exists, per this chapter's own discoverability
+    instruction ("power-user features must never become hidden
+    features").
+11. **Quote and Document Summary are a documented, deliberate
+    non-goal for this chapter, not an oversight.** The reusable
+    component makes adding them later a small, bounded addition (one
+    new summary endpoint + one registry-driven consumption, following
+    the exact Customer/Asset pattern) — named explicitly so it's never
+    mistaken for a gap nobody noticed.
+
+### What Chapter 6 builds
+
+- `packages/shared/src/timeline.ts`: the generic `TimelineEvent<TType>`
+  envelope type.
+- `apps/api/src/customers/`: `timeline.types.ts`
+  (`CustomerTimelineEventType`, `CustomerTimelineEvent`),
+  `summary.types.ts` (`CustomerSummary`), `CustomersService.timeline()`
+  - `.summary()`, `GET tenants/:tenantId/customers/:id/timeline` and
+    `.../summary` — no permission decorator, matching every other route
+    already on `CustomersController` (it has `TenantGuard` only, no
+    `PermissionsGuard` — Customers has no granular permission model, see
+    `UI_AUDIT.md` finding #4).
+- `apps/api/src/assets/`: `summary.types.ts` (`AssetSummary`),
+  `AssetsService.summary()` and `GET .../assets/:id/summary` (gated
+  `assets.read`, matching the existing `timeline` route's permission),
+  reusing `computeItemLineTotalMinor()` read-time for revenue, never a
+  stored/recomputed total.
+- Existing `assets`/`rentals`/`quotes`/`documents` timeline type files
+  refactored onto the shared generic (behavior-identical).
+- `apps/web/src/types/timeline.ts` (frontend mirror of the generic
+  type) and `apps/web/src/lib/timeline-registries.ts` — one file
+  exporting one registry constant per entity.
+- `apps/web/src/components/timeline/timeline.tsx`: the one shared,
+  reusable Timeline — icon/label/tone by kind, day-grouping, search
+  (also serves as an implicit kind filter, since kind labels are
+  searchable), arrow-key navigation between items, one-click
+  navigation via `getHref`, loading/empty states, dark mode,
+  responsive/mobile, a `DismissibleHint` on first use.
+- New `useCustomerTimeline`/`useCustomerSummary` functions added to
+  the existing `hooks/use-customers.ts`, and `useAssetSummary` added
+  to the existing `hooks/use-assets.ts` — not separate new hook files,
+  matching how every other entity's timeline hook already lives
+  alongside its sibling hooks. Existing
+  `use{Asset,Rental,Quote,Document}Timeline` hooks unchanged (still
+  hit the existing, unrenamed routes).
+- Customers, Assets, Rentals, Quotes, Documents detail pages migrated
+  onto `<Timeline>`, replacing every hand-rolled `<ol>` block.
+- Customer detail page gets a real `PageHeader` for the first time
+  (currently has none) plus an Entity Summary strip; Rental and Asset
+  detail pages each gain an Entity Summary strip below their existing
+  header.
+- `apps/web/src/app/app/settings/shortcuts/page.tsx` — new settings
+  page listing every registered shortcut, added to the settings nav.
+- New `DismissibleHint` instance(s) (Chapter 5's existing, reusable
+  primitive — no new discoverability system) and platform-aware
+  keyboard badges on 1-2 more actionable controls.
+- New localization keys across all six locales; component/hook tests
+  for every new piece.
+
+### What Chapter 6 does not build (documented gaps, not fabricated)
+
+- **Overdue invoices, invoice-paid status, payment reliability** — no
+  Invoices/Payments module exists (`VISION.md`: "Planned, later
+  phase"). Not approximated from any proxy value.
+- **Maintenance cost, utilization %** — no maintenance-cost tracking or
+  time-in-status aggregation exists on `Asset` today. Not
+  approximated.
+- **Inline PDF/image/email preview inside Timeline items** — no such
+  widget exists anywhere in the product (`UI_RESEARCH.md` finding
+  #34); Timeline items navigate to the related entity instead, which
+  is what "open... with one click" literally requires.
+- **Quote Summary, Document Summary** — the reusable component and
+  backend pattern make this a small future addition, deliberately not
+  built now (design decision 11).
+- **Any real email sending/receiving/thread history/open-tracking
+  implementation** — `EmailProvider`/`EmailService` remain exactly as
+  shipped; `DocumentEmailDelivery` remains the only per-entity
+  delivery-history model. This chapter documents the seam a future
+  `CustomerEmailDelivery`/`RentalEmailDelivery` would follow
+  (structurally identical to `DocumentEmailDelivery`) — no new model,
+  no new provider, no new UI.
+- **Apartment/room/office/warehouse/parking/storage rental object
+  types** — not built; every component this chapter ships (Timeline,
+  Summary) is verified against the Universal Rental Philosophy test
+  (Section 3) and works identically regardless of what `Asset`
+  represents, without a single line of industry-specific logic.
+- **Any AI implementation** — the Timeline event registry and Summary
+  stat definitions are the same "registry over hardcoding" extension
+  point `PRODUCT_BIBLE.md` §20 already documents; no AI code is
+  written.
+
 ## Later chapters (named, not detailed — scoped when reached)
 
-- **Chapter 6 — Forms & Wizards:** reconcile `RentalWizard`/
+- **Chapter 7 — Forms & Wizards:** reconcile `RentalWizard`/
   `QuoteWizard` against `UI_PATTERNS.md`'s Wizard/Stepper/Forms specs.
-- **Chapter 7 — Settings & Account:** profile/account pages, the
+- **Chapter 8 — Settings & Account:** profile/account pages, the
   language-switcher's live wiring, notification preferences once a
   backend exists.
 

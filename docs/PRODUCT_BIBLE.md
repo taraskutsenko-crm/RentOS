@@ -455,11 +455,12 @@ single, chronological view merging its status history and audit
 trail — reusing the one pattern already proven across the product,
 never a bespoke per-module history view.
 
-- **Already real:** Assets, Rentals, Quotes, and Documents each render
-  a merged timeline of status changes and audit events (`.timeline()`
-  service methods, `timeline.types.ts` per module) — the same shape,
-  the same chronological-merge approach, independently implemented
-  per module but never independently _designed_.
+- **Already real:** Customers, Assets, Rentals, Quotes, and Documents
+  each render a merged timeline of status changes and audit events
+  (`.timeline()` service methods, `timeline.types.ts` per module,
+  sharing one `TimelineEvent<TType>` envelope generic) through one
+  shared, registry-driven `<Timeline>` frontend component — not five
+  independently hand-rolled renderings of the same shape.
 - **The rule:** a new entity with more than one lifecycle state
   (anything with a `status` column, in practice) gets a timeline built
   the same way, not a "recent activity" widget invented fresh for that

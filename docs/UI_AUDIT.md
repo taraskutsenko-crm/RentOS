@@ -516,6 +516,78 @@ or extends and should document with the same rigor as every other
 pattern in that file (Purpose/When to use/Visual/Keyboard/Loading/
 Empty/Error/Disabled/Mobile behavior, where applicable).
 
+## Addendum — Timeline, Summary, Discoverability (Chapter 6)
+
+### 37. Every entity's timeline is a separate, hand-rolled UI with zero shared implementation
+
+`apps/web/src/app/app/{assets,rentals,quotes,documents}/[id]/page.tsx`
+each independently render the identical `<ol>`/`<li>` markup — same
+Tailwind classes, same structure, copy-pasted four times. None reads
+`event.data`; none shows an icon or color by event kind; none is
+click-through-navigable. This is `PRODUCT_BIBLE.md` §12's "never
+independently designed" gap made concrete, and directly contradicts
+`PRODUCT_BIBLE.md` §22's "no duplicate UI" rule.
+
+### 38. Customers has no timeline at all, despite already writing the audit trail one needs
+
+`customers.service.ts` logs `customer.created`/`customer.updated`/
+`customer.deleted` via `AuditService` on every mutation — real,
+already-written data with no UI or endpoint surfacing it. The Customer
+detail page (`apps/web/src/app/app/customers/[id]/page.tsx`) is a bare
+edit form: no `PageHeader`, no timeline, no summary, no `<h1>` even.
+
+### 39. No entity detail page shows any summary/stats — the Chapter 4 dashboard components have never been reused elsewhere
+
+`DashboardMetric`/`DashboardGrid`/`DashboardCard` usage is 100%
+confined to `apps/app/page.tsx`. Their props are already
+entity-agnostic (`label`, `value`, `isLoading`, `isError`, `href`) —
+nothing in the components themselves prevents reuse on a detail page;
+only the fact that no page has tried yet.
+
+### 40. `PageHeader` is used by one of five entity detail pages
+
+Only Rentals. Assets/Quotes/Documents hand-roll a bare `<h1>`;
+Customers has neither. A consistent "header, then summary, then
+content" layout cannot exist while headers themselves are
+inconsistent — this predates Chapter 6 but blocks it directly.
+
+### 41. Asset-level revenue has never been computed anywhere — but is safely derivable, not fabricated
+
+No stored field or endpoint currently answers "how much revenue has
+this asset generated." It's derivable, without recomputing or risking
+disagreement with any stored total, by summing the existing pure
+`computeItemLineTotalMinor()` function read-time over the asset's
+frozen `RentalItem` rows (`apps/api/src/rentals/rental-pricing.util.ts`)
+— reusing the canonical pricing function, not forking it
+(`ARCHITECTURE_LOCK.md` §1.4).
+
+### 42. Some example Summary metrics named in product direction have no underlying data and must be documented as gaps, not built
+
+"Overdue invoices," "Invoice paid," and "Payment reliability" require
+an Invoices/Payments module that does not exist (`VISION.md`: "Planned,
+later phase"). "Maintenance cost" and "Utilization %" require
+maintenance-cost tracking that does not exist on `Asset`. Building any
+of these would mean fabricated or approximated numbers — forbidden by
+this chapter's own "no fake data" instruction. These are named,
+honest, documented gaps for a future task, not omissions to hide.
+
+### 43. No inline PDF/image/email preview widget exists anywhere — Documents' HTML-in-`<iframe>` is the closest, and it is not that
+
+The only "preview" in the product renders server-generated HTML in an
+`<iframe srcDoc>`, not a binary PDF or image viewer. A Timeline that
+tried to render inline previews for every attachment/document/email
+event would be building this widget for the first time, a
+substantially larger undertaking than the Timeline component itself —
+out of this chapter's bounded scope; click-through-to-the-entity is
+the shipped behavior instead.
+
+### 44. No settings page lists keyboard shortcuts
+
+Only `ShortcutsHelpDialog` (Chapter 5, a `Shift+?` modal) exists.
+`apps/app/settings/` has four subpages, none shortcut-related — a
+user who doesn't already know `Shift+?` exists has no way to discover
+the shortcut list via normal navigation.
+
 ## Summary table
 
 | Area                      | Current state                                                                      | Target (see `UI_REDESIGN_PLAN.md`)                                                                                                 |
@@ -531,3 +603,6 @@ Empty/Error/Disabled/Mobile behavior, where applicable).
 | Dashboard                 | Staff: stub. Portal: real but ad hoc, no shared components, no skeleton            | Chapter 4 — shared `DashboardCard`/`DashboardMetric`/etc., real KPIs from existing endpoints, both pages reuse the same components |
 | Tenant switcher           | Full-page navigation                                                               | In-header dropdown, reusing existing hooks                                                                                         |
 | Productivity layer        | Command Palette is navigate-only, opens empty; no recent/pinned/shortcuts registry | Chapter 5 — unified palette (recent, pinned, quick actions, search providers), keyboard shortcut registry, discoverability hints   |
+| Entity timeline           | 4 hand-rolled, independently-implemented `<ol>` blocks; Customers has none         | Chapter 6 — one shared `<Timeline>` reused by all 5 entities, icon/color by kind, search/filter/group, click-through navigation    |
+| Entity summary            | No detail page shows any summary/stats block                                       | Chapter 6 — Customer/Rental/Asset summaries reusing Chapter 4's dashboard components, real data only, honest gaps documented       |
+| Shortcuts discoverability | Modal only (`Shift+?`)                                                             | Chapter 6 — adds a Settings page listing every shortcut, reachable via normal navigation                                           |

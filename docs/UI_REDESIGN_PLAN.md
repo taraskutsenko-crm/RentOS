@@ -907,7 +907,7 @@ exists anywhere (finding #33) — `use-sidebar-state.ts`/
 `useSyncExternalStore` + `localStorage` pattern for whatever this
 chapter builds, though both existing stores are deliberately
 browser-global rather than per-user. No discoverability/hint system
-exists anywhere (finding #34, matching `PRODUCT_BIBLE.md` §5's own
+exists anywhere (finding #34, matching `PRODUCT_BIBLE.md` §8's own
 gap list). The sidebar's `⌘K` badge is hardcoded to the Mac symbol
 regardless of platform (finding #35). `UI_PATTERNS.md` already
 references a "Command Palette" pattern entry that doesn't exist
@@ -915,14 +915,14 @@ references a "Command Palette" pattern entry that doesn't exist
 
 ### Step 2 — Compared against the governing docs
 
-- `PRODUCT_BIBLE.md` §3 (Zero Friction), §4 (One Click Rule), §5
-  (Productivity Philosophy), §6 (Power User Experience), §7 (AI
-  Readiness), and §9 (Discoverability) are, collectively, this
-  chapter's entire brief — every numbered build item in the user's own
-  instruction maps onto one of these sections, and §7 in particular is
-  the direct source of this chapter's "extend existing typed seams,
-  never build a parallel AI-only code path" constraint.
-- `PRODUCT_BIBLE.md` §10 (Anti-Patterns) — "no duplicated UI," "no
+- `PRODUCT_BIBLE.md` §5 (Zero Friction), §6 (One Click Rule), §8
+  (Productivity Philosophy), §9 (Power User Experience), §20
+  (AI-Ready Architecture), and §11 (Discoverability) are, collectively,
+  this chapter's entire brief — every numbered build item in the
+  user's own instruction maps onto one of these sections, and §20 in
+  particular is the direct source of this chapter's "extend existing
+  typed seams, never build a parallel AI-only code path" constraint.
+- `PRODUCT_BIBLE.md` §22 (Anti-Patterns) — "no duplicated UI," "no
   duplicated implementations" — is the direct reason Favorites and
   Pinned Items (design decision 7 below) share one underlying store
   instead of two nearly-identical ones, and the reason the Command
@@ -1025,7 +1025,7 @@ permission, search(query, tenantId) }`; the palette iterates the
    entity types," "support customers/assets/rentals/documents/future
    entities"). Building two parallel, nearly-identical localStorage
    stores under two names would directly violate this chapter's own
-   "no duplicated implementations" rule and `PRODUCT_BIBLE.md` §10.
+   "no duplicated implementations" rule and `PRODUCT_BIBLE.md` §22.
    The single store is exposed as `usePinnedItems()`
    (`hooks/use-pinned-items.ts`), and the Command Palette surfaces it
    under one "Pinned" section (starred) — the product-facing "Favorite"
@@ -1043,11 +1043,11 @@ permission, search(query, tenantId) }`; the palette iterates the
    jump anywhere"), dismissible, remembered per user
    (`localStorage`, `rentos_dismissed_hints:<userId>`), never shown
    again once dismissed, never blocking interaction with anything
-   underneath it — the exact shape `PRODUCT_BIBLE.md` §5's "teach
+   underneath it — the exact shape `PRODUCT_BIBLE.md` §8's "teach
    through usage, never a blocking tutorial" and `UI_RESEARCH.md`
    finding #26 require. This chapter does not build a general
    onboarding/coaching engine, adaptive difficulty, or a checklist
-   flow — `PRODUCT_BIBLE.md` §5 already names those as real, separate,
+   flow — `PRODUCT_BIBLE.md` §8 already names those as real, separate,
    larger gaps for a future chapter, and building a full coaching
    system to justify one hint would be exactly the kind of
    disproportionate scope `ARCHITECTURE_LOCK.md`'s "no broad rewrite...
@@ -1119,7 +1119,7 @@ permission, search(query, tenantId) }`; the palette iterates the
   a documentation comment are added (design decision 9); no AI code
   runs anywhere in this chapter's diff.
 - **A general onboarding/coaching engine, adaptive difficulty, or
-  first-run checklist** — `PRODUCT_BIBLE.md` §5 already names these as
+  first-run checklist** — `PRODUCT_BIBLE.md` §8 already names these as
   real, larger gaps; this chapter builds the one reusable hint
   primitive and one real, honest instance of it, not a coaching system
   built to justify itself.

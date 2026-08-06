@@ -397,7 +397,9 @@ wired in later.
 
 ## Roadmap
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for the full, status-tagged
+See [docs/PRODUCT_BIBLE.md](docs/PRODUCT_BIBLE.md) for the product
+philosophy and decision framework every feature is checked against,
+[docs/ROADMAP.md](docs/ROADMAP.md) for the full, status-tagged
 roadmap, including the agreed TASK-0010–TASK-0020 sequence, and
 [docs/ARCHITECTURE_LOCK.md](docs/ARCHITECTURE_LOCK.md) for the
 governance rules every future task must follow.

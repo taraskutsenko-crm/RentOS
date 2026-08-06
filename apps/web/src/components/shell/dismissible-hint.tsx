@@ -10,7 +10,7 @@ import { useDismissibleHint } from "../../hooks/use-dismissible-hint";
  * One reusable, non-modal callout — dismissed once, remembered forever,
  * never blocking anything underneath it. See
  * docs/UI_REDESIGN_PLAN.md Chapter 5, design decision 7 and
- * docs/PRODUCT_BIBLE.md §5/§9 ("teach through usage, never a blocking
+ * docs/PRODUCT_BIBLE.md §8/§11 ("teach through usage, never a blocking
  * tutorial"). Any future hint reuses this component with a new `hintId`.
  */
 export function DismissibleHint({

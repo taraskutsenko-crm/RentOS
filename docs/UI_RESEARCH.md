@@ -256,8 +256,8 @@ the principles above.
 ## Productivity-layer patterns — Chapter 5 addendum
 
 New findings for TASK-0010 Part 2 Chapter 5 (Productivity Layer),
-gathered against `docs/PRODUCT_BIBLE.md` §5–7 (Productivity
-Philosophy, Power User Experience, AI Readiness) — the first chapter
+gathered against `docs/PRODUCT_BIBLE.md` §8, §9, and §20 (Productivity
+Philosophy, Power User Experience, AI-Ready Architecture) — the first chapter
 whose research is checked against `PRODUCT_BIBLE.md` before the
 brand/pattern/UX documents, per that document's own reading order.
 
@@ -301,7 +301,7 @@ brand/pattern/UX documents, per that document's own reading order.
     reference product's own copilot/AI-assist features (Notion AI,
     Linear's agents, GitHub Copilot Workspace) call the identical
     command/action/search objects the human command palette already
-    exposes — this is the concrete shape behind `PRODUCT_BIBLE.md` §7's
+    exposes — this is the concrete shape behind `PRODUCT_BIBLE.md` §20's
     "without rewriting UI architecture" requirement, not a separate
     research finding: a well-typed `CommandItem`/`SearchProvider`/
     `QuickActionDefinition` registry _is_ the AI extension point,
@@ -313,7 +313,7 @@ brand/pattern/UX documents, per that document's own reading order.
     coach-mark pattern is a small, non-modal callout anchored to the
     real control it's teaching (never a full-screen takeover), with a
     persisted per-user dismissal so it never reappears once seen. This
-    is the concrete shape `PRODUCT_BIBLE.md` §5's "teach through usage,
+    is the concrete shape `PRODUCT_BIBLE.md` §8's "teach through usage,
     never a blocking tutorial" principle already commits to — Chapter 5
     is the first chapter to build any part of it.
 

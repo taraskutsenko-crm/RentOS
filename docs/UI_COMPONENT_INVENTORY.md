@@ -236,7 +236,7 @@ design rationale behind every decision below.
 | `components/shell/pin-button.tsx`                                         | `PinButton` — generic, entity-type-agnostic; instantiated on the 5 entity detail pages (Customers, Assets, Rentals, Quotes, Documents).                                                                                                              |
 | `components/shell/command-palette.tsx`                                    | Rebuilt — never opens empty (Recent → Pinned → Quick Actions → Commands → Navigation when idle; Quick Actions → Pinned → Commands → Navigation → live Search results while typing), debounced multi-provider search, permission-filtered throughout. |
 | `components/shell/shortcuts-help-dialog.tsx`                              | `Shift+?` surface — groups every registered shortcut by `groupKey`, platform-aware key rendering (`⌘` vs `Ctrl`).                                                                                                                                    |
-| `hooks/use-dismissible-hint.ts` / `components/shell/dismissible-hint.tsx` | Generic, reusable "dismissed once, remembered forever, never blocking" primitive — not a coaching/onboarding engine (`PRODUCT_BIBLE.md` §5 names that as a separate, larger, un-built gap).                                                          |
+| `hooks/use-dismissible-hint.ts` / `components/shell/dismissible-hint.tsx` | Generic, reusable "dismissed once, remembered forever, never blocking" primitive — not a coaching/onboarding engine (`PRODUCT_BIBLE.md` §8 names that as a separate, larger, un-built gap).                                                          |
 | `components/shell/command-palette-hint.tsx`                               | The one real hint instance built on the primitive above: the `Cmd/Ctrl+K` tip in the sidebar.                                                                                                                                                        |
 | `lib/platform.ts`                                                         | `isMacPlatform()` / `formatShortcutKeys()` — also fixed a real pre-existing bug where the sidebar's `⌘K` badge was hardcoded regardless of platform.                                                                                                 |
 | `lib/command-types.ts`                                                    | Rewritten `CommandItem` (kinds: `navigate`/`action`/`recent`/`pinned`/`search-result`) — every kind already carries a plain `href` or `run()` closure a future AI agent could call without DOM interaction (design decision 9; no AI code written).  |
@@ -256,7 +256,7 @@ and the palette's Quick Actions section.
   decision 9).
 - **A general onboarding/coaching engine** — `DismissibleHint` is one
   reusable primitive with one real instance, not a tour/tooltip
-  system; `PRODUCT_BIBLE.md` §5 already names that as a separate gap.
+  system; `PRODUCT_BIBLE.md` §8 already names that as a separate gap.
 
 ## Icons
 

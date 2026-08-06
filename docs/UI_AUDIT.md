@@ -492,7 +492,7 @@ existing precedents, not an oversight.
 Confirmed by grep for "hint"/"coach"/"tooltip"/"onboarding" across
 `apps/web/src` (excluding third-party Radix internals) — zero matches
 for any in-product teaching surface. This matches
-`PRODUCT_BIBLE.md`'s own Section 5 finding, restated here as a UI
+`PRODUCT_BIBLE.md`'s own Section 8 finding, restated here as a UI
 finding: Havelio has no mechanism today to teach a user the Command
 Palette exists, or that a keyboard shortcut replaces a click they just
 made with the mouse.

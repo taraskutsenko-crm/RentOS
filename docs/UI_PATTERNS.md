@@ -456,7 +456,7 @@ full-width-friendly.
 **Purpose:** one unified surface for global search, navigation, quick
 actions, and commands — reachable from anywhere in the product without
 using the mouse. See docs/UI_REDESIGN_PLAN.md Chapter 5 for the full
-design rationale and docs/PRODUCT_BIBLE.md §6 (Power User Experience).
+design rationale and docs/PRODUCT_BIBLE.md §9 (Power User Experience).
 
 **When to use:** the single global instance mounted once in
 `AppLayout` — never a second, page-scoped palette instance.
@@ -505,8 +505,8 @@ responsive at any width.
 ## Keyboard shortcuts
 
 **Purpose:** let a returning user complete any common action without
-reaching for the mouse — see docs/PRODUCT_BIBLE.md §4 (One Click Rule)
-and §6 (Power User Experience).
+reaching for the mouse — see docs/PRODUCT_BIBLE.md §6 (One Click Rule)
+and §9 (Power User Experience).
 
 **When to use:** any action reachable from the global shell (open the
 palette, create something, jump to a top-level page). Registered once

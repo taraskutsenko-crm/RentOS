@@ -91,9 +91,11 @@ prior conversations.
 
 RentOS is a multi-tenant SaaS "Rental Operating System" — see
 [VISION.md](VISION.md) for the full product framing. This file is the
-practical, technical resume-work reference; VISION/ROADMAP explain _why_
-and _what's next_, PRODUCT_PRINCIPLES explains _how we decide_, this file
-explains _how the code is actually laid out and how to work in it_.
+practical, technical resume-work reference;
+[PRODUCT_BIBLE.md](PRODUCT_BIBLE.md) explains the product philosophy
+and decision framework, VISION/ROADMAP explain _why_ and _what's
+next_, PRODUCT_PRINCIPLES explains _how we decide_, this file explains
+_how the code is actually laid out and how to work in it_.
 
 ## Technology stack
 

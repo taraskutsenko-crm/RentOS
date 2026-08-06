@@ -7,10 +7,14 @@ Dates below are commit-history-derived where available; where the
 repository doesn't record a completion date, none is invented.
 
 > Before starting any task on this roadmap, read
-> [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md) — it defines which
-> parts of the architecture below are locked, which are extensible,
-> which require a new ADR before implementation, and the verification
-> contract every task must satisfy before it's considered done.
+> [`PRODUCT_BIBLE.md`](PRODUCT_BIBLE.md) first, then
+> [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md). `PRODUCT_BIBLE.md` is
+> the highest-level product document — vision, philosophy, and the
+> decision framework every feature is checked against.
+> `ARCHITECTURE_LOCK.md` defines which parts of the architecture below
+> are locked, which are extensible, which require a new ADR before
+> implementation, and the verification contract every task must
+> satisfy before it's considered done.
 
 ## Completed
 

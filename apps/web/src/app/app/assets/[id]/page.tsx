@@ -8,9 +8,12 @@ import { useTranslation } from "react-i18next";
 
 import { AssetFilesManager } from "../../../../components/assets/asset-files-manager";
 import { PinButton } from "../../../../components/shell/pin-button";
+import { DashboardGrid, DashboardMetric } from "../../../../components/dashboard";
+import { Timeline } from "../../../../components/timeline/timeline";
 import { useAssetStatuses } from "../../../../hooks/use-asset-statuses";
 import {
   useAsset,
+  useAssetSummary,
   useAssetTimeline,
   useChangeAssetLocation,
   useChangeAssetStatus,
@@ -20,6 +23,7 @@ import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import { formatMoney } from "../../../../lib/money";
+import { ASSET_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 
 export default function AssetDetailPage() {
   const { t } = useTranslation();
@@ -29,6 +33,7 @@ export default function AssetDetailPage() {
 
   const { data: asset, isLoading } = useAsset(tenantId, params.id);
   const { data: timeline } = useAssetTimeline(tenantId, params.id);
+  const { data: summary } = useAssetSummary(tenantId, params.id);
   const trackRecentItem = useTrackRecentItem();
 
   useEffect(() => {
@@ -118,6 +123,28 @@ export default function AssetDetailPage() {
           )}
         </div>
       </div>
+
+      <DashboardGrid className="grid-cols-2 sm:grid-cols-2 lg:grid-cols-2">
+        <DashboardMetric
+          label={t("asset.summary.totalRentals")}
+          value={summary?.totalRentals ?? 0}
+          isLoading={!summary}
+        />
+        <Card>
+          <CardContent className="p-4">
+            {summary ? (
+              <p className="text-2xl font-semibold">
+                {formatMoney(summary.revenueGeneratedMinor, summary.currency)}
+              </p>
+            ) : (
+              <div role="status" aria-label={t("common.loading")}>
+                <div className="bg-muted h-8 w-24 animate-pulse rounded" />
+              </div>
+            )}
+            <p className="text-muted-foreground text-xs">{t("asset.summary.revenueGenerated")}</p>
+          </CardContent>
+        </Card>
+      </DashboardGrid>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
@@ -297,22 +324,16 @@ export default function AssetDetailPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>{t("asset.sections.timeline")}</CardTitle>
+              <CardTitle>{t("timeline.title")}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ol className="flex flex-col gap-3 text-sm">
-                {timeline?.map((event) => (
-                  <li key={event.id} className="border-l-2 pl-3">
-                    <p className="font-medium">{t(`asset.timeline.${event.type}`)}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {new Date(event.occurredAt).toLocaleString()}
-                    </p>
-                  </li>
-                ))}
-                {(!timeline || timeline.length === 0) && (
-                  <p className="text-muted-foreground text-sm">{t("asset.noTimelineEvents")}</p>
-                )}
-              </ol>
+              <Timeline
+                events={timeline}
+                registry={ASSET_TIMELINE_REGISTRY}
+                isLoading={!timeline}
+                emptyLabel={t("timeline.empty")}
+                searchPlaceholder={t("timeline.searchPlaceholder")}
+              />
             </CardContent>
           </Card>
         </div>

@@ -1,5 +1,6 @@
 import type { Asset } from "./asset";
 import type { Customer } from "./customer";
+import type { TimelineEvent } from "./timeline";
 
 export type DocumentType =
   | "QUOTE"
@@ -126,13 +127,7 @@ export type DocumentTimelineEventType =
   | "signature_requested"
   | "signature_status_changed";
 
-export interface DocumentTimelineEvent {
-  id: string;
-  type: DocumentTimelineEventType;
-  occurredAt: string;
-  actorUserId: string | null;
-  data: Record<string, unknown>;
-}
+export type DocumentTimelineEvent = TimelineEvent<DocumentTimelineEventType>;
 
 export interface DocumentPreview {
   documentNumber: string;

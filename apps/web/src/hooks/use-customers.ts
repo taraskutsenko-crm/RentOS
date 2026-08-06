@@ -3,7 +3,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiClient } from "../lib/api-client";
-import type { Customer, CustomerStatus, PaginatedCustomers } from "../types/customer";
+import type {
+  Customer,
+  CustomerStatus,
+  CustomerSummary,
+  CustomerTimelineEvent,
+  PaginatedCustomers,
+} from "../types/customer";
 
 export interface CustomerListParams {
   page?: number | undefined;
@@ -46,6 +52,23 @@ export function useCustomer(tenantId: string | null, id: string | null) {
   return useQuery({
     queryKey: ["customers", tenantId, "detail", id],
     queryFn: () => apiClient.get<Customer>(`/tenants/${tenantId}/customers/${id}`),
+    enabled: !!tenantId && !!id,
+  });
+}
+
+export function useCustomerTimeline(tenantId: string | null, id: string | null) {
+  return useQuery({
+    queryKey: ["customers", tenantId, "timeline", id],
+    queryFn: () =>
+      apiClient.get<CustomerTimelineEvent[]>(`/tenants/${tenantId}/customers/${id}/timeline`),
+    enabled: !!tenantId && !!id,
+  });
+}
+
+export function useCustomerSummary(tenantId: string | null, id: string | null) {
+  return useQuery({
+    queryKey: ["customers", tenantId, "summary", id],
+    queryFn: () => apiClient.get<CustomerSummary>(`/tenants/${tenantId}/customers/${id}/summary`),
     enabled: !!tenantId && !!id,
   });
 }

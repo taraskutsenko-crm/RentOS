@@ -1,3 +1,5 @@
+import type { TimelineEvent } from "./timeline";
+
 export type AssetFieldType =
   | "TEXT"
   | "TEXTAREA"
@@ -178,10 +180,12 @@ export type AssetTimelineEventType =
   | "image_uploaded"
   | "document_uploaded";
 
-export interface AssetTimelineEvent {
-  id: string;
-  type: AssetTimelineEventType;
-  occurredAt: string;
-  actorUserId: string | null;
-  data: Record<string, unknown>;
+export type AssetTimelineEvent = TimelineEvent<AssetTimelineEventType>;
+
+export interface AssetSummary {
+  totalRentals: number;
+  revenueGeneratedMinor: number;
+  currency: string | null;
+  currentStatus: { id: string; code: string; name: string };
+  currentLocation: string | null;
 }

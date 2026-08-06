@@ -7,11 +7,21 @@ import { useTranslation } from "react-i18next";
 
 import { CustomerForm } from "../../../../components/customers/customer-form";
 import { CustomerPortalPanel } from "../../../../components/customers/customer-portal-panel";
+import { DashboardGrid, DashboardMetric } from "../../../../components/dashboard";
+import { PageHeader } from "../../../../components/shell/page-header";
 import { PinButton } from "../../../../components/shell/pin-button";
-import { useCustomer, useUpdateCustomer } from "../../../../hooks/use-customers";
+import { Timeline } from "../../../../components/timeline/timeline";
+import {
+  useCustomer,
+  useCustomerSummary,
+  useCustomerTimeline,
+  useUpdateCustomer,
+} from "../../../../hooks/use-customers";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import { apiErrorKey } from "../../../../lib/api-error-i18n";
+import { formatMoney } from "../../../../lib/money";
+import { CUSTOMER_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 import type { CustomerFormValues } from "../../../../lib/validation";
 
 export default function EditCustomerPage() {
@@ -20,6 +30,8 @@ export default function EditCustomerPage() {
   const params = useParams<{ id: string }>();
   const [tenantId] = useCurrentTenantId();
   const { data: customer, isLoading } = useCustomer(tenantId, params.id);
+  const { data: summary } = useCustomerSummary(tenantId, params.id);
+  const { data: timeline } = useCustomerTimeline(tenantId, params.id);
   const updateCustomer = useUpdateCustomer(tenantId);
   const trackRecentItem = useTrackRecentItem();
 
@@ -45,40 +57,98 @@ export default function EditCustomerPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle>{t("customer.editCustomer")}</CardTitle>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={`${customer.firstName} ${customer.lastName}`}
+        subtitle={t(`customer.status${customer.status === "ACTIVE" ? "Active" : "Inactive"}`)}
+        secondaryActions={
           <PinButton
             entityType="customer"
             entityId={customer.id}
             label={`${customer.firstName} ${customer.lastName}`}
             href={`/app/customers/${customer.id}`}
           />
-        </CardHeader>
-        <CardContent>
-          <CustomerForm
-            initialValues={{
-              firstName: customer.firstName,
-              lastName: customer.lastName,
-              company: customer.company ?? "",
-              phone: customer.phone ?? "",
-              email: customer.email ?? "",
-              vatNumber: customer.vatNumber ?? "",
-              address: customer.address ?? "",
-              notes: customer.notes ?? "",
-              status: customer.status,
-            }}
-            onSubmit={handleSubmit}
-            isPending={updateCustomer.isPending}
-            errorMessage={updateCustomer.isError ? t(apiErrorKey(updateCustomer.error)) : null}
-            submitLabel={t("customer.save")}
-            submittingLabel={t("customer.saving")}
-          />
-        </CardContent>
-      </Card>
+        }
+      />
 
-      {tenantId && <CustomerPortalPanel tenantId={tenantId} customerId={params.id} />}
+      <DashboardGrid>
+        <DashboardMetric
+          label={t("customer.summary.totalRentals")}
+          value={summary?.totalRentals ?? 0}
+          isLoading={!summary}
+        />
+        <DashboardMetric
+          label={t("customer.summary.activeRentals")}
+          value={summary?.activeRentals ?? 0}
+          isLoading={!summary}
+        />
+        <Card>
+          <CardContent className="p-4">
+            {summary ? (
+              <p className="text-2xl font-semibold">
+                {formatMoney(summary.totalRevenueMinor, summary.currency)}
+              </p>
+            ) : (
+              <div role="status" aria-label={t("common.loading")}>
+                <div className="bg-muted h-8 w-24 animate-pulse rounded" />
+              </div>
+            )}
+            <p className="text-muted-foreground text-xs">{t("customer.summary.totalRevenue")}</p>
+          </CardContent>
+        </Card>
+        <DashboardMetric
+          label={t("customer.summary.damageReports")}
+          value={summary?.damageReportsCount ?? 0}
+          isLoading={!summary}
+        />
+      </DashboardGrid>
+
+      <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="flex flex-col gap-6 lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("customer.editCustomer")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CustomerForm
+                initialValues={{
+                  firstName: customer.firstName,
+                  lastName: customer.lastName,
+                  company: customer.company ?? "",
+                  phone: customer.phone ?? "",
+                  email: customer.email ?? "",
+                  vatNumber: customer.vatNumber ?? "",
+                  address: customer.address ?? "",
+                  notes: customer.notes ?? "",
+                  status: customer.status,
+                }}
+                onSubmit={handleSubmit}
+                isPending={updateCustomer.isPending}
+                errorMessage={updateCustomer.isError ? t(apiErrorKey(updateCustomer.error)) : null}
+                submitLabel={t("customer.save")}
+                submittingLabel={t("customer.saving")}
+              />
+            </CardContent>
+          </Card>
+
+          {tenantId && <CustomerPortalPanel tenantId={tenantId} customerId={params.id} />}
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("timeline.title")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Timeline
+              events={timeline}
+              registry={CUSTOMER_TIMELINE_REGISTRY}
+              isLoading={!timeline}
+              emptyLabel={t("timeline.empty")}
+              searchPlaceholder={t("timeline.searchPlaceholder")}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

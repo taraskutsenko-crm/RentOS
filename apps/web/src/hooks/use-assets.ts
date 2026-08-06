@@ -3,7 +3,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiClient } from "../lib/api-client";
-import type { Asset, AssetDetail, AssetTimelineEvent, PaginatedAssets } from "../types/asset";
+import type {
+  Asset,
+  AssetDetail,
+  AssetSummary,
+  AssetTimelineEvent,
+  PaginatedAssets,
+} from "../types/asset";
 
 export interface AssetListParams {
   page?: number | undefined;
@@ -70,6 +76,14 @@ export function useAssetTimeline(tenantId: string | null, id: string | null) {
     queryKey: ["assets", tenantId, "timeline", id],
     queryFn: () =>
       apiClient.get<AssetTimelineEvent[]>(`/tenants/${tenantId}/assets/${id}/timeline`),
+    enabled: !!tenantId && !!id,
+  });
+}
+
+export function useAssetSummary(tenantId: string | null, id: string | null) {
+  return useQuery({
+    queryKey: ["assets", tenantId, "summary", id],
+    queryFn: () => apiClient.get<AssetSummary>(`/tenants/${tenantId}/assets/${id}/summary`),
     enabled: !!tenantId && !!id,
   });
 }

@@ -48,7 +48,8 @@
         "goDocuments": "Ir a Documentos",
         "goQuotes": "Ir a Presupuestos",
         "groupGeneral": "General",
-        "groupNavigation": "Navegación"
+        "groupNavigation": "Navegación",
+        "settingsSubtitle": "Todos los atajos registrados en la aplicación, siempre actualizados."
       },
       "pin": "Fijar",
       "unpin": "Desfijar"
@@ -209,6 +210,17 @@
       "convertToDocument": "Convertir en documento",
       "sendMessage": "Enviar",
       "messagePlaceholder": "Responder a este cliente…"
+    },
+    "timeline": {
+      "created": "Cliente creado",
+      "updated": "Cliente actualizado",
+      "deleted": "Cliente eliminado"
+    },
+    "summary": {
+      "totalRentals": "Alquileres totales",
+      "activeRentals": "Alquileres activos",
+      "totalRevenue": "Ingresos totales",
+      "damageReports": "Informes de daños"
     }
   },
   "asset": {
@@ -297,6 +309,10 @@
       "location_changed": "Ubicación cambiada",
       "image_uploaded": "Imagen subida",
       "document_uploaded": "Documento subido"
+    },
+    "summary": {
+      "totalRentals": "Alquileres totales",
+      "revenueGenerated": "Ingresos generados"
     },
     "documentTypes": {
       "PURCHASE_DOCUMENT": "Documento de compra",
@@ -428,6 +444,10 @@
       "updated": "Alquiler actualizado",
       "status_changed": "Estado cambiado",
       "items_returned": "Elemento(s) devuelto(s)"
+    },
+    "summary": {
+      "totalDeposit": "Depósito total",
+      "daysRemaining": "Días restantes"
     },
     "errors": {
       "customerRequired": "Selecciona un cliente",
@@ -1003,5 +1023,13 @@
     "darkMode": {
       "toggle": "Alternar modo oscuro"
     }
+  },
+  "timeline": {
+    "title": "Cronología",
+    "empty": "Aún no hay actividad registrada",
+    "searchPlaceholder": "Buscar en la cronología…",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "hint": "Escribe para buscar, usa ↑/↓ para moverte entre eventos"
   }
 }

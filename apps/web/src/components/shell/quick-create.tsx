@@ -51,6 +51,9 @@ export function QuickCreate({
         <Button size="sm" className="gap-1.5">
           <Plus className="size-4" aria-hidden="true" />
           <span className="hidden sm:inline">{t("app.shell.create")}</span>
+          <kbd className="border-primary-foreground/30 text-primary-foreground/80 hidden rounded border px-1 py-0.5 text-[10px] sm:inline-block">
+            N
+          </kbd>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>

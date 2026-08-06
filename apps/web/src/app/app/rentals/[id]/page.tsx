@@ -6,9 +6,11 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { DashboardGrid, DashboardMetric } from "../../../../components/dashboard";
 import { usePageBreadcrumbs } from "../../../../components/shell/breadcrumb-context";
 import { PageHeader } from "../../../../components/shell/page-header";
 import { PinButton } from "../../../../components/shell/pin-button";
+import { Timeline } from "../../../../components/timeline/timeline";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
@@ -24,6 +26,7 @@ import {
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatMoney } from "../../../../lib/money";
 import { estimateMonthlyBreakdown } from "../../../../lib/rental-pricing";
+import { RENTAL_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 
 const EDITABLE_STATUSES = new Set(["DRAFT", "QUOTE"]);
 const DELETABLE_STATUSES = new Set(["DRAFT", "QUOTE", "CANCELLED"]);
@@ -162,6 +165,31 @@ export default function RentalDetailPage() {
 
       {actionError && <p className="text-destructive text-sm">{actionError}</p>}
 
+      <DashboardGrid
+        className={rental.status === "ACTIVE" ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-2" : "grid-cols-1"}
+      >
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-2xl font-semibold">
+              {formatMoney(
+                rental.items.reduce((sum, item) => sum + item.depositMinor, 0),
+                rental.currency,
+              )}
+            </p>
+            <p className="text-muted-foreground text-xs">{t("rental.summary.totalDeposit")}</p>
+          </CardContent>
+        </Card>
+        {rental.status === "ACTIVE" && (
+          <DashboardMetric
+            label={t("rental.summary.daysRemaining")}
+            value={Math.max(
+              0,
+              Math.ceil((new Date(rental.plannedEnd).getTime() - Date.now()) / (24 * 60 * 60 * 1000)),
+            )}
+          />
+        )}
+      </DashboardGrid>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
           <Card>
@@ -288,22 +316,16 @@ export default function RentalDetailPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t("asset.sections.timeline")}</CardTitle>
+            <CardTitle>{t("timeline.title")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="flex flex-col gap-3 text-sm">
-              {timeline?.map((event) => (
-                <li key={event.id} className="border-l-2 pl-3">
-                  <p className="font-medium">{t(`rental.timeline.${event.type}`)}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {new Date(event.occurredAt).toLocaleString()}
-                  </p>
-                </li>
-              ))}
-              {(!timeline || timeline.length === 0) && (
-                <p className="text-muted-foreground text-sm">{t("asset.noTimelineEvents")}</p>
-              )}
-            </ol>
+            <Timeline
+              events={timeline}
+              registry={RENTAL_TIMELINE_REGISTRY}
+              isLoading={!timeline}
+              emptyLabel={t("timeline.empty")}
+              searchPlaceholder={t("timeline.searchPlaceholder")}
+            />
           </CardContent>
         </Card>
       </div>

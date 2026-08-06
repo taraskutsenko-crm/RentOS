@@ -48,7 +48,8 @@
         "goDocuments": "Zu Dokumenten",
         "goQuotes": "Zu Angeboten",
         "groupGeneral": "Allgemein",
-        "groupNavigation": "Navigation"
+        "groupNavigation": "Navigation",
+        "settingsSubtitle": "Alle in der App registrierten Tastenkürzel — stets aktuell."
       },
       "pin": "Anheften",
       "unpin": "Lösen"
@@ -209,6 +210,17 @@
       "convertToDocument": "In Dokument umwandeln",
       "sendMessage": "Senden",
       "messagePlaceholder": "Diesem Kunden antworten…"
+    },
+    "timeline": {
+      "created": "Kunde erstellt",
+      "updated": "Kunde aktualisiert",
+      "deleted": "Kunde gelöscht"
+    },
+    "summary": {
+      "totalRentals": "Vermietungen gesamt",
+      "activeRentals": "Aktive Vermietungen",
+      "totalRevenue": "Gesamtumsatz",
+      "damageReports": "Schadensmeldungen"
     }
   },
   "asset": {
@@ -297,6 +309,10 @@
       "location_changed": "Standort geändert",
       "image_uploaded": "Bild hochgeladen",
       "document_uploaded": "Dokument hochgeladen"
+    },
+    "summary": {
+      "totalRentals": "Vermietungen gesamt",
+      "revenueGenerated": "Erzielter Umsatz"
     },
     "documentTypes": {
       "PURCHASE_DOCUMENT": "Kaufbeleg",
@@ -428,6 +444,10 @@
       "updated": "Vermietung aktualisiert",
       "status_changed": "Status geändert",
       "items_returned": "Position(en) zurückgegeben"
+    },
+    "summary": {
+      "totalDeposit": "Kaution gesamt",
+      "daysRemaining": "Verbleibende Tage"
     },
     "errors": {
       "customerRequired": "Wählen Sie einen Kunden",
@@ -1003,5 +1023,13 @@
     "darkMode": {
       "toggle": "Dunkelmodus umschalten"
     }
+  },
+  "timeline": {
+    "title": "Verlauf",
+    "empty": "Noch keine Aktivität erfasst",
+    "searchPlaceholder": "Verlauf durchsuchen…",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "hint": "Tippen zum Suchen, ↑/↓ zum Wechseln zwischen Ereignissen"
   }
 }

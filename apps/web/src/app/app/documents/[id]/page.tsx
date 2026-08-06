@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PinButton } from "../../../../components/shell/pin-button";
+import { Timeline } from "../../../../components/timeline/timeline";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
   documentPdfUrl,
@@ -37,6 +38,7 @@ import {
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
+import { DOCUMENT_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 import type { DocumentEmailRecipientType } from "../../../../types/document";
 
 const DELETABLE_STATUSES = new Set(["DRAFT", "VOIDED"]);
@@ -617,22 +619,16 @@ export default function DocumentDetailPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t("asset.sections.timeline")}</CardTitle>
+            <CardTitle>{t("timeline.title")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="flex flex-col gap-3 text-sm">
-              {timeline?.map((event) => (
-                <li key={event.id} className="border-l-2 pl-3">
-                  <p className="font-medium">{t(`document.timeline.${event.type}`)}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {new Date(event.occurredAt).toLocaleString()}
-                  </p>
-                </li>
-              ))}
-              {(!timeline || timeline.length === 0) && (
-                <p className="text-muted-foreground text-sm">{t("asset.noTimelineEvents")}</p>
-              )}
-            </ol>
+            <Timeline
+              events={timeline}
+              registry={DOCUMENT_TIMELINE_REGISTRY}
+              isLoading={!timeline}
+              emptyLabel={t("timeline.empty")}
+              searchPlaceholder={t("timeline.searchPlaceholder")}
+            />
           </CardContent>
         </Card>
       </div>

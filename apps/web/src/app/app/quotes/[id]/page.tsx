@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PinButton } from "../../../../components/shell/pin-button";
+import { Timeline } from "../../../../components/timeline/timeline";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
@@ -26,6 +27,7 @@ import {
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatMoney } from "../../../../lib/money";
 import { estimateMonthlyBreakdown } from "../../../../lib/rental-pricing";
+import { QUOTE_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 
 const EDITABLE_STATUSES = new Set(["DRAFT"]);
 const DELETABLE_STATUSES = new Set(["DRAFT", "CANCELLED"]);
@@ -367,22 +369,21 @@ export default function QuoteDetailPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{t("asset.sections.timeline")}</CardTitle>
+            <CardTitle>{t("timeline.title")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="flex flex-col gap-3 text-sm">
-              {timeline?.map((event) => (
-                <li key={event.id} className="border-l-2 pl-3">
-                  <p className="font-medium">{t(`quote.timeline.${event.type}`)}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {new Date(event.occurredAt).toLocaleString()}
-                  </p>
-                </li>
-              ))}
-              {(!timeline || timeline.length === 0) && (
-                <p className="text-muted-foreground text-sm">{t("asset.noTimelineEvents")}</p>
-              )}
-            </ol>
+            <Timeline
+              events={timeline}
+              registry={QUOTE_TIMELINE_REGISTRY}
+              isLoading={!timeline}
+              emptyLabel={t("timeline.empty")}
+              searchPlaceholder={t("timeline.searchPlaceholder")}
+              getHref={(event) =>
+                event.type === "converted" && quote.convertedRental
+                  ? `/app/rentals/${quote.convertedRental.id}`
+                  : undefined
+              }
+            />
           </CardContent>
         </Card>
       </div>

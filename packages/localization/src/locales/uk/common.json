@@ -48,7 +48,8 @@
         "goDocuments": "Перейти до документів",
         "goQuotes": "Перейти до кошторисів",
         "groupGeneral": "Загальні",
-        "groupNavigation": "Навігація"
+        "groupNavigation": "Навігація",
+        "settingsSubtitle": "Усі гарячі клавіші, зареєстровані в додатку — завжди актуальні."
       },
       "pin": "Закріпити",
       "unpin": "Відкріпити"
@@ -209,6 +210,17 @@
       "convertToDocument": "Перетворити на документ",
       "sendMessage": "Надіслати",
       "messagePlaceholder": "Відповісти цьому клієнту…"
+    },
+    "timeline": {
+      "created": "Клієнта створено",
+      "updated": "Клієнта оновлено",
+      "deleted": "Клієнта видалено"
+    },
+    "summary": {
+      "totalRentals": "Усього оренд",
+      "activeRentals": "Активні оренди",
+      "totalRevenue": "Загальний дохід",
+      "damageReports": "Звіти про пошкодження"
     }
   },
   "asset": {
@@ -297,6 +309,10 @@
       "location_changed": "Розташування змінено",
       "image_uploaded": "Завантажено зображення",
       "document_uploaded": "Завантажено документ"
+    },
+    "summary": {
+      "totalRentals": "Усього оренд",
+      "revenueGenerated": "Отриманий дохід"
     },
     "documentTypes": {
       "PURCHASE_DOCUMENT": "Документ про придбання",
@@ -428,6 +444,10 @@
       "updated": "Оренду оновлено",
       "status_changed": "Статус змінено",
       "items_returned": "Позиції повернено"
+    },
+    "summary": {
+      "totalDeposit": "Загальна застава",
+      "daysRemaining": "Залишилось днів"
     },
     "errors": {
       "customerRequired": "Оберіть клієнта",
@@ -1003,5 +1023,13 @@
     "darkMode": {
       "toggle": "Перемкнути темний режим"
     }
+  },
+  "timeline": {
+    "title": "Хронологія",
+    "empty": "Активності поки що не зафіксовано",
+    "searchPlaceholder": "Пошук у хронології…",
+    "today": "Сьогодні",
+    "yesterday": "Учора",
+    "hint": "Введіть текст для пошуку, використовуйте ↑/↓ для переходу між подіями"
   }
 }

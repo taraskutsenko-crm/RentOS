@@ -1,6 +1,7 @@
 import type { Asset } from "./asset";
 import type { Customer } from "./customer";
 import type { MonthlyBillingStrategy } from "./rental";
+import type { TimelineEvent } from "./timeline";
 
 export type QuoteStatus =
   "DRAFT" | "SENT" | "VIEWED" | "ACCEPTED" | "REJECTED" | "EXPIRED" | "CONVERTED" | "CANCELLED";
@@ -122,13 +123,7 @@ export type QuoteTimelineEventType =
   | "converted"
   | "pdf_generated";
 
-export interface QuoteTimelineEvent {
-  id: string;
-  type: QuoteTimelineEventType;
-  occurredAt: string;
-  actorUserId: string | null;
-  data: Record<string, unknown>;
-}
+export type QuoteTimelineEvent = TimelineEvent<QuoteTimelineEventType>;
 
 export interface SendQuoteResult {
   quote: Quote;

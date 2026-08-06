@@ -48,7 +48,8 @@
         "goDocuments": "Go to Documents",
         "goQuotes": "Go to Quotes",
         "groupGeneral": "General",
-        "groupNavigation": "Navigation"
+        "groupNavigation": "Navigation",
+        "settingsSubtitle": "Every shortcut registered in the app — always up to date with what's actually bound."
       },
       "pin": "Pin",
       "unpin": "Unpin"
@@ -209,6 +210,17 @@
       "convertToDocument": "Convert to document",
       "sendMessage": "Send",
       "messagePlaceholder": "Reply to this customer…"
+    },
+    "timeline": {
+      "created": "Customer created",
+      "updated": "Customer updated",
+      "deleted": "Customer deleted"
+    },
+    "summary": {
+      "totalRentals": "Total rentals",
+      "activeRentals": "Active rentals",
+      "totalRevenue": "Total revenue",
+      "damageReports": "Damage reports"
     }
   },
   "asset": {
@@ -297,6 +309,10 @@
       "location_changed": "Location changed",
       "image_uploaded": "Image uploaded",
       "document_uploaded": "Document uploaded"
+    },
+    "summary": {
+      "totalRentals": "Total rentals",
+      "revenueGenerated": "Revenue generated"
     },
     "documentTypes": {
       "PURCHASE_DOCUMENT": "Purchase document",
@@ -428,6 +444,10 @@
       "updated": "Rental updated",
       "status_changed": "Status changed",
       "items_returned": "Item(s) returned"
+    },
+    "summary": {
+      "totalDeposit": "Total deposit",
+      "daysRemaining": "Days remaining"
     },
     "errors": {
       "customerRequired": "Select a customer",
@@ -1003,5 +1023,13 @@
     "darkMode": {
       "toggle": "Toggle dark mode"
     }
+  },
+  "timeline": {
+    "title": "Timeline",
+    "empty": "No activity recorded yet",
+    "searchPlaceholder": "Search timeline…",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "hint": "Type to search, use ↑/↓ to move between events"
   }
 }

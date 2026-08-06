@@ -1,5 +1,6 @@
 import type { Asset } from "./asset";
 import type { Customer } from "./customer";
+import type { TimelineEvent } from "./timeline";
 
 export type RentalStatus =
   "DRAFT" | "QUOTE" | "RESERVED" | "ACTIVE" | "RETURNED" | "COMPLETED" | "CANCELLED";
@@ -79,13 +80,7 @@ export interface PaginatedRentals {
 
 export type RentalTimelineEventType = "created" | "updated" | "status_changed" | "items_returned";
 
-export interface RentalTimelineEvent {
-  id: string;
-  type: RentalTimelineEventType;
-  occurredAt: string;
-  actorUserId: string | null;
-  data: Record<string, unknown>;
-}
+export type RentalTimelineEvent = TimelineEvent<RentalTimelineEventType>;
 
 export interface AvailabilityConflict {
   rentalId: string;

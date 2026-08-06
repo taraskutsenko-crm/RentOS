@@ -1,3 +1,5 @@
+import type { TimelineEvent } from "./timeline";
+
 export type CustomerStatus = "ACTIVE" | "INACTIVE";
 
 export interface Customer {
@@ -22,4 +24,18 @@ export interface PaginatedCustomers {
   total: number;
   page: number;
   pageSize: number;
+}
+
+export type CustomerTimelineEventType = "created" | "updated" | "deleted";
+
+export type CustomerTimelineEvent = TimelineEvent<CustomerTimelineEventType>;
+
+export interface CustomerSummary {
+  customerSince: string;
+  totalRentals: number;
+  activeRentals: number;
+  totalRevenueMinor: number;
+  currency: string | null;
+  lastActivityAt: string | null;
+  damageReportsCount: number;
 }

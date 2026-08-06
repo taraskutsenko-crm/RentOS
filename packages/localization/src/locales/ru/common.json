@@ -48,7 +48,8 @@
         "goDocuments": "Перейти к документам",
         "goQuotes": "Перейти к сметам",
         "groupGeneral": "Общие",
-        "groupNavigation": "Навигация"
+        "groupNavigation": "Навигация",
+        "settingsSubtitle": "Все горячие клавиши, зарегистрированные в приложении — всегда актуальны."
       },
       "pin": "Закрепить",
       "unpin": "Открепить"
@@ -209,6 +210,17 @@
       "convertToDocument": "Преобразовать в документ",
       "sendMessage": "Отправить",
       "messagePlaceholder": "Ответить этому клиенту…"
+    },
+    "timeline": {
+      "created": "Клиент создан",
+      "updated": "Клиент обновлён",
+      "deleted": "Клиент удалён"
+    },
+    "summary": {
+      "totalRentals": "Всего аренд",
+      "activeRentals": "Активные аренды",
+      "totalRevenue": "Общий доход",
+      "damageReports": "Отчёты о повреждениях"
     }
   },
   "asset": {
@@ -297,6 +309,10 @@
       "location_changed": "Местоположение изменено",
       "image_uploaded": "Загружено изображение",
       "document_uploaded": "Загружен документ"
+    },
+    "summary": {
+      "totalRentals": "Всего аренд",
+      "revenueGenerated": "Полученный доход"
     },
     "documentTypes": {
       "PURCHASE_DOCUMENT": "Документ о покупке",
@@ -428,6 +444,10 @@
       "updated": "Аренда обновлена",
       "status_changed": "Статус изменён",
       "items_returned": "Позиции возвращены"
+    },
+    "summary": {
+      "totalDeposit": "Общий залог",
+      "daysRemaining": "Осталось дней"
     },
     "errors": {
       "customerRequired": "Выберите клиента",
@@ -1003,5 +1023,13 @@
     "darkMode": {
       "toggle": "Переключить тёмный режим"
     }
+  },
+  "timeline": {
+    "title": "Хронология",
+    "empty": "Активность пока не зафиксирована",
+    "searchPlaceholder": "Поиск по хронологии…",
+    "today": "Сегодня",
+    "yesterday": "Вчера",
+    "hint": "Введите текст для поиска, используйте ↑/↓ для перемещения между событиями"
   }
 }

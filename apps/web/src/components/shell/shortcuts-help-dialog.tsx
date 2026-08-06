@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { isMacPlatform } from "../../lib/platform";
 import type { KeyboardShortcut } from "../../lib/keyboard-shortcuts";
 
-function shortcutLabel(shortcut: KeyboardShortcut, isMac: boolean): string {
+export function shortcutLabel(shortcut: KeyboardShortcut, isMac: boolean): string {
   if (shortcut.keys.length === 2) {
     return `${shortcut.keys[0].toUpperCase()} ${shortcut.keys[1].toUpperCase()}`;
   }

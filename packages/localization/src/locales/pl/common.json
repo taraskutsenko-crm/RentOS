@@ -48,7 +48,8 @@
         "goDocuments": "Przejdź do dokumentów",
         "goQuotes": "Przejdź do ofert",
         "groupGeneral": "Ogólne",
-        "groupNavigation": "Nawigacja"
+        "groupNavigation": "Nawigacja",
+        "settingsSubtitle": "Wszystkie skróty klawiszowe zarejestrowane w aplikacji — zawsze aktualne."
       },
       "pin": "Przypnij",
       "unpin": "Odepnij"
@@ -209,6 +210,17 @@
       "convertToDocument": "Przekształć w dokument",
       "sendMessage": "Wyślij",
       "messagePlaceholder": "Odpowiedz temu klientowi…"
+    },
+    "timeline": {
+      "created": "Klient utworzony",
+      "updated": "Klient zaktualizowany",
+      "deleted": "Klient usunięty"
+    },
+    "summary": {
+      "totalRentals": "Łączna liczba wynajmów",
+      "activeRentals": "Aktywne wynajmy",
+      "totalRevenue": "Łączny przychód",
+      "damageReports": "Zgłoszenia szkód"
     }
   },
   "asset": {
@@ -297,6 +309,10 @@
       "location_changed": "Lokalizacja zmieniona",
       "image_uploaded": "Przesłano zdjęcie",
       "document_uploaded": "Przesłano dokument"
+    },
+    "summary": {
+      "totalRentals": "Łączna liczba wynajmów",
+      "revenueGenerated": "Wygenerowany przychód"
     },
     "documentTypes": {
       "PURCHASE_DOCUMENT": "Dokument zakupu",
@@ -428,6 +444,10 @@
       "updated": "Wynajem zaktualizowany",
       "status_changed": "Status zmieniony",
       "items_returned": "Zwrócono pozycję/e"
+    },
+    "summary": {
+      "totalDeposit": "Łączna kaucja",
+      "daysRemaining": "Pozostało dni"
     },
     "errors": {
       "customerRequired": "Wybierz klienta",
@@ -1003,5 +1023,13 @@
     "darkMode": {
       "toggle": "Przełącz tryb ciemny"
     }
+  },
+  "timeline": {
+    "title": "Oś czasu",
+    "empty": "Brak zarejestrowanej aktywności",
+    "searchPlaceholder": "Szukaj w osi czasu…",
+    "today": "Dziś",
+    "yesterday": "Wczoraj",
+    "hint": "Wpisz, aby wyszukać, użyj ↑/↓, aby przechodzić między zdarzeniami"
   }
 }

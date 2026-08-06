@@ -282,4 +282,55 @@ describe("Customers E2E", () => {
       "customer.deleted",
     ]);
   });
+
+  it("timeline() reflects create/update in order and rejects access from another tenant's member", async () => {
+    const created = await createCustomer().expect(201);
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}/customers/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .send({ notes: "x" })
+      .expect(200);
+
+    const timeline = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/customers/${created.body.id}/timeline`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(timeline.body.map((event: { type: string }) => event.type)).toEqual([
+      "created",
+      "updated",
+    ]);
+
+    const otherResponse = await request(app.getHttpServer())
+      .post("/auth/register")
+      .send({
+        ...validRegisterPayload,
+        email: "other-timeline@example.com",
+        companyName: "Other Co",
+      })
+      .expect(201);
+    const otherCookie = extractCookie(otherResponse.headers, "rentos_access_token");
+
+    await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/customers/${created.body.id}/timeline`)
+      .set("Cookie", otherCookie)
+      .expect(403);
+  });
+
+  it("summary() reflects a real customer with no rentals yet", async () => {
+    const created = await createCustomer().expect(201);
+
+    const summary = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/customers/${created.body.id}/summary`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(summary.body).toMatchObject({
+      totalRentals: 0,
+      activeRentals: 0,
+      totalRevenueMinor: 0,
+      currency: null,
+      damageReportsCount: 0,
+    });
+    expect(summary.body.customerSince).toBeTruthy();
+    expect(summary.body.lastActivityAt).toBeTruthy();
+  });
 });

@@ -12,6 +12,16 @@ function buildService() {
       findFirst: vi.fn(),
       updateMany: vi.fn(),
     },
+    auditLog: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+    },
+    rental: {
+      findMany: vi.fn(),
+    },
+    rentalDamageReport: {
+      count: vi.fn(),
+    },
   };
   const auditService = { log: vi.fn() };
 
@@ -112,5 +122,122 @@ describe("CustomersService", () => {
         take: 10,
       }),
     );
+  });
+
+  it("timeline() throws NotFoundException for a customer outside the tenant", async () => {
+    const { service, prisma } = buildService();
+    prisma.customer.findFirst.mockResolvedValue(null);
+
+    await expect(service.timeline("t1", "missing")).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it("timeline() queries AuditLog scoped by tenant/entity and maps known actions to event types", async () => {
+    const { service, prisma } = buildService();
+    prisma.customer.findFirst.mockResolvedValue({ id: "c1", tenantId: "t1" });
+    prisma.auditLog.findMany.mockResolvedValue([
+      {
+        id: "log-created",
+        action: "customer.created",
+        userId: "u1",
+        createdAt: new Date("2026-01-01T00:00:00Z"),
+        metadata: null,
+      },
+      {
+        id: "log-updated",
+        action: "customer.updated",
+        userId: "u2",
+        createdAt: new Date("2026-01-02T00:00:00Z"),
+        metadata: { notes: "x" },
+      },
+    ]);
+
+    const events = await service.timeline("t1", "c1");
+
+    expect(prisma.auditLog.findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: "t1",
+        entityType: "Customer",
+        entityId: "c1",
+        action: { in: ["customer.created", "customer.updated", "customer.deleted"] },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    expect(events).toEqual([
+      {
+        id: "log-created",
+        type: "created",
+        occurredAt: "2026-01-01T00:00:00.000Z",
+        actorUserId: "u1",
+        data: {},
+      },
+      {
+        id: "log-updated",
+        type: "updated",
+        occurredAt: "2026-01-02T00:00:00.000Z",
+        actorUserId: "u2",
+        data: { notes: "x" },
+      },
+    ]);
+  });
+
+  it("summary() throws NotFoundException for a customer outside the tenant", async () => {
+    const { service, prisma } = buildService();
+    prisma.customer.findFirst.mockResolvedValue(null);
+
+    await expect(service.summary("t1", "missing")).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it("summary() aggregates only counted rental statuses, using the stored totalMinor", async () => {
+    const { service, prisma } = buildService();
+    prisma.customer.findFirst.mockResolvedValue({
+      id: "c1",
+      tenantId: "t1",
+      createdAt: new Date("2025-01-01T00:00:00Z"),
+    });
+    prisma.rental.findMany.mockResolvedValue([
+      { status: "ACTIVE", totalMinor: 5000, currency: "USD" },
+      { status: "COMPLETED", totalMinor: 3000, currency: "USD" },
+    ]);
+    prisma.rentalDamageReport.count.mockResolvedValue(2);
+    prisma.auditLog.findFirst.mockResolvedValue({ createdAt: new Date("2026-01-05T00:00:00Z") });
+
+    const result = await service.summary("t1", "c1");
+
+    expect(prisma.rental.findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: "t1",
+        customerId: "c1",
+        deletedAt: null,
+        status: { in: ["RESERVED", "ACTIVE", "RETURNED", "COMPLETED"] },
+      },
+      select: { status: true, totalMinor: true, currency: true },
+    });
+    expect(result).toEqual({
+      customerSince: "2025-01-01T00:00:00.000Z",
+      totalRentals: 2,
+      activeRentals: 1,
+      totalRevenueMinor: 8000,
+      currency: "USD",
+      lastActivityAt: "2026-01-05T00:00:00.000Z",
+      damageReportsCount: 2,
+    });
+  });
+
+  it("summary() returns null currency/lastActivityAt when there is no rental or audit history", async () => {
+    const { service, prisma } = buildService();
+    prisma.customer.findFirst.mockResolvedValue({
+      id: "c1",
+      tenantId: "t1",
+      createdAt: new Date("2025-01-01T00:00:00Z"),
+    });
+    prisma.rental.findMany.mockResolvedValue([]);
+    prisma.rentalDamageReport.count.mockResolvedValue(0);
+    prisma.auditLog.findFirst.mockResolvedValue(null);
+
+    const result = await service.summary("t1", "c1");
+
+    expect(result.currency).toBeNull();
+    expect(result.lastActivityAt).toBeNull();
+    expect(result.totalRentals).toBe(0);
   });
 });

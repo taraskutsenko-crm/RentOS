@@ -404,6 +404,29 @@ describe("Assets E2E", () => {
       .expect(404);
   });
 
+  // 21b. Summary reflects real state and is tenant-isolated
+  it("computes an asset summary with zero rentals and keeps it tenant-isolated", async () => {
+    const created = await createAsset({ currentLocationText: "Bay 2" }).expect(201);
+    const other = await registerSecondTenant();
+
+    const summary = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/assets/${created.body.id}/summary`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(summary.body).toMatchObject({
+      totalRentals: 0,
+      revenueGeneratedMinor: 0,
+      currency: null,
+      currentLocation: "Bay 2",
+    });
+    expect(summary.body.currentStatus.code).toBe("AVAILABLE");
+
+    await request(app.getHttpServer())
+      .get(`/tenants/${other.tenantId}/assets/${created.body.id}/summary`)
+      .set("Cookie", other.cookie)
+      .expect(404);
+  });
+
   // 22. Image metadata is tenant-isolated
   it("keeps asset image metadata tenant-isolated", async () => {
     const created = await createAsset().expect(201);

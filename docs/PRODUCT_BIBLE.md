@@ -269,8 +269,11 @@ of becoming a fourth click.
 
 ## 7. Simplicity Rule
 
-Prefer the simpler of two designs whenever both solve the problem
-equally well — in the schema, in the backend, and in the UI alike.
+Complexity is a cost, not a neutral choice: every extra button,
+setting, field, dialog, workflow, or navigation level adds cognitive
+load someone pays on every use, not once at build time. Prefer the
+simpler of two designs whenever both solve the problem equally well —
+in the schema, in the backend, and in the UI alike.
 
 - **Complexity must be justified by a real, current requirement,
   never a hypothetical future one.** A field, an abstraction, or a
@@ -470,6 +473,20 @@ never a bespoke per-module history view.
   engineering support — the same audit data Section 15 (Event-Driven
   Thinking) treats as the seam for a future event system is what a
   timeline already renders for a human today.
+- **A timeline is business history, not an audit log.** It renders
+  what happened in terms an operator thinks in — "Rental started,"
+  "Invoice paid," "Damage reported" — never a raw technical trail.
+  `AuditService.log()` (Section 15) is the data source; the timeline
+  is the human-facing product surface built on it, not a UI wrapper
+  around the log table itself.
+- **Every timeline page opens with an Entity Summary** — a small set
+  of real, aggregated numbers (a customer's total rentals and revenue,
+  an asset's revenue generated) rendered above the timeline, using one
+  reusable summary-card pattern regardless of entity. Like the
+  timeline itself, Entity Summary is a shared pattern a new entity
+  reuses, never a bespoke stats block invented per screen — and a
+  field with no real underlying data is omitted, never approximated
+  (Section 7, Simplicity Rule).
 
 ---
 
@@ -745,6 +762,15 @@ Never:
   canonical implementation. This is the same discipline
   `ARCHITECTURE_LOCK.md` §1.4 requires for backend business logic,
   applied to the frontend.
+- **Build speculative platform infrastructure** — a plugin runtime, an
+  AI-agent execution system, or marketplace tooling built before a
+  real, concrete requirement exists. Platform Extensibility (Section
+  16), Plugin-First (Section 17), Marketplace Readiness (Section 18),
+  and AI-Ready Architecture (Section 20) are long-term directions that
+  shape today's seams and interfaces — they are not license to build
+  the infrastructure itself early. Extend an existing seam when a real
+  need arrives; don't build a seam's imagined future consumer today
+  (see Section 7, Simplicity Rule, and Section 26, Ten-Year Rule).
 - **Add unnecessary clicks** — see Section 6.
 - **Hide important actions** — a control the user has permission to
   use is shown where they'd look for it, not buried behind an extra
@@ -782,6 +808,10 @@ makes faster, safer, or clearer for a real operator, it doesn't ship.
   accountant) and the moment in their day this changes. "It would be
   useful" is not a name; "a manager checking asset availability before
   quoting a customer on the phone" is.
+- **Not a feature-parity checklist.** A competitor having a feature is
+  not, by itself, a reason to build it — the test above applies
+  identically whether an idea originated from a competitor's
+  changelog, a support ticket, or an internal brainstorm.
 - **This is the first, sharpest filter** — see Section 24 (Decision
   Filter) for how it fits alongside the Universal Rental Philosophy
   (Section 3) and Simplicity Rule (Section 7) as the fast pre-check

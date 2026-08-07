@@ -426,12 +426,29 @@
       "subtotal": "Suma częściowa",
       "total": "Razem",
       "internalNotes": "Notatki wewnętrzne",
-      "returnedAt": "Zwrócono"
+      "returnedAt": "Zwrócono",
+      "sourceQuote": "Oferta źródłowa"
     },
     "sections": {
       "details": "Szczegóły",
       "items": "Aktywa",
-      "financial": "Podsumowanie finansowe"
+      "financial": "Podsumowanie finansowe",
+      "customer": "Klient",
+      "documents": "Dokumenty"
+    },
+    "documents": {
+      "empty": "Do tego wynajmu nie przypisano jeszcze żadnych dokumentów"
+    },
+    "timeIntelligence": {
+      "starts_today": "Rozpoczyna się dzisiaj",
+      "starts_tomorrow": "Rozpoczyna się jutro",
+      "starts_in_days": "Rozpoczyna się za {{count}} dni",
+      "days_remaining": "Pozostało {{count}} dni",
+      "due_today": "Termin dzisiaj",
+      "overdue": "Opóźnienie o {{count}} dni",
+      "completed": "Zakończono",
+      "cancelled": "Anulowano",
+      "none": "—"
     },
     "actions": {
       "reserve": "Zarezerwuj",
@@ -447,7 +464,10 @@
     },
     "summary": {
       "totalDeposit": "Łączna kaucja",
-      "daysRemaining": "Pozostało dni"
+      "daysRemaining": "Pozostało dni",
+      "rentalValue": "Wartość wynajmu",
+      "assetsCount": "Liczba sprzętu",
+      "timeStatus": "Status czasowy"
     },
     "errors": {
       "customerRequired": "Wybierz klienta",

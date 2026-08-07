@@ -41,6 +41,41 @@ export interface RentalBillingSettings {
   updatedAt: string | null;
 }
 
+export interface RentalSourceQuote {
+  id: string;
+  quoteNumber: string;
+}
+
+export type RentalDocumentType =
+  | "QUOTE"
+  | "CONTRACT"
+  | "HANDOVER_PROTOCOL"
+  | "RETURN_PROTOCOL"
+  | "DAMAGE_REPORT"
+  | "CONTRACT_AMENDMENT"
+  | "CUSTOM";
+
+export type RentalDocumentStatus =
+  | "DRAFT"
+  | "READY"
+  | "SENT"
+  | "VIEWED"
+  | "PARTIALLY_SIGNED"
+  | "SIGNED"
+  | "REJECTED"
+  | "VOIDED"
+  | "ARCHIVED";
+
+export interface RentalDocument {
+  id: string;
+  documentType: RentalDocumentType;
+  customTypeName: string | null;
+  documentNumber: string;
+  status: RentalDocumentStatus;
+  title: string | null;
+  createdAt: string;
+}
+
 export interface Rental {
   id: string;
   tenantId: string;
@@ -58,6 +93,7 @@ export interface Rental {
   totalMinor: number;
   notes: string | null;
   internalNotes: string | null;
+  sourceQuoteId: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -65,9 +101,11 @@ export interface Rental {
   updatedByUserId: string | null;
   customer: Customer;
   items: RentalItem[];
+  sourceQuote: RentalSourceQuote | null;
+  documents: RentalDocument[];
 }
 
-export interface RentalListItem extends Omit<Rental, "items"> {
+export interface RentalListItem extends Omit<Rental, "items" | "sourceQuote" | "documents"> {
   itemCount: number;
 }
 

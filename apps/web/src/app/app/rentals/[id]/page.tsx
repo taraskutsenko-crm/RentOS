@@ -3,10 +3,11 @@
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { DashboardGrid, DashboardMetric } from "../../../../components/dashboard";
+import { RentalStatusBadge } from "../../../../components/rentals/rental-status-badge";
 import { usePageBreadcrumbs } from "../../../../components/shell/breadcrumb-context";
 import { PageHeader } from "../../../../components/shell/page-header";
 import { PinButton } from "../../../../components/shell/pin-button";
@@ -25,7 +26,11 @@ import {
 } from "../../../../hooks/use-rentals";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatMoney } from "../../../../lib/money";
-import { estimateMonthlyBreakdown } from "../../../../lib/rental-pricing";
+import {
+  estimateItemLineTotalMinor,
+  estimateMonthlyBreakdown,
+} from "../../../../lib/rental-pricing";
+import { getRentalTimeIntelligence } from "../../../../lib/rental-time-intelligence";
 import { RENTAL_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 
 const EDITABLE_STATUSES = new Set(["DRAFT", "QUOTE"]);
@@ -106,11 +111,32 @@ export default function RentalDetailPage() {
     });
   }
 
+  const timeIntelligence = getRentalTimeIntelligence(
+    rental.status,
+    rental.plannedStart,
+    rental.plannedEnd,
+    nowMs,
+  );
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={rental.rentalNumber}
-        subtitle={`${rental.customer.firstName} ${rental.customer.lastName} · ${t(`rental.statuses.${rental.status}`)}`}
+        subtitle={`${rental.customer.firstName} ${rental.customer.lastName}`}
+        contextInfo={
+          <div className="flex flex-wrap items-center gap-3">
+            <RentalStatusBadge status={rental.status} />
+            <span className="text-muted-foreground">
+              {t(`rental.timeIntelligence.${timeIntelligence.kind}`, {
+                count: timeIntelligence.days,
+              })}
+            </span>
+            <span className="text-muted-foreground">
+              {new Date(rental.plannedStart).toLocaleDateString()} –{" "}
+              {new Date(rental.plannedEnd).toLocaleDateString()}
+            </span>
+          </div>
+        }
         secondaryActions={
           <>
             <PinButton
@@ -168,11 +194,15 @@ export default function RentalDetailPage() {
 
       {actionError && <p className="text-destructive text-sm">{actionError}</p>}
 
-      <DashboardGrid
-        className={
-          rental.status === "ACTIVE" ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-2" : "grid-cols-1"
-        }
-      >
+      <DashboardGrid>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-2xl font-semibold">
+              {formatMoney(rental.totalMinor, rental.currency)}
+            </p>
+            <p className="text-muted-foreground text-xs">{t("rental.summary.rentalValue")}</p>
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-semibold">
@@ -184,45 +214,40 @@ export default function RentalDetailPage() {
             <p className="text-muted-foreground text-xs">{t("rental.summary.totalDeposit")}</p>
           </CardContent>
         </Card>
-        {rental.status === "ACTIVE" && (
-          <DashboardMetric
-            label={t("rental.summary.daysRemaining")}
-            value={Math.max(
-              0,
-              Math.ceil((new Date(rental.plannedEnd).getTime() - nowMs) / (24 * 60 * 60 * 1000)),
-            )}
-          />
-        )}
+        <DashboardMetric label={t("rental.summary.assetsCount")} value={rental.items.length} />
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-2xl font-semibold">
+              {t(`rental.timeIntelligence.${timeIntelligence.kind}`, {
+                count: timeIntelligence.days,
+              })}
+            </p>
+            <p className="text-muted-foreground text-xs">{t("rental.summary.timeStatus")}</p>
+          </CardContent>
+        </Card>
       </DashboardGrid>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>{t("rental.sections.details")}</CardTitle>
+              <CardTitle>{t("rental.sections.customer")}</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-3 text-sm">
               <InfoRow
-                label={t("rental.fields.plannedStart")}
-                value={new Date(rental.plannedStart).toLocaleString()}
+                label={t("customer.firstName")}
+                value={
+                  <Link
+                    href={`/app/customers/${rental.customer.id}`}
+                    className="text-primary hover:underline"
+                  >
+                    {rental.customer.firstName} {rental.customer.lastName}
+                  </Link>
+                }
               />
-              <InfoRow
-                label={t("rental.fields.plannedEnd")}
-                value={new Date(rental.plannedEnd).toLocaleString()}
-              />
-              <InfoRow
-                label={t("rental.fields.actualStart")}
-                value={rental.actualStart ? new Date(rental.actualStart).toLocaleString() : "—"}
-              />
-              <InfoRow
-                label={t("rental.fields.actualEnd")}
-                value={rental.actualEnd ? new Date(rental.actualEnd).toLocaleString() : "—"}
-              />
-              <InfoRow label={t("customer.notes")} value={rental.notes ?? "—"} />
-              <InfoRow
-                label={t("rental.fields.internalNotes")}
-                value={rental.internalNotes ?? "—"}
-              />
+              <InfoRow label={t("customer.company")} value={rental.customer.company ?? "—"} />
+              <InfoRow label={t("customer.phone")} value={rental.customer.phone ?? "—"} />
+              <InfoRow label={t("customer.email")} value={rental.customer.email ?? "—"} />
             </CardContent>
           </Card>
 
@@ -235,8 +260,10 @@ export default function RentalDetailPage() {
                 <thead>
                   <tr className="border-b text-left">
                     <th className="p-3 font-medium">{t("asset.fields.name")}</th>
+                    <th className="p-3 font-medium">{t("asset.fields.status")}</th>
                     <th className="p-3 font-medium">{t("rental.fields.billingMode")}</th>
                     <th className="p-3 font-medium">{t("rental.fields.quantity")}</th>
+                    <th className="p-3 font-medium">{t("rental.fields.total")}</th>
                     <th className="p-3 font-medium">{t("rental.fields.returnedAt")}</th>
                   </tr>
                 </thead>
@@ -251,9 +278,54 @@ export default function RentalDetailPage() {
                             rental.plannedEnd,
                           )
                         : null;
+                    const lineTotalMinor =
+                      item.billingMode === "MONTHLY" && item.monthlyBillingStrategy
+                        ? estimateItemLineTotalMinor(
+                            {
+                              billingMode: "MONTHLY",
+                              quantity: item.quantity,
+                              dailyPriceMinor: item.dailyPriceMinor ?? undefined,
+                              monthlyPriceMinor: item.monthlyPriceMinor ?? undefined,
+                              discountMinor: item.discountMinor,
+                              monthlyBillingStrategy: item.monthlyBillingStrategy,
+                              customMonthLengthDays: item.customMonthLengthDays,
+                            },
+                            rental.plannedStart,
+                            rental.plannedEnd,
+                          )
+                        : estimateItemLineTotalMinor(
+                            {
+                              billingMode: item.billingMode,
+                              quantity: item.quantity,
+                              dailyPriceMinor: item.dailyPriceMinor ?? undefined,
+                              weeklyPriceMinor: item.weeklyPriceMinor ?? undefined,
+                              customPriceMinor: item.customPriceMinor ?? undefined,
+                              discountMinor: item.discountMinor,
+                            },
+                            rental.plannedStart,
+                            rental.plannedEnd,
+                          );
                     return (
                       <tr key={item.id} className="border-b last:border-0">
-                        <td className="p-3">{item.asset.name}</td>
+                        <td className="p-3">
+                          <Link
+                            href={`/app/assets/${item.asset.id}`}
+                            className="text-primary hover:underline"
+                          >
+                            {item.asset.name}
+                          </Link>
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`rounded px-2 py-0.5 text-xs ${
+                              item.asset.currentStatus.isAvailableForRental
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground"
+                            }`}
+                          >
+                            {item.asset.currentStatus.name}
+                          </span>
+                        </td>
                         <td className="p-3">
                           {t(`rental.billingModes.${item.billingMode}`)}
                           {breakdown && (
@@ -283,6 +355,7 @@ export default function RentalDetailPage() {
                           )}
                         </td>
                         <td className="p-3">{item.quantity}</td>
+                        <td className="p-3">{formatMoney(lineTotalMinor, rental.currency)}</td>
                         <td className="p-3">
                           {item.returnedAt ? new Date(item.returnedAt).toLocaleString() : "—"}
                         </td>
@@ -291,6 +364,78 @@ export default function RentalDetailPage() {
                   })}
                 </tbody>
               </table>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("rental.sections.documents")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!rental.sourceQuote && rental.documents.length === 0 ? (
+                <p className="text-muted-foreground text-sm">{t("rental.documents.empty")}</p>
+              ) : (
+                <ul className="flex flex-col gap-2 text-sm">
+                  {rental.sourceQuote && (
+                    <li className="flex items-center justify-between">
+                      <span className="text-muted-foreground">
+                        {t("rental.fields.sourceQuote")}
+                      </span>
+                      <Link
+                        href={`/app/quotes/${rental.sourceQuote.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {rental.sourceQuote.quoteNumber}
+                      </Link>
+                    </li>
+                  )}
+                  {rental.documents.map((document) => (
+                    <li key={document.id} className="flex items-center justify-between">
+                      <span>
+                        {document.documentType === "CUSTOM" && document.customTypeName
+                          ? document.customTypeName
+                          : t(`document.types.${document.documentType}`)}
+                        {document.title ? ` — ${document.title}` : ""}
+                      </span>
+                      <Link
+                        href={`/app/documents/${document.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {document.documentNumber}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("rental.sections.details")}</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3 text-sm">
+              <InfoRow
+                label={t("rental.fields.plannedStart")}
+                value={new Date(rental.plannedStart).toLocaleString()}
+              />
+              <InfoRow
+                label={t("rental.fields.plannedEnd")}
+                value={new Date(rental.plannedEnd).toLocaleString()}
+              />
+              <InfoRow
+                label={t("rental.fields.actualStart")}
+                value={rental.actualStart ? new Date(rental.actualStart).toLocaleString() : "—"}
+              />
+              <InfoRow
+                label={t("rental.fields.actualEnd")}
+                value={rental.actualEnd ? new Date(rental.actualEnd).toLocaleString() : "—"}
+              />
+              <InfoRow label={t("customer.notes")} value={rental.notes ?? "—"} />
+              <InfoRow
+                label={t("rental.fields.internalNotes")}
+                value={rental.internalNotes ?? "—"}
+              />
             </CardContent>
           </Card>
 
@@ -338,7 +483,7 @@ export default function RentalDetailPage() {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex flex-col">
       <span className="text-muted-foreground text-xs">{label}</span>

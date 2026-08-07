@@ -426,12 +426,29 @@
       "subtotal": "Промежуточный итог",
       "total": "Итого",
       "internalNotes": "Внутренние заметки",
-      "returnedAt": "Возвращено"
+      "returnedAt": "Возвращено",
+      "sourceQuote": "Исходная смета"
     },
     "sections": {
       "details": "Детали",
       "items": "Активы",
-      "financial": "Финансовая сводка"
+      "financial": "Финансовая сводка",
+      "customer": "Клиент",
+      "documents": "Документы"
+    },
+    "documents": {
+      "empty": "К этой аренде пока не привязаны документы"
+    },
+    "timeIntelligence": {
+      "starts_today": "Начинается сегодня",
+      "starts_tomorrow": "Начинается завтра",
+      "starts_in_days": "Начинается через {{count}} дн.",
+      "days_remaining": "Осталось {{count}} дн.",
+      "due_today": "Срок сегодня",
+      "overdue": "Просрочено на {{count}} дн.",
+      "completed": "Завершено",
+      "cancelled": "Отменено",
+      "none": "—"
     },
     "actions": {
       "reserve": "Забронировать",
@@ -447,7 +464,10 @@
     },
     "summary": {
       "totalDeposit": "Общий залог",
-      "daysRemaining": "Осталось дней"
+      "daysRemaining": "Осталось дней",
+      "rentalValue": "Сумма аренды",
+      "assetsCount": "Количество активов",
+      "timeStatus": "Статус по времени"
     },
     "errors": {
       "customerRequired": "Выберите клиента",

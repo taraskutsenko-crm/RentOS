@@ -426,12 +426,29 @@
       "subtotal": "Subtotal",
       "total": "Total",
       "internalNotes": "Internal notes",
-      "returnedAt": "Returned at"
+      "returnedAt": "Returned at",
+      "sourceQuote": "Source quote"
     },
     "sections": {
       "details": "Details",
       "items": "Assets",
-      "financial": "Financial summary"
+      "financial": "Financial summary",
+      "customer": "Customer",
+      "documents": "Documents"
+    },
+    "documents": {
+      "empty": "No documents linked to this rental yet"
+    },
+    "timeIntelligence": {
+      "starts_today": "Starts today",
+      "starts_tomorrow": "Starts tomorrow",
+      "starts_in_days": "Starts in {{count}} days",
+      "days_remaining": "{{count}} days remaining",
+      "due_today": "Due today",
+      "overdue": "Overdue by {{count}} days",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "none": "—"
     },
     "actions": {
       "reserve": "Reserve",
@@ -447,7 +464,10 @@
     },
     "summary": {
       "totalDeposit": "Total deposit",
-      "daysRemaining": "Days remaining"
+      "daysRemaining": "Days remaining",
+      "rentalValue": "Rental value",
+      "assetsCount": "Asset count",
+      "timeStatus": "Time status"
     },
     "errors": {
       "customerRequired": "Select a customer",

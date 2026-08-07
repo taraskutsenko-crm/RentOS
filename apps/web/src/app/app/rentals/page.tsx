@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { RentalStatusBadge } from "../../../components/rentals/rental-status-badge";
 import { PageHeader } from "../../../components/shell/page-header";
 import {
   DataTable,
@@ -64,7 +65,7 @@ export default function RentalsPage() {
     {
       id: "status",
       header: t("rental.fields.status"),
-      cell: (rental) => t(`rental.statuses.${rental.status}`),
+      cell: (rental) => <RentalStatusBadge status={rental.status} />,
       mobileRole: "secondary",
     },
     {

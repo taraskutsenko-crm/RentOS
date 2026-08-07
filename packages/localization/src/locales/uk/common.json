@@ -426,12 +426,29 @@
       "subtotal": "Проміжний підсумок",
       "total": "Разом",
       "internalNotes": "Внутрішні нотатки",
-      "returnedAt": "Повернено"
+      "returnedAt": "Повернено",
+      "sourceQuote": "Вихідний кошторис"
     },
     "sections": {
       "details": "Деталі",
       "items": "Активи",
-      "financial": "Фінансовий підсумок"
+      "financial": "Фінансовий підсумок",
+      "customer": "Клієнт",
+      "documents": "Документи"
+    },
+    "documents": {
+      "empty": "До цієї оренди ще не прив'язано жодного документа"
+    },
+    "timeIntelligence": {
+      "starts_today": "Починається сьогодні",
+      "starts_tomorrow": "Починається завтра",
+      "starts_in_days": "Починається через {{count}} дн.",
+      "days_remaining": "Залишилось {{count}} дн.",
+      "due_today": "Термін сьогодні",
+      "overdue": "Прострочено на {{count}} дн.",
+      "completed": "Завершено",
+      "cancelled": "Скасовано",
+      "none": "—"
     },
     "actions": {
       "reserve": "Забронювати",
@@ -447,7 +464,10 @@
     },
     "summary": {
       "totalDeposit": "Загальна застава",
-      "daysRemaining": "Залишилось днів"
+      "daysRemaining": "Залишилось днів",
+      "rentalValue": "Сума оренди",
+      "assetsCount": "Кількість активів",
+      "timeStatus": "Статус за часом"
     },
     "errors": {
       "customerRequired": "Оберіть клієнта",

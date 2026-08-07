@@ -426,12 +426,29 @@
       "subtotal": "Zwischensumme",
       "total": "Gesamt",
       "internalNotes": "Interne Notizen",
-      "returnedAt": "Zurückgegeben am"
+      "returnedAt": "Zurückgegeben am",
+      "sourceQuote": "Ursprüngliches Angebot"
     },
     "sections": {
       "details": "Details",
       "items": "Anlagen",
-      "financial": "Finanzübersicht"
+      "financial": "Finanzübersicht",
+      "customer": "Kunde",
+      "documents": "Dokumente"
+    },
+    "documents": {
+      "empty": "Dieser Vermietung sind noch keine Dokumente zugeordnet"
+    },
+    "timeIntelligence": {
+      "starts_today": "Beginnt heute",
+      "starts_tomorrow": "Beginnt morgen",
+      "starts_in_days": "Beginnt in {{count}} Tagen",
+      "days_remaining": "Noch {{count}} Tage",
+      "due_today": "Heute fällig",
+      "overdue": "{{count}} Tage überfällig",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert",
+      "none": "—"
     },
     "actions": {
       "reserve": "Reservieren",
@@ -447,7 +464,10 @@
     },
     "summary": {
       "totalDeposit": "Kaution gesamt",
-      "daysRemaining": "Verbleibende Tage"
+      "daysRemaining": "Verbleibende Tage",
+      "rentalValue": "Mietwert",
+      "assetsCount": "Anzahl Ausrüstung",
+      "timeStatus": "Zeitstatus"
     },
     "errors": {
       "customerRequired": "Wählen Sie einen Kunden",

@@ -426,12 +426,29 @@
       "subtotal": "Subtotal",
       "total": "Total",
       "internalNotes": "Notas internas",
-      "returnedAt": "Devuelto el"
+      "returnedAt": "Devuelto el",
+      "sourceQuote": "Presupuesto de origen"
     },
     "sections": {
       "details": "Detalles",
       "items": "Activos",
-      "financial": "Resumen financiero"
+      "financial": "Resumen financiero",
+      "customer": "Cliente",
+      "documents": "Documentos"
+    },
+    "documents": {
+      "empty": "Todavía no hay documentos vinculados a este alquiler"
+    },
+    "timeIntelligence": {
+      "starts_today": "Comienza hoy",
+      "starts_tomorrow": "Comienza mañana",
+      "starts_in_days": "Comienza en {{count}} días",
+      "days_remaining": "Quedan {{count}} días",
+      "due_today": "Vence hoy",
+      "overdue": "Con {{count}} días de retraso",
+      "completed": "Completado",
+      "cancelled": "Cancelado",
+      "none": "—"
     },
     "actions": {
       "reserve": "Reservar",
@@ -447,7 +464,10 @@
     },
     "summary": {
       "totalDeposit": "Depósito total",
-      "daysRemaining": "Días restantes"
+      "daysRemaining": "Días restantes",
+      "rentalValue": "Valor del alquiler",
+      "assetsCount": "Cantidad de activos",
+      "timeStatus": "Estado temporal"
     },
     "errors": {
       "customerRequired": "Selecciona un cliente",

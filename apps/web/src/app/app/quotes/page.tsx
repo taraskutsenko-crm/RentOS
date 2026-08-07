@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { QuoteStatusBadge } from "../../../components/quotes/quote-status-badge";
 import { PageHeader } from "../../../components/shell/page-header";
 import {
   DataTable,
@@ -64,7 +65,7 @@ export default function QuotesPage() {
     {
       id: "status",
       header: t("quote.fields.status"),
-      cell: (quote) => t(`quote.statuses.${quote.status}`),
+      cell: (quote) => <QuoteStatusBadge status={quote.status} />,
       mobileRole: "secondary",
     },
     {

@@ -545,7 +545,6 @@
     "allStatuses": "Alle Status",
     "noQuotes": "Keine Angebote gefunden",
     "convertConfirm": "Dieses Angebot in eine Vermietung umwandeln?",
-    "convertedNotice": "Dieses Angebot wurde in die Vermietung umgewandelt",
     "availabilityWarningTitle": "Eine oder mehrere Anlagen könnten zu den geplanten Terminen nicht verfügbar sein",
     "statuses": {
       "DRAFT": "Entwurf",
@@ -556,6 +555,29 @@
       "EXPIRED": "Abgelaufen",
       "CONVERTED": "Umgewandelt",
       "CANCELLED": "Storniert"
+    },
+    "sections": {
+      "customer": "Kunde",
+      "documents": "Dokumente"
+    },
+    "documents": {
+      "empty": "Diesem Angebot sind noch keine Dokumente zugeordnet"
+    },
+    "summary": {
+      "quoteValue": "Angebotswert",
+      "depositTotal": "Kaution gesamt",
+      "itemsCount": "Positionen",
+      "validityStatus": "Gültigkeitsstatus"
+    },
+    "validityIntelligence": {
+      "expires_today": "Läuft heute ab",
+      "expires_tomorrow": "Läuft morgen ab",
+      "expires_in_days": "Läuft in {{count}} Tagen ab",
+      "expired": "Abgelaufen",
+      "accepted": "Angenommen",
+      "rejected": "Abgelehnt",
+      "converted": "Umgewandelt",
+      "cancelled": "Storniert"
     },
     "itemTypes": {
       "ASSET": "Anlage",
@@ -604,7 +626,8 @@
       "taxTotal": "Steuer",
       "depositTotal": "Kaution",
       "customerNotes": "Notizen für den Kunden",
-      "termsAndConditions": "Allgemeine Geschäftsbedingungen"
+      "termsAndConditions": "Allgemeine Geschäftsbedingungen",
+      "convertedRental": "Umgewandelte Vermietung"
     },
     "actions": {
       "send": "Angebot senden",

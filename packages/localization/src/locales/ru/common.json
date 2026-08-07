@@ -545,7 +545,6 @@
     "allStatuses": "Все статусы",
     "noQuotes": "Сметы не найдены",
     "convertConfirm": "Преобразовать эту смету в аренду?",
-    "convertedNotice": "Эта смета была преобразована в аренду",
     "availabilityWarningTitle": "Один или несколько активов могут быть недоступны на плановые даты",
     "statuses": {
       "DRAFT": "Черновик",
@@ -556,6 +555,29 @@
       "EXPIRED": "Истекла",
       "CONVERTED": "Преобразована",
       "CANCELLED": "Отменена"
+    },
+    "sections": {
+      "customer": "Клиент",
+      "documents": "Документы"
+    },
+    "documents": {
+      "empty": "К этой смете пока не привязаны документы"
+    },
+    "summary": {
+      "quoteValue": "Сумма сметы",
+      "depositTotal": "Общий залог",
+      "itemsCount": "Позиции",
+      "validityStatus": "Статус действия"
+    },
+    "validityIntelligence": {
+      "expires_today": "Истекает сегодня",
+      "expires_tomorrow": "Истекает завтра",
+      "expires_in_days": "Истекает через {{count}} дн.",
+      "expired": "Истекла",
+      "accepted": "Принята",
+      "rejected": "Отклонена",
+      "converted": "Преобразована",
+      "cancelled": "Отменена"
     },
     "itemTypes": {
       "ASSET": "Актив",
@@ -604,7 +626,8 @@
       "taxTotal": "Налог",
       "depositTotal": "Залог",
       "customerNotes": "Заметки для клиента",
-      "termsAndConditions": "Условия"
+      "termsAndConditions": "Условия",
+      "convertedRental": "Аренда после преобразования"
     },
     "actions": {
       "send": "Отправить смету",

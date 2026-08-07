@@ -545,7 +545,6 @@
     "allStatuses": "All statuses",
     "noQuotes": "No quotes found",
     "convertConfirm": "Convert this quote into a rental?",
-    "convertedNotice": "This quote was converted into rental",
     "availabilityWarningTitle": "One or more assets may not be available for the planned dates",
     "statuses": {
       "DRAFT": "Draft",
@@ -556,6 +555,29 @@
       "EXPIRED": "Expired",
       "CONVERTED": "Converted",
       "CANCELLED": "Cancelled"
+    },
+    "sections": {
+      "customer": "Customer",
+      "documents": "Documents"
+    },
+    "documents": {
+      "empty": "No documents linked to this quote yet"
+    },
+    "summary": {
+      "quoteValue": "Quote value",
+      "depositTotal": "Deposit total",
+      "itemsCount": "Items",
+      "validityStatus": "Validity status"
+    },
+    "validityIntelligence": {
+      "expires_today": "Expires today",
+      "expires_tomorrow": "Expires tomorrow",
+      "expires_in_days": "Expires in {{count}} days",
+      "expired": "Expired",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "converted": "Converted",
+      "cancelled": "Cancelled"
     },
     "itemTypes": {
       "ASSET": "Asset",
@@ -604,7 +626,8 @@
       "taxTotal": "Tax",
       "depositTotal": "Deposit",
       "customerNotes": "Customer notes",
-      "termsAndConditions": "Terms and conditions"
+      "termsAndConditions": "Terms and conditions",
+      "convertedRental": "Converted rental"
     },
     "actions": {
       "send": "Send quote",

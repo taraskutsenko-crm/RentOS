@@ -545,7 +545,6 @@
     "allStatuses": "Todos los estados",
     "noQuotes": "No se encontraron presupuestos",
     "convertConfirm": "¿Convertir este presupuesto en un alquiler?",
-    "convertedNotice": "Este presupuesto se convirtió en el alquiler",
     "availabilityWarningTitle": "Uno o más activos podrían no estar disponibles en las fechas previstas",
     "statuses": {
       "DRAFT": "Borrador",
@@ -556,6 +555,29 @@
       "EXPIRED": "Caducado",
       "CONVERTED": "Convertido",
       "CANCELLED": "Cancelado"
+    },
+    "sections": {
+      "customer": "Cliente",
+      "documents": "Documentos"
+    },
+    "documents": {
+      "empty": "Todavía no hay documentos vinculados a este presupuesto"
+    },
+    "summary": {
+      "quoteValue": "Valor del presupuesto",
+      "depositTotal": "Depósito total",
+      "itemsCount": "Artículos",
+      "validityStatus": "Estado de validez"
+    },
+    "validityIntelligence": {
+      "expires_today": "Vence hoy",
+      "expires_tomorrow": "Vence mañana",
+      "expires_in_days": "Vence en {{count}} días",
+      "expired": "Vencido",
+      "accepted": "Aceptado",
+      "rejected": "Rechazado",
+      "converted": "Convertido",
+      "cancelled": "Cancelado"
     },
     "itemTypes": {
       "ASSET": "Activo",
@@ -604,7 +626,8 @@
       "taxTotal": "Impuesto",
       "depositTotal": "Depósito",
       "customerNotes": "Notas para el cliente",
-      "termsAndConditions": "Términos y condiciones"
+      "termsAndConditions": "Términos y condiciones",
+      "convertedRental": "Alquiler convertido"
     },
     "actions": {
       "send": "Enviar presupuesto",

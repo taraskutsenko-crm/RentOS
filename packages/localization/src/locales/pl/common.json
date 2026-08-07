@@ -545,7 +545,6 @@
     "allStatuses": "Wszystkie statusy",
     "noQuotes": "Nie znaleziono ofert",
     "convertConfirm": "Przekształcić tę ofertę w wynajem?",
-    "convertedNotice": "Ta oferta została przekształcona w wynajem",
     "availabilityWarningTitle": "Jedno lub więcej aktywów może być niedostępne w planowanych terminach",
     "statuses": {
       "DRAFT": "Szkic",
@@ -556,6 +555,29 @@
       "EXPIRED": "Wygasła",
       "CONVERTED": "Przekształcona",
       "CANCELLED": "Anulowana"
+    },
+    "sections": {
+      "customer": "Klient",
+      "documents": "Dokumenty"
+    },
+    "documents": {
+      "empty": "Do tej oferty nie przypisano jeszcze żadnych dokumentów"
+    },
+    "summary": {
+      "quoteValue": "Wartość oferty",
+      "depositTotal": "Łączna kaucja",
+      "itemsCount": "Pozycje",
+      "validityStatus": "Status ważności"
+    },
+    "validityIntelligence": {
+      "expires_today": "Wygasa dzisiaj",
+      "expires_tomorrow": "Wygasa jutro",
+      "expires_in_days": "Wygasa za {{count}} dni",
+      "expired": "Wygasła",
+      "accepted": "Zaakceptowana",
+      "rejected": "Odrzucona",
+      "converted": "Przekształcona",
+      "cancelled": "Anulowana"
     },
     "itemTypes": {
       "ASSET": "Aktywo",
@@ -604,7 +626,8 @@
       "taxTotal": "Podatek",
       "depositTotal": "Kaucja",
       "customerNotes": "Notatki dla klienta",
-      "termsAndConditions": "Warunki"
+      "termsAndConditions": "Warunki",
+      "convertedRental": "Wynajem po przekształceniu"
     },
     "actions": {
       "send": "Wyślij ofertę",

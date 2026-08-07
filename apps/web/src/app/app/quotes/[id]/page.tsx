@@ -3,9 +3,12 @@
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { DashboardGrid, DashboardMetric } from "../../../../components/dashboard";
+import { QuoteStatusBadge } from "../../../../components/quotes/quote-status-badge";
+import { PageHeader } from "../../../../components/shell/page-header";
 import { PinButton } from "../../../../components/shell/pin-button";
 import { Timeline } from "../../../../components/timeline/timeline";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
@@ -26,6 +29,7 @@ import {
 } from "../../../../hooks/use-quotes";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatMoney } from "../../../../lib/money";
+import { getQuoteValidityIntelligence } from "../../../../lib/quote-validity-intelligence";
 import { estimateMonthlyBreakdown } from "../../../../lib/rental-pricing";
 import { QUOTE_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 
@@ -41,6 +45,9 @@ export default function QuoteDetailPage() {
   const params = useParams<{ id: string }>();
   const [tenantId] = useCurrentTenantId();
   const [actionError, setActionError] = useState<string | null>(null);
+  // Date.now() cannot be called during render (impure) — a lazy useState
+  // initializer is the sanctioned one-time-impure-computation escape hatch.
+  const [nowMs] = useState<number>(() => Date.now());
 
   const { data: quote, isLoading, isError } = useQuote(tenantId, params.id);
   const { data: timeline } = useQuoteTimeline(tenantId, params.id);
@@ -121,106 +128,134 @@ export default function QuoteDetailPage() {
     await runAction(() => rejectQuote.mutateAsync({ id: quote!.id, reason }));
   }
 
+  const validity = getQuoteValidityIntelligence(quote.status, quote.validUntil, nowMs);
+  const canConvertNow = canConvert && quote.status === "ACCEPTED";
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{quote.quoteNumber}</h1>
-          <p className="text-muted-foreground text-sm">
-            {quote.customer.firstName} {quote.customer.lastName} ·{" "}
-            <span aria-label={t(`quote.statuses.${quote.status}`)}>
-              {t(`quote.statuses.${quote.status}`)}
+      <PageHeader
+        title={quote.quoteNumber}
+        subtitle={`${quote.customer.firstName} ${quote.customer.lastName}`}
+        contextInfo={
+          <div className="flex flex-wrap items-center gap-3">
+            <QuoteStatusBadge status={quote.status} />
+            <span className="text-muted-foreground">
+              {t(`quote.validityIntelligence.${validity.kind}`, { count: validity.days })}
             </span>
-            {" · "}
-            {t("quote.fields.validUntil")}: {new Date(quote.validUntil).toLocaleDateString()}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <PinButton
-            entityType="quote"
-            entityId={quote.id}
-            label={quote.quoteNumber}
-            href={`/app/quotes/${quote.id}`}
-          />
-          {canUpdate && EDITABLE_STATUSES.has(quote.status) && (
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/app/quotes/${quote.id}/edit`}>{t("quote.editQuote")}</Link>
-            </Button>
-          )}
-          {canDownload && (
-            <Button asChild variant="outline" size="sm">
-              <a href={quotePdfUrl(tenantId, quote.id)} target="_blank" rel="noreferrer">
-                {t("quote.actions.viewPdf")}
-              </a>
-            </Button>
-          )}
-          {canDownload && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void runAction(() => regeneratePdf.mutateAsync(quote!.id))}
-            >
-              {t("quote.actions.regeneratePdf")}
-            </Button>
-          )}
-          {canSend && SENDABLE_STATUSES.has(quote.status) && (
-            <Button
-              size="sm"
-              onClick={() => void runAction(() => sendQuote.mutateAsync({ id: quote!.id }))}
-            >
-              {t("quote.actions.send")}
-            </Button>
-          )}
-          {canAccept && DECIDABLE_STATUSES.has(quote.status) && (
-            <Button
-              size="sm"
-              onClick={() => void runAction(() => acceptQuote.mutateAsync({ id: quote!.id }))}
-            >
-              {t("quote.actions.accept")}
-            </Button>
-          )}
-          {canReject && DECIDABLE_STATUSES.has(quote.status) && (
-            <Button variant="outline" size="sm" onClick={() => void handleReject()}>
-              {t("quote.actions.reject")}
-            </Button>
-          )}
-          {canConvert && quote.status === "ACCEPTED" && (
+            <span className="text-muted-foreground">
+              {t("quote.fields.validUntil")}: {new Date(quote.validUntil).toLocaleDateString()}
+            </span>
+          </div>
+        }
+        primaryAction={
+          canConvertNow ? (
             <Button size="sm" onClick={() => void handleConvert()}>
               {t("quote.actions.convert")}
             </Button>
-          )}
-          {canDuplicate && (
-            <Button variant="outline" size="sm" onClick={() => void handleDuplicate()}>
-              {t("quote.actions.duplicate")}
-            </Button>
-          )}
-          {canUpdate && CANCELLABLE_STATUSES.has(quote.status) && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void runAction(() => cancelQuote.mutateAsync({ id: quote!.id }))}
-            >
-              {t("quote.actions.cancel")}
-            </Button>
-          )}
-          {canDelete && DELETABLE_STATUSES.has(quote.status) && (
-            <Button size="sm" variant="outline" onClick={() => void handleDelete()}>
-              {t("customer.delete")}
-            </Button>
-          )}
-        </div>
-      </div>
+          ) : undefined
+        }
+        secondaryActions={
+          <>
+            <PinButton
+              entityType="quote"
+              entityId={quote.id}
+              label={quote.quoteNumber}
+              href={`/app/quotes/${quote.id}`}
+            />
+            {canUpdate && EDITABLE_STATUSES.has(quote.status) && (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/app/quotes/${quote.id}/edit`}>{t("quote.editQuote")}</Link>
+              </Button>
+            )}
+            {canDownload && (
+              <Button asChild variant="outline" size="sm">
+                <a href={quotePdfUrl(tenantId, quote.id)} target="_blank" rel="noreferrer">
+                  {t("quote.actions.viewPdf")}
+                </a>
+              </Button>
+            )}
+            {canDownload && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void runAction(() => regeneratePdf.mutateAsync(quote!.id))}
+              >
+                {t("quote.actions.regeneratePdf")}
+              </Button>
+            )}
+            {canSend && SENDABLE_STATUSES.has(quote.status) && (
+              <Button
+                size="sm"
+                onClick={() => void runAction(() => sendQuote.mutateAsync({ id: quote!.id }))}
+              >
+                {t("quote.actions.send")}
+              </Button>
+            )}
+            {canAccept && DECIDABLE_STATUSES.has(quote.status) && (
+              <Button
+                size="sm"
+                onClick={() => void runAction(() => acceptQuote.mutateAsync({ id: quote!.id }))}
+              >
+                {t("quote.actions.accept")}
+              </Button>
+            )}
+            {canReject && DECIDABLE_STATUSES.has(quote.status) && (
+              <Button variant="outline" size="sm" onClick={() => void handleReject()}>
+                {t("quote.actions.reject")}
+              </Button>
+            )}
+            {canDuplicate && (
+              <Button variant="outline" size="sm" onClick={() => void handleDuplicate()}>
+                {t("quote.actions.duplicate")}
+              </Button>
+            )}
+            {canUpdate && CANCELLABLE_STATUSES.has(quote.status) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void runAction(() => cancelQuote.mutateAsync({ id: quote!.id }))}
+              >
+                {t("quote.actions.cancel")}
+              </Button>
+            )}
+            {canDelete && DELETABLE_STATUSES.has(quote.status) && (
+              <Button size="sm" variant="outline" onClick={() => void handleDelete()}>
+                {t("customer.delete")}
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {actionError && <p className="text-destructive text-sm">{actionError}</p>}
 
-      {quote.status === "CONVERTED" && quote.convertedRental && (
-        <p className="text-sm">
-          {t("quote.convertedNotice")}{" "}
-          <Link className="underline" href={`/app/rentals/${quote.convertedRental.id}`}>
-            {quote.convertedRental.rentalNumber}
-          </Link>
-        </p>
-      )}
+      <DashboardGrid>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-2xl font-semibold">
+              {formatMoney(quote.totalMinor, quote.currency)}
+            </p>
+            <p className="text-muted-foreground text-xs">{t("quote.summary.quoteValue")}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-2xl font-semibold">
+              {formatMoney(quote.depositTotalMinor, quote.currency)}
+            </p>
+            <p className="text-muted-foreground text-xs">{t("quote.summary.depositTotal")}</p>
+          </CardContent>
+        </Card>
+        <DashboardMetric label={t("quote.summary.itemsCount")} value={quote.items.length} />
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-2xl font-semibold">
+              {t(`quote.validityIntelligence.${validity.kind}`, { count: validity.days })}
+            </p>
+            <p className="text-muted-foreground text-xs">{t("quote.summary.validityStatus")}</p>
+          </CardContent>
+        </Card>
+      </DashboardGrid>
 
       {quote.availabilityWarnings.length > 0 && (
         <div className="border-destructive rounded-md border p-3 text-sm">
@@ -237,6 +272,28 @@ export default function QuoteDetailPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("quote.sections.customer")}</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3 text-sm">
+              <InfoRow
+                label={t("customer.firstName")}
+                value={
+                  <Link
+                    href={`/app/customers/${quote.customer.id}`}
+                    className="text-primary hover:underline"
+                  >
+                    {quote.customer.firstName} {quote.customer.lastName}
+                  </Link>
+                }
+              />
+              <InfoRow label={t("customer.company")} value={quote.customer.company ?? "—"} />
+              <InfoRow label={t("customer.phone")} value={quote.customer.phone ?? "—"} />
+              <InfoRow label={t("customer.email")} value={quote.customer.email ?? "—"} />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>{t("rental.sections.details")}</CardTitle>
@@ -282,6 +339,8 @@ export default function QuoteDetailPage() {
                     <th className="p-3 font-medium">{t("quote.fields.itemType")}</th>
                     <th className="p-3 font-medium">{t("rental.fields.billingMode")}</th>
                     <th className="p-3 font-medium">{t("rental.fields.quantity")}</th>
+                    <th className="p-3 font-medium">{t("rental.fields.discount")}</th>
+                    <th className="p-3 font-medium">{t("quote.fields.taxTotal")}</th>
                     <th className="p-3 font-medium">{t("rental.fields.total")}</th>
                   </tr>
                 </thead>
@@ -298,7 +357,18 @@ export default function QuoteDetailPage() {
                         : null;
                     return (
                       <tr key={item.id} className="border-b last:border-0">
-                        <td className="p-3">{item.name}</td>
+                        <td className="p-3">
+                          {item.itemType === "ASSET" && item.asset ? (
+                            <Link
+                              href={`/app/assets/${item.asset.id}`}
+                              className="text-primary hover:underline"
+                            >
+                              {item.name}
+                            </Link>
+                          ) : (
+                            item.name
+                          )}
+                        </td>
                         <td className="p-3">{t(`quote.itemTypes.${item.itemType}`)}</td>
                         <td className="p-3">
                           {t(`quote.billingModes.${item.billingMode}`)}
@@ -329,12 +399,59 @@ export default function QuoteDetailPage() {
                           )}
                         </td>
                         <td className="p-3">{item.quantity}</td>
+                        <td className="p-3">
+                          {formatMoney(item.discountTotalMinor, quote.currency)}
+                        </td>
+                        <td className="p-3">{formatMoney(item.taxTotalMinor, quote.currency)}</td>
                         <td className="p-3">{formatMoney(item.lineTotalMinor, quote.currency)}</td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("quote.sections.documents")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!quote.convertedRental && quote.platformDocuments.length === 0 ? (
+                <p className="text-muted-foreground text-sm">{t("quote.documents.empty")}</p>
+              ) : (
+                <ul className="flex flex-col gap-2 text-sm">
+                  {quote.convertedRental && (
+                    <li className="flex items-center justify-between">
+                      <span className="text-muted-foreground">
+                        {t("quote.fields.convertedRental")}
+                      </span>
+                      <Link
+                        href={`/app/rentals/${quote.convertedRental.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {quote.convertedRental.rentalNumber}
+                      </Link>
+                    </li>
+                  )}
+                  {quote.platformDocuments.map((document) => (
+                    <li key={document.id} className="flex items-center justify-between">
+                      <span>
+                        {document.documentType === "CUSTOM" && document.customTypeName
+                          ? document.customTypeName
+                          : t(`document.types.${document.documentType}`)}
+                        {document.title ? ` — ${document.title}` : ""}
+                      </span>
+                      <Link
+                        href={`/app/documents/${document.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {document.documentNumber}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
 
@@ -391,7 +508,7 @@ export default function QuoteDetailPage() {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex flex-col">
       <span className="text-muted-foreground text-xs">{label}</span>

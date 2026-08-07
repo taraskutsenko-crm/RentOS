@@ -1,4 +1,11 @@
-import type { Customer, MonthlyBillingStrategy, Prisma, Quote, Rental } from "@prisma/client";
+import type {
+  Customer,
+  Document,
+  MonthlyBillingStrategy,
+  Prisma,
+  Quote,
+  Rental,
+} from "@prisma/client";
 
 export const QUOTE_ITEM_INCLUDE = {
   asset: { include: { category: true, currentStatus: true } },
@@ -8,16 +15,37 @@ export type QuoteItemWithAsset = Prisma.QuoteItemGetPayload<{
   include: typeof QUOTE_ITEM_INCLUDE;
 }>;
 
+export const QUOTE_PLATFORM_DOCUMENT_SELECT = {
+  id: true,
+  documentType: true,
+  customTypeName: true,
+  documentNumber: true,
+  status: true,
+  title: true,
+  createdAt: true,
+} satisfies Prisma.DocumentSelect;
+
 export const QUOTE_DETAIL_INCLUDE = {
   customer: true,
   items: { include: QUOTE_ITEM_INCLUDE, orderBy: { sortOrder: "asc" } },
   convertedRental: true,
+  platformDocuments: {
+    where: { deletedAt: null },
+    select: QUOTE_PLATFORM_DOCUMENT_SELECT,
+    orderBy: { createdAt: "desc" },
+  },
 } satisfies Prisma.QuoteInclude;
+
+export type QuotePlatformDocumentView = Pick<
+  Document,
+  "id" | "documentType" | "customTypeName" | "documentNumber" | "status" | "title" | "createdAt"
+>;
 
 export interface QuoteDetailView extends Quote {
   customer: Customer;
   items: QuoteItemWithAsset[];
   convertedRental: Rental | null;
+  platformDocuments: QuotePlatformDocumentView[];
 }
 
 export interface QuoteListItemView extends Omit<Quote, "publicTokenHash"> {

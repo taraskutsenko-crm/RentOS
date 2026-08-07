@@ -1,7 +1,18 @@
 import type { Asset } from "./asset";
 import type { Customer } from "./customer";
+import type { DocumentStatus, DocumentType } from "./document";
 import type { MonthlyBillingStrategy } from "./rental";
 import type { TimelineEvent } from "./timeline";
+
+export interface QuotePlatformDocument {
+  id: string;
+  documentType: DocumentType;
+  customTypeName: string | null;
+  documentNumber: string;
+  status: DocumentStatus;
+  title: string | null;
+  createdAt: string;
+}
 
 export type QuoteStatus =
   "DRAFT" | "SENT" | "VIEWED" | "ACCEPTED" | "REJECTED" | "EXPIRED" | "CONVERTED" | "CANCELLED";
@@ -94,12 +105,13 @@ export interface Quote {
   customer: Customer;
   items: QuoteItem[];
   convertedRental: { id: string; rentalNumber: string } | null;
+  platformDocuments: QuotePlatformDocument[];
   availabilityWarnings: QuoteAvailabilityWarning[];
 }
 
 export interface QuoteListItem extends Omit<
   Quote,
-  "items" | "convertedRental" | "availabilityWarnings"
+  "items" | "convertedRental" | "platformDocuments" | "availabilityWarnings"
 > {
   itemCount: number;
 }

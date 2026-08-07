@@ -545,7 +545,6 @@
     "allStatuses": "Усі статуси",
     "noQuotes": "Кошторисів не знайдено",
     "convertConfirm": "Перетворити цей кошторис на оренду?",
-    "convertedNotice": "Цей кошторис перетворено на оренду",
     "availabilityWarningTitle": "Один або декілька активів можуть бути недоступні на плановані дати",
     "statuses": {
       "DRAFT": "Чернетка",
@@ -556,6 +555,29 @@
       "EXPIRED": "Прострочено",
       "CONVERTED": "Перетворено",
       "CANCELLED": "Скасовано"
+    },
+    "sections": {
+      "customer": "Клієнт",
+      "documents": "Документи"
+    },
+    "documents": {
+      "empty": "До цього кошторису ще не прив'язано жодного документа"
+    },
+    "summary": {
+      "quoteValue": "Сума кошторису",
+      "depositTotal": "Загальна застава",
+      "itemsCount": "Позиції",
+      "validityStatus": "Статус дії"
+    },
+    "validityIntelligence": {
+      "expires_today": "Спливає сьогодні",
+      "expires_tomorrow": "Спливає завтра",
+      "expires_in_days": "Спливає через {{count}} дн.",
+      "expired": "Прострочено",
+      "accepted": "Прийнято",
+      "rejected": "Відхилено",
+      "converted": "Перетворено",
+      "cancelled": "Скасовано"
     },
     "itemTypes": {
       "ASSET": "Актив",
@@ -604,7 +626,8 @@
       "taxTotal": "Податок",
       "depositTotal": "Застава",
       "customerNotes": "Нотатки для клієнта",
-      "termsAndConditions": "Умови"
+      "termsAndConditions": "Умови",
+      "convertedRental": "Оренда після перетворення"
     },
     "actions": {
       "send": "Надіслати кошторис",

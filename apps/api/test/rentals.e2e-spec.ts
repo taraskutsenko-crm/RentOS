@@ -850,6 +850,44 @@ describe("Rentals E2E", () => {
     );
   });
 
+  // 32b. Rental detail surfaces linked documents and a null sourceQuote for a directly-created rental (Chapter 7)
+  it("GET /rentals/:id includes sourceQuote (null) and any linked, non-deleted documents", async () => {
+    const created = await createRental().expect(201);
+
+    const noDocuments = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/rentals/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(noDocuments.body.sourceQuote).toBeNull();
+    expect(noDocuments.body.documents).toEqual([]);
+
+    const document = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "CONTRACT", customerId, rentalId: created.body.id })
+      .expect(201);
+
+    const deletedDocument = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "CONTRACT", customerId, rentalId: created.body.id })
+      .expect(201);
+    await request(app.getHttpServer())
+      .delete(`/tenants/${tenantId}/documents/${deletedDocument.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(204);
+
+    const withDocuments = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/rentals/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(withDocuments.body.documents).toHaveLength(1);
+    expect(withDocuments.body.documents[0]).toMatchObject({
+      id: document.body.id,
+      documentType: "CONTRACT",
+    });
+  });
+
   // 32. Pagination and filtering
   it("paginates and filters the rental list by status", async () => {
     for (let i = 0; i < 3; i += 1) {

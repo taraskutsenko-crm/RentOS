@@ -3,7 +3,19 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import RentalDetailPage from "../../src/app/app/rentals/[id]/page";
+import { formatMoney } from "../../src/lib/money";
 import { renderWithProviders } from "../test-utils";
+
+/**
+ * formatMoney's Intl output can contain locale-specific whitespace (e.g. a
+ * narrow no-break space) that differs from a plain ASCII space once
+ * jest-dom's toHaveTextContent normalizes DOM whitespace — build a
+ * whitespace-tolerant regex instead of comparing raw strings.
+ */
+function moneyPattern(minor: number, currency: string): RegExp {
+  const escaped = formatMoney(minor, currency).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(escaped.replace(/\s+/g, "\\s*"));
+}
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -53,8 +65,18 @@ function baseRental(status: string) {
     totalMinor: 3000,
     notes: null,
     internalNotes: null,
-    customer: { firstName: "Jane", lastName: "Doe" },
+    sourceQuoteId: null,
+    customer: {
+      id: "customer-1",
+      firstName: "Jane",
+      lastName: "Doe",
+      company: null,
+      phone: null,
+      email: null,
+    },
     items: [],
+    sourceQuote: null,
+    documents: [],
   };
 }
 
@@ -76,7 +98,157 @@ describe("RentalDetailPage", () => {
     renderWithProviders(<RentalDetailPage />);
 
     expect(screen.getByRole("heading", { name: "RNT-000001" })).toBeInTheDocument();
-    expect(screen.getByText(/jane doe/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/jane doe/i).length).toBeGreaterThan(0);
+    expect(screen.getByText("Draft")).toBeInTheDocument();
+  });
+
+  // Chapter 7: Customer card links to the customer's own detail page
+  it("renders a Customer card linking to the customer's detail page", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({
+      data: {
+        ...baseRental("DRAFT"),
+        customer: {
+          id: "customer-1",
+          firstName: "Jane",
+          lastName: "Doe",
+          company: "Acme Co",
+          phone: "555-1234",
+          email: "jane@example.com",
+        },
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    const customerLink = screen.getByRole("link", { name: "Jane Doe" });
+    expect(customerLink).toHaveAttribute("href", "/app/customers/customer-1");
+    expect(screen.getByText("Acme Co")).toBeInTheDocument();
+    expect(screen.getByText("555-1234")).toBeInTheDocument();
+    expect(screen.getByText("jane@example.com")).toBeInTheDocument();
+  });
+
+  // Chapter 7: Smart Summary shows the real rental value and asset count — never fabricated
+  it("shows the rental value, asset count, and total deposit in the summary strip", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({
+      data: {
+        ...baseRental("DRAFT"),
+        totalMinor: 12000,
+        items: [
+          {
+            id: "item-1",
+            billingMode: "DAILY",
+            quantity: 1,
+            dailyPriceMinor: 1000,
+            weeklyPriceMinor: null,
+            monthlyPriceMinor: null,
+            customPriceMinor: null,
+            monthlyBillingStrategy: null,
+            customMonthLengthDays: null,
+            discountMinor: 0,
+            depositMinor: 500,
+            returnedAt: null,
+            asset: {
+              id: "asset-1",
+              name: "Generator A",
+              currentStatus: { name: "Available", isAvailableForRental: true },
+            },
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    const rentalValueCard = screen.getByText("Rental value").closest("div");
+    expect(rentalValueCard).toHaveTextContent(moneyPattern(12000, "USD"));
+
+    const depositCard = screen.getByText("Total deposit").closest("div");
+    expect(depositCard).toHaveTextContent(moneyPattern(500, "USD"));
+
+    const assetsCard = screen.getByText("Asset count").closest("div");
+    expect(assetsCard).toHaveTextContent("1");
+  });
+
+  // Chapter 7: the Assets card links each item to its asset and shows the asset's own status
+  it("links each rental item to its asset detail page and shows the asset's status", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({
+      data: {
+        ...baseRental("DRAFT"),
+        items: [
+          {
+            id: "item-1",
+            billingMode: "DAILY",
+            quantity: 1,
+            dailyPriceMinor: 1000,
+            weeklyPriceMinor: null,
+            monthlyPriceMinor: null,
+            customPriceMinor: null,
+            monthlyBillingStrategy: null,
+            customMonthLengthDays: null,
+            discountMinor: 0,
+            depositMinor: 0,
+            returnedAt: null,
+            asset: {
+              id: "asset-1",
+              name: "Generator A",
+              currentStatus: { name: "Rented out", isAvailableForRental: false },
+            },
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    const assetLink = screen.getByRole("link", { name: "Generator A" });
+    expect(assetLink).toHaveAttribute("href", "/app/assets/asset-1");
+    expect(screen.getByText("Rented out")).toBeInTheDocument();
+  });
+
+  // Chapter 7: Documents card — honest empty state when nothing is linked
+  it("shows the honest empty state in the Documents card when no source quote or documents exist", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({ data: baseRental("DRAFT"), isLoading: false });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    expect(screen.getByText(/no documents linked to this rental yet/i)).toBeInTheDocument();
+  });
+
+  // Chapter 7: Documents card — source quote and linked documents, never fabricated
+  it("renders the source quote and linked documents when they exist", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({
+      data: {
+        ...baseRental("DRAFT"),
+        sourceQuote: { id: "quote-1", quoteNumber: "Q-2026-000001" },
+        documents: [
+          {
+            id: "doc-1",
+            documentType: "CONTRACT",
+            customTypeName: null,
+            documentNumber: "DOC-000001",
+            status: "SENT",
+            title: null,
+            createdAt: "2026-08-01T00:00:00Z",
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    const quoteLink = screen.getByRole("link", { name: "Q-2026-000001" });
+    expect(quoteLink).toHaveAttribute("href", "/app/quotes/quote-1");
+    const documentLink = screen.getByRole("link", { name: "DOC-000001" });
+    expect(documentLink).toHaveAttribute("href", "/app/documents/doc-1");
   });
 
   // 8. Status change / workflow test: only shows the reserve action for a DRAFT rental

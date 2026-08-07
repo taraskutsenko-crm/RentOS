@@ -414,6 +414,16 @@ describe("Quotes E2E", () => {
 
       expect(converted.body.rental.totalMinor).toBe(quote.body.totalMinor);
       expect(converted.body.rental.items[0].monthlyBillingStrategy).toBe("CALENDAR_MONTH");
+
+      // The converted Rental surfaces its source Quote (Chapter 7).
+      const rental = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${converted.body.rental.id}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(rental.body.sourceQuote).toMatchObject({
+        id: quoteId,
+        quoteNumber: quote.body.quoteNumber,
+      });
     });
 
     it("a legacy MONTHLY item with no stored strategy (pre-dating this feature) is still readable and reproduces its original whole-month-rounding total on an unrelated edit", async () => {

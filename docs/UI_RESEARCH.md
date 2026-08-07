@@ -442,3 +442,130 @@ See `UI_REDESIGN_PLAN.md` Chapter 6 for the concrete scope this
 research feeds into, and `UI_AUDIT.md`'s addendum for exactly what
 gaps exist in today's per-entity timeline/summary/discoverability
 surfaces.
+
+## Rental domain — Chapter 7 addendum
+
+A full inventory of the rental domain as it actually exists today —
+schema, service, pricing, availability, permissions, and frontend —
+gathered before any redesign work, per `ARCHITECTURE_LOCK.md`'s "read
+the repository first" contract. Every claim below is a verified fact
+about the current codebase, not a plan.
+
+**Schema (`apps/api/prisma/schema.prisma`)**
+
+37. **`RentalStatus` has 7 values but only 6 are reachable.**
+    `DRAFT | QUOTE | RESERVED | ACTIVE | RETURNED | COMPLETED |
+CANCELLED` (`:58-66`) — `COMPLETED` is defined but no
+    `RentalsService` method ever sets it; the real post-`ACTIVE`
+    terminal state is `RETURNED`. A redesign must not imply
+    `COMPLETED` is a real, reachable state.
+38. **No deposit total is stored on `Rental` itself.** Deposit exists
+    only per-`RentalItem` (`depositMinor`, `:843`); `Rental` has no
+    `depositMinor`/`depositTotalMinor` column at all — the Chapter 6
+    summary strip's "Total deposit" is already a client-side sum for
+    exactly this reason, and any new UI showing deposit must keep
+    summing, not assume a stored aggregate exists.
+39. **`Rental.sourceQuoteId` is real, populated only by quote
+    conversion, and completely unsurfaced on the frontend.**
+    `sourceQuoteId String? @unique` (`:789`) with relation
+    `sourceQuote Quote?` (`:800`); `Quote.convertedRental` is the real,
+    documented inverse (`schema.prisma:979-981`). `apps/web/src/types/
+rental.ts`'s `Rental` interface has no field for it at all (lines
+    44-68) — the frontend doesn't even type this link, so even though
+    the backend relation exists, nothing in the UI can reach it today.
+40. **`Document.rentalId` is a real, direct, nullable FK** —
+    `schema.prisma:1165`, indexed (`:1206`) — not an indirect link
+    through line items. `Rental.documents Document[]` is the inverse
+    side (`:804`). The rental detail page shows no documents section
+    at all today.
+41. **No `Invoice`/`Payment`/`Transaction` model exists anywhere.**
+    Confirmed by a full-schema grep for those three terms: zero
+    matches. Any "payment status"/"invoice total" UI would be
+    fabricated data with nothing to back it.
+
+**Service (`apps/api/src/rentals/rentals.service.ts`)**
+
+44. **The real lifecycle, exactly as enforced today:**
+    `create()` always starts `DRAFT` (`:70-144`); `reserve()` moves
+    `DRAFT`/`QUOTE` → `RESERVED`, asserting availability first
+    (`:410-436`); `start()` requires exactly `RESERVED` → `ACTIVE`,
+    stamps `actualStart` (`:438-488`); `returnRental()` requires
+    exactly `ACTIVE`, supports partial per-item returns via
+    `itemIds`, only flips to `RETURNED` once every item is returned
+    (`:490-566`); `cancel()` works from `DRAFT`/`QUOTE`/`RESERVED`/
+    `ACTIVE` (`:568-636`). `remove()` (soft delete) only allowed from
+    `DRAFT`/`QUOTE`/`CANCELLED` (`:385-408`).
+45. **`extendPlannedEnd()` exists and is fully implemented and tested,
+    but has no staff-facing REST route.** (`rentals.service.ts:320-383`)
+    — reachable today only from
+    `PortalExtensionRequestsService.approve` when staff approve a
+    _customer's_ portal extension request. A staff member cannot
+    extend a rental's planned end directly from the staff app; the
+    capability exists in the service layer only.
+46. **Availability is opt-in almost everywhere, not automatic.**
+    `AvailabilityService` (`availability.service.ts`) is only invoked
+    automatically at `reserve()` and for the newly-added tail window
+    in `extendPlannedEnd()`. `create()` and a `DRAFT`/`QUOTE` `update()`
+    never check availability — a draft can be freely created or edited
+    into a double-booking; the real enforcement point is `reserve()`,
+    which throws `ConflictException` naming every unavailable asset.
+    The dedicated `GET /tenants/:tenantId/rentals/availability`
+    endpoint (`rentals.controller.ts:64-78`) is advisory, used today
+    only by the wizard's live per-asset feedback and the availability
+    calendar page — it never blocks anything itself.
+
+**Frontend (`apps/web/src/app/app/rentals/[id]/page.tsx`, as of Chapter 6)**
+
+47. **The current detail page shows: header (number/customer-name-as-
+    plain-text/status-as-plain-text), a deposit+days-remaining
+    dashboard strip (Chapter 6), planned/actual dates + notes, an
+    items table with no per-item price column, a financial summary
+    (subtotal/discount/tax/total), and the shared Timeline.** It shows
+    **zero** of: a customer link, a source-quote reference, a
+    documents list, an asset detail link, a per-item rate, or any
+    status color-coding.
+48. **No entity in the product has a colored status badge today** —
+    confirmed by grepping the Rentals, Quotes, and Documents list/
+    detail pages for any status-to-color mapping: none exists.
+    Every status renders as plain translated text everywhere it
+    appears. `PRODUCT_BIBLE.md` §10's "a record's status renders
+    identically everywhere it appears" is trivially satisfied today
+    only because there is exactly one (colorless) rendering — a new
+    colored badge introduced for Rentals must be applied everywhere
+    a rental status renders (list + detail), not only the new
+    workspace, to keep satisfying that rule rather than break it.
+49. **The rentals list page wires only `search`/`status`/pagination as
+    UI filters**, even though the API's `QueryRentalsDto` also
+    supports `customerId`, `assetId`, `plannedStartFrom`/`To`
+    (`rentals.service.ts:146-196`) — an existing, unused backend
+    capability, not a gap to build against in this chapter.
+50. **The availability calendar page** (`apps/app/rentals/
+availability/page.tsx`) is a single-month, per-selected-asset day
+    grid reading the same advisory `GET .../availability` endpoint —
+    not a cross-asset scheduling/Gantt view, no drag-to-book, no
+    click-to-create.
+
+**Permissions** — `rentals.view/create/update/delete/reserve/start/
+return/cancel` plus `rental_settings.view/manage`
+(`permission.ts:35-46`), confirmed identical between backend and the
+frontend mirror. `MANAGER` gets everything except `delete` and
+`rental_settings.manage`; `TECHNICIAN` gets only `view/start/return`
+(the two physically-handling-equipment transitions); `ACCOUNTANT`/
+`VIEWER` get read-only.
+
+**Testing** — `rentals.e2e-spec.ts` already covers the full lifecycle,
+every billing mode, availability/double-booking rejection, partial
+return, and the permission matrix. `rental-pricing.util.spec.ts`
+covers every pricing branch including leap-year/DST/year-boundary
+edge cases. Nothing about `sourceQuote`/`documents` surfacing exists
+in any test today, since nothing surfaces them today.
+
+## How this informs Chapter 7
+
+`UI_REDESIGN_PLAN.md` Chapter 7 turns findings #40-43 into the
+Rental Workspace's Documents section (a real, existing FK relation,
+never built into UI before) and finding #48 into one reusable
+`RentalStatusBadge` applied consistently everywhere a rental status
+renders. Findings #37, #45, and #46 become explicitly documented
+gaps/non-goals, not features invented to fill out the page — see
+`UI_AUDIT.md`'s addendum for the full gap list.

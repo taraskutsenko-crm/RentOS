@@ -1387,11 +1387,275 @@ labelKey: string; tone?: "success" | "warning" | "destructive" }>`)
   point `PRODUCT_BIBLE.md` §20 already documents; no AI code is
   written.
 
+## Chapter 7 — Rental Workspace & Rental Lifecycle
+
+**A note on chapter numbering:** the "Later chapters" list below (written
+when Chapter 3 closed) had named "Forms & Wizards" as Chapter 7. The
+user's own instruction opening this chapter explicitly frames it as
+"Chapter 7," the same user-directed reprioritization Chapters 4, 5, and
+6 already made. Rental Workspace & Rental Lifecycle is Chapter 7; Forms
+& Wizards moves later (see the renumbered list at the end of this
+section).
+
+**Scope:** transform the Rental detail page from a CRUD form with a
+Chapter 6 summary strip into an operational workspace connecting every
+relationship a rental actually has (Customer, Assets, source Quote,
+Documents, financial totals, Timeline) — using only relations and data
+that genuinely exist in the schema today, adding one small, additive
+backend read-side extension (surfacing two already-real FKs that were
+never included in the API response), and centralizing date-derived
+status language that today is scattered and incomplete. Checked against
+`PRODUCT_BIBLE.md` first, with the Ten-Year Rule (§26), Simplicity Rule
+(§7), Customer Value Rule (§23), and Universal Rental Philosophy (§3)
+as this chapter's sharpest filters, per the user's own explicit
+instruction.
+
+### Step 1 — Current implementation, read directly from source
+
+The rental domain's business logic (pricing, lifecycle transitions,
+availability) is mature, fully tested, and untouched by this chapter —
+see `UI_RESEARCH.md`'s Chapter 7 addendum (findings #37, #44-50) for
+the complete inventory. In summary: the lifecycle is `DRAFT`/`QUOTE` →
+`RESERVED` → `ACTIVE` → `RETURNED`, with `CANCELLED` reachable from any
+non-terminal state and `COMPLETED` defined in the enum but never
+reachable (finding #37); availability is enforced automatically only at
+`reserve()` (finding #46); `Rental.sourceQuoteId` and `Document.rentalId`
+are both real, populated, indexed foreign keys that have never been
+surfaced anywhere in the frontend (findings #41-42, #46); no entity's
+status renders with any color anywhere in the product (finding #47/#48);
+no date-derived operational label ("3 days remaining," "Overdue by 2
+days") exists as a reusable utility anywhere (finding #48); and no
+`Invoice`/`Payment`/`Transaction` model exists in the schema at all
+(finding #43/#49).
+
+### Step 2 — Compared against the governing docs
+
+- `PRODUCT_BIBLE.md`'s framing that "a rental is a business process,"
+  not a database row, and this chapter's own explicit instruction that
+  a user must understand a rental's complete state "without jumping
+  between multiple pages," is the direct mandate for surfacing the
+  Customer/Assets/Documents/Quote relationships that already exist in
+  the schema but have never been rendered.
+- `ARCHITECTURE_LOCK.md` Part 2's "new reports/analytics built by
+  reading existing data... as long as they don't introduce a second,
+  competing computation" is the explicit permission for the one backend
+  change this chapter makes: adding `sourceQuote`/`documents` to
+  `RentalsService.findOne()`'s existing Prisma `include` — an additive,
+  read-only extension of an existing query, not new business logic, not
+  a new endpoint, not a schema change.
+- `PRODUCT_BIBLE.md` §26 (Ten-Year Rule) plus its explicit
+  anti-overengineering caveat, and §7 (Simplicity Rule), are why this
+  chapter does **not** add a staff-facing `extend rental` endpoint (the
+  service method exists but has no route — finding #50) even though it
+  would be easy: nothing in this chapter's brief asked for it, and
+  building unrequested backend surface area is exactly the speculative
+  work both principles warn against.
+- `PRODUCT_BIBLE.md` §10 (Product Consistency, "a record's status
+  renders identically everywhere it appears") is why the new
+  `RentalStatusBadge` this chapter introduces is applied to **both**
+  the Rental Workspace and the rentals list page, not the workspace
+  alone (finding #47/#48) — introducing a colored badge in only one
+  place would itself violate the rule it's trying to satisfy.
+- `PRODUCT_BIBLE.md` §3 (Universal Rental Philosophy) and this
+  chapter's explicit apartment/property-rental compatibility test are
+  checked against every new UI element added: none assumes a specific
+  asset type, industry vocabulary, or billing cadence.
+- `ARCHITECTURE_LOCK.md` §1.5 (historical financial immutability) is
+  why the Smart Rental Summary's "rental value" reads the existing
+  stored `Rental.totalMinor` verbatim — never recomputed from current
+  item state — the same discipline Chapter 6 already established for
+  Asset revenue (reuse the canonical pricing function for a genuinely
+  new derived number; never touch a stored historical total).
+- This chapter's own explicit "Anti-Fabrication Rule" and "do not
+  fabricate backend functionality" instruction is why no payment
+  status, invoice total, availability-conflict detail beyond what
+  `AvailabilityService` already returns, email-sending action, or
+  calendar view is built — see "What Chapter 7 does not build" below.
+
+### Step 3 — Design Rationale
+
+1. **One additive backend change: `RENTAL_DETAIL_INCLUDE` gains
+   `sourceQuote` (id, quoteNumber only) and `documents` (id, type,
+   number, status, title, createdAt; `deletedAt: null`; newest
+   first).** Both are existing Prisma relations already present in the
+   schema (`Rental.sourceQuote`, `Rental.documents`) that `findOne()`
+   simply never included before. No new service method, no new
+   controller route, no new permission, no migration — the existing
+   `rentals.view` permission that already gates `findOne()` is judged
+   sufficient for both, following the exact precedent Chapter 6 set for
+   `CustomerSummary`/`AssetSummary`: a cross-entity reference surfaced
+   on an entity's own detail response is gated by that entity's own
+   view permission, not a second compound permission check.
+2. **`extendPlannedEnd()` is left exactly as shipped — no new route.**
+   The method is fully implemented, tested, and correctly reachable
+   from the customer-portal extension-approval flow. This chapter was
+   not asked to build a staff-facing "extend rental" action; adding one
+   speculatively would be new backend surface area introduced without a
+   stated requirement, the exact anti-pattern §26/§7 name. Documented
+   as a real, named extension point in "What Chapter 7 does not build"
+   below, not a silent gap.
+3. **One reusable `RentalStatusBadge` component
+   (`apps/web/src/components/rentals/rental-status-badge.tsx`),
+   replacing the plain-text status rendering on both the Rental
+   Workspace and the rentals list page.** Tone mapping uses only
+   existing semantic tokens, matching the exact `bg-{tone}-light
+text-{tone}` pairing `Alert`'s own variants already use
+   (`packages/ui/src/components/alert.tsx`): `DRAFT`/`QUOTE`/
+   `CANCELLED` → neutral (`bg-muted text-muted-foreground`, matching
+   the Asset detail page's existing "unavailable" treatment);
+   `RESERVED` → info; `ACTIVE` → primary (matching Asset's existing
+   "available" treatment — the one state representing a live,
+   in-progress operation); `RETURNED` → success. No new color, no new
+   Tailwind utility invented — every class already exists in the design
+   token system.
+4. **One centralized, pure time-intelligence utility
+   (`apps/web/src/lib/rental-time-intelligence.ts`), replacing the
+   single bare-number `daysRemaining` calculation Chapter 6 wrote
+   inline in the detail page.** A pure function of
+   `(status, plannedStart, plannedEnd, nowMs)` returns one of a closed
+   set of derived labels — `starts_today`/`starts_tomorrow`/
+   `starts_in_days`/`days_remaining`/`due_today`/`overdue`/`completed`/
+   `cancelled`/`none` — covering exactly the states the user's own
+   instruction named as examples. This is deterministic, derived UI
+   computed fresh on every render, never a new persisted column or
+   status value — matching the user's own explicit constraint. Built
+   as one small library function rather than inline per-component
+   branching specifically because the user's own instruction requires
+   centralizing this logic "rather than duplicating it through
+   components" — the same "registry/utility over hardcoding" pattern
+   every prior chapter has followed for date math, pricing, and
+   permission checks.
+5. **The Smart Rental Summary reuses Chapter 4/6's `DashboardGrid`/
+   `DashboardMetric` pattern exactly, extending (not replacing)
+   Chapter 6's existing deposit/days-remaining strip.** New cards:
+   rental value (`Rental.totalMinor`, the canonical stored total,
+   never recomputed), asset count, and the time-intelligence label from
+   design decision 4 (replacing Chapter 6's bare `daysRemaining`
+   number, which only ever covered the `ACTIVE` case). Total deposit
+   is unchanged from Chapter 6 (still a client-side sum — no stored
+   deposit total exists on `Rental`, per `UI_RESEARCH.md` finding #40).
+6. **A new Customer card** (name, company, phone, email where present,
+   a real link to the customer's own detail page) is pure frontend
+   work — the `Rental.customer` relation is already fetched by
+   `findOne()` today; it was simply never rendered as more than plain
+   text in the `PageHeader` subtitle.
+7. **A new Assets card** replaces the existing items table, adding: a
+   real link to each asset's detail page, the asset's own current
+   status (`item.asset.currentStatus`, already included via
+   `RENTAL_ITEM_INCLUDE` since before this chapter — no new backend
+   read needed), and a per-item price/rate column computed client-side
+   via the existing `estimateItemLineTotalMinor` pricing mirror
+   (`apps/web/src/lib/rental-pricing.ts`) — the same "client estimates
+   for display, server remains authoritative" discipline
+   `ARCHITECTURE_LOCK.md` §1.3 already requires, applied to a read-only
+   display value rather than a submitted one.
+8. **A new Documents card** shows the source Quote reference (design
+   decision 1) as its first row when present, followed by every
+   document linked via `Document.rentalId`, each a real link to that
+   document's own detail page — where the existing, already-shipped
+   Send/preview/signature capability (`DocumentEmailService`, built in
+   an earlier task) already lives. This chapter deliberately does
+   **not** duplicate a "Send" action inline in the workspace — one
+   click already reaches the document's full existing capability set,
+   and duplicating that trigger would be a second implementation of
+   the same action, the exact violation `ARCHITECTURE_LOCK.md` §1.4
+   forbids. When no documents and no source quote exist, the card
+   renders the product's standard empty-state treatment, never omitted
+   silently (`PRODUCT_BIBLE.md` §5, Zero Friction Principle).
+9. **No payment/invoice UI of any kind.** The existing financial
+   card (`subtotalMinor`/`discountMinor`/`taxMinor`/`totalMinor`, all
+   real, stored, server-computed values) is kept exactly as shipped.
+   Nothing resembling "paid"/"outstanding"/"invoice status" is added,
+   since no `Invoice`/`Payment`/`Transaction` model exists anywhere in
+   the schema (`UI_RESEARCH.md` finding #43) — building any such UI
+   would be exactly the fabrication this chapter's own instruction
+   forbids.
+10. **The Timeline sidebar is unchanged — the exact Chapter 6
+    `<Timeline>` component and `RENTAL_TIMELINE_REGISTRY`, reused
+    verbatim.** No rental-specific timeline reimplementation, per the
+    user's own explicit instruction and `PRODUCT_BIBLE.md` §12's "never
+    a bespoke per-module history view" rule. The 4 real event types
+    (`created`/`updated`/`status_changed`/`items_returned`) are exactly
+    what `RentalsService.timeline()` already produces — no new event
+    kind is synthesized.
+11. **Availability and the wizard's create/edit flow are unchanged.**
+    `AvailabilityService.assertAvailable()` already blocks the one
+    moment that matters — `reserve()`, the transition that actually
+    commits an asset to a customer — so a `DRAFT` rental can still be
+    created or edited freely with a provisional, not-yet-committed
+    asset selection, exactly as designed (`docs/adr/0006-rental-
+lifecycle-and-availability.md`). Rewriting this working, tested
+    safeguard was not requested and would violate `ARCHITECTURE_LOCK.md`
+    "no broad rewrite... without a specific, stated necessity."
+12. **Property/apartment rental compatibility verified, not assumed.**
+    Every new element this chapter ships — Customer card, Assets card,
+    Documents card, Smart Summary, `RentalStatusBadge`, time-
+    intelligence labels — is checked against Section 3's test with a
+    concrete substitution (Asset = "Apartment 4B," Customer = the
+    tenant, a `MONTHLY`-billed `RentalItem` = the lease term) and holds
+    without a single industry-specific field, label, or branch. No new
+    schema, category, or field was introduced that would need to be
+    ripped out for a non-equipment vertical.
+
+### What Chapter 7 builds
+
+- `apps/api/src/rentals/rental.types.ts`: `RENTAL_DETAIL_INCLUDE`
+  gains `sourceQuote` and `documents`; `RentalDetailView` gains the
+  matching typed fields.
+- `apps/web/src/types/rental.ts`: `Rental` gains `sourceQuote`/
+  `documents` fields.
+- `apps/web/src/lib/rental-time-intelligence.ts`: the centralized,
+  pure, unit-tested time-status derivation function.
+- `apps/web/src/components/rentals/rental-status-badge.tsx`: the one
+  reusable status badge, consumed by both the list page and the
+  workspace.
+- `apps/web/src/app/app/rentals/[id]/page.tsx`: rebuilt into the
+  Rental Workspace — header with `RentalStatusBadge` + time-
+  intelligence chip, Smart Summary, Customer card, Assets card,
+  Documents card (source quote + documents, honest empty state),
+  Details/financial card, unchanged Timeline sidebar.
+- `apps/web/src/app/app/rentals/page.tsx`: status column now renders
+  `RentalStatusBadge` instead of plain text.
+- New localization keys across all six locales; component/unit tests
+  for every new piece.
+
+### What Chapter 7 does not build (documented gaps, not fabricated)
+
+- **A staff-facing "extend rental" action** — `extendPlannedEnd()`
+  exists and works, reachable only via customer-portal extension
+  approval today; a direct staff route was not requested (design
+  decision 2).
+- **Any payment/invoice/"amount paid" UI** — no such model exists in
+  the schema (`UI_RESEARCH.md` finding #43).
+- **A "Send email"/"Send document" action inline in the workspace** —
+  the capability already exists one click away on the Document detail
+  page; duplicating the trigger would duplicate business logic/UI
+  (design decision 8). A future direct-to-customer "compose an email"
+  action (not document-specific) would call the existing `EmailService`
+  the same way Quote/Document sending already do — no new provider
+  integration needed, and none is built here.
+- **Rental/return reminders, or any queued/scheduled notification** —
+  no background-job infrastructure exists; `ARCHITECTURE_LOCK.md` §3
+  requires an ADR before introducing one. Not attempted.
+- **A calendar/scheduling view beyond the existing single-month
+  per-asset availability grid** — not in this chapter's scope; the
+  domain model (`plannedStart`/`plannedEnd`/`assetId`/`customerId` on
+  every `RentalItem`) already supports a future cross-asset calendar
+  view without any schema change, which this chapter's design was
+  explicitly checked against and does not obstruct.
+- **Any new asset-availability conflict detection beyond what
+  `AvailabilityService` already returns** — the existing advisory
+  endpoint and `reserve()`-time enforcement are unchanged (design
+  decision 11).
+- **Apartment/property-specific fields or a fork of the rental
+  domain** — verified compatible with the existing universal model
+  instead (design decision 12); nothing industry-specific was added.
+
 ## Later chapters (named, not detailed — scoped when reached)
 
-- **Chapter 7 — Forms & Wizards:** reconcile `RentalWizard`/
+- **Chapter 8 — Forms & Wizards:** reconcile `RentalWizard`/
   `QuoteWizard` against `UI_PATTERNS.md`'s Wizard/Stepper/Forms specs.
-- **Chapter 8 — Settings & Account:** profile/account pages, the
+- **Chapter 9 — Settings & Account:** profile/account pages, the
   language-switcher's live wiring, notification preferences once a
   backend exists.
 

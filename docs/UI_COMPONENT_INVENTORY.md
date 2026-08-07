@@ -297,6 +297,41 @@ none before; the whole page was just an inline edit form).
   types, any AI implementation** — architecture-only per the task
   spec; nothing built this chapter.
 
+## Rental Workspace — added Chapter 7
+
+Rebuilds the Rental detail page from a plain CRUD form + Chapter 6
+summary strip into an operational workspace surfacing every real
+relationship a rental has — Customer, Assets, source Quote, linked
+Documents, financial totals, and the unchanged Chapter 6 Timeline. See
+`UI_REDESIGN_PLAN.md` Chapter 7 for the full design rationale and
+`UI_RESEARCH.md`/`UI_AUDIT.md`'s Chapter 7 addenda for the research
+this was built on.
+
+| File                                         | Purpose                                                                                                                                                                                                                                                                                       |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend: `rentals/rental.types.ts`           | `RENTAL_DETAIL_INCLUDE` gains `sourceQuote` (id/quoteNumber) and `documents` (non-deleted, newest first) — both real, existing Prisma relations that `findOne()` simply never included before; no new endpoint, no new permission.                                                            |
+| `lib/rental-time-intelligence.ts`            | `getRentalTimeIntelligence()` — one pure, centralized function deriving a closed set of date-relative labels (`starts_today`/`starts_in_days`/`days_remaining`/`overdue`/etc.) from status + planned dates; never a persisted value.                                                          |
+| `components/rentals/rental-status-badge.tsx` | `<RentalStatusBadge>` — the one colored status badge, reused by both the Workspace and the rentals list page (`PRODUCT_BIBLE.md` §10); tone mapping reuses `Alert`'s existing semantic tokens, no new color introduced.                                                                       |
+| `app/app/rentals/[id]/page.tsx`              | Rebuilt: header (status badge + time-intelligence chip + date range), Smart Summary (rental value/deposit/assets/time-status), Customer card, enhanced Assets card (asset link + status + price), consolidated Documents card, unchanged Details/Financial cards, unchanged Timeline sidebar. |
+| `app/app/rentals/page.tsx`                   | Status column now renders `<RentalStatusBadge>` instead of plain translated text.                                                                                                                                                                                                             |
+
+### What Chapter 7 does not build (documented gaps, not fabricated)
+
+- **A staff-facing "extend rental" route** — `RentalsService.extendPlannedEnd()`
+  exists and is fully tested, reachable only from the customer-portal
+  extension-approval flow today; not requested this chapter, so no new
+  route was added (`ARCHITECTURE_LOCK.md` "no unrequested surface area").
+- **Any payment/invoice/"amount paid" UI** — no `Invoice`/`Payment`/
+  `Transaction` model exists anywhere in the schema.
+- **A "Send" action duplicated inside the Workspace** — the real,
+  already-shipped send capability lives one click away on the Document
+  detail page; the Documents card links there instead of re-implementing it.
+- **Rental/return reminders, a calendar/scheduling view, new
+  availability-conflict detection, a new keyboard shortcut, or any
+  apartment/property-specific fork** — each evaluated and explicitly
+  not needed; see `UI_REDESIGN_PLAN.md` Chapter 7 design decisions
+  8–12 for the reasoning behind each.
+
 ## Icons
 
 `lucide-react` is an existing `@rentos/ui` dependency, zero current

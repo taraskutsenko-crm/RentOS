@@ -19,15 +19,41 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `6443da4` (docs: document TASK-0010 Part 2
-  Chapter 6) — TASK-0010 Part 2 Chapter 6 (Smart Timeline & Entity
-  Summary). Sits on top of `952bddf` (PRODUCT_BIBLE.md expanded into
-  the platform constitution), `00a410a` (Chapter 5 — Productivity
-  Layer), `e177d14` (Chapter 4 — dashboard experience), `1a251fe`
-  (Chapter 3 — universal data views), `1ba4fc4` (Chapter 2 — premium
-  authentication experience), and `ec06729`/`5157e2c` (Chapter 1 —
-  application shell redesign).
-- **What shipped:** a shared, registry-driven `<Timeline>` component
+- **Latest verified commit:** pending — TASK-0010 Part 2 Chapter 7
+  (Rental Workspace & Rental Lifecycle) is complete locally (quality
+  gates, Docker rebuild, and manual browser verification all green);
+  this line is updated by a small follow-up commit once this chapter's
+  commits are pushed and CI is confirmed green, mirroring the
+  Chapter 6 `6443da4` → `8960a17` pattern. Sits on top of `6443da4`
+  (docs: document TASK-0010 Part 2 Chapter 6), `952bddf`
+  (PRODUCT_BIBLE.md expanded into the platform constitution), `00a410a`
+  (Chapter 5 — Productivity Layer), `e177d14` (Chapter 4 — dashboard
+  experience), `1a251fe` (Chapter 3 — universal data views), `1ba4fc4`
+  (Chapter 2 — premium authentication experience), and
+  `ec06729`/`5157e2c` (Chapter 1 — application shell redesign).
+- **What shipped (Chapter 7):** the Rental detail page rebuilt from a
+  plain CRUD form into an operational workspace. One additive backend
+  change — `RENTAL_DETAIL_INCLUDE` now includes `sourceQuote` and
+  `documents`, both real, existing Prisma relations `findOne()` never
+  surfaced before (D-051) — no new endpoint, no new permission, no
+  migration. A centralized, pure `getRentalTimeIntelligence()` derives
+  a closed set of date-relative labels (`starts_in_days`/
+  `days_remaining`/`overdue`/etc.) from status + planned dates, never a
+  persisted value; a single `<RentalStatusBadge>` reused by both the
+  Workspace and the rentals list page gives status a real color for
+  the first time anywhere in the product, using only existing semantic
+  tokens (D-052). The Workspace now shows: a Customer card (name/
+  company/phone/email, linked); an enhanced Assets card (asset link,
+  the asset's own status, computed price via the existing
+  `estimateItemLineTotalMinor` pricing mirror); a consolidated
+  Documents card (source Quote + linked Documents, each a real link,
+  with an honest empty state — never fabricated); the unchanged
+  Chapter 6 Timeline sidebar. See `UI_REDESIGN_PLAN.md` Chapter 7 for
+  the full design rationale, including every documented gap (no
+  payment/invoice UI, no new "Send" button, no new keyboard shortcut,
+  no calendar view, no property-management fork — nothing in the
+  schema or this chapter's brief supports any of them).
+- **Previous chapter — what shipped (Chapter 6):** a shared, registry-driven `<Timeline>` component
   (`components/timeline/timeline.tsx`) replacing four independently
   hand-rolled `<ol>` blocks (Asset/Rental/Quote/Document) — client-side
   search shown past 5 events (also serves as an implicit kind filter),
@@ -57,42 +83,65 @@ prior conversations.
   rationale, including the documented gaps (no overdue-invoice/
   payment-reliability/maintenance-cost/utilization data source; no
   inline PDF/image/email preview; Quote/Document Summary deferred).
-- **Quality gates:** format/lint/typecheck/build green across all 6
-  packages; 483 backend + 288 frontend tests passing (771 total,
-  including 14 new backend tests for the Customer/Asset timeline and
-  summary endpoints and 9 new frontend tests for `<Timeline>`, the
-  Customer detail page, and the shortcuts settings page). A real React
-  Compiler purity violation was caught by lint during this chapter —
-  `Date.now()` was being called directly during render for the
-  Rental's "days remaining" metric; fixed with a `useState` lazy
-  initializer, the sanctioned one-time-impure-computation pattern
-  (see D-049).
-- **Docker/browser verification:** the `web` and `api` images were
-  rebuilt and redeployed into the running Docker Compose stack.
-  Verified with a real tenant/customer/asset created live through the
-  UI: Customer detail page shows a real `PageHeader`, a 4-metric
-  Summary strip (honest `0`/`—` states, no fake data), and a Timeline
-  with a real `customer.created` event grouped under "Today"; Asset
-  detail page shows the same pattern; `/app/settings/shortcuts` lists
-  every shortcut grouped with platform-correct `kbd` badges, matching
-  the `Shift+?` modal; the Quick Create button shows an "N" badge;
-  light mode and mobile (375px) both verified correctly on the
+- **Quality gates (Chapter 7):** format/lint/typecheck/build green
+  across all 6 packages; 476 backend + 303 frontend tests passing (779
+  total), including 2 new backend tests (`sourceQuote`/`documents`
+  inclusion on a direct rental and on a quote-converted rental) and 15
+  new frontend tests (`rental-time-intelligence.ts` covering every
+  derived label, `<RentalStatusBadge>`'s per-status tone, and the
+  rebuilt Workspace's Customer/Assets/Documents/Summary sections).
+- **Docker/browser verification (Chapter 7):** the `web` and `api`
+  images were rebuilt and redeployed into the running Docker Compose
+  stack. Verified with a real tenant/customer/asset/rental created live
+  through the UI: the Workspace's header shows the colored status
+  badge and a real time-intelligence chip ("Starts in 3 days"); the
+  Smart Summary shows the real rental value/deposit/asset-count/time-
+  status (no fabricated numbers); the Customer card links to the real
+  customer; the Assets card links to the real asset and shows its own
+  status; the Documents card renders the honest empty state
+  ("No documents linked to this rental yet") for a rental with no
+  linked documents/quote — confirmed via `GET /rentals/:id`'s raw JSON
+  response (`sourceQuote: null, documents: []`); the rentals list page
+  renders the same `<RentalStatusBadge>` in its status column. Dark
+  mode and German localization both spot-checked live on the Workspace
+  (dark-mode badge/background contrast correct; "Mietwert"/"Kaution
+  gesamt"/"Anzahl Ausrüstung"/"Zeitstatus"/"Kunde"/"Anlagen"/
+  "Dokumente" all genuinely translated, no leftover English strings);
+  no console errors, no failed network requests, no horizontal
+  overflow at 375px.
+- **GitHub Actions (Chapter 7):** not yet checked — this chapter's
+  commits have not been pushed yet as of this update; see the next
+  HANDOVER update (or the final Chapter 7 report) for the verified
+  run result.
+- **Previous chapter's quality gates/verification (Chapter 6):**
+  format/lint/typecheck/build green across all 6 packages; 483 backend
+  and 288 frontend tests passing (771 total), including 14 new backend
+  tests for the Customer/Asset timeline and summary endpoints and 9
+  new frontend tests for `<Timeline>`, the Customer detail page, and
+  the shortcuts settings page. A real React Compiler purity violation
+  was caught by lint during that chapter — `Date.now()` was being
+  called directly during render for the Rental's "days remaining"
+  metric; fixed with a `useState` lazy initializer, the sanctioned
+  one-time-impure-computation pattern (see D-049). Docker/browser
+  verification: Customer detail page showed a real `PageHeader`, a
+  4-metric Summary strip (honest `0`/`—` states, no fake data), and a
+  Timeline with a real `customer.created` event grouped under "Today";
+  Asset detail page showed the same pattern; `/app/settings/shortcuts`
+  listed every shortcut grouped with platform-correct `kbd` badges,
+  matching the `Shift+?` modal; the Quick Create button showed an "N"
+  badge; light mode and mobile (375px) both verified correctly on the
   Customer detail page; Russian localization spot-checked in context
   (Хронология/Сегодня/Клиент создан — genuinely translated).
-- **GitHub Actions:** unresolved, platform-level scheduling issue —
-  as of this chapter's push, none of the 6 Chapter 6 commits
-  (`c449029`…`6443da4`) had a run scheduled at all (checked
-  repeatedly over several minutes; `queued`/`in_progress` both `0`).
-  The two most recent runs that did eventually fire, for the prior
-  Task A/B commits `952bddf` and `5e425f0`, both came back
-  `cancelled`/`failure` at the job level with no logged test output —
-  consistent with a runner-availability or scheduling problem on this
-  repository, not a real code failure: locally,
-  `pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build`
-  are all green (483 backend + 288 frontend tests passing). This is
-  reported honestly rather than assumed-fixed; it needs the repository
-  owner's attention (GitHub Actions runner/billing/concurrency
-  settings), not another retry from here.
+  GitHub Actions had an unresolved, platform-level scheduling issue at
+  the time — none of the 6 Chapter 6 commits (`c449029`…`6443da4`) had
+  a run scheduled at all when checked repeatedly, and the two most
+  recent runs that did eventually fire, for the prior Task A/B commits
+  `952bddf` and `5e425f0`, both came back `cancelled`/`failure` at the
+  job level with no logged test output — consistent with a
+  runner-availability or scheduling problem, not a real code failure.
+  This was later confirmed resolved: commit `6443da4` itself
+  subsequently ran and passed CI in full (see D-050's commit and the
+  `8960a17` follow-up).
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

@@ -588,21 +588,81 @@ Only `ShortcutsHelpDialog` (Chapter 5, a `Shift+?` modal) exists.
 user who doesn't already know `Shift+?` exists has no way to discover
 the shortcut list via normal navigation.
 
+## Addendum — Rental Workspace (Chapter 7)
+
+### 45. The Rental detail page is a CRUD form with a Chapter 6 summary strip bolted on, not an operational workspace
+
+It shows a rental's own fields (dates, items, totals) and nothing
+about the _relationships_ a rental actually has: no link to the
+customer beyond a name in the subtitle text, no reference to the
+source quote it may have been converted from, no list of documents
+generated against it, and no per-item price so a staff member can't
+see what any single line actually costs without opening the edit
+wizard. `PRODUCT_BIBLE.md`'s framing of a rental as "a business
+process," not a database row, is directly contradicted by the current
+page's shape.
+
+### 46. `Rental.sourceQuoteId` and `Document.rentalId` are real, populated, indexed FKs that have never been surfaced anywhere in the staff UI
+
+Both relations exist in the schema today, are populated by real
+existing flows (`QuotesService.convertToRental`, `DocumentsService`
+create with a `rentalId`), and cost nothing new to expose — this is
+`UI_RESEARCH.md` findings #41-42 made into an audit gap: the backend
+already tracks these connections; only the UI never reads them.
+
+### 47. No entity's status renders with any color anywhere in the product
+
+Confirmed by grep across Rentals/Quotes/Documents list and detail
+pages: every status is plain, colorless, translated text. This isn't
+wrong on its own, but it means the Rental Workspace can't add a
+colored status treatment to only itself without violating
+`PRODUCT_BIBLE.md` §10 ("a record's status renders identically
+everywhere it appears") — a new badge must apply to every rendering
+of a rental's status, not just the new page.
+
+### 48. No date-derived operational label exists anywhere — "3 days remaining"/"Overdue" is entirely unbuilt, and the one date-math case that does exist (Chapter 6's `daysRemaining`) is a bare number with no due-today/overdue/starts-in-N-days branching
+
+Chapter 6 added a single `Math.ceil(...)` number for `ACTIVE` rentals
+only (`apps/web/src/app/app/rentals/[id]/page.tsx`, pre-Chapter-7).
+There is no reusable date/status-to-label utility anywhere in
+`apps/web/src/lib/` — every future page that wants this kind of label
+would otherwise reimplement the same date math independently.
+
+### 49. Payment/invoice data does not exist — any "payment status" UI would be fabricated
+
+Confirmed by a full-schema grep (`UI_RESEARCH.md` finding #43): zero
+`Invoice`/`Payment`/`Transaction` models exist. The Rental Workspace's
+financial section can honestly show `subtotalMinor`/`discountMinor`/
+`taxMinor`/`totalMinor` (all real, stored, server-computed) and
+nothing resembling "paid"/"outstanding," which this codebase has no
+data to back.
+
+### 50. `extendPlannedEnd()` is a fully working, tested service method with no staff-facing route — a real, named gap, not something to build speculatively in this chapter
+
+The method already handles the availability re-check and total
+recomputation correctly; it's simply never been wired to a
+`RentalsController` route for direct staff use (only reachable via
+customer-portal extension-request approval). Building a new staff
+"extend rental" action was not requested for this chapter and is
+recorded as a documented extension point, not implemented.
+
 ## Summary table
 
-| Area                      | Current state                                                                      | Target (see `UI_REDESIGN_PLAN.md`)                                                                                                 |
-| ------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Navigation                | Flat top-bar link list, no icons, no active state                                  | Collapsible sidebar, icons, active indicator                                                                                       |
-| Breadcrumbs               | None                                                                               | Route-registry-driven, responsive                                                                                                  |
-| Page headers              | Hand-written per page, inconsistent                                                | Shared `PageHeader` component                                                                                                      |
-| Search                    | Per-list only                                                                      | Unified global search + command palette (foundation)                                                                               |
-| Permission-aware nav      | Not implemented (real 403 bug for TECHNICIAN)                                      | Every nav item gated on its `.view`/`.read` permission                                                                             |
-| Dark mode (staff)         | Not available                                                                      | Reuses portal's `use-dark-mode.ts`                                                                                                 |
-| Language switcher (staff) | Not available                                                                      | Foundation added to user menu                                                                                                      |
-| Notifications (staff)     | Not available (no backend either)                                                  | UI architecture only, honestly empty                                                                                               |
-| Dashboard                 | Staff: stub. Portal: real but ad hoc, no shared components, no skeleton            | Chapter 4 — shared `DashboardCard`/`DashboardMetric`/etc., real KPIs from existing endpoints, both pages reuse the same components |
-| Tenant switcher           | Full-page navigation                                                               | In-header dropdown, reusing existing hooks                                                                                         |
-| Productivity layer        | Command Palette is navigate-only, opens empty; no recent/pinned/shortcuts registry | Chapter 5 — unified palette (recent, pinned, quick actions, search providers), keyboard shortcut registry, discoverability hints   |
-| Entity timeline           | 4 hand-rolled, independently-implemented `<ol>` blocks; Customers has none         | Chapter 6 — one shared `<Timeline>` reused by all 5 entities, icon/color by kind, search/filter/group, click-through navigation    |
-| Entity summary            | No detail page shows any summary/stats block                                       | Chapter 6 — Customer/Rental/Asset summaries reusing Chapter 4's dashboard components, real data only, honest gaps documented       |
-| Shortcuts discoverability | Modal only (`Shift+?`)                                                             | Chapter 6 — adds a Settings page listing every shortcut, reachable via normal navigation                                           |
+| Area                      | Current state                                                                                                  | Target (see `UI_REDESIGN_PLAN.md`)                                                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Navigation                | Flat top-bar link list, no icons, no active state                                                              | Collapsible sidebar, icons, active indicator                                                                                                |
+| Breadcrumbs               | None                                                                                                           | Route-registry-driven, responsive                                                                                                           |
+| Page headers              | Hand-written per page, inconsistent                                                                            | Shared `PageHeader` component                                                                                                               |
+| Search                    | Per-list only                                                                                                  | Unified global search + command palette (foundation)                                                                                        |
+| Permission-aware nav      | Not implemented (real 403 bug for TECHNICIAN)                                                                  | Every nav item gated on its `.view`/`.read` permission                                                                                      |
+| Dark mode (staff)         | Not available                                                                                                  | Reuses portal's `use-dark-mode.ts`                                                                                                          |
+| Language switcher (staff) | Not available                                                                                                  | Foundation added to user menu                                                                                                               |
+| Notifications (staff)     | Not available (no backend either)                                                                              | UI architecture only, honestly empty                                                                                                        |
+| Dashboard                 | Staff: stub. Portal: real but ad hoc, no shared components, no skeleton                                        | Chapter 4 — shared `DashboardCard`/`DashboardMetric`/etc., real KPIs from existing endpoints, both pages reuse the same components          |
+| Tenant switcher           | Full-page navigation                                                                                           | In-header dropdown, reusing existing hooks                                                                                                  |
+| Productivity layer        | Command Palette is navigate-only, opens empty; no recent/pinned/shortcuts registry                             | Chapter 5 — unified palette (recent, pinned, quick actions, search providers), keyboard shortcut registry, discoverability hints            |
+| Entity timeline           | 4 hand-rolled, independently-implemented `<ol>` blocks; Customers has none                                     | Chapter 6 — one shared `<Timeline>` reused by all 5 entities, icon/color by kind, search/filter/group, click-through navigation             |
+| Entity summary            | No detail page shows any summary/stats block                                                                   | Chapter 6 — Customer/Rental/Asset summaries reusing Chapter 4's dashboard components, real data only, honest gaps documented                |
+| Shortcuts discoverability | Modal only (`Shift+?`)                                                                                         | Chapter 6 — adds a Settings page listing every shortcut, reachable via normal navigation                                                    |
+| Rental detail page        | CRUD form + Chapter 6 summary strip; no customer/quote/document links, no status color, no date-derived labels | Chapter 7 — Rental Workspace: Customer/Assets/Documents sections, `RentalStatusBadge` (list + detail), centralized time-intelligence labels |
+| Rental status rendering   | Plain colorless text everywhere                                                                                | Chapter 7 — one reusable `RentalStatusBadge`, applied consistently to list + workspace                                                      |

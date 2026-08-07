@@ -850,6 +850,43 @@ describe("Quotes E2E", () => {
     expect(types).toContain("status_changed");
   });
 
+  // 32b. Quote detail surfaces linked generic Documents (Chapter 8)
+  it("GET /quotes/:id includes platformDocuments reflecting real Document.quoteId links", async () => {
+    const created = await createQuote().expect(201);
+
+    const noDocuments = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/quotes/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(noDocuments.body.platformDocuments).toEqual([]);
+
+    const document = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "CONTRACT", customerId, quoteId: created.body.id })
+      .expect(201);
+
+    const deletedDocument = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "CONTRACT", customerId, quoteId: created.body.id })
+      .expect(201);
+    await request(app.getHttpServer())
+      .delete(`/tenants/${tenantId}/documents/${deletedDocument.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(204);
+
+    const withDocuments = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/quotes/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(withDocuments.body.platformDocuments).toHaveLength(1);
+    expect(withDocuments.body.platformDocuments[0]).toMatchObject({
+      id: document.body.id,
+      documentType: "CONTRACT",
+    });
+  });
+
   // ---------------------------------------------------------------------
   // Public token workflow (view / accept / reject)
   // ---------------------------------------------------------------------

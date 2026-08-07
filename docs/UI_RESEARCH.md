@@ -569,3 +569,165 @@ never built into UI before) and finding #48 into one reusable
 renders. Findings #37, #45, and #46 become explicitly documented
 gaps/non-goals, not features invented to fill out the page — see
 `UI_AUDIT.md`'s addendum for the full gap list.
+
+## Quote domain — Chapter 8 addendum
+
+A full inventory of the Quote domain as it actually exists today —
+schema, service, pricing, conversion, email, public token, portal
+exposure, and frontend — gathered before any redesign work. Every
+claim below is a verified fact about the current codebase, not a
+plan.
+
+**Schema (`apps/api/prisma/schema.prisma:932-1127`)**
+
+51. **`QuoteStatus` has 8 values, and — unlike `RentalStatus`'s
+    unreachable `COMPLETED` — all 8 are actually reachable in code:**
+    `DRAFT | SENT | VIEWED | ACCEPTED | REJECTED | EXPIRED | CONVERTED
+| CANCELLED`. A real `ALLOWED_TRANSITIONS` table exists
+    (`quotes.service.ts:76-85`) mirroring these, but it is only
+    actually consulted by `assertTransition` in exactly one call site
+    — `send()`'s first-send `DRAFT`→`SENT` check (`:488`). Every other
+    transition (`accept`/`reject`/`cancel`/lazy-expiry/`convertToRental`/
+    public accept/reject) is enforced ad hoc with its own explicit
+    status-membership check and an idempotent no-op on repeat calls,
+    not by consulting the table. A redesign must read the real,
+    scattered enforcement (documented in full below), not assume the
+    `ALLOWED_TRANSITIONS` table is authoritative everywhere.
+52. **`Quote.platformDocuments Document[]` is a real, populated,
+    indexed FK relation, completely unsurfaced on `QuoteDetailView` —
+    the exact same shape of gap Chapter 7 fixed for
+    `Rental.documents`.** `Document.quoteId` (`schema.prisma:1166`,
+    indexed `:1207`) is a real, direct, nullable FK, already read and
+    written by `documents.service.ts` (`assertQuoteBelongsToTenant`,
+    `:840`) for a `CONTRACT`/other document type generated from an
+    accepted quote. But `QUOTE_DETAIL_INCLUDE`
+    (`apps/api/src/quotes/quote.types.ts:11-15`) includes only
+    `customer`, `items`, `convertedRental` — no `platformDocuments`.
+    The Quote detail page has no way to show a linked contract today,
+    even though the FK and the data already exist.
+53. **`Quote.convertedRental` is already included and surfaced — unlike
+    `Rental.sourceQuoteId` before Chapter 7 — but rendered
+    asymmetrically.** `QUOTE_DETAIL_INCLUDE` already has
+    `convertedRental: true` (`quote.types.ts:14`); the current detail
+    page renders it as a bare one-line notice (`quotes/[id]/page.tsx:
+216-223`) sitting outside any card, not inside a "related/
+    documents" section the way Chapter 7 put `Rental.sourceQuote`
+    inside the Rental Workspace's Documents card. The data exists; the
+    presentation is the gap.
+54. **`Quote.depositTotalMinor` is a real, stored, server-computed
+    column — unlike `Rental`, which has no stored deposit total and
+    requires the frontend to client-sum `RentalItem.depositMinor`
+    (finding #38).** `computeQuoteTotals` (`quote-pricing.util.ts:
+210-236`) sums every item's `depositMinor` into this field at
+    write time. A Quote Entity Summary can read it directly — no
+    client-side aggregation workaround needed, unlike Chapter 6/7's
+    Rental deposit strip.
+
+**Service (`apps/api/src/quotes/quotes.service.ts`)**
+
+55. **Quote → Rental conversion (`convertToRental`, `:923-1072`) is
+    fully implemented, transactional, idempotent, and tested — nothing
+    to build here, only to surface better.** Idempotent on `CONVERTED`
+    (returns the existing linked rental rather than erroring or
+    creating a duplicate); requires `ACCEPTED` otherwise; requires at
+    least one `ASSET`-type item; re-validates assets are still active/
+    rentable and re-checks availability at conversion time (a second,
+    independent check from the advisory warnings shown on `findOne`);
+    copies the Rental's totals **verbatim** from the Quote's own
+    authoritative totals inside one `$transaction`, never recomputed
+    from just the asset items (ADR 0007); non-`ASSET` items
+    (`SERVICE`/`FEE`/`DELIVERY`/etc.) are deliberately never copied to
+    the Rental — they remain only on the immutable source Quote.
+56. **Email sending is real, working infrastructure today — not a
+    fake or a stub button.** `EmailModule` binds `EMAIL_PROVIDER` to
+    `LoggingEmailProvider` (`email.module.ts:7-11`) — a genuine
+    implementation of the real `EmailProvider` interface
+    (`send(message): Promise<EmailSendResult>`), documented as "a
+    deliberate, honest placeholder" that logs rather than delivers.
+    `QuotesService.send()` (`:464-565`) actually generates and stores
+    a PDF, builds a real HTML email body, calls `EmailService.send()`
+    with the PDF attached, and returns an honest
+    `{quote, emailSent, emailError?}` to the caller — never silently
+    swallowing a failure, never claiming success it didn't achieve.
+    On failure it logs a `quote.send_email_failed` audit entry instead
+    of throwing. **A "Send" action already exists and already works
+    exactly as far as this codebase's real infrastructure goes** — the
+    only thing not real is the delivery backend (no SMTP/SES/SendGrid
+    provider is wired in), which is precisely the swappable seam
+    `ARCHITECTURE_LOCK.md` §1.15 already describes.
+57. **The public quote token workflow (`quote-public-token.util.ts`,
+    `public-quotes.controller.ts`) is a complete, tested,
+    unauthenticated view/accept/reject/PDF flow — structurally
+    separate from the Customer Portal's authenticated session
+    model.** A token is a per-send, SHA-256-hashed, expiring
+    (`validUntil`-bound) opaque link requiring no login; the Customer
+    Portal is a persistent, cookie-authenticated per-customer session
+    (D-033). These are two different mechanisms serving two different
+    trust models — a future "customer views their quotes inside the
+    portal" feature would be new portal work, not a reuse of the
+    existing public-token link.
+
+**Customer Portal exposure**
+
+58. **The Customer Portal exposes zero quote functionality today.**
+    An exhaustive search of `apps/api/src/customer-portal/**`
+    (dashboard, rentals, documents, damage-reports,
+    extension-requests, messages, notifications, invitations, staff,
+    assets) finds no quote-related controller, service, route, or DTO
+    — only two incidental comment mentions of `PublicQuotesController`/
+    `quote-public-token.util.ts` as naming-convention analogies,
+    neither wiring any actual functionality. Contrast: the portal
+    already exposes Rentals, Documents, damage reports, extension
+    requests, and messages to customers. Quotes are a real, named gap
+    in the portal's coverage, not an oversight to silently work around.
+
+**Frontend (`apps/web/src/app/app/quotes/[id]/page.tsx`, as of
+Chapter 7)**
+
+59. **The current detail page shows: a bare `<h1>`/`<p>` header (no
+    `PageHeader`), status as plain text, no Entity Summary strip, a
+    Details card, an items table with no per-item discount/tax
+    breakdown column, a Financial summary card, and the shared
+    Timeline (already correctly wired to `QUOTE_TIMELINE_REGISTRY`).**
+    It reuses several `rental.*` localization keys directly
+    (`rental.sections.details/items/financial`,
+    `rental.fields.plannedStart/plannedEnd/billingMode/quantity/total/
+discount/subtotal/internalNotes`) — a pre-existing, deliberate
+    cross-domain key-sharing convention (both entities use identical
+    generic English labels), not a bug to fix this chapter.
+60. **No entity-wide colored status badge exists for Quotes** — the
+    exact same gap finding #48 documented for Rentals before Chapter
+    7, now confirmed independently for Quotes: `apps/web/src/
+components/quotes/` contains only `quote-item-row.tsx` and
+    `quote-wizard.tsx`, no status-badge component. The quotes list
+    page (`quotes/page.tsx`) also renders status as plain translated
+    text in its status column.
+61. **Global search, Quick Create, Command Palette, and nav
+    registration for Quotes are already fully wired — no gap to
+    close.** `lib/nav-registry.ts:77-81`, `lib/quick-actions.ts:52-58`
+    ("New quote"), and `lib/search-providers.ts:100-114` (a real
+    `"quotes"` search provider hitting the existing list endpoint) all
+    already exist and are already permission-gated. Chapter 8 needs no
+    new productivity-layer wiring for basic Quote discoverability.
+
+**Testing** — `quotes.e2e-spec.ts` already covers creation/pricing
+(every billing mode including FLAT, combined discount+tax+deposit),
+full CRUD/lifecycle, the permission matrix, the public token flow
+(view/accept/reject/PDF, idempotency, expiry), duplication, and
+conversion (including the multi-asset-item and unavailable-asset-
+conflict cases). Nothing about `platformDocuments` surfacing, a
+status badge, or an Entity Summary exists in any test today, since
+none of those exist in the product today.
+
+## How this informs Chapter 8
+
+`UI_REDESIGN_PLAN.md` Chapter 8 turns finding #52 into the Quote
+Workspace's Documents card (the same additive, read-only
+`QUOTE_DETAIL_INCLUDE` extension pattern Chapter 7 used for
+`Rental.documents`) and finding #60 into one reusable
+`QuoteStatusBadge`, applied consistently to both the list and the
+Workspace, mirroring `RentalStatusBadge`. Findings #56 and #57 mean
+Section 11/12 of this chapter's brief (email/portal readiness) are
+answered largely by documenting what's real today, not by building
+new infrastructure — see `UI_AUDIT.md`'s addendum for the full gap
+list.

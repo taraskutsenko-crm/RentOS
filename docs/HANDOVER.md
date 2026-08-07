@@ -19,19 +19,56 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** pending — TASK-0010 Part 2 Chapter 7
-  (Rental Workspace & Rental Lifecycle) is complete locally (quality
+- **Latest verified commit:** pending — TASK-0010 Part 2 Chapter 8
+  (Quotes & Commercial Offers Workspace) is complete locally (quality
   gates, Docker rebuild, and manual browser verification all green);
   this line is updated by a small follow-up commit once this chapter's
   commits are pushed and CI is confirmed green, mirroring the
-  Chapter 6 `6443da4` → `8960a17` pattern. Sits on top of `6443da4`
-  (docs: document TASK-0010 Part 2 Chapter 6), `952bddf`
-  (PRODUCT_BIBLE.md expanded into the platform constitution), `00a410a`
-  (Chapter 5 — Productivity Layer), `e177d14` (Chapter 4 — dashboard
-  experience), `1a251fe` (Chapter 3 — universal data views), `1ba4fc4`
-  (Chapter 2 — premium authentication experience), and
-  `ec06729`/`5157e2c` (Chapter 1 — application shell redesign).
-- **What shipped (Chapter 7):** the Rental detail page rebuilt from a
+  Chapter 7 pattern. Sits on top of `8960a17` (docs: verified commit
+  hash for Chapter 7), `12c0567` (feat: Rental Workspace & Rental
+  Lifecycle), `952bddf` (PRODUCT_BIBLE.md expanded into the platform
+  constitution), `00a410a` (Chapter 5 — Productivity Layer), `e177d14`
+  (Chapter 4 — dashboard experience), `1a251fe` (Chapter 3 — universal
+  data views), `1ba4fc4` (Chapter 2 — premium authentication
+  experience), and `ec06729`/`5157e2c` (Chapter 1 — application shell
+  redesign).
+- **What shipped (Chapter 8):** the Quote detail page rebuilt from a
+  plain CRUD form into an operational Quote Workspace, mirroring
+  Chapter 7's Rental Workspace shape wherever the underlying domain
+  concept is structurally the same. One additive backend change —
+  `QUOTE_DETAIL_INCLUDE` now includes `platformDocuments`, a real,
+  existing `Quote.platformDocuments` relation `findOneRaw()` never
+  surfaced before (D-053) — no new endpoint, no new permission, no
+  migration. A centralized, pure `getQuoteValidityIntelligence()`
+  derives a closed set of validity labels (`expires_in_days`/
+  `expires_today`/`expired`/`accepted`/etc.) from status + `validUntil`,
+  never a persisted value; a single `<QuoteStatusBadge>` reused by both
+  the Workspace and the quotes list page gives quote status a real
+  color for the first time, using only existing semantic tokens
+  (D-053). The Workspace now shows: a Customer card (name/company/
+  phone/email, linked); a Smart Summary (quote value/deposit/items
+  count/validity status); an enhanced items table (discount/tax
+  columns, asset links); a consolidated Documents card (converted
+  Rental link + linked platform Documents, each a real link, with an
+  honest empty state — never fabricated). Verified end-to-end with real
+  data: created a customer, an asset category, an asset, a Quote with a
+  real DAILY-billed asset line, sent it, accepted it, and converted it
+  to a Rental — the resulting Rental's `sourceQuote` link and the
+  Quote's `convertedRental` link both render correctly, and a genuine
+  availability warning appeared (the just-created Rental reserves the
+  same asset for the same dates), confirming the warning logic reads
+  real state rather than fabricated data. Two product gaps were
+  evaluated and explicitly documented rather than built: the Customer
+  Portal has zero quote exposure today (the public-token link and the
+  portal's authenticated-session model are structurally different, not
+  conflated), and no new "Send" UI was needed since the existing
+  Send button + `EmailService`/`LoggingEmailProvider` infrastructure
+  already satisfies the chapter's Email/Send-Readiness requirement
+  honestly. See `UI_REDESIGN_PLAN.md` Chapter 8 for the full design
+  rationale, including every documented gap (no accounting/payment/
+  invoicing/e-signature/AI-generation/property-management subsystem —
+  nothing in the schema or this chapter's brief supports any of them).
+- **Previous chapter — what shipped (Chapter 7):** the Rental detail page rebuilt from a
   plain CRUD form into an operational workspace. One additive backend
   change — `RENTAL_DETAIL_INCLUDE` now includes `sourceQuote` and
   `documents`, both real, existing Prisma relations `findOne()` never
@@ -83,36 +120,66 @@ prior conversations.
   rationale, including the documented gaps (no overdue-invoice/
   payment-reliability/maintenance-cost/utilization data source; no
   inline PDF/image/email preview; Quote/Document Summary deferred).
-- **Quality gates (Chapter 7):** format/lint/typecheck/build green
-  across all 6 packages; 476 backend + 303 frontend tests passing (779
-  total), including 2 new backend tests (`sourceQuote`/`documents`
-  inclusion on a direct rental and on a quote-converted rental) and 15
-  new frontend tests (`rental-time-intelligence.ts` covering every
-  derived label, `<RentalStatusBadge>`'s per-status tone, and the
-  rebuilt Workspace's Customer/Assets/Documents/Summary sections).
-- **Docker/browser verification (Chapter 7):** the `web` and `api`
+- **Quality gates (Chapter 8):** format/lint/typecheck/build green
+  across all 6 packages; 477 backend + 328 frontend tests passing (805
+  total), including 1 new backend test (`platformDocuments` inclusion
+  reflecting real `Document.quoteId` links, and exclusion of a
+  soft-deleted one) and 27 new frontend tests
+  (`quote-validity-intelligence.ts` covering every derived label,
+  `<QuoteStatusBadge>`'s per-status tone, and 6 new assertions in the
+  rebuilt Workspace's Customer/Documents/Summary/asset-link sections).
+  i18n key-parity, permission-registry sync, and doc-link checks all
+  passed.
+- **Docker/browser verification (Chapter 8):** the `web` and `api`
   images were rebuilt and redeployed into the running Docker Compose
-  stack. Verified with a real tenant/customer/asset/rental created live
-  through the UI: the Workspace's header shows the colored status
-  badge and a real time-intelligence chip ("Starts in 3 days"); the
-  Smart Summary shows the real rental value/deposit/asset-count/time-
-  status (no fabricated numbers); the Customer card links to the real
-  customer; the Assets card links to the real asset and shows its own
-  status; the Documents card renders the honest empty state
-  ("No documents linked to this rental yet") for a rental with no
-  linked documents/quote — confirmed via `GET /rentals/:id`'s raw JSON
-  response (`sourceQuote: null, documents: []`); the rentals list page
-  renders the same `<RentalStatusBadge>` in its status column. Dark
+  stack. Verified with a real tenant/customer/asset-category/asset/
+  quote created live through the UI, then sent, accepted, and
+  converted to a Rental: the Workspace's header shows the colored
+  status badge and a real validity chip ("Expires in 6 days" →
+  "Accepted" → "Converted" as status changed); the Smart Summary shows
+  the real quote value/deposit/items-count/validity status (no
+  fabricated numbers, e.g. `786,50 $`/`100,00 $`/`1`); the Customer
+  card links to the real customer; the items table shows real
+  discount/tax columns and an asset link; the Documents card
+  transitioned from the honest empty state
+  ("No documents linked to this quote yet") to showing the real
+  converted-rental link (`RNT-000001`) once conversion completed; the
+  resulting Rental's own Documents card correctly showed the reverse
+  `sourceQuote` link back to `Q-2026-000001`; a genuine availability
+  warning appeared on the now-Converted quote ("Generator A: Not
+  available for these dates") since the new Rental now reserves that
+  asset for the same dates — confirming the warning reads real
+  availability state, not a fabricated message; the quotes list page
+  renders the same `<QuoteStatusBadge>` in its status column. Dark
   mode and German localization both spot-checked live on the Workspace
-  (dark-mode badge/background contrast correct; "Mietwert"/"Kaution
-  gesamt"/"Anzahl Ausrüstung"/"Zeitstatus"/"Kunde"/"Anlagen"/
-  "Dokumente" all genuinely translated, no leftover English strings);
-  no console errors, no failed network requests, no horizontal
-  overflow at 375px.
-- **GitHub Actions (Chapter 7):** not yet checked — this chapter's
+  (dark-mode badge/background/warning-banner contrast correct;
+  "Umgewandelt"/"Kaution gesamt"/"Angebotswert"/"Gültigkeitsstatus"/
+  "Kunde"/"Dokumente"/"Umgewandelte Vermietung" all genuinely
+  translated, no leftover English strings); mobile (375px) verified
+  with no page-level horizontal overflow (the items table scrolls
+  within its own card, per the established Chapter 3 `DataTable`
+  convention); no console errors, no failed network requests.
+- **GitHub Actions (Chapter 8):** not yet checked — this chapter's
   commits have not been pushed yet as of this update; see the next
-  HANDOVER update (or the final Chapter 7 report) for the verified
+  HANDOVER update (or the final Chapter 8 report) for the verified
   run result.
+- **Previous chapter's quality gates/verification (Chapter 7):**
+  format/lint/typecheck/build green across all 6 packages; 476 backend
+  - 303 frontend tests passing (779 total), including 2 new backend
+    tests (`sourceQuote`/`documents` inclusion on a direct rental and on
+    a quote-converted rental) and 15 new frontend tests
+    (`rental-time-intelligence.ts` covering every derived label,
+    `<RentalStatusBadge>`'s per-status tone, and the rebuilt Workspace's
+    Customer/Assets/Documents/Summary sections). Docker/browser
+    verification: the Workspace's header showed the colored status badge
+    and a real time-intelligence chip ("Starts in 3 days"); the Documents
+    card rendered the honest empty state for a rental with no linked
+    documents/quote, confirmed via `GET /rentals/:id`'s raw JSON response
+    (`sourceQuote: null, documents: []`); dark mode and German
+    localization both spot-checked correctly; no console errors, no
+    horizontal overflow at 375px. This chapter's commits (`12c0567`,
+    `82bb810`) were later pushed and confirmed green on CI, recorded in
+    `8960a17`.
 - **Previous chapter's quality gates/verification (Chapter 6):**
   format/lint/typecheck/build green across all 6 packages; 483 backend
   and 288 frontend tests passing (771 total), including 14 new backend

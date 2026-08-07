@@ -1651,11 +1651,261 @@ lifecycle-and-availability.md`). Rewriting this working, tested
   domain** — verified compatible with the existing universal model
   instead (design decision 12); nothing industry-specific was added.
 
+## Chapter 8 — Quotes & Commercial Offers Workspace
+
+**A note on chapter numbering:** the "Later chapters" list below (from
+Chapter 7's close) had named "Forms & Wizards" as Chapter 8. The
+user's own instruction opening this chapter explicitly frames it as
+"Chapter 8: Quotes & Commercial Offers Workspace" — the same
+user-directed reprioritization Chapters 4 through 7 already made.
+Quotes & Commercial Offers Workspace is Chapter 8; Forms & Wizards
+moves to Chapter 9, Settings & Account to Chapter 10 (see the
+renumbered list at the end of this section).
+
+**Scope:** transform the Quote detail page from a bare CRUD-with-
+actions page into an operational workspace, symmetric with Chapter
+7's Rental Workspace: an Entity Summary, a Customer card, a properly
+formatted line-items table, and a consolidated Documents card
+surfacing the two real, existing relations the current page leaves
+unsurfaced (`Quote.platformDocuments`, and a proper presentation of
+the already-surfaced `Quote.convertedRental`). One small, additive
+backend read-side extension (mirroring Chapter 7's exact pattern for
+`Rental.documents`); one new shared `QuoteStatusBadge`; one new
+centralized, pure validity-intelligence utility. Checked against
+`PRODUCT_BIBLE.md` §3 (Universal Rental Philosophy), §10 (Product
+Consistency), §12 (Timeline First), and this chapter's own explicit
+anti-fabrication instruction throughout.
+
+### Step 1 — Current implementation, read directly from source
+
+The Quote domain's business logic (pricing, lifecycle transitions,
+conversion, the public token workflow, email sending) is mature,
+fully tested, and untouched by this chapter — see `UI_RESEARCH.md`'s
+Chapter 8 addendum (findings #51-61) for the complete inventory. In
+summary: `QuoteStatus` has 8 values, all reachable
+(`DRAFT/SENT/VIEWED/ACCEPTED/REJECTED/EXPIRED/CONVERTED/CANCELLED`),
+enforced ad hoc per-transition rather than via one central table
+(finding #51); `Quote.platformDocuments` is a real, indexed,
+populated FK relation never included in `QUOTE_DETAIL_INCLUDE`
+(finding #52); `Quote.convertedRental` is already fetched but
+rendered as a bare notice outside any card (finding #53);
+`Quote.depositTotalMinor` is already a real stored aggregate, unlike
+`Rental`'s client-summed deposit (finding #54); Quote → Rental
+conversion is fully transactional, idempotent, and tested (finding
+#55); email sending is real, honest, working infrastructure behind a
+documented placeholder provider, not a fake button (finding #56); the
+Customer Portal exposes zero quote functionality today (finding #58);
+no colored status badge exists anywhere for Quotes (finding #60); and
+global search/Quick Create/Command Palette/nav registration for
+Quotes are already fully wired (finding #61).
+
+### Step 2 — Compared against the governing docs
+
+- `PRODUCT_BIBLE.md` §12 (Timeline First) — "every timeline page opens
+  with an Entity Summary" — is the direct mandate for giving the Quote
+  Workspace the same Entity Summary strip every other timelined entity
+  already has (Customer/Rental/Asset since Chapter 6).
+- `ARCHITECTURE_LOCK.md` Part 2's "new reports/analytics built by
+  reading existing data" and the exact precedent Chapter 7 set (D-051)
+  is the explicit permission for this chapter's one backend change:
+  adding `platformDocuments` to `QuotesService.findOne()`'s existing
+  `include` — additive, read-only, no new endpoint, no new permission,
+  no migration.
+- `PRODUCT_BIBLE.md` §10 (Product Consistency, "a record's status
+  renders identically everywhere it appears") is why the new
+  `QuoteStatusBadge` is applied to **both** the Quote Workspace and
+  the quotes list page, not the workspace alone — the same rule
+  Chapter 7's D-052 already applied to `RentalStatusBadge`.
+- This chapter's own explicit Section 11 (Email/Send Readiness)
+  instruction — "FIRST inspect whether real email sending
+  infrastructure currently exists... if it does, integrate it
+  appropriately" — is answered directly by finding #56: it already
+  exists and is already integrated (`QuotesService.send()`,
+  `EmailProvider`/`LoggingEmailProvider`). No new send UI is built;
+  the existing, working Send button is kept and its place in the new
+  layout is preserved.
+- This chapter's own explicit Section 12 (Customer-Facing Offer
+  Readiness) instruction — "if not, document the future flow" — is
+  answered by finding #58/#55 (`UI_AUDIT.md`): the portal has no quote
+  routes today, and the existing public-token link is a structurally
+  different, unauthenticated mechanism from the portal's authenticated
+  session model, so "reuse the public link inside the portal" is not a
+  safe shortcut — a real future portal feature needs its own routes.
+- `PRODUCT_BIBLE.md` §3 (Universal Rental Philosophy) is checked
+  against every new Workspace element: `QuoteItemType`'s existing
+  generic vocabulary (`ASSET/SERVICE/PRODUCT/FEE/DELIVERY/COLLECTION/
+LABOR/CUSTOM`) is reused verbatim, nothing industry-specific is
+  introduced anywhere in the new UI.
+- `ARCHITECTURE_LOCK.md` §1.5 (historical financial immutability) is
+  why the Smart Summary's "quote value" and "deposit total" read
+  `totalMinor`/`depositTotalMinor` verbatim — never recomputed — the
+  same discipline Chapter 7 applied to `Rental.totalMinor`.
+
+### Step 3 — Design Rationale
+
+1. **One additive backend change: `QUOTE_DETAIL_INCLUDE` gains
+   `platformDocuments` (id, documentType, customTypeName,
+   documentNumber, status, title, createdAt; `deletedAt: null`; newest
+   first).** An existing Prisma relation (`Quote.platformDocuments`)
+   that `findOne()` simply never included before — identical shape and
+   reasoning to Chapter 7's `RENTAL_DETAIL_INCLUDE` extension (D-051).
+   No new service method, no new controller route, no new permission
+   — gated by the existing `quotes.view` permission that already
+   guards `findOne()`, reusing the same cross-entity-reference
+   permission precedent Chapter 6/7 established.
+2. **One reusable `QuoteStatusBadge` component
+   (`apps/web/src/components/quotes/quote-status-badge.tsx`),
+   replacing the plain-text status rendering on both the Quote
+   Workspace and the quotes list page.** Tone mapping reuses the exact
+   semantic tokens `RentalStatusBadge` already established, extended
+   to Quote's 8 states: `DRAFT`→neutral, `SENT`→info,
+   `VIEWED`→primary (the customer has actually engaged — a
+   meaningfully different next-step signal from a plain "sent and
+   waiting," matching the "primary = active/in-progress" convention
+   `RentalStatusBadge` already set for `ACTIVE`), `ACCEPTED`→success,
+   `REJECTED`→destructive, `EXPIRED`→warning (needs staff attention —
+   distinct from a flat "done" state, reusing `Alert`'s existing
+   warning token), `CONVERTED`→success (a positive terminal outcome,
+   matching `RETURNED`'s treatment), `CANCELLED`→neutral. No new color
+   introduced — every token already exists in the design system.
+3. **One centralized, pure validity-intelligence utility
+   (`apps/web/src/lib/quote-validity-intelligence.ts`,
+   `getQuoteValidityIntelligence`), mirroring the exact architecture
+   of Chapter 7's `getRentalTimeIntelligence`.** A pure function of
+   `(status, validUntil, nowMs)` returns one of a closed set of
+   derived labels — `expires_today`/`expires_tomorrow`/
+   `expires_in_days`/`expired`/`accepted`/`rejected`/`converted`/
+   `cancelled` — covering every real `QuoteStatus` value. Deterministic
+   and computed fresh on every render, never a new persisted value.
+   Built as one small utility specifically so no component duplicates
+   this date math, the same centralization rule the user's Chapter 7
+   instruction stated and this chapter's spec repeats implicitly by
+   asking for "validity / expiration if supported."
+4. **The Quote Smart Summary reuses Chapter 4/6/7's `DashboardGrid`/
+   `DashboardMetric` pattern exactly:** quote value (`totalMinor`, the
+   canonical stored total, never recomputed), deposit total
+   (`depositTotalMinor` — already a real stored column, unlike
+   Rental's client-summed deposit, design decision needs no workaround
+   here), items count, and the validity-intelligence label from design
+   decision 3 (replacing nothing, since no summary strip exists on
+   Quote today).
+5. **A new Customer card** (name, company, phone, email where
+   present, a real link to the customer's own detail page) — pure
+   frontend work, identical in shape to Chapter 7's Rental Workspace
+   Customer card; `Quote.customer` is already fetched by `findOne()`
+   today.
+6. **The existing items table gains discount/tax columns it was
+   already computing but not displaying** (`discountTotalMinor`,
+   `taxTotalMinor` per line, both already returned by the API) —
+   exposing existing data, not adding a new field. Asset-bound items
+   keep a real link to the asset's detail page (new); non-asset items
+   (`SERVICE`/`FEE`/`DELIVERY`/etc.) render their free-text `name`
+   with no link, since they reference no entity.
+7. **Source Quote's `convertedRental` and the new `platformDocuments`
+   are consolidated into one "Documents" card**, mirroring Chapter 7's
+   exact symmetric pattern (which put `Rental.sourceQuote` inside its
+   own Documents card) rather than the current bare one-line notice.
+   The Quote's own generated PDF (View/Regenerate) remains a header
+   action, unchanged — it is the Quote's own primary artifact, not a
+   "related document," and moving a working, well-placed action would
+   be change without benefit.
+8. **The existing Convert button becomes the `PageHeader`
+   `primaryAction` when `status === "ACCEPTED"`**, improving
+   discoverability exactly as this chapter's Section 9 asks ("improve
+   discoverability... without rewriting the underlying business
+   logic") — the same `useConvertQuoteToRental`/`window.confirm` logic
+   is reused verbatim, only its visual prominence changes.
+9. **No new Send UI, no new email infrastructure, no delivery-status
+   UI.** Finding #56: a real Send button already exists, already
+   builds a real PDF, already calls a real (if placeholder-backed)
+   `EmailProvider`, and already reports an honest `emailSent`/
+   `emailError` result. This satisfies the chapter's own Section 11
+   instruction by recognizing what's real, not by building a second,
+   redundant "send" surface.
+10. **No Customer Portal quote exposure is built.** Finding #58: zero
+    portal quote routes exist today, and the portal's authenticated-
+    session trust model is structurally different from the existing
+    public-token link's unauthenticated model — conflating the two
+    would be a real architectural shortcut, not a safe reuse. The
+    future flow (staff creates → sends → customer authenticates in
+    portal → views → accepts/rejects → Timeline records it) is
+    documented in "What Chapter 8 does not build" below, not
+    implemented.
+11. **The Timeline sidebar is unchanged** — the exact Chapter 6
+    `<Timeline>` component and `QUOTE_TIMELINE_REGISTRY`, already
+    correctly wired with a working `converted`→Rental link, reused
+    verbatim.
+12. **No new keyboard shortcut, no new search/Quick Create/Command
+    Palette wiring.** Finding #61: `nav-registry.ts`, `quick-actions.ts`
+    ("New quote"), and `search-providers.ts` (a real `"quotes"`
+    provider) are already fully wired and permission-gated — nothing
+    to add for basic Quote discoverability this chapter.
+13. **Universal Rental Philosophy check (Section 3 test):** every new
+    element — Customer card, enhanced items table, Documents card,
+    Smart Summary, `QuoteStatusBadge`, validity-intelligence labels —
+    holds for a non-equipment vertical without modification (a
+    property-management company's quote for "Apartment 4B, one month"
+    uses the exact same `ASSET`-type item, the exact same generic
+    fields, no industry-specific label anywhere).
+
+### What Chapter 8 builds
+
+- `apps/api/src/quotes/quote.types.ts`: `QUOTE_DETAIL_INCLUDE` gains
+  `platformDocuments`; `QuoteDetailView`/`QuoteDetailResponse` gain
+  the matching typed field.
+- `apps/web/src/types/quote.ts`: `Quote` gains a `platformDocuments`
+  field.
+- `apps/web/src/lib/quote-validity-intelligence.ts`: the centralized,
+  pure, unit-tested validity-status derivation function.
+- `apps/web/src/components/quotes/quote-status-badge.tsx`: the one
+  reusable status badge, consumed by both the list page and the
+  workspace.
+- `apps/web/src/app/app/quotes/[id]/page.tsx`: rebuilt into the Quote
+  Workspace — `PageHeader` (status badge + validity chip, Convert as
+  `primaryAction` when ACCEPTED), Smart Summary, Customer card,
+  enhanced items table (discount/tax columns, asset links), Documents
+  card (converted-rental link + linked documents, honest empty
+  state), unchanged Details/Financial cards, unchanged Timeline
+  sidebar.
+- `apps/web/src/app/app/quotes/page.tsx`: status column now renders
+  `QuoteStatusBadge` instead of plain text.
+- New localization keys across all six locales; component/unit tests
+  for every new piece.
+
+### What Chapter 8 does not build (documented gaps, not fabricated)
+
+- **Real SMTP/SES/SendGrid email delivery** — `LoggingEmailProvider`
+  remains the bound implementation; a real provider is a future
+  `useClass` swap behind the existing `EmailProvider` interface
+  (`ARCHITECTURE_LOCK.md` §1.15), not something to build speculatively
+  this chapter (design decision 9).
+- **Customer Portal quote exposure** (view/accept/reject a quote from
+  inside an authenticated portal session) — no portal routes/DTOs
+  exist today; documented as a future flow: staff creates a Quote →
+  sends it → the customer authenticates in the portal → views the
+  offer → accepts/rejects → the Timeline records the event → staff
+  sees the result. Building this was not requested and would need new
+  portal-side work, not a Workspace-page change (design decision 10).
+- **A central `ALLOWED_TRANSITIONS`-driven lifecycle engine** — the
+  existing ad hoc per-transition enforcement (finding #51) already
+  correctly enforces every real business rule; consolidating it into
+  one central dispatcher was not requested and is not a UI concern.
+- **Any payment/invoice/"amount paid" UI** — no `Invoice`/`Payment`/
+  `Transaction` model exists anywhere in the schema (same gap
+  documented for Rentals in Chapter 7).
+- **A revision-history/version-compare UI beyond the existing
+  duplicate-based lineage** (`duplicatedFromQuoteId`) — ADR 0007's own
+  deliberate "duplication, not revisions" scope decision, unchanged.
+- **A new keyboard shortcut for Quotes** — the existing Command
+  Palette/Quick Create/global-search coverage (finding #61) already
+  satisfies rapid access; no dedicated shortcut provides enough
+  additional value to justify one (design decision 12).
+
 ## Later chapters (named, not detailed — scoped when reached)
 
-- **Chapter 8 — Forms & Wizards:** reconcile `RentalWizard`/
+- **Chapter 9 — Forms & Wizards:** reconcile `RentalWizard`/
   `QuoteWizard` against `UI_PATTERNS.md`'s Wizard/Stepper/Forms specs.
-- **Chapter 9 — Settings & Account:** profile/account pages, the
+- **Chapter 10 — Settings & Account:** profile/account pages, the
   language-switcher's live wiring, notification preferences once a
   backend exists.
 

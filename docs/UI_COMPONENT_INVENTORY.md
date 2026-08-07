@@ -332,6 +332,47 @@ this was built on.
   not needed; see `UI_REDESIGN_PLAN.md` Chapter 7 design decisions
   8–12 for the reasoning behind each.
 
+## Quote Workspace — added Chapter 8
+
+Rebuilds the Quote detail page from a plain CRUD form into an
+operational workspace surfacing every real relationship a quote has —
+Customer, Assets/line items, converted Rental (if any), linked
+platform Documents, financial totals, and the unchanged Chapter 6
+Timeline. Mirrors the Rental Workspace's shape (Chapter 7) wherever the
+underlying domain concept is structurally the same. See
+`UI_REDESIGN_PLAN.md` Chapter 8 for the full design rationale and
+`UI_RESEARCH.md`/`UI_AUDIT.md`'s Chapter 8 addenda for the research
+this was built on.
+
+| File                                       | Purpose                                                                                                                                                                                                                                                          |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend: `quotes/quote.types.ts`           | `QUOTE_DETAIL_INCLUDE` gains `platformDocuments` (non-deleted, newest first) — a real, existing `Quote.platformDocuments` relation that `findOneRaw()` simply never included before; no new endpoint, no new permission. `convertedRental` was already included. |
+| `lib/quote-validity-intelligence.ts`       | `getQuoteValidityIntelligence()` — one pure, centralized function deriving a closed set of validity labels (`expires_today`/`expires_in_days`/`expired`/`accepted`/etc.) from status + `validUntil` + `nowMs`; never a persisted value.                          |
+| `components/quotes/quote-status-badge.tsx` | `<QuoteStatusBadge>` — the one colored status badge, reused by both the Workspace and the quotes list page (`PRODUCT_BIBLE.md` §10); tone mapping reuses `Alert`'s existing semantic tokens, no new color introduced.                                            |
+| `app/app/quotes/[id]/page.tsx`             | Rebuilt: `PageHeader` (status badge + validity chip + valid-until date), Smart Summary (quote value/deposit/items/validity status), Customer card, enhanced items table (discount/tax columns + asset links), consolidated Documents card, unchanged Timeline.   |
+| `app/app/quotes/page.tsx`                  | Status column now renders `<QuoteStatusBadge>` instead of plain translated text.                                                                                                                                                                                 |
+
+### What Chapter 8 does not build (documented gaps, not fabricated)
+
+- **Real customer-facing quote acceptance inside the Customer Portal**
+  — the portal has zero quote exposure today; the existing public-token
+  link (`/quote/[token]`) and the portal's authenticated-session model
+  are structurally different trust mechanisms and were not conflated.
+  The future flow (staff sends → customer authenticates in-portal →
+  views/accepts/rejects → Timeline records it → staff sees the result)
+  is documented in `UI_RESEARCH.md`, not built.
+- **A new "Send" UI beyond the existing button** — real (if
+  placeholder-backed) email infrastructure already exists
+  (`EmailService`/`LoggingEmailProvider`); no new UI was needed to
+  satisfy the chapter's Email/Send Readiness requirement honestly.
+- **Accounting, payment processing, an invoicing engine, e-signature
+  platform, AI quote generation, or a property-management subsystem**
+  — explicitly out of scope per the chapter's "do not overbuild"
+  instruction; none of these have a backing model in the schema.
+- **A new keyboard shortcut or a separate Quote search provider** —
+  Quotes were already fully wired into the Chapter 5 keyboard registry
+  and search-provider architecture; nothing needed adding.
+
 ## Icons
 
 `lucide-react` is an existing `@rentos/ui` dependency, zero current

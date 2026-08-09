@@ -16,8 +16,10 @@ vi.mock("../../src/hooks/use-current-tenant-role", () => ({
 }));
 
 const useDocumentsMock = vi.fn();
+const useDocumentsSummaryMock = vi.fn();
 vi.mock("../../src/hooks/use-documents", () => ({
   useDocuments: (...args: unknown[]) => useDocumentsMock(...args),
+  useDocumentsSummary: (...args: unknown[]) => useDocumentsSummaryMock(...args),
 }));
 
 const baseDocument = {
@@ -32,6 +34,14 @@ const baseDocument = {
 describe("DocumentsPage", () => {
   beforeEach(() => {
     useCurrentTenantIdMock.mockReturnValue(["tenant-1", vi.fn()]);
+    useDocumentsSummaryMock.mockReturnValue({
+      total: 4,
+      draft: 1,
+      sent: 2,
+      signed: 1,
+      isLoading: false,
+      isError: false,
+    });
   });
 
   it("renders a row per document with number, type, customer, and status", () => {
@@ -48,6 +58,23 @@ describe("DocumentsPage", () => {
     expect(table.getByText("DOC-2026-000001")).toBeInTheDocument();
     expect(table.getByText("Jane Doe")).toBeInTheDocument();
     expect(table.getByRole("cell", { name: "Draft" })).toBeInTheDocument();
+  });
+
+  it("renders the Smart Summary with real counts from useDocumentsSummary", () => {
+    usePermissionMock.mockReturnValue(false);
+    useDocumentsMock.mockReturnValue({
+      data: { items: [], total: 4, page: 1, pageSize: 20 },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithProviders(<DocumentsPage />);
+
+    expect(screen.getByText("4")).toBeInTheDocument();
+    expect(screen.getByText("Total documents")).toBeInTheDocument();
+    const sentCard = screen.getByText("2").closest("div");
+    expect(sentCard).not.toBeNull();
+    expect(within(sentCard as HTMLElement).getByText("Sent")).toBeInTheDocument();
   });
 
   it("renders the empty state when there are no documents", () => {

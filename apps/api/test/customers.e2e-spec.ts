@@ -97,6 +97,42 @@ describe("Customers E2E", () => {
     expect(response.body.notes).toBeNull();
   });
 
+  it("GET /customers/:id includes documents reflecting real Document.customerId links", async () => {
+    const created = await createCustomer().expect(201);
+
+    const noDocuments = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/customers/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(noDocuments.body.documents).toEqual([]);
+
+    const document = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "CONTRACT", customerId: created.body.id })
+      .expect(201);
+
+    const deletedDocument = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "CONTRACT", customerId: created.body.id })
+      .expect(201);
+    await request(app.getHttpServer())
+      .delete(`/tenants/${tenantId}/documents/${deletedDocument.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(204);
+
+    const withDocuments = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/customers/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(withDocuments.body.documents).toHaveLength(1);
+    expect(withDocuments.body.documents[0]).toMatchObject({
+      id: document.body.id,
+      documentType: "CONTRACT",
+    });
+  });
+
   it("clearing a field via PATCH (empty string) actually nulls it out, not leaves the old value", async () => {
     const created = await createCustomer({ company: "Acme Inc", email: "a@b.com" }).expect(201);
 

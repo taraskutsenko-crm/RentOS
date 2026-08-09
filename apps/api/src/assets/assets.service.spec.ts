@@ -16,6 +16,9 @@ function buildService() {
     rentalItem: {
       findMany: vi.fn(),
     },
+    document: {
+      findMany: vi.fn(),
+    },
   };
   const auditService = { log: vi.fn() };
   const assetStatusesService = {};

@@ -158,6 +158,49 @@ describe("DocumentDetailPage", () => {
     expect(screen.queryByRole("button", { name: /reject/i })).not.toBeInTheDocument();
   });
 
+  it("renders a Related records card linking to the customer, rental, quote, and asset when present", () => {
+    usePermissionMock.mockReturnValue(false);
+    useDocumentMock.mockReturnValue({
+      data: {
+        ...baseDocument("DRAFT"),
+        customer: { id: "cust-1", firstName: "Jane", lastName: "Doe" },
+        rental: { id: "rental-1", rentalNumber: "RNT-000001" },
+        quote: { id: "quote-1", quoteNumber: "Q-2026-000001" },
+        asset: { id: "asset-1", name: "Generator A" },
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<DocumentDetailPage />);
+
+    expect(screen.getByText("Related records")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Jane Doe" })).toHaveAttribute(
+      "href",
+      "/app/customers/cust-1",
+    );
+    expect(screen.getByRole("link", { name: "RNT-000001" })).toHaveAttribute(
+      "href",
+      "/app/rentals/rental-1",
+    );
+    expect(screen.getByRole("link", { name: "Q-2026-000001" })).toHaveAttribute(
+      "href",
+      "/app/quotes/quote-1",
+    );
+    expect(screen.getByRole("link", { name: "Generator A" })).toHaveAttribute(
+      "href",
+      "/app/assets/asset-1",
+    );
+  });
+
+  it("omits the Related records card entirely when no relation exists", () => {
+    usePermissionMock.mockReturnValue(false);
+    useDocumentMock.mockReturnValue({ data: baseDocument("DRAFT"), isLoading: false });
+
+    renderWithProviders(<DocumentDetailPage />);
+
+    expect(screen.queryByText("Related records")).not.toBeInTheDocument();
+  });
+
   it("shows the error message when a lifecycle action fails", async () => {
     usePermissionMock.mockImplementation((permission: string) => permission === "documents.update");
     useDocumentMock.mockReturnValue({ data: baseDocument("DRAFT"), isLoading: false });

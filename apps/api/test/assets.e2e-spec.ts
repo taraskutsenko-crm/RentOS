@@ -211,6 +211,42 @@ describe("Assets E2E", () => {
     });
   });
 
+  it("GET /assets/:id includes platformDocuments reflecting real Document.assetId links", async () => {
+    const created = await createAsset().expect(201);
+
+    const noDocuments = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/assets/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(noDocuments.body.platformDocuments).toEqual([]);
+
+    const document = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "CONTRACT", assetId: created.body.id })
+      .expect(201);
+
+    const deletedDocument = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "CONTRACT", assetId: created.body.id })
+      .expect(201);
+    await request(app.getHttpServer())
+      .delete(`/tenants/${tenantId}/documents/${deletedDocument.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(204);
+
+    const withDocuments = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/assets/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(withDocuments.body.platformDocuments).toHaveLength(1);
+    expect(withDocuments.body.platformDocuments[0]).toMatchObject({
+      id: document.body.id,
+      documentType: "CONTRACT",
+    });
+  });
+
   // 11. Location change creates history
   it("creates an AssetLocationHistory record when the location changes", async () => {
     const created = await createAsset({ currentLocationText: "Depot A" }).expect(201);

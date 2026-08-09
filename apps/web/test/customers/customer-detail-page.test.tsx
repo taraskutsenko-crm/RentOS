@@ -48,6 +48,7 @@ const baseCustomer = {
   address: null,
   notes: null,
   status: "ACTIVE" as const,
+  documents: [],
 };
 
 describe("CustomerDetailPage", () => {
@@ -68,6 +69,39 @@ describe("CustomerDetailPage", () => {
     renderWithProviders(<CustomerDetailPage />);
 
     expect(screen.getByRole("heading", { name: "Jane Doe" })).toBeInTheDocument();
+  });
+
+  it("renders the Documents card with an honest empty state, and lists real linked documents", () => {
+    useCustomerMock.mockReturnValue({ data: baseCustomer, isLoading: false });
+    useCustomerSummaryMock.mockReturnValue({ data: undefined });
+
+    const { unmount } = renderWithProviders(<CustomerDetailPage />);
+    expect(screen.getByText(/no documents linked to this customer yet/i)).toBeInTheDocument();
+    unmount();
+
+    useCustomerMock.mockReturnValue({
+      data: {
+        ...baseCustomer,
+        documents: [
+          {
+            id: "doc-1",
+            documentType: "CONTRACT",
+            customTypeName: null,
+            documentNumber: "CON-000001",
+            status: "DRAFT",
+            title: null,
+            createdAt: "2026-08-01T00:00:00Z",
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<CustomerDetailPage />);
+    expect(screen.getByRole("link", { name: "CON-000001" })).toHaveAttribute(
+      "href",
+      "/app/documents/doc-1",
+    );
   });
 
   it("shows real summary numbers once loaded", () => {

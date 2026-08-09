@@ -55,6 +55,7 @@ const baseAsset = {
   customFields: {},
   images: [],
   documents: [],
+  platformDocuments: [],
   manufacturer: null,
   model: null,
   sku: null,
@@ -121,6 +122,41 @@ describe("AssetDetailPage", () => {
         id: "asset-1",
         statusId: "status-reserved",
       }),
+    );
+  });
+
+  it("renders the platformDocuments card with an honest empty state, and lists real linked documents", () => {
+    usePermissionMock.mockReturnValue(false);
+    useAssetMock.mockReturnValue({ data: baseAsset, isLoading: false });
+    useChangeAssetStatusMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useChangeAssetLocationMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+
+    const { unmount } = renderWithProviders(<AssetDetailPage />);
+    expect(screen.getByText(/no documents linked to this asset yet/i)).toBeInTheDocument();
+    unmount();
+
+    useAssetMock.mockReturnValue({
+      data: {
+        ...baseAsset,
+        platformDocuments: [
+          {
+            id: "doc-1",
+            documentType: "CONTRACT",
+            customTypeName: null,
+            documentNumber: "CON-000001",
+            status: "DRAFT",
+            title: null,
+            createdAt: "2026-08-01T00:00:00Z",
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<AssetDetailPage />);
+    expect(screen.getByRole("link", { name: "CON-000001" })).toHaveAttribute(
+      "href",
+      "/app/documents/doc-1",
     );
   });
 

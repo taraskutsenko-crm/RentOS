@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -249,6 +249,50 @@ describe("RentalDetailPage", () => {
     expect(quoteLink).toHaveAttribute("href", "/app/quotes/quote-1");
     const documentLink = screen.getByRole("link", { name: "DOC-000001" });
     expect(documentLink).toHaveAttribute("href", "/app/documents/doc-1");
+  });
+
+  // Chapter 9: Document checklist — derived intelligence, never fabricated completion
+  it("renders the document checklist reflecting real linked documents and rental status", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({
+      data: {
+        ...baseRental("ACTIVE"),
+        sourceQuote: { id: "quote-1", quoteNumber: "Q-2026-000001" },
+        documents: [
+          {
+            id: "doc-1",
+            documentType: "CONTRACT",
+            customTypeName: null,
+            documentNumber: "CON-000001",
+            status: "SIGNED",
+            title: null,
+            createdAt: "2026-08-01T00:00:00Z",
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    const checklistCard = screen.getByText("Document checklist").closest("div")
+      ?.parentElement as HTMLElement;
+    const checklist = within(checklistCard);
+
+    expect(checklist.getByText("Commercial offer")).toBeInTheDocument();
+    expect(checklist.getByText("Rental contract")).toBeInTheDocument();
+    expect(checklist.getByText("Handover protocol")).toBeInTheDocument();
+    expect(checklist.getAllByText("Linked")).toHaveLength(2); // commercial offer + contract
+    expect(checklist.getByText("Missing")).toBeInTheDocument(); // handover protocol, since ACTIVE
+  });
+
+  it("omits the document checklist card for a CANCELLED rental", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({ data: baseRental("CANCELLED"), isLoading: false });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    expect(screen.queryByText("Document checklist")).not.toBeInTheDocument();
   });
 
   // 8. Status change / workflow test: only shows the reserve action for a DRAFT rental

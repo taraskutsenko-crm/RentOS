@@ -22,6 +22,9 @@ function buildService() {
     rentalDamageReport: {
       count: vi.fn(),
     },
+    document: {
+      findMany: vi.fn(),
+    },
   };
   const auditService = { log: vi.fn() };
 

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PageHeader } from "../../../components/shell/page-header";
+import { DashboardGrid, DashboardMetric } from "../../../components/dashboard";
 import {
   DataTable,
   DataTablePagination,
@@ -14,9 +15,10 @@ import {
   useDataTableState,
   type DataTableColumn,
 } from "../../../components/data-table";
+import { DocumentStatusBadge } from "../../../components/documents/document-status-badge";
 import { useCurrentTenantId } from "../../../hooks/use-current-tenant";
 import { usePermission } from "../../../hooks/use-current-tenant-role";
-import { useDocuments } from "../../../hooks/use-documents";
+import { useDocuments, useDocumentsSummary } from "../../../hooks/use-documents";
 import type { DocumentListItem, DocumentStatus } from "../../../types/document";
 
 const STATUSES: DocumentStatus[] = [
@@ -37,6 +39,7 @@ export default function DocumentsPage() {
   const [status, setStatus] = useState<DocumentStatus | "">("");
 
   const canCreate = usePermission("documents.create");
+  const summary = useDocumentsSummary(tenantId);
   const table = useDataTableState({ initialSortBy: "createdAt", initialSortDirection: "desc" });
   const { data, isLoading, isError, refetch } = useDocuments(tenantId, {
     page: table.page,
@@ -76,7 +79,7 @@ export default function DocumentsPage() {
       id: "status",
       header: t("document.fields.status"),
       sortable: true,
-      cell: (document) => t(`document.statuses.${document.status}`),
+      cell: (document) => <DocumentStatusBadge status={document.status} />,
       mobileRole: "secondary",
     },
   ];
@@ -99,6 +102,29 @@ export default function DocumentsPage() {
           )
         }
       />
+
+      <DashboardGrid>
+        <DashboardMetric
+          label={t("document.summary.total")}
+          value={summary.total}
+          isLoading={summary.isLoading}
+        />
+        <DashboardMetric
+          label={t("document.summary.draft")}
+          value={summary.draft}
+          isLoading={summary.isLoading}
+        />
+        <DashboardMetric
+          label={t("document.summary.sent")}
+          value={summary.sent}
+          isLoading={summary.isLoading}
+        />
+        <DashboardMetric
+          label={t("document.summary.signed")}
+          value={summary.signed}
+          isLoading={summary.isLoading}
+        />
+      </DashboardGrid>
 
       <FilterBar
         activeFilters={

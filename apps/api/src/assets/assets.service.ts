@@ -8,6 +8,7 @@ import type {
   AssetCustomFieldDefinition,
   AssetDocument,
   AssetImage,
+  Document,
   Prisma,
   RentalStatus,
 } from "@prisma/client";
@@ -35,6 +36,21 @@ const ASSET_INCLUDE = {
 /** Rentals that represent real, counted business activity — DRAFT and CANCELLED are excluded. */
 const COUNTED_RENTAL_STATUSES: RentalStatus[] = ["RESERVED", "ACTIVE", "RETURNED", "COMPLETED"];
 
+export const ASSET_PLATFORM_DOCUMENT_SELECT = {
+  id: true,
+  documentType: true,
+  customTypeName: true,
+  documentNumber: true,
+  status: true,
+  title: true,
+  createdAt: true,
+} satisfies Prisma.DocumentSelect;
+
+export type AssetPlatformDocumentView = Pick<
+  Document,
+  "id" | "documentType" | "customTypeName" | "documentNumber" | "status" | "title" | "createdAt"
+>;
+
 type AssetWithRelations = Prisma.AssetGetPayload<{ include: typeof ASSET_INCLUDE }>;
 
 export interface AssetListItemView extends AssetWithCustomFields<AssetWithRelations> {
@@ -44,6 +60,7 @@ export interface AssetListItemView extends AssetWithCustomFields<AssetWithRelati
 export interface AssetDetailView extends AssetWithCustomFields<AssetWithRelations> {
   images: AssetImage[];
   documents: AssetDocument[];
+  platformDocuments: AssetPlatformDocumentView[];
 }
 
 @Injectable()
@@ -187,7 +204,7 @@ export class AssetsService {
     if (!asset) {
       throw new NotFoundException("Asset not found");
     }
-    const [valuesByKey, images, documents] = await Promise.all([
+    const [valuesByKey, images, documents, platformDocuments] = await Promise.all([
       this.fieldValuesService.getExistingValuesByKey(asset.id),
       this.prisma.assetImage.findMany({
         where: { tenantId, assetId: id, deletedAt: null },
@@ -197,8 +214,18 @@ export class AssetsService {
         where: { tenantId, assetId: id, deletedAt: null },
         orderBy: { createdAt: "desc" },
       }),
+      this.prisma.document.findMany({
+        where: { tenantId, assetId: id, deletedAt: null },
+        select: ASSET_PLATFORM_DOCUMENT_SELECT,
+        orderBy: { createdAt: "desc" },
+      }),
     ]);
-    return { ...this.fieldValuesService.attach(asset, valuesByKey), images, documents };
+    return {
+      ...this.fieldValuesService.attach(asset, valuesByKey),
+      images,
+      documents,
+      platformDocuments,
+    };
   }
 
   async update(

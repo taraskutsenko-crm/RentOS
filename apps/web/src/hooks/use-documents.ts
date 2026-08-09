@@ -72,6 +72,43 @@ export function useDocument(tenantId: string | null, id: string | null) {
   });
 }
 
+/**
+ * Real tenant-wide document counts for the Documents Workspace's Smart
+ * Summary, composed from the existing list endpoint's `.total` the same
+ * way `useDashboardStats` does (`pageSize:1`, read `.total`) — no
+ * dedicated backend aggregation endpoint exists or is needed for this.
+ * See docs/UI_REDESIGN_PLAN.md Chapter 9, design decision 2.
+ */
+export function useDocumentsSummary(tenantId: string | null) {
+  const totalQuery = useDocuments(tenantId, { pageSize: 1 });
+  const draftQuery = useDocuments(tenantId, { pageSize: 1, status: "DRAFT" });
+  const sentQuery = useDocuments(tenantId, { pageSize: 1, status: "SENT" });
+  const viewedQuery = useDocuments(tenantId, { pageSize: 1, status: "VIEWED" });
+  const signedQuery = useDocuments(tenantId, { pageSize: 1, status: "SIGNED" });
+  const partiallySignedQuery = useDocuments(tenantId, {
+    pageSize: 1,
+    status: "PARTIALLY_SIGNED",
+  });
+
+  const queries = [
+    totalQuery,
+    draftQuery,
+    sentQuery,
+    viewedQuery,
+    signedQuery,
+    partiallySignedQuery,
+  ];
+
+  return {
+    total: totalQuery.data?.total ?? 0,
+    draft: draftQuery.data?.total ?? 0,
+    sent: (sentQuery.data?.total ?? 0) + (viewedQuery.data?.total ?? 0),
+    signed: (signedQuery.data?.total ?? 0) + (partiallySignedQuery.data?.total ?? 0),
+    isLoading: queries.some((query) => query.isLoading),
+    isError: queries.some((query) => query.isError),
+  };
+}
+
 export function useDocumentTimeline(tenantId: string | null, id: string | null) {
   return useQuery({
     queryKey: [BASE_KEY, tenantId, "history", id],

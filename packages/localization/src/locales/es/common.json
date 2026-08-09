@@ -221,7 +221,11 @@
       "activeRentals": "Alquileres activos",
       "totalRevenue": "Ingresos totales",
       "damageReports": "Informes de daños"
-    }
+    },
+    "sections": {
+      "documents": "Documentos"
+    },
+    "documentsEmpty": "Todavía no hay documentos vinculados a este cliente"
   },
   "asset": {
     "title": "Activos",
@@ -242,6 +246,7 @@
     "noTimelineEvents": "Aún no hay actividad registrada",
     "noImages": "Todavía no se han subido imágenes",
     "noDocuments": "Todavía no se han subido documentos",
+    "platformDocumentsEmpty": "Todavía no hay documentos vinculados a este activo",
     "sort": {
       "newest": "Más recientes primero",
       "oldest": "Más antiguos primero",
@@ -287,7 +292,8 @@
       "images": "Imágenes",
       "documents": "Documentos",
       "timeline": "Historial",
-      "filesManagement": "Imágenes y documentos"
+      "filesManagement": "Imágenes y documentos",
+      "platformDocuments": "Documentos"
     },
     "actions": {
       "changeStatus": "Cambiar estado",
@@ -438,6 +444,20 @@
     },
     "documents": {
       "empty": "Todavía no hay documentos vinculados a este alquiler"
+    },
+    "documentChecklist": {
+      "title": "Lista de verificación de documentos",
+      "items": {
+        "commercialOffer": "Oferta comercial",
+        "contract": "Contrato de alquiler",
+        "handoverProtocol": "Acta de entrega",
+        "returnProtocol": "Acta de devolución"
+      },
+      "states": {
+        "present": "Vinculado",
+        "missing": "Falta",
+        "notRequired": "Aún no requerido"
+      }
     },
     "timeIntelligence": {
       "starts_today": "Comienza hoy",
@@ -729,7 +749,17 @@
       "customTypeName": "Nombre del tipo personalizado",
       "none": "Ninguno",
       "version": "Versión",
-      "createdAt": "Creado"
+      "createdAt": "Creado",
+      "customer": "Cliente",
+      "rental": "Alquiler",
+      "quote": "Presupuesto",
+      "asset": "Activo"
+    },
+    "summary": {
+      "total": "Documentos totales",
+      "draft": "Borrador",
+      "sent": "Enviado",
+      "signed": "Firmado"
     },
     "actions": {
       "viewPdf": "Ver PDF",
@@ -749,7 +779,8 @@
     "sections": {
       "preview": "Vista previa",
       "email": "Envío por correo",
-      "signature": "Firma electrónica"
+      "signature": "Firma electrónica",
+      "relatedEntities": "Registros relacionados"
     },
     "email": {
       "recipientType": "Destinatario",

@@ -221,7 +221,11 @@
       "activeRentals": "Aktywne wynajmy",
       "totalRevenue": "Łączny przychód",
       "damageReports": "Zgłoszenia szkód"
-    }
+    },
+    "sections": {
+      "documents": "Dokumenty"
+    },
+    "documentsEmpty": "Do tego klienta nie przypisano jeszcze żadnych dokumentów"
   },
   "asset": {
     "title": "Aktywa",
@@ -242,6 +246,7 @@
     "noTimelineEvents": "Brak zarejestrowanej aktywności",
     "noImages": "Nie przesłano jeszcze żadnych zdjęć",
     "noDocuments": "Nie przesłano jeszcze żadnych dokumentów",
+    "platformDocumentsEmpty": "Do tego zasobu nie przypisano jeszcze żadnych dokumentów",
     "sort": {
       "newest": "Od najnowszych",
       "oldest": "Od najstarszych",
@@ -287,7 +292,8 @@
       "images": "Zdjęcia",
       "documents": "Dokumenty",
       "timeline": "Historia",
-      "filesManagement": "Zdjęcia i dokumenty"
+      "filesManagement": "Zdjęcia i dokumenty",
+      "platformDocuments": "Dokumenty"
     },
     "actions": {
       "changeStatus": "Zmień status",
@@ -438,6 +444,20 @@
     },
     "documents": {
       "empty": "Do tego wynajmu nie przypisano jeszcze żadnych dokumentów"
+    },
+    "documentChecklist": {
+      "title": "Lista kontrolna dokumentów",
+      "items": {
+        "commercialOffer": "Oferta handlowa",
+        "contract": "Umowa najmu",
+        "handoverProtocol": "Protokół wydania",
+        "returnProtocol": "Protokół zwrotu"
+      },
+      "states": {
+        "present": "Powiązany",
+        "missing": "Brak",
+        "notRequired": "Jeszcze niewymagany"
+      }
     },
     "timeIntelligence": {
       "starts_today": "Rozpoczyna się dzisiaj",
@@ -729,7 +749,17 @@
       "customTypeName": "Nazwa niestandardowego typu",
       "none": "Brak",
       "version": "Wersja",
-      "createdAt": "Utworzono"
+      "createdAt": "Utworzono",
+      "customer": "Klient",
+      "rental": "Wynajem",
+      "quote": "Oferta",
+      "asset": "Zasób"
+    },
+    "summary": {
+      "total": "Wszystkie dokumenty",
+      "draft": "Wersje robocze",
+      "sent": "Wysłane",
+      "signed": "Podpisane"
     },
     "actions": {
       "viewPdf": "Zobacz PDF",
@@ -749,7 +779,8 @@
     "sections": {
       "preview": "Podgląd",
       "email": "Wysyłka e-mail",
-      "signature": "Podpis elektroniczny"
+      "signature": "Podpis elektroniczny",
+      "relatedEntities": "Powiązane rekordy"
     },
     "email": {
       "recipientType": "Odbiorca",

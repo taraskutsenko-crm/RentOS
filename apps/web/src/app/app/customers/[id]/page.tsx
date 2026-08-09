@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -134,20 +135,52 @@ export default function EditCustomerPage() {
           {tenantId && <CustomerPortalPanel tenantId={tenantId} customerId={params.id} />}
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("timeline.title")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Timeline
-              events={timeline}
-              registry={CUSTOMER_TIMELINE_REGISTRY}
-              isLoading={!timeline}
-              emptyLabel={t("timeline.empty")}
-              searchPlaceholder={t("timeline.searchPlaceholder")}
-            />
-          </CardContent>
-        </Card>
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("customer.sections.documents")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {customer.documents.length === 0 ? (
+                <p className="text-muted-foreground text-sm">{t("customer.documentsEmpty")}</p>
+              ) : (
+                <ul className="flex flex-col gap-2 text-sm">
+                  {customer.documents.map((document) => (
+                    <li key={document.id} className="flex items-center justify-between">
+                      <span>
+                        {document.documentType === "CUSTOM" && document.customTypeName
+                          ? document.customTypeName
+                          : t(`document.types.${document.documentType}`)}
+                        {document.title ? ` — ${document.title}` : ""}
+                      </span>
+                      <Link
+                        href={`/app/documents/${document.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {document.documentNumber}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("timeline.title")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Timeline
+                events={timeline}
+                registry={CUSTOMER_TIMELINE_REGISTRY}
+                isLoading={!timeline}
+                emptyLabel={t("timeline.empty")}
+                searchPlaceholder={t("timeline.searchPlaceholder")}
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

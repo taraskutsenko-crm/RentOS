@@ -25,6 +25,7 @@ import {
   useStartRental,
 } from "../../../../hooks/use-rentals";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
+import { getRentalDocumentChecklist } from "../../../../lib/document-completeness-intelligence";
 import { formatMoney } from "../../../../lib/money";
 import {
   estimateItemLineTotalMinor,
@@ -366,6 +367,34 @@ export default function RentalDetailPage() {
               </table>
             </CardContent>
           </Card>
+
+          {rental.status !== "CANCELLED" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("rental.documentChecklist.title")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="flex flex-col gap-2 text-sm">
+                  {getRentalDocumentChecklist(rental).map((item) => (
+                    <li key={item.key} className="flex items-center justify-between">
+                      <span>{t(`rental.documentChecklist.items.${item.key}`)}</span>
+                      <span
+                        className={
+                          item.state === "present"
+                            ? "text-success"
+                            : item.state === "missing"
+                              ? "text-warning"
+                              : "text-muted-foreground"
+                        }
+                      >
+                        {t(`rental.documentChecklist.states.${item.state}`)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

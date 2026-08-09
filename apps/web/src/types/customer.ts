@@ -1,3 +1,4 @@
+import type { DocumentStatus, DocumentType } from "./document";
 import type { TimelineEvent } from "./timeline";
 
 export type CustomerStatus = "ACTIVE" | "INACTIVE";
@@ -17,6 +18,20 @@ export interface Customer {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+}
+
+export interface CustomerDocument {
+  id: string;
+  documentType: DocumentType;
+  customTypeName: string | null;
+  documentNumber: string;
+  status: DocumentStatus;
+  title: string | null;
+  createdAt: string;
+}
+
+export interface CustomerDetail extends Customer {
+  documents: CustomerDocument[];
 }
 
 export interface PaginatedCustomers {

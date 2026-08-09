@@ -6,8 +6,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PageHeader } from "../../../../components/shell/page-header";
 import { PinButton } from "../../../../components/shell/pin-button";
 import { Timeline } from "../../../../components/timeline/timeline";
+import { DocumentStatusBadge } from "../../../../components/documents/document-status-badge";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
   documentPdfUrl,
@@ -198,70 +200,44 @@ export default function DocumentDetailPage() {
       (v) => v.versionNumber === (selectedVersion ?? document.currentVersionNumber),
     ) ?? document.versions[0];
 
+  const canMarkReady = canUpdate && READY_STATUSES.has(document.status);
+  const canMarkSent = canSend && SENDABLE_STATUSES.has(document.status);
+  const canMarkSigned = canSign && SIGNABLE_STATUSES.has(document.status);
+  const nextAction: "ready" | "sent" | "sign" | null = canMarkReady
+    ? "ready"
+    : canMarkSent
+      ? "sent"
+      : canMarkSigned
+        ? "sign"
+        : null;
+
+  const documentTypeLabel =
+    document.documentType === "CUSTOM"
+      ? (document.customTypeName ?? t("document.types.CUSTOM"))
+      : t(`document.types.${document.documentType}`);
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{document.documentNumber}</h1>
-          <p className="text-muted-foreground text-sm">
-            {document.documentType === "CUSTOM"
-              ? (document.customTypeName ?? t("document.types.CUSTOM"))
-              : t(`document.types.${document.documentType}`)}{" "}
-            ·{" "}
-            <span aria-label={t(`document.statuses.${document.status}`)}>
-              {t(`document.statuses.${document.status}`)}
-            </span>
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <PinButton
-            entityType="document"
-            entityId={document.id}
-            label={document.documentNumber}
-            href={`/app/documents/${document.id}`}
-          />
-          {canDownload && (
-            <Button asChild variant="outline" size="sm">
-              <a href={documentPdfUrl(tenantId, document.id)} target="_blank" rel="noreferrer">
-                {t("document.actions.viewPdf")}
-              </a>
-            </Button>
-          )}
-          {canRender && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void runAction(() => regeneratePdf.mutateAsync(document!.id))}
-            >
-              {t("document.actions.regeneratePdf")}
-            </Button>
-          )}
-          {canUpdate && READY_STATUSES.has(document.status) && (
+      <PageHeader
+        title={document.documentNumber}
+        subtitle={documentTypeLabel}
+        contextInfo={<DocumentStatusBadge status={document.status} />}
+        primaryAction={
+          nextAction === "ready" ? (
             <Button
               size="sm"
               onClick={() => void runAction(() => markReady.mutateAsync({ id: document!.id }))}
             >
               {t("document.actions.markReady")}
             </Button>
-          )}
-          {canSend && SENDABLE_STATUSES.has(document.status) && (
+          ) : nextAction === "sent" ? (
             <Button
               size="sm"
               onClick={() => void runAction(() => markSent.mutateAsync({ id: document!.id }))}
             >
               {t("document.actions.markSent")}
             </Button>
-          )}
-          {canSend && VIEWABLE_STATUSES.has(document.status) && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void runAction(() => markViewed.mutateAsync({ id: document!.id }))}
-            >
-              {t("document.actions.markViewed")}
-            </Button>
-          )}
-          {canSign && SIGNABLE_STATUSES.has(document.status) && (
+          ) : nextAction === "sign" ? (
             <Button
               size="sm"
               onClick={() =>
@@ -270,58 +246,133 @@ export default function DocumentDetailPage() {
             >
               {t("document.actions.markSigned")}
             </Button>
-          )}
-          {canSign &&
-            document.status !== "PARTIALLY_SIGNED" &&
-            SIGNABLE_STATUSES.has(document.status) && (
+          ) : undefined
+        }
+        secondaryActions={
+          <div className="flex flex-wrap gap-2">
+            <PinButton
+              entityType="document"
+              entityId={document.id}
+              label={document.documentNumber}
+              href={`/app/documents/${document.id}`}
+            />
+            {canDownload && (
+              <Button asChild variant="outline" size="sm">
+                <a href={documentPdfUrl(tenantId, document.id)} target="_blank" rel="noreferrer">
+                  {t("document.actions.viewPdf")}
+                </a>
+              </Button>
+            )}
+            {canRender && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void runAction(() => regeneratePdf.mutateAsync(document!.id))}
+              >
+                {t("document.actions.regeneratePdf")}
+              </Button>
+            )}
+            {canSend && VIEWABLE_STATUSES.has(document.status) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void runAction(() => markViewed.mutateAsync({ id: document!.id }))}
+              >
+                {t("document.actions.markViewed")}
+              </Button>
+            )}
+            {canSign &&
+              document.status !== "PARTIALLY_SIGNED" &&
+              SIGNABLE_STATUSES.has(document.status) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    void runAction(() =>
+                      signDocument.mutateAsync({ id: document!.id, full: false }),
+                    )
+                  }
+                >
+                  {t("document.actions.markPartiallySigned")}
+                </Button>
+              )}
+            {canSign && REJECTABLE_STATUSES.has(document.status) && (
+              <Button variant="outline" size="sm" onClick={() => void handleReject()}>
+                {t("document.actions.reject")}
+              </Button>
+            )}
+            {canCreate && (
+              <Button variant="outline" size="sm" onClick={() => void handleDuplicate()}>
+                {t("document.actions.duplicate")}
+              </Button>
+            )}
+            {canVoid && VOIDABLE_STATUSES.has(document.status) && (
+              <Button variant="outline" size="sm" onClick={() => void handleVoid()}>
+                {t("document.actions.void")}
+              </Button>
+            )}
+            {canArchive && ARCHIVABLE_STATUSES.has(document.status) && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  void runAction(() => signDocument.mutateAsync({ id: document!.id, full: false }))
+                  void runAction(() => archiveDocument.mutateAsync({ id: document!.id }))
                 }
               >
-                {t("document.actions.markPartiallySigned")}
+                {t("document.actions.archive")}
               </Button>
             )}
-          {canSign && REJECTABLE_STATUSES.has(document.status) && (
-            <Button variant="outline" size="sm" onClick={() => void handleReject()}>
-              {t("document.actions.reject")}
-            </Button>
-          )}
-          {canCreate && (
-            <Button variant="outline" size="sm" onClick={() => void handleDuplicate()}>
-              {t("document.actions.duplicate")}
-            </Button>
-          )}
-          {canVoid && VOIDABLE_STATUSES.has(document.status) && (
-            <Button variant="outline" size="sm" onClick={() => void handleVoid()}>
-              {t("document.actions.void")}
-            </Button>
-          )}
-          {canArchive && ARCHIVABLE_STATUSES.has(document.status) && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                void runAction(() => archiveDocument.mutateAsync({ id: document!.id }))
-              }
-            >
-              {t("document.actions.archive")}
-            </Button>
-          )}
-          {canDelete && DELETABLE_STATUSES.has(document.status) && (
-            <Button size="sm" variant="outline" onClick={() => void handleDelete()}>
-              {t("customer.delete")}
-            </Button>
-          )}
-        </div>
-      </div>
+            {canDelete && DELETABLE_STATUSES.has(document.status) && (
+              <Button size="sm" variant="outline" onClick={() => void handleDelete()}>
+                {t("customer.delete")}
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       {actionError && <p className="text-destructive text-sm">{actionError}</p>}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
+          {(document.customer ?? document.rental ?? document.quote ?? document.asset) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("document.sections.relatedEntities")}</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-3 text-sm">
+                {document.customer && (
+                  <RelatedEntityRow
+                    label={t("document.fields.customer")}
+                    href={`/app/customers/${document.customer.id}`}
+                    value={`${document.customer.firstName} ${document.customer.lastName}`}
+                  />
+                )}
+                {document.rental && (
+                  <RelatedEntityRow
+                    label={t("document.fields.rental")}
+                    href={`/app/rentals/${document.rental.id}`}
+                    value={document.rental.rentalNumber}
+                  />
+                )}
+                {document.quote && (
+                  <RelatedEntityRow
+                    label={t("document.fields.quote")}
+                    href={`/app/quotes/${document.quote.id}`}
+                    value={document.quote.quoteNumber}
+                  />
+                )}
+                {document.asset && (
+                  <RelatedEntityRow
+                    label={t("document.fields.asset")}
+                    href={`/app/assets/${document.asset.id}`}
+                    value={document.asset.name}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t("document.sections.preview")}</CardTitle>
@@ -635,6 +686,17 @@ export default function DocumentDetailPage() {
 
       <Link href="/app/documents" className="text-muted-foreground text-sm underline">
         {t("document.backToList")}
+      </Link>
+    </div>
+  );
+}
+
+function RelatedEntityRow({ label, href, value }: { label: string; href: string; value: string }) {
+  return (
+    <div className="flex flex-col">
+      <span className="text-muted-foreground text-xs">{label}</span>
+      <Link href={href} className="text-primary hover:underline">
+        {value}
       </Link>
     </div>
   );

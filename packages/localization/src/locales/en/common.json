@@ -221,7 +221,11 @@
       "activeRentals": "Active rentals",
       "totalRevenue": "Total revenue",
       "damageReports": "Damage reports"
-    }
+    },
+    "sections": {
+      "documents": "Documents"
+    },
+    "documentsEmpty": "No documents linked to this customer yet"
   },
   "asset": {
     "title": "Assets",
@@ -242,6 +246,7 @@
     "noTimelineEvents": "No activity recorded yet",
     "noImages": "No images uploaded yet",
     "noDocuments": "No documents uploaded yet",
+    "platformDocumentsEmpty": "No documents linked to this asset yet",
     "sort": {
       "newest": "Newest first",
       "oldest": "Oldest first",
@@ -287,7 +292,8 @@
       "images": "Images",
       "documents": "Documents",
       "timeline": "Timeline",
-      "filesManagement": "Images & documents"
+      "filesManagement": "Images & documents",
+      "platformDocuments": "Documents"
     },
     "actions": {
       "changeStatus": "Change status",
@@ -438,6 +444,20 @@
     },
     "documents": {
       "empty": "No documents linked to this rental yet"
+    },
+    "documentChecklist": {
+      "title": "Document checklist",
+      "items": {
+        "commercialOffer": "Commercial offer",
+        "contract": "Rental contract",
+        "handoverProtocol": "Handover protocol",
+        "returnProtocol": "Return protocol"
+      },
+      "states": {
+        "present": "Linked",
+        "missing": "Missing",
+        "notRequired": "Not required yet"
+      }
     },
     "timeIntelligence": {
       "starts_today": "Starts today",
@@ -729,7 +749,17 @@
       "customTypeName": "Custom type name",
       "none": "None",
       "version": "Version",
-      "createdAt": "Created"
+      "createdAt": "Created",
+      "customer": "Customer",
+      "rental": "Rental",
+      "quote": "Quote",
+      "asset": "Asset"
+    },
+    "summary": {
+      "total": "Total documents",
+      "draft": "Draft",
+      "sent": "Sent",
+      "signed": "Signed"
     },
     "actions": {
       "viewPdf": "View PDF",
@@ -749,7 +779,8 @@
     "sections": {
       "preview": "Preview",
       "email": "Email delivery",
-      "signature": "E-signature"
+      "signature": "E-signature",
+      "relatedEntities": "Related records"
     },
     "email": {
       "recipientType": "Recipient",

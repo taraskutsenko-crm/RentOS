@@ -221,7 +221,11 @@
       "activeRentals": "Активні оренди",
       "totalRevenue": "Загальний дохід",
       "damageReports": "Звіти про пошкодження"
-    }
+    },
+    "sections": {
+      "documents": "Документи"
+    },
+    "documentsEmpty": "До цього клієнта ще не прив'язано жодного документа"
   },
   "asset": {
     "title": "Активи",
@@ -242,6 +246,7 @@
     "noTimelineEvents": "Подій поки що немає",
     "noImages": "Зображення ще не завантажено",
     "noDocuments": "Документи ще не завантажено",
+    "platformDocumentsEmpty": "До цього активу ще не прив'язано жодного документа",
     "sort": {
       "newest": "Спочатку нові",
       "oldest": "Спочатку старі",
@@ -287,7 +292,8 @@
       "images": "Зображення",
       "documents": "Документи",
       "timeline": "Історія",
-      "filesManagement": "Зображення та документи"
+      "filesManagement": "Зображення та документи",
+      "platformDocuments": "Документи"
     },
     "actions": {
       "changeStatus": "Змінити статус",
@@ -438,6 +444,20 @@
     },
     "documents": {
       "empty": "До цієї оренди ще не прив'язано жодного документа"
+    },
+    "documentChecklist": {
+      "title": "Перелік документів",
+      "items": {
+        "commercialOffer": "Комерційна пропозиція",
+        "contract": "Договір оренди",
+        "handoverProtocol": "Акт приймання-передачі",
+        "returnProtocol": "Акт повернення"
+      },
+      "states": {
+        "present": "Є",
+        "missing": "Відсутній",
+        "notRequired": "Поки не потрібен"
+      }
     },
     "timeIntelligence": {
       "starts_today": "Починається сьогодні",
@@ -729,7 +749,17 @@
       "customTypeName": "Назва довільного типу",
       "none": "Немає",
       "version": "Версія",
-      "createdAt": "Створено"
+      "createdAt": "Створено",
+      "customer": "Клієнт",
+      "rental": "Оренда",
+      "quote": "Кошторис",
+      "asset": "Актив"
+    },
+    "summary": {
+      "total": "Усього документів",
+      "draft": "Чернетки",
+      "sent": "Надіслано",
+      "signed": "Підписано"
     },
     "actions": {
       "viewPdf": "Переглянути PDF",
@@ -749,7 +779,8 @@
     "sections": {
       "preview": "Попередній перегляд",
       "email": "Надсилання електронною поштою",
-      "signature": "Електронний підпис"
+      "signature": "Електронний підпис",
+      "relatedEntities": "Пов'язані записи"
     },
     "email": {
       "recipientType": "Отримувач",

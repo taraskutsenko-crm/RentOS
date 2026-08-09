@@ -324,6 +324,36 @@ export default function AssetDetailPage() {
 
           <Card>
             <CardHeader>
+              <CardTitle>{t("asset.sections.platformDocuments")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {asset.platformDocuments.length === 0 ? (
+                <p className="text-muted-foreground text-sm">{t("asset.platformDocumentsEmpty")}</p>
+              ) : (
+                <ul className="flex flex-col gap-2 text-sm">
+                  {asset.platformDocuments.map((document) => (
+                    <li key={document.id} className="flex items-center justify-between">
+                      <span>
+                        {document.documentType === "CUSTOM" && document.customTypeName
+                          ? document.customTypeName
+                          : t(`document.types.${document.documentType}`)}
+                        {document.title ? ` — ${document.title}` : ""}
+                      </span>
+                      <Link
+                        href={`/app/documents/${document.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {document.documentNumber}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>{t("timeline.title")}</CardTitle>
             </CardHeader>
             <CardContent>

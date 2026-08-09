@@ -1,4 +1,15 @@
+import type { DocumentStatus, DocumentType } from "./document";
 import type { TimelineEvent } from "./timeline";
+
+export interface AssetPlatformDocument {
+  id: string;
+  documentType: DocumentType;
+  customTypeName: string | null;
+  documentNumber: string;
+  status: DocumentStatus;
+  title: string | null;
+  createdAt: string;
+}
 
 export type AssetFieldType =
   | "TEXT"
@@ -163,6 +174,7 @@ export interface AssetListItem extends Asset {
 export interface AssetDetail extends Asset {
   images: AssetImage[];
   documents: AssetDocument[];
+  platformDocuments: AssetPlatformDocument[];
 }
 
 export interface PaginatedAssets {

@@ -357,8 +357,13 @@ export function DataTable<T>({
                     <div className="flex flex-col gap-1 rounded-md border p-3">
                       <span className="font-medium">{primary?.cell(row)}</span>
                       {secondary.length > 0 && (
-                        <span className="text-muted-foreground text-xs">
-                          {secondary.map((column) => column.cell(row)).join(" · ")}
+                        <span className="text-muted-foreground flex flex-wrap items-center gap-x-1 text-xs">
+                          {secondary.map((column, index) => (
+                            <span key={column.id} className="flex items-center gap-x-1">
+                              {index > 0 && <span aria-hidden="true">·</span>}
+                              {column.cell(row)}
+                            </span>
+                          ))}
                         </span>
                       )}
                     </div>

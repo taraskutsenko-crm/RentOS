@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/api-client";
 import type {
   Customer,
+  CustomerDetail,
   CustomerStatus,
   CustomerSummary,
   CustomerTimelineEvent,
@@ -51,7 +52,7 @@ export function useCustomers(tenantId: string | null, params: CustomerListParams
 export function useCustomer(tenantId: string | null, id: string | null) {
   return useQuery({
     queryKey: ["customers", tenantId, "detail", id],
-    queryFn: () => apiClient.get<Customer>(`/tenants/${tenantId}/customers/${id}`),
+    queryFn: () => apiClient.get<CustomerDetail>(`/tenants/${tenantId}/customers/${id}`),
     enabled: !!tenantId && !!id,
   });
 }

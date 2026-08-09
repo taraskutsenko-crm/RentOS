@@ -221,7 +221,11 @@
       "activeRentals": "Активные аренды",
       "totalRevenue": "Общий доход",
       "damageReports": "Отчёты о повреждениях"
-    }
+    },
+    "sections": {
+      "documents": "Документы"
+    },
+    "documentsEmpty": "К этому клиенту пока не привязано ни одного документа"
   },
   "asset": {
     "title": "Активы",
@@ -242,6 +246,7 @@
     "noTimelineEvents": "Пока нет истории событий",
     "noImages": "Изображения ещё не загружены",
     "noDocuments": "Документы ещё не загружены",
+    "platformDocumentsEmpty": "К этому активу пока не привязано ни одного документа",
     "sort": {
       "newest": "Сначала новые",
       "oldest": "Сначала старые",
@@ -287,7 +292,8 @@
       "images": "Изображения",
       "documents": "Документы",
       "timeline": "История",
-      "filesManagement": "Изображения и документы"
+      "filesManagement": "Изображения и документы",
+      "platformDocuments": "Документы"
     },
     "actions": {
       "changeStatus": "Изменить статус",
@@ -438,6 +444,20 @@
     },
     "documents": {
       "empty": "К этой аренде пока не привязаны документы"
+    },
+    "documentChecklist": {
+      "title": "Контрольный список документов",
+      "items": {
+        "commercialOffer": "Коммерческое предложение",
+        "contract": "Договор аренды",
+        "handoverProtocol": "Акт передачи",
+        "returnProtocol": "Акт возврата"
+      },
+      "states": {
+        "present": "Есть",
+        "missing": "Отсутствует",
+        "notRequired": "Пока не требуется"
+      }
     },
     "timeIntelligence": {
       "starts_today": "Начинается сегодня",
@@ -729,7 +749,17 @@
       "customTypeName": "Название произвольного типа",
       "none": "Нет",
       "version": "Версия",
-      "createdAt": "Создан"
+      "createdAt": "Создан",
+      "customer": "Клиент",
+      "rental": "Аренда",
+      "quote": "Смета",
+      "asset": "Актив"
+    },
+    "summary": {
+      "total": "Всего документов",
+      "draft": "Черновики",
+      "sent": "Отправлено",
+      "signed": "Подписано"
     },
     "actions": {
       "viewPdf": "Просмотреть PDF",
@@ -749,7 +779,8 @@
     "sections": {
       "preview": "Предпросмотр",
       "email": "Отправка по email",
-      "signature": "Электронная подпись"
+      "signature": "Электронная подпись",
+      "relatedEntities": "Связанные записи"
     },
     "email": {
       "recipientType": "Получатель",

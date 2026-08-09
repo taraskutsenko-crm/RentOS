@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import type { Customer, Prisma, RentalStatus } from "@prisma/client";
+import type { Customer, Document, Prisma, RentalStatus } from "@prisma/client";
 
 import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../prisma/prisma.service";
@@ -14,6 +14,25 @@ export interface PaginatedResult<T> {
   total: number;
   page: number;
   pageSize: number;
+}
+
+export const CUSTOMER_DOCUMENT_SELECT = {
+  id: true,
+  documentType: true,
+  customTypeName: true,
+  documentNumber: true,
+  status: true,
+  title: true,
+  createdAt: true,
+} satisfies Prisma.DocumentSelect;
+
+export type CustomerDocumentView = Pick<
+  Document,
+  "id" | "documentType" | "customTypeName" | "documentNumber" | "status" | "title" | "createdAt"
+>;
+
+export interface CustomerDetailView extends Customer {
+  documents: CustomerDocumentView[];
 }
 
 const AUDIT_ACTION_TO_TIMELINE_TYPE: Record<string, CustomerTimelineEventType> = {
@@ -82,14 +101,19 @@ export class CustomersService {
     return { items, total, page, pageSize };
   }
 
-  async findOne(tenantId: string, id: string): Promise<Customer> {
+  async findOne(tenantId: string, id: string): Promise<CustomerDetailView> {
     const customer = await this.prisma.customer.findFirst({
       where: { id, tenantId, deletedAt: null },
     });
     if (!customer) {
       throw new NotFoundException("Customer not found");
     }
-    return customer;
+    const documents = await this.prisma.document.findMany({
+      where: { tenantId, customerId: id, deletedAt: null },
+      select: CUSTOMER_DOCUMENT_SELECT,
+      orderBy: { createdAt: "desc" },
+    });
+    return { ...customer, documents };
   }
 
   async update(

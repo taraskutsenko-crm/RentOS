@@ -221,7 +221,11 @@
       "activeRentals": "Aktive Vermietungen",
       "totalRevenue": "Gesamtumsatz",
       "damageReports": "Schadensmeldungen"
-    }
+    },
+    "sections": {
+      "documents": "Dokumente"
+    },
+    "documentsEmpty": "Diesem Kunden sind noch keine Dokumente zugeordnet"
   },
   "asset": {
     "title": "Anlagen",
@@ -242,6 +246,7 @@
     "noTimelineEvents": "Noch keine Aktivitäten erfasst",
     "noImages": "Noch keine Bilder hochgeladen",
     "noDocuments": "Noch keine Dokumente hochgeladen",
+    "platformDocumentsEmpty": "Diesem Anlagegut sind noch keine Dokumente zugeordnet",
     "sort": {
       "newest": "Neueste zuerst",
       "oldest": "Älteste zuerst",
@@ -287,7 +292,8 @@
       "images": "Bilder",
       "documents": "Dokumente",
       "timeline": "Verlauf",
-      "filesManagement": "Bilder & Dokumente"
+      "filesManagement": "Bilder & Dokumente",
+      "platformDocuments": "Dokumente"
     },
     "actions": {
       "changeStatus": "Status ändern",
@@ -438,6 +444,20 @@
     },
     "documents": {
       "empty": "Dieser Vermietung sind noch keine Dokumente zugeordnet"
+    },
+    "documentChecklist": {
+      "title": "Dokumenten-Checkliste",
+      "items": {
+        "commercialOffer": "Angebot",
+        "contract": "Mietvertrag",
+        "handoverProtocol": "Übergabeprotokoll",
+        "returnProtocol": "Rückgabeprotokoll"
+      },
+      "states": {
+        "present": "Verknüpft",
+        "missing": "Fehlt",
+        "notRequired": "Noch nicht erforderlich"
+      }
     },
     "timeIntelligence": {
       "starts_today": "Beginnt heute",
@@ -729,7 +749,17 @@
       "customTypeName": "Name des benutzerdefinierten Typs",
       "none": "Keine",
       "version": "Version",
-      "createdAt": "Erstellt"
+      "createdAt": "Erstellt",
+      "customer": "Kunde",
+      "rental": "Vermietung",
+      "quote": "Angebot",
+      "asset": "Anlagegut"
+    },
+    "summary": {
+      "total": "Dokumente gesamt",
+      "draft": "Entwurf",
+      "sent": "Gesendet",
+      "signed": "Unterschrieben"
     },
     "actions": {
       "viewPdf": "PDF ansehen",
@@ -749,7 +779,8 @@
     "sections": {
       "preview": "Vorschau",
       "email": "E-Mail-Versand",
-      "signature": "E-Signatur"
+      "signature": "E-Signatur",
+      "relatedEntities": "Verknüpfte Datensätze"
     },
     "email": {
       "recipientType": "Empfänger",

@@ -373,6 +373,56 @@ this was built on.
   Quotes were already fully wired into the Chapter 5 keyboard registry
   and search-provider architecture; nothing needed adding.
 
+## Documents Workspace — added Chapter 9
+
+Applies the established `PageHeader`/`<EntityType>StatusBadge`/
+related-entities pattern (Chapters 7/8) to the one standalone entity
+page that never got it — the Document detail page (the Documents
+_list_ page already had `PageHeader`+`DataTable`). Also closes the
+"real FK relation, never surfaced" gap for two more entities
+(`Asset.platformDocuments`, `Customer.documents`), and adds one pure,
+real-data-only derived-intelligence util for a Rental's document
+checklist. See `UI_REDESIGN_PLAN.md` Chapter 9 for the full design
+rationale and `UI_RESEARCH.md`/`UI_AUDIT.md`'s Chapter 9 addenda for
+the research this was built on.
+
+| File                                             | Purpose                                                                                                                                                                                                                       |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend: `assets/assets.service.ts`              | `AssetDetailView` gains `platformDocuments` (non-deleted, newest first) — a real, existing `Asset.platformDocuments` relation `findOne()` never included before; no new endpoint, no new permission.                          |
+| Backend: `customers/customers.service.ts`        | `CustomerDetailView` (new) gains `documents` (non-deleted, newest first) — a real, existing `Customer.documents` relation `findOne()` never included before; no new endpoint, no new permission.                              |
+| `components/documents/document-status-badge.tsx` | `<DocumentStatusBadge>` — the one colored status badge, reused by both the Workspace and the documents list page (`PRODUCT_BIBLE.md` §10); tone mapping reuses `Alert`'s existing semantic tokens, no new color introduced.   |
+| `lib/document-completeness-intelligence.ts`      | `getRentalDocumentChecklist()` — one pure, centralized function deriving a closed set of checklist states (`present`/`missing`/`notRequired`) per document type from status + real linked documents; never a persisted value. |
+| `hooks/use-documents.ts`                         | `useDocumentsSummary()` — real tenant-wide counts (total/draft/sent/signed) composed from the existing list endpoint's `.total`, the same `pageSize:1` technique `use-dashboard-stats.ts` established (Chapter 4).            |
+| `app/app/documents/page.tsx`                     | Status column now renders `<DocumentStatusBadge>`; new Smart Summary strip (Total/Draft/Sent/Signed) above the filter bar.                                                                                                    |
+| `app/app/documents/[id]/page.tsx`                | Rebuilt: `PageHeader` (status badge + one computed `primaryAction`), a new Related Entities card (Customer/Rental/Quote/Asset, only rendering relations that exist), unchanged Preview/Share/Email/Signature/Timeline cards.  |
+| `app/app/assets/[id]/page.tsx`                   | New Documents card (`platformDocuments`), mirroring the Rental/Quote card's exact JSX pattern, honest empty state.                                                                                                            |
+| `app/app/customers/[id]/page.tsx`                | New Documents card (`documents`), same pattern, honest empty state.                                                                                                                                                           |
+| `app/app/rentals/[id]/page.tsx`                  | New Document Checklist card (Commercial Offer/Contract/Handover Protocol/Return Protocol), derived purely from real data, omitted for `CANCELLED` rentals; the existing Documents card is unchanged.                          |
+
+### What Chapter 9 does not build (documented gaps, not fabricated)
+
+- **An Invoice document type, or any payment/"amount paid" UI** — no
+  `Invoice`/`Payment`/`Transaction` model exists anywhere in the
+  schema (the same gap documented for Rentals in Chapter 7 and Quotes
+  in Chapter 8).
+- **Real e-signature integration** — `LocalMockSignatureProvider`
+  remains the only implementation; "signing" stays a staff/customer-
+  authenticated status flip, unchanged by this chapter.
+- **Real SMTP/SES/SendGrid email delivery** — `LoggingEmailProvider`
+  remains the bound implementation; a real provider is a future
+  `useClass` swap behind the existing `EmailProvider` interface.
+- **A drag-and-drop template designer** — the existing raw HTML/CSS
+  template editor already satisfies "templates exist and are
+  editable"; a richer editor was not requested.
+- **A tenant-wide "documents awaiting signature" KPI or a background
+  reminder job** — no cross-document aggregation beyond the per-status
+  counts `useDocumentsSummary()` already composes exists; a scheduled
+  reminder would require a background-job system, out of scope per
+  `ARCHITECTURE_LOCK.md` §3.
+- **A new keyboard shortcut or a separate Documents search provider**
+  — Documents were already fully wired into the Chapter 5 keyboard
+  registry and search-provider architecture; nothing needed adding.
+
 ## Icons
 
 `lucide-react` is an existing `@rentos/ui` dependency, zero current

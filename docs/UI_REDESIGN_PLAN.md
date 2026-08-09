@@ -1901,11 +1901,219 @@ LABOR/CUSTOM`) is reused verbatim, nothing industry-specific is
   satisfies rapid access; no dedicated shortcut provides enough
   additional value to justify one (design decision 12).
 
+## Chapter 9 — Documents & Contracts Workspace
+
+**A note on chapter numbering:** the "Later chapters" list below (from
+Chapter 8's close) had named "Forms & Wizards" as Chapter 9. The
+user's own instruction opening this chapter explicitly frames it as
+"Chapter 9: Documents & Contracts Workspace" — the same
+user-directed reprioritization Chapters 4 through 8 already made.
+Documents & Contracts Workspace is Chapter 9; Forms & Wizards moves to
+Chapter 10, Settings & Account to Chapter 11 (see the renumbered list
+at the end of this section).
+
+**Scope:** the generic Document platform (built before this UI-redesign
+sequence began) already implements almost everything this chapter's
+brief describes as aspirational — `DocumentType` already covers
+Rental Contract, Handover Protocol, and Return Protocol with a full,
+working lifecycle, real PDF generation (Puppeteer), real templates,
+real sharing, and real per-attempt email delivery tracking. This
+chapter is, like Chapters 7 and 8, primarily a UI-surfacing chapter:
+apply the established `PageHeader`/`<EntityType>StatusBadge`/related-
+entities pattern to the one standalone entity page that never got it
+(Document detail), close the same "real FK relation, never surfaced"
+gap a third and fourth time (`Asset.platformDocuments`,
+`Customer.documents`), and add one small, pure, real-data-only
+derived-intelligence util (a Rental's document checklist) — never a
+new persisted state. Checked against `PRODUCT_BIBLE.md` §3 (Universal
+Rental Philosophy), §10 (Product Consistency), §12 (Timeline First),
+and this chapter's own explicit anti-fabrication instruction
+throughout.
+
+### Step 1 — Current implementation, read directly from source
+
+A dedicated research pass (`UI_RESEARCH.md` findings #62–71,
+`UI_AUDIT.md` findings #57–61) confirmed: `DocumentType` (`QUOTE`
+reserved/unused | `CONTRACT` | `HANDOVER_PROTOCOL` | `RETURN_PROTOCOL`
+| `DAMAGE_REPORT` | `CONTRACT_AMENDMENT` | `CUSTOM`) and
+`DocumentStatus` (9 values) are both real, already-shipped enums with
+a full `DocumentsService` lifecycle (create/ready/send/viewed/sign/
+reject/void/archive/duplicate/createVersion/history/preview/pdf/
+files). Real Puppeteer-based PDF rendering, a real tenant-scoped
+template registry with a resolution precedence chain, real public
+sharing, and real per-attempt email delivery tracking already exist
+and were already exercised by the pre-existing Document detail page's
+Preview/Share/Email/Signature cards. `DocumentsService.findOne()`
+already returns nested `customer`/`rental`/`quote`/`asset` objects —
+no backend change was needed to build a Related Entities card.
+`Rental.documents`/`Quote.platformDocuments` were already surfaced in
+Chapters 7/8; `Asset.platformDocuments`/`Customer.documents` were not.
+No `Invoice`/`Payment`/`Transaction` model exists anywhere in the
+schema (re-confirmed). No tenant-wide document-count endpoint exists;
+`use-dashboard-stats.ts`'s own `pageSize:1`-composition technique
+(Chapter 4, design decision 11) is the project's already-established
+answer to exactly this shape of gap.
+
+### Step 2 — Compared against the governing docs
+
+- `PRODUCT_BIBLE.md` §10 (Product Consistency) requires a record's
+  status to render identically everywhere it appears — the Document
+  detail page's plain-text status directly violated this, the same
+  gap `RentalStatusBadge`/`QuoteStatusBadge` already closed twice.
+- `PRODUCT_BIBLE.md` §12 (Timeline First) is already fully satisfied
+  for Documents — `DocumentsService.history()` and
+  `DOCUMENT_TIMELINE_REGISTRY` (19 real event types) already exist and
+  were already wired to the shared `<Timeline>` component; nothing
+  needed adding.
+- `ARCHITECTURE_LOCK.md` §1.4 (No duplicated business logic) is the
+  reason a new `GET /documents/summary` endpoint was rejected in favor
+  of reusing the Dashboard's established `pageSize:1` composition
+  technique for the same kind of tenant-wide count.
+- The chapter's own explicit anti-fabrication instruction (Sections 4,
+  21, 43) directly drove the decision to _document_ rather than build
+  an Invoice document type, real e-signature, and real email
+  transport — none of these have backing capability today.
+
+### Step 3 — Design Rationale
+
+1. **No backend change was needed for the Related Entities card.**
+   `RentOSDocument` already includes `customer`/`rental`/`quote`/
+   `asset` nested objects — the card is pure frontend JSX reading data
+   the API was already sending, mirroring the exact `InfoRow`-style
+   pattern the Rental/Quote Workspaces already established.
+2. **`AssetsService.findOne()` and `CustomersService.findOne()` each
+   gain one small, additive extension** — a parallel `document.findMany`
+   query alongside the existing `assetImage`/`assetDocument` queries
+   (Asset) or the sole existing query (Customer), selecting the same
+   `{id, documentType, customTypeName, documentNumber, status, title,
+createdAt}` shape `RENTAL_DETAIL_INCLUDE`/`QUOTE_DETAIL_INCLUDE`
+   already established. This is the third and fourth application of
+   the exact precedent D-051/D-053 set — judged against the same "does
+   this cross the STOP-and-ask bar" test and found not to, for the
+   same reasons.
+3. **`DocumentStatusBadge` mirrors `RentalStatusBadge`/
+   `QuoteStatusBadge` exactly** (same `TONE_CLASSES`/`STATUS_TONE`/
+   `cn(...)` shape), reusing the already-existing
+   `document.statuses.*` localization keys — no new keys needed for
+   the badge itself. Tone mapping: `DRAFT`/`VOIDED`/`ARCHIVED` =
+   neutral, `READY`/`SENT` = info, `VIEWED` = primary,
+   `PARTIALLY_SIGNED` = warning, `SIGNED` = success, `REJECTED` =
+   destructive — no new color introduced.
+4. **The Documents Workspace Smart Summary uses the Dashboard's own
+   `pageSize:1`-composition technique**, not a new backend endpoint —
+   `useDocumentsSummary()` composes four filtered `useDocuments()`
+   calls (`total`, `draft`, `sent+viewed`, `signed+partially_signed`),
+   the exact "combine two real status counts" idiom
+   `use-dashboard-stats.ts`'s own `pendingQuotes` metric already
+   established. "Recently created" was considered and dropped — no
+   date-range filter exists on the list endpoint, and fabricating one
+   just for a dashboard tile was judged out of proportion to the
+   value.
+5. **The Document detail page's header is rebuilt with `PageHeader` +
+   `DocumentStatusBadge`, with exactly one `primaryAction`** computed
+   from the document's current status (Mark ready → Mark sent → Mark
+   signed, whichever applies first) — mirroring the Quote Workspace's
+   exact "one clear next step, everything else secondary" pattern.
+   Every existing button (Preview/Share/Email/Signature cards, PDF
+   actions, Duplicate/Void/Archive/Delete) is preserved unchanged,
+   only reorganized between `primaryAction` and `secondaryActions`.
+6. **A Related Entities card is added above the existing Preview
+   card**, rendering only the relations that exist (`document.customer`
+   / `.rental` / `.quote` / `.asset`), each a real link to the related
+   entity's own page — omitted entirely when no relation exists at
+   all, never a placeholder row.
+7. **`getRentalDocumentChecklist()` is a pure function, never a new
+   persisted state.** `commercialOffer` is informational only
+   (`present` if a source quote exists, `notRequired` — never
+   `missing` — if not, since a directly-created rental is a legitimate
+   workflow); `contract` is always expected (`present`/`missing`,
+   ignoring `VOIDED` documents); `handoverProtocol`/`returnProtocol`
+   only become `missing` once the rental has actually reached the
+   relevant lifecycle stage (`ACTIVE`/`RETURNED`/`COMPLETED` for
+   handover, `RETURNED`/`COMPLETED` for return), `notRequired` before
+   that — never a fabricated warning for a stage the rental hasn't
+   reached yet. The card is omitted entirely for `CANCELLED` rentals.
+8. **The Rental Workspace's existing Documents card is left
+   unchanged** — the new checklist is a separate, smaller card
+   immediately above it, not a restructuring of an already-correct,
+   already-tested card.
+9. **No Invoice document type, no real e-signature, no real SMTP
+   provider were built** — each is a genuine, honestly-documented
+   product gap (see "What Chapter 9 does not build" below), consistent
+   with the chapter's own explicit instruction not to fabricate
+   backend capability that doesn't exist.
+
+### What Chapter 9 builds
+
+- Backend: `AssetsService.findOne()`/`CustomersService.findOne()`
+  each gain a small additive `platformDocuments`/`documents`
+  extension (no migration, no new endpoint, no new permission).
+- `apps/web/src/components/documents/document-status-badge.tsx`:
+  `<DocumentStatusBadge>`, the single source of document status color.
+- `apps/web/src/lib/document-completeness-intelligence.ts`:
+  `getRentalDocumentChecklist()`, a pure derived-intelligence util.
+- `apps/web/src/hooks/use-documents.ts`: `useDocumentsSummary()`,
+  composing real counts from the existing list endpoint.
+- Documents list page: `<DocumentStatusBadge>` in the status column,
+  a Smart Summary strip (Total/Draft/Sent/Signed).
+- Document detail page: rebuilt with `PageHeader`,
+  `<DocumentStatusBadge>`, a Related Entities card, one computed
+  `primaryAction`; every existing capability (Preview/Share/Email/
+  Signature, PDF actions, lifecycle actions) preserved unchanged.
+- Asset and Customer detail pages: a new Documents card each, mirroring
+  the Rental/Quote card's exact JSX pattern.
+- Rental Workspace: a new Document Checklist card (Commercial
+  Offer/Contract/Handover Protocol/Return Protocol), omitted for
+  `CANCELLED` rentals.
+- Localization: new keys across all 6 locales (`document.summary.*`,
+  `document.sections.relatedEntities`, `document.fields.customer/
+rental/quote/asset`, `asset.sections.platformDocuments`,
+  `asset.platformDocumentsEmpty`, `customer.sections.documents`,
+  `customer.documentsEmpty`, `rental.documentChecklist.*`) — reusing
+  the existing `document.statuses.*`/`document.types.*` keys for the
+  badge and Documents-card rows.
+
+### What Chapter 9 does not build (documented gaps, not fabricated)
+
+- **An Invoice document type, or any payment/"amount paid" UI** — no
+  `Invoice`/`Payment`/`Transaction` model exists anywhere in the
+  schema (the same gap documented for Rentals in Chapter 7 and Quotes
+  in Chapter 8, now re-confirmed a third time for Documents).
+- **Real e-signature integration** — `LocalMockSignatureProvider`
+  remains the only implementation; DocuSign/Adobe Sign/Autenti/eIDAS
+  stay reserved enum values, not built capability. "Signing" remains a
+  staff/customer-authenticated status flip, exactly as it was before
+  this chapter.
+- **Real SMTP/SES/SendGrid email delivery** — `LoggingEmailProvider`
+  remains the bound implementation; a real provider is a future
+  `useClass` swap behind the existing `EmailProvider` interface, not
+  something to build speculatively this chapter.
+- **A drag-and-drop template designer or WYSIWYG editor** — the
+  existing raw HTML/CSS `<textarea>` template editor (pre-existing,
+  untouched) already satisfies "templates exist and are editable";
+  building a richer editor was not requested and is a substantially
+  larger undertaking than this chapter's scope.
+- **Customer Portal document-signing flows beyond what already
+  exists** — the portal's own `customerSign()` flow (TASK-0009,
+  unchanged) already lets a customer sign from inside the portal; no
+  new portal-side work was requested or built this chapter.
+- **A tenant-wide "documents awaiting signature"/"documents expiring
+  soon" KPI or a background reminder job** — no cross-document
+  aggregation endpoint exists beyond the per-status counts
+  `useDocumentsSummary()` already composes; a scheduled reminder would
+  require a background-job system, explicitly out of scope per
+  `ARCHITECTURE_LOCK.md` §3 (queues/background jobs require an ADR
+  before implementation).
+- **A new keyboard shortcut or a separate Documents search provider**
+  — Documents were already fully wired into the Chapter 5 keyboard-
+  shortcut registry, Quick Create, and search-provider architecture;
+  nothing needed adding.
+
 ## Later chapters (named, not detailed — scoped when reached)
 
-- **Chapter 9 — Forms & Wizards:** reconcile `RentalWizard`/
+- **Chapter 10 — Forms & Wizards:** reconcile `RentalWizard`/
   `QuoteWizard` against `UI_PATTERNS.md`'s Wizard/Stepper/Forms specs.
-- **Chapter 10 — Settings & Account:** profile/account pages, the
+- **Chapter 11 — Settings & Account:** profile/account pages, the
   language-switcher's live wiring, notification preferences once a
   backend exists.
 

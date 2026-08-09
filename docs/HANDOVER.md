@@ -19,20 +19,57 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** pending — TASK-0010 Part 2 Chapter 8
-  (Quotes & Commercial Offers Workspace) is complete locally (quality
-  gates, Docker rebuild, and manual browser verification all green);
-  this line is updated by a small follow-up commit once this chapter's
+- **Latest verified commit:** pending — TASK-0010 Part 2 Chapter 9
+  (Documents & Contracts Workspace) is complete locally (quality gates,
+  Docker rebuild, and manual browser verification all green); this
+  line is updated by a small follow-up commit once this chapter's
   commits are pushed and CI is confirmed green, mirroring the
-  Chapter 7 pattern. Sits on top of `8960a17` (docs: verified commit
-  hash for Chapter 7), `12c0567` (feat: Rental Workspace & Rental
-  Lifecycle), `952bddf` (PRODUCT_BIBLE.md expanded into the platform
-  constitution), `00a410a` (Chapter 5 — Productivity Layer), `e177d14`
-  (Chapter 4 — dashboard experience), `1a251fe` (Chapter 3 — universal
-  data views), `1ba4fc4` (Chapter 2 — premium authentication
-  experience), and `ec06729`/`5157e2c` (Chapter 1 — application shell
-  redesign).
-- **What shipped (Chapter 8):** the Quote detail page rebuilt from a
+  Chapter 7/8 pattern. Sits on top of the Chapter 8 commits (Quote
+  Workspace), `8960a17` (docs: verified commit hash for Chapter 7),
+  `12c0567` (feat: Rental Workspace & Rental Lifecycle), `952bddf`
+  (PRODUCT_BIBLE.md expanded into the platform constitution),
+  `00a410a` (Chapter 5 — Productivity Layer), `e177d14` (Chapter 4 —
+  dashboard experience), `1a251fe` (Chapter 3 — universal data views),
+  `1ba4fc4` (Chapter 2 — premium authentication experience), and
+  `ec06729`/`5157e2c` (Chapter 1 — application shell redesign).
+- **What shipped (Chapter 9):** a Documents & Contracts Workspace
+  built entirely on existing platform-document infrastructure — no
+  second document system, no Invoice type, no real e-signature/SMTP.
+  Two additive backend extensions (D-054): `AssetsService.findOne()`
+  and `CustomersService.findOne()` now include `platformDocuments`/
+  `documents`, real, existing `Document.assetId`/`Document.customerId`
+  relations never surfaced before — no new endpoint, no migration. A
+  new `<DocumentStatusBadge>` mirrors `RentalStatusBadge`/
+  `QuoteStatusBadge` exactly, giving every document status a real
+  color everywhere it appears. A new, pure
+  `getRentalDocumentChecklist()` derives a 4-item checklist (commercial
+  offer/rental contract/handover protocol/return protocol) from a
+  Rental's real `sourceQuote`/`documents`/`status` fields — never a new
+  persisted state, and `commercialOffer` deliberately never reads
+  "missing" (a direct-created rental with no source quote is a
+  legitimate workflow, not a defect). The Documents list gained a
+  Smart Summary (Total/Draft/Sent/Signed) via `useDocumentsSummary()`,
+  composed from the existing list endpoint's `.total` using the same
+  `pageSize:1` technique `use-dashboard-stats.ts` established in
+  Chapter 4, rather than a new aggregation endpoint. The Document
+  detail page gained a Related Records card (Customer/Rental/Quote/
+  Asset, each a real link, only rendered when the relation exists).
+  Asset and Customer detail pages each gained a Documents card for the
+  first time. See `UI_REDESIGN_PLAN.md` Chapter 9 for the full design
+  rationale, including every documented gap (no Invoice document type
+  — zero `Invoice`/`Payment`/`Transaction` model in the schema; no real
+  e-signature — `LocalMockSignatureProvider` remains the only
+  implementation; no real SMTP — `LoggingEmailProvider` remains bound;
+  no template designer/drag-and-drop editor). While verifying Chapter
+  9's own mobile (375px) responsive requirement, a pre-existing bug was
+  found and fixed in the shared `<DataTable>` mobile-card renderer
+  (D-055): it silently rendered `[object Object]` for any
+  `mobileRole:"secondary"` column whose `cell` returned a React element
+  (a status badge) instead of a string, via
+  `.map(...).join(" · ")`-ing React nodes. This also silently affected
+  the pre-existing Rentals and Quotes mobile cards — fixed once for all
+  three, full frontend suite re-verified green (365/365).
+- **Previous chapter — what shipped (Chapter 8):** the Quote detail page rebuilt from a
   plain CRUD form into an operational Quote Workspace, mirroring
   Chapter 7's Rental Workspace shape wherever the underlying domain
   concept is structurally the same. One additive backend change —
@@ -90,79 +127,69 @@ prior conversations.
   payment/invoice UI, no new "Send" button, no new keyboard shortcut,
   no calendar view, no property-management fork — nothing in the
   schema or this chapter's brief supports any of them).
-- **Previous chapter — what shipped (Chapter 6):** a shared, registry-driven `<Timeline>` component
-  (`components/timeline/timeline.tsx`) replacing four independently
-  hand-rolled `<ol>` blocks (Asset/Rental/Quote/Document) — client-side
-  search shown past 5 events (also serves as an implicit kind filter),
-  day-grouping ("Today"/"Yesterday"/date), arrow-key navigation between
-  items, one-click navigation to a related entity via `getHref`.
-  Customers gets a Timeline for the first time — it never had one,
-  despite already writing the audit trail it needed
-  (`CustomersService.timeline()`, sourced entirely from real
-  `AuditLog` rows, no synthetic events). Customer/Rental/Asset detail
-  pages each gained an Entity Summary strip reusing Chapter 4's
-  `DashboardGrid`/`DashboardMetric` as-is; Customer detail page also
-  got a real `PageHeader` for the first time (it was previously just a
-  bare edit form). `AssetsService.summary()` computes revenue
-  read-time via the existing `computeItemLineTotalMinor` pricing
-  function — never a separately stored/recomputed total. A new
-  `packages/shared/src/timeline.ts` `TimelineEvent<TType>` generic
-  backend envelope replaces 5 independently-declared-but-identical
-  interfaces; the frontend keeps its own separately-declared mirror
-  generic (`types/timeline.ts`), preserving the established
-  never-cross-import convention between the two layers. A new
-  `/app/settings/shortcuts` page gives every registered keyboard
-  shortcut a permanent, discoverable home (reads the same
-  `useAppShortcuts()` registry as the Chapter 5 `Shift+?` modal, so the
-  two can never drift apart), plus a "N" keyboard badge on the Quick
-  Create button and a dismissible hint on the Timeline's search
-  affordance. See `UI_REDESIGN_PLAN.md` Chapter 6 for the full design
-  rationale, including the documented gaps (no overdue-invoice/
-  payment-reliability/maintenance-cost/utilization data source; no
-  inline PDF/image/email preview; Quote/Document Summary deferred).
-- **Quality gates (Chapter 8):** format/lint/typecheck/build green
-  across all 6 packages; 477 backend + 328 frontend tests passing (805
-  total), including 1 new backend test (`platformDocuments` inclusion
-  reflecting real `Document.quoteId` links, and exclusion of a
-  soft-deleted one) and 27 new frontend tests
-  (`quote-validity-intelligence.ts` covering every derived label,
-  `<QuoteStatusBadge>`'s per-status tone, and 6 new assertions in the
-  rebuilt Workspace's Customer/Documents/Summary/asset-link sections).
-  i18n key-parity, permission-registry sync, and doc-link checks all
+- **Quality gates (Chapter 9):** format/lint/typecheck/build green
+  across all 6 packages; 479 backend + 365 frontend tests passing (844
+  total), including 4 new backend tests (`platformDocuments`/
+  `documents` inclusion reflecting real `Document.assetId`/
+  `Document.customerId` links, and exclusion of soft-deleted ones) and
+  37 new frontend tests (`<DocumentStatusBadge>` per-status tone,
+  `document-completeness-intelligence.ts` covering every checklist
+  state across all relevant `RentalStatus` values, the Documents
+  Workspace Smart Summary, the Document detail page's Related Records
+  card, and the Asset/Customer Documents cards). i18n key-parity (6
+  locales, identical structure), permission-registry sync (49
+  permissions, 6 roles), and doc-link checks (266 links, 31 files) all
   passed.
-- **Docker/browser verification (Chapter 8):** the `web` and `api`
+- **Docker/browser verification (Chapter 9):** the `web` and `api`
   images were rebuilt and redeployed into the running Docker Compose
   stack. Verified with a real tenant/customer/asset-category/asset/
-  quote created live through the UI, then sent, accepted, and
-  converted to a Rental: the Workspace's header shows the colored
-  status badge and a real validity chip ("Expires in 6 days" →
-  "Accepted" → "Converted" as status changed); the Smart Summary shows
-  the real quote value/deposit/items-count/validity status (no
-  fabricated numbers, e.g. `786,50 $`/`100,00 $`/`1`); the Customer
-  card links to the real customer; the items table shows real
-  discount/tax columns and an asset link; the Documents card
-  transitioned from the honest empty state
-  ("No documents linked to this quote yet") to showing the real
-  converted-rental link (`RNT-000001`) once conversion completed; the
-  resulting Rental's own Documents card correctly showed the reverse
-  `sourceQuote` link back to `Q-2026-000001`; a genuine availability
-  warning appeared on the now-Converted quote ("Generator A: Not
-  available for these dates") since the new Rental now reserves that
-  asset for the same dates — confirming the warning reads real
-  availability state, not a fabricated message; the quotes list page
-  renders the same `<QuoteStatusBadge>` in its status column. Dark
-  mode and German localization both spot-checked live on the Workspace
-  (dark-mode badge/background/warning-banner contrast correct;
-  "Umgewandelt"/"Kaution gesamt"/"Angebotswert"/"Gültigkeitsstatus"/
-  "Kunde"/"Dokumente"/"Umgewandelte Vermietung" all genuinely
-  translated, no leftover English strings); mobile (375px) verified
-  with no page-level horizontal overflow (the items table scrolls
-  within its own card, per the established Chapter 3 `DataTable`
-  convention); no console errors, no failed network requests.
-- **GitHub Actions (Chapter 8):** not yet checked — this chapter's
+  quote created live through the UI, sent, accepted, and converted to
+  a Rental (re-confirming Quote→Rental conversion still works): the
+  resulting Rental's new Document Checklist card correctly showed
+  Commercial offer=Linked, Rental contract=Missing, Handover/Return
+  protocol=Not required yet for the freshly-`RESERVED` rental. A real
+  `CONTRACT`-type Document was then created and linked to the customer
+  and asset (not the rental), exercising its full real lifecycle
+  (Draft→Ready→Sent→Signed) — the Documents Workspace Smart Summary
+  correctly updated its Draft/Sent/Signed counts at each transition;
+  the Asset and Customer detail pages' new Documents cards both showed
+  the real linked document; the Document detail page's new Related
+  Records card showed real, correctly-linked Customer and Asset
+  entries; the Rental's checklist still correctly showed Rental
+  contract=Missing afterward, since the real document was linked to
+  Customer/Asset, not that Rental — confirming the checklist derives
+  strictly from real `rental.documents`, never fabricated completion.
+  The Document detail page rendered a real generated HTML preview
+  (company/parties/asset table, genuine data, not a placeholder). Dark
+  mode and mobile (375px) both verified on the Rental Workspace and
+  Documents Workspace with no horizontal overflow; German and
+  Ukrainian localization spot-checked live on the new elements
+  ("Mietvertrag"/"Unterschrieben"/"Verknüpfte Datensätze" in German;
+  "Договір оренди"/"Підписано"/"Пов'язані записи" in Ukrainian — all
+  genuinely translated, no leftover English); no console errors. A
+  genuine pre-existing bug (D-055) was found live during this mobile
+  pass — the shared `<DataTable>` mobile card silently rendered
+  `[object Object]` for any status-badge column — fixed, and the fix
+  was re-verified live on the Documents, Rentals, and Quotes mobile
+  cards, all now showing their real colored status badge.
+- **GitHub Actions (Chapter 9):** not yet checked — this chapter's
   commits have not been pushed yet as of this update; see the next
-  HANDOVER update (or the final Chapter 8 report) for the verified
-  run result.
+  HANDOVER update (or the final Chapter 9 report) for the verified run
+  result.
+- **Previous chapter's quality gates/verification (Chapter 8):**
+  format/lint/typecheck/build green across all 6 packages; 477 backend
+  - 328 frontend tests passing (805 total). Docker/browser
+    verification: the Workspace's header showed the colored status badge
+    and a real validity chip ("Expires in 6 days" → "Accepted" →
+    "Converted" as status changed); the Smart Summary showed real
+    quote-value/deposit/items-count/validity-status numbers (no fabricated
+    data); the Documents card transitioned from an honest empty state to
+    showing the real converted-rental link once conversion completed; a
+    genuine availability warning appeared on the now-Converted quote
+    since the resulting Rental reserves the same asset for the same
+    dates. Dark mode and German localization both spot-checked correctly;
+    mobile (375px) verified with no horizontal overflow. This chapter's
+    commits were later pushed and confirmed green on CI.
 - **Previous chapter's quality gates/verification (Chapter 7):**
   format/lint/typecheck/build green across all 6 packages; 476 backend
   - 303 frontend tests passing (779 total), including 2 new backend
@@ -180,35 +207,6 @@ prior conversations.
     horizontal overflow at 375px. This chapter's commits (`12c0567`,
     `82bb810`) were later pushed and confirmed green on CI, recorded in
     `8960a17`.
-- **Previous chapter's quality gates/verification (Chapter 6):**
-  format/lint/typecheck/build green across all 6 packages; 483 backend
-  and 288 frontend tests passing (771 total), including 14 new backend
-  tests for the Customer/Asset timeline and summary endpoints and 9
-  new frontend tests for `<Timeline>`, the Customer detail page, and
-  the shortcuts settings page. A real React Compiler purity violation
-  was caught by lint during that chapter — `Date.now()` was being
-  called directly during render for the Rental's "days remaining"
-  metric; fixed with a `useState` lazy initializer, the sanctioned
-  one-time-impure-computation pattern (see D-049). Docker/browser
-  verification: Customer detail page showed a real `PageHeader`, a
-  4-metric Summary strip (honest `0`/`—` states, no fake data), and a
-  Timeline with a real `customer.created` event grouped under "Today";
-  Asset detail page showed the same pattern; `/app/settings/shortcuts`
-  listed every shortcut grouped with platform-correct `kbd` badges,
-  matching the `Shift+?` modal; the Quick Create button showed an "N"
-  badge; light mode and mobile (375px) both verified correctly on the
-  Customer detail page; Russian localization spot-checked in context
-  (Хронология/Сегодня/Клиент создан — genuinely translated).
-  GitHub Actions had an unresolved, platform-level scheduling issue at
-  the time — none of the 6 Chapter 6 commits (`c449029`…`6443da4`) had
-  a run scheduled at all when checked repeatedly, and the two most
-  recent runs that did eventually fire, for the prior Task A/B commits
-  `952bddf` and `5e425f0`, both came back `cancelled`/`failure` at the
-  job level with no logged test output — consistent with a
-  runner-availability or scheduling problem, not a real code failure.
-  This was later confirmed resolved: commit `6443da4` itself
-  subsequently ran and passed CI in full (see D-050's commit and the
-  `8960a17` follow-up).
 
 > Update-in-place marker: the "Latest verified state" section above must
 > be the first thing updated when a task pushes new green CI. Do not let

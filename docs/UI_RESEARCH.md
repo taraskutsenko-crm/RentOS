@@ -731,3 +731,99 @@ Section 11/12 of this chapter's brief (email/portal readiness) are
 answered largely by documenting what's real today, not by building
 new infrastructure — see `UI_AUDIT.md`'s addendum for the full gap
 list.
+
+## Documents & Contracts domain — Chapter 9 addendum
+
+62. **The generic Document platform (built pre-Chapter-1, before this
+    UI-redesign sequence began) already implements almost everything
+    Chapter 9's brief describes as aspirational.** `DocumentType`
+    (`schema.prisma:151`) already covers `CONTRACT`,
+    `HANDOVER_PROTOCOL`, `RETURN_PROTOCOL`, `DAMAGE_REPORT`,
+    `CONTRACT_AMENDMENT`, and `CUSTOM` — Rental Contract, Handover
+    Protocol, and Return Protocol are not new capabilities to build,
+    they are existing enum values with a full, working lifecycle
+    already wired to real PDF generation (Puppeteer,
+    `PdfRendererService`), real templates (`DocumentTemplate`/
+    `DocumentTemplateVersion`, tenant-active → built-in-default
+    precedence), real sharing (`DocumentShareLink`), and real
+    per-attempt email delivery tracking (`DocumentEmailDelivery`).
+    `DocumentType.QUOTE` exists but stays reserved/unused (D-021,
+    unchanged) — the real Quote module remains the canonical
+    implementation of "Commercial Offer."
+63. **No `Invoice`/`Payment`/`Transaction` model exists anywhere in the
+    schema** (re-confirmed from `UI_AUDIT.md` finding #49's full-schema
+    grep) — an "Invoice" document type or a payment-status field would
+    be entirely fabricated. Documented as a future product gap (see
+    `PRODUCT_BIBLE.md` evaluation below), not built.
+64. **`DocumentsService.findOne()`/`RentOSDocument` already returns
+    nested `customer`/`rental`/`quote`/`asset` objects** (not just
+    IDs) — `apps/web/src/types/document.ts:86-89`. A "Related entities"
+    card needed no backend change at all, only frontend JSX reading
+    fields the API was already sending.
+65. **`Rental.documents` and `Quote.platformDocuments` (surfaced in
+    Chapters 7/8) are not the only unsurfaced generic-Document
+    relations — `Asset.platformDocuments Document[]` and
+    `Customer.documents Document[]` are real, populated,
+    schema-comment-documented relations (`schema.prisma:588`,
+    `:460`) that were never included in `AssetsService.findOne()` or
+    `CustomersService.findOne()` before this chapter — the exact same
+    class of gap `UI_AUDIT.md` finding #46 named for Rentals before
+    Chapter 7 closed it, now confirmed for two more entities.
+66. **The Documents list page (`app/app/documents/page.tsx`) already
+    uses `PageHeader` + `FilterBar` + the shared `DataTable`** — unlike
+    Assets/pre-Chapter-8-Quotes, this page was never a `UI_AUDIT.md`
+    finding #32 case. Only the standalone Document _detail_ page
+    (`app/app/documents/[id]/page.tsx`) hand-rolls a bare `<h1>`
+    header with no `PageHeader`, no Entity Summary, and no colored
+    status badge — the same gap class Quotes had before Chapter 8.
+67. **No tenant-wide document-count aggregation endpoint exists**
+    (confirmed via `apps/api/src/documents/documents.controller.ts` —
+    only per-document routes and a paginated, filterable list). The
+    Dashboard's own `useDashboardStats` hook already established the
+    project's answer to exactly this gap (`UI_REDESIGN_PLAN.md`
+    Chapter 4, design decision 11): compose the existing list
+    endpoint's `.total` via `pageSize:1` filtered queries client-side,
+    never build a second aggregation surface for a value the list
+    endpoint can already answer.
+68. **No inline PDF/image preview widget exists anywhere in the
+    product** (re-confirmed, `UI_AUDIT.md` finding #34) — the Document
+    detail page's `<iframe srcDoc>` HTML render remains the only
+    "preview" in the product, distinct from an embedded PDF/image
+    viewer. Chapter 9 does not change this.
+69. **"Signing" a document today is a staff- or customer-authenticated
+    status flip, never a real e-signature.** `LocalMockSignatureProvider`
+    (`document-signature-provider.types.ts`) logs a line and returns
+    `PENDING` immediately; `checkStatus()` always returns `PENDING`
+    regardless of input; no DocuSign/Adobe Sign/Autenti/eIDAS
+    integration exists despite the enum reserving those values. This
+    was already true before Chapter 9 and remains true after it.
+70. **Email transport remains the same honest placeholder documented
+    for Quotes in Chapter 8** — `LoggingEmailProvider` logs and
+    reports success without delivering mail; `DocumentEmailService`'s
+    per-attempt `DocumentEmailDelivery` row tracking is real and
+    already fully built, so Chapter 9 needed no new UI to satisfy an
+    honest Email/Send-Readiness requirement.
+71. **`RentalStatusBadge`/`QuoteStatusBadge` (Chapters 7/8) share one
+    exact structural shape** (`TONE_CLASSES`/`STATUS_TONE`/`cn(...)`
+    span markup, `t("<entity>.statuses.<STATUS>")` label) — a
+    `DocumentStatusBadge` mirroring that shape exactly required zero
+    new localization keys, since `document.statuses.*` already existed
+    for all 9 `DocumentStatus` values (used by the pre-Chapter-9
+    hand-rolled subtitle text).
+
+## How this informs Chapter 9
+
+`UI_REDESIGN_PLAN.md` Chapter 9 turns finding #64 into a "Related
+entities" card on the Document detail page (zero backend change),
+findings #65 into two small additive `findOne()` extensions
+(`AssetsService`, `CustomersService`) mirroring Chapter 7/8's exact
+`RENTAL_DETAIL_INCLUDE`/`QUOTE_DETAIL_INCLUDE` pattern, finding #66
+into a `PageHeader`+`DocumentStatusBadge` rebuild of the Document
+detail page only (the list page already had `PageHeader`), and finding
+#67 into a `useDocumentsSummary()` hook following Chapter 4's own
+established `pageSize:1`-composition precedent instead of a new
+backend aggregation endpoint. Findings #62/63/68/69/70 mean most of
+Chapter 9's brief is satisfied by _documenting_ real, already-built
+capability rather than building anything new — see `UI_AUDIT.md`'s
+addendum for the full gap list, including the honest "no Invoice type"
+and "no real e-signature" gaps.

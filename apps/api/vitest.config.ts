@@ -11,8 +11,12 @@ export default defineConfig({
     // Real Postgres integration tests share one database — running them
     // in parallel would corrupt each other's state.
     fileParallelism: false,
-    hookTimeout: 20_000,
-    testTimeout: 20_000,
+    // 20s was tight enough that a heavy concurrency e2e test (25
+    // simultaneous rental-creation requests) tripped hookTimeout on a
+    // loaded CI runner, leaving the following test's cleanDatabase() call
+    // racing against still-in-flight writes from the timed-out request.
+    hookTimeout: 40_000,
+    testTimeout: 40_000,
   },
   plugins: [
     // NestJS relies on emitDecoratorMetadata for constructor-based DI,

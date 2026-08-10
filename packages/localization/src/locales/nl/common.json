@@ -145,7 +145,10 @@
     "selectTitle": "Selecteer een bedrijf",
     "selectSubtitle": "Kies welke werkruimte je wilt openen",
     "noTenants": "Je hoort nog bij geen enkel bedrijf",
-    "role": "Rol"
+    "role": "Rol",
+    "errors": {
+      "noAccess": "U heeft geen toegang meer tot deze bedrijfswerkruimte. Selecteer een andere."
+    }
   },
   "country": {
     "US": "Verenigde Staten",

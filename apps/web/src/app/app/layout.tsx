@@ -11,6 +11,7 @@ import { ShortcutsHelpDialog } from "../../components/shell/shortcuts-help-dialo
 import { Sidebar } from "../../components/shell/sidebar";
 import { useAppShortcuts } from "../../hooks/use-app-shortcuts";
 import { useMe } from "../../hooks/use-auth";
+import { useEnsureTenantContext } from "../../hooks/use-ensure-tenant-context";
 import { useKeyboardShortcuts } from "../../hooks/use-keyboard-shortcuts";
 import { useTrackRecentItem } from "../../hooks/use-recent-items";
 import { ALL_NAV_ITEMS } from "../../lib/nav-registry";
@@ -20,6 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { data, isLoading, isError } = useMe();
+  const { ready: tenantContextReady } = useEnsureTenantContext();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [quickCreateOpen, setQuickCreateOpen] = useState(false);
@@ -55,7 +57,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   });
   useKeyboardShortcuts(shortcuts);
 
-  if (isLoading) {
+  // /app/select-tenant is the escape hatch a multi-tenant account gets
+  // redirected to below — it must never itself be blocked by the same
+  // gate, or a user with 2+ tenants and no selection yet would be stuck
+  // behind an infinite loading spinner.
+  const isSelectTenantRoute = pathname === "/app/select-tenant";
+
+  if (isLoading || (!isError && !isSelectTenantRoute && !tenantContextReady)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-muted-foreground text-sm">{t("common.loading")}</p>

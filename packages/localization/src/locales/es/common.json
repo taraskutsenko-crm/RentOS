@@ -145,7 +145,10 @@
     "selectTitle": "Selecciona una empresa",
     "selectSubtitle": "Elige el espacio de trabajo que quieres abrir",
     "noTenants": "Todavía no perteneces a ninguna empresa",
-    "role": "Rol"
+    "role": "Rol",
+    "errors": {
+      "noAccess": "Ya no tienes acceso a este espacio de trabajo de la empresa. Selecciona otro."
+    }
   },
   "country": {
     "US": "Estados Unidos",

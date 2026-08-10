@@ -145,7 +145,10 @@
     "selectTitle": "选择公司",
     "selectSubtitle": "选择要打开的工作空间",
     "noTenants": "您尚未加入任何公司",
-    "role": "角色"
+    "role": "角色",
+    "errors": {
+      "noAccess": "您已无权访问此公司工作区。请选择其他工作区。"
+    }
   },
   "country": {
     "US": "美国",

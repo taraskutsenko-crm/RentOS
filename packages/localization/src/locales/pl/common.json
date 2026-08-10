@@ -145,7 +145,10 @@
     "selectTitle": "Wybierz firmę",
     "selectSubtitle": "Wybierz przestrzeń roboczą firmy do otwarcia",
     "noTenants": "Nie należysz jeszcze do żadnej firmy",
-    "role": "Rola"
+    "role": "Rola",
+    "errors": {
+      "noAccess": "Nie masz już dostępu do tego obszaru roboczego firmy. Wybierz inny."
+    }
   },
   "country": {
     "US": "Stany Zjednoczone",

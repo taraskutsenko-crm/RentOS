@@ -5,6 +5,14 @@ const KNOWN_MESSAGES: Record<string, string> = {
   "Invalid email or password": "auth.errors.invalidCredentials",
   "This account is inactive": "auth.errors.accountInactive",
   "An account with this email already exists": "auth.errors.emailInUse",
+  // TenantGuard (apps/api/src/tenants/tenant.guard.ts) — normally
+  // unreachable now that AppLayout's useEnsureTenantContext() keeps the
+  // selected tenant valid before any tenant-scoped request goes out, but a
+  // membership revoked mid-session (or a request in flight during the
+  // correction) can still surface one of these.
+  "No tenant context provided": "tenant.errors.noAccess",
+  "You do not have access to this tenant": "tenant.errors.noAccess",
+  "This tenant is not available": "tenant.errors.noAccess",
 };
 
 export function apiErrorKey(error: unknown): string {

@@ -145,7 +145,10 @@
     "selectTitle": "Vyberte firmu",
     "selectSubtitle": "Vyberte, který pracovní prostor otevřít",
     "noTenants": "Zatím nepatříte k žádné firmě",
-    "role": "Role"
+    "role": "Role",
+    "errors": {
+      "noAccess": "Již nemáte přístup k tomuto firemnímu pracovnímu prostoru. Vyberte prosím jiný."
+    }
   },
   "country": {
     "US": "Spojené státy",

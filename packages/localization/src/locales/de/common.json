@@ -145,7 +145,10 @@
     "selectTitle": "Unternehmen auswählen",
     "selectSubtitle": "Wählen Sie den zu öffnenden Unternehmensbereich",
     "noTenants": "Sie gehören noch keinem Unternehmen an",
-    "role": "Rolle"
+    "role": "Rolle",
+    "errors": {
+      "noAccess": "Sie haben keinen Zugriff mehr auf diesen Firmenbereich. Bitte wählen Sie einen anderen aus."
+    }
   },
   "country": {
     "US": "Vereinigte Staaten",

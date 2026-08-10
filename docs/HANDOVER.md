@@ -19,14 +19,19 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** pending push — Pre-Chapter 10
-  Globalization & Internationalization Foundation (D-057) is complete
-  locally, quality gates green, Docker-verified in the browser across
-  6+ locales; commit hash recorded here once pushed and CI-confirmed
-  green (see the follow-up "record verified commit hash" commit, same
-  convention as Chapter 9/`8960a17`). Sits on top of `7caa4e8` — TASK-0010
-  Part 2 Chapter 9 (Documents & Contracts Workspace, CI-green, GitHub
-  Actions run #36).
+- **Latest verified commit:** `591ee4e` (docs: record globalization
+  foundation decisions) — Pre-Chapter 10 Globalization &
+  Internationalization Foundation (D-057) is complete and CI-green.
+  Sits on top of `9ee9ade` (test: globalization coverage for locale
+  registry, formatting, and fallback) and `1339cbc` (feat: globalize
+  locale registry, expand to 14 UI locales, wire timezone and RTL),
+  which sit on top of `7caa4e8` — TASK-0010 Part 2 Chapter 9 (Documents
+  & Contracts Workspace, CI-green, GitHub Actions run #36). GitHub
+  Actions came back green after one re-run of the same
+  `rental-numbering.e2e-spec.ts` concurrency flake documented for
+  Chapter 9/D-056 (a CI-runner contention flake, not a regression in
+  this chapter's own locale/formatting/timezone changes) — same known
+  flake, not a new failure mode.
 - **What shipped (Pre-Chapter 10 — Globalization Foundation, D-057):**
   explicit HARD STOP before Chapter 10 to harden Havelio's global
   readiness rather than add a new feature. Consolidated all locale

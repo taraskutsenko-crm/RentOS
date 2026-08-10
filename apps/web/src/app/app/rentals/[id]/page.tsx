@@ -25,6 +25,7 @@ import {
   useStartRental,
 } from "../../../../hooks/use-rentals";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
+import { formatDate, formatDateTime } from "../../../../lib/date-format";
 import { getRentalDocumentChecklist } from "../../../../lib/document-completeness-intelligence";
 import { formatMoney } from "../../../../lib/money";
 import {
@@ -39,7 +40,7 @@ const DELETABLE_STATUSES = new Set(["DRAFT", "QUOTE", "CANCELLED"]);
 const CANCELLABLE_STATUSES = new Set(["DRAFT", "QUOTE", "RESERVED", "ACTIVE"]);
 
 export default function RentalDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const [tenantId] = useCurrentTenantId();
@@ -133,8 +134,8 @@ export default function RentalDetailPage() {
               })}
             </span>
             <span className="text-muted-foreground">
-              {new Date(rental.plannedStart).toLocaleDateString()} –{" "}
-              {new Date(rental.plannedEnd).toLocaleDateString()}
+              {formatDate(rental.plannedStart, i18n.language)} –{" "}
+              {formatDate(rental.plannedEnd, i18n.language)}
             </span>
           </div>
         }
@@ -358,7 +359,7 @@ export default function RentalDetailPage() {
                         <td className="p-3">{item.quantity}</td>
                         <td className="p-3">{formatMoney(lineTotalMinor, rental.currency)}</td>
                         <td className="p-3">
-                          {item.returnedAt ? new Date(item.returnedAt).toLocaleString() : "—"}
+                          {item.returnedAt ? formatDateTime(item.returnedAt, i18n.language) : "—"}
                         </td>
                       </tr>
                     );
@@ -446,19 +447,19 @@ export default function RentalDetailPage() {
             <CardContent className="grid grid-cols-2 gap-3 text-sm">
               <InfoRow
                 label={t("rental.fields.plannedStart")}
-                value={new Date(rental.plannedStart).toLocaleString()}
+                value={formatDateTime(rental.plannedStart, i18n.language)}
               />
               <InfoRow
                 label={t("rental.fields.plannedEnd")}
-                value={new Date(rental.plannedEnd).toLocaleString()}
+                value={formatDateTime(rental.plannedEnd, i18n.language)}
               />
               <InfoRow
                 label={t("rental.fields.actualStart")}
-                value={rental.actualStart ? new Date(rental.actualStart).toLocaleString() : "—"}
+                value={rental.actualStart ? formatDateTime(rental.actualStart, i18n.language) : "—"}
               />
               <InfoRow
                 label={t("rental.fields.actualEnd")}
-                value={rental.actualEnd ? new Date(rental.actualEnd).toLocaleString() : "—"}
+                value={rental.actualEnd ? formatDateTime(rental.actualEnd, i18n.language) : "—"}
               />
               <InfoRow label={t("customer.notes")} value={rental.notes ?? "—"} />
               <InfoRow

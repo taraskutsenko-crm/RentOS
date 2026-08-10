@@ -40,6 +40,7 @@ import {
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
+import { formatDate, formatDateTime } from "../../../../lib/date-format";
 import { DOCUMENT_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 import type { DocumentEmailRecipientType } from "../../../../types/document";
 
@@ -53,7 +54,7 @@ const VOIDABLE_STATUSES = new Set(["DRAFT", "READY", "SENT", "VIEWED", "PARTIALL
 const ARCHIVABLE_STATUSES = new Set(["SIGNED", "REJECTED", "VOIDED"]);
 
 export default function DocumentDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const [tenantId] = useCurrentTenantId();
@@ -403,7 +404,7 @@ export default function DocumentDetailPage() {
               {currentVersion && (
                 <p className="text-muted-foreground mt-2 text-xs">
                   {t("document.fields.createdAt")}:{" "}
-                  {new Date(currentVersion.createdAt).toLocaleString()}
+                  {formatDateTime(currentVersion.createdAt, i18n.language)}
                   {currentVersion.reason ? ` · ${currentVersion.reason}` : ""}
                 </p>
               )}
@@ -441,7 +442,7 @@ export default function DocumentDetailPage() {
                         {link.disabledAt ? t("share.status.disabled") : t("share.status.active")} ·{" "}
                         {t("share.fields.views")}: {link.viewCount} · {t("share.fields.downloads")}:{" "}
                         {link.downloadCount} · {t("share.fields.expiresAt")}:{" "}
-                        {new Date(link.expiresAt).toLocaleDateString()}
+                        {formatDate(link.expiresAt, i18n.language)}
                       </span>
                       {!link.disabledAt && (
                         <Button

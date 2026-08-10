@@ -18,6 +18,7 @@ import {
 import { useCurrentTenantId } from "../../../hooks/use-current-tenant";
 import { usePermission } from "../../../hooks/use-current-tenant-role";
 import { useRentals } from "../../../hooks/use-rentals";
+import { formatDate } from "../../../lib/date-format";
 import { formatMoney } from "../../../lib/money";
 import type { RentalListItem, RentalStatus } from "../../../types/rental";
 
@@ -32,7 +33,7 @@ const STATUSES: RentalStatus[] = [
 ];
 
 export default function RentalsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [tenantId] = useCurrentTenantId();
 
   const canCreate = usePermission("rentals.create");
@@ -72,13 +73,13 @@ export default function RentalsPage() {
       id: "plannedStart",
       header: t("rental.fields.plannedStart"),
       sortable: true,
-      cell: (rental) => new Date(rental.plannedStart).toLocaleDateString(),
+      cell: (rental) => formatDate(rental.plannedStart, i18n.language),
     },
     {
       id: "plannedEnd",
       header: t("rental.fields.plannedEnd"),
       sortable: true,
-      cell: (rental) => new Date(rental.plannedEnd).toLocaleDateString(),
+      cell: (rental) => formatDate(rental.plannedEnd, i18n.language),
     },
     {
       id: "total",

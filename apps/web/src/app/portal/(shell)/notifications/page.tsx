@@ -9,9 +9,10 @@ import {
   useMarkPortalNotificationRead,
   usePortalNotifications,
 } from "../../../../hooks/use-portal-notifications";
+import { formatDateTime } from "../../../../lib/date-format";
 
 export default function PortalNotificationsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: notifications, isLoading } = usePortalNotifications();
   const markRead = useMarkPortalNotificationRead();
   const markAllRead = useMarkAllPortalNotificationsRead();
@@ -47,7 +48,7 @@ export default function PortalNotificationsPage() {
                       <p className="text-muted-foreground">{notification.body}</p>
                       <p className="text-muted-foreground mt-1 text-xs">
                         {t(`portal.notifications.types.${notification.type}`)} ·{" "}
-                        {new Date(notification.createdAt).toLocaleString()}
+                        {formatDateTime(notification.createdAt, i18n.language)}
                       </p>
                     </div>
                     {!notification.readAt && (

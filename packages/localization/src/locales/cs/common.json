@@ -1,0 +1,1109 @@
+{
+  "app": {
+    "name": "Havelio",
+    "tagline": "Jedna platforma. Každý majetek.",
+    "nav": {
+      "dashboard": "Přehled",
+      "settingsGroup": "Nastavení"
+    },
+    "shell": {
+      "sidebarLabel": "Hlavní navigace",
+      "openNav": "Otevřít navigaci",
+      "closeNav": "Zavřít navigaci",
+      "expandSidebar": "Rozbalit postranní panel",
+      "collapseSidebar": "Sbalit postranní panel",
+      "searchPlaceholder": "Hledat…",
+      "userMenu": "Nabídka účtu",
+      "lightMode": "Světlý režim",
+      "darkMode": "Tmavý režim",
+      "language": "Jazyk",
+      "create": "Vytvořit",
+      "breadcrumbs": {
+        "new": "Nový",
+        "edit": "Upravit"
+      },
+      "notifications": {
+        "title": "Oznámení",
+        "empty": "Máte vše aktuální"
+      },
+      "commandPalette": {
+        "title": "Paleta příkazů",
+        "placeholder": "Hledat nebo přejít na…",
+        "noResults": "Nenalezeny žádné výsledky",
+        "pagesGroup": "Stránky",
+        "quickActionsGroup": "Rychlé akce",
+        "commandsGroup": "Příkazy",
+        "pinnedGroup": "Připnuté",
+        "recentGroup": "Nedávné",
+        "hint": "Stiskněte {{keys}} pro hledání nebo rychlý přechod"
+      },
+      "shortcuts": {
+        "title": "Klávesové zkratky",
+        "openPalette": "Otevřít paletu příkazů",
+        "newItem": "Nová položka",
+        "help": "Zobrazit klávesové zkratky",
+        "goCustomers": "Přejít na Zákazníky",
+        "goRentals": "Přejít na Pronájmy",
+        "goAssets": "Přejít na Majetek",
+        "goDocuments": "Přejít na Dokumenty",
+        "goQuotes": "Přejít na Nabídky",
+        "groupGeneral": "Obecné",
+        "groupNavigation": "Navigace",
+        "settingsSubtitle": "Každá zkratka registrovaná v aplikaci — vždy aktuální podle toho, co je skutečně přiřazeno."
+      },
+      "pin": "Připnout",
+      "unpin": "Odepnout"
+    }
+  },
+  "common": {
+    "loading": "Načítání…",
+    "error": "Něco se pokazilo. Zkuste to prosím znovu.",
+    "showPassword": "Zobrazit heslo",
+    "hidePassword": "Skrýt heslo",
+    "saving": "Ukládání…",
+    "cancel": "Zrušit",
+    "confirm": "Potvrdit",
+    "dismiss": "Zavřít",
+    "table": {
+      "columns": "Sloupce",
+      "permissionDenied": "Nemáte oprávnění zobrazit tato data.",
+      "retry": "Zkusit znovu",
+      "selectAll": "Vybrat všechny řádky",
+      "selectRow": "Vybrat řádek",
+      "rowActions": "Akce řádku",
+      "searchPlaceholder": "Hledat…",
+      "clearSearch": "Vymazat hledání",
+      "clearSelection": "Zrušit výběr",
+      "selectedCount": "Vybráno: {{count}}"
+    },
+    "pagination": {
+      "range": "{{start}}–{{end}} z {{total}}",
+      "previous": "Předchozí",
+      "next": "Další",
+      "pageOf": "Stránka {{page}} z {{totalPages}}"
+    },
+    "filters": {
+      "remove": "Odebrat filtr {{filter}}",
+      "resetAll": "Obnovit všechny filtry"
+    },
+    "bulkActions": {
+      "delete": "Odstranit",
+      "deleteConfirmTitle": "Odstranit {{count}} zákazníků?",
+      "deleteConfirmDescription": "Tato akce trvale odstraní vybrané zákazníky. Nelze ji vrátit zpět.",
+      "deletePartialFailure": "{{failed}} z {{total}} nebylo možné odstranit."
+    }
+  },
+  "nav": {
+    "logout": "Odhlásit se",
+    "selectTenant": "Vybrat firmu"
+  },
+  "auth": {
+    "register": {
+      "title": "Vytvořte si účet",
+      "subtitle": "Nastavte pracovní prostor své firmy",
+      "firstName": "Jméno",
+      "lastName": "Příjmení",
+      "email": "E-mail",
+      "password": "Heslo",
+      "passwordConfirmation": "Potvrzení hesla",
+      "companyName": "Název firmy",
+      "country": "Země",
+      "language": "Jazyk",
+      "currency": "Měna",
+      "timezone": "Časové pásmo",
+      "submit": "Vytvořit účet",
+      "submitting": "Vytváření účtu…",
+      "haveAccount": "Máte již účet?",
+      "signIn": "Přihlásit se",
+      "companySection": "Firma"
+    },
+    "login": {
+      "title": "Přihlásit se",
+      "subtitle": "Vítejte zpět",
+      "email": "E-mail",
+      "password": "Heslo",
+      "submit": "Přihlásit se",
+      "submitting": "Přihlašování…",
+      "noAccount": "Nemáte účet?",
+      "signUp": "Vytvořit si ho"
+    },
+    "errors": {
+      "required": "Toto pole je povinné",
+      "invalidEmail": "Zadejte platnou e-mailovou adresu",
+      "passwordTooShort": "Heslo musí mít alespoň 12 znaků",
+      "passwordUppercase": "Heslo musí obsahovat velké písmeno",
+      "passwordLowercase": "Heslo musí obsahovat malé písmeno",
+      "passwordNumber": "Heslo musí obsahovat číslici",
+      "passwordMismatch": "Hesla se neshodují",
+      "emailInUse": "Účet s tímto e-mailem již existuje",
+      "invalidCredentials": "Neplatný e-mail nebo heslo",
+      "accountInactive": "Tento účet je neaktivní",
+      "generic": "Něco se pokazilo. Zkuste to prosím znovu."
+    }
+  },
+  "tenant": {
+    "selectTitle": "Vyberte firmu",
+    "selectSubtitle": "Vyberte, který pracovní prostor otevřít",
+    "noTenants": "Zatím nepatříte k žádné firmě",
+    "role": "Role"
+  },
+  "country": {
+    "US": "Spojené státy",
+    "PL": "Polsko",
+    "DE": "Německo",
+    "UA": "Ukrajina",
+    "ES": "Španělsko",
+    "GB": "Spojené království"
+  },
+  "customer": {
+    "title": "Zákazníci",
+    "subtitle": "Spravujte záznamy svých zákazníků",
+    "newCustomer": "Nový zákazník",
+    "editCustomer": "Upravit zákazníka",
+    "searchPlaceholder": "Hledat zákazníky…",
+    "filterStatus": "Stav",
+    "allStatuses": "Všechny stavy",
+    "firstName": "Jméno",
+    "lastName": "Příjmení",
+    "company": "Firma",
+    "phone": "Telefon",
+    "email": "E-mail",
+    "vatNumber": "DIČ",
+    "address": "Adresa",
+    "notes": "Poznámky",
+    "status": "Stav",
+    "statusActive": "Aktivní",
+    "statusInactive": "Neaktivní",
+    "save": "Uložit",
+    "saving": "Ukládání…",
+    "cancel": "Zrušit",
+    "delete": "Odstranit",
+    "deleteConfirm": "Opravdu chcete tohoto zákazníka odstranit?",
+    "noCustomers": "Nenalezeni žádní zákazníci",
+    "backToList": "Zpět na zákazníky",
+    "previous": "Předchozí",
+    "next": "Další",
+    "portal": {
+      "title": "Přístup do zákaznického portálu",
+      "notInvited": "Zatím nepozván",
+      "invited": "Pozvánka odeslána",
+      "activated": "Portál aktivní",
+      "invitationExpired": "Pozvánka vypršela",
+      "lastLogin": "Poslední přihlášení",
+      "invite": "Pozvat do portálu",
+      "reinvite": "Znovu odeslat pozvánku",
+      "revoke": "Odebrat přístup",
+      "revokeConfirm": "Tímto se zákazník odhlásí z portálu a přístup bude zakázán až do nové pozvánky. Pokračovat?",
+      "inviteLinkCreated": "Odkaz na pozvánku byl vytvořen — sdílejte jej se svým zákazníkem:",
+      "noEmailOnFile": "Tento zákazník nemá zaznamenaný e-mail. Přidejte jej pro odeslání pozvánky.",
+      "extensionRequests": "Žádosti o prodloužení",
+      "damageReports": "Hlášení škod",
+      "messages": "Zprávy z portálu",
+      "noExtensionRequests": "Žádné žádosti o prodloužení",
+      "noDamageReports": "Žádná hlášení škod",
+      "noMessages": "Zatím žádné zprávy",
+      "approve": "Schválit",
+      "reject": "Zamítnout",
+      "responseMessagePlaceholder": "Volitelná poznámka pro zákazníka…",
+      "markReviewed": "Označit jako zkontrolováno",
+      "markResolved": "Označit jako vyřešeno",
+      "convertToDocument": "Převést na dokument",
+      "sendMessage": "Odeslat",
+      "messagePlaceholder": "Odpovědět tomuto zákazníkovi…"
+    },
+    "timeline": {
+      "created": "Zákazník vytvořen",
+      "updated": "Zákazník aktualizován",
+      "deleted": "Zákazník odstraněn"
+    },
+    "summary": {
+      "totalRentals": "Celkem pronájmů",
+      "activeRentals": "Aktivní pronájmy",
+      "totalRevenue": "Celkové tržby",
+      "damageReports": "Hlášení škod"
+    },
+    "sections": {
+      "documents": "Dokumenty"
+    },
+    "documentsEmpty": "K tomuto zákazníkovi zatím nejsou přiřazeny žádné dokumenty"
+  },
+  "asset": {
+    "title": "Majetek",
+    "subtitle": "Spravujte veškeré pronajímatelné položky své firmy",
+    "newAsset": "Nový majetek",
+    "editAsset": "Upravit majetek",
+    "save": "Uložit",
+    "saving": "Ukládání…",
+    "delete": "Odstranit",
+    "deleteConfirm": "Opravdu chcete tento majetek odstranit?",
+    "searchPlaceholder": "Hledat majetek…",
+    "allCategories": "Všechny kategorie",
+    "allStatuses": "Všechny stavy",
+    "noAssets": "Nenalezen žádný majetek",
+    "view": "Zobrazit",
+    "rentableYes": "Ano",
+    "rentableNo": "Ne",
+    "noTimelineEvents": "Zatím nezaznamenána žádná aktivita",
+    "noImages": "Zatím nenahrány žádné obrázky",
+    "noDocuments": "Zatím nenahrány žádné dokumenty",
+    "platformDocumentsEmpty": "K tomuto majetku zatím nejsou přiřazeny žádné dokumenty",
+    "sort": {
+      "newest": "Nejnovější první",
+      "oldest": "Nejstarší první",
+      "nameAsc": "Název (A–Z)",
+      "nameDesc": "Název (Z–A)"
+    },
+    "fields": {
+      "name": "Název",
+      "description": "Popis",
+      "internalNumber": "Interní číslo",
+      "sku": "SKU",
+      "serialNumber": "Sériové číslo",
+      "barcode": "Čárový kód",
+      "qrCodeValue": "Hodnota QR kódu",
+      "category": "Kategorie",
+      "status": "Stav",
+      "statusDefaultHint": "Výchozí (Dostupný)",
+      "manufacturer": "Výrobce",
+      "model": "Model",
+      "purchaseDate": "Datum nákupu",
+      "purchasePrice": "Nákupní cena",
+      "currency": "Měna",
+      "replacementValue": "Pořizovací hodnota",
+      "conditionNotes": "Poznámky ke stavu",
+      "isRentable": "Pronajímatelný",
+      "isActive": "Aktivní",
+      "currentLocation": "Aktuální umístění",
+      "locationChangeHint": "Umístění se mění na stránce detailu majetku, takže je každý přesun zaznamenán na časové ose.",
+      "selectPlaceholder": "Vybrat…",
+      "primaryImage": "Hlavní",
+      "documentTitle": "Název dokumentu",
+      "booleanYes": "Ano"
+    },
+    "sections": {
+      "basicInfo": "Základní informace",
+      "identification": "Identifikace",
+      "category": "Kategorie",
+      "status": "Stav",
+      "manufacturerModel": "Výrobce a model",
+      "financial": "Finanční informace",
+      "locationCondition": "Umístění a stav",
+      "customFields": "Vlastní pole",
+      "images": "Obrázky",
+      "documents": "Dokumenty",
+      "timeline": "Časová osa",
+      "filesManagement": "Obrázky a dokumenty",
+      "platformDocuments": "Dokumenty"
+    },
+    "actions": {
+      "changeStatus": "Změnit stav",
+      "changeLocation": "Změnit umístění",
+      "deleteImage": "Odstranit obrázek",
+      "deleteDocument": "Odstranit",
+      "uploadDocument": "Nahrát"
+    },
+    "errors": {
+      "customFieldRequired": "Toto pole je povinné",
+      "categoryRequired": "Vyberte kategorii",
+      "statusCodeFormat": "Kód musí obsahovat velká písmena, číslice a podtržítka",
+      "fieldKeyFormat": "Klíč musí obsahovat malá písmena, číslice a podtržítka"
+    },
+    "timeline": {
+      "created": "Majetek vytvořen",
+      "updated": "Majetek aktualizován",
+      "status_changed": "Stav změněn",
+      "location_changed": "Umístění změněno",
+      "image_uploaded": "Obrázek nahrán",
+      "document_uploaded": "Dokument nahrán"
+    },
+    "summary": {
+      "totalRentals": "Celkem pronájmů",
+      "revenueGenerated": "Vygenerované tržby"
+    },
+    "documentTypes": {
+      "PURCHASE_DOCUMENT": "Doklad o koupi",
+      "MANUAL": "Manuál",
+      "CERTIFICATE": "Certifikát",
+      "INSURANCE": "Pojištění",
+      "REGISTRATION": "Registrace",
+      "INSPECTION": "Zpráva o kontrole",
+      "OTHER": "Jiné"
+    },
+    "fieldTypes": {
+      "TEXT": "Text",
+      "TEXTAREA": "Dlouhý text",
+      "INTEGER": "Celé číslo",
+      "DECIMAL": "Desetinné číslo",
+      "BOOLEAN": "Ano/Ne",
+      "DATE": "Datum",
+      "DATETIME": "Datum a čas",
+      "SELECT": "Jedna volba",
+      "MULTISELECT": "Více voleb",
+      "URL": "Odkaz",
+      "EMAIL": "E-mail",
+      "PHONE": "Telefon"
+    },
+    "categorySettings": {
+      "navLabel": "Kategorie",
+      "title": "Kategorie majetku",
+      "subtitle": "Uspořádejte svůj majetek do stromu kategorií",
+      "newCategoryName": "Název nové kategorie",
+      "parent": "Nadřazená kategorie",
+      "noParent": "Bez nadřazené kategorie (nejvyšší úroveň)",
+      "create": "Přidat kategorii",
+      "noCategories": "Zatím žádné kategorie",
+      "activate": "Aktivovat",
+      "deactivate": "Deaktivovat",
+      "deleteConfirm": "Odstranit tuto kategorii? Není to možné, dokud obsahuje aktivní majetek nebo podkategorie."
+    },
+    "statusSettings": {
+      "navLabel": "Stavy",
+      "title": "Stavy majetku",
+      "subtitle": "Nakonfigurujte stavy životního cyklu, které může majetek mít",
+      "name": "Název",
+      "code": "Kód",
+      "type": "Typ",
+      "systemStatus": "Systémový",
+      "customStatus": "Vlastní",
+      "availableForRental": "Dostupný k pronájmu",
+      "create": "Přidat stav",
+      "deleteConfirm": "Odstranit tento stav? Není to možné u systémových stavů nebo stavů, které jsou aktuálně používány."
+    },
+    "fieldSettings": {
+      "navLabel": "Vlastní pole",
+      "title": "Vlastní pole majetku",
+      "subtitle": "Definujte atributy specifické pro vaše kategorie majetku",
+      "name": "Název",
+      "key": "Klíč",
+      "category": "Kategorie",
+      "globalField": "Všechny kategorie",
+      "fieldType": "Typ pole",
+      "optionsHint": "Jedna možnost na řádek",
+      "required": "Povinné",
+      "filterable": "Filtrovatelné",
+      "searchable": "Vyhledávatelné",
+      "create": "Přidat pole",
+      "deleteConfirm": "Odstranit tuto definici vlastního pole?"
+    }
+  },
+  "rental": {
+    "title": "Pronájmy",
+    "subtitle": "Rezervujte, sledujte a vracejte pronajatý majetek",
+    "newRental": "Nový pronájem",
+    "editRental": "Upravit pronájem",
+    "save": "Uložit",
+    "deleteConfirm": "Opravdu chcete tento pronájem odstranit?",
+    "searchPlaceholder": "Hledat pronájmy…",
+    "allStatuses": "Všechny stavy",
+    "noRentals": "Nenalezeny žádné pronájmy",
+    "statuses": {
+      "DRAFT": "Koncept",
+      "QUOTE": "Nabídka",
+      "RESERVED": "Rezervováno",
+      "ACTIVE": "Aktivní",
+      "RETURNED": "Vráceno",
+      "COMPLETED": "Dokončeno",
+      "CANCELLED": "Zrušeno"
+    },
+    "billingModes": {
+      "DAILY": "Denní",
+      "WEEKLY": "Týdenní",
+      "MONTHLY": "Měsíční",
+      "CUSTOM": "Vlastní"
+    },
+    "fields": {
+      "rentalNumber": "Číslo pronájmu",
+      "status": "Stav",
+      "plannedStart": "Plánovaný začátek",
+      "plannedEnd": "Plánovaný konec",
+      "actualStart": "Skutečný začátek",
+      "actualEnd": "Skutečný konec",
+      "billingMode": "Způsob fakturace",
+      "quantity": "Množství",
+      "dailyPrice": "Denní cena",
+      "dailyPriceForRemainder": "Denní cena (za zbývající dny)",
+      "weeklyPrice": "Týdenní cena",
+      "monthlyPrice": "Měsíční cena",
+      "customPrice": "Vlastní cena",
+      "deposit": "Kauce",
+      "itemDiscount": "Sleva na položku",
+      "discount": "Sleva",
+      "tax": "Daň",
+      "subtotal": "Mezisoučet",
+      "total": "Celkem",
+      "internalNotes": "Interní poznámky",
+      "returnedAt": "Vráceno dne",
+      "sourceQuote": "Zdrojová nabídka"
+    },
+    "sections": {
+      "details": "Podrobnosti",
+      "items": "Majetek",
+      "financial": "Finanční přehled",
+      "customer": "Zákazník",
+      "documents": "Dokumenty"
+    },
+    "documents": {
+      "empty": "K tomuto pronájmu zatím nejsou přiřazeny žádné dokumenty"
+    },
+    "documentChecklist": {
+      "title": "Kontrolní seznam dokumentů",
+      "items": {
+        "commercialOffer": "Obchodní nabídka",
+        "contract": "Smlouva o pronájmu",
+        "handoverProtocol": "Předávací protokol",
+        "returnProtocol": "Protokol o vrácení"
+      },
+      "states": {
+        "present": "Přiřazeno",
+        "missing": "Chybí",
+        "notRequired": "Zatím nevyžadováno"
+      }
+    },
+    "timeIntelligence": {
+      "starts_today": "Začíná dnes",
+      "starts_tomorrow": "Začíná zítra",
+      "starts_in_days": "Začíná za {{count}} dní",
+      "days_remaining": "Zbývá {{count}} dní",
+      "due_today": "Splatnost dnes",
+      "overdue": "Zpoždění {{count}} dní",
+      "completed": "Dokončeno",
+      "cancelled": "Zrušeno",
+      "none": "—"
+    },
+    "actions": {
+      "reserve": "Rezervovat",
+      "start": "Zahájit pronájem",
+      "returnAll": "Vrátit vše",
+      "cancel": "Zrušit pronájem"
+    },
+    "timeline": {
+      "created": "Pronájem vytvořen",
+      "updated": "Pronájem aktualizován",
+      "status_changed": "Stav změněn",
+      "items_returned": "Položka(y) vrácena(y)"
+    },
+    "summary": {
+      "totalDeposit": "Celková kauce",
+      "daysRemaining": "Zbývající dny",
+      "rentalValue": "Hodnota pronájmu",
+      "assetsCount": "Počet majetku",
+      "timeStatus": "Časový stav"
+    },
+    "errors": {
+      "customerRequired": "Vyberte zákazníka",
+      "datesRequired": "Plánované datum začátku a konce je povinné",
+      "endBeforeStart": "Plánovaný konec musí být po plánovaném začátku",
+      "assetRequired": "Vyberte majetek",
+      "selectAtLeastOneAsset": "Vyberte alespoň jeden majetek",
+      "customMonthLengthRequired": "Zadejte počet dní mezi 1 a 365"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Zákazník",
+        "assets": "Majetek",
+        "dates": "Data",
+        "pricing": "Ceny",
+        "review": "Kontrola"
+      },
+      "back": "Zpět",
+      "next": "Další",
+      "creating": "Vytváření pronájmu…",
+      "createRental": "Vytvořit pronájem",
+      "availabilityCheck": "Kontrola dostupnosti",
+      "available": "Dostupný",
+      "unavailable": "Nedostupný pro tato data",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}} kalendářních měsíců × {{price}}",
+        "FIXED_30_DAYS": "{{count}} pevných 30denních období × {{price}}",
+        "CUSTOM": "{{count}} vlastních {{length}}denních období × {{price}}",
+        "days": "{{count}} dní × {{price}}",
+        "pending": "Zadejte platná data a ceny pro zobrazení rozpisu cen"
+      }
+    },
+    "availabilityCalendar": {
+      "title": "Kalendář dostupnosti",
+      "subtitle": "Před rezervací zkontrolujte, kdy je majetek volný",
+      "previousMonth": "Předchozí měsíc",
+      "nextMonth": "Další měsíc",
+      "selectAssetsHint": "Vyberte jeden nebo více majetků pro zobrazení jejich dostupnosti",
+      "booked": "Obsazeno",
+      "free": "Volné"
+    },
+    "billingSettings": {
+      "navLabel": "Nastavení fakturace",
+      "title": "Nastavení fakturace pronájmů",
+      "subtitle": "Nakonfigurujte, jak je pro tuto firmu fakturován MĚSÍČNĚ oceněný pronájem",
+      "monthlyMethod": "Metoda měsíční fakturace",
+      "customMonthLengthDays": "Počet dní ve vlastním fakturačním měsíci",
+      "save": "Uložit",
+      "saving": "Ukládání…",
+      "saved": "Nastavení fakturace uloženo",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "Kalendářní měsíc",
+          "description": "Fakturuje od data do odpovídajícího data v následujícím kalendářním měsíci, s ošetřením konce měsíce."
+        },
+        "FIXED_30_DAYS": {
+          "label": "Pevných 30 dní",
+          "description": "Každých 30 fakturovatelných dní je považováno za jednu měsíční fakturační jednotku."
+        },
+        "CUSTOM": {
+          "label": "Vlastní období",
+          "description": "Definujte, kolik fakturovatelných dní tvoří jednu měsíční fakturační jednotku."
+        }
+      }
+    }
+  },
+  "quote": {
+    "title": "Nabídky",
+    "subtitle": "Připravte a odešlete obchodní nabídky před vytvořením pronájmu",
+    "newQuote": "Nová nabídka",
+    "editQuote": "Upravit nabídku",
+    "save": "Uložit",
+    "deleteConfirm": "Opravdu chcete tuto nabídku odstranit?",
+    "searchPlaceholder": "Hledat nabídky…",
+    "allStatuses": "Všechny stavy",
+    "noQuotes": "Nenalezeny žádné nabídky",
+    "convertConfirm": "Převést tuto nabídku na pronájem?",
+    "availabilityWarningTitle": "Jeden nebo více majetků nemusí být pro plánovaná data k dispozici",
+    "statuses": {
+      "DRAFT": "Koncept",
+      "SENT": "Odesláno",
+      "VIEWED": "Zobrazeno",
+      "ACCEPTED": "Přijato",
+      "REJECTED": "Zamítnuto",
+      "EXPIRED": "Vypršelo",
+      "CONVERTED": "Převedeno",
+      "CANCELLED": "Zrušeno"
+    },
+    "sections": {
+      "customer": "Zákazník",
+      "documents": "Dokumenty"
+    },
+    "documents": {
+      "empty": "K této nabídce zatím nejsou přiřazeny žádné dokumenty"
+    },
+    "summary": {
+      "quoteValue": "Hodnota nabídky",
+      "depositTotal": "Celková kauce",
+      "itemsCount": "Položky",
+      "validityStatus": "Stav platnosti"
+    },
+    "validityIntelligence": {
+      "expires_today": "Vyprší dnes",
+      "expires_tomorrow": "Vyprší zítra",
+      "expires_in_days": "Vyprší za {{count}} dní",
+      "expired": "Vypršelo",
+      "accepted": "Přijato",
+      "rejected": "Zamítnuto",
+      "converted": "Převedeno",
+      "cancelled": "Zrušeno"
+    },
+    "itemTypes": {
+      "ASSET": "Majetek",
+      "SERVICE": "Služba",
+      "PRODUCT": "Produkt",
+      "FEE": "Poplatek",
+      "DELIVERY": "Doprava",
+      "COLLECTION": "Vyzvednutí",
+      "LABOR": "Práce",
+      "CUSTOM": "Vlastní"
+    },
+    "billingModes": {
+      "DAILY": "Denní",
+      "WEEKLY": "Týdenní",
+      "MONTHLY": "Měsíční",
+      "CUSTOM": "Vlastní",
+      "FLAT": "Paušální"
+    },
+    "discountTypes": {
+      "FIXED": "Pevná částka",
+      "PERCENTAGE": "Procento"
+    },
+    "fields": {
+      "quoteNumber": "Číslo nabídky",
+      "status": "Stav",
+      "issueDate": "Datum vystavení",
+      "validUntil": "Platnost do",
+      "name": "Název",
+      "description": "Popis",
+      "itemType": "Typ položky",
+      "unit": "Jednotka",
+      "unitPlaceholder": "např. den, hodina, kus",
+      "billingMode": "Způsob fakturace",
+      "quantity": "Množství",
+      "unitPrice": "Jednotková cena",
+      "dailyPrice": "Denní cena",
+      "weeklyPrice": "Týdenní cena",
+      "monthlyPrice": "Měsíční cena",
+      "customPrice": "Vlastní cena",
+      "deposit": "Kauce",
+      "discountType": "Typ slevy",
+      "noDiscount": "Bez slevy",
+      "discountPercent": "Sleva (%)",
+      "discountAmount": "Výše slevy",
+      "taxRatePercent": "Sazba daně (%)",
+      "taxTotal": "Daň",
+      "depositTotal": "Kauce",
+      "customerNotes": "Poznámky zákazníka",
+      "termsAndConditions": "Obchodní podmínky",
+      "convertedRental": "Převedený pronájem"
+    },
+    "actions": {
+      "send": "Odeslat nabídku",
+      "accept": "Přijmout",
+      "reject": "Zamítnout",
+      "rejectPrompt": "Důvod zamítnutí (volitelné)",
+      "cancel": "Zrušit nabídku",
+      "duplicate": "Duplikovat",
+      "convert": "Převést na pronájem",
+      "removeItem": "Odebrat",
+      "addServiceItem": "Přidat produkt nebo službu",
+      "viewPdf": "Zobrazit PDF",
+      "regeneratePdf": "Znovu vygenerovat PDF",
+      "downloadPdf": "Stáhnout PDF"
+    },
+    "timeline": {
+      "created": "Nabídka vytvořena",
+      "updated": "Nabídka aktualizována",
+      "status_changed": "Stav změněn",
+      "sent": "Nabídka odeslána",
+      "viewed": "Zobrazeno zákazníkem",
+      "accepted": "Přijato",
+      "rejected": "Zamítnuto",
+      "duplicated": "Duplikováno",
+      "converted": "Převedeno na pronájem",
+      "pdf_generated": "PDF vygenerováno"
+    },
+    "errors": {
+      "customerRequired": "Vyberte zákazníka",
+      "validUntilRequired": "Datum platnosti je povinné",
+      "datesRequired": "Plánované datum začátku a konce je povinné",
+      "endBeforeStart": "Plánovaný konec musí být po plánovaném začátku",
+      "validUntilBeforeIssueDate": "Platnost do nemůže být v minulosti",
+      "itemNameRequired": "Zadejte název této položky",
+      "quantityMustBePositive": "Množství musí být alespoň 1",
+      "noItems": "Přidejte alespoň jednu položku",
+      "onlyDraftEditable": "Upravovat lze pouze koncepty nabídek — místo toho tuto nabídku duplikujte"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Zákazník",
+        "dates": "Data",
+        "assets": "Majetek",
+        "services": "Produkty a služby",
+        "pricing": "Ceny",
+        "terms": "Podmínky",
+        "review": "Kontrola"
+      },
+      "saving": "Ukládání nabídky…",
+      "createQuote": "Vytvořit nabídku",
+      "noServiceItems": "Zatím nepřidány žádné produkty ani služby"
+    },
+    "public": {
+      "notFound": "Tento odkaz na nabídku je neplatný nebo vypršel",
+      "acceptedNotice": "Přijato uživatelem {{name}}",
+      "rejectedNotice": "Tato nabídka byla zamítnuta",
+      "acceptanceDisclaimer": "Přijetím níže zaznamenáváte souhlas s touto nabídkou. Nejedná se o kvalifikovaný elektronický podpis.",
+      "rejectReasonPlaceholder": "Sdělte nám důvod (volitelné)",
+      "confirmReject": "Potvrdit zamítnutí"
+    }
+  },
+  "document": {
+    "title": "Dokumenty",
+    "subtitle": "Generujte, sdílejte, odesílejte a podepisujte každý dokument na jednom místě",
+    "newDocument": "Nový dokument",
+    "save": "Uložit",
+    "saving": "Ukládání…",
+    "deleteConfirm": "Opravdu chcete tento dokument odstranit?",
+    "searchPlaceholder": "Hledat dokumenty…",
+    "allStatuses": "Všechny stavy",
+    "allTypes": "Všechny typy",
+    "noDocuments": "Nenalezeny žádné dokumenty",
+    "backToList": "Zpět na dokumenty",
+    "types": {
+      "QUOTE": "Nabídka",
+      "CONTRACT": "Smlouva o pronájmu",
+      "HANDOVER_PROTOCOL": "Předávací protokol",
+      "RETURN_PROTOCOL": "Protokol o vrácení",
+      "DAMAGE_REPORT": "Hlášení škody",
+      "CONTRACT_AMENDMENT": "Dodatek smlouvy",
+      "CUSTOM": "Vlastní"
+    },
+    "statuses": {
+      "DRAFT": "Koncept",
+      "READY": "Připraveno",
+      "SENT": "Odesláno",
+      "VIEWED": "Zobrazeno",
+      "PARTIALLY_SIGNED": "Částečně podepsáno",
+      "SIGNED": "Podepsáno",
+      "REJECTED": "Zamítnuto",
+      "VOIDED": "Zneplatněno",
+      "ARCHIVED": "Archivováno"
+    },
+    "fields": {
+      "documentNumber": "Číslo dokumentu",
+      "documentType": "Typ dokumentu",
+      "status": "Stav",
+      "title": "Název",
+      "customTypeName": "Název vlastního typu",
+      "none": "Žádné",
+      "version": "Verze",
+      "createdAt": "Vytvořeno",
+      "customer": "Zákazník",
+      "rental": "Pronájem",
+      "quote": "Nabídka",
+      "asset": "Majetek"
+    },
+    "summary": {
+      "total": "Celkem dokumentů",
+      "draft": "Koncept",
+      "sent": "Odesláno",
+      "signed": "Podepsáno"
+    },
+    "actions": {
+      "viewPdf": "Zobrazit PDF",
+      "regeneratePdf": "Znovu vygenerovat PDF",
+      "markReady": "Označit jako připraveno",
+      "markSent": "Označit jako odesláno",
+      "markViewed": "Označit jako zobrazeno",
+      "markSigned": "Označit jako podepsáno",
+      "markPartiallySigned": "Označit jako částečně podepsáno",
+      "reject": "Zamítnout",
+      "rejectPrompt": "Důvod zamítnutí (volitelné)",
+      "duplicate": "Duplikovat",
+      "void": "Zneplatnit",
+      "voidPrompt": "Důvod zneplatnění (volitelné)",
+      "archive": "Archivovat"
+    },
+    "sections": {
+      "preview": "Náhled",
+      "email": "Doručení e-mailem",
+      "signature": "Elektronický podpis",
+      "relatedEntities": "Související záznamy"
+    },
+    "email": {
+      "recipientType": "Příjemce",
+      "recipientTypes": {
+        "CUSTOMER": "Zákazník",
+        "EMPLOYEE": "Zaměstnanec",
+        "CUSTOM": "Vlastní e-mail"
+      },
+      "customEmail": "E-mailová adresa",
+      "subject": "Předmět",
+      "message": "Zpráva",
+      "send": "Odeslat e-mail",
+      "retry": "Zkusit znovu",
+      "noDeliveries": "Zatím nebyly odeslány žádné e-maily",
+      "statuses": {
+        "PENDING": "Čeká se",
+        "SENT": "Odesláno",
+        "FAILED": "Selhalo"
+      }
+    },
+    "signature": {
+      "signerName": "Jméno podepisujícího",
+      "signerEmail": "E-mail podepisujícího",
+      "request": "Vyžádat podpis",
+      "refresh": "Obnovit stav",
+      "cancel": "Zrušit",
+      "noRequests": "Zatím žádné žádosti o podpis",
+      "statuses": {
+        "REQUESTED": "Vyžádáno",
+        "PENDING": "Čeká se",
+        "SIGNED": "Podepsáno",
+        "REJECTED": "Zamítnuto",
+        "EXPIRED": "Vypršelo",
+        "CANCELLED": "Zrušeno"
+      },
+      "providers": {
+        "LOCAL_MOCK": "Ruční (interní)",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "Dokument vytvořen",
+      "updated": "Dokument aktualizován",
+      "status_changed": "Stav změněn",
+      "sent": "Dokument odeslán",
+      "viewed": "Zobrazeno",
+      "signed": "Podpis zaznamenán",
+      "downloaded": "Staženo",
+      "archived": "Archivováno",
+      "version_created": "Vytvořena nová verze",
+      "file_uploaded": "Soubor nahrán",
+      "file_deleted": "Soubor odstraněn",
+      "rendered": "PDF vygenerováno",
+      "shared": "Vytvořen odkaz ke sdílení",
+      "share_viewed": "Zobrazeno přes sdílený odkaz",
+      "share_downloaded": "Staženo přes sdílený odkaz",
+      "share_disabled": "Sdílený odkaz zakázán",
+      "email_sent": "E-mail odeslán",
+      "email_failed": "Doručení e-mailu selhalo",
+      "signature_requested": "Podpis vyžádán",
+      "signature_status_changed": "Stav podpisu změněn"
+    },
+    "errors": {
+      "customTypeNameRequired": "Zadejte název tohoto vlastního typu dokumentu"
+    }
+  },
+  "documentTemplate": {
+    "title": "Šablony dokumentů",
+    "subtitle": "Spravujte HTML šablony používané k generování každého typu dokumentu",
+    "newTemplate": "Nová šablona",
+    "save": "Uložit",
+    "saving": "Ukládání…",
+    "searchPlaceholder": "Hledat šablony…",
+    "noTemplates": "Nenalezeny žádné šablony",
+    "statuses": {
+      "DRAFT": "Koncept",
+      "ACTIVE": "Aktivní",
+      "ARCHIVED": "Archivováno"
+    },
+    "fields": {
+      "name": "Název",
+      "description": "Popis",
+      "htmlContent": "Obsah HTML",
+      "css": "CSS",
+      "status": "Stav",
+      "versionCount": "Verze",
+      "current": "aktuální"
+    },
+    "actions": {
+      "activate": "Aktivovat",
+      "archive": "Archivovat",
+      "restore": "Obnovit",
+      "duplicate": "Duplikovat",
+      "saveAsNewVersion": "Uložit jako novou verzi",
+      "restoreVersion": "Obnovit tuto verzi"
+    },
+    "sections": {
+      "metadata": "Podrobnosti",
+      "content": "Obsah",
+      "preview": "Náhled",
+      "versions": "Historie verzí"
+    }
+  },
+  "share": {
+    "title": "Veřejné sdílené odkazy",
+    "fields": {
+      "password": "Heslo",
+      "passwordPlaceholder": "Volitelné přístupové heslo",
+      "views": "Zobrazení",
+      "downloads": "Stažení",
+      "expiresAt": "Vyprší"
+    },
+    "status": {
+      "active": "Aktivní",
+      "disabled": "Zakázáno"
+    },
+    "actions": {
+      "create": "Vytvořit odkaz",
+      "disable": "Zakázat"
+    },
+    "noLinks": "Zatím žádné sdílené odkazy",
+    "linkCreatedPrompt": "Sdílejte tento odkaz se svým zákazníkem:",
+    "public": {
+      "passwordRequiredTitle": "Tento dokument je chráněn heslem",
+      "wrongPassword": "Nesprávné heslo",
+      "unlock": "Odemknout",
+      "notFound": "Tento odkaz je neplatný nebo vypršel",
+      "downloadPdf": "Stáhnout PDF"
+    }
+  },
+  "dashboard": {
+    "welcome": "Vítejte zpět, {{name}}",
+    "sections": {
+      "overview": "Přehled",
+      "quickActions": "Rychlé akce",
+      "recentActivity": "Nedávná aktivita"
+    },
+    "metrics": {
+      "customers": "Zákazníci",
+      "activeRentals": "Aktivní pronájmy",
+      "availableAssets": "Dostupný majetek",
+      "pendingQuotes": "Čekající nabídky",
+      "needsAttention": "Vyžaduje pozornost"
+    },
+    "recentRentals": "Nedávné pronájmy",
+    "recentDocuments": "Nedávné dokumenty",
+    "viewAll": "Zobrazit vše",
+    "emptyRecentRentals": "Zatím žádné pronájmy",
+    "emptyRecentDocuments": "Zatím žádné dokumenty"
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Přehled",
+      "rentals": "Pronájmy",
+      "calendar": "Kalendář",
+      "documents": "Dokumenty",
+      "messages": "Zprávy",
+      "notifications": "Oznámení",
+      "logout": "Odhlásit se"
+    },
+    "auth": {
+      "login": {
+        "title": "Zákaznický portál",
+        "subtitle": "Přihlaste se pro správu svých pronájmů",
+        "company": "Firma",
+        "companyPlaceholder": "vase-firma",
+        "email": "E-mail",
+        "password": "Heslo",
+        "submit": "Přihlásit se",
+        "submitting": "Přihlašování…"
+      },
+      "activate": {
+        "title": "Aktivujte svůj účet",
+        "subtitle": "Nastavte heslo pro přístup do svého zákaznického portálu",
+        "password": "Heslo",
+        "submit": "Aktivovat účet",
+        "submitting": "Aktivace…",
+        "invalidToken": "Tento odkaz na pozvánku je neplatný nebo vypršel.",
+        "successTitle": "Vítejte ve firmě {{company}}!",
+        "successDescription": "Váš účet je připraven. Přesměrováváme vás na váš přehled…"
+      },
+      "errors": {
+        "invalidCredentials": "Neplatný e-mail, heslo nebo firma.",
+        "invalidToken": "Neplatná nebo vypršelá pozvánka.",
+        "generic": "Něco se pokazilo. Zkuste to prosím znovu."
+      },
+      "tagline": "Spravujte své pronájmy, dokumenty a žádosti na jednom místě."
+    },
+    "dashboard": {
+      "title": "Přehled",
+      "welcome": "Vítejte zpět, {{name}}",
+      "currentRentals": "Aktuální pronájmy",
+      "upcomingRentals": "Nadcházející pronájmy",
+      "unreadMessages": "Nepřečtené zprávy",
+      "pendingSignatures": "Čekající podpisy",
+      "pendingExtensions": "Čekající žádosti o prodloužení",
+      "recentRentals": "Nedávné pronájmy",
+      "viewAll": "Zobrazit vše",
+      "noRentals": "Zatím nemáte žádné pronájmy"
+    },
+    "rentals": {
+      "title": "Pronájmy",
+      "backToList": "Zpět na pronájmy",
+      "searchPlaceholder": "Hledat pronájmy…",
+      "filterStatus": "Stav",
+      "allStatuses": "Všechny stavy",
+      "detailTitle": "Pronájem {{number}}",
+      "period": "Doba pronájmu",
+      "items": "Vybavení",
+      "timeline": "Časová osa",
+      "documents": "Dokumenty",
+      "downloadAllDocuments": "Stáhnout všechny dokumenty (.zip)",
+      "qrCode": "QR kód",
+      "showQrCode": "Zobrazit QR kód",
+      "requestExtension": "Požádat o prodloužení",
+      "reportDamage": "Nahlásit škodu",
+      "extensionRequests": "Žádosti o prodloužení",
+      "damageReports": "Hlášení škod",
+      "noRentals": "Nenalezeny žádné pronájmy",
+      "quantity": "Množství",
+      "statuses": {
+        "DRAFT": "Koncept",
+        "QUOTE": "Nabídka",
+        "RESERVED": "Rezervováno",
+        "ACTIVE": "Aktivní",
+        "RETURNED": "Vráceno",
+        "COMPLETED": "Dokončeno",
+        "CANCELLED": "Zrušeno"
+      }
+    },
+    "calendar": {
+      "title": "Kalendář pronájmů",
+      "empty": "V tomto období nejsou žádné pronájmy"
+    },
+    "extensionRequests": {
+      "title": "Požádat o prodloužení",
+      "currentEnd": "Aktuální datum konce",
+      "newEndDate": "Nové datum konce",
+      "message": "Zpráva (volitelné)",
+      "submit": "Odeslat žádost",
+      "submitting": "Odesílání…",
+      "submitted": "Vaše žádost o prodloužení byla odeslána.",
+      "responseFrom": "Odpověď",
+      "statuses": {
+        "PENDING": "Čeká se",
+        "APPROVED": "Schváleno",
+        "REJECTED": "Zamítnuto",
+        "CANCELLED": "Zrušeno"
+      }
+    },
+    "damageReports": {
+      "title": "Nahlásit škodu",
+      "description": "Popis",
+      "descriptionPlaceholder": "Popište, co se stalo…",
+      "asset": "Vybavení (volitelné)",
+      "anyEquipment": "Nejste si jistí / obecné",
+      "photos": "Fotografie",
+      "addPhoto": "Přidat fotografii",
+      "uploading": "Nahrávání…",
+      "submit": "Odeslat hlášení",
+      "submitting": "Odesílání…",
+      "submitted": "Vaše hlášení škody bylo odesláno.",
+      "statuses": {
+        "SUBMITTED": "Odesláno",
+        "REVIEWED": "Zkontrolováno",
+        "RESOLVED": "Vyřešeno",
+        "CONVERTED_TO_DOCUMENT": "Zdokumentováno"
+      }
+    },
+    "documents": {
+      "title": "Dokumenty",
+      "backToList": "Zpět na dokumenty",
+      "filterStatus": "Stav",
+      "allStatuses": "Všechny stavy",
+      "preview": "Náhled",
+      "download": "Stáhnout PDF",
+      "sign": "Podepsat dokument",
+      "signing": "Podepisování…",
+      "signed": "Tento dokument jste podepsali.",
+      "pendingSignature": "Čeká se na váš podpis",
+      "noDocuments": "Nenalezeny žádné dokumenty",
+      "signatureRequests": "Žádosti o podpis"
+    },
+    "messages": {
+      "title": "Zprávy",
+      "placeholder": "Napište zprávu…",
+      "send": "Odeslat",
+      "sending": "Odesílání…",
+      "empty": "Zatím žádné zprávy",
+      "generalThread": "Obecné"
+    },
+    "notifications": {
+      "title": "Oznámení",
+      "markAllRead": "Označit vše jako přečtené",
+      "empty": "Máte vše aktuální",
+      "types": {
+        "MESSAGE": "Nová zpráva",
+        "DOCUMENT_SHARED": "Dokument sdílen",
+        "SIGNATURE_REQUESTED": "Vyžádán podpis",
+        "EXTENSION_RESPONSE": "Aktualizace žádosti o prodloužení",
+        "RENTAL_UPDATE": "Aktualizace pronájmu",
+        "DAMAGE_REPORT_UPDATE": "Aktualizace hlášení škody"
+      }
+    },
+    "assets": {
+      "title": "Vybavení",
+      "manufacturer": "Výrobce",
+      "model": "Model",
+      "condition": "Poznámky ke stavu"
+    },
+    "darkMode": {
+      "toggle": "Přepnout tmavý režim"
+    }
+  },
+  "timeline": {
+    "title": "Časová osa",
+    "empty": "Zatím nezaznamenána žádná aktivita",
+    "searchPlaceholder": "Hledat v časové ose…",
+    "today": "Dnes",
+    "yesterday": "Včera",
+    "hint": "Pište pro hledání, použijte ↑/↓ pro pohyb mezi událostmi"
+  }
+}

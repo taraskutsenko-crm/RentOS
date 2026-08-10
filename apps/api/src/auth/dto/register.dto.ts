@@ -1,4 +1,5 @@
-import { IsEmail, IsString, Length, Matches, MaxLength, MinLength } from "class-validator";
+import { supportedLanguages } from "@rentos/localization";
+import { IsEmail, IsIn, IsString, Length, Matches, MaxLength, MinLength } from "class-validator";
 
 export class RegisterDto {
   @IsEmail()
@@ -31,9 +32,9 @@ export class RegisterDto {
   @Length(2, 2)
   countryCode!: string;
 
-  @IsString()
-  @MinLength(2)
-  @MaxLength(10)
+  @IsIn(supportedLanguages, {
+    message: `defaultLanguage must be one of: ${supportedLanguages.join(", ")}`,
+  })
   defaultLanguage!: string;
 
   @IsString()

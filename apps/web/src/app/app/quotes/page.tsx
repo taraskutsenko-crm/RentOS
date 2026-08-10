@@ -18,6 +18,7 @@ import {
 import { useCurrentTenantId } from "../../../hooks/use-current-tenant";
 import { usePermission } from "../../../hooks/use-current-tenant-role";
 import { useQuotes } from "../../../hooks/use-quotes";
+import { formatDate } from "../../../lib/date-format";
 import { formatMoney } from "../../../lib/money";
 import type { QuoteListItem, QuoteStatus } from "../../../types/quote";
 
@@ -33,7 +34,7 @@ const STATUSES: QuoteStatus[] = [
 ];
 
 export default function QuotesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [tenantId] = useCurrentTenantId();
   const [status, setStatus] = useState<QuoteStatus | "">("");
 
@@ -72,7 +73,7 @@ export default function QuotesPage() {
       id: "validUntil",
       header: t("quote.fields.validUntil"),
       sortable: true,
-      cell: (quote) => new Date(quote.validUntil).toLocaleDateString(),
+      cell: (quote) => formatDate(quote.validUntil, i18n.language),
     },
     {
       id: "total",

@@ -6,9 +6,10 @@ import { useTranslation } from "react-i18next";
 
 import { usePortalMessages, useSendPortalMessage } from "../../../../hooks/use-portal-messages";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
+import { formatDateTime } from "../../../../lib/date-format";
 
 export default function PortalMessagesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +49,7 @@ export default function PortalMessagesPage() {
               >
                 <p className="whitespace-pre-wrap">{message.body}</p>
                 <p className="mt-1 text-[10px] opacity-70">
-                  {new Date(message.createdAt).toLocaleString()}
+                  {formatDateTime(message.createdAt, i18n.language)}
                 </p>
               </div>
             ))}

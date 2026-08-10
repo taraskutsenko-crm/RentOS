@@ -1,0 +1,1109 @@
+{
+  "app": {
+    "name": "Havelio",
+    "tagline": "Une plateforme. Tous les actifs.",
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "settingsGroup": "Paramètres"
+    },
+    "shell": {
+      "sidebarLabel": "Navigation principale",
+      "openNav": "Ouvrir la navigation",
+      "closeNav": "Fermer la navigation",
+      "expandSidebar": "Développer la barre latérale",
+      "collapseSidebar": "Réduire la barre latérale",
+      "searchPlaceholder": "Rechercher…",
+      "userMenu": "Menu du compte",
+      "lightMode": "Mode clair",
+      "darkMode": "Mode sombre",
+      "language": "Langue",
+      "create": "Créer",
+      "breadcrumbs": {
+        "new": "Nouveau",
+        "edit": "Modifier"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "empty": "Vous êtes à jour"
+      },
+      "commandPalette": {
+        "title": "Palette de commandes",
+        "placeholder": "Rechercher ou accéder à…",
+        "noResults": "Aucun résultat trouvé",
+        "pagesGroup": "Pages",
+        "quickActionsGroup": "Actions rapides",
+        "commandsGroup": "Commandes",
+        "pinnedGroup": "Épinglés",
+        "recentGroup": "Récents",
+        "hint": "Appuyez sur {{keys}} pour rechercher ou naviguer"
+      },
+      "shortcuts": {
+        "title": "Raccourcis clavier",
+        "openPalette": "Ouvrir la palette de commandes",
+        "newItem": "Nouvel élément",
+        "help": "Afficher les raccourcis clavier",
+        "goCustomers": "Aller aux clients",
+        "goRentals": "Aller aux locations",
+        "goAssets": "Aller aux actifs",
+        "goDocuments": "Aller aux documents",
+        "goQuotes": "Aller aux devis",
+        "groupGeneral": "Général",
+        "groupNavigation": "Navigation",
+        "settingsSubtitle": "Tous les raccourcis enregistrés dans l'application — toujours à jour avec ce qui est réellement disponible."
+      },
+      "pin": "Épingler",
+      "unpin": "Désépingler"
+    }
+  },
+  "common": {
+    "loading": "Chargement…",
+    "error": "Une erreur s'est produite. Veuillez réessayer.",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "dismiss": "Ignorer",
+    "table": {
+      "columns": "Colonnes",
+      "permissionDenied": "Vous n'avez pas la permission de voir ces données.",
+      "retry": "Réessayer",
+      "selectAll": "Sélectionner toutes les lignes",
+      "selectRow": "Sélectionner la ligne",
+      "rowActions": "Actions de la ligne",
+      "searchPlaceholder": "Rechercher…",
+      "clearSearch": "Effacer la recherche",
+      "clearSelection": "Effacer la sélection",
+      "selectedCount": "{{count}} sélectionné(s)"
+    },
+    "pagination": {
+      "range": "{{start}}–{{end}} sur {{total}}",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "pageOf": "Page {{page}} sur {{totalPages}}"
+    },
+    "filters": {
+      "remove": "Retirer le filtre {{filter}}",
+      "resetAll": "Réinitialiser tous les filtres"
+    },
+    "bulkActions": {
+      "delete": "Supprimer",
+      "deleteConfirmTitle": "Supprimer {{count}} clients ?",
+      "deleteConfirmDescription": "Cette action supprime définitivement les clients sélectionnés. Elle est irréversible.",
+      "deletePartialFailure": "{{failed}} sur {{total}} n'ont pas pu être supprimés."
+    }
+  },
+  "nav": {
+    "logout": "Déconnexion",
+    "selectTenant": "Sélectionner l'entreprise"
+  },
+  "auth": {
+    "register": {
+      "title": "Créez votre compte",
+      "subtitle": "Configurez l'espace de travail de votre entreprise",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "passwordConfirmation": "Confirmer le mot de passe",
+      "companyName": "Nom de l'entreprise",
+      "country": "Pays",
+      "language": "Langue",
+      "currency": "Devise",
+      "timezone": "Fuseau horaire",
+      "submit": "Créer le compte",
+      "submitting": "Création du compte…",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signIn": "Se connecter",
+      "companySection": "Entreprise"
+    },
+    "login": {
+      "title": "Se connecter",
+      "subtitle": "Bon retour",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "submitting": "Connexion…",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "signUp": "En créer un"
+    },
+    "errors": {
+      "required": "Ce champ est obligatoire",
+      "invalidEmail": "Saisissez une adresse e-mail valide",
+      "passwordTooShort": "Le mot de passe doit comporter au moins 12 caractères",
+      "passwordUppercase": "Le mot de passe doit contenir une majuscule",
+      "passwordLowercase": "Le mot de passe doit contenir une minuscule",
+      "passwordNumber": "Le mot de passe doit contenir un chiffre",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "emailInUse": "Un compte avec cette adresse e-mail existe déjà",
+      "invalidCredentials": "E-mail ou mot de passe invalide",
+      "accountInactive": "Ce compte est inactif",
+      "generic": "Une erreur s'est produite. Veuillez réessayer."
+    }
+  },
+  "tenant": {
+    "selectTitle": "Sélectionner une entreprise",
+    "selectSubtitle": "Choisissez l'espace de travail à ouvrir",
+    "noTenants": "Vous n'appartenez encore à aucune entreprise",
+    "role": "Rôle"
+  },
+  "country": {
+    "US": "États-Unis",
+    "PL": "Pologne",
+    "DE": "Allemagne",
+    "UA": "Ukraine",
+    "ES": "Espagne",
+    "GB": "Royaume-Uni"
+  },
+  "customer": {
+    "title": "Clients",
+    "subtitle": "Gérez vos fiches clients",
+    "newCustomer": "Nouveau client",
+    "editCustomer": "Modifier le client",
+    "searchPlaceholder": "Rechercher des clients…",
+    "filterStatus": "Statut",
+    "allStatuses": "Tous les statuts",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "company": "Entreprise",
+    "phone": "Téléphone",
+    "email": "E-mail",
+    "vatNumber": "Numéro de TVA",
+    "address": "Adresse",
+    "notes": "Notes",
+    "status": "Statut",
+    "statusActive": "Actif",
+    "statusInactive": "Inactif",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "deleteConfirm": "Voulez-vous vraiment supprimer ce client ?",
+    "noCustomers": "Aucun client trouvé",
+    "backToList": "Retour aux clients",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "portal": {
+      "title": "Accès au portail client",
+      "notInvited": "Pas encore invité",
+      "invited": "Invitation envoyée",
+      "activated": "Portail actif",
+      "invitationExpired": "Invitation expirée",
+      "lastLogin": "Dernière connexion",
+      "invite": "Inviter au portail",
+      "reinvite": "Renvoyer l'invitation",
+      "revoke": "Révoquer l'accès",
+      "revokeConfirm": "Cela déconnectera le client du portail et désactivera son accès jusqu'à une nouvelle invitation. Continuer ?",
+      "inviteLinkCreated": "Lien d'invitation créé — partagez-le avec votre client :",
+      "noEmailOnFile": "Ce client n'a pas d'e-mail enregistré. Ajoutez-en un pour envoyer une invitation.",
+      "extensionRequests": "Demandes de prolongation",
+      "damageReports": "Rapports de dommages",
+      "messages": "Messages du portail",
+      "noExtensionRequests": "Aucune demande de prolongation",
+      "noDamageReports": "Aucun rapport de dommages",
+      "noMessages": "Aucun message pour l'instant",
+      "approve": "Approuver",
+      "reject": "Refuser",
+      "responseMessagePlaceholder": "Note facultative pour le client…",
+      "markReviewed": "Marquer comme examiné",
+      "markResolved": "Marquer comme résolu",
+      "convertToDocument": "Convertir en document",
+      "sendMessage": "Envoyer",
+      "messagePlaceholder": "Répondre à ce client…"
+    },
+    "timeline": {
+      "created": "Client créé",
+      "updated": "Client mis à jour",
+      "deleted": "Client supprimé"
+    },
+    "summary": {
+      "totalRentals": "Locations totales",
+      "activeRentals": "Locations actives",
+      "totalRevenue": "Revenu total",
+      "damageReports": "Rapports de dommages"
+    },
+    "sections": {
+      "documents": "Documents"
+    },
+    "documentsEmpty": "Aucun document lié à ce client pour l'instant"
+  },
+  "asset": {
+    "title": "Actifs",
+    "subtitle": "Gérez chaque article louable de votre entreprise",
+    "newAsset": "Nouvel actif",
+    "editAsset": "Modifier l'actif",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "delete": "Supprimer",
+    "deleteConfirm": "Voulez-vous vraiment supprimer cet actif ?",
+    "searchPlaceholder": "Rechercher des actifs…",
+    "allCategories": "Toutes les catégories",
+    "allStatuses": "Tous les statuts",
+    "noAssets": "Aucun actif trouvé",
+    "view": "Voir",
+    "rentableYes": "Oui",
+    "rentableNo": "Non",
+    "noTimelineEvents": "Aucune activité enregistrée pour l'instant",
+    "noImages": "Aucune image téléchargée pour l'instant",
+    "noDocuments": "Aucun document téléchargé pour l'instant",
+    "platformDocumentsEmpty": "Aucun document lié à cet actif pour l'instant",
+    "sort": {
+      "newest": "Plus récents d'abord",
+      "oldest": "Plus anciens d'abord",
+      "nameAsc": "Nom (A–Z)",
+      "nameDesc": "Nom (Z–A)"
+    },
+    "fields": {
+      "name": "Nom",
+      "description": "Description",
+      "internalNumber": "Numéro interne",
+      "sku": "Référence (SKU)",
+      "serialNumber": "Numéro de série",
+      "barcode": "Code-barres",
+      "qrCodeValue": "Valeur du QR code",
+      "category": "Catégorie",
+      "status": "Statut",
+      "statusDefaultHint": "Par défaut (Disponible)",
+      "manufacturer": "Fabricant",
+      "model": "Modèle",
+      "purchaseDate": "Date d'achat",
+      "purchasePrice": "Prix d'achat",
+      "currency": "Devise",
+      "replacementValue": "Valeur de remplacement",
+      "conditionNotes": "Notes sur l'état",
+      "isRentable": "Louable",
+      "isActive": "Actif",
+      "currentLocation": "Emplacement actuel",
+      "locationChangeHint": "L'emplacement se modifie depuis la page de détail de l'actif, afin que chaque déplacement soit enregistré dans la chronologie.",
+      "selectPlaceholder": "Sélectionner…",
+      "primaryImage": "Principale",
+      "documentTitle": "Titre du document",
+      "booleanYes": "Oui"
+    },
+    "sections": {
+      "basicInfo": "Informations de base",
+      "identification": "Identification",
+      "category": "Catégorie",
+      "status": "Statut",
+      "manufacturerModel": "Fabricant et modèle",
+      "financial": "Informations financières",
+      "locationCondition": "Emplacement et état",
+      "customFields": "Champs personnalisés",
+      "images": "Images",
+      "documents": "Documents",
+      "timeline": "Chronologie",
+      "filesManagement": "Images et documents",
+      "platformDocuments": "Documents"
+    },
+    "actions": {
+      "changeStatus": "Changer le statut",
+      "changeLocation": "Changer l'emplacement",
+      "deleteImage": "Supprimer l'image",
+      "deleteDocument": "Supprimer",
+      "uploadDocument": "Téléverser"
+    },
+    "errors": {
+      "customFieldRequired": "Ce champ est obligatoire",
+      "categoryRequired": "Sélectionnez une catégorie",
+      "statusCodeFormat": "Le code doit contenir des lettres majuscules, des chiffres et des underscores",
+      "fieldKeyFormat": "La clé doit contenir des lettres minuscules, des chiffres et des underscores"
+    },
+    "timeline": {
+      "created": "Actif créé",
+      "updated": "Actif mis à jour",
+      "status_changed": "Statut modifié",
+      "location_changed": "Emplacement modifié",
+      "image_uploaded": "Image téléversée",
+      "document_uploaded": "Document téléversé"
+    },
+    "summary": {
+      "totalRentals": "Locations totales",
+      "revenueGenerated": "Revenu généré"
+    },
+    "documentTypes": {
+      "PURCHASE_DOCUMENT": "Justificatif d'achat",
+      "MANUAL": "Manuel",
+      "CERTIFICATE": "Certificat",
+      "INSURANCE": "Assurance",
+      "REGISTRATION": "Immatriculation",
+      "INSPECTION": "Rapport d'inspection",
+      "OTHER": "Autre"
+    },
+    "fieldTypes": {
+      "TEXT": "Texte",
+      "TEXTAREA": "Texte long",
+      "INTEGER": "Nombre entier",
+      "DECIMAL": "Nombre décimal",
+      "BOOLEAN": "Oui/Non",
+      "DATE": "Date",
+      "DATETIME": "Date et heure",
+      "SELECT": "Choix unique",
+      "MULTISELECT": "Choix multiple",
+      "URL": "Lien",
+      "EMAIL": "E-mail",
+      "PHONE": "Téléphone"
+    },
+    "categorySettings": {
+      "navLabel": "Catégories",
+      "title": "Catégories d'actifs",
+      "subtitle": "Organisez vos actifs en arborescence de catégories",
+      "newCategoryName": "Nom de la nouvelle catégorie",
+      "parent": "Catégorie parente",
+      "noParent": "Aucun parent (niveau supérieur)",
+      "create": "Ajouter une catégorie",
+      "noCategories": "Aucune catégorie pour l'instant",
+      "activate": "Activer",
+      "deactivate": "Désactiver",
+      "deleteConfirm": "Supprimer cette catégorie ? Impossible tant qu'elle contient des actifs actifs ou des sous-catégories."
+    },
+    "statusSettings": {
+      "navLabel": "Statuts",
+      "title": "Statuts des actifs",
+      "subtitle": "Configurez les statuts de cycle de vie que les actifs peuvent avoir",
+      "name": "Nom",
+      "code": "Code",
+      "type": "Type",
+      "systemStatus": "Système",
+      "customStatus": "Personnalisé",
+      "availableForRental": "Disponible à la location",
+      "create": "Ajouter un statut",
+      "deleteConfirm": "Supprimer ce statut ? Impossible pour les statuts système ou les statuts actuellement utilisés."
+    },
+    "fieldSettings": {
+      "navLabel": "Champs personnalisés",
+      "title": "Champs personnalisés d'actifs",
+      "subtitle": "Définissez des attributs spécifiques pour vos catégories d'actifs",
+      "name": "Nom",
+      "key": "Clé",
+      "category": "Catégorie",
+      "globalField": "Toutes les catégories",
+      "fieldType": "Type de champ",
+      "optionsHint": "Une option par ligne",
+      "required": "Obligatoire",
+      "filterable": "Filtrable",
+      "searchable": "Recherchable",
+      "create": "Ajouter un champ",
+      "deleteConfirm": "Supprimer cette définition de champ personnalisé ?"
+    }
+  },
+  "rental": {
+    "title": "Locations",
+    "subtitle": "Réservez, suivez et retournez les actifs loués",
+    "newRental": "Nouvelle location",
+    "editRental": "Modifier la location",
+    "save": "Enregistrer",
+    "deleteConfirm": "Voulez-vous vraiment supprimer cette location ?",
+    "searchPlaceholder": "Rechercher des locations…",
+    "allStatuses": "Tous les statuts",
+    "noRentals": "Aucune location trouvée",
+    "statuses": {
+      "DRAFT": "Brouillon",
+      "QUOTE": "Devis",
+      "RESERVED": "Réservée",
+      "ACTIVE": "Active",
+      "RETURNED": "Retournée",
+      "COMPLETED": "Terminée",
+      "CANCELLED": "Annulée"
+    },
+    "billingModes": {
+      "DAILY": "Journalier",
+      "WEEKLY": "Hebdomadaire",
+      "MONTHLY": "Mensuel",
+      "CUSTOM": "Personnalisé"
+    },
+    "fields": {
+      "rentalNumber": "Numéro de location",
+      "status": "Statut",
+      "plannedStart": "Début prévu",
+      "plannedEnd": "Fin prévue",
+      "actualStart": "Début réel",
+      "actualEnd": "Fin réelle",
+      "billingMode": "Mode de facturation",
+      "quantity": "Quantité",
+      "dailyPrice": "Prix journalier",
+      "dailyPriceForRemainder": "Prix journalier (jours restants)",
+      "weeklyPrice": "Prix hebdomadaire",
+      "monthlyPrice": "Prix mensuel",
+      "customPrice": "Prix personnalisé",
+      "deposit": "Caution",
+      "itemDiscount": "Remise sur l'article",
+      "discount": "Remise",
+      "tax": "Taxe",
+      "subtotal": "Sous-total",
+      "total": "Total",
+      "internalNotes": "Notes internes",
+      "returnedAt": "Retourné le",
+      "sourceQuote": "Devis d'origine"
+    },
+    "sections": {
+      "details": "Détails",
+      "items": "Actifs",
+      "financial": "Résumé financier",
+      "customer": "Client",
+      "documents": "Documents"
+    },
+    "documents": {
+      "empty": "Aucun document lié à cette location pour l'instant"
+    },
+    "documentChecklist": {
+      "title": "Liste de contrôle des documents",
+      "items": {
+        "commercialOffer": "Offre commerciale",
+        "contract": "Contrat de location",
+        "handoverProtocol": "Protocole de remise",
+        "returnProtocol": "Protocole de retour"
+      },
+      "states": {
+        "present": "Lié",
+        "missing": "Manquant",
+        "notRequired": "Pas encore requis"
+      }
+    },
+    "timeIntelligence": {
+      "starts_today": "Débute aujourd'hui",
+      "starts_tomorrow": "Débute demain",
+      "starts_in_days": "Débute dans {{count}} jours",
+      "days_remaining": "{{count}} jours restants",
+      "due_today": "Échéance aujourd'hui",
+      "overdue": "En retard de {{count}} jours",
+      "completed": "Terminée",
+      "cancelled": "Annulée",
+      "none": "—"
+    },
+    "actions": {
+      "reserve": "Réserver",
+      "start": "Démarrer la location",
+      "returnAll": "Tout retourner",
+      "cancel": "Annuler la location"
+    },
+    "timeline": {
+      "created": "Location créée",
+      "updated": "Location mise à jour",
+      "status_changed": "Statut modifié",
+      "items_returned": "Article(s) retourné(s)"
+    },
+    "summary": {
+      "totalDeposit": "Caution totale",
+      "daysRemaining": "Jours restants",
+      "rentalValue": "Valeur de la location",
+      "assetsCount": "Nombre d'actifs",
+      "timeStatus": "Statut temporel"
+    },
+    "errors": {
+      "customerRequired": "Sélectionnez un client",
+      "datesRequired": "Les dates de début et de fin prévues sont obligatoires",
+      "endBeforeStart": "La fin prévue doit être après le début prévu",
+      "assetRequired": "Sélectionnez un actif",
+      "selectAtLeastOneAsset": "Sélectionnez au moins un actif",
+      "customMonthLengthRequired": "Saisissez un nombre de jours entre 1 et 365"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Client",
+        "assets": "Actifs",
+        "dates": "Dates",
+        "pricing": "Tarification",
+        "review": "Vérification"
+      },
+      "back": "Retour",
+      "next": "Suivant",
+      "creating": "Création de la location…",
+      "createRental": "Créer la location",
+      "availabilityCheck": "Vérification de disponibilité",
+      "available": "Disponible",
+      "unavailable": "Non disponible pour ces dates",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}} mois calendaires × {{price}}",
+        "FIXED_30_DAYS": "{{count}} périodes fixes de 30 jours × {{price}}",
+        "CUSTOM": "{{count}} périodes personnalisées de {{length}} jours × {{price}}",
+        "days": "{{count}} jours × {{price}}",
+        "pending": "Saisissez des dates et des prix valides pour voir le détail de la tarification"
+      }
+    },
+    "availabilityCalendar": {
+      "title": "Calendrier de disponibilité",
+      "subtitle": "Vérifiez la disponibilité des actifs avant de les réserver",
+      "previousMonth": "Mois précédent",
+      "nextMonth": "Mois suivant",
+      "selectAssetsHint": "Sélectionnez un ou plusieurs actifs pour voir leur disponibilité",
+      "booked": "Réservé",
+      "free": "Libre"
+    },
+    "billingSettings": {
+      "navLabel": "Paramètres de facturation",
+      "title": "Paramètres de facturation des locations",
+      "subtitle": "Configurez la facturation des locations tarifées MENSUELLEMENT pour cette entreprise",
+      "monthlyMethod": "Méthode de facturation mensuelle",
+      "customMonthLengthDays": "Nombre de jours dans un mois de facturation personnalisé",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saved": "Paramètres de facturation enregistrés",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "Mois calendaire",
+          "description": "Facture d'une date à la date correspondante du mois calendaire suivant, avec gestion de fin de mois."
+        },
+        "FIXED_30_DAYS": {
+          "label": "30 jours fixes",
+          "description": "Chaque tranche de 30 jours facturables est traitée comme une unité de facturation mensuelle."
+        },
+        "CUSTOM": {
+          "label": "Période personnalisée",
+          "description": "Définissez combien de jours facturables composent une unité de facturation mensuelle."
+        }
+      }
+    }
+  },
+  "quote": {
+    "title": "Devis",
+    "subtitle": "Préparez et envoyez des offres commerciales avant de créer une location",
+    "newQuote": "Nouveau devis",
+    "editQuote": "Modifier le devis",
+    "save": "Enregistrer",
+    "deleteConfirm": "Voulez-vous vraiment supprimer ce devis ?",
+    "searchPlaceholder": "Rechercher des devis…",
+    "allStatuses": "Tous les statuts",
+    "noQuotes": "Aucun devis trouvé",
+    "convertConfirm": "Convertir ce devis en location ?",
+    "availabilityWarningTitle": "Un ou plusieurs actifs peuvent ne pas être disponibles pour les dates prévues",
+    "statuses": {
+      "DRAFT": "Brouillon",
+      "SENT": "Envoyé",
+      "VIEWED": "Consulté",
+      "ACCEPTED": "Accepté",
+      "REJECTED": "Refusé",
+      "EXPIRED": "Expiré",
+      "CONVERTED": "Converti",
+      "CANCELLED": "Annulé"
+    },
+    "sections": {
+      "customer": "Client",
+      "documents": "Documents"
+    },
+    "documents": {
+      "empty": "Aucun document lié à ce devis pour l'instant"
+    },
+    "summary": {
+      "quoteValue": "Valeur du devis",
+      "depositTotal": "Caution totale",
+      "itemsCount": "Articles",
+      "validityStatus": "Statut de validité"
+    },
+    "validityIntelligence": {
+      "expires_today": "Expire aujourd'hui",
+      "expires_tomorrow": "Expire demain",
+      "expires_in_days": "Expire dans {{count}} jours",
+      "expired": "Expiré",
+      "accepted": "Accepté",
+      "rejected": "Refusé",
+      "converted": "Converti",
+      "cancelled": "Annulé"
+    },
+    "itemTypes": {
+      "ASSET": "Actif",
+      "SERVICE": "Service",
+      "PRODUCT": "Produit",
+      "FEE": "Frais",
+      "DELIVERY": "Livraison",
+      "COLLECTION": "Collecte",
+      "LABOR": "Main-d'œuvre",
+      "CUSTOM": "Personnalisé"
+    },
+    "billingModes": {
+      "DAILY": "Journalier",
+      "WEEKLY": "Hebdomadaire",
+      "MONTHLY": "Mensuel",
+      "CUSTOM": "Personnalisé",
+      "FLAT": "Forfaitaire"
+    },
+    "discountTypes": {
+      "FIXED": "Montant fixe",
+      "PERCENTAGE": "Pourcentage"
+    },
+    "fields": {
+      "quoteNumber": "Numéro de devis",
+      "status": "Statut",
+      "issueDate": "Date d'émission",
+      "validUntil": "Valide jusqu'au",
+      "name": "Nom",
+      "description": "Description",
+      "itemType": "Type d'article",
+      "unit": "Unité",
+      "unitPlaceholder": "ex. jour, heure, pièce",
+      "billingMode": "Mode de facturation",
+      "quantity": "Quantité",
+      "unitPrice": "Prix unitaire",
+      "dailyPrice": "Prix journalier",
+      "weeklyPrice": "Prix hebdomadaire",
+      "monthlyPrice": "Prix mensuel",
+      "customPrice": "Prix personnalisé",
+      "deposit": "Caution",
+      "discountType": "Type de remise",
+      "noDiscount": "Aucune remise",
+      "discountPercent": "Remise (%)",
+      "discountAmount": "Montant de la remise",
+      "taxRatePercent": "Taux de taxe (%)",
+      "taxTotal": "Taxe",
+      "depositTotal": "Caution",
+      "customerNotes": "Notes client",
+      "termsAndConditions": "Conditions générales",
+      "convertedRental": "Location convertie"
+    },
+    "actions": {
+      "send": "Envoyer le devis",
+      "accept": "Accepter",
+      "reject": "Refuser",
+      "rejectPrompt": "Motif du refus (facultatif)",
+      "cancel": "Annuler le devis",
+      "duplicate": "Dupliquer",
+      "convert": "Convertir en location",
+      "removeItem": "Retirer",
+      "addServiceItem": "Ajouter un produit ou service",
+      "viewPdf": "Voir le PDF",
+      "regeneratePdf": "Régénérer le PDF",
+      "downloadPdf": "Télécharger le PDF"
+    },
+    "timeline": {
+      "created": "Devis créé",
+      "updated": "Devis mis à jour",
+      "status_changed": "Statut modifié",
+      "sent": "Devis envoyé",
+      "viewed": "Consulté par le client",
+      "accepted": "Accepté",
+      "rejected": "Refusé",
+      "duplicated": "Dupliqué",
+      "converted": "Converti en location",
+      "pdf_generated": "PDF généré"
+    },
+    "errors": {
+      "customerRequired": "Sélectionnez un client",
+      "validUntilRequired": "La date de validité est obligatoire",
+      "datesRequired": "Les dates de début et de fin prévues sont obligatoires",
+      "endBeforeStart": "La fin prévue doit être après le début prévu",
+      "validUntilBeforeIssueDate": "La date de validité ne peut pas être dans le passé",
+      "itemNameRequired": "Saisissez un nom pour cet article",
+      "quantityMustBePositive": "La quantité doit être d'au moins 1",
+      "noItems": "Ajoutez au moins un article",
+      "onlyDraftEditable": "Seuls les devis en brouillon peuvent être modifiés — dupliquez plutôt ce devis"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Client",
+        "dates": "Dates",
+        "assets": "Actifs",
+        "services": "Produits et services",
+        "pricing": "Tarification",
+        "terms": "Conditions",
+        "review": "Vérification"
+      },
+      "saving": "Enregistrement du devis…",
+      "createQuote": "Créer le devis",
+      "noServiceItems": "Aucun produit ou service ajouté pour l'instant"
+    },
+    "public": {
+      "notFound": "Ce lien de devis est invalide ou a expiré",
+      "acceptedNotice": "Accepté par {{name}}",
+      "rejectedNotice": "Ce devis a été refusé",
+      "acceptanceDisclaimer": "En acceptant ci-dessous, vous enregistrez votre acceptation de ce devis. Il ne s'agit pas d'une signature électronique qualifiée.",
+      "rejectReasonPlaceholder": "Indiquez la raison (facultatif)",
+      "confirmReject": "Confirmer le refus"
+    }
+  },
+  "document": {
+    "title": "Documents",
+    "subtitle": "Générez, partagez, envoyez et signez chaque document depuis un seul endroit",
+    "newDocument": "Nouveau document",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "deleteConfirm": "Voulez-vous vraiment supprimer ce document ?",
+    "searchPlaceholder": "Rechercher des documents…",
+    "allStatuses": "Tous les statuts",
+    "allTypes": "Tous les types",
+    "noDocuments": "Aucun document trouvé",
+    "backToList": "Retour aux documents",
+    "types": {
+      "QUOTE": "Devis",
+      "CONTRACT": "Contrat de location",
+      "HANDOVER_PROTOCOL": "Protocole de remise",
+      "RETURN_PROTOCOL": "Protocole de retour",
+      "DAMAGE_REPORT": "Rapport de dommages",
+      "CONTRACT_AMENDMENT": "Avenant au contrat",
+      "CUSTOM": "Personnalisé"
+    },
+    "statuses": {
+      "DRAFT": "Brouillon",
+      "READY": "Prêt",
+      "SENT": "Envoyé",
+      "VIEWED": "Consulté",
+      "PARTIALLY_SIGNED": "Partiellement signé",
+      "SIGNED": "Signé",
+      "REJECTED": "Refusé",
+      "VOIDED": "Annulé",
+      "ARCHIVED": "Archivé"
+    },
+    "fields": {
+      "documentNumber": "Numéro de document",
+      "documentType": "Type de document",
+      "status": "Statut",
+      "title": "Titre",
+      "customTypeName": "Nom du type personnalisé",
+      "none": "Aucun",
+      "version": "Version",
+      "createdAt": "Créé",
+      "customer": "Client",
+      "rental": "Location",
+      "quote": "Devis",
+      "asset": "Actif"
+    },
+    "summary": {
+      "total": "Total des documents",
+      "draft": "Brouillon",
+      "sent": "Envoyé",
+      "signed": "Signé"
+    },
+    "actions": {
+      "viewPdf": "Voir le PDF",
+      "regeneratePdf": "Régénérer le PDF",
+      "markReady": "Marquer comme prêt",
+      "markSent": "Marquer comme envoyé",
+      "markViewed": "Marquer comme consulté",
+      "markSigned": "Marquer comme signé",
+      "markPartiallySigned": "Marquer comme partiellement signé",
+      "reject": "Refuser",
+      "rejectPrompt": "Motif du refus (facultatif)",
+      "duplicate": "Dupliquer",
+      "void": "Annuler",
+      "voidPrompt": "Motif de l'annulation (facultatif)",
+      "archive": "Archiver"
+    },
+    "sections": {
+      "preview": "Aperçu",
+      "email": "Envoi par e-mail",
+      "signature": "Signature électronique",
+      "relatedEntities": "Enregistrements liés"
+    },
+    "email": {
+      "recipientType": "Destinataire",
+      "recipientTypes": {
+        "CUSTOMER": "Client",
+        "EMPLOYEE": "Employé",
+        "CUSTOM": "E-mail personnalisé"
+      },
+      "customEmail": "Adresse e-mail",
+      "subject": "Objet",
+      "message": "Message",
+      "send": "Envoyer l'e-mail",
+      "retry": "Réessayer",
+      "noDeliveries": "Aucun e-mail envoyé pour l'instant",
+      "statuses": {
+        "PENDING": "En attente",
+        "SENT": "Envoyé",
+        "FAILED": "Échoué"
+      }
+    },
+    "signature": {
+      "signerName": "Nom du signataire",
+      "signerEmail": "E-mail du signataire",
+      "request": "Demander une signature",
+      "refresh": "Actualiser le statut",
+      "cancel": "Annuler",
+      "noRequests": "Aucune demande de signature pour l'instant",
+      "statuses": {
+        "REQUESTED": "Demandée",
+        "PENDING": "En attente",
+        "SIGNED": "Signée",
+        "REJECTED": "Refusée",
+        "EXPIRED": "Expirée",
+        "CANCELLED": "Annulée"
+      },
+      "providers": {
+        "LOCAL_MOCK": "Manuelle (interne)",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "Document créé",
+      "updated": "Document mis à jour",
+      "status_changed": "Statut modifié",
+      "sent": "Document envoyé",
+      "viewed": "Consulté",
+      "signed": "Signature enregistrée",
+      "downloaded": "Téléchargé",
+      "archived": "Archivé",
+      "version_created": "Nouvelle version créée",
+      "file_uploaded": "Fichier téléversé",
+      "file_deleted": "Fichier supprimé",
+      "rendered": "PDF généré",
+      "shared": "Lien de partage créé",
+      "share_viewed": "Consulté via le lien de partage",
+      "share_downloaded": "Téléchargé via le lien de partage",
+      "share_disabled": "Lien de partage désactivé",
+      "email_sent": "E-mail envoyé",
+      "email_failed": "Échec de l'envoi de l'e-mail",
+      "signature_requested": "Signature demandée",
+      "signature_status_changed": "Statut de la signature modifié"
+    },
+    "errors": {
+      "customTypeNameRequired": "Saisissez un nom pour ce type de document personnalisé"
+    }
+  },
+  "documentTemplate": {
+    "title": "Modèles de documents",
+    "subtitle": "Gérez les modèles HTML utilisés pour générer chaque type de document",
+    "newTemplate": "Nouveau modèle",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "searchPlaceholder": "Rechercher des modèles…",
+    "noTemplates": "Aucun modèle trouvé",
+    "statuses": {
+      "DRAFT": "Brouillon",
+      "ACTIVE": "Actif",
+      "ARCHIVED": "Archivé"
+    },
+    "fields": {
+      "name": "Nom",
+      "description": "Description",
+      "htmlContent": "Contenu HTML",
+      "css": "CSS",
+      "status": "Statut",
+      "versionCount": "Versions",
+      "current": "actuel"
+    },
+    "actions": {
+      "activate": "Activer",
+      "archive": "Archiver",
+      "restore": "Restaurer",
+      "duplicate": "Dupliquer",
+      "saveAsNewVersion": "Enregistrer comme nouvelle version",
+      "restoreVersion": "Restaurer cette version"
+    },
+    "sections": {
+      "metadata": "Détails",
+      "content": "Contenu",
+      "preview": "Aperçu",
+      "versions": "Historique des versions"
+    }
+  },
+  "share": {
+    "title": "Liens de partage publics",
+    "fields": {
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Mot de passe d'accès facultatif",
+      "views": "Vues",
+      "downloads": "Téléchargements",
+      "expiresAt": "Expire"
+    },
+    "status": {
+      "active": "Actif",
+      "disabled": "Désactivé"
+    },
+    "actions": {
+      "create": "Créer un lien",
+      "disable": "Désactiver"
+    },
+    "noLinks": "Aucun lien de partage pour l'instant",
+    "linkCreatedPrompt": "Partagez ce lien avec votre client :",
+    "public": {
+      "passwordRequiredTitle": "Ce document est protégé par un mot de passe",
+      "wrongPassword": "Mot de passe incorrect",
+      "unlock": "Déverrouiller",
+      "notFound": "Ce lien est invalide ou a expiré",
+      "downloadPdf": "Télécharger le PDF"
+    }
+  },
+  "dashboard": {
+    "welcome": "Bon retour, {{name}}",
+    "sections": {
+      "overview": "Vue d'ensemble",
+      "quickActions": "Actions rapides",
+      "recentActivity": "Activité récente"
+    },
+    "metrics": {
+      "customers": "Clients",
+      "activeRentals": "Locations actives",
+      "availableAssets": "Actifs disponibles",
+      "pendingQuotes": "Devis en attente",
+      "needsAttention": "Nécessite une attention"
+    },
+    "recentRentals": "Locations récentes",
+    "recentDocuments": "Documents récents",
+    "viewAll": "Tout voir",
+    "emptyRecentRentals": "Aucune location pour l'instant",
+    "emptyRecentDocuments": "Aucun document pour l'instant"
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "rentals": "Locations",
+      "calendar": "Calendrier",
+      "documents": "Documents",
+      "messages": "Messages",
+      "notifications": "Notifications",
+      "logout": "Déconnexion"
+    },
+    "auth": {
+      "login": {
+        "title": "Portail client",
+        "subtitle": "Connectez-vous pour gérer vos locations",
+        "company": "Entreprise",
+        "companyPlaceholder": "votre-entreprise",
+        "email": "E-mail",
+        "password": "Mot de passe",
+        "submit": "Se connecter",
+        "submitting": "Connexion…"
+      },
+      "activate": {
+        "title": "Activez votre compte",
+        "subtitle": "Définissez un mot de passe pour accéder à votre portail client",
+        "password": "Mot de passe",
+        "submit": "Activer le compte",
+        "submitting": "Activation…",
+        "invalidToken": "Ce lien d'invitation est invalide ou a expiré.",
+        "successTitle": "Bienvenue chez {{company}} !",
+        "successDescription": "Votre compte est prêt. Redirection vers votre tableau de bord…"
+      },
+      "errors": {
+        "invalidCredentials": "E-mail, mot de passe ou entreprise invalide.",
+        "invalidToken": "Invitation invalide ou expirée.",
+        "generic": "Une erreur s'est produite. Veuillez réessayer."
+      },
+      "tagline": "Gérez vos locations, documents et demandes en un seul endroit."
+    },
+    "dashboard": {
+      "title": "Tableau de bord",
+      "welcome": "Bon retour, {{name}}",
+      "currentRentals": "Locations en cours",
+      "upcomingRentals": "Locations à venir",
+      "unreadMessages": "Messages non lus",
+      "pendingSignatures": "Signatures en attente",
+      "pendingExtensions": "Demandes de prolongation en attente",
+      "recentRentals": "Locations récentes",
+      "viewAll": "Tout voir",
+      "noRentals": "Vous n'avez encore aucune location"
+    },
+    "rentals": {
+      "title": "Locations",
+      "backToList": "Retour aux locations",
+      "searchPlaceholder": "Rechercher des locations…",
+      "filterStatus": "Statut",
+      "allStatuses": "Tous les statuts",
+      "detailTitle": "Location {{number}}",
+      "period": "Période de location",
+      "items": "Équipement",
+      "timeline": "Chronologie",
+      "documents": "Documents",
+      "downloadAllDocuments": "Télécharger tous les documents (.zip)",
+      "qrCode": "QR code",
+      "showQrCode": "Afficher le QR code",
+      "requestExtension": "Demander une prolongation",
+      "reportDamage": "Signaler un dommage",
+      "extensionRequests": "Demandes de prolongation",
+      "damageReports": "Rapports de dommages",
+      "noRentals": "Aucune location trouvée",
+      "quantity": "Qté",
+      "statuses": {
+        "DRAFT": "Brouillon",
+        "QUOTE": "Devis",
+        "RESERVED": "Réservée",
+        "ACTIVE": "Active",
+        "RETURNED": "Retournée",
+        "COMPLETED": "Terminée",
+        "CANCELLED": "Annulée"
+      }
+    },
+    "calendar": {
+      "title": "Calendrier des locations",
+      "empty": "Aucune location pour cette période"
+    },
+    "extensionRequests": {
+      "title": "Demander une prolongation",
+      "currentEnd": "Date de fin actuelle",
+      "newEndDate": "Nouvelle date de fin",
+      "message": "Message (facultatif)",
+      "submit": "Envoyer la demande",
+      "submitting": "Envoi…",
+      "submitted": "Votre demande de prolongation a été envoyée.",
+      "responseFrom": "Réponse",
+      "statuses": {
+        "PENDING": "En attente",
+        "APPROVED": "Approuvée",
+        "REJECTED": "Refusée",
+        "CANCELLED": "Annulée"
+      }
+    },
+    "damageReports": {
+      "title": "Signaler un dommage",
+      "description": "Description",
+      "descriptionPlaceholder": "Décrivez ce qui s'est passé…",
+      "asset": "Équipement (facultatif)",
+      "anyEquipment": "Non précisé / général",
+      "photos": "Photos",
+      "addPhoto": "Ajouter une photo",
+      "uploading": "Téléversement…",
+      "submit": "Envoyer le rapport",
+      "submitting": "Envoi…",
+      "submitted": "Votre rapport de dommages a été envoyé.",
+      "statuses": {
+        "SUBMITTED": "Envoyé",
+        "REVIEWED": "Examiné",
+        "RESOLVED": "Résolu",
+        "CONVERTED_TO_DOCUMENT": "Documenté"
+      }
+    },
+    "documents": {
+      "title": "Documents",
+      "backToList": "Retour aux documents",
+      "filterStatus": "Statut",
+      "allStatuses": "Tous les statuts",
+      "preview": "Aperçu",
+      "download": "Télécharger le PDF",
+      "sign": "Signer le document",
+      "signing": "Signature…",
+      "signed": "Vous avez signé ce document.",
+      "pendingSignature": "En attente de votre signature",
+      "noDocuments": "Aucun document trouvé",
+      "signatureRequests": "Demandes de signature"
+    },
+    "messages": {
+      "title": "Messages",
+      "placeholder": "Écrire un message…",
+      "send": "Envoyer",
+      "sending": "Envoi…",
+      "empty": "Aucun message pour l'instant",
+      "generalThread": "Général"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAllRead": "Tout marquer comme lu",
+      "empty": "Vous êtes à jour",
+      "types": {
+        "MESSAGE": "Nouveau message",
+        "DOCUMENT_SHARED": "Document partagé",
+        "SIGNATURE_REQUESTED": "Signature demandée",
+        "EXTENSION_RESPONSE": "Mise à jour de la demande de prolongation",
+        "RENTAL_UPDATE": "Mise à jour de la location",
+        "DAMAGE_REPORT_UPDATE": "Mise à jour du rapport de dommages"
+      }
+    },
+    "assets": {
+      "title": "Équipement",
+      "manufacturer": "Fabricant",
+      "model": "Modèle",
+      "condition": "Notes sur l'état"
+    },
+    "darkMode": {
+      "toggle": "Basculer le mode sombre"
+    }
+  },
+  "timeline": {
+    "title": "Chronologie",
+    "empty": "Aucune activité enregistrée pour l'instant",
+    "searchPlaceholder": "Rechercher dans la chronologie…",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "hint": "Tapez pour rechercher, utilisez ↑/↓ pour naviguer entre les événements"
+  }
+}

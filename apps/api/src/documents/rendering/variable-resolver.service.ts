@@ -35,7 +35,7 @@ export class VariableResolverService {
   ): Promise<RenderContext> {
     const tenant = await this.prisma.tenant.findUniqueOrThrow({
       where: { id: tenantId },
-      select: { name: true, defaultLanguage: true, defaultCurrency: true },
+      select: { name: true, defaultLanguage: true, defaultCurrency: true, timezone: true },
     });
 
     const employeeUser = document.employeeUserId
@@ -61,6 +61,7 @@ export class VariableResolverService {
       : {};
 
     const language = tenant.defaultLanguage;
+    const timezone = tenant.timezone;
     const employeeName = employeeUser
       ? fullName(employeeUser.firstName, employeeUser.lastName)
       : createdByUser
@@ -106,8 +107,8 @@ export class VariableResolverService {
       rental: document.rental
         ? {
             number: document.rental.rentalNumber,
-            start: formatDate(document.rental.plannedStart, language),
-            end: formatDate(document.rental.plannedEnd, language),
+            start: formatDate(document.rental.plannedStart, language, timezone),
+            end: formatDate(document.rental.plannedEnd, language, timezone),
             total: formatMoney(
               document.rental.totalMinor,
               document.rental.currency ?? CURRENCY_FALLBACK,
@@ -125,7 +126,7 @@ export class VariableResolverService {
             ),
           }
         : {},
-      today: formatDate(new Date(), language),
+      today: formatDate(new Date(), language, timezone),
       signature: {
         company: tenant.name,
         employee: employeeName,
@@ -164,12 +165,17 @@ function fullName(firstName: string, lastName: string): string {
   return `${firstName} ${lastName}`.trim();
 }
 
-function formatDate(value: Date, language: string): string {
+/**
+ * `timezone` is the tenant's own IANA zone (`Tenant.timezone`, set at
+ * registration) rather than hardcoded UTC — a rendered contract/document is
+ * dated from the issuing tenant's perspective, not the server's.
+ */
+function formatDate(value: Date, language: string, timezone: string): string {
   return new Intl.DateTimeFormat(language, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-    timeZone: "UTC",
+    timeZone: timezone,
   }).format(value);
 }
 

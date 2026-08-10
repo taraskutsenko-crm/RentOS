@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { localeRegistry } from "@rentos/localization";
 import { Button, Label } from "@rentos/ui";
 import { countries } from "@rentos/shared";
 import Link from "next/link";
@@ -144,12 +145,27 @@ export function RegisterForm() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <AuthField
-            id="defaultLanguage"
-            label={t("auth.register.language")}
-            error={errors.defaultLanguage && t(errors.defaultLanguage.message ?? "")}
-            {...register("defaultLanguage")}
-          />
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="defaultLanguage">{t("auth.register.language")}</Label>
+            <select
+              id="defaultLanguage"
+              className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+              aria-invalid={!!errors.defaultLanguage}
+              aria-describedby={errors.defaultLanguage ? "defaultLanguage-error" : undefined}
+              {...register("defaultLanguage")}
+            >
+              {localeRegistry.map((locale) => (
+                <option key={locale.code} value={locale.code}>
+                  {locale.nativeName}
+                </option>
+              ))}
+            </select>
+            {errors.defaultLanguage && (
+              <p id="defaultLanguage-error" className="text-destructive text-sm">
+                {t(errors.defaultLanguage.message ?? "")}
+              </p>
+            )}
+          </div>
           <AuthField
             id="defaultCurrency"
             label={t("auth.register.currency")}

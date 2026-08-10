@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { usePortalRentals } from "../../../../hooks/use-portal-rentals";
+import { formatMonthYear } from "../../../../lib/date-format";
 import type { PortalRentalListItem } from "../../../../types/portal";
 
 const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -38,7 +39,7 @@ function overlapsDay(rental: PortalRentalListItem, day: Date): boolean {
 }
 
 export default function PortalCalendarPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [monthCursor, setMonthCursor] = useState(() => startOfMonth(new Date()));
   const { data, isLoading } = usePortalRentals({ pageSize: 100 });
 
@@ -62,7 +63,7 @@ export default function PortalCalendarPage() {
             ←
           </Button>
           <span className="min-w-32 text-center text-sm font-medium">
-            {monthCursor.toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+            {formatMonthYear(monthCursor, i18n.language)}
           </span>
           <Button
             variant="outline"

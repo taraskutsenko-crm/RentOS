@@ -1,0 +1,1109 @@
+{
+  "app": {
+    "name": "Havelio",
+    "tagline": "Eén platform. Elk bezit.",
+    "nav": {
+      "dashboard": "Dashboard",
+      "settingsGroup": "Instellingen"
+    },
+    "shell": {
+      "sidebarLabel": "Hoofdnavigatie",
+      "openNav": "Navigatie openen",
+      "closeNav": "Navigatie sluiten",
+      "expandSidebar": "Zijbalk uitklappen",
+      "collapseSidebar": "Zijbalk inklappen",
+      "searchPlaceholder": "Zoeken…",
+      "userMenu": "Accountmenu",
+      "lightMode": "Lichte modus",
+      "darkMode": "Donkere modus",
+      "language": "Taal",
+      "create": "Aanmaken",
+      "breadcrumbs": {
+        "new": "Nieuw",
+        "edit": "Bewerken"
+      },
+      "notifications": {
+        "title": "Meldingen",
+        "empty": "Je bent helemaal bij"
+      },
+      "commandPalette": {
+        "title": "Opdrachtenpalet",
+        "placeholder": "Zoeken of ga naar…",
+        "noResults": "Geen resultaten gevonden",
+        "pagesGroup": "Pagina's",
+        "quickActionsGroup": "Snelle acties",
+        "commandsGroup": "Opdrachten",
+        "pinnedGroup": "Vastgezet",
+        "recentGroup": "Recent",
+        "hint": "Druk op {{keys}} om overal te zoeken of naartoe te gaan"
+      },
+      "shortcuts": {
+        "title": "Sneltoetsen",
+        "openPalette": "Opdrachtenpalet openen",
+        "newItem": "Nieuw item",
+        "help": "Sneltoetsen tonen",
+        "goCustomers": "Ga naar Klanten",
+        "goRentals": "Ga naar Verhuur",
+        "goAssets": "Ga naar Bezittingen",
+        "goDocuments": "Ga naar Documenten",
+        "goQuotes": "Ga naar Offertes",
+        "groupGeneral": "Algemeen",
+        "groupNavigation": "Navigatie",
+        "settingsSubtitle": "Elke sneltoets die in de app is geregistreerd — altijd actueel met wat daadwerkelijk actief is."
+      },
+      "pin": "Vastzetten",
+      "unpin": "Losmaken"
+    }
+  },
+  "common": {
+    "loading": "Laden…",
+    "error": "Er is iets misgegaan. Probeer het opnieuw.",
+    "showPassword": "Wachtwoord tonen",
+    "hidePassword": "Wachtwoord verbergen",
+    "saving": "Opslaan…",
+    "cancel": "Annuleren",
+    "confirm": "Bevestigen",
+    "dismiss": "Sluiten",
+    "table": {
+      "columns": "Kolommen",
+      "permissionDenied": "Je hebt geen toestemming om deze gegevens te bekijken.",
+      "retry": "Opnieuw proberen",
+      "selectAll": "Alle rijen selecteren",
+      "selectRow": "Rij selecteren",
+      "rowActions": "Rijacties",
+      "searchPlaceholder": "Zoeken…",
+      "clearSearch": "Zoekopdracht wissen",
+      "clearSelection": "Selectie wissen",
+      "selectedCount": "{{count}} geselecteerd"
+    },
+    "pagination": {
+      "range": "{{start}}–{{end}} van {{total}}",
+      "previous": "Vorige",
+      "next": "Volgende",
+      "pageOf": "Pagina {{page}} van {{totalPages}}"
+    },
+    "filters": {
+      "remove": "Filter {{filter}} verwijderen",
+      "resetAll": "Alle filters resetten"
+    },
+    "bulkActions": {
+      "delete": "Verwijderen",
+      "deleteConfirmTitle": "{{count}} klanten verwijderen?",
+      "deleteConfirmDescription": "Dit verwijdert de geselecteerde klanten permanent. Dit kan niet ongedaan worden gemaakt.",
+      "deletePartialFailure": "{{failed}} van {{total}} konden niet worden verwijderd."
+    }
+  },
+  "nav": {
+    "logout": "Uitloggen",
+    "selectTenant": "Bedrijf selecteren"
+  },
+  "auth": {
+    "register": {
+      "title": "Maak je account aan",
+      "subtitle": "Stel de werkruimte van je bedrijf in",
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "email": "E-mail",
+      "password": "Wachtwoord",
+      "passwordConfirmation": "Wachtwoord bevestigen",
+      "companyName": "Bedrijfsnaam",
+      "country": "Land",
+      "language": "Taal",
+      "currency": "Valuta",
+      "timezone": "Tijdzone",
+      "submit": "Account aanmaken",
+      "submitting": "Account wordt aangemaakt…",
+      "haveAccount": "Heb je al een account?",
+      "signIn": "Inloggen",
+      "companySection": "Bedrijf"
+    },
+    "login": {
+      "title": "Inloggen",
+      "subtitle": "Welkom terug",
+      "email": "E-mail",
+      "password": "Wachtwoord",
+      "submit": "Inloggen",
+      "submitting": "Bezig met inloggen…",
+      "noAccount": "Heb je nog geen account?",
+      "signUp": "Maak er een aan"
+    },
+    "errors": {
+      "required": "Dit veld is verplicht",
+      "invalidEmail": "Voer een geldig e-mailadres in",
+      "passwordTooShort": "Het wachtwoord moet minstens 12 tekens bevatten",
+      "passwordUppercase": "Het wachtwoord moet een hoofdletter bevatten",
+      "passwordLowercase": "Het wachtwoord moet een kleine letter bevatten",
+      "passwordNumber": "Het wachtwoord moet een cijfer bevatten",
+      "passwordMismatch": "Wachtwoorden komen niet overeen",
+      "emailInUse": "Er bestaat al een account met dit e-mailadres",
+      "invalidCredentials": "Ongeldige e-mail of wachtwoord",
+      "accountInactive": "Dit account is inactief",
+      "generic": "Er is iets misgegaan. Probeer het opnieuw."
+    }
+  },
+  "tenant": {
+    "selectTitle": "Selecteer een bedrijf",
+    "selectSubtitle": "Kies welke werkruimte je wilt openen",
+    "noTenants": "Je hoort nog bij geen enkel bedrijf",
+    "role": "Rol"
+  },
+  "country": {
+    "US": "Verenigde Staten",
+    "PL": "Polen",
+    "DE": "Duitsland",
+    "UA": "Oekraïne",
+    "ES": "Spanje",
+    "GB": "Verenigd Koninkrijk"
+  },
+  "customer": {
+    "title": "Klanten",
+    "subtitle": "Beheer je klantgegevens",
+    "newCustomer": "Nieuwe klant",
+    "editCustomer": "Klant bewerken",
+    "searchPlaceholder": "Klanten zoeken…",
+    "filterStatus": "Status",
+    "allStatuses": "Alle statussen",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
+    "company": "Bedrijf",
+    "phone": "Telefoon",
+    "email": "E-mail",
+    "vatNumber": "Btw-nummer",
+    "address": "Adres",
+    "notes": "Notities",
+    "status": "Status",
+    "statusActive": "Actief",
+    "statusInactive": "Inactief",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "deleteConfirm": "Weet je zeker dat je deze klant wilt verwijderen?",
+    "noCustomers": "Geen klanten gevonden",
+    "backToList": "Terug naar klanten",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "portal": {
+      "title": "Toegang tot klantenportaal",
+      "notInvited": "Nog niet uitgenodigd",
+      "invited": "Uitnodiging verzonden",
+      "activated": "Portaal actief",
+      "invitationExpired": "Uitnodiging verlopen",
+      "lastLogin": "Laatste keer ingelogd",
+      "invite": "Uitnodigen voor portaal",
+      "reinvite": "Uitnodiging opnieuw verzenden",
+      "revoke": "Toegang intrekken",
+      "revokeConfirm": "Hiermee wordt de klant uitgelogd uit het portaal en wordt de toegang uitgeschakeld tot een nieuwe uitnodiging. Doorgaan?",
+      "inviteLinkCreated": "Uitnodigingslink aangemaakt — deel deze met je klant:",
+      "noEmailOnFile": "Deze klant heeft geen e-mailadres geregistreerd. Voeg er een toe om een uitnodiging te versturen.",
+      "extensionRequests": "Verlengingsverzoeken",
+      "damageReports": "Schademeldingen",
+      "messages": "Portaalberichten",
+      "noExtensionRequests": "Geen verlengingsverzoeken",
+      "noDamageReports": "Geen schademeldingen",
+      "noMessages": "Nog geen berichten",
+      "approve": "Goedkeuren",
+      "reject": "Afwijzen",
+      "responseMessagePlaceholder": "Optionele notitie voor de klant…",
+      "markReviewed": "Markeren als beoordeeld",
+      "markResolved": "Markeren als opgelost",
+      "convertToDocument": "Omzetten naar document",
+      "sendMessage": "Verzenden",
+      "messagePlaceholder": "Reageer op deze klant…"
+    },
+    "timeline": {
+      "created": "Klant aangemaakt",
+      "updated": "Klant bijgewerkt",
+      "deleted": "Klant verwijderd"
+    },
+    "summary": {
+      "totalRentals": "Totaal aantal verhuringen",
+      "activeRentals": "Actieve verhuringen",
+      "totalRevenue": "Totale omzet",
+      "damageReports": "Schademeldingen"
+    },
+    "sections": {
+      "documents": "Documenten"
+    },
+    "documentsEmpty": "Nog geen documenten gekoppeld aan deze klant"
+  },
+  "asset": {
+    "title": "Bezittingen",
+    "subtitle": "Beheer elk verhuurbaar item van je bedrijf",
+    "newAsset": "Nieuw bezit",
+    "editAsset": "Bezit bewerken",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "delete": "Verwijderen",
+    "deleteConfirm": "Weet je zeker dat je dit bezit wilt verwijderen?",
+    "searchPlaceholder": "Bezittingen zoeken…",
+    "allCategories": "Alle categorieën",
+    "allStatuses": "Alle statussen",
+    "noAssets": "Geen bezittingen gevonden",
+    "view": "Bekijken",
+    "rentableYes": "Ja",
+    "rentableNo": "Nee",
+    "noTimelineEvents": "Nog geen activiteit geregistreerd",
+    "noImages": "Nog geen afbeeldingen geüpload",
+    "noDocuments": "Nog geen documenten geüpload",
+    "platformDocumentsEmpty": "Nog geen documenten gekoppeld aan dit bezit",
+    "sort": {
+      "newest": "Nieuwste eerst",
+      "oldest": "Oudste eerst",
+      "nameAsc": "Naam (A–Z)",
+      "nameDesc": "Naam (Z–A)"
+    },
+    "fields": {
+      "name": "Naam",
+      "description": "Omschrijving",
+      "internalNumber": "Intern nummer",
+      "sku": "SKU",
+      "serialNumber": "Serienummer",
+      "barcode": "Streepjescode",
+      "qrCodeValue": "QR-codewaarde",
+      "category": "Categorie",
+      "status": "Status",
+      "statusDefaultHint": "Standaard (Beschikbaar)",
+      "manufacturer": "Fabrikant",
+      "model": "Model",
+      "purchaseDate": "Aankoopdatum",
+      "purchasePrice": "Aankoopprijs",
+      "currency": "Valuta",
+      "replacementValue": "Vervangingswaarde",
+      "conditionNotes": "Notities over de staat",
+      "isRentable": "Verhuurbaar",
+      "isActive": "Actief",
+      "currentLocation": "Huidige locatie",
+      "locationChangeHint": "De locatie wordt gewijzigd vanaf de detailpagina van het bezit, zodat elke verplaatsing in de tijdlijn wordt vastgelegd.",
+      "selectPlaceholder": "Selecteren…",
+      "primaryImage": "Primair",
+      "documentTitle": "Documenttitel",
+      "booleanYes": "Ja"
+    },
+    "sections": {
+      "basicInfo": "Basisinformatie",
+      "identification": "Identificatie",
+      "category": "Categorie",
+      "status": "Status",
+      "manufacturerModel": "Fabrikant en model",
+      "financial": "Financiële informatie",
+      "locationCondition": "Locatie en staat",
+      "customFields": "Aangepaste velden",
+      "images": "Afbeeldingen",
+      "documents": "Documenten",
+      "timeline": "Tijdlijn",
+      "filesManagement": "Afbeeldingen en documenten",
+      "platformDocuments": "Documenten"
+    },
+    "actions": {
+      "changeStatus": "Status wijzigen",
+      "changeLocation": "Locatie wijzigen",
+      "deleteImage": "Afbeelding verwijderen",
+      "deleteDocument": "Verwijderen",
+      "uploadDocument": "Uploaden"
+    },
+    "errors": {
+      "customFieldRequired": "Dit veld is verplicht",
+      "categoryRequired": "Selecteer een categorie",
+      "statusCodeFormat": "Code moet uit hoofdletters, cijfers en underscores bestaan",
+      "fieldKeyFormat": "Sleutel moet uit kleine letters, cijfers en underscores bestaan"
+    },
+    "timeline": {
+      "created": "Bezit aangemaakt",
+      "updated": "Bezit bijgewerkt",
+      "status_changed": "Status gewijzigd",
+      "location_changed": "Locatie gewijzigd",
+      "image_uploaded": "Afbeelding geüpload",
+      "document_uploaded": "Document geüpload"
+    },
+    "summary": {
+      "totalRentals": "Totaal aantal verhuringen",
+      "revenueGenerated": "Gegenereerde omzet"
+    },
+    "documentTypes": {
+      "PURCHASE_DOCUMENT": "Aankoopbewijs",
+      "MANUAL": "Handleiding",
+      "CERTIFICATE": "Certificaat",
+      "INSURANCE": "Verzekering",
+      "REGISTRATION": "Registratie",
+      "INSPECTION": "Inspectierapport",
+      "OTHER": "Overig"
+    },
+    "fieldTypes": {
+      "TEXT": "Tekst",
+      "TEXTAREA": "Lange tekst",
+      "INTEGER": "Geheel getal",
+      "DECIMAL": "Decimaal getal",
+      "BOOLEAN": "Ja/Nee",
+      "DATE": "Datum",
+      "DATETIME": "Datum en tijd",
+      "SELECT": "Enkele keuze",
+      "MULTISELECT": "Meervoudige keuze",
+      "URL": "Link",
+      "EMAIL": "E-mail",
+      "PHONE": "Telefoon"
+    },
+    "categorySettings": {
+      "navLabel": "Categorieën",
+      "title": "Bezitscategorieën",
+      "subtitle": "Organiseer je bezittingen in een categorieboom",
+      "newCategoryName": "Naam nieuwe categorie",
+      "parent": "Bovenliggende categorie",
+      "noParent": "Geen bovenliggende categorie (topniveau)",
+      "create": "Categorie toevoegen",
+      "noCategories": "Nog geen categorieën",
+      "activate": "Activeren",
+      "deactivate": "Deactiveren",
+      "deleteConfirm": "Deze categorie verwijderen? Dit kan niet zolang deze actieve bezittingen of subcategorieën bevat."
+    },
+    "statusSettings": {
+      "navLabel": "Statussen",
+      "title": "Bezitsstatussen",
+      "subtitle": "Configureer de levenscyclusstatussen die bezittingen kunnen hebben",
+      "name": "Naam",
+      "code": "Code",
+      "type": "Type",
+      "systemStatus": "Systeem",
+      "customStatus": "Aangepast",
+      "availableForRental": "Beschikbaar voor verhuur",
+      "create": "Status toevoegen",
+      "deleteConfirm": "Deze status verwijderen? Dit kan niet voor systeemstatussen of statussen die momenteel in gebruik zijn."
+    },
+    "fieldSettings": {
+      "navLabel": "Aangepaste velden",
+      "title": "Aangepaste velden voor bezittingen",
+      "subtitle": "Definieer type-specifieke kenmerken voor je bezitscategorieën",
+      "name": "Naam",
+      "key": "Sleutel",
+      "category": "Categorie",
+      "globalField": "Alle categorieën",
+      "fieldType": "Veldtype",
+      "optionsHint": "Eén optie per regel",
+      "required": "Verplicht",
+      "filterable": "Filterbaar",
+      "searchable": "Doorzoekbaar",
+      "create": "Veld toevoegen",
+      "deleteConfirm": "Deze aangepaste velddefinitie verwijderen?"
+    }
+  },
+  "rental": {
+    "title": "Verhuur",
+    "subtitle": "Boek, volg en retourneer verhuurde bezittingen",
+    "newRental": "Nieuwe verhuur",
+    "editRental": "Verhuur bewerken",
+    "save": "Opslaan",
+    "deleteConfirm": "Weet je zeker dat je deze verhuur wilt verwijderen?",
+    "searchPlaceholder": "Verhuur zoeken…",
+    "allStatuses": "Alle statussen",
+    "noRentals": "Geen verhuringen gevonden",
+    "statuses": {
+      "DRAFT": "Concept",
+      "QUOTE": "Offerte",
+      "RESERVED": "Gereserveerd",
+      "ACTIVE": "Actief",
+      "RETURNED": "Geretourneerd",
+      "COMPLETED": "Voltooid",
+      "CANCELLED": "Geannuleerd"
+    },
+    "billingModes": {
+      "DAILY": "Dagelijks",
+      "WEEKLY": "Wekelijks",
+      "MONTHLY": "Maandelijks",
+      "CUSTOM": "Aangepast"
+    },
+    "fields": {
+      "rentalNumber": "Verhuurnummer",
+      "status": "Status",
+      "plannedStart": "Geplande start",
+      "plannedEnd": "Gepland einde",
+      "actualStart": "Werkelijke start",
+      "actualEnd": "Werkelijk einde",
+      "billingMode": "Factureringswijze",
+      "quantity": "Aantal",
+      "dailyPrice": "Dagprijs",
+      "dailyPriceForRemainder": "Dagprijs (resterende dagen)",
+      "weeklyPrice": "Weekprijs",
+      "monthlyPrice": "Maandprijs",
+      "customPrice": "Aangepaste prijs",
+      "deposit": "Borg",
+      "itemDiscount": "Korting op item",
+      "discount": "Korting",
+      "tax": "Belasting",
+      "subtotal": "Subtotaal",
+      "total": "Totaal",
+      "internalNotes": "Interne notities",
+      "returnedAt": "Geretourneerd op",
+      "sourceQuote": "Bron-offerte"
+    },
+    "sections": {
+      "details": "Details",
+      "items": "Bezittingen",
+      "financial": "Financieel overzicht",
+      "customer": "Klant",
+      "documents": "Documenten"
+    },
+    "documents": {
+      "empty": "Nog geen documenten gekoppeld aan deze verhuur"
+    },
+    "documentChecklist": {
+      "title": "Documentenchecklist",
+      "items": {
+        "commercialOffer": "Commercieel aanbod",
+        "contract": "Huurcontract",
+        "handoverProtocol": "Overdrachtsprotocol",
+        "returnProtocol": "Retourprotocol"
+      },
+      "states": {
+        "present": "Gekoppeld",
+        "missing": "Ontbreekt",
+        "notRequired": "Nog niet vereist"
+      }
+    },
+    "timeIntelligence": {
+      "starts_today": "Start vandaag",
+      "starts_tomorrow": "Start morgen",
+      "starts_in_days": "Start over {{count}} dagen",
+      "days_remaining": "Nog {{count}} dagen",
+      "due_today": "Vervalt vandaag",
+      "overdue": "{{count}} dagen te laat",
+      "completed": "Voltooid",
+      "cancelled": "Geannuleerd",
+      "none": "—"
+    },
+    "actions": {
+      "reserve": "Reserveren",
+      "start": "Verhuur starten",
+      "returnAll": "Alles retourneren",
+      "cancel": "Verhuur annuleren"
+    },
+    "timeline": {
+      "created": "Verhuur aangemaakt",
+      "updated": "Verhuur bijgewerkt",
+      "status_changed": "Status gewijzigd",
+      "items_returned": "Item(s) geretourneerd"
+    },
+    "summary": {
+      "totalDeposit": "Totale borg",
+      "daysRemaining": "Resterende dagen",
+      "rentalValue": "Verhuurwaarde",
+      "assetsCount": "Aantal bezittingen",
+      "timeStatus": "Tijdstatus"
+    },
+    "errors": {
+      "customerRequired": "Selecteer een klant",
+      "datesRequired": "De geplande start- en einddatum zijn verplicht",
+      "endBeforeStart": "Het geplande einde moet na de geplande start liggen",
+      "assetRequired": "Selecteer een bezit",
+      "selectAtLeastOneAsset": "Selecteer ten minste één bezit",
+      "customMonthLengthRequired": "Voer een aantal dagen tussen 1 en 365 in"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Klant",
+        "assets": "Bezittingen",
+        "dates": "Data",
+        "pricing": "Tarieven",
+        "review": "Controleren"
+      },
+      "back": "Terug",
+      "next": "Volgende",
+      "creating": "Verhuur wordt aangemaakt…",
+      "createRental": "Verhuur aanmaken",
+      "availabilityCheck": "Beschikbaarheidscontrole",
+      "available": "Beschikbaar",
+      "unavailable": "Niet beschikbaar voor deze data",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}} kalendermaanden × {{price}}",
+        "FIXED_30_DAYS": "{{count}} vaste periodes van 30 dagen × {{price}}",
+        "CUSTOM": "{{count}} aangepaste periodes van {{length}} dagen × {{price}}",
+        "days": "{{count}} dagen × {{price}}",
+        "pending": "Voer geldige data en prijzen in om de prijsopbouw te zien"
+      }
+    },
+    "availabilityCalendar": {
+      "title": "Beschikbaarheidskalender",
+      "subtitle": "Controleer wanneer bezittingen vrij zijn voordat je ze boekt",
+      "previousMonth": "Vorige maand",
+      "nextMonth": "Volgende maand",
+      "selectAssetsHint": "Selecteer een of meer bezittingen om hun beschikbaarheid te zien",
+      "booked": "Geboekt",
+      "free": "Vrij"
+    },
+    "billingSettings": {
+      "navLabel": "Factureringsinstellingen",
+      "title": "Factureringsinstellingen voor verhuur",
+      "subtitle": "Configureer hoe MAANDELIJKS geprijsde verhuur wordt gefactureerd voor dit bedrijf",
+      "monthlyMethod": "Maandelijkse factureringsmethode",
+      "customMonthLengthDays": "Aantal dagen in een aangepaste factureringsmaand",
+      "save": "Opslaan",
+      "saving": "Opslaan…",
+      "saved": "Factureringsinstellingen opgeslagen",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "Kalendermaand",
+          "description": "Factureert van een datum tot de overeenkomstige datum in de volgende kalendermaand, met afhandeling van maandeindes."
+        },
+        "FIXED_30_DAYS": {
+          "label": "Vaste 30 dagen",
+          "description": "Elke 30 factureerbare dagen wordt behandeld als één maandelijkse factureringseenheid."
+        },
+        "CUSTOM": {
+          "label": "Aangepaste periode",
+          "description": "Bepaal hoeveel factureerbare dagen één maandelijkse factureringseenheid vormen."
+        }
+      }
+    }
+  },
+  "quote": {
+    "title": "Offertes",
+    "subtitle": "Bereid commerciële aanbiedingen voor en verstuur ze voordat je een verhuur aanmaakt",
+    "newQuote": "Nieuwe offerte",
+    "editQuote": "Offerte bewerken",
+    "save": "Opslaan",
+    "deleteConfirm": "Weet je zeker dat je deze offerte wilt verwijderen?",
+    "searchPlaceholder": "Offertes zoeken…",
+    "allStatuses": "Alle statussen",
+    "noQuotes": "Geen offertes gevonden",
+    "convertConfirm": "Deze offerte omzetten naar een verhuur?",
+    "availabilityWarningTitle": "Een of meer bezittingen zijn mogelijk niet beschikbaar voor de geplande data",
+    "statuses": {
+      "DRAFT": "Concept",
+      "SENT": "Verzonden",
+      "VIEWED": "Bekeken",
+      "ACCEPTED": "Geaccepteerd",
+      "REJECTED": "Afgewezen",
+      "EXPIRED": "Verlopen",
+      "CONVERTED": "Omgezet",
+      "CANCELLED": "Geannuleerd"
+    },
+    "sections": {
+      "customer": "Klant",
+      "documents": "Documenten"
+    },
+    "documents": {
+      "empty": "Nog geen documenten gekoppeld aan deze offerte"
+    },
+    "summary": {
+      "quoteValue": "Offertewaarde",
+      "depositTotal": "Totale borg",
+      "itemsCount": "Items",
+      "validityStatus": "Geldigheidsstatus"
+    },
+    "validityIntelligence": {
+      "expires_today": "Verloopt vandaag",
+      "expires_tomorrow": "Verloopt morgen",
+      "expires_in_days": "Verloopt over {{count}} dagen",
+      "expired": "Verlopen",
+      "accepted": "Geaccepteerd",
+      "rejected": "Afgewezen",
+      "converted": "Omgezet",
+      "cancelled": "Geannuleerd"
+    },
+    "itemTypes": {
+      "ASSET": "Bezit",
+      "SERVICE": "Dienst",
+      "PRODUCT": "Product",
+      "FEE": "Kosten",
+      "DELIVERY": "Levering",
+      "COLLECTION": "Ophalen",
+      "LABOR": "Arbeid",
+      "CUSTOM": "Aangepast"
+    },
+    "billingModes": {
+      "DAILY": "Dagelijks",
+      "WEEKLY": "Wekelijks",
+      "MONTHLY": "Maandelijks",
+      "CUSTOM": "Aangepast",
+      "FLAT": "Vast bedrag"
+    },
+    "discountTypes": {
+      "FIXED": "Vast bedrag",
+      "PERCENTAGE": "Percentage"
+    },
+    "fields": {
+      "quoteNumber": "Offertenummer",
+      "status": "Status",
+      "issueDate": "Uitgiftedatum",
+      "validUntil": "Geldig tot",
+      "name": "Naam",
+      "description": "Omschrijving",
+      "itemType": "Itemtype",
+      "unit": "Eenheid",
+      "unitPlaceholder": "bijv. dag, uur, stuk",
+      "billingMode": "Factureringswijze",
+      "quantity": "Aantal",
+      "unitPrice": "Eenheidsprijs",
+      "dailyPrice": "Dagprijs",
+      "weeklyPrice": "Weekprijs",
+      "monthlyPrice": "Maandprijs",
+      "customPrice": "Aangepaste prijs",
+      "deposit": "Borg",
+      "discountType": "Kortingstype",
+      "noDiscount": "Geen korting",
+      "discountPercent": "Korting (%)",
+      "discountAmount": "Kortingsbedrag",
+      "taxRatePercent": "Belastingtarief (%)",
+      "taxTotal": "Belasting",
+      "depositTotal": "Borg",
+      "customerNotes": "Klantnotities",
+      "termsAndConditions": "Algemene voorwaarden",
+      "convertedRental": "Omgezette verhuur"
+    },
+    "actions": {
+      "send": "Offerte verzenden",
+      "accept": "Accepteren",
+      "reject": "Afwijzen",
+      "rejectPrompt": "Reden voor afwijzing (optioneel)",
+      "cancel": "Offerte annuleren",
+      "duplicate": "Dupliceren",
+      "convert": "Omzetten naar verhuur",
+      "removeItem": "Verwijderen",
+      "addServiceItem": "Product of dienst toevoegen",
+      "viewPdf": "PDF bekijken",
+      "regeneratePdf": "PDF opnieuw genereren",
+      "downloadPdf": "PDF downloaden"
+    },
+    "timeline": {
+      "created": "Offerte aangemaakt",
+      "updated": "Offerte bijgewerkt",
+      "status_changed": "Status gewijzigd",
+      "sent": "Offerte verzonden",
+      "viewed": "Bekeken door klant",
+      "accepted": "Geaccepteerd",
+      "rejected": "Afgewezen",
+      "duplicated": "Gedupliceerd",
+      "converted": "Omgezet naar verhuur",
+      "pdf_generated": "PDF gegenereerd"
+    },
+    "errors": {
+      "customerRequired": "Selecteer een klant",
+      "validUntilRequired": "De geldigheidsdatum is verplicht",
+      "datesRequired": "De geplande start- en einddatum zijn verplicht",
+      "endBeforeStart": "Het geplande einde moet na de geplande start liggen",
+      "validUntilBeforeIssueDate": "Geldig tot kan niet in het verleden liggen",
+      "itemNameRequired": "Voer een naam in voor dit item",
+      "quantityMustBePositive": "Het aantal moet minimaal 1 zijn",
+      "noItems": "Voeg ten minste één item toe",
+      "onlyDraftEditable": "Alleen conceptoffertes kunnen worden bewerkt — dupliceer deze offerte in plaats daarvan"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Klant",
+        "dates": "Data",
+        "assets": "Bezittingen",
+        "services": "Producten en diensten",
+        "pricing": "Tarieven",
+        "terms": "Voorwaarden",
+        "review": "Controleren"
+      },
+      "saving": "Offerte wordt opgeslagen…",
+      "createQuote": "Offerte aanmaken",
+      "noServiceItems": "Nog geen producten of diensten toegevoegd"
+    },
+    "public": {
+      "notFound": "Deze offertelink is ongeldig of verlopen",
+      "acceptedNotice": "Geaccepteerd door {{name}}",
+      "rejectedNotice": "Deze offerte is afgewezen",
+      "acceptanceDisclaimer": "Door hieronder te accepteren, registreer je je acceptatie van deze offerte. Dit is geen gekwalificeerde elektronische handtekening.",
+      "rejectReasonPlaceholder": "Laat ons weten waarom (optioneel)",
+      "confirmReject": "Afwijzing bevestigen"
+    }
+  },
+  "document": {
+    "title": "Documenten",
+    "subtitle": "Genereer, deel, verstuur en onderteken elk document vanaf één plek",
+    "newDocument": "Nieuw document",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "deleteConfirm": "Weet je zeker dat je dit document wilt verwijderen?",
+    "searchPlaceholder": "Documenten zoeken…",
+    "allStatuses": "Alle statussen",
+    "allTypes": "Alle typen",
+    "noDocuments": "Geen documenten gevonden",
+    "backToList": "Terug naar documenten",
+    "types": {
+      "QUOTE": "Offerte",
+      "CONTRACT": "Huurcontract",
+      "HANDOVER_PROTOCOL": "Overdrachtsprotocol",
+      "RETURN_PROTOCOL": "Retourprotocol",
+      "DAMAGE_REPORT": "Schademelding",
+      "CONTRACT_AMENDMENT": "Contractwijziging",
+      "CUSTOM": "Aangepast"
+    },
+    "statuses": {
+      "DRAFT": "Concept",
+      "READY": "Gereed",
+      "SENT": "Verzonden",
+      "VIEWED": "Bekeken",
+      "PARTIALLY_SIGNED": "Gedeeltelijk ondertekend",
+      "SIGNED": "Ondertekend",
+      "REJECTED": "Afgewezen",
+      "VOIDED": "Nietig verklaard",
+      "ARCHIVED": "Gearchiveerd"
+    },
+    "fields": {
+      "documentNumber": "Documentnummer",
+      "documentType": "Documenttype",
+      "status": "Status",
+      "title": "Titel",
+      "customTypeName": "Naam aangepast type",
+      "none": "Geen",
+      "version": "Versie",
+      "createdAt": "Aangemaakt",
+      "customer": "Klant",
+      "rental": "Verhuur",
+      "quote": "Offerte",
+      "asset": "Bezit"
+    },
+    "summary": {
+      "total": "Totaal aantal documenten",
+      "draft": "Concept",
+      "sent": "Verzonden",
+      "signed": "Ondertekend"
+    },
+    "actions": {
+      "viewPdf": "PDF bekijken",
+      "regeneratePdf": "PDF opnieuw genereren",
+      "markReady": "Markeren als gereed",
+      "markSent": "Markeren als verzonden",
+      "markViewed": "Markeren als bekeken",
+      "markSigned": "Markeren als ondertekend",
+      "markPartiallySigned": "Markeren als gedeeltelijk ondertekend",
+      "reject": "Afwijzen",
+      "rejectPrompt": "Reden voor afwijzing (optioneel)",
+      "duplicate": "Dupliceren",
+      "void": "Nietig verklaren",
+      "voidPrompt": "Reden voor nietigverklaring (optioneel)",
+      "archive": "Archiveren"
+    },
+    "sections": {
+      "preview": "Voorbeeld",
+      "email": "E-mailbezorging",
+      "signature": "Elektronische handtekening",
+      "relatedEntities": "Gerelateerde records"
+    },
+    "email": {
+      "recipientType": "Ontvanger",
+      "recipientTypes": {
+        "CUSTOMER": "Klant",
+        "EMPLOYEE": "Werknemer",
+        "CUSTOM": "Aangepast e-mailadres"
+      },
+      "customEmail": "E-mailadres",
+      "subject": "Onderwerp",
+      "message": "Bericht",
+      "send": "E-mail verzenden",
+      "retry": "Opnieuw proberen",
+      "noDeliveries": "Nog geen e-mails verzonden",
+      "statuses": {
+        "PENDING": "In behandeling",
+        "SENT": "Verzonden",
+        "FAILED": "Mislukt"
+      }
+    },
+    "signature": {
+      "signerName": "Naam ondertekenaar",
+      "signerEmail": "E-mail ondertekenaar",
+      "request": "Handtekening aanvragen",
+      "refresh": "Status vernieuwen",
+      "cancel": "Annuleren",
+      "noRequests": "Nog geen handtekeningaanvragen",
+      "statuses": {
+        "REQUESTED": "Aangevraagd",
+        "PENDING": "In behandeling",
+        "SIGNED": "Ondertekend",
+        "REJECTED": "Afgewezen",
+        "EXPIRED": "Verlopen",
+        "CANCELLED": "Geannuleerd"
+      },
+      "providers": {
+        "LOCAL_MOCK": "Handmatig (intern)",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "Document aangemaakt",
+      "updated": "Document bijgewerkt",
+      "status_changed": "Status gewijzigd",
+      "sent": "Document verzonden",
+      "viewed": "Bekeken",
+      "signed": "Handtekening geregistreerd",
+      "downloaded": "Gedownload",
+      "archived": "Gearchiveerd",
+      "version_created": "Nieuwe versie aangemaakt",
+      "file_uploaded": "Bestand geüpload",
+      "file_deleted": "Bestand verwijderd",
+      "rendered": "PDF gegenereerd",
+      "shared": "Deellink aangemaakt",
+      "share_viewed": "Bekeken via deellink",
+      "share_downloaded": "Gedownload via deellink",
+      "share_disabled": "Deellink uitgeschakeld",
+      "email_sent": "E-mail verzonden",
+      "email_failed": "E-mailbezorging mislukt",
+      "signature_requested": "Handtekening aangevraagd",
+      "signature_status_changed": "Handtekeningstatus gewijzigd"
+    },
+    "errors": {
+      "customTypeNameRequired": "Voer een naam in voor dit aangepaste documenttype"
+    }
+  },
+  "documentTemplate": {
+    "title": "Documentsjablonen",
+    "subtitle": "Beheer de HTML-sjablonen die worden gebruikt om elk documenttype te genereren",
+    "newTemplate": "Nieuw sjabloon",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "searchPlaceholder": "Sjablonen zoeken…",
+    "noTemplates": "Geen sjablonen gevonden",
+    "statuses": {
+      "DRAFT": "Concept",
+      "ACTIVE": "Actief",
+      "ARCHIVED": "Gearchiveerd"
+    },
+    "fields": {
+      "name": "Naam",
+      "description": "Omschrijving",
+      "htmlContent": "HTML-inhoud",
+      "css": "CSS",
+      "status": "Status",
+      "versionCount": "Versies",
+      "current": "huidig"
+    },
+    "actions": {
+      "activate": "Activeren",
+      "archive": "Archiveren",
+      "restore": "Herstellen",
+      "duplicate": "Dupliceren",
+      "saveAsNewVersion": "Opslaan als nieuwe versie",
+      "restoreVersion": "Deze versie herstellen"
+    },
+    "sections": {
+      "metadata": "Details",
+      "content": "Inhoud",
+      "preview": "Voorbeeld",
+      "versions": "Versiegeschiedenis"
+    }
+  },
+  "share": {
+    "title": "Openbare deellinks",
+    "fields": {
+      "password": "Wachtwoord",
+      "passwordPlaceholder": "Optioneel toegangswachtwoord",
+      "views": "Weergaven",
+      "downloads": "Downloads",
+      "expiresAt": "Verloopt"
+    },
+    "status": {
+      "active": "Actief",
+      "disabled": "Uitgeschakeld"
+    },
+    "actions": {
+      "create": "Link aanmaken",
+      "disable": "Uitschakelen"
+    },
+    "noLinks": "Nog geen deellinks",
+    "linkCreatedPrompt": "Deel deze link met je klant:",
+    "public": {
+      "passwordRequiredTitle": "Dit document is beveiligd met een wachtwoord",
+      "wrongPassword": "Onjuist wachtwoord",
+      "unlock": "Ontgrendelen",
+      "notFound": "Deze link is ongeldig of verlopen",
+      "downloadPdf": "PDF downloaden"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welkom terug, {{name}}",
+    "sections": {
+      "overview": "Overzicht",
+      "quickActions": "Snelle acties",
+      "recentActivity": "Recente activiteit"
+    },
+    "metrics": {
+      "customers": "Klanten",
+      "activeRentals": "Actieve verhuringen",
+      "availableAssets": "Beschikbare bezittingen",
+      "pendingQuotes": "Openstaande offertes",
+      "needsAttention": "Vereist aandacht"
+    },
+    "recentRentals": "Recente verhuringen",
+    "recentDocuments": "Recente documenten",
+    "viewAll": "Alles bekijken",
+    "emptyRecentRentals": "Nog geen verhuringen",
+    "emptyRecentDocuments": "Nog geen documenten"
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "rentals": "Verhuur",
+      "calendar": "Kalender",
+      "documents": "Documenten",
+      "messages": "Berichten",
+      "notifications": "Meldingen",
+      "logout": "Uitloggen"
+    },
+    "auth": {
+      "login": {
+        "title": "Klantenportaal",
+        "subtitle": "Log in om je verhuringen te beheren",
+        "company": "Bedrijf",
+        "companyPlaceholder": "jouw-bedrijf",
+        "email": "E-mail",
+        "password": "Wachtwoord",
+        "submit": "Inloggen",
+        "submitting": "Bezig met inloggen…"
+      },
+      "activate": {
+        "title": "Activeer je account",
+        "subtitle": "Stel een wachtwoord in om toegang te krijgen tot je klantenportaal",
+        "password": "Wachtwoord",
+        "submit": "Account activeren",
+        "submitting": "Activeren…",
+        "invalidToken": "Deze uitnodigingslink is ongeldig of verlopen.",
+        "successTitle": "Welkom bij {{company}}!",
+        "successDescription": "Je account is klaar. Je wordt naar je dashboard gebracht…"
+      },
+      "errors": {
+        "invalidCredentials": "Ongeldige e-mail, wachtwoord of bedrijf.",
+        "invalidToken": "Ongeldige of verlopen uitnodiging.",
+        "generic": "Er is iets misgegaan. Probeer het opnieuw."
+      },
+      "tagline": "Beheer je verhuringen, documenten en verzoeken op één plek."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welkom terug, {{name}}",
+      "currentRentals": "Huidige verhuringen",
+      "upcomingRentals": "Aankomende verhuringen",
+      "unreadMessages": "Ongelezen berichten",
+      "pendingSignatures": "Openstaande handtekeningen",
+      "pendingExtensions": "Openstaande verlengingsverzoeken",
+      "recentRentals": "Recente verhuringen",
+      "viewAll": "Alles bekijken",
+      "noRentals": "Je hebt nog geen verhuringen"
+    },
+    "rentals": {
+      "title": "Verhuur",
+      "backToList": "Terug naar verhuur",
+      "searchPlaceholder": "Verhuur zoeken…",
+      "filterStatus": "Status",
+      "allStatuses": "Alle statussen",
+      "detailTitle": "Verhuur {{number}}",
+      "period": "Verhuurperiode",
+      "items": "Uitrusting",
+      "timeline": "Tijdlijn",
+      "documents": "Documenten",
+      "downloadAllDocuments": "Alle documenten downloaden (.zip)",
+      "qrCode": "QR-code",
+      "showQrCode": "QR-code tonen",
+      "requestExtension": "Verlenging aanvragen",
+      "reportDamage": "Schade melden",
+      "extensionRequests": "Verlengingsverzoeken",
+      "damageReports": "Schademeldingen",
+      "noRentals": "Geen verhuringen gevonden",
+      "quantity": "Aantal",
+      "statuses": {
+        "DRAFT": "Concept",
+        "QUOTE": "Offerte",
+        "RESERVED": "Gereserveerd",
+        "ACTIVE": "Actief",
+        "RETURNED": "Geretourneerd",
+        "COMPLETED": "Voltooid",
+        "CANCELLED": "Geannuleerd"
+      }
+    },
+    "calendar": {
+      "title": "Verhuurkalender",
+      "empty": "Geen verhuringen in deze periode"
+    },
+    "extensionRequests": {
+      "title": "Een verlenging aanvragen",
+      "currentEnd": "Huidige einddatum",
+      "newEndDate": "Nieuwe einddatum",
+      "message": "Bericht (optioneel)",
+      "submit": "Verzoek indienen",
+      "submitting": "Bezig met indienen…",
+      "submitted": "Je verlengingsverzoek is ingediend.",
+      "responseFrom": "Reactie",
+      "statuses": {
+        "PENDING": "In behandeling",
+        "APPROVED": "Goedgekeurd",
+        "REJECTED": "Afgewezen",
+        "CANCELLED": "Geannuleerd"
+      }
+    },
+    "damageReports": {
+      "title": "Schade melden",
+      "description": "Omschrijving",
+      "descriptionPlaceholder": "Beschrijf wat er is gebeurd…",
+      "asset": "Uitrusting (optioneel)",
+      "anyEquipment": "Niet zeker / algemeen",
+      "photos": "Foto's",
+      "addPhoto": "Foto toevoegen",
+      "uploading": "Uploaden…",
+      "submit": "Melding indienen",
+      "submitting": "Bezig met indienen…",
+      "submitted": "Je schademelding is ingediend.",
+      "statuses": {
+        "SUBMITTED": "Ingediend",
+        "REVIEWED": "Beoordeeld",
+        "RESOLVED": "Opgelost",
+        "CONVERTED_TO_DOCUMENT": "Gedocumenteerd"
+      }
+    },
+    "documents": {
+      "title": "Documenten",
+      "backToList": "Terug naar documenten",
+      "filterStatus": "Status",
+      "allStatuses": "Alle statussen",
+      "preview": "Voorbeeld",
+      "download": "PDF downloaden",
+      "sign": "Document ondertekenen",
+      "signing": "Ondertekenen…",
+      "signed": "Je hebt dit document ondertekend.",
+      "pendingSignature": "Wacht op jouw handtekening",
+      "noDocuments": "Geen documenten gevonden",
+      "signatureRequests": "Handtekeningaanvragen"
+    },
+    "messages": {
+      "title": "Berichten",
+      "placeholder": "Schrijf een bericht…",
+      "send": "Verzenden",
+      "sending": "Verzenden…",
+      "empty": "Nog geen berichten",
+      "generalThread": "Algemeen"
+    },
+    "notifications": {
+      "title": "Meldingen",
+      "markAllRead": "Alles als gelezen markeren",
+      "empty": "Je bent helemaal bij",
+      "types": {
+        "MESSAGE": "Nieuw bericht",
+        "DOCUMENT_SHARED": "Document gedeeld",
+        "SIGNATURE_REQUESTED": "Handtekening aangevraagd",
+        "EXTENSION_RESPONSE": "Update verlengingsverzoek",
+        "RENTAL_UPDATE": "Update verhuur",
+        "DAMAGE_REPORT_UPDATE": "Update schademelding"
+      }
+    },
+    "assets": {
+      "title": "Uitrusting",
+      "manufacturer": "Fabrikant",
+      "model": "Model",
+      "condition": "Notities over de staat"
+    },
+    "darkMode": {
+      "toggle": "Donkere modus wisselen"
+    }
+  },
+  "timeline": {
+    "title": "Tijdlijn",
+    "empty": "Nog geen activiteit geregistreerd",
+    "searchPlaceholder": "Tijdlijn doorzoeken…",
+    "today": "Vandaag",
+    "yesterday": "Gisteren",
+    "hint": "Typ om te zoeken, gebruik ↑/↓ om tussen gebeurtenissen te navigeren"
+  }
+}

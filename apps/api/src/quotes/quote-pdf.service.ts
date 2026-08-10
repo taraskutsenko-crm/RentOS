@@ -50,13 +50,18 @@ export class QuotePdfService {
   ): Promise<GeneratedQuotePdf> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { name: true, defaultLanguage: true },
+      select: { name: true, defaultLanguage: true, timezone: true },
     });
     if (!tenant) {
       throw new NotFoundException("Tenant not found");
     }
 
-    const buffer = await this.renderPdf(quote, tenant.name, tenant.defaultLanguage);
+    const buffer = await this.renderPdf(
+      quote,
+      tenant.name,
+      tenant.defaultLanguage,
+      tenant.timezone,
+    );
     const fileName = `${quote.quoteNumber}.pdf`;
     const storageKey = this.buildKey(tenantId, quote.id, fileName);
 
@@ -99,10 +104,15 @@ export class QuotePdfService {
     return `tenants/${tenantId}/quotes/${quoteId}/pdf/${randomUUID()}-${safeName}`;
   }
 
-  private renderPdf(quote: QuoteDetailView, tenantName: string, language: string): Promise<Buffer> {
+  private renderPdf(
+    quote: QuoteDetailView,
+    tenantName: string,
+    language: string,
+    timezone: string,
+  ): Promise<Buffer> {
     const t = (path: string, fallback: string) => pdfLabel(language, path, fallback);
     const money = (minor: number) => formatMoney(minor, quote.currency, language);
-    const date = (value: Date) => formatDate(value, language);
+    const date = (value: Date) => formatDate(value, language, timezone);
 
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN, bufferPages: true });
@@ -459,12 +469,17 @@ function describeUnitPrice(item: QuoteItemWithAsset, money: (minor: number) => s
   }
 }
 
-function formatDate(value: Date, language: string): string {
+/**
+ * `timezone` is the tenant's own IANA zone (`Tenant.timezone`, set at
+ * registration) rather than hardcoded UTC — a quote PDF is a business
+ * document dated from the issuing tenant's perspective, not the server's.
+ */
+function formatDate(value: Date, language: string, timezone: string): string {
   return new Intl.DateTimeFormat(language, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-    timeZone: "UTC",
+    timeZone: timezone,
   }).format(value);
 }
 

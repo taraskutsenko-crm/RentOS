@@ -12,6 +12,7 @@ import {
   useRejectPublicQuote,
 } from "../../../hooks/use-public-quote";
 import { apiErrorMessage } from "../../../lib/api-error-i18n";
+import { formatDate } from "../../../lib/date-format";
 import { formatMoney } from "../../../lib/money";
 
 const DECIDABLE_STATUSES = new Set(["SENT", "VIEWED"]);
@@ -24,7 +25,7 @@ const DECIDABLE_STATUSES = new Set(["SENT", "VIEWED"]);
  * self-contained (see apps/web/src/app/login/page.tsx).
  */
 export default function PublicQuotePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const params = useParams<{ token: string }>();
   const [actionError, setActionError] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -76,7 +77,7 @@ export default function PublicQuotePage() {
               <CardTitle>{quote.quoteNumber}</CardTitle>
               <CardDescription>
                 {t(`quote.statuses.${quote.status}`)} · {t("quote.fields.validUntil")}:{" "}
-                {new Date(quote.validUntil).toLocaleDateString()}
+                {formatDate(quote.validUntil, i18n.language)}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
@@ -95,8 +96,8 @@ export default function PublicQuotePage() {
                   {t("rental.fields.plannedStart")} — {t("rental.fields.plannedEnd")}
                 </p>
                 <p>
-                  {new Date(quote.plannedStart).toLocaleDateString()} —{" "}
-                  {new Date(quote.plannedEnd).toLocaleDateString()}
+                  {formatDate(quote.plannedStart, i18n.language)} —{" "}
+                  {formatDate(quote.plannedEnd, i18n.language)}
                 </p>
               </div>
 

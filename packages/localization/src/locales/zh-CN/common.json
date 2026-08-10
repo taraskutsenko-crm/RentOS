@@ -1,0 +1,1109 @@
+{
+  "app": {
+    "name": "Havelio",
+    "tagline": "一个平台，覆盖所有资产。",
+    "nav": {
+      "dashboard": "仪表盘",
+      "settingsGroup": "设置"
+    },
+    "shell": {
+      "sidebarLabel": "主导航",
+      "openNav": "打开导航",
+      "closeNav": "关闭导航",
+      "expandSidebar": "展开侧边栏",
+      "collapseSidebar": "收起侧边栏",
+      "searchPlaceholder": "搜索…",
+      "userMenu": "账户菜单",
+      "lightMode": "浅色模式",
+      "darkMode": "深色模式",
+      "language": "语言",
+      "create": "新建",
+      "breadcrumbs": {
+        "new": "新建",
+        "edit": "编辑"
+      },
+      "notifications": {
+        "title": "通知",
+        "empty": "暂无新通知"
+      },
+      "commandPalette": {
+        "title": "命令面板",
+        "placeholder": "搜索或跳转到…",
+        "noResults": "未找到匹配结果",
+        "pagesGroup": "页面",
+        "quickActionsGroup": "快捷操作",
+        "commandsGroup": "命令",
+        "pinnedGroup": "已固定",
+        "recentGroup": "最近使用",
+        "hint": "按 {{keys}} 可随时搜索或跳转"
+      },
+      "shortcuts": {
+        "title": "键盘快捷键",
+        "openPalette": "打开命令面板",
+        "newItem": "新建项目",
+        "help": "显示键盘快捷键",
+        "goCustomers": "前往客户",
+        "goRentals": "前往租赁",
+        "goAssets": "前往资产",
+        "goDocuments": "前往文档",
+        "goQuotes": "前往报价单",
+        "groupGeneral": "常规",
+        "groupNavigation": "导航",
+        "settingsSubtitle": "应用中已注册的所有快捷键——与实际生效的设置始终保持同步。"
+      },
+      "pin": "固定",
+      "unpin": "取消固定"
+    }
+  },
+  "common": {
+    "loading": "加载中…",
+    "error": "出现了一些问题，请重试。",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "saving": "保存中…",
+    "cancel": "取消",
+    "confirm": "确认",
+    "dismiss": "关闭",
+    "table": {
+      "columns": "列",
+      "permissionDenied": "您没有权限查看此数据。",
+      "retry": "重试",
+      "selectAll": "全选行",
+      "selectRow": "选择行",
+      "rowActions": "行操作",
+      "searchPlaceholder": "搜索…",
+      "clearSearch": "清除搜索",
+      "clearSelection": "清除选择",
+      "selectedCount": "已选择 {{count}} 项"
+    },
+    "pagination": {
+      "range": "第 {{start}}–{{end}} 项，共 {{total}} 项",
+      "previous": "上一页",
+      "next": "下一页",
+      "pageOf": "第 {{page}} 页，共 {{totalPages}} 页"
+    },
+    "filters": {
+      "remove": "移除筛选条件“{{filter}}”",
+      "resetAll": "重置所有筛选条件"
+    },
+    "bulkActions": {
+      "delete": "删除",
+      "deleteConfirmTitle": "删除 {{count}} 个客户？",
+      "deleteConfirmDescription": "此操作将永久删除所选客户，且无法撤销。",
+      "deletePartialFailure": "{{total}} 个中有 {{failed}} 个未能删除。"
+    }
+  },
+  "nav": {
+    "logout": "退出登录",
+    "selectTenant": "选择公司"
+  },
+  "auth": {
+    "register": {
+      "title": "创建您的账户",
+      "subtitle": "设置您公司的工作空间",
+      "firstName": "名",
+      "lastName": "姓",
+      "email": "电子邮箱",
+      "password": "密码",
+      "passwordConfirmation": "确认密码",
+      "companyName": "公司名称",
+      "country": "国家/地区",
+      "language": "语言",
+      "currency": "货币",
+      "timezone": "时区",
+      "submit": "创建账户",
+      "submitting": "正在创建账户…",
+      "haveAccount": "已经有账户了？",
+      "signIn": "登录",
+      "companySection": "公司"
+    },
+    "login": {
+      "title": "登录",
+      "subtitle": "欢迎回来",
+      "email": "电子邮箱",
+      "password": "密码",
+      "submit": "登录",
+      "submitting": "正在登录…",
+      "noAccount": "还没有账户？",
+      "signUp": "立即创建"
+    },
+    "errors": {
+      "required": "此字段为必填项",
+      "invalidEmail": "请输入有效的电子邮箱地址",
+      "passwordTooShort": "密码长度必须至少为 12 个字符",
+      "passwordUppercase": "密码必须包含大写字母",
+      "passwordLowercase": "密码必须包含小写字母",
+      "passwordNumber": "密码必须包含数字",
+      "passwordMismatch": "两次输入的密码不一致",
+      "emailInUse": "该邮箱已被注册",
+      "invalidCredentials": "邮箱或密码不正确",
+      "accountInactive": "该账户已停用",
+      "generic": "出现了一些问题，请重试。"
+    }
+  },
+  "tenant": {
+    "selectTitle": "选择公司",
+    "selectSubtitle": "选择要打开的工作空间",
+    "noTenants": "您尚未加入任何公司",
+    "role": "角色"
+  },
+  "country": {
+    "US": "美国",
+    "PL": "波兰",
+    "DE": "德国",
+    "UA": "乌克兰",
+    "ES": "西班牙",
+    "GB": "英国"
+  },
+  "customer": {
+    "title": "客户",
+    "subtitle": "管理您的客户档案",
+    "newCustomer": "新建客户",
+    "editCustomer": "编辑客户",
+    "searchPlaceholder": "搜索客户…",
+    "filterStatus": "状态",
+    "allStatuses": "全部状态",
+    "firstName": "名",
+    "lastName": "姓",
+    "company": "公司",
+    "phone": "电话",
+    "email": "电子邮箱",
+    "vatNumber": "增值税号",
+    "address": "地址",
+    "notes": "备注",
+    "status": "状态",
+    "statusActive": "启用",
+    "statusInactive": "停用",
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "取消",
+    "delete": "删除",
+    "deleteConfirm": "确定要删除此客户吗？",
+    "noCustomers": "未找到客户",
+    "backToList": "返回客户列表",
+    "previous": "上一页",
+    "next": "下一页",
+    "portal": {
+      "title": "客户门户访问权限",
+      "notInvited": "尚未邀请",
+      "invited": "邀请已发送",
+      "activated": "门户已激活",
+      "invitationExpired": "邀请已过期",
+      "lastLogin": "上次登录",
+      "invite": "邀请加入门户",
+      "reinvite": "重新发送邀请",
+      "revoke": "撤销访问权限",
+      "revokeConfirm": "此操作将使该客户从门户中退出登录，并禁用其访问权限，直到重新收到邀请。是否继续？",
+      "inviteLinkCreated": "邀请链接已创建——请分享给您的客户：",
+      "noEmailOnFile": "该客户尚未登记电子邮箱。请添加邮箱后再发送邀请。",
+      "extensionRequests": "延期申请",
+      "damageReports": "损坏报告",
+      "messages": "门户消息",
+      "noExtensionRequests": "暂无延期申请",
+      "noDamageReports": "暂无损坏报告",
+      "noMessages": "暂无消息",
+      "approve": "批准",
+      "reject": "拒绝",
+      "responseMessagePlaceholder": "给客户的备注（可选）…",
+      "markReviewed": "标记为已审核",
+      "markResolved": "标记为已解决",
+      "convertToDocument": "转换为文档",
+      "sendMessage": "发送",
+      "messagePlaceholder": "回复该客户…"
+    },
+    "timeline": {
+      "created": "客户已创建",
+      "updated": "客户信息已更新",
+      "deleted": "客户已删除"
+    },
+    "summary": {
+      "totalRentals": "租赁总数",
+      "activeRentals": "进行中的租赁",
+      "totalRevenue": "总收入",
+      "damageReports": "损坏报告"
+    },
+    "sections": {
+      "documents": "文档"
+    },
+    "documentsEmpty": "该客户尚未关联任何文档"
+  },
+  "asset": {
+    "title": "资产",
+    "subtitle": "管理贵公司所有可租赁物品",
+    "newAsset": "新建资产",
+    "editAsset": "编辑资产",
+    "save": "保存",
+    "saving": "保存中…",
+    "delete": "删除",
+    "deleteConfirm": "确定要删除此资产吗？",
+    "searchPlaceholder": "搜索资产…",
+    "allCategories": "全部分类",
+    "allStatuses": "全部状态",
+    "noAssets": "未找到资产",
+    "view": "查看",
+    "rentableYes": "是",
+    "rentableNo": "否",
+    "noTimelineEvents": "暂无活动记录",
+    "noImages": "暂未上传任何图片",
+    "noDocuments": "暂未上传任何文档",
+    "platformDocumentsEmpty": "该资产尚未关联任何文档",
+    "sort": {
+      "newest": "最新在前",
+      "oldest": "最旧在前",
+      "nameAsc": "名称（A–Z）",
+      "nameDesc": "名称（Z–A）"
+    },
+    "fields": {
+      "name": "名称",
+      "description": "描述",
+      "internalNumber": "内部编号",
+      "sku": "SKU",
+      "serialNumber": "序列号",
+      "barcode": "条形码",
+      "qrCodeValue": "二维码内容",
+      "category": "分类",
+      "status": "状态",
+      "statusDefaultHint": "默认（可用）",
+      "manufacturer": "制造商",
+      "model": "型号",
+      "purchaseDate": "购买日期",
+      "purchasePrice": "购买价格",
+      "currency": "货币",
+      "replacementValue": "重置价值",
+      "conditionNotes": "状况说明",
+      "isRentable": "可租赁",
+      "isActive": "启用",
+      "currentLocation": "当前位置",
+      "locationChangeHint": "位置信息需从资产详情页修改，以便每次移动都记录在时间线中。",
+      "selectPlaceholder": "请选择…",
+      "primaryImage": "主图",
+      "documentTitle": "文档标题",
+      "booleanYes": "是"
+    },
+    "sections": {
+      "basicInfo": "基本信息",
+      "identification": "识别信息",
+      "category": "分类",
+      "status": "状态",
+      "manufacturerModel": "制造商与型号",
+      "financial": "财务信息",
+      "locationCondition": "位置与状况",
+      "customFields": "自定义字段",
+      "images": "图片",
+      "documents": "文档",
+      "timeline": "时间线",
+      "filesManagement": "图片与文档",
+      "platformDocuments": "文档"
+    },
+    "actions": {
+      "changeStatus": "更改状态",
+      "changeLocation": "更改位置",
+      "deleteImage": "删除图片",
+      "deleteDocument": "删除",
+      "uploadDocument": "上传"
+    },
+    "errors": {
+      "customFieldRequired": "此字段为必填项",
+      "categoryRequired": "请选择一个分类",
+      "statusCodeFormat": "代码必须由大写字母、数字和下划线组成",
+      "fieldKeyFormat": "键必须由小写字母、数字和下划线组成"
+    },
+    "timeline": {
+      "created": "资产已创建",
+      "updated": "资产信息已更新",
+      "status_changed": "状态已变更",
+      "location_changed": "位置已变更",
+      "image_uploaded": "图片已上传",
+      "document_uploaded": "文档已上传"
+    },
+    "summary": {
+      "totalRentals": "租赁总数",
+      "revenueGenerated": "已产生收入"
+    },
+    "documentTypes": {
+      "PURCHASE_DOCUMENT": "购买凭证",
+      "MANUAL": "使用手册",
+      "CERTIFICATE": "证书",
+      "INSURANCE": "保险",
+      "REGISTRATION": "登记证明",
+      "INSPECTION": "检验报告",
+      "OTHER": "其他"
+    },
+    "fieldTypes": {
+      "TEXT": "文本",
+      "TEXTAREA": "长文本",
+      "INTEGER": "整数",
+      "DECIMAL": "小数",
+      "BOOLEAN": "是/否",
+      "DATE": "日期",
+      "DATETIME": "日期与时间",
+      "SELECT": "单选",
+      "MULTISELECT": "多选",
+      "URL": "链接",
+      "EMAIL": "电子邮箱",
+      "PHONE": "电话"
+    },
+    "categorySettings": {
+      "navLabel": "分类",
+      "title": "资产分类",
+      "subtitle": "将资产整理为分类树结构",
+      "newCategoryName": "新分类名称",
+      "parent": "上级分类",
+      "noParent": "无上级分类（顶级）",
+      "create": "添加分类",
+      "noCategories": "暂无分类",
+      "activate": "启用",
+      "deactivate": "停用",
+      "deleteConfirm": "确定要删除此分类吗？只要该分类下仍有启用中的资产或子分类，就无法删除。"
+    },
+    "statusSettings": {
+      "navLabel": "状态",
+      "title": "资产状态",
+      "subtitle": "配置资产可能拥有的生命周期状态",
+      "name": "名称",
+      "code": "代码",
+      "type": "类型",
+      "systemStatus": "系统状态",
+      "customStatus": "自定义状态",
+      "availableForRental": "可用于租赁",
+      "create": "添加状态",
+      "deleteConfirm": "确定要删除此状态吗？系统状态或正在使用中的状态无法删除。"
+    },
+    "fieldSettings": {
+      "navLabel": "自定义字段",
+      "title": "资产自定义字段",
+      "subtitle": "为您的资产分类定义特定的属性",
+      "name": "名称",
+      "key": "键",
+      "category": "分类",
+      "globalField": "全部分类",
+      "fieldType": "字段类型",
+      "optionsHint": "每行一个选项",
+      "required": "必填",
+      "filterable": "可筛选",
+      "searchable": "可搜索",
+      "create": "添加字段",
+      "deleteConfirm": "确定要删除此自定义字段定义吗？"
+    }
+  },
+  "rental": {
+    "title": "租赁",
+    "subtitle": "预订、跟踪并归还已租出的资产",
+    "newRental": "新建租赁",
+    "editRental": "编辑租赁",
+    "save": "保存",
+    "deleteConfirm": "确定要删除此租赁吗？",
+    "searchPlaceholder": "搜索租赁…",
+    "allStatuses": "全部状态",
+    "noRentals": "未找到租赁记录",
+    "statuses": {
+      "DRAFT": "草稿",
+      "QUOTE": "报价单",
+      "RESERVED": "已预订",
+      "ACTIVE": "进行中",
+      "RETURNED": "已归还",
+      "COMPLETED": "已完成",
+      "CANCELLED": "已取消"
+    },
+    "billingModes": {
+      "DAILY": "按日",
+      "WEEKLY": "按周",
+      "MONTHLY": "按月",
+      "CUSTOM": "自定义"
+    },
+    "fields": {
+      "rentalNumber": "租赁编号",
+      "status": "状态",
+      "plannedStart": "计划开始时间",
+      "plannedEnd": "计划结束时间",
+      "actualStart": "实际开始时间",
+      "actualEnd": "实际结束时间",
+      "billingMode": "计费方式",
+      "quantity": "数量",
+      "dailyPrice": "日租价格",
+      "dailyPriceForRemainder": "日租价格（剩余天数）",
+      "weeklyPrice": "周租价格",
+      "monthlyPrice": "月租价格",
+      "customPrice": "自定义价格",
+      "deposit": "押金",
+      "itemDiscount": "单项折扣",
+      "discount": "折扣",
+      "tax": "税费",
+      "subtotal": "小计",
+      "total": "总计",
+      "internalNotes": "内部备注",
+      "returnedAt": "归还时间",
+      "sourceQuote": "来源报价单"
+    },
+    "sections": {
+      "details": "详情",
+      "items": "资产",
+      "financial": "财务摘要",
+      "customer": "客户",
+      "documents": "文档"
+    },
+    "documents": {
+      "empty": "该租赁尚未关联任何文档"
+    },
+    "documentChecklist": {
+      "title": "文档核对清单",
+      "items": {
+        "commercialOffer": "商业报价",
+        "contract": "租赁合同",
+        "handoverProtocol": "交接单",
+        "returnProtocol": "归还单"
+      },
+      "states": {
+        "present": "已关联",
+        "missing": "缺失",
+        "notRequired": "暂不需要"
+      }
+    },
+    "timeIntelligence": {
+      "starts_today": "今天开始",
+      "starts_tomorrow": "明天开始",
+      "starts_in_days": "{{count}} 天后开始",
+      "days_remaining": "还剩 {{count}} 天",
+      "due_today": "今天到期",
+      "overdue": "已逾期 {{count}} 天",
+      "completed": "已完成",
+      "cancelled": "已取消",
+      "none": "—"
+    },
+    "actions": {
+      "reserve": "预订",
+      "start": "开始租赁",
+      "returnAll": "全部归还",
+      "cancel": "取消租赁"
+    },
+    "timeline": {
+      "created": "租赁已创建",
+      "updated": "租赁信息已更新",
+      "status_changed": "状态已变更",
+      "items_returned": "物品已归还"
+    },
+    "summary": {
+      "totalDeposit": "押金总额",
+      "daysRemaining": "剩余天数",
+      "rentalValue": "租赁金额",
+      "assetsCount": "资产数量",
+      "timeStatus": "时间状态"
+    },
+    "errors": {
+      "customerRequired": "请选择客户",
+      "datesRequired": "计划开始和结束日期为必填项",
+      "endBeforeStart": "计划结束时间必须晚于计划开始时间",
+      "assetRequired": "请选择资产",
+      "selectAtLeastOneAsset": "请至少选择一项资产",
+      "customMonthLengthRequired": "请输入 1 到 365 之间的天数"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "客户",
+        "assets": "资产",
+        "dates": "日期",
+        "pricing": "定价",
+        "review": "确认"
+      },
+      "back": "上一步",
+      "next": "下一步",
+      "creating": "正在创建租赁…",
+      "createRental": "创建租赁",
+      "availabilityCheck": "可用性检查",
+      "available": "可用",
+      "unavailable": "所选日期不可用",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}} 个自然月 × {{price}}",
+        "FIXED_30_DAYS": "{{count}} 个固定 30 天周期 × {{price}}",
+        "CUSTOM": "{{count}} 个自定义 {{length}} 天周期 × {{price}}",
+        "days": "{{count}} 天 × {{price}}",
+        "pending": "请输入有效的日期和价格以查看价格明细"
+      }
+    },
+    "availabilityCalendar": {
+      "title": "可用性日历",
+      "subtitle": "预订前查看资产的空闲时间",
+      "previousMonth": "上个月",
+      "nextMonth": "下个月",
+      "selectAssetsHint": "选择一项或多项资产以查看其可用性",
+      "booked": "已预订",
+      "free": "空闲"
+    },
+    "billingSettings": {
+      "navLabel": "计费设置",
+      "title": "租赁计费设置",
+      "subtitle": "配置该公司按月计价的租赁的计费方式",
+      "monthlyMethod": "月度计费方式",
+      "customMonthLengthDays": "自定义计费月的天数",
+      "save": "保存",
+      "saving": "保存中…",
+      "saved": "计费设置已保存",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "自然月",
+          "description": "从某一日期计费至下一自然月的对应日期，并处理月末情况。"
+        },
+        "FIXED_30_DAYS": {
+          "label": "固定 30 天",
+          "description": "每 30 个可计费天数视为一个月度计费单位。"
+        },
+        "CUSTOM": {
+          "label": "自定义周期",
+          "description": "定义多少个可计费天数构成一个月度计费单位。"
+        }
+      }
+    }
+  },
+  "quote": {
+    "title": "报价单",
+    "subtitle": "在创建租赁之前准备并发送商业报价",
+    "newQuote": "新建报价单",
+    "editQuote": "编辑报价单",
+    "save": "保存",
+    "deleteConfirm": "确定要删除此报价单吗？",
+    "searchPlaceholder": "搜索报价单…",
+    "allStatuses": "全部状态",
+    "noQuotes": "未找到报价单",
+    "convertConfirm": "将此报价单转换为租赁吗？",
+    "availabilityWarningTitle": "一项或多项资产在计划日期内可能不可用",
+    "statuses": {
+      "DRAFT": "草稿",
+      "SENT": "已发送",
+      "VIEWED": "已查看",
+      "ACCEPTED": "已接受",
+      "REJECTED": "已拒绝",
+      "EXPIRED": "已过期",
+      "CONVERTED": "已转换",
+      "CANCELLED": "已取消"
+    },
+    "sections": {
+      "customer": "客户",
+      "documents": "文档"
+    },
+    "documents": {
+      "empty": "该报价单尚未关联任何文档"
+    },
+    "summary": {
+      "quoteValue": "报价金额",
+      "depositTotal": "押金总额",
+      "itemsCount": "项目数",
+      "validityStatus": "有效状态"
+    },
+    "validityIntelligence": {
+      "expires_today": "今天到期",
+      "expires_tomorrow": "明天到期",
+      "expires_in_days": "{{count}} 天后到期",
+      "expired": "已过期",
+      "accepted": "已接受",
+      "rejected": "已拒绝",
+      "converted": "已转换",
+      "cancelled": "已取消"
+    },
+    "itemTypes": {
+      "ASSET": "资产",
+      "SERVICE": "服务",
+      "PRODUCT": "产品",
+      "FEE": "费用",
+      "DELIVERY": "配送",
+      "COLLECTION": "取件",
+      "LABOR": "人工",
+      "CUSTOM": "自定义"
+    },
+    "billingModes": {
+      "DAILY": "按日",
+      "WEEKLY": "按周",
+      "MONTHLY": "按月",
+      "CUSTOM": "自定义",
+      "FLAT": "固定价格"
+    },
+    "discountTypes": {
+      "FIXED": "固定金额",
+      "PERCENTAGE": "百分比"
+    },
+    "fields": {
+      "quoteNumber": "报价单编号",
+      "status": "状态",
+      "issueDate": "开具日期",
+      "validUntil": "有效期至",
+      "name": "名称",
+      "description": "描述",
+      "itemType": "项目类型",
+      "unit": "单位",
+      "unitPlaceholder": "例如：天、小时、件",
+      "billingMode": "计费方式",
+      "quantity": "数量",
+      "unitPrice": "单价",
+      "dailyPrice": "日租价格",
+      "weeklyPrice": "周租价格",
+      "monthlyPrice": "月租价格",
+      "customPrice": "自定义价格",
+      "deposit": "押金",
+      "discountType": "折扣类型",
+      "noDiscount": "无折扣",
+      "discountPercent": "折扣（%）",
+      "discountAmount": "折扣金额",
+      "taxRatePercent": "税率（%）",
+      "taxTotal": "税费",
+      "depositTotal": "押金",
+      "customerNotes": "客户备注",
+      "termsAndConditions": "条款与条件",
+      "convertedRental": "已转换的租赁"
+    },
+    "actions": {
+      "send": "发送报价单",
+      "accept": "接受",
+      "reject": "拒绝",
+      "rejectPrompt": "拒绝原因（可选）",
+      "cancel": "取消报价单",
+      "duplicate": "复制",
+      "convert": "转换为租赁",
+      "removeItem": "移除",
+      "addServiceItem": "添加产品或服务",
+      "viewPdf": "查看 PDF",
+      "regeneratePdf": "重新生成 PDF",
+      "downloadPdf": "下载 PDF"
+    },
+    "timeline": {
+      "created": "报价单已创建",
+      "updated": "报价单已更新",
+      "status_changed": "状态已变更",
+      "sent": "报价单已发送",
+      "viewed": "客户已查看",
+      "accepted": "已接受",
+      "rejected": "已拒绝",
+      "duplicated": "已复制",
+      "converted": "已转换为租赁",
+      "pdf_generated": "PDF 已生成"
+    },
+    "errors": {
+      "customerRequired": "请选择客户",
+      "validUntilRequired": "有效期日期为必填项",
+      "datesRequired": "计划开始和结束日期为必填项",
+      "endBeforeStart": "计划结束时间必须晚于计划开始时间",
+      "validUntilBeforeIssueDate": "有效期不能是过去的日期",
+      "itemNameRequired": "请输入该项目的名称",
+      "quantityMustBePositive": "数量必须至少为 1",
+      "noItems": "请至少添加一个项目",
+      "onlyDraftEditable": "只有草稿状态的报价单可以编辑——请改为复制此报价单"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "客户",
+        "dates": "日期",
+        "assets": "资产",
+        "services": "产品与服务",
+        "pricing": "定价",
+        "terms": "条款",
+        "review": "确认"
+      },
+      "saving": "正在保存报价单…",
+      "createQuote": "创建报价单",
+      "noServiceItems": "尚未添加任何产品或服务"
+    },
+    "public": {
+      "notFound": "该报价单链接无效或已过期",
+      "acceptedNotice": "由 {{name}} 接受",
+      "rejectedNotice": "该报价单已被拒绝",
+      "acceptanceDisclaimer": "在下方确认接受即表示您已记录对本报价单的接受。这并非合格的电子签名。",
+      "rejectReasonPlaceholder": "请告诉我们原因（可选）",
+      "confirmReject": "确认拒绝"
+    }
+  },
+  "document": {
+    "title": "文档",
+    "subtitle": "在一处生成、共享、发送并签署每一份文档",
+    "newDocument": "新建文档",
+    "save": "保存",
+    "saving": "保存中…",
+    "deleteConfirm": "确定要删除此文档吗？",
+    "searchPlaceholder": "搜索文档…",
+    "allStatuses": "全部状态",
+    "allTypes": "全部类型",
+    "noDocuments": "未找到文档",
+    "backToList": "返回文档列表",
+    "types": {
+      "QUOTE": "报价单",
+      "CONTRACT": "租赁合同",
+      "HANDOVER_PROTOCOL": "交接单",
+      "RETURN_PROTOCOL": "归还单",
+      "DAMAGE_REPORT": "损坏报告",
+      "CONTRACT_AMENDMENT": "合同修订",
+      "CUSTOM": "自定义"
+    },
+    "statuses": {
+      "DRAFT": "草稿",
+      "READY": "已就绪",
+      "SENT": "已发送",
+      "VIEWED": "已查看",
+      "PARTIALLY_SIGNED": "部分已签署",
+      "SIGNED": "已签署",
+      "REJECTED": "已拒绝",
+      "VOIDED": "已作废",
+      "ARCHIVED": "已归档"
+    },
+    "fields": {
+      "documentNumber": "文档编号",
+      "documentType": "文档类型",
+      "status": "状态",
+      "title": "标题",
+      "customTypeName": "自定义类型名称",
+      "none": "无",
+      "version": "版本",
+      "createdAt": "创建时间",
+      "customer": "客户",
+      "rental": "租赁",
+      "quote": "报价单",
+      "asset": "资产"
+    },
+    "summary": {
+      "total": "文档总数",
+      "draft": "草稿",
+      "sent": "已发送",
+      "signed": "已签署"
+    },
+    "actions": {
+      "viewPdf": "查看 PDF",
+      "regeneratePdf": "重新生成 PDF",
+      "markReady": "标记为已就绪",
+      "markSent": "标记为已发送",
+      "markViewed": "标记为已查看",
+      "markSigned": "标记为已签署",
+      "markPartiallySigned": "标记为部分已签署",
+      "reject": "拒绝",
+      "rejectPrompt": "拒绝原因（可选）",
+      "duplicate": "复制",
+      "void": "作废",
+      "voidPrompt": "作废原因（可选）",
+      "archive": "归档"
+    },
+    "sections": {
+      "preview": "预览",
+      "email": "邮件发送",
+      "signature": "电子签名",
+      "relatedEntities": "关联记录"
+    },
+    "email": {
+      "recipientType": "收件人",
+      "recipientTypes": {
+        "CUSTOMER": "客户",
+        "EMPLOYEE": "员工",
+        "CUSTOM": "自定义邮箱"
+      },
+      "customEmail": "电子邮箱地址",
+      "subject": "主题",
+      "message": "消息内容",
+      "send": "发送邮件",
+      "retry": "重试",
+      "noDeliveries": "尚未发送任何邮件",
+      "statuses": {
+        "PENDING": "待处理",
+        "SENT": "已发送",
+        "FAILED": "发送失败"
+      }
+    },
+    "signature": {
+      "signerName": "签署人姓名",
+      "signerEmail": "签署人邮箱",
+      "request": "请求签名",
+      "refresh": "刷新状态",
+      "cancel": "取消",
+      "noRequests": "尚无签名请求",
+      "statuses": {
+        "REQUESTED": "已请求",
+        "PENDING": "待处理",
+        "SIGNED": "已签署",
+        "REJECTED": "已拒绝",
+        "EXPIRED": "已过期",
+        "CANCELLED": "已取消"
+      },
+      "providers": {
+        "LOCAL_MOCK": "手动（内部）",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "文档已创建",
+      "updated": "文档已更新",
+      "status_changed": "状态已变更",
+      "sent": "文档已发送",
+      "viewed": "已查看",
+      "signed": "签名已记录",
+      "downloaded": "已下载",
+      "archived": "已归档",
+      "version_created": "已创建新版本",
+      "file_uploaded": "文件已上传",
+      "file_deleted": "文件已删除",
+      "rendered": "PDF 已生成",
+      "shared": "已创建共享链接",
+      "share_viewed": "已通过共享链接查看",
+      "share_downloaded": "已通过共享链接下载",
+      "share_disabled": "共享链接已禁用",
+      "email_sent": "邮件已发送",
+      "email_failed": "邮件发送失败",
+      "signature_requested": "已请求签名",
+      "signature_status_changed": "签名状态已变更"
+    },
+    "errors": {
+      "customTypeNameRequired": "请输入该自定义文档类型的名称"
+    }
+  },
+  "documentTemplate": {
+    "title": "文档模板",
+    "subtitle": "管理用于生成各类文档的 HTML 模板",
+    "newTemplate": "新建模板",
+    "save": "保存",
+    "saving": "保存中…",
+    "searchPlaceholder": "搜索模板…",
+    "noTemplates": "未找到模板",
+    "statuses": {
+      "DRAFT": "草稿",
+      "ACTIVE": "已启用",
+      "ARCHIVED": "已归档"
+    },
+    "fields": {
+      "name": "名称",
+      "description": "描述",
+      "htmlContent": "HTML 内容",
+      "css": "CSS",
+      "status": "状态",
+      "versionCount": "版本数",
+      "current": "当前"
+    },
+    "actions": {
+      "activate": "启用",
+      "archive": "归档",
+      "restore": "恢复",
+      "duplicate": "复制",
+      "saveAsNewVersion": "另存为新版本",
+      "restoreVersion": "恢复此版本"
+    },
+    "sections": {
+      "metadata": "详情",
+      "content": "内容",
+      "preview": "预览",
+      "versions": "版本历史"
+    }
+  },
+  "share": {
+    "title": "公开共享链接",
+    "fields": {
+      "password": "密码",
+      "passwordPlaceholder": "可选的访问密码",
+      "views": "查看次数",
+      "downloads": "下载次数",
+      "expiresAt": "过期时间"
+    },
+    "status": {
+      "active": "启用",
+      "disabled": "已禁用"
+    },
+    "actions": {
+      "create": "创建链接",
+      "disable": "禁用"
+    },
+    "noLinks": "尚无共享链接",
+    "linkCreatedPrompt": "将此链接分享给您的客户：",
+    "public": {
+      "passwordRequiredTitle": "此文档受密码保护",
+      "wrongPassword": "密码错误",
+      "unlock": "解锁",
+      "notFound": "此链接无效或已过期",
+      "downloadPdf": "下载 PDF"
+    }
+  },
+  "dashboard": {
+    "welcome": "欢迎回来，{{name}}",
+    "sections": {
+      "overview": "概览",
+      "quickActions": "快捷操作",
+      "recentActivity": "近期活动"
+    },
+    "metrics": {
+      "customers": "客户",
+      "activeRentals": "进行中的租赁",
+      "availableAssets": "可用资产",
+      "pendingQuotes": "待处理报价单",
+      "needsAttention": "需要关注"
+    },
+    "recentRentals": "近期租赁",
+    "recentDocuments": "近期文档",
+    "viewAll": "查看全部",
+    "emptyRecentRentals": "暂无租赁记录",
+    "emptyRecentDocuments": "暂无文档"
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "仪表盘",
+      "rentals": "租赁",
+      "calendar": "日历",
+      "documents": "文档",
+      "messages": "消息",
+      "notifications": "通知",
+      "logout": "退出登录"
+    },
+    "auth": {
+      "login": {
+        "title": "客户门户",
+        "subtitle": "登录以管理您的租赁",
+        "company": "公司",
+        "companyPlaceholder": "your-company",
+        "email": "电子邮箱",
+        "password": "密码",
+        "submit": "登录",
+        "submitting": "正在登录…"
+      },
+      "activate": {
+        "title": "激活您的账户",
+        "subtitle": "设置密码以访问您的客户门户",
+        "password": "密码",
+        "submit": "激活账户",
+        "submitting": "激活中…",
+        "invalidToken": "该邀请链接无效或已过期。",
+        "successTitle": "欢迎加入 {{company}}！",
+        "successDescription": "您的账户已就绪，正在为您跳转至仪表盘…"
+      },
+      "errors": {
+        "invalidCredentials": "邮箱、密码或公司信息无效。",
+        "invalidToken": "邀请无效或已过期。",
+        "generic": "出现了一些问题，请重试。"
+      },
+      "tagline": "在一处管理您的租赁、文档与请求。"
+    },
+    "dashboard": {
+      "title": "仪表盘",
+      "welcome": "欢迎回来，{{name}}",
+      "currentRentals": "当前租赁",
+      "upcomingRentals": "即将开始的租赁",
+      "unreadMessages": "未读消息",
+      "pendingSignatures": "待签署",
+      "pendingExtensions": "待处理的延期申请",
+      "recentRentals": "近期租赁",
+      "viewAll": "查看全部",
+      "noRentals": "您目前暂无租赁记录"
+    },
+    "rentals": {
+      "title": "租赁",
+      "backToList": "返回租赁列表",
+      "searchPlaceholder": "搜索租赁…",
+      "filterStatus": "状态",
+      "allStatuses": "全部状态",
+      "detailTitle": "租赁 {{number}}",
+      "period": "租赁期限",
+      "items": "设备",
+      "timeline": "时间线",
+      "documents": "文档",
+      "downloadAllDocuments": "下载全部文档（.zip）",
+      "qrCode": "二维码",
+      "showQrCode": "显示二维码",
+      "requestExtension": "申请延期",
+      "reportDamage": "报告损坏",
+      "extensionRequests": "延期申请",
+      "damageReports": "损坏报告",
+      "noRentals": "未找到租赁记录",
+      "quantity": "数量",
+      "statuses": {
+        "DRAFT": "草稿",
+        "QUOTE": "报价单",
+        "RESERVED": "已预订",
+        "ACTIVE": "进行中",
+        "RETURNED": "已归还",
+        "COMPLETED": "已完成",
+        "CANCELLED": "已取消"
+      }
+    },
+    "calendar": {
+      "title": "租赁日历",
+      "empty": "该时段内暂无租赁"
+    },
+    "extensionRequests": {
+      "title": "申请延期",
+      "currentEnd": "当前结束日期",
+      "newEndDate": "新的结束日期",
+      "message": "备注（可选）",
+      "submit": "提交申请",
+      "submitting": "提交中…",
+      "submitted": "您的延期申请已提交。",
+      "responseFrom": "回复",
+      "statuses": {
+        "PENDING": "待处理",
+        "APPROVED": "已批准",
+        "REJECTED": "已拒绝",
+        "CANCELLED": "已取消"
+      }
+    },
+    "damageReports": {
+      "title": "报告损坏",
+      "description": "描述",
+      "descriptionPlaceholder": "描述发生的情况…",
+      "asset": "设备（可选）",
+      "anyEquipment": "不确定 / 综合情况",
+      "photos": "照片",
+      "addPhoto": "添加照片",
+      "uploading": "上传中…",
+      "submit": "提交报告",
+      "submitting": "提交中…",
+      "submitted": "您的损坏报告已提交。",
+      "statuses": {
+        "SUBMITTED": "已提交",
+        "REVIEWED": "已审核",
+        "RESOLVED": "已解决",
+        "CONVERTED_TO_DOCUMENT": "已生成文档"
+      }
+    },
+    "documents": {
+      "title": "文档",
+      "backToList": "返回文档列表",
+      "filterStatus": "状态",
+      "allStatuses": "全部状态",
+      "preview": "预览",
+      "download": "下载 PDF",
+      "sign": "签署文档",
+      "signing": "签署中…",
+      "signed": "您已签署此文档。",
+      "pendingSignature": "等待您的签名",
+      "noDocuments": "未找到文档",
+      "signatureRequests": "签名请求"
+    },
+    "messages": {
+      "title": "消息",
+      "placeholder": "输入消息…",
+      "send": "发送",
+      "sending": "发送中…",
+      "empty": "暂无消息",
+      "generalThread": "常规"
+    },
+    "notifications": {
+      "title": "通知",
+      "markAllRead": "全部标记为已读",
+      "empty": "暂无新通知",
+      "types": {
+        "MESSAGE": "新消息",
+        "DOCUMENT_SHARED": "文档已共享",
+        "SIGNATURE_REQUESTED": "已请求签名",
+        "EXTENSION_RESPONSE": "延期申请更新",
+        "RENTAL_UPDATE": "租赁更新",
+        "DAMAGE_REPORT_UPDATE": "损坏报告更新"
+      }
+    },
+    "assets": {
+      "title": "设备",
+      "manufacturer": "制造商",
+      "model": "型号",
+      "condition": "状况说明"
+    },
+    "darkMode": {
+      "toggle": "切换深色模式"
+    }
+  },
+  "timeline": {
+    "title": "时间线",
+    "empty": "暂无活动记录",
+    "searchPlaceholder": "搜索时间线…",
+    "today": "今天",
+    "yesterday": "昨天",
+    "hint": "输入以搜索，使用 ↑/↓ 在事件间移动"
+  }
+}

@@ -11,10 +11,11 @@ import {
 } from "../../../../components/dashboard";
 import { usePortalDashboard } from "../../../../hooks/use-portal-dashboard";
 import { usePortalMe } from "../../../../hooks/use-portal-auth";
+import { formatDate } from "../../../../lib/date-format";
 import { formatMoney } from "../../../../lib/money";
 
 export default function PortalDashboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: session } = usePortalMe();
   const { data, isLoading, isError, refetch } = usePortalDashboard();
 
@@ -85,8 +86,8 @@ export default function PortalDashboardPage() {
               </span>
               <span className="text-muted-foreground flex items-center justify-between text-xs">
                 <span>
-                  {new Date(rental.plannedStart).toLocaleDateString()} –{" "}
-                  {new Date(rental.plannedEnd).toLocaleDateString()}
+                  {formatDate(rental.plannedStart, i18n.language)} –{" "}
+                  {formatDate(rental.plannedEnd, i18n.language)}
                 </span>
                 <span>{formatMoney(rental.totalMinor, rental.currency)}</span>
               </span>

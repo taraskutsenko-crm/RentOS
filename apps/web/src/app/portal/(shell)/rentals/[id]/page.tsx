@@ -33,10 +33,11 @@ import {
   usePortalRentalTimeline,
 } from "../../../../../hooks/use-portal-rentals";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
+import { formatDate, formatDateTime } from "../../../../../lib/date-format";
 import { formatMoney } from "../../../../../lib/money";
 
 export default function PortalRentalDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const params = useParams<{ id: string }>();
 
   const { data: rental, isLoading, isError } = usePortalRental(params.id);
@@ -127,19 +128,19 @@ export default function PortalRentalDetailPage() {
             <CardContent className="grid grid-cols-2 gap-3 text-sm">
               <InfoRow
                 label={t("rental.fields.plannedStart")}
-                value={new Date(rental.plannedStart).toLocaleString()}
+                value={formatDateTime(rental.plannedStart, i18n.language)}
               />
               <InfoRow
                 label={t("rental.fields.plannedEnd")}
-                value={new Date(rental.plannedEnd).toLocaleString()}
+                value={formatDateTime(rental.plannedEnd, i18n.language)}
               />
               <InfoRow
                 label={t("rental.fields.actualStart")}
-                value={rental.actualStart ? new Date(rental.actualStart).toLocaleString() : "—"}
+                value={rental.actualStart ? formatDateTime(rental.actualStart, i18n.language) : "—"}
               />
               <InfoRow
                 label={t("rental.fields.actualEnd")}
-                value={rental.actualEnd ? new Date(rental.actualEnd).toLocaleString() : "—"}
+                value={rental.actualEnd ? formatDateTime(rental.actualEnd, i18n.language) : "—"}
               />
             </CardContent>
           </Card>
@@ -237,7 +238,7 @@ export default function PortalRentalDetailPage() {
                   <div key={request.id} className="border-l-2 pl-3">
                     <p className="font-medium">
                       {t(`portal.extensionRequests.statuses.${request.status}`)} —{" "}
-                      {new Date(request.requestedEnd).toLocaleDateString()}
+                      {formatDate(request.requestedEnd, i18n.language)}
                     </p>
                     {request.responseMessage && (
                       <p className="text-muted-foreground text-xs">{request.responseMessage}</p>
@@ -277,7 +278,7 @@ export default function PortalRentalDetailPage() {
                 <li key={event.id} className="border-l-2 pl-3">
                   <p className="font-medium">{t(`rental.timeline.${event.type}`)}</p>
                   <p className="text-muted-foreground text-xs">
-                    {new Date(event.occurredAt).toLocaleString()}
+                    {formatDateTime(event.occurredAt, i18n.language)}
                   </p>
                 </li>
               ))}
@@ -310,7 +311,7 @@ function ExtensionRequestForm({
   currentEnd: string;
   onDone: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [requestedEnd, setRequestedEnd] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -342,7 +343,7 @@ function ExtensionRequestForm({
           <Input
             id="currentEnd"
             type="text"
-            value={new Date(currentEnd).toLocaleDateString()}
+            value={formatDate(currentEnd, i18n.language)}
             disabled
           />
         </div>

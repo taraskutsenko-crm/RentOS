@@ -1,13 +1,14 @@
 "use client";
 
+import { localeRegistry, type SupportedLanguage } from "@rentos/localization";
 import {
-  cn,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Select,
 } from "@rentos/ui";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -16,15 +17,7 @@ import { useTranslation } from "react-i18next";
 import { useLogout, useMe } from "../../hooks/use-auth";
 import { useDarkMode } from "../../hooks/use-dark-mode";
 import { useCurrentTenantRole } from "../../hooks/use-current-tenant-role";
-
-const LANGUAGES = [
-  { code: "en", label: "EN" },
-  { code: "de", label: "DE" },
-  { code: "es", label: "ES" },
-  { code: "pl", label: "PL" },
-  { code: "ru", label: "RU" },
-  { code: "uk", label: "UK" },
-] as const;
+import { useLanguagePreference } from "../../hooks/use-language-preference";
 
 function initials(firstName: string, lastName: string): string {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -39,12 +32,13 @@ function initials(firstName: string, lastName: string): string {
  * surface for the same action).
  */
 export function UserMenu() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const router = useRouter();
   const { data } = useMe();
   const { data: tenantData } = useCurrentTenantRole();
   const logout = useLogout();
   const [isDark, setDarkMode] = useDarkMode("rentos_app_dark_mode");
+  const { language, setLanguage } = useLanguagePreference();
 
   if (!data) return null;
   const { user } = data;
@@ -83,22 +77,18 @@ export function UserMenu() {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel>{t("app.shell.language")}</DropdownMenuLabel>
-        <div className="grid grid-cols-3 gap-1 px-2 pb-1.5">
-          {LANGUAGES.map((language) => (
-            <button
-              key={language.code}
-              type="button"
-              onClick={() => void i18n.changeLanguage(language.code)}
-              className={cn(
-                "rounded-sm border px-2 py-1 text-xs transition-colors duration-[var(--duration-fast)]",
-                i18n.language === language.code
-                  ? "border-primary bg-primary-light text-primary font-medium"
-                  : "border-border text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {language.label}
-            </button>
-          ))}
+        <div className="px-2 pb-1.5">
+          <Select
+            value={language}
+            onChange={(event) => setLanguage(event.target.value as SupportedLanguage)}
+            aria-label={t("app.shell.language")}
+          >
+            {localeRegistry.map((locale) => (
+              <option key={locale.code} value={locale.code}>
+                {locale.nativeName}
+              </option>
+            ))}
+          </Select>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onSelect={() => void handleLogout()}>

@@ -19,6 +19,7 @@ import {
   useUpdateDocumentTemplateMeta,
 } from "../../../../../hooks/use-document-templates";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
+import { formatDateTime } from "../../../../../lib/date-format";
 import type { DocumentTemplate } from "../../../../../types/document";
 
 export default function DocumentTemplateDetailPage() {
@@ -46,7 +47,7 @@ function TemplateEditor({
   tenantId: string | null;
   template: DocumentTemplate;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -252,7 +253,7 @@ function TemplateEditor({
                         ` (${t("documentTemplate.fields.current")})`}
                       <br />
                       <span className="text-muted-foreground text-xs">
-                        {new Date(version.createdAt).toLocaleString()}
+                        {formatDateTime(version.createdAt, i18n.language)}
                       </span>
                     </span>
                     {canManage && version.versionNumber !== template.currentVersionNumber && (

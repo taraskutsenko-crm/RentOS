@@ -1,0 +1,1109 @@
+{
+  "app": {
+    "name": "Havelio",
+    "tagline": "하나의 플랫폼, 모든 자산.",
+    "nav": {
+      "dashboard": "대시보드",
+      "settingsGroup": "설정"
+    },
+    "shell": {
+      "sidebarLabel": "기본 탐색",
+      "openNav": "탐색 메뉴 열기",
+      "closeNav": "탐색 메뉴 닫기",
+      "expandSidebar": "사이드바 펼치기",
+      "collapseSidebar": "사이드바 접기",
+      "searchPlaceholder": "검색…",
+      "userMenu": "계정 메뉴",
+      "lightMode": "라이트 모드",
+      "darkMode": "다크 모드",
+      "language": "언어",
+      "create": "만들기",
+      "breadcrumbs": {
+        "new": "새로 만들기",
+        "edit": "편집"
+      },
+      "notifications": {
+        "title": "알림",
+        "empty": "새로운 알림이 없습니다"
+      },
+      "commandPalette": {
+        "title": "명령 팔레트",
+        "placeholder": "검색 또는 이동…",
+        "noResults": "일치하는 결과가 없습니다",
+        "pagesGroup": "페이지",
+        "quickActionsGroup": "빠른 작업",
+        "commandsGroup": "명령",
+        "pinnedGroup": "고정됨",
+        "recentGroup": "최근 항목",
+        "hint": "{{keys}} 키를 눌러 어디서든 검색하거나 이동하세요"
+      },
+      "shortcuts": {
+        "title": "키보드 단축키",
+        "openPalette": "명령 팔레트 열기",
+        "newItem": "새 항목",
+        "help": "키보드 단축키 표시",
+        "goCustomers": "고객으로 이동",
+        "goRentals": "대여로 이동",
+        "goAssets": "자산으로 이동",
+        "goDocuments": "문서로 이동",
+        "goQuotes": "견적서로 이동",
+        "groupGeneral": "일반",
+        "groupNavigation": "탐색",
+        "settingsSubtitle": "앱에 등록된 모든 단축키 — 실제 설정과 항상 동기화됩니다."
+      },
+      "pin": "고정",
+      "unpin": "고정 해제"
+    }
+  },
+  "common": {
+    "loading": "불러오는 중…",
+    "error": "문제가 발생했습니다. 다시 시도해 주세요.",
+    "showPassword": "비밀번호 표시",
+    "hidePassword": "비밀번호 숨기기",
+    "saving": "저장 중…",
+    "cancel": "취소",
+    "confirm": "확인",
+    "dismiss": "닫기",
+    "table": {
+      "columns": "열",
+      "permissionDenied": "이 데이터를 볼 수 있는 권한이 없습니다.",
+      "retry": "다시 시도",
+      "selectAll": "모든 행 선택",
+      "selectRow": "행 선택",
+      "rowActions": "행 작업",
+      "searchPlaceholder": "검색…",
+      "clearSearch": "검색어 지우기",
+      "clearSelection": "선택 항목 지우기",
+      "selectedCount": "{{count}}개 선택됨"
+    },
+    "pagination": {
+      "range": "전체 {{total}}개 중 {{start}}–{{end}}",
+      "previous": "이전",
+      "next": "다음",
+      "pageOf": "{{totalPages}} 페이지 중 {{page}} 페이지"
+    },
+    "filters": {
+      "remove": "{{filter}} 필터 제거",
+      "resetAll": "모든 필터 초기화"
+    },
+    "bulkActions": {
+      "delete": "삭제",
+      "deleteConfirmTitle": "고객 {{count}}명을 삭제하시겠습니까?",
+      "deleteConfirmDescription": "선택한 고객을 완전히 삭제합니다. 이 작업은 취소할 수 없습니다.",
+      "deletePartialFailure": "총 {{total}}개 중 {{failed}}개를 삭제하지 못했습니다."
+    }
+  },
+  "nav": {
+    "logout": "로그아웃",
+    "selectTenant": "회사 선택"
+  },
+  "auth": {
+    "register": {
+      "title": "계정 만들기",
+      "subtitle": "회사 작업 공간을 설정하세요",
+      "firstName": "이름",
+      "lastName": "성",
+      "email": "이메일",
+      "password": "비밀번호",
+      "passwordConfirmation": "비밀번호 확인",
+      "companyName": "회사명",
+      "country": "국가",
+      "language": "언어",
+      "currency": "통화",
+      "timezone": "시간대",
+      "submit": "계정 만들기",
+      "submitting": "계정을 만드는 중…",
+      "haveAccount": "이미 계정이 있으신가요?",
+      "signIn": "로그인",
+      "companySection": "회사"
+    },
+    "login": {
+      "title": "로그인",
+      "subtitle": "다시 오신 것을 환영합니다",
+      "email": "이메일",
+      "password": "비밀번호",
+      "submit": "로그인",
+      "submitting": "로그인 중…",
+      "noAccount": "계정이 없으신가요?",
+      "signUp": "계정 만들기"
+    },
+    "errors": {
+      "required": "필수 입력 항목입니다",
+      "invalidEmail": "유효한 이메일 주소를 입력하세요",
+      "passwordTooShort": "비밀번호는 12자 이상이어야 합니다",
+      "passwordUppercase": "비밀번호에는 대문자가 포함되어야 합니다",
+      "passwordLowercase": "비밀번호에는 소문자가 포함되어야 합니다",
+      "passwordNumber": "비밀번호에는 숫자가 포함되어야 합니다",
+      "passwordMismatch": "비밀번호가 일치하지 않습니다",
+      "emailInUse": "이 이메일로 가입된 계정이 이미 있습니다",
+      "invalidCredentials": "이메일 또는 비밀번호가 올바르지 않습니다",
+      "accountInactive": "이 계정은 비활성 상태입니다",
+      "generic": "문제가 발생했습니다. 다시 시도해 주세요."
+    }
+  },
+  "tenant": {
+    "selectTitle": "회사 선택",
+    "selectSubtitle": "열고자 하는 작업 공간을 선택하세요",
+    "noTenants": "아직 소속된 회사가 없습니다",
+    "role": "역할"
+  },
+  "country": {
+    "US": "미국",
+    "PL": "폴란드",
+    "DE": "독일",
+    "UA": "우크라이나",
+    "ES": "스페인",
+    "GB": "영국"
+  },
+  "customer": {
+    "title": "고객",
+    "subtitle": "고객 정보를 관리하세요",
+    "newCustomer": "새 고객",
+    "editCustomer": "고객 편집",
+    "searchPlaceholder": "고객 검색…",
+    "filterStatus": "상태",
+    "allStatuses": "모든 상태",
+    "firstName": "이름",
+    "lastName": "성",
+    "company": "회사",
+    "phone": "전화번호",
+    "email": "이메일",
+    "vatNumber": "사업자등록번호",
+    "address": "주소",
+    "notes": "메모",
+    "status": "상태",
+    "statusActive": "활성",
+    "statusInactive": "비활성",
+    "save": "저장",
+    "saving": "저장 중…",
+    "cancel": "취소",
+    "delete": "삭제",
+    "deleteConfirm": "이 고객을 삭제하시겠습니까?",
+    "noCustomers": "고객을 찾을 수 없습니다",
+    "backToList": "고객 목록으로 돌아가기",
+    "previous": "이전",
+    "next": "다음",
+    "portal": {
+      "title": "고객 포털 접근 권한",
+      "notInvited": "아직 초대되지 않음",
+      "invited": "초대 발송됨",
+      "activated": "포털 활성화됨",
+      "invitationExpired": "초대 만료됨",
+      "lastLogin": "마지막 로그인",
+      "invite": "포털에 초대",
+      "reinvite": "초대 다시 보내기",
+      "revoke": "접근 권한 취소",
+      "revokeConfirm": "이 작업을 수행하면 고객이 포털에서 로그아웃되고 새로 초대할 때까지 접근이 제한됩니다. 계속하시겠습니까?",
+      "inviteLinkCreated": "초대 링크가 생성되었습니다 — 고객에게 공유하세요:",
+      "noEmailOnFile": "이 고객에게 등록된 이메일이 없습니다. 초대를 보내려면 이메일을 추가하세요.",
+      "extensionRequests": "연장 요청",
+      "damageReports": "파손 신고",
+      "messages": "포털 메시지",
+      "noExtensionRequests": "연장 요청이 없습니다",
+      "noDamageReports": "파손 신고가 없습니다",
+      "noMessages": "아직 메시지가 없습니다",
+      "approve": "승인",
+      "reject": "거절",
+      "responseMessagePlaceholder": "고객에게 보낼 메모（선택 사항）…",
+      "markReviewed": "검토 완료로 표시",
+      "markResolved": "해결됨으로 표시",
+      "convertToDocument": "문서로 변환",
+      "sendMessage": "보내기",
+      "messagePlaceholder": "이 고객에게 답장…"
+    },
+    "timeline": {
+      "created": "고객이 생성되었습니다",
+      "updated": "고객 정보가 업데이트되었습니다",
+      "deleted": "고객이 삭제되었습니다"
+    },
+    "summary": {
+      "totalRentals": "총 대여 수",
+      "activeRentals": "진행 중인 대여",
+      "totalRevenue": "총 매출",
+      "damageReports": "파손 신고"
+    },
+    "sections": {
+      "documents": "문서"
+    },
+    "documentsEmpty": "이 고객과 연결된 문서가 아직 없습니다"
+  },
+  "asset": {
+    "title": "자산",
+    "subtitle": "귀사의 모든 대여 가능 품목을 관리하세요",
+    "newAsset": "새 자산",
+    "editAsset": "자산 편집",
+    "save": "저장",
+    "saving": "저장 중…",
+    "delete": "삭제",
+    "deleteConfirm": "이 자산을 삭제하시겠습니까?",
+    "searchPlaceholder": "자산 검색…",
+    "allCategories": "모든 카테고리",
+    "allStatuses": "모든 상태",
+    "noAssets": "자산을 찾을 수 없습니다",
+    "view": "보기",
+    "rentableYes": "예",
+    "rentableNo": "아니요",
+    "noTimelineEvents": "아직 기록된 활동이 없습니다",
+    "noImages": "아직 업로드된 이미지가 없습니다",
+    "noDocuments": "아직 업로드된 문서가 없습니다",
+    "platformDocumentsEmpty": "이 자산과 연결된 문서가 아직 없습니다",
+    "sort": {
+      "newest": "최신순",
+      "oldest": "오래된순",
+      "nameAsc": "이름（A–Z）",
+      "nameDesc": "이름（Z–A）"
+    },
+    "fields": {
+      "name": "이름",
+      "description": "설명",
+      "internalNumber": "내부 번호",
+      "sku": "SKU",
+      "serialNumber": "일련번호",
+      "barcode": "바코드",
+      "qrCodeValue": "QR 코드 값",
+      "category": "카테고리",
+      "status": "상태",
+      "statusDefaultHint": "기본값（이용 가능）",
+      "manufacturer": "제조사",
+      "model": "모델",
+      "purchaseDate": "구매일",
+      "purchasePrice": "구매 가격",
+      "currency": "통화",
+      "replacementValue": "교체 가치",
+      "conditionNotes": "상태 메모",
+      "isRentable": "대여 가능",
+      "isActive": "활성",
+      "currentLocation": "현재 위치",
+      "locationChangeHint": "위치는 자산 상세 페이지에서 변경되며, 이동할 때마다 타임라인에 기록됩니다.",
+      "selectPlaceholder": "선택하세요…",
+      "primaryImage": "대표",
+      "documentTitle": "문서 제목",
+      "booleanYes": "예"
+    },
+    "sections": {
+      "basicInfo": "기본 정보",
+      "identification": "식별 정보",
+      "category": "카테고리",
+      "status": "상태",
+      "manufacturerModel": "제조사 및 모델",
+      "financial": "재무 정보",
+      "locationCondition": "위치 및 상태",
+      "customFields": "사용자 지정 필드",
+      "images": "이미지",
+      "documents": "문서",
+      "timeline": "타임라인",
+      "filesManagement": "이미지 및 문서",
+      "platformDocuments": "문서"
+    },
+    "actions": {
+      "changeStatus": "상태 변경",
+      "changeLocation": "위치 변경",
+      "deleteImage": "이미지 삭제",
+      "deleteDocument": "삭제",
+      "uploadDocument": "업로드"
+    },
+    "errors": {
+      "customFieldRequired": "필수 입력 항목입니다",
+      "categoryRequired": "카테고리를 선택하세요",
+      "statusCodeFormat": "코드는 대문자, 숫자, 밑줄로 구성되어야 합니다",
+      "fieldKeyFormat": "키는 소문자, 숫자, 밑줄로 구성되어야 합니다"
+    },
+    "timeline": {
+      "created": "자산이 생성되었습니다",
+      "updated": "자산 정보가 업데이트되었습니다",
+      "status_changed": "상태가 변경되었습니다",
+      "location_changed": "위치가 변경되었습니다",
+      "image_uploaded": "이미지가 업로드되었습니다",
+      "document_uploaded": "문서가 업로드되었습니다"
+    },
+    "summary": {
+      "totalRentals": "총 대여 수",
+      "revenueGenerated": "발생 매출"
+    },
+    "documentTypes": {
+      "PURCHASE_DOCUMENT": "구매 증빙",
+      "MANUAL": "사용 설명서",
+      "CERTIFICATE": "인증서",
+      "INSURANCE": "보험",
+      "REGISTRATION": "등록증",
+      "INSPECTION": "점검 보고서",
+      "OTHER": "기타"
+    },
+    "fieldTypes": {
+      "TEXT": "텍스트",
+      "TEXTAREA": "긴 텍스트",
+      "INTEGER": "정수",
+      "DECIMAL": "소수",
+      "BOOLEAN": "예/아니요",
+      "DATE": "날짜",
+      "DATETIME": "날짜 및 시간",
+      "SELECT": "단일 선택",
+      "MULTISELECT": "다중 선택",
+      "URL": "링크",
+      "EMAIL": "이메일",
+      "PHONE": "전화번호"
+    },
+    "categorySettings": {
+      "navLabel": "카테고리",
+      "title": "자산 카테고리",
+      "subtitle": "자산을 카테고리 트리로 정리하세요",
+      "newCategoryName": "새 카테고리 이름",
+      "parent": "상위 카테고리",
+      "noParent": "상위 카테고리 없음（최상위）",
+      "create": "카테고리 추가",
+      "noCategories": "아직 카테고리가 없습니다",
+      "activate": "활성화",
+      "deactivate": "비활성화",
+      "deleteConfirm": "이 카테고리를 삭제하시겠습니까? 활성 자산이나 하위 카테고리가 있는 동안에는 삭제할 수 없습니다."
+    },
+    "statusSettings": {
+      "navLabel": "상태",
+      "title": "자산 상태",
+      "subtitle": "자산이 가질 수 있는 생명주기 상태를 구성하세요",
+      "name": "이름",
+      "code": "코드",
+      "type": "유형",
+      "systemStatus": "시스템",
+      "customStatus": "사용자 지정",
+      "availableForRental": "대여 가능",
+      "create": "상태 추가",
+      "deleteConfirm": "이 상태를 삭제하시겠습니까? 시스템 상태이거나 현재 사용 중인 상태는 삭제할 수 없습니다."
+    },
+    "fieldSettings": {
+      "navLabel": "사용자 지정 필드",
+      "title": "자산 사용자 지정 필드",
+      "subtitle": "자산 카테고리별 특정 속성을 정의하세요",
+      "name": "이름",
+      "key": "키",
+      "category": "카테고리",
+      "globalField": "모든 카테고리",
+      "fieldType": "필드 유형",
+      "optionsHint": "한 줄에 하나의 옵션",
+      "required": "필수",
+      "filterable": "필터 가능",
+      "searchable": "검색 가능",
+      "create": "필드 추가",
+      "deleteConfirm": "이 사용자 지정 필드 정의를 삭제하시겠습니까?"
+    }
+  },
+  "rental": {
+    "title": "대여",
+    "subtitle": "대여한 자산을 예약, 추적 및 반납하세요",
+    "newRental": "새 대여",
+    "editRental": "대여 편집",
+    "save": "저장",
+    "deleteConfirm": "이 대여를 삭제하시겠습니까?",
+    "searchPlaceholder": "대여 검색…",
+    "allStatuses": "모든 상태",
+    "noRentals": "대여 내역을 찾을 수 없습니다",
+    "statuses": {
+      "DRAFT": "임시 저장",
+      "QUOTE": "견적",
+      "RESERVED": "예약됨",
+      "ACTIVE": "진행 중",
+      "RETURNED": "반납됨",
+      "COMPLETED": "완료됨",
+      "CANCELLED": "취소됨"
+    },
+    "billingModes": {
+      "DAILY": "일 단위",
+      "WEEKLY": "주 단위",
+      "MONTHLY": "월 단위",
+      "CUSTOM": "사용자 지정"
+    },
+    "fields": {
+      "rentalNumber": "대여 번호",
+      "status": "상태",
+      "plannedStart": "예정 시작일",
+      "plannedEnd": "예정 종료일",
+      "actualStart": "실제 시작일",
+      "actualEnd": "실제 종료일",
+      "billingMode": "청구 방식",
+      "quantity": "수량",
+      "dailyPrice": "일일 요금",
+      "dailyPriceForRemainder": "일일 요금（남은 일수）",
+      "weeklyPrice": "주간 요금",
+      "monthlyPrice": "월간 요금",
+      "customPrice": "사용자 지정 요금",
+      "deposit": "보증금",
+      "itemDiscount": "품목 할인",
+      "discount": "할인",
+      "tax": "세금",
+      "subtotal": "소계",
+      "total": "합계",
+      "internalNotes": "내부 메모",
+      "returnedAt": "반납일",
+      "sourceQuote": "원본 견적서"
+    },
+    "sections": {
+      "details": "세부 정보",
+      "items": "자산",
+      "financial": "재무 요약",
+      "customer": "고객",
+      "documents": "문서"
+    },
+    "documents": {
+      "empty": "이 대여와 연결된 문서가 아직 없습니다"
+    },
+    "documentChecklist": {
+      "title": "문서 체크리스트",
+      "items": {
+        "commercialOffer": "상업 제안서",
+        "contract": "대여 계약서",
+        "handoverProtocol": "인도 확인서",
+        "returnProtocol": "반납 확인서"
+      },
+      "states": {
+        "present": "연결됨",
+        "missing": "누락됨",
+        "notRequired": "아직 필요 없음"
+      }
+    },
+    "timeIntelligence": {
+      "starts_today": "오늘 시작",
+      "starts_tomorrow": "내일 시작",
+      "starts_in_days": "{{count}}일 후 시작",
+      "days_remaining": "{{count}}일 남음",
+      "due_today": "오늘 마감",
+      "overdue": "{{count}}일 지연",
+      "completed": "완료됨",
+      "cancelled": "취소됨",
+      "none": "—"
+    },
+    "actions": {
+      "reserve": "예약",
+      "start": "대여 시작",
+      "returnAll": "전체 반납",
+      "cancel": "대여 취소"
+    },
+    "timeline": {
+      "created": "대여가 생성되었습니다",
+      "updated": "대여 정보가 업데이트되었습니다",
+      "status_changed": "상태가 변경되었습니다",
+      "items_returned": "품목이 반납되었습니다"
+    },
+    "summary": {
+      "totalDeposit": "총 보증금",
+      "daysRemaining": "남은 일수",
+      "rentalValue": "대여 금액",
+      "assetsCount": "자산 수",
+      "timeStatus": "기간 상태"
+    },
+    "errors": {
+      "customerRequired": "고객을 선택하세요",
+      "datesRequired": "예정 시작일과 종료일은 필수입니다",
+      "endBeforeStart": "예정 종료일은 예정 시작일 이후여야 합니다",
+      "assetRequired": "자산을 선택하세요",
+      "selectAtLeastOneAsset": "최소 하나 이상의 자산을 선택하세요",
+      "customMonthLengthRequired": "1에서 365 사이의 일수를 입력하세요"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "고객",
+        "assets": "자산",
+        "dates": "날짜",
+        "pricing": "요금",
+        "review": "검토"
+      },
+      "back": "이전",
+      "next": "다음",
+      "creating": "대여를 생성하는 중…",
+      "createRental": "대여 생성",
+      "availabilityCheck": "이용 가능 여부 확인",
+      "available": "이용 가능",
+      "unavailable": "해당 날짜에는 이용할 수 없습니다",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}}개 달력 월 × {{price}}",
+        "FIXED_30_DAYS": "고정 30일 {{count}}회 × {{price}}",
+        "CUSTOM": "사용자 지정 {{length}}일 {{count}}회 × {{price}}",
+        "days": "{{count}}일 × {{price}}",
+        "pending": "요금 명세를 보려면 유효한 날짜와 요금을 입력하세요"
+      }
+    },
+    "availabilityCalendar": {
+      "title": "이용 가능 여부 캘린더",
+      "subtitle": "예약하기 전에 자산의 이용 가능 여부를 확인하세요",
+      "previousMonth": "이전 달",
+      "nextMonth": "다음 달",
+      "selectAssetsHint": "이용 가능 여부를 확인하려면 하나 이상의 자산을 선택하세요",
+      "booked": "예약됨",
+      "free": "이용 가능"
+    },
+    "billingSettings": {
+      "navLabel": "청구 설정",
+      "title": "대여 청구 설정",
+      "subtitle": "이 회사에서 월 단위로 요금이 책정된 대여의 청구 방식을 구성하세요",
+      "monthlyMethod": "월간 청구 방식",
+      "customMonthLengthDays": "사용자 지정 청구 월의 일수",
+      "save": "저장",
+      "saving": "저장 중…",
+      "saved": "청구 설정이 저장되었습니다",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "달력 월",
+          "description": "특정 날짜부터 다음 달력 월의 동일한 날짜까지 청구하며, 월말 처리를 포함합니다."
+        },
+        "FIXED_30_DAYS": {
+          "label": "고정 30일",
+          "description": "청구 가능한 30일마다 하나의 월간 청구 단위로 취급합니다."
+        },
+        "CUSTOM": {
+          "label": "사용자 지정 기간",
+          "description": "하나의 월간 청구 단위를 구성하는 청구 가능 일수를 정의하세요."
+        }
+      }
+    }
+  },
+  "quote": {
+    "title": "견적서",
+    "subtitle": "대여를 생성하기 전에 상업 제안서를 준비하고 발송하세요",
+    "newQuote": "새 견적서",
+    "editQuote": "견적서 편집",
+    "save": "저장",
+    "deleteConfirm": "이 견적서를 삭제하시겠습니까?",
+    "searchPlaceholder": "견적서 검색…",
+    "allStatuses": "모든 상태",
+    "noQuotes": "견적서를 찾을 수 없습니다",
+    "convertConfirm": "이 견적서를 대여로 전환하시겠습니까?",
+    "availabilityWarningTitle": "하나 이상의 자산이 예정된 날짜에 이용 불가능할 수 있습니다",
+    "statuses": {
+      "DRAFT": "임시 저장",
+      "SENT": "발송됨",
+      "VIEWED": "열람됨",
+      "ACCEPTED": "수락됨",
+      "REJECTED": "거절됨",
+      "EXPIRED": "만료됨",
+      "CONVERTED": "전환됨",
+      "CANCELLED": "취소됨"
+    },
+    "sections": {
+      "customer": "고객",
+      "documents": "문서"
+    },
+    "documents": {
+      "empty": "이 견적서와 연결된 문서가 아직 없습니다"
+    },
+    "summary": {
+      "quoteValue": "견적 금액",
+      "depositTotal": "총 보증금",
+      "itemsCount": "품목 수",
+      "validityStatus": "유효 상태"
+    },
+    "validityIntelligence": {
+      "expires_today": "오늘 만료",
+      "expires_tomorrow": "내일 만료",
+      "expires_in_days": "{{count}}일 후 만료",
+      "expired": "만료됨",
+      "accepted": "수락됨",
+      "rejected": "거절됨",
+      "converted": "전환됨",
+      "cancelled": "취소됨"
+    },
+    "itemTypes": {
+      "ASSET": "자산",
+      "SERVICE": "서비스",
+      "PRODUCT": "제품",
+      "FEE": "수수료",
+      "DELIVERY": "배송",
+      "COLLECTION": "수거",
+      "LABOR": "인건비",
+      "CUSTOM": "사용자 지정"
+    },
+    "billingModes": {
+      "DAILY": "일 단위",
+      "WEEKLY": "주 단위",
+      "MONTHLY": "월 단위",
+      "CUSTOM": "사용자 지정",
+      "FLAT": "고정 금액"
+    },
+    "discountTypes": {
+      "FIXED": "고정 금액",
+      "PERCENTAGE": "비율"
+    },
+    "fields": {
+      "quoteNumber": "견적서 번호",
+      "status": "상태",
+      "issueDate": "발행일",
+      "validUntil": "유효 기한",
+      "name": "이름",
+      "description": "설명",
+      "itemType": "품목 유형",
+      "unit": "단위",
+      "unitPlaceholder": "예: 일, 시간, 개",
+      "billingMode": "청구 방식",
+      "quantity": "수량",
+      "unitPrice": "단가",
+      "dailyPrice": "일일 요금",
+      "weeklyPrice": "주간 요금",
+      "monthlyPrice": "월간 요금",
+      "customPrice": "사용자 지정 요금",
+      "deposit": "보증금",
+      "discountType": "할인 유형",
+      "noDiscount": "할인 없음",
+      "discountPercent": "할인（%）",
+      "discountAmount": "할인 금액",
+      "taxRatePercent": "세율（%）",
+      "taxTotal": "세금",
+      "depositTotal": "보증금",
+      "customerNotes": "고객 메모",
+      "termsAndConditions": "이용 약관",
+      "convertedRental": "전환된 대여"
+    },
+    "actions": {
+      "send": "견적서 발송",
+      "accept": "수락",
+      "reject": "거절",
+      "rejectPrompt": "거절 사유（선택 사항）",
+      "cancel": "견적서 취소",
+      "duplicate": "복제",
+      "convert": "대여로 전환",
+      "removeItem": "제거",
+      "addServiceItem": "제품 또는 서비스 추가",
+      "viewPdf": "PDF 보기",
+      "regeneratePdf": "PDF 다시 생성",
+      "downloadPdf": "PDF 다운로드"
+    },
+    "timeline": {
+      "created": "견적서가 생성되었습니다",
+      "updated": "견적서가 업데이트되었습니다",
+      "status_changed": "상태가 변경되었습니다",
+      "sent": "견적서가 발송되었습니다",
+      "viewed": "고객이 열람했습니다",
+      "accepted": "수락되었습니다",
+      "rejected": "거절되었습니다",
+      "duplicated": "복제되었습니다",
+      "converted": "대여로 전환되었습니다",
+      "pdf_generated": "PDF가 생성되었습니다"
+    },
+    "errors": {
+      "customerRequired": "고객을 선택하세요",
+      "validUntilRequired": "유효 기한은 필수입니다",
+      "datesRequired": "예정 시작일과 종료일은 필수입니다",
+      "endBeforeStart": "예정 종료일은 예정 시작일 이후여야 합니다",
+      "validUntilBeforeIssueDate": "유효 기한은 과거 날짜로 설정할 수 없습니다",
+      "itemNameRequired": "이 품목의 이름을 입력하세요",
+      "quantityMustBePositive": "수량은 최소 1이어야 합니다",
+      "noItems": "최소 하나 이상의 품목을 추가하세요",
+      "onlyDraftEditable": "임시 저장 상태의 견적서만 편집할 수 있습니다 — 대신 이 견적서를 복제하세요"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "고객",
+        "dates": "날짜",
+        "assets": "자산",
+        "services": "제품 및 서비스",
+        "pricing": "요금",
+        "terms": "약관",
+        "review": "검토"
+      },
+      "saving": "견적서를 저장하는 중…",
+      "createQuote": "견적서 생성",
+      "noServiceItems": "아직 추가된 제품이나 서비스가 없습니다"
+    },
+    "public": {
+      "notFound": "이 견적서 링크는 유효하지 않거나 만료되었습니다",
+      "acceptedNotice": "{{name}}님이 수락함",
+      "rejectedNotice": "이 견적서는 거절되었습니다",
+      "acceptanceDisclaimer": "아래에서 수락하면 이 견적서에 대한 수락이 기록됩니다. 이는 적격 전자 서명이 아닙니다.",
+      "rejectReasonPlaceholder": "이유를 알려주세요（선택 사항）",
+      "confirmReject": "거절 확정"
+    }
+  },
+  "document": {
+    "title": "문서",
+    "subtitle": "모든 문서를 한 곳에서 생성, 공유, 발송 및 서명하세요",
+    "newDocument": "새 문서",
+    "save": "저장",
+    "saving": "저장 중…",
+    "deleteConfirm": "이 문서를 삭제하시겠습니까?",
+    "searchPlaceholder": "문서 검색…",
+    "allStatuses": "모든 상태",
+    "allTypes": "모든 유형",
+    "noDocuments": "문서를 찾을 수 없습니다",
+    "backToList": "문서 목록으로 돌아가기",
+    "types": {
+      "QUOTE": "견적서",
+      "CONTRACT": "대여 계약서",
+      "HANDOVER_PROTOCOL": "인도 확인서",
+      "RETURN_PROTOCOL": "반납 확인서",
+      "DAMAGE_REPORT": "파손 신고서",
+      "CONTRACT_AMENDMENT": "계약 수정서",
+      "CUSTOM": "사용자 지정"
+    },
+    "statuses": {
+      "DRAFT": "임시 저장",
+      "READY": "준비 완료",
+      "SENT": "발송됨",
+      "VIEWED": "열람됨",
+      "PARTIALLY_SIGNED": "부분 서명됨",
+      "SIGNED": "서명됨",
+      "REJECTED": "거절됨",
+      "VOIDED": "무효화됨",
+      "ARCHIVED": "보관됨"
+    },
+    "fields": {
+      "documentNumber": "문서 번호",
+      "documentType": "문서 유형",
+      "status": "상태",
+      "title": "제목",
+      "customTypeName": "사용자 지정 유형 이름",
+      "none": "없음",
+      "version": "버전",
+      "createdAt": "생성일",
+      "customer": "고객",
+      "rental": "대여",
+      "quote": "견적서",
+      "asset": "자산"
+    },
+    "summary": {
+      "total": "총 문서 수",
+      "draft": "임시 저장",
+      "sent": "발송됨",
+      "signed": "서명됨"
+    },
+    "actions": {
+      "viewPdf": "PDF 보기",
+      "regeneratePdf": "PDF 다시 생성",
+      "markReady": "준비 완료로 표시",
+      "markSent": "발송됨으로 표시",
+      "markViewed": "열람됨으로 표시",
+      "markSigned": "서명됨으로 표시",
+      "markPartiallySigned": "부분 서명됨으로 표시",
+      "reject": "거절",
+      "rejectPrompt": "거절 사유（선택 사항）",
+      "duplicate": "복제",
+      "void": "무효화",
+      "voidPrompt": "무효화 사유（선택 사항）",
+      "archive": "보관"
+    },
+    "sections": {
+      "preview": "미리보기",
+      "email": "이메일 발송",
+      "signature": "전자 서명",
+      "relatedEntities": "관련 레코드"
+    },
+    "email": {
+      "recipientType": "수신자",
+      "recipientTypes": {
+        "CUSTOMER": "고객",
+        "EMPLOYEE": "직원",
+        "CUSTOM": "사용자 지정 이메일"
+      },
+      "customEmail": "이메일 주소",
+      "subject": "제목",
+      "message": "메시지",
+      "send": "이메일 보내기",
+      "retry": "다시 시도",
+      "noDeliveries": "아직 발송된 이메일이 없습니다",
+      "statuses": {
+        "PENDING": "대기 중",
+        "SENT": "발송됨",
+        "FAILED": "실패"
+      }
+    },
+    "signature": {
+      "signerName": "서명자 이름",
+      "signerEmail": "서명자 이메일",
+      "request": "서명 요청",
+      "refresh": "상태 새로고침",
+      "cancel": "취소",
+      "noRequests": "아직 서명 요청이 없습니다",
+      "statuses": {
+        "REQUESTED": "요청됨",
+        "PENDING": "대기 중",
+        "SIGNED": "서명됨",
+        "REJECTED": "거절됨",
+        "EXPIRED": "만료됨",
+        "CANCELLED": "취소됨"
+      },
+      "providers": {
+        "LOCAL_MOCK": "수동（내부）",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "문서가 생성되었습니다",
+      "updated": "문서가 업데이트되었습니다",
+      "status_changed": "상태가 변경되었습니다",
+      "sent": "문서가 발송되었습니다",
+      "viewed": "열람되었습니다",
+      "signed": "서명이 기록되었습니다",
+      "downloaded": "다운로드되었습니다",
+      "archived": "보관되었습니다",
+      "version_created": "새 버전이 생성되었습니다",
+      "file_uploaded": "파일이 업로드되었습니다",
+      "file_deleted": "파일이 삭제되었습니다",
+      "rendered": "PDF가 생성되었습니다",
+      "shared": "공유 링크가 생성되었습니다",
+      "share_viewed": "공유 링크를 통해 열람되었습니다",
+      "share_downloaded": "공유 링크를 통해 다운로드되었습니다",
+      "share_disabled": "공유 링크가 비활성화되었습니다",
+      "email_sent": "이메일이 발송되었습니다",
+      "email_failed": "이메일 발송에 실패했습니다",
+      "signature_requested": "서명이 요청되었습니다",
+      "signature_status_changed": "서명 상태가 변경되었습니다"
+    },
+    "errors": {
+      "customTypeNameRequired": "이 사용자 지정 문서 유형의 이름을 입력하세요"
+    }
+  },
+  "documentTemplate": {
+    "title": "문서 템플릿",
+    "subtitle": "각 문서 유형을 생성하는 데 사용되는 HTML 템플릿을 관리하세요",
+    "newTemplate": "새 템플릿",
+    "save": "저장",
+    "saving": "저장 중…",
+    "searchPlaceholder": "템플릿 검색…",
+    "noTemplates": "템플릿을 찾을 수 없습니다",
+    "statuses": {
+      "DRAFT": "임시 저장",
+      "ACTIVE": "활성",
+      "ARCHIVED": "보관됨"
+    },
+    "fields": {
+      "name": "이름",
+      "description": "설명",
+      "htmlContent": "HTML 콘텐츠",
+      "css": "CSS",
+      "status": "상태",
+      "versionCount": "버전 수",
+      "current": "현재"
+    },
+    "actions": {
+      "activate": "활성화",
+      "archive": "보관",
+      "restore": "복원",
+      "duplicate": "복제",
+      "saveAsNewVersion": "새 버전으로 저장",
+      "restoreVersion": "이 버전 복원"
+    },
+    "sections": {
+      "metadata": "세부 정보",
+      "content": "콘텐츠",
+      "preview": "미리보기",
+      "versions": "버전 기록"
+    }
+  },
+  "share": {
+    "title": "공개 공유 링크",
+    "fields": {
+      "password": "비밀번호",
+      "passwordPlaceholder": "선택적 접근 비밀번호",
+      "views": "조회수",
+      "downloads": "다운로드 수",
+      "expiresAt": "만료일"
+    },
+    "status": {
+      "active": "활성",
+      "disabled": "비활성화됨"
+    },
+    "actions": {
+      "create": "링크 생성",
+      "disable": "비활성화"
+    },
+    "noLinks": "아직 공유 링크가 없습니다",
+    "linkCreatedPrompt": "이 링크를 고객과 공유하세요:",
+    "public": {
+      "passwordRequiredTitle": "이 문서는 비밀번호로 보호되어 있습니다",
+      "wrongPassword": "비밀번호가 올바르지 않습니다",
+      "unlock": "잠금 해제",
+      "notFound": "이 링크는 유효하지 않거나 만료되었습니다",
+      "downloadPdf": "PDF 다운로드"
+    }
+  },
+  "dashboard": {
+    "welcome": "다시 오신 것을 환영합니다, {{name}}님",
+    "sections": {
+      "overview": "개요",
+      "quickActions": "빠른 작업",
+      "recentActivity": "최근 활동"
+    },
+    "metrics": {
+      "customers": "고객",
+      "activeRentals": "진행 중인 대여",
+      "availableAssets": "이용 가능한 자산",
+      "pendingQuotes": "대기 중인 견적서",
+      "needsAttention": "확인 필요"
+    },
+    "recentRentals": "최근 대여",
+    "recentDocuments": "최근 문서",
+    "viewAll": "모두 보기",
+    "emptyRecentRentals": "아직 대여 내역이 없습니다",
+    "emptyRecentDocuments": "아직 문서가 없습니다"
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "대시보드",
+      "rentals": "대여",
+      "calendar": "캘린더",
+      "documents": "문서",
+      "messages": "메시지",
+      "notifications": "알림",
+      "logout": "로그아웃"
+    },
+    "auth": {
+      "login": {
+        "title": "고객 포털",
+        "subtitle": "로그인하여 대여를 관리하세요",
+        "company": "회사",
+        "companyPlaceholder": "your-company",
+        "email": "이메일",
+        "password": "비밀번호",
+        "submit": "로그인",
+        "submitting": "로그인 중…"
+      },
+      "activate": {
+        "title": "계정 활성화",
+        "subtitle": "고객 포털에 접근하기 위한 비밀번호를 설정하세요",
+        "password": "비밀번호",
+        "submit": "계정 활성화",
+        "submitting": "활성화 중…",
+        "invalidToken": "이 초대 링크는 유효하지 않거나 만료되었습니다.",
+        "successTitle": "{{company}}에 오신 것을 환영합니다!",
+        "successDescription": "계정 준비가 완료되었습니다. 대시보드로 이동합니다…"
+      },
+      "errors": {
+        "invalidCredentials": "이메일, 비밀번호 또는 회사 정보가 올바르지 않습니다.",
+        "invalidToken": "초대가 유효하지 않거나 만료되었습니다.",
+        "generic": "문제가 발생했습니다. 다시 시도해 주세요."
+      },
+      "tagline": "대여, 문서, 요청을 한 곳에서 관리하세요."
+    },
+    "dashboard": {
+      "title": "대시보드",
+      "welcome": "다시 오신 것을 환영합니다, {{name}}님",
+      "currentRentals": "현재 대여",
+      "upcomingRentals": "예정된 대여",
+      "unreadMessages": "읽지 않은 메시지",
+      "pendingSignatures": "대기 중인 서명",
+      "pendingExtensions": "대기 중인 연장 요청",
+      "recentRentals": "최근 대여",
+      "viewAll": "모두 보기",
+      "noRentals": "아직 대여 내역이 없습니다"
+    },
+    "rentals": {
+      "title": "대여",
+      "backToList": "대여 목록으로 돌아가기",
+      "searchPlaceholder": "대여 검색…",
+      "filterStatus": "상태",
+      "allStatuses": "모든 상태",
+      "detailTitle": "대여 {{number}}",
+      "period": "대여 기간",
+      "items": "장비",
+      "timeline": "타임라인",
+      "documents": "문서",
+      "downloadAllDocuments": "모든 문서 다운로드（.zip）",
+      "qrCode": "QR 코드",
+      "showQrCode": "QR 코드 표시",
+      "requestExtension": "연장 요청",
+      "reportDamage": "파손 신고",
+      "extensionRequests": "연장 요청",
+      "damageReports": "파손 신고",
+      "noRentals": "대여 내역을 찾을 수 없습니다",
+      "quantity": "수량",
+      "statuses": {
+        "DRAFT": "임시 저장",
+        "QUOTE": "견적",
+        "RESERVED": "예약됨",
+        "ACTIVE": "진행 중",
+        "RETURNED": "반납됨",
+        "COMPLETED": "완료됨",
+        "CANCELLED": "취소됨"
+      }
+    },
+    "calendar": {
+      "title": "대여 캘린더",
+      "empty": "이 기간에는 대여 내역이 없습니다"
+    },
+    "extensionRequests": {
+      "title": "연장 요청",
+      "currentEnd": "현재 종료일",
+      "newEndDate": "새 종료일",
+      "message": "메시지（선택 사항）",
+      "submit": "요청 제출",
+      "submitting": "제출 중…",
+      "submitted": "연장 요청이 제출되었습니다.",
+      "responseFrom": "답변",
+      "statuses": {
+        "PENDING": "대기 중",
+        "APPROVED": "승인됨",
+        "REJECTED": "거절됨",
+        "CANCELLED": "취소됨"
+      }
+    },
+    "damageReports": {
+      "title": "파손 신고",
+      "description": "설명",
+      "descriptionPlaceholder": "어떤 일이 있었는지 설명해 주세요…",
+      "asset": "장비（선택 사항）",
+      "anyEquipment": "잘 모르겠음 / 전체",
+      "photos": "사진",
+      "addPhoto": "사진 추가",
+      "uploading": "업로드 중…",
+      "submit": "신고 제출",
+      "submitting": "제출 중…",
+      "submitted": "파손 신고가 제출되었습니다.",
+      "statuses": {
+        "SUBMITTED": "제출됨",
+        "REVIEWED": "검토됨",
+        "RESOLVED": "해결됨",
+        "CONVERTED_TO_DOCUMENT": "문서화됨"
+      }
+    },
+    "documents": {
+      "title": "문서",
+      "backToList": "문서 목록으로 돌아가기",
+      "filterStatus": "상태",
+      "allStatuses": "모든 상태",
+      "preview": "미리보기",
+      "download": "PDF 다운로드",
+      "sign": "문서에 서명",
+      "signing": "서명 중…",
+      "signed": "이 문서에 서명했습니다.",
+      "pendingSignature": "서명 대기 중입니다",
+      "noDocuments": "문서를 찾을 수 없습니다",
+      "signatureRequests": "서명 요청"
+    },
+    "messages": {
+      "title": "메시지",
+      "placeholder": "메시지를 입력하세요…",
+      "send": "보내기",
+      "sending": "보내는 중…",
+      "empty": "아직 메시지가 없습니다",
+      "generalThread": "일반"
+    },
+    "notifications": {
+      "title": "알림",
+      "markAllRead": "모두 읽음으로 표시",
+      "empty": "새로운 알림이 없습니다",
+      "types": {
+        "MESSAGE": "새 메시지",
+        "DOCUMENT_SHARED": "문서가 공유됨",
+        "SIGNATURE_REQUESTED": "서명이 요청됨",
+        "EXTENSION_RESPONSE": "연장 요청 업데이트",
+        "RENTAL_UPDATE": "대여 업데이트",
+        "DAMAGE_REPORT_UPDATE": "파손 신고 업데이트"
+      }
+    },
+    "assets": {
+      "title": "장비",
+      "manufacturer": "제조사",
+      "model": "모델",
+      "condition": "상태 메모"
+    },
+    "darkMode": {
+      "toggle": "다크 모드 전환"
+    }
+  },
+  "timeline": {
+    "title": "타임라인",
+    "empty": "아직 기록된 활동이 없습니다",
+    "searchPlaceholder": "타임라인 검색…",
+    "today": "오늘",
+    "yesterday": "어제",
+    "hint": "입력하여 검색, ↑/↓ 키로 이벤트 간 이동"
+  }
+}

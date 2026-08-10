@@ -1,0 +1,1109 @@
+{
+  "app": {
+    "name": "Havelio",
+    "tagline": "Una piattaforma. Ogni bene.",
+    "nav": {
+      "dashboard": "Dashboard",
+      "settingsGroup": "Impostazioni"
+    },
+    "shell": {
+      "sidebarLabel": "Navigazione principale",
+      "openNav": "Apri navigazione",
+      "closeNav": "Chiudi navigazione",
+      "expandSidebar": "Espandi barra laterale",
+      "collapseSidebar": "Comprimi barra laterale",
+      "searchPlaceholder": "Cerca…",
+      "userMenu": "Menu account",
+      "lightMode": "Modalità chiara",
+      "darkMode": "Modalità scura",
+      "language": "Lingua",
+      "create": "Crea",
+      "breadcrumbs": {
+        "new": "Nuovo",
+        "edit": "Modifica"
+      },
+      "notifications": {
+        "title": "Notifiche",
+        "empty": "Sei tutto aggiornato"
+      },
+      "commandPalette": {
+        "title": "Pannello comandi",
+        "placeholder": "Cerca o vai a…",
+        "noResults": "Nessun risultato trovato",
+        "pagesGroup": "Pagine",
+        "quickActionsGroup": "Azioni rapide",
+        "commandsGroup": "Comandi",
+        "pinnedGroup": "Bloccati",
+        "recentGroup": "Recenti",
+        "hint": "Premi {{keys}} per cercare o navigare ovunque"
+      },
+      "shortcuts": {
+        "title": "Scorciatoie da tastiera",
+        "openPalette": "Apri pannello comandi",
+        "newItem": "Nuovo elemento",
+        "help": "Mostra scorciatoie da tastiera",
+        "goCustomers": "Vai a Clienti",
+        "goRentals": "Vai a Noleggi",
+        "goAssets": "Vai a Beni",
+        "goDocuments": "Vai a Documenti",
+        "goQuotes": "Vai a Preventivi",
+        "groupGeneral": "Generale",
+        "groupNavigation": "Navigazione",
+        "settingsSubtitle": "Ogni scorciatoia registrata nell'app — sempre aggiornata con ciò che è effettivamente attivo."
+      },
+      "pin": "Blocca",
+      "unpin": "Sblocca"
+    }
+  },
+  "common": {
+    "loading": "Caricamento…",
+    "error": "Qualcosa è andato storto. Riprova.",
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi password",
+    "saving": "Salvataggio…",
+    "cancel": "Annulla",
+    "confirm": "Conferma",
+    "dismiss": "Ignora",
+    "table": {
+      "columns": "Colonne",
+      "permissionDenied": "Non hai il permesso di visualizzare questi dati.",
+      "retry": "Riprova",
+      "selectAll": "Seleziona tutte le righe",
+      "selectRow": "Seleziona riga",
+      "rowActions": "Azioni riga",
+      "searchPlaceholder": "Cerca…",
+      "clearSearch": "Cancella ricerca",
+      "clearSelection": "Cancella selezione",
+      "selectedCount": "{{count}} selezionati"
+    },
+    "pagination": {
+      "range": "{{start}}–{{end}} di {{total}}",
+      "previous": "Precedente",
+      "next": "Successivo",
+      "pageOf": "Pagina {{page}} di {{totalPages}}"
+    },
+    "filters": {
+      "remove": "Rimuovi filtro {{filter}}",
+      "resetAll": "Reimposta tutti i filtri"
+    },
+    "bulkActions": {
+      "delete": "Elimina",
+      "deleteConfirmTitle": "Eliminare {{count}} clienti?",
+      "deleteConfirmDescription": "Questa azione elimina definitivamente i clienti selezionati e non può essere annullata.",
+      "deletePartialFailure": "{{failed}} su {{total}} non è stato possibile eliminarli."
+    }
+  },
+  "nav": {
+    "logout": "Esci",
+    "selectTenant": "Seleziona azienda"
+  },
+  "auth": {
+    "register": {
+      "title": "Crea il tuo account",
+      "subtitle": "Configura lo spazio di lavoro della tua azienda",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "email": "E-mail",
+      "password": "Password",
+      "passwordConfirmation": "Conferma password",
+      "companyName": "Nome azienda",
+      "country": "Paese",
+      "language": "Lingua",
+      "currency": "Valuta",
+      "timezone": "Fuso orario",
+      "submit": "Crea account",
+      "submitting": "Creazione account…",
+      "haveAccount": "Hai già un account?",
+      "signIn": "Accedi",
+      "companySection": "Azienda"
+    },
+    "login": {
+      "title": "Accedi",
+      "subtitle": "Bentornato",
+      "email": "E-mail",
+      "password": "Password",
+      "submit": "Accedi",
+      "submitting": "Accesso in corso…",
+      "noAccount": "Non hai un account?",
+      "signUp": "Creane uno"
+    },
+    "errors": {
+      "required": "Questo campo è obbligatorio",
+      "invalidEmail": "Inserisci un indirizzo e-mail valido",
+      "passwordTooShort": "La password deve contenere almeno 12 caratteri",
+      "passwordUppercase": "La password deve contenere una lettera maiuscola",
+      "passwordLowercase": "La password deve contenere una lettera minuscola",
+      "passwordNumber": "La password deve contenere un numero",
+      "passwordMismatch": "Le password non corrispondono",
+      "emailInUse": "Esiste già un account con questa e-mail",
+      "invalidCredentials": "E-mail o password non valide",
+      "accountInactive": "Questo account è inattivo",
+      "generic": "Qualcosa è andato storto. Riprova."
+    }
+  },
+  "tenant": {
+    "selectTitle": "Seleziona un'azienda",
+    "selectSubtitle": "Scegli quale spazio di lavoro aprire",
+    "noTenants": "Non appartieni ancora a nessuna azienda",
+    "role": "Ruolo"
+  },
+  "country": {
+    "US": "Stati Uniti",
+    "PL": "Polonia",
+    "DE": "Germania",
+    "UA": "Ucraina",
+    "ES": "Spagna",
+    "GB": "Regno Unito"
+  },
+  "customer": {
+    "title": "Clienti",
+    "subtitle": "Gestisci le schede dei tuoi clienti",
+    "newCustomer": "Nuovo cliente",
+    "editCustomer": "Modifica cliente",
+    "searchPlaceholder": "Cerca clienti…",
+    "filterStatus": "Stato",
+    "allStatuses": "Tutti gli stati",
+    "firstName": "Nome",
+    "lastName": "Cognome",
+    "company": "Azienda",
+    "phone": "Telefono",
+    "email": "E-mail",
+    "vatNumber": "Partita IVA",
+    "address": "Indirizzo",
+    "notes": "Note",
+    "status": "Stato",
+    "statusActive": "Attivo",
+    "statusInactive": "Inattivo",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "deleteConfirm": "Sei sicuro di voler eliminare questo cliente?",
+    "noCustomers": "Nessun cliente trovato",
+    "backToList": "Torna ai clienti",
+    "previous": "Precedente",
+    "next": "Successivo",
+    "portal": {
+      "title": "Accesso al portale clienti",
+      "notInvited": "Non ancora invitato",
+      "invited": "Invito inviato",
+      "activated": "Portale attivo",
+      "invitationExpired": "Invito scaduto",
+      "lastLogin": "Ultimo accesso",
+      "invite": "Invita al portale",
+      "reinvite": "Reinvia invito",
+      "revoke": "Revoca accesso",
+      "revokeConfirm": "Il cliente verrà disconnesso dal portale e l'accesso sarà disabilitato fino a un nuovo invito. Continuare?",
+      "inviteLinkCreated": "Link di invito creato — condividilo con il tuo cliente:",
+      "noEmailOnFile": "Questo cliente non ha un'e-mail registrata. Aggiungine una per inviare un invito.",
+      "extensionRequests": "Richieste di proroga",
+      "damageReports": "Segnalazioni di danni",
+      "messages": "Messaggi del portale",
+      "noExtensionRequests": "Nessuna richiesta di proroga",
+      "noDamageReports": "Nessuna segnalazione di danni",
+      "noMessages": "Ancora nessun messaggio",
+      "approve": "Approva",
+      "reject": "Rifiuta",
+      "responseMessagePlaceholder": "Nota facoltativa per il cliente…",
+      "markReviewed": "Segna come esaminato",
+      "markResolved": "Segna come risolto",
+      "convertToDocument": "Converti in documento",
+      "sendMessage": "Invia",
+      "messagePlaceholder": "Rispondi a questo cliente…"
+    },
+    "timeline": {
+      "created": "Cliente creato",
+      "updated": "Cliente aggiornato",
+      "deleted": "Cliente eliminato"
+    },
+    "summary": {
+      "totalRentals": "Noleggi totali",
+      "activeRentals": "Noleggi attivi",
+      "totalRevenue": "Ricavi totali",
+      "damageReports": "Segnalazioni di danni"
+    },
+    "sections": {
+      "documents": "Documenti"
+    },
+    "documentsEmpty": "Ancora nessun documento collegato a questo cliente"
+  },
+  "asset": {
+    "title": "Beni",
+    "subtitle": "Gestisci ogni articolo noleggiabile della tua azienda",
+    "newAsset": "Nuovo bene",
+    "editAsset": "Modifica bene",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "delete": "Elimina",
+    "deleteConfirm": "Sei sicuro di voler eliminare questo bene?",
+    "searchPlaceholder": "Cerca beni…",
+    "allCategories": "Tutte le categorie",
+    "allStatuses": "Tutti gli stati",
+    "noAssets": "Nessun bene trovato",
+    "view": "Visualizza",
+    "rentableYes": "Sì",
+    "rentableNo": "No",
+    "noTimelineEvents": "Ancora nessuna attività registrata",
+    "noImages": "Ancora nessuna immagine caricata",
+    "noDocuments": "Ancora nessun documento caricato",
+    "platformDocumentsEmpty": "Ancora nessun documento collegato a questo bene",
+    "sort": {
+      "newest": "Più recenti",
+      "oldest": "Meno recenti",
+      "nameAsc": "Nome (A–Z)",
+      "nameDesc": "Nome (Z–A)"
+    },
+    "fields": {
+      "name": "Nome",
+      "description": "Descrizione",
+      "internalNumber": "Numero interno",
+      "sku": "SKU",
+      "serialNumber": "Numero di serie",
+      "barcode": "Codice a barre",
+      "qrCodeValue": "Valore codice QR",
+      "category": "Categoria",
+      "status": "Stato",
+      "statusDefaultHint": "Predefinito (Disponibile)",
+      "manufacturer": "Produttore",
+      "model": "Modello",
+      "purchaseDate": "Data di acquisto",
+      "purchasePrice": "Prezzo di acquisto",
+      "currency": "Valuta",
+      "replacementValue": "Valore di sostituzione",
+      "conditionNotes": "Note sulle condizioni",
+      "isRentable": "Noleggiabile",
+      "isActive": "Attivo",
+      "currentLocation": "Posizione attuale",
+      "locationChangeHint": "La posizione si modifica dalla pagina di dettaglio del bene, così ogni spostamento viene registrato nella cronologia.",
+      "selectPlaceholder": "Seleziona…",
+      "primaryImage": "Principale",
+      "documentTitle": "Titolo del documento",
+      "booleanYes": "Sì"
+    },
+    "sections": {
+      "basicInfo": "Informazioni di base",
+      "identification": "Identificazione",
+      "category": "Categoria",
+      "status": "Stato",
+      "manufacturerModel": "Produttore e modello",
+      "financial": "Informazioni finanziarie",
+      "locationCondition": "Posizione e condizioni",
+      "customFields": "Campi personalizzati",
+      "images": "Immagini",
+      "documents": "Documenti",
+      "timeline": "Cronologia",
+      "filesManagement": "Immagini e documenti",
+      "platformDocuments": "Documenti"
+    },
+    "actions": {
+      "changeStatus": "Cambia stato",
+      "changeLocation": "Cambia posizione",
+      "deleteImage": "Elimina immagine",
+      "deleteDocument": "Elimina",
+      "uploadDocument": "Carica"
+    },
+    "errors": {
+      "customFieldRequired": "Questo campo è obbligatorio",
+      "categoryRequired": "Seleziona una categoria",
+      "statusCodeFormat": "Il codice deve contenere lettere maiuscole, cifre e trattini bassi",
+      "fieldKeyFormat": "La chiave deve contenere lettere minuscole, cifre e trattini bassi"
+    },
+    "timeline": {
+      "created": "Bene creato",
+      "updated": "Bene aggiornato",
+      "status_changed": "Stato modificato",
+      "location_changed": "Posizione modificata",
+      "image_uploaded": "Immagine caricata",
+      "document_uploaded": "Documento caricato"
+    },
+    "summary": {
+      "totalRentals": "Noleggi totali",
+      "revenueGenerated": "Ricavi generati"
+    },
+    "documentTypes": {
+      "PURCHASE_DOCUMENT": "Documento di acquisto",
+      "MANUAL": "Manuale",
+      "CERTIFICATE": "Certificato",
+      "INSURANCE": "Assicurazione",
+      "REGISTRATION": "Immatricolazione",
+      "INSPECTION": "Rapporto di ispezione",
+      "OTHER": "Altro"
+    },
+    "fieldTypes": {
+      "TEXT": "Testo",
+      "TEXTAREA": "Testo lungo",
+      "INTEGER": "Numero intero",
+      "DECIMAL": "Numero decimale",
+      "BOOLEAN": "Sì/No",
+      "DATE": "Data",
+      "DATETIME": "Data e ora",
+      "SELECT": "Scelta singola",
+      "MULTISELECT": "Scelta multipla",
+      "URL": "Link",
+      "EMAIL": "E-mail",
+      "PHONE": "Telefono"
+    },
+    "categorySettings": {
+      "navLabel": "Categorie",
+      "title": "Categorie di beni",
+      "subtitle": "Organizza i tuoi beni in un albero di categorie",
+      "newCategoryName": "Nome nuova categoria",
+      "parent": "Categoria principale",
+      "noParent": "Nessun genitore (livello superiore)",
+      "create": "Aggiungi categoria",
+      "noCategories": "Ancora nessuna categoria",
+      "activate": "Attiva",
+      "deactivate": "Disattiva",
+      "deleteConfirm": "Eliminare questa categoria? Non è possibile finché contiene beni attivi o sottocategorie."
+    },
+    "statusSettings": {
+      "navLabel": "Stati",
+      "title": "Stati dei beni",
+      "subtitle": "Configura gli stati del ciclo di vita che i beni possono avere",
+      "name": "Nome",
+      "code": "Codice",
+      "type": "Tipo",
+      "systemStatus": "Sistema",
+      "customStatus": "Personalizzato",
+      "availableForRental": "Disponibile per il noleggio",
+      "create": "Aggiungi stato",
+      "deleteConfirm": "Eliminare questo stato? Non è possibile per gli stati di sistema o quelli attualmente in uso."
+    },
+    "fieldSettings": {
+      "navLabel": "Campi personalizzati",
+      "title": "Campi personalizzati dei beni",
+      "subtitle": "Definisci attributi specifici per le tue categorie di beni",
+      "name": "Nome",
+      "key": "Chiave",
+      "category": "Categoria",
+      "globalField": "Tutte le categorie",
+      "fieldType": "Tipo di campo",
+      "optionsHint": "Un'opzione per riga",
+      "required": "Obbligatorio",
+      "filterable": "Filtrabile",
+      "searchable": "Ricercabile",
+      "create": "Aggiungi campo",
+      "deleteConfirm": "Eliminare questa definizione di campo personalizzato?"
+    }
+  },
+  "rental": {
+    "title": "Noleggi",
+    "subtitle": "Prenota, monitora e restituisci i beni noleggiati",
+    "newRental": "Nuovo noleggio",
+    "editRental": "Modifica noleggio",
+    "save": "Salva",
+    "deleteConfirm": "Sei sicuro di voler eliminare questo noleggio?",
+    "searchPlaceholder": "Cerca noleggi…",
+    "allStatuses": "Tutti gli stati",
+    "noRentals": "Nessun noleggio trovato",
+    "statuses": {
+      "DRAFT": "Bozza",
+      "QUOTE": "Preventivo",
+      "RESERVED": "Prenotato",
+      "ACTIVE": "Attivo",
+      "RETURNED": "Restituito",
+      "COMPLETED": "Completato",
+      "CANCELLED": "Annullato"
+    },
+    "billingModes": {
+      "DAILY": "Giornaliero",
+      "WEEKLY": "Settimanale",
+      "MONTHLY": "Mensile",
+      "CUSTOM": "Personalizzato"
+    },
+    "fields": {
+      "rentalNumber": "Numero noleggio",
+      "status": "Stato",
+      "plannedStart": "Inizio previsto",
+      "plannedEnd": "Fine prevista",
+      "actualStart": "Inizio effettivo",
+      "actualEnd": "Fine effettiva",
+      "billingMode": "Modalità di fatturazione",
+      "quantity": "Quantità",
+      "dailyPrice": "Prezzo giornaliero",
+      "dailyPriceForRemainder": "Prezzo giornaliero (giorni rimanenti)",
+      "weeklyPrice": "Prezzo settimanale",
+      "monthlyPrice": "Prezzo mensile",
+      "customPrice": "Prezzo personalizzato",
+      "deposit": "Cauzione",
+      "itemDiscount": "Sconto articolo",
+      "discount": "Sconto",
+      "tax": "Imposta",
+      "subtotal": "Subtotale",
+      "total": "Totale",
+      "internalNotes": "Note interne",
+      "returnedAt": "Restituito il",
+      "sourceQuote": "Preventivo di origine"
+    },
+    "sections": {
+      "details": "Dettagli",
+      "items": "Beni",
+      "financial": "Riepilogo finanziario",
+      "customer": "Cliente",
+      "documents": "Documenti"
+    },
+    "documents": {
+      "empty": "Ancora nessun documento collegato a questo noleggio"
+    },
+    "documentChecklist": {
+      "title": "Elenco documenti",
+      "items": {
+        "commercialOffer": "Offerta commerciale",
+        "contract": "Contratto di noleggio",
+        "handoverProtocol": "Verbale di consegna",
+        "returnProtocol": "Verbale di restituzione"
+      },
+      "states": {
+        "present": "Collegato",
+        "missing": "Mancante",
+        "notRequired": "Non ancora richiesto"
+      }
+    },
+    "timeIntelligence": {
+      "starts_today": "Inizia oggi",
+      "starts_tomorrow": "Inizia domani",
+      "starts_in_days": "Inizia tra {{count}} giorni",
+      "days_remaining": "{{count}} giorni rimanenti",
+      "due_today": "Scade oggi",
+      "overdue": "In ritardo di {{count}} giorni",
+      "completed": "Completato",
+      "cancelled": "Annullato",
+      "none": "—"
+    },
+    "actions": {
+      "reserve": "Prenota",
+      "start": "Avvia noleggio",
+      "returnAll": "Restituisci tutto",
+      "cancel": "Annulla noleggio"
+    },
+    "timeline": {
+      "created": "Noleggio creato",
+      "updated": "Noleggio aggiornato",
+      "status_changed": "Stato modificato",
+      "items_returned": "Articolo/i restituito/i"
+    },
+    "summary": {
+      "totalDeposit": "Cauzione totale",
+      "daysRemaining": "Giorni rimanenti",
+      "rentalValue": "Valore del noleggio",
+      "assetsCount": "Numero di beni",
+      "timeStatus": "Stato temporale"
+    },
+    "errors": {
+      "customerRequired": "Seleziona un cliente",
+      "datesRequired": "Le date di inizio e fine previste sono obbligatorie",
+      "endBeforeStart": "La fine prevista deve essere successiva all'inizio previsto",
+      "assetRequired": "Seleziona un bene",
+      "selectAtLeastOneAsset": "Seleziona almeno un bene",
+      "customMonthLengthRequired": "Inserisci un numero di giorni tra 1 e 365"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Cliente",
+        "assets": "Beni",
+        "dates": "Date",
+        "pricing": "Tariffe",
+        "review": "Verifica"
+      },
+      "back": "Indietro",
+      "next": "Avanti",
+      "creating": "Creazione noleggio…",
+      "createRental": "Crea noleggio",
+      "availabilityCheck": "Verifica disponibilità",
+      "available": "Disponibile",
+      "unavailable": "Non disponibile per queste date",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}} mesi solari × {{price}}",
+        "FIXED_30_DAYS": "{{count}} periodi fissi di 30 giorni × {{price}}",
+        "CUSTOM": "{{count}} periodi personalizzati di {{length}} giorni × {{price}}",
+        "days": "{{count}} giorni × {{price}}",
+        "pending": "Inserisci date e prezzi validi per vedere il dettaglio delle tariffe"
+      }
+    },
+    "availabilityCalendar": {
+      "title": "Calendario disponibilità",
+      "subtitle": "Controlla quando i beni sono liberi prima di prenotarli",
+      "previousMonth": "Mese precedente",
+      "nextMonth": "Mese successivo",
+      "selectAssetsHint": "Seleziona uno o più beni per vedere la loro disponibilità",
+      "booked": "Prenotato",
+      "free": "Libero"
+    },
+    "billingSettings": {
+      "navLabel": "Impostazioni di fatturazione",
+      "title": "Impostazioni di fatturazione dei noleggi",
+      "subtitle": "Configura come vengono fatturati i noleggi a prezzo MENSILE per questa azienda",
+      "monthlyMethod": "Metodo di fatturazione mensile",
+      "customMonthLengthDays": "Numero di giorni in un mese di fatturazione personalizzato",
+      "save": "Salva",
+      "saving": "Salvataggio…",
+      "saved": "Impostazioni di fatturazione salvate",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "Mese solare",
+          "description": "Fattura da una data alla data corrispondente del mese solare successivo, con gestione di fine mese."
+        },
+        "FIXED_30_DAYS": {
+          "label": "30 giorni fissi",
+          "description": "Ogni 30 giorni fatturabili viene trattato come un'unità di fatturazione mensile."
+        },
+        "CUSTOM": {
+          "label": "Periodo personalizzato",
+          "description": "Definisci quanti giorni fatturabili compongono un'unità di fatturazione mensile."
+        }
+      }
+    }
+  },
+  "quote": {
+    "title": "Preventivi",
+    "subtitle": "Prepara e invia offerte commerciali prima di creare un noleggio",
+    "newQuote": "Nuovo preventivo",
+    "editQuote": "Modifica preventivo",
+    "save": "Salva",
+    "deleteConfirm": "Sei sicuro di voler eliminare questo preventivo?",
+    "searchPlaceholder": "Cerca preventivi…",
+    "allStatuses": "Tutti gli stati",
+    "noQuotes": "Nessun preventivo trovato",
+    "convertConfirm": "Convertire questo preventivo in un noleggio?",
+    "availabilityWarningTitle": "Uno o più beni potrebbero non essere disponibili per le date previste",
+    "statuses": {
+      "DRAFT": "Bozza",
+      "SENT": "Inviato",
+      "VIEWED": "Visualizzato",
+      "ACCEPTED": "Accettato",
+      "REJECTED": "Rifiutato",
+      "EXPIRED": "Scaduto",
+      "CONVERTED": "Convertito",
+      "CANCELLED": "Annullato"
+    },
+    "sections": {
+      "customer": "Cliente",
+      "documents": "Documenti"
+    },
+    "documents": {
+      "empty": "Ancora nessun documento collegato a questo preventivo"
+    },
+    "summary": {
+      "quoteValue": "Valore del preventivo",
+      "depositTotal": "Cauzione totale",
+      "itemsCount": "Articoli",
+      "validityStatus": "Stato di validità"
+    },
+    "validityIntelligence": {
+      "expires_today": "Scade oggi",
+      "expires_tomorrow": "Scade domani",
+      "expires_in_days": "Scade tra {{count}} giorni",
+      "expired": "Scaduto",
+      "accepted": "Accettato",
+      "rejected": "Rifiutato",
+      "converted": "Convertito",
+      "cancelled": "Annullato"
+    },
+    "itemTypes": {
+      "ASSET": "Bene",
+      "SERVICE": "Servizio",
+      "PRODUCT": "Prodotto",
+      "FEE": "Costo",
+      "DELIVERY": "Consegna",
+      "COLLECTION": "Ritiro",
+      "LABOR": "Manodopera",
+      "CUSTOM": "Personalizzato"
+    },
+    "billingModes": {
+      "DAILY": "Giornaliero",
+      "WEEKLY": "Settimanale",
+      "MONTHLY": "Mensile",
+      "CUSTOM": "Personalizzato",
+      "FLAT": "Forfettario"
+    },
+    "discountTypes": {
+      "FIXED": "Importo fisso",
+      "PERCENTAGE": "Percentuale"
+    },
+    "fields": {
+      "quoteNumber": "Numero preventivo",
+      "status": "Stato",
+      "issueDate": "Data di emissione",
+      "validUntil": "Valido fino al",
+      "name": "Nome",
+      "description": "Descrizione",
+      "itemType": "Tipo di articolo",
+      "unit": "Unità",
+      "unitPlaceholder": "es. giorno, ora, pezzo",
+      "billingMode": "Modalità di fatturazione",
+      "quantity": "Quantità",
+      "unitPrice": "Prezzo unitario",
+      "dailyPrice": "Prezzo giornaliero",
+      "weeklyPrice": "Prezzo settimanale",
+      "monthlyPrice": "Prezzo mensile",
+      "customPrice": "Prezzo personalizzato",
+      "deposit": "Cauzione",
+      "discountType": "Tipo di sconto",
+      "noDiscount": "Nessuno sconto",
+      "discountPercent": "Sconto (%)",
+      "discountAmount": "Importo dello sconto",
+      "taxRatePercent": "Aliquota imposta (%)",
+      "taxTotal": "Imposta",
+      "depositTotal": "Cauzione",
+      "customerNotes": "Note cliente",
+      "termsAndConditions": "Termini e condizioni",
+      "convertedRental": "Noleggio convertito"
+    },
+    "actions": {
+      "send": "Invia preventivo",
+      "accept": "Accetta",
+      "reject": "Rifiuta",
+      "rejectPrompt": "Motivo del rifiuto (facoltativo)",
+      "cancel": "Annulla preventivo",
+      "duplicate": "Duplica",
+      "convert": "Converti in noleggio",
+      "removeItem": "Rimuovi",
+      "addServiceItem": "Aggiungi prodotto o servizio",
+      "viewPdf": "Visualizza PDF",
+      "regeneratePdf": "Rigenera PDF",
+      "downloadPdf": "Scarica PDF"
+    },
+    "timeline": {
+      "created": "Preventivo creato",
+      "updated": "Preventivo aggiornato",
+      "status_changed": "Stato modificato",
+      "sent": "Preventivo inviato",
+      "viewed": "Visualizzato dal cliente",
+      "accepted": "Accettato",
+      "rejected": "Rifiutato",
+      "duplicated": "Duplicato",
+      "converted": "Convertito in noleggio",
+      "pdf_generated": "PDF generato"
+    },
+    "errors": {
+      "customerRequired": "Seleziona un cliente",
+      "validUntilRequired": "La data di validità è obbligatoria",
+      "datesRequired": "Le date di inizio e fine previste sono obbligatorie",
+      "endBeforeStart": "La fine prevista deve essere successiva all'inizio previsto",
+      "validUntilBeforeIssueDate": "La data di validità non può essere nel passato",
+      "itemNameRequired": "Inserisci un nome per questo articolo",
+      "quantityMustBePositive": "La quantità deve essere almeno 1",
+      "noItems": "Aggiungi almeno un articolo",
+      "onlyDraftEditable": "Solo i preventivi in bozza possono essere modificati — duplica invece questo preventivo"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "Cliente",
+        "dates": "Date",
+        "assets": "Beni",
+        "services": "Prodotti e servizi",
+        "pricing": "Tariffe",
+        "terms": "Termini",
+        "review": "Verifica"
+      },
+      "saving": "Salvataggio preventivo…",
+      "createQuote": "Crea preventivo",
+      "noServiceItems": "Ancora nessun prodotto o servizio aggiunto"
+    },
+    "public": {
+      "notFound": "Questo link del preventivo non è valido o è scaduto",
+      "acceptedNotice": "Accettato da {{name}}",
+      "rejectedNotice": "Questo preventivo è stato rifiutato",
+      "acceptanceDisclaimer": "Accettando qui sotto registri la tua accettazione di questo preventivo. Non si tratta di una firma elettronica qualificata.",
+      "rejectReasonPlaceholder": "Facci sapere il motivo (facoltativo)",
+      "confirmReject": "Conferma rifiuto"
+    }
+  },
+  "document": {
+    "title": "Documenti",
+    "subtitle": "Genera, condividi, invia e firma ogni documento da un unico posto",
+    "newDocument": "Nuovo documento",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "deleteConfirm": "Sei sicuro di voler eliminare questo documento?",
+    "searchPlaceholder": "Cerca documenti…",
+    "allStatuses": "Tutti gli stati",
+    "allTypes": "Tutti i tipi",
+    "noDocuments": "Nessun documento trovato",
+    "backToList": "Torna ai documenti",
+    "types": {
+      "QUOTE": "Preventivo",
+      "CONTRACT": "Contratto di noleggio",
+      "HANDOVER_PROTOCOL": "Verbale di consegna",
+      "RETURN_PROTOCOL": "Verbale di restituzione",
+      "DAMAGE_REPORT": "Segnalazione di danno",
+      "CONTRACT_AMENDMENT": "Modifica contrattuale",
+      "CUSTOM": "Personalizzato"
+    },
+    "statuses": {
+      "DRAFT": "Bozza",
+      "READY": "Pronto",
+      "SENT": "Inviato",
+      "VIEWED": "Visualizzato",
+      "PARTIALLY_SIGNED": "Parzialmente firmato",
+      "SIGNED": "Firmato",
+      "REJECTED": "Rifiutato",
+      "VOIDED": "Annullato",
+      "ARCHIVED": "Archiviato"
+    },
+    "fields": {
+      "documentNumber": "Numero documento",
+      "documentType": "Tipo di documento",
+      "status": "Stato",
+      "title": "Titolo",
+      "customTypeName": "Nome tipo personalizzato",
+      "none": "Nessuno",
+      "version": "Versione",
+      "createdAt": "Creato",
+      "customer": "Cliente",
+      "rental": "Noleggio",
+      "quote": "Preventivo",
+      "asset": "Bene"
+    },
+    "summary": {
+      "total": "Documenti totali",
+      "draft": "Bozza",
+      "sent": "Inviato",
+      "signed": "Firmato"
+    },
+    "actions": {
+      "viewPdf": "Visualizza PDF",
+      "regeneratePdf": "Rigenera PDF",
+      "markReady": "Segna come pronto",
+      "markSent": "Segna come inviato",
+      "markViewed": "Segna come visualizzato",
+      "markSigned": "Segna come firmato",
+      "markPartiallySigned": "Segna come parzialmente firmato",
+      "reject": "Rifiuta",
+      "rejectPrompt": "Motivo del rifiuto (facoltativo)",
+      "duplicate": "Duplica",
+      "void": "Annulla",
+      "voidPrompt": "Motivo dell'annullamento (facoltativo)",
+      "archive": "Archivia"
+    },
+    "sections": {
+      "preview": "Anteprima",
+      "email": "Invio e-mail",
+      "signature": "Firma elettronica",
+      "relatedEntities": "Record collegati"
+    },
+    "email": {
+      "recipientType": "Destinatario",
+      "recipientTypes": {
+        "CUSTOMER": "Cliente",
+        "EMPLOYEE": "Dipendente",
+        "CUSTOM": "E-mail personalizzata"
+      },
+      "customEmail": "Indirizzo e-mail",
+      "subject": "Oggetto",
+      "message": "Messaggio",
+      "send": "Invia e-mail",
+      "retry": "Riprova",
+      "noDeliveries": "Ancora nessuna e-mail inviata",
+      "statuses": {
+        "PENDING": "In attesa",
+        "SENT": "Inviato",
+        "FAILED": "Non riuscito"
+      }
+    },
+    "signature": {
+      "signerName": "Nome del firmatario",
+      "signerEmail": "E-mail del firmatario",
+      "request": "Richiedi firma",
+      "refresh": "Aggiorna stato",
+      "cancel": "Annulla",
+      "noRequests": "Ancora nessuna richiesta di firma",
+      "statuses": {
+        "REQUESTED": "Richiesta",
+        "PENDING": "In attesa",
+        "SIGNED": "Firmata",
+        "REJECTED": "Rifiutata",
+        "EXPIRED": "Scaduta",
+        "CANCELLED": "Annullata"
+      },
+      "providers": {
+        "LOCAL_MOCK": "Manuale (interna)",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "Documento creato",
+      "updated": "Documento aggiornato",
+      "status_changed": "Stato modificato",
+      "sent": "Documento inviato",
+      "viewed": "Visualizzato",
+      "signed": "Firma registrata",
+      "downloaded": "Scaricato",
+      "archived": "Archiviato",
+      "version_created": "Nuova versione creata",
+      "file_uploaded": "File caricato",
+      "file_deleted": "File eliminato",
+      "rendered": "PDF generato",
+      "shared": "Link di condivisione creato",
+      "share_viewed": "Visualizzato tramite link di condivisione",
+      "share_downloaded": "Scaricato tramite link di condivisione",
+      "share_disabled": "Link di condivisione disabilitato",
+      "email_sent": "E-mail inviata",
+      "email_failed": "Invio e-mail non riuscito",
+      "signature_requested": "Firma richiesta",
+      "signature_status_changed": "Stato della firma modificato"
+    },
+    "errors": {
+      "customTypeNameRequired": "Inserisci un nome per questo tipo di documento personalizzato"
+    }
+  },
+  "documentTemplate": {
+    "title": "Modelli di documento",
+    "subtitle": "Gestisci i modelli HTML usati per generare ogni tipo di documento",
+    "newTemplate": "Nuovo modello",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "searchPlaceholder": "Cerca modelli…",
+    "noTemplates": "Nessun modello trovato",
+    "statuses": {
+      "DRAFT": "Bozza",
+      "ACTIVE": "Attivo",
+      "ARCHIVED": "Archiviato"
+    },
+    "fields": {
+      "name": "Nome",
+      "description": "Descrizione",
+      "htmlContent": "Contenuto HTML",
+      "css": "CSS",
+      "status": "Stato",
+      "versionCount": "Versioni",
+      "current": "attuale"
+    },
+    "actions": {
+      "activate": "Attiva",
+      "archive": "Archivia",
+      "restore": "Ripristina",
+      "duplicate": "Duplica",
+      "saveAsNewVersion": "Salva come nuova versione",
+      "restoreVersion": "Ripristina questa versione"
+    },
+    "sections": {
+      "metadata": "Dettagli",
+      "content": "Contenuto",
+      "preview": "Anteprima",
+      "versions": "Cronologia versioni"
+    }
+  },
+  "share": {
+    "title": "Link di condivisione pubblici",
+    "fields": {
+      "password": "Password",
+      "passwordPlaceholder": "Password di accesso facoltativa",
+      "views": "Visualizzazioni",
+      "downloads": "Download",
+      "expiresAt": "Scade"
+    },
+    "status": {
+      "active": "Attivo",
+      "disabled": "Disabilitato"
+    },
+    "actions": {
+      "create": "Crea link",
+      "disable": "Disabilita"
+    },
+    "noLinks": "Ancora nessun link di condivisione",
+    "linkCreatedPrompt": "Condividi questo link con il tuo cliente:",
+    "public": {
+      "passwordRequiredTitle": "Questo documento è protetto da password",
+      "wrongPassword": "Password errata",
+      "unlock": "Sblocca",
+      "notFound": "Questo link non è valido o è scaduto",
+      "downloadPdf": "Scarica PDF"
+    }
+  },
+  "dashboard": {
+    "welcome": "Bentornato, {{name}}",
+    "sections": {
+      "overview": "Panoramica",
+      "quickActions": "Azioni rapide",
+      "recentActivity": "Attività recente"
+    },
+    "metrics": {
+      "customers": "Clienti",
+      "activeRentals": "Noleggi attivi",
+      "availableAssets": "Beni disponibili",
+      "pendingQuotes": "Preventivi in sospeso",
+      "needsAttention": "Richiede attenzione"
+    },
+    "recentRentals": "Noleggi recenti",
+    "recentDocuments": "Documenti recenti",
+    "viewAll": "Vedi tutti",
+    "emptyRecentRentals": "Ancora nessun noleggio",
+    "emptyRecentDocuments": "Ancora nessun documento"
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "rentals": "Noleggi",
+      "calendar": "Calendario",
+      "documents": "Documenti",
+      "messages": "Messaggi",
+      "notifications": "Notifiche",
+      "logout": "Esci"
+    },
+    "auth": {
+      "login": {
+        "title": "Portale clienti",
+        "subtitle": "Accedi per gestire i tuoi noleggi",
+        "company": "Azienda",
+        "companyPlaceholder": "tua-azienda",
+        "email": "E-mail",
+        "password": "Password",
+        "submit": "Accedi",
+        "submitting": "Accesso in corso…"
+      },
+      "activate": {
+        "title": "Attiva il tuo account",
+        "subtitle": "Imposta una password per accedere al tuo portale clienti",
+        "password": "Password",
+        "submit": "Attiva account",
+        "submitting": "Attivazione…",
+        "invalidToken": "Questo link di invito non è valido o è scaduto.",
+        "successTitle": "Benvenuto in {{company}}!",
+        "successDescription": "Il tuo account è pronto. Ti stiamo portando alla dashboard…"
+      },
+      "errors": {
+        "invalidCredentials": "E-mail, password o azienda non validi.",
+        "invalidToken": "Invito non valido o scaduto.",
+        "generic": "Qualcosa è andato storto. Riprova."
+      },
+      "tagline": "Gestisci i tuoi noleggi, documenti e richieste in un unico posto."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Bentornato, {{name}}",
+      "currentRentals": "Noleggi in corso",
+      "upcomingRentals": "Noleggi imminenti",
+      "unreadMessages": "Messaggi non letti",
+      "pendingSignatures": "Firme in sospeso",
+      "pendingExtensions": "Richieste di proroga in sospeso",
+      "recentRentals": "Noleggi recenti",
+      "viewAll": "Vedi tutti",
+      "noRentals": "Non hai ancora noleggi"
+    },
+    "rentals": {
+      "title": "Noleggi",
+      "backToList": "Torna ai noleggi",
+      "searchPlaceholder": "Cerca noleggi…",
+      "filterStatus": "Stato",
+      "allStatuses": "Tutti gli stati",
+      "detailTitle": "Noleggio {{number}}",
+      "period": "Periodo di noleggio",
+      "items": "Attrezzatura",
+      "timeline": "Cronologia",
+      "documents": "Documenti",
+      "downloadAllDocuments": "Scarica tutti i documenti (.zip)",
+      "qrCode": "Codice QR",
+      "showQrCode": "Mostra codice QR",
+      "requestExtension": "Richiedi proroga",
+      "reportDamage": "Segnala danno",
+      "extensionRequests": "Richieste di proroga",
+      "damageReports": "Segnalazioni di danni",
+      "noRentals": "Nessun noleggio trovato",
+      "quantity": "Qtà",
+      "statuses": {
+        "DRAFT": "Bozza",
+        "QUOTE": "Preventivo",
+        "RESERVED": "Prenotato",
+        "ACTIVE": "Attivo",
+        "RETURNED": "Restituito",
+        "COMPLETED": "Completato",
+        "CANCELLED": "Annullato"
+      }
+    },
+    "calendar": {
+      "title": "Calendario noleggi",
+      "empty": "Nessun noleggio in questo periodo"
+    },
+    "extensionRequests": {
+      "title": "Richiedi una proroga",
+      "currentEnd": "Data di fine attuale",
+      "newEndDate": "Nuova data di fine",
+      "message": "Messaggio (facoltativo)",
+      "submit": "Invia richiesta",
+      "submitting": "Invio…",
+      "submitted": "La tua richiesta di proroga è stata inviata.",
+      "responseFrom": "Risposta",
+      "statuses": {
+        "PENDING": "In attesa",
+        "APPROVED": "Approvata",
+        "REJECTED": "Rifiutata",
+        "CANCELLED": "Annullata"
+      }
+    },
+    "damageReports": {
+      "title": "Segnala un danno",
+      "description": "Descrizione",
+      "descriptionPlaceholder": "Descrivi cosa è successo…",
+      "asset": "Attrezzatura (facoltativo)",
+      "anyEquipment": "Non specificato / generale",
+      "photos": "Foto",
+      "addPhoto": "Aggiungi foto",
+      "uploading": "Caricamento…",
+      "submit": "Invia segnalazione",
+      "submitting": "Invio…",
+      "submitted": "La tua segnalazione di danno è stata inviata.",
+      "statuses": {
+        "SUBMITTED": "Inviata",
+        "REVIEWED": "Esaminata",
+        "RESOLVED": "Risolta",
+        "CONVERTED_TO_DOCUMENT": "Documentata"
+      }
+    },
+    "documents": {
+      "title": "Documenti",
+      "backToList": "Torna ai documenti",
+      "filterStatus": "Stato",
+      "allStatuses": "Tutti gli stati",
+      "preview": "Anteprima",
+      "download": "Scarica PDF",
+      "sign": "Firma documento",
+      "signing": "Firma in corso…",
+      "signed": "Hai firmato questo documento.",
+      "pendingSignature": "In attesa della tua firma",
+      "noDocuments": "Nessun documento trovato",
+      "signatureRequests": "Richieste di firma"
+    },
+    "messages": {
+      "title": "Messaggi",
+      "placeholder": "Scrivi un messaggio…",
+      "send": "Invia",
+      "sending": "Invio…",
+      "empty": "Ancora nessun messaggio",
+      "generalThread": "Generale"
+    },
+    "notifications": {
+      "title": "Notifiche",
+      "markAllRead": "Segna tutte come lette",
+      "empty": "Sei tutto aggiornato",
+      "types": {
+        "MESSAGE": "Nuovo messaggio",
+        "DOCUMENT_SHARED": "Documento condiviso",
+        "SIGNATURE_REQUESTED": "Firma richiesta",
+        "EXTENSION_RESPONSE": "Aggiornamento richiesta di proroga",
+        "RENTAL_UPDATE": "Aggiornamento noleggio",
+        "DAMAGE_REPORT_UPDATE": "Aggiornamento segnalazione danno"
+      }
+    },
+    "assets": {
+      "title": "Attrezzatura",
+      "manufacturer": "Produttore",
+      "model": "Modello",
+      "condition": "Note sulle condizioni"
+    },
+    "darkMode": {
+      "toggle": "Attiva/disattiva modalità scura"
+    }
+  },
+  "timeline": {
+    "title": "Cronologia",
+    "empty": "Ancora nessuna attività registrata",
+    "searchPlaceholder": "Cerca nella cronologia…",
+    "today": "Oggi",
+    "yesterday": "Ieri",
+    "hint": "Digita per cercare, usa ↑/↓ per spostarti tra gli eventi"
+  }
+}

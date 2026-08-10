@@ -1,3 +1,4 @@
+import { isSupportedLanguage } from "@rentos/localization";
 import { z } from "zod";
 
 /**
@@ -20,7 +21,10 @@ export const registerSchema = z
     passwordConfirmation: z.string().min(1, "auth.errors.required"),
     companyName: z.string().min(1, "auth.errors.required"),
     countryCode: z.string().min(1, "auth.errors.required"),
-    defaultLanguage: z.string().min(1, "auth.errors.required"),
+    defaultLanguage: z
+      .string()
+      .min(1, "auth.errors.required")
+      .refine((value): boolean => isSupportedLanguage(value), "auth.errors.required"),
     defaultCurrency: z.string().min(1, "auth.errors.required"),
     timezone: z.string().min(1, "auth.errors.required"),
   })

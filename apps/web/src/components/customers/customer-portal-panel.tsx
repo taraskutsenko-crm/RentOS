@@ -19,6 +19,7 @@ import {
 } from "../../hooks/use-customer-portal";
 import { usePermission } from "../../hooks/use-current-tenant-role";
 import { apiErrorMessage } from "../../lib/api-error-i18n";
+import { formatDate, formatDateTime } from "../../lib/date-format";
 
 export function CustomerPortalPanel({
   tenantId,
@@ -44,7 +45,7 @@ export function CustomerPortalPanel({
 }
 
 function PortalAccessCard({ tenantId, customerId }: { tenantId: string; customerId: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [error, setError] = useState<string | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
 
@@ -101,7 +102,8 @@ function PortalAccessCard({ tenantId, customerId }: { tenantId: string; customer
             </p>
             {status.lastLoginAt && (
               <p className="text-muted-foreground text-xs">
-                {t("customer.portal.lastLogin")}: {new Date(status.lastLoginAt).toLocaleString()}
+                {t("customer.portal.lastLogin")}:{" "}
+                {formatDateTime(status.lastLoginAt, i18n.language)}
               </p>
             )}
             <div className="flex gap-2">
@@ -135,7 +137,7 @@ function PortalExtensionRequestsCard({
   tenantId: string;
   customerId: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: allRequests } = useStaffExtensionRequests(tenantId);
   const respond = useRespondToExtensionRequest(tenantId);
   const requests = allRequests?.filter((request) => request.customerId === customerId) ?? [];
@@ -164,7 +166,7 @@ function PortalExtensionRequestsCard({
             <div>
               <p>{t(`portal.extensionRequests.statuses.${request.status}`)}</p>
               <p className="text-muted-foreground text-xs">
-                → {new Date(request.requestedEnd).toLocaleDateString()}
+                → {formatDate(request.requestedEnd, i18n.language)}
                 {request.message ? ` · ${request.message}` : ""}
               </p>
             </div>
@@ -266,7 +268,7 @@ function PortalDamageReportsCard({
 }
 
 function PortalMessagesCard({ tenantId, customerId }: { tenantId: string; customerId: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [body, setBody] = useState("");
   const { data: messages } = useStaffPortalMessages(tenantId, customerId);
   const sendMessage = useSendStaffPortalMessage(tenantId);
@@ -298,7 +300,7 @@ function PortalMessagesCard({ tenantId, customerId }: { tenantId: string; custom
             >
               <p className="whitespace-pre-wrap">{message.body}</p>
               <p className="mt-1 text-[10px] opacity-70">
-                {new Date(message.createdAt).toLocaleString()}
+                {formatDateTime(message.createdAt, i18n.language)}
               </p>
             </div>
           ))}

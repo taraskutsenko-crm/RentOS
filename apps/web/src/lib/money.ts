@@ -25,15 +25,24 @@ export function fromMinorUnits(minor: number | null | undefined): string {
   return (minor / 100).toFixed(2);
 }
 
+/**
+ * `locale` defaults to the browser's own locale (`undefined`), same as
+ * before — pass the active `i18n.language` explicitly from a component so
+ * digit-grouping/symbol-placement follows the user's chosen UI language
+ * rather than their OS locale (PRODUCT_BIBLE.md §28: currency is always an
+ * explicit parameter here, never inferred from language — the `currency`
+ * code and the display `locale` are independent inputs).
+ */
 export function formatMoney(
   minor: number | null | undefined,
   currency: string | null | undefined,
+  locale?: string,
 ): string {
   if (minor === null || minor === undefined || !currency) {
     return "—";
   }
   try {
-    return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(minor / 100);
+    return new Intl.NumberFormat(locale, { style: "currency", currency }).format(minor / 100);
   } catch {
     return `${(minor / 100).toFixed(2)} ${currency}`;
   }

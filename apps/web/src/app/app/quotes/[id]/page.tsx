@@ -28,6 +28,7 @@ import {
   useSendQuote,
 } from "../../../../hooks/use-quotes";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
+import { formatDate, formatDateTime } from "../../../../lib/date-format";
 import { formatMoney } from "../../../../lib/money";
 import { getQuoteValidityIntelligence } from "../../../../lib/quote-validity-intelligence";
 import { estimateMonthlyBreakdown } from "../../../../lib/rental-pricing";
@@ -40,7 +41,7 @@ const DECIDABLE_STATUSES = new Set(["SENT", "VIEWED"]);
 const CANCELLABLE_STATUSES = new Set(["DRAFT", "SENT"]);
 
 export default function QuoteDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const [tenantId] = useCurrentTenantId();
@@ -143,7 +144,7 @@ export default function QuoteDetailPage() {
               {t(`quote.validityIntelligence.${validity.kind}`, { count: validity.days })}
             </span>
             <span className="text-muted-foreground">
-              {t("quote.fields.validUntil")}: {new Date(quote.validUntil).toLocaleDateString()}
+              {t("quote.fields.validUntil")}: {formatDate(quote.validUntil, i18n.language)}
             </span>
           </div>
         }
@@ -301,19 +302,19 @@ export default function QuoteDetailPage() {
             <CardContent className="grid grid-cols-2 gap-3 text-sm">
               <InfoRow
                 label={t("rental.fields.plannedStart")}
-                value={new Date(quote.plannedStart).toLocaleString()}
+                value={formatDateTime(quote.plannedStart, i18n.language)}
               />
               <InfoRow
                 label={t("rental.fields.plannedEnd")}
-                value={new Date(quote.plannedEnd).toLocaleString()}
+                value={formatDateTime(quote.plannedEnd, i18n.language)}
               />
               <InfoRow
                 label={t("quote.fields.issueDate")}
-                value={new Date(quote.issueDate).toLocaleDateString()}
+                value={formatDate(quote.issueDate, i18n.language)}
               />
               <InfoRow
                 label={t("quote.fields.validUntil")}
-                value={new Date(quote.validUntil).toLocaleString()}
+                value={formatDateTime(quote.validUntil, i18n.language)}
               />
               <InfoRow label={t("quote.fields.customerNotes")} value={quote.customerNotes ?? "—"} />
               <InfoRow

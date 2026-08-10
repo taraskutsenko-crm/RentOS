@@ -1,0 +1,1109 @@
+{
+  "app": {
+    "name": "Havelio",
+    "tagline": "ひとつのプラットフォームで、あらゆる資産を。",
+    "nav": {
+      "dashboard": "ダッシュボード",
+      "settingsGroup": "設定"
+    },
+    "shell": {
+      "sidebarLabel": "メインナビゲーション",
+      "openNav": "ナビゲーションを開く",
+      "closeNav": "ナビゲーションを閉じる",
+      "expandSidebar": "サイドバーを展開",
+      "collapseSidebar": "サイドバーを折りたたむ",
+      "searchPlaceholder": "検索…",
+      "userMenu": "アカウントメニュー",
+      "lightMode": "ライトモード",
+      "darkMode": "ダークモード",
+      "language": "言語",
+      "create": "作成",
+      "breadcrumbs": {
+        "new": "新規",
+        "edit": "編集"
+      },
+      "notifications": {
+        "title": "通知",
+        "empty": "新しい通知はありません"
+      },
+      "commandPalette": {
+        "title": "コマンドパレット",
+        "placeholder": "検索または移動先…",
+        "noResults": "一致する結果が見つかりません",
+        "pagesGroup": "ページ",
+        "quickActionsGroup": "クイックアクション",
+        "commandsGroup": "コマンド",
+        "pinnedGroup": "ピン留め",
+        "recentGroup": "最近使用した項目",
+        "hint": "{{keys}} を押すと、どこからでも検索・移動できます"
+      },
+      "shortcuts": {
+        "title": "キーボードショートカット",
+        "openPalette": "コマンドパレットを開く",
+        "newItem": "新規項目",
+        "help": "キーボードショートカットを表示",
+        "goCustomers": "顧客へ移動",
+        "goRentals": "レンタルへ移動",
+        "goAssets": "資産へ移動",
+        "goDocuments": "ドキュメントへ移動",
+        "goQuotes": "見積書へ移動",
+        "groupGeneral": "全般",
+        "groupNavigation": "ナビゲーション",
+        "settingsSubtitle": "アプリに登録されているすべてのショートカット — 実際の設定と常に同期しています。"
+      },
+      "pin": "ピン留め",
+      "unpin": "ピン留めを解除"
+    }
+  },
+  "common": {
+    "loading": "読み込み中…",
+    "error": "問題が発生しました。もう一度お試しください。",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを非表示",
+    "saving": "保存中…",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "dismiss": "閉じる",
+    "table": {
+      "columns": "列",
+      "permissionDenied": "このデータを表示する権限がありません。",
+      "retry": "再試行",
+      "selectAll": "すべての行を選択",
+      "selectRow": "行を選択",
+      "rowActions": "行の操作",
+      "searchPlaceholder": "検索…",
+      "clearSearch": "検索をクリア",
+      "clearSelection": "選択をクリア",
+      "selectedCount": "{{count}} 件選択中"
+    },
+    "pagination": {
+      "range": "{{total}} 件中 {{start}}–{{end}} 件",
+      "previous": "前へ",
+      "next": "次へ",
+      "pageOf": "{{totalPages}} ページ中 {{page}} ページ"
+    },
+    "filters": {
+      "remove": "「{{filter}}」フィルターを解除",
+      "resetAll": "すべてのフィルターをリセット"
+    },
+    "bulkActions": {
+      "delete": "削除",
+      "deleteConfirmTitle": "{{count}} 件の顧客を削除しますか？",
+      "deleteConfirmDescription": "選択した顧客を完全に削除します。この操作は元に戻せません。",
+      "deletePartialFailure": "{{total}} 件中 {{failed}} 件を削除できませんでした。"
+    }
+  },
+  "nav": {
+    "logout": "ログアウト",
+    "selectTenant": "会社を選択"
+  },
+  "auth": {
+    "register": {
+      "title": "アカウントを作成",
+      "subtitle": "会社のワークスペースを設定します",
+      "firstName": "名",
+      "lastName": "姓",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "passwordConfirmation": "パスワード（確認）",
+      "companyName": "会社名",
+      "country": "国",
+      "language": "言語",
+      "currency": "通貨",
+      "timezone": "タイムゾーン",
+      "submit": "アカウントを作成",
+      "submitting": "アカウントを作成中…",
+      "haveAccount": "すでにアカウントをお持ちですか？",
+      "signIn": "ログイン",
+      "companySection": "会社情報"
+    },
+    "login": {
+      "title": "ログイン",
+      "subtitle": "おかえりなさい",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "submit": "ログイン",
+      "submitting": "ログイン中…",
+      "noAccount": "アカウントをお持ちでないですか？",
+      "signUp": "作成する"
+    },
+    "errors": {
+      "required": "この項目は必須です",
+      "invalidEmail": "有効なメールアドレスを入力してください",
+      "passwordTooShort": "パスワードは12文字以上で入力してください",
+      "passwordUppercase": "パスワードには大文字を含めてください",
+      "passwordLowercase": "パスワードには小文字を含めてください",
+      "passwordNumber": "パスワードには数字を含めてください",
+      "passwordMismatch": "パスワードが一致しません",
+      "emailInUse": "このメールアドレスのアカウントはすでに存在します",
+      "invalidCredentials": "メールアドレスまたはパスワードが正しくありません",
+      "accountInactive": "このアカウントは無効化されています",
+      "generic": "問題が発生しました。もう一度お試しください。"
+    }
+  },
+  "tenant": {
+    "selectTitle": "会社を選択",
+    "selectSubtitle": "開くワークスペースを選択してください",
+    "noTenants": "まだどの会社にも所属していません",
+    "role": "役割"
+  },
+  "country": {
+    "US": "アメリカ合衆国",
+    "PL": "ポーランド",
+    "DE": "ドイツ",
+    "UA": "ウクライナ",
+    "ES": "スペイン",
+    "GB": "イギリス"
+  },
+  "customer": {
+    "title": "顧客",
+    "subtitle": "顧客情報を管理します",
+    "newCustomer": "新規顧客",
+    "editCustomer": "顧客を編集",
+    "searchPlaceholder": "顧客を検索…",
+    "filterStatus": "ステータス",
+    "allStatuses": "すべてのステータス",
+    "firstName": "名",
+    "lastName": "姓",
+    "company": "会社",
+    "phone": "電話番号",
+    "email": "メールアドレス",
+    "vatNumber": "税番号",
+    "address": "住所",
+    "notes": "メモ",
+    "status": "ステータス",
+    "statusActive": "有効",
+    "statusInactive": "無効",
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "deleteConfirm": "この顧客を削除してもよろしいですか？",
+    "noCustomers": "顧客が見つかりません",
+    "backToList": "顧客一覧に戻る",
+    "previous": "前へ",
+    "next": "次へ",
+    "portal": {
+      "title": "顧客ポータルへのアクセス",
+      "notInvited": "未招待",
+      "invited": "招待済み",
+      "activated": "ポータル有効",
+      "invitationExpired": "招待の有効期限切れ",
+      "lastLogin": "前回のログイン",
+      "invite": "ポータルへ招待",
+      "reinvite": "招待を再送信",
+      "revoke": "アクセスを取り消す",
+      "revokeConfirm": "この操作により、顧客はポータルからログアウトされ、新たに招待するまでアクセスできなくなります。続行しますか？",
+      "inviteLinkCreated": "招待リンクを作成しました — 顧客に共有してください：",
+      "noEmailOnFile": "この顧客にはメールアドレスが登録されていません。招待を送信するには追加してください。",
+      "extensionRequests": "延長リクエスト",
+      "damageReports": "損傷報告",
+      "messages": "ポータルメッセージ",
+      "noExtensionRequests": "延長リクエストはありません",
+      "noDamageReports": "損傷報告はありません",
+      "noMessages": "まだメッセージはありません",
+      "approve": "承認",
+      "reject": "却下",
+      "responseMessagePlaceholder": "顧客への任意のメモ…",
+      "markReviewed": "確認済みにする",
+      "markResolved": "解決済みにする",
+      "convertToDocument": "ドキュメントに変換",
+      "sendMessage": "送信",
+      "messagePlaceholder": "この顧客に返信…"
+    },
+    "timeline": {
+      "created": "顧客を作成しました",
+      "updated": "顧客情報を更新しました",
+      "deleted": "顧客を削除しました"
+    },
+    "summary": {
+      "totalRentals": "レンタル総数",
+      "activeRentals": "進行中のレンタル",
+      "totalRevenue": "総収益",
+      "damageReports": "損傷報告"
+    },
+    "sections": {
+      "documents": "ドキュメント"
+    },
+    "documentsEmpty": "この顧客に関連付けられたドキュメントはまだありません"
+  },
+  "asset": {
+    "title": "資産",
+    "subtitle": "貴社のレンタル可能なすべての品目を管理します",
+    "newAsset": "新規資産",
+    "editAsset": "資産を編集",
+    "save": "保存",
+    "saving": "保存中…",
+    "delete": "削除",
+    "deleteConfirm": "この資産を削除してもよろしいですか？",
+    "searchPlaceholder": "資産を検索…",
+    "allCategories": "すべてのカテゴリ",
+    "allStatuses": "すべてのステータス",
+    "noAssets": "資産が見つかりません",
+    "view": "表示",
+    "rentableYes": "はい",
+    "rentableNo": "いいえ",
+    "noTimelineEvents": "まだ記録された活動はありません",
+    "noImages": "まだ画像がアップロードされていません",
+    "noDocuments": "まだドキュメントがアップロードされていません",
+    "platformDocumentsEmpty": "この資産に関連付けられたドキュメントはまだありません",
+    "sort": {
+      "newest": "新しい順",
+      "oldest": "古い順",
+      "nameAsc": "名前（A–Z）",
+      "nameDesc": "名前（Z–A）"
+    },
+    "fields": {
+      "name": "名前",
+      "description": "説明",
+      "internalNumber": "内部番号",
+      "sku": "SKU",
+      "serialNumber": "シリアル番号",
+      "barcode": "バーコード",
+      "qrCodeValue": "QRコードの値",
+      "category": "カテゴリ",
+      "status": "ステータス",
+      "statusDefaultHint": "デフォルト（利用可能）",
+      "manufacturer": "メーカー",
+      "model": "モデル",
+      "purchaseDate": "購入日",
+      "purchasePrice": "購入価格",
+      "currency": "通貨",
+      "replacementValue": "再調達価値",
+      "conditionNotes": "状態に関するメモ",
+      "isRentable": "レンタル可能",
+      "isActive": "有効",
+      "currentLocation": "現在の所在地",
+      "locationChangeHint": "所在地の変更は資産の詳細ページから行うため、移動があるたびにタイムラインに記録されます。",
+      "selectPlaceholder": "選択してください…",
+      "primaryImage": "メイン",
+      "documentTitle": "ドキュメントのタイトル",
+      "booleanYes": "はい"
+    },
+    "sections": {
+      "basicInfo": "基本情報",
+      "identification": "識別情報",
+      "category": "カテゴリ",
+      "status": "ステータス",
+      "manufacturerModel": "メーカーとモデル",
+      "financial": "財務情報",
+      "locationCondition": "所在地と状態",
+      "customFields": "カスタムフィールド",
+      "images": "画像",
+      "documents": "ドキュメント",
+      "timeline": "タイムライン",
+      "filesManagement": "画像とドキュメント",
+      "platformDocuments": "ドキュメント"
+    },
+    "actions": {
+      "changeStatus": "ステータスを変更",
+      "changeLocation": "所在地を変更",
+      "deleteImage": "画像を削除",
+      "deleteDocument": "削除",
+      "uploadDocument": "アップロード"
+    },
+    "errors": {
+      "customFieldRequired": "この項目は必須です",
+      "categoryRequired": "カテゴリを選択してください",
+      "statusCodeFormat": "コードは大文字、数字、アンダースコアで入力してください",
+      "fieldKeyFormat": "キーは小文字、数字、アンダースコアで入力してください"
+    },
+    "timeline": {
+      "created": "資産を作成しました",
+      "updated": "資産情報を更新しました",
+      "status_changed": "ステータスが変更されました",
+      "location_changed": "所在地が変更されました",
+      "image_uploaded": "画像がアップロードされました",
+      "document_uploaded": "ドキュメントがアップロードされました"
+    },
+    "summary": {
+      "totalRentals": "レンタル総数",
+      "revenueGenerated": "発生した収益"
+    },
+    "documentTypes": {
+      "PURCHASE_DOCUMENT": "購入証明書",
+      "MANUAL": "取扱説明書",
+      "CERTIFICATE": "証明書",
+      "INSURANCE": "保険証書",
+      "REGISTRATION": "登録証明書",
+      "INSPECTION": "検査報告書",
+      "OTHER": "その他"
+    },
+    "fieldTypes": {
+      "TEXT": "テキスト",
+      "TEXTAREA": "長文テキスト",
+      "INTEGER": "整数",
+      "DECIMAL": "小数",
+      "BOOLEAN": "はい/いいえ",
+      "DATE": "日付",
+      "DATETIME": "日付と時刻",
+      "SELECT": "単一選択",
+      "MULTISELECT": "複数選択",
+      "URL": "リンク",
+      "EMAIL": "メールアドレス",
+      "PHONE": "電話番号"
+    },
+    "categorySettings": {
+      "navLabel": "カテゴリ",
+      "title": "資産カテゴリ",
+      "subtitle": "資産をカテゴリツリーに整理します",
+      "newCategoryName": "新しいカテゴリ名",
+      "parent": "親カテゴリ",
+      "noParent": "親カテゴリなし（最上位）",
+      "create": "カテゴリを追加",
+      "noCategories": "まだカテゴリがありません",
+      "activate": "有効化",
+      "deactivate": "無効化",
+      "deleteConfirm": "このカテゴリを削除しますか？有効な資産またはサブカテゴリがある間は削除できません。"
+    },
+    "statusSettings": {
+      "navLabel": "ステータス",
+      "title": "資産のステータス",
+      "subtitle": "資産が持つことのできるライフサイクルのステータスを設定します",
+      "name": "名前",
+      "code": "コード",
+      "type": "種類",
+      "systemStatus": "システム",
+      "customStatus": "カスタム",
+      "availableForRental": "レンタル可能",
+      "create": "ステータスを追加",
+      "deleteConfirm": "このステータスを削除しますか？システムステータス、または現在使用中のステータスは削除できません。"
+    },
+    "fieldSettings": {
+      "navLabel": "カスタムフィールド",
+      "title": "資産のカスタムフィールド",
+      "subtitle": "資産カテゴリごとの固有の属性を定義します",
+      "name": "名前",
+      "key": "キー",
+      "category": "カテゴリ",
+      "globalField": "すべてのカテゴリ",
+      "fieldType": "フィールドの種類",
+      "optionsHint": "1行につき1つの選択肢",
+      "required": "必須",
+      "filterable": "フィルター可能",
+      "searchable": "検索可能",
+      "create": "フィールドを追加",
+      "deleteConfirm": "このカスタムフィールド定義を削除しますか？"
+    }
+  },
+  "rental": {
+    "title": "レンタル",
+    "subtitle": "資産の予約、追跡、返却を行います",
+    "newRental": "新規レンタル",
+    "editRental": "レンタルを編集",
+    "save": "保存",
+    "deleteConfirm": "このレンタルを削除してもよろしいですか？",
+    "searchPlaceholder": "レンタルを検索…",
+    "allStatuses": "すべてのステータス",
+    "noRentals": "レンタルが見つかりません",
+    "statuses": {
+      "DRAFT": "下書き",
+      "QUOTE": "見積り",
+      "RESERVED": "予約済み",
+      "ACTIVE": "進行中",
+      "RETURNED": "返却済み",
+      "COMPLETED": "完了",
+      "CANCELLED": "キャンセル済み"
+    },
+    "billingModes": {
+      "DAILY": "日単位",
+      "WEEKLY": "週単位",
+      "MONTHLY": "月単位",
+      "CUSTOM": "カスタム"
+    },
+    "fields": {
+      "rentalNumber": "レンタル番号",
+      "status": "ステータス",
+      "plannedStart": "開始予定日",
+      "plannedEnd": "終了予定日",
+      "actualStart": "実際の開始日",
+      "actualEnd": "実際の終了日",
+      "billingMode": "請求方式",
+      "quantity": "数量",
+      "dailyPrice": "日額料金",
+      "dailyPriceForRemainder": "日額料金（残り日数分）",
+      "weeklyPrice": "週額料金",
+      "monthlyPrice": "月額料金",
+      "customPrice": "カスタム料金",
+      "deposit": "保証金",
+      "itemDiscount": "品目割引",
+      "discount": "割引",
+      "tax": "税金",
+      "subtotal": "小計",
+      "total": "合計",
+      "internalNotes": "内部メモ",
+      "returnedAt": "返却日",
+      "sourceQuote": "元の見積書"
+    },
+    "sections": {
+      "details": "詳細",
+      "items": "資産",
+      "financial": "財務概要",
+      "customer": "顧客",
+      "documents": "ドキュメント"
+    },
+    "documents": {
+      "empty": "このレンタルに関連付けられたドキュメントはまだありません"
+    },
+    "documentChecklist": {
+      "title": "ドキュメントチェックリスト",
+      "items": {
+        "commercialOffer": "商業オファー",
+        "contract": "レンタル契約書",
+        "handoverProtocol": "引渡書",
+        "returnProtocol": "返却書"
+      },
+      "states": {
+        "present": "関連付け済み",
+        "missing": "未作成",
+        "notRequired": "まだ不要"
+      }
+    },
+    "timeIntelligence": {
+      "starts_today": "本日開始",
+      "starts_tomorrow": "明日開始",
+      "starts_in_days": "{{count}} 日後に開始",
+      "days_remaining": "残り {{count}} 日",
+      "due_today": "本日期限",
+      "overdue": "{{count}} 日遅延",
+      "completed": "完了",
+      "cancelled": "キャンセル済み",
+      "none": "—"
+    },
+    "actions": {
+      "reserve": "予約",
+      "start": "レンタルを開始",
+      "returnAll": "すべて返却",
+      "cancel": "レンタルをキャンセル"
+    },
+    "timeline": {
+      "created": "レンタルを作成しました",
+      "updated": "レンタル情報を更新しました",
+      "status_changed": "ステータスが変更されました",
+      "items_returned": "品目が返却されました"
+    },
+    "summary": {
+      "totalDeposit": "保証金合計",
+      "daysRemaining": "残り日数",
+      "rentalValue": "レンタル金額",
+      "assetsCount": "資産数",
+      "timeStatus": "期間の状態"
+    },
+    "errors": {
+      "customerRequired": "顧客を選択してください",
+      "datesRequired": "開始予定日と終了予定日は必須です",
+      "endBeforeStart": "終了予定日は開始予定日より後にしてください",
+      "assetRequired": "資産を選択してください",
+      "selectAtLeastOneAsset": "少なくとも1つの資産を選択してください",
+      "customMonthLengthRequired": "1〜365の範囲で日数を入力してください"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "顧客",
+        "assets": "資産",
+        "dates": "日程",
+        "pricing": "料金",
+        "review": "確認"
+      },
+      "back": "戻る",
+      "next": "次へ",
+      "creating": "レンタルを作成中…",
+      "createRental": "レンタルを作成",
+      "availabilityCheck": "空き状況の確認",
+      "available": "利用可能",
+      "unavailable": "この日程では利用できません",
+      "monthlyBreakdown": {
+        "CALENDAR_MONTH": "{{count}} カレンダー月 × {{price}}",
+        "FIXED_30_DAYS": "固定30日間 × {{count}} 期間 × {{price}}",
+        "CUSTOM": "カスタム{{length}}日間 × {{count}} 期間 × {{price}}",
+        "days": "{{count}} 日 × {{price}}",
+        "pending": "有効な日程と料金を入力すると、料金の内訳が表示されます"
+      }
+    },
+    "availabilityCalendar": {
+      "title": "空き状況カレンダー",
+      "subtitle": "予約前に資産の空き状況を確認します",
+      "previousMonth": "前の月",
+      "nextMonth": "次の月",
+      "selectAssetsHint": "1つ以上の資産を選択して空き状況を確認してください",
+      "booked": "予約済み",
+      "free": "空き"
+    },
+    "billingSettings": {
+      "navLabel": "請求設定",
+      "title": "レンタル請求設定",
+      "subtitle": "この会社における月額制レンタルの請求方法を設定します",
+      "monthlyMethod": "月額請求方式",
+      "customMonthLengthDays": "カスタム請求月の日数",
+      "save": "保存",
+      "saving": "保存中…",
+      "saved": "請求設定を保存しました",
+      "strategies": {
+        "CALENDAR_MONTH": {
+          "label": "カレンダー月",
+          "description": "ある日付から翌カレンダー月の対応する日付まで請求し、月末の処理を行います。"
+        },
+        "FIXED_30_DAYS": {
+          "label": "固定30日間",
+          "description": "請求対象の30日ごとを1つの月額請求単位として扱います。"
+        },
+        "CUSTOM": {
+          "label": "カスタム期間",
+          "description": "1つの月額請求単位を構成する請求対象日数を定義します。"
+        }
+      }
+    }
+  },
+  "quote": {
+    "title": "見積書",
+    "subtitle": "レンタルを作成する前に、商業オファーを準備して送付します",
+    "newQuote": "新規見積書",
+    "editQuote": "見積書を編集",
+    "save": "保存",
+    "deleteConfirm": "この見積書を削除してもよろしいですか？",
+    "searchPlaceholder": "見積書を検索…",
+    "allStatuses": "すべてのステータス",
+    "noQuotes": "見積書が見つかりません",
+    "convertConfirm": "この見積書をレンタルに変換しますか？",
+    "availabilityWarningTitle": "1つ以上の資産が予定日程で利用できない可能性があります",
+    "statuses": {
+      "DRAFT": "下書き",
+      "SENT": "送付済み",
+      "VIEWED": "閲覧済み",
+      "ACCEPTED": "承諾済み",
+      "REJECTED": "却下済み",
+      "EXPIRED": "期限切れ",
+      "CONVERTED": "変換済み",
+      "CANCELLED": "キャンセル済み"
+    },
+    "sections": {
+      "customer": "顧客",
+      "documents": "ドキュメント"
+    },
+    "documents": {
+      "empty": "この見積書に関連付けられたドキュメントはまだありません"
+    },
+    "summary": {
+      "quoteValue": "見積金額",
+      "depositTotal": "保証金合計",
+      "itemsCount": "品目数",
+      "validityStatus": "有効期限の状態"
+    },
+    "validityIntelligence": {
+      "expires_today": "本日失効",
+      "expires_tomorrow": "明日失効",
+      "expires_in_days": "{{count}} 日後に失効",
+      "expired": "期限切れ",
+      "accepted": "承諾済み",
+      "rejected": "却下済み",
+      "converted": "変換済み",
+      "cancelled": "キャンセル済み"
+    },
+    "itemTypes": {
+      "ASSET": "資産",
+      "SERVICE": "サービス",
+      "PRODUCT": "製品",
+      "FEE": "手数料",
+      "DELIVERY": "配送",
+      "COLLECTION": "引き取り",
+      "LABOR": "人件費",
+      "CUSTOM": "カスタム"
+    },
+    "billingModes": {
+      "DAILY": "日単位",
+      "WEEKLY": "週単位",
+      "MONTHLY": "月単位",
+      "CUSTOM": "カスタム",
+      "FLAT": "固定料金"
+    },
+    "discountTypes": {
+      "FIXED": "固定額",
+      "PERCENTAGE": "割合"
+    },
+    "fields": {
+      "quoteNumber": "見積書番号",
+      "status": "ステータス",
+      "issueDate": "発行日",
+      "validUntil": "有効期限",
+      "name": "名前",
+      "description": "説明",
+      "itemType": "品目の種類",
+      "unit": "単位",
+      "unitPlaceholder": "例：日、時間、個",
+      "billingMode": "請求方式",
+      "quantity": "数量",
+      "unitPrice": "単価",
+      "dailyPrice": "日額料金",
+      "weeklyPrice": "週額料金",
+      "monthlyPrice": "月額料金",
+      "customPrice": "カスタム料金",
+      "deposit": "保証金",
+      "discountType": "割引の種類",
+      "noDiscount": "割引なし",
+      "discountPercent": "割引（%）",
+      "discountAmount": "割引額",
+      "taxRatePercent": "税率（%）",
+      "taxTotal": "税金",
+      "depositTotal": "保証金",
+      "customerNotes": "顧客向けメモ",
+      "termsAndConditions": "利用規約",
+      "convertedRental": "変換されたレンタル"
+    },
+    "actions": {
+      "send": "見積書を送付",
+      "accept": "承諾",
+      "reject": "却下",
+      "rejectPrompt": "却下理由（任意）",
+      "cancel": "見積書をキャンセル",
+      "duplicate": "複製",
+      "convert": "レンタルに変換",
+      "removeItem": "削除",
+      "addServiceItem": "製品・サービスを追加",
+      "viewPdf": "PDFを表示",
+      "regeneratePdf": "PDFを再生成",
+      "downloadPdf": "PDFをダウンロード"
+    },
+    "timeline": {
+      "created": "見積書を作成しました",
+      "updated": "見積書を更新しました",
+      "status_changed": "ステータスが変更されました",
+      "sent": "見積書を送付しました",
+      "viewed": "顧客が閲覧しました",
+      "accepted": "承諾されました",
+      "rejected": "却下されました",
+      "duplicated": "複製されました",
+      "converted": "レンタルに変換されました",
+      "pdf_generated": "PDFが生成されました"
+    },
+    "errors": {
+      "customerRequired": "顧客を選択してください",
+      "validUntilRequired": "有効期限日は必須です",
+      "datesRequired": "開始予定日と終了予定日は必須です",
+      "endBeforeStart": "終了予定日は開始予定日より後にしてください",
+      "validUntilBeforeIssueDate": "有効期限を過去の日付にすることはできません",
+      "itemNameRequired": "この品目の名前を入力してください",
+      "quantityMustBePositive": "数量は1以上にしてください",
+      "noItems": "少なくとも1つの品目を追加してください",
+      "onlyDraftEditable": "編集できるのは下書き状態の見積書のみです — 代わりにこの見積書を複製してください"
+    },
+    "wizard": {
+      "steps": {
+        "customer": "顧客",
+        "dates": "日程",
+        "assets": "資産",
+        "services": "製品とサービス",
+        "pricing": "料金",
+        "terms": "条件",
+        "review": "確認"
+      },
+      "saving": "見積書を保存中…",
+      "createQuote": "見積書を作成",
+      "noServiceItems": "まだ製品やサービスが追加されていません"
+    },
+    "public": {
+      "notFound": "この見積書リンクは無効か、有効期限が切れています",
+      "acceptedNotice": "{{name}} により承諾されました",
+      "rejectedNotice": "この見積書は却下されました",
+      "acceptanceDisclaimer": "以下で承諾すると、この見積書への承諾が記録されます。これは適格電子署名ではありません。",
+      "rejectReasonPlaceholder": "理由をお聞かせください（任意）",
+      "confirmReject": "却下を確定"
+    }
+  },
+  "document": {
+    "title": "ドキュメント",
+    "subtitle": "すべてのドキュメントの生成、共有、送付、署名を一箇所で行います",
+    "newDocument": "新規ドキュメント",
+    "save": "保存",
+    "saving": "保存中…",
+    "deleteConfirm": "このドキュメントを削除してもよろしいですか？",
+    "searchPlaceholder": "ドキュメントを検索…",
+    "allStatuses": "すべてのステータス",
+    "allTypes": "すべての種類",
+    "noDocuments": "ドキュメントが見つかりません",
+    "backToList": "ドキュメント一覧に戻る",
+    "types": {
+      "QUOTE": "見積書",
+      "CONTRACT": "レンタル契約書",
+      "HANDOVER_PROTOCOL": "引渡書",
+      "RETURN_PROTOCOL": "返却書",
+      "DAMAGE_REPORT": "損傷報告書",
+      "CONTRACT_AMENDMENT": "契約変更書",
+      "CUSTOM": "カスタム"
+    },
+    "statuses": {
+      "DRAFT": "下書き",
+      "READY": "準備完了",
+      "SENT": "送付済み",
+      "VIEWED": "閲覧済み",
+      "PARTIALLY_SIGNED": "一部署名済み",
+      "SIGNED": "署名済み",
+      "REJECTED": "却下済み",
+      "VOIDED": "無効",
+      "ARCHIVED": "アーカイブ済み"
+    },
+    "fields": {
+      "documentNumber": "ドキュメント番号",
+      "documentType": "ドキュメントの種類",
+      "status": "ステータス",
+      "title": "タイトル",
+      "customTypeName": "カスタム種類の名前",
+      "none": "なし",
+      "version": "バージョン",
+      "createdAt": "作成日",
+      "customer": "顧客",
+      "rental": "レンタル",
+      "quote": "見積書",
+      "asset": "資産"
+    },
+    "summary": {
+      "total": "ドキュメント総数",
+      "draft": "下書き",
+      "sent": "送付済み",
+      "signed": "署名済み"
+    },
+    "actions": {
+      "viewPdf": "PDFを表示",
+      "regeneratePdf": "PDFを再生成",
+      "markReady": "準備完了にする",
+      "markSent": "送付済みにする",
+      "markViewed": "閲覧済みにする",
+      "markSigned": "署名済みにする",
+      "markPartiallySigned": "一部署名済みにする",
+      "reject": "却下",
+      "rejectPrompt": "却下理由（任意）",
+      "duplicate": "複製",
+      "void": "無効にする",
+      "voidPrompt": "無効化の理由（任意）",
+      "archive": "アーカイブ"
+    },
+    "sections": {
+      "preview": "プレビュー",
+      "email": "メール送付",
+      "signature": "電子署名",
+      "relatedEntities": "関連レコード"
+    },
+    "email": {
+      "recipientType": "宛先",
+      "recipientTypes": {
+        "CUSTOMER": "顧客",
+        "EMPLOYEE": "従業員",
+        "CUSTOM": "カスタムメールアドレス"
+      },
+      "customEmail": "メールアドレス",
+      "subject": "件名",
+      "message": "メッセージ",
+      "send": "メールを送信",
+      "retry": "再試行",
+      "noDeliveries": "まだメールは送信されていません",
+      "statuses": {
+        "PENDING": "保留中",
+        "SENT": "送信済み",
+        "FAILED": "失敗"
+      }
+    },
+    "signature": {
+      "signerName": "署名者名",
+      "signerEmail": "署名者メールアドレス",
+      "request": "署名を依頼",
+      "refresh": "状態を更新",
+      "cancel": "キャンセル",
+      "noRequests": "まだ署名依頼はありません",
+      "statuses": {
+        "REQUESTED": "依頼済み",
+        "PENDING": "保留中",
+        "SIGNED": "署名済み",
+        "REJECTED": "却下済み",
+        "EXPIRED": "期限切れ",
+        "CANCELLED": "キャンセル済み"
+      },
+      "providers": {
+        "LOCAL_MOCK": "手動（内部）",
+        "DOCUSIGN": "DocuSign",
+        "ADOBE_SIGN": "Adobe Sign",
+        "AUTENTI": "Autenti",
+        "EIDAS": "eIDAS"
+      }
+    },
+    "timeline": {
+      "created": "ドキュメントを作成しました",
+      "updated": "ドキュメントを更新しました",
+      "status_changed": "ステータスが変更されました",
+      "sent": "ドキュメントを送付しました",
+      "viewed": "閲覧されました",
+      "signed": "署名が記録されました",
+      "downloaded": "ダウンロードされました",
+      "archived": "アーカイブされました",
+      "version_created": "新しいバージョンが作成されました",
+      "file_uploaded": "ファイルがアップロードされました",
+      "file_deleted": "ファイルが削除されました",
+      "rendered": "PDFが生成されました",
+      "shared": "共有リンクが作成されました",
+      "share_viewed": "共有リンク経由で閲覧されました",
+      "share_downloaded": "共有リンク経由でダウンロードされました",
+      "share_disabled": "共有リンクが無効化されました",
+      "email_sent": "メールを送信しました",
+      "email_failed": "メールの送信に失敗しました",
+      "signature_requested": "署名が依頼されました",
+      "signature_status_changed": "署名ステータスが変更されました"
+    },
+    "errors": {
+      "customTypeNameRequired": "このカスタムドキュメント種類の名前を入力してください"
+    }
+  },
+  "documentTemplate": {
+    "title": "ドキュメントテンプレート",
+    "subtitle": "各種ドキュメントの生成に使用するHTMLテンプレートを管理します",
+    "newTemplate": "新規テンプレート",
+    "save": "保存",
+    "saving": "保存中…",
+    "searchPlaceholder": "テンプレートを検索…",
+    "noTemplates": "テンプレートが見つかりません",
+    "statuses": {
+      "DRAFT": "下書き",
+      "ACTIVE": "有効",
+      "ARCHIVED": "アーカイブ済み"
+    },
+    "fields": {
+      "name": "名前",
+      "description": "説明",
+      "htmlContent": "HTMLコンテンツ",
+      "css": "CSS",
+      "status": "ステータス",
+      "versionCount": "バージョン数",
+      "current": "現在"
+    },
+    "actions": {
+      "activate": "有効化",
+      "archive": "アーカイブ",
+      "restore": "復元",
+      "duplicate": "複製",
+      "saveAsNewVersion": "新しいバージョンとして保存",
+      "restoreVersion": "このバージョンを復元"
+    },
+    "sections": {
+      "metadata": "詳細",
+      "content": "コンテンツ",
+      "preview": "プレビュー",
+      "versions": "バージョン履歴"
+    }
+  },
+  "share": {
+    "title": "公開共有リンク",
+    "fields": {
+      "password": "パスワード",
+      "passwordPlaceholder": "任意のアクセスパスワード",
+      "views": "閲覧数",
+      "downloads": "ダウンロード数",
+      "expiresAt": "有効期限"
+    },
+    "status": {
+      "active": "有効",
+      "disabled": "無効"
+    },
+    "actions": {
+      "create": "リンクを作成",
+      "disable": "無効化"
+    },
+    "noLinks": "まだ共有リンクはありません",
+    "linkCreatedPrompt": "このリンクを顧客に共有してください：",
+    "public": {
+      "passwordRequiredTitle": "このドキュメントはパスワードで保護されています",
+      "wrongPassword": "パスワードが正しくありません",
+      "unlock": "ロック解除",
+      "notFound": "このリンクは無効か、有効期限が切れています",
+      "downloadPdf": "PDFをダウンロード"
+    }
+  },
+  "dashboard": {
+    "welcome": "おかえりなさい、{{name}} さん",
+    "sections": {
+      "overview": "概要",
+      "quickActions": "クイックアクション",
+      "recentActivity": "最近のアクティビティ"
+    },
+    "metrics": {
+      "customers": "顧客",
+      "activeRentals": "進行中のレンタル",
+      "availableAssets": "利用可能な資産",
+      "pendingQuotes": "保留中の見積書",
+      "needsAttention": "要確認"
+    },
+    "recentRentals": "最近のレンタル",
+    "recentDocuments": "最近のドキュメント",
+    "viewAll": "すべて表示",
+    "emptyRecentRentals": "まだレンタルはありません",
+    "emptyRecentDocuments": "まだドキュメントはありません"
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "ダッシュボード",
+      "rentals": "レンタル",
+      "calendar": "カレンダー",
+      "documents": "ドキュメント",
+      "messages": "メッセージ",
+      "notifications": "通知",
+      "logout": "ログアウト"
+    },
+    "auth": {
+      "login": {
+        "title": "顧客ポータル",
+        "subtitle": "ログインしてレンタルを管理します",
+        "company": "会社",
+        "companyPlaceholder": "your-company",
+        "email": "メールアドレス",
+        "password": "パスワード",
+        "submit": "ログイン",
+        "submitting": "ログイン中…"
+      },
+      "activate": {
+        "title": "アカウントを有効化",
+        "subtitle": "顧客ポータルにアクセスするためのパスワードを設定します",
+        "password": "パスワード",
+        "submit": "アカウントを有効化",
+        "submitting": "有効化中…",
+        "invalidToken": "この招待リンクは無効か、有効期限が切れています。",
+        "successTitle": "{{company}} へようこそ！",
+        "successDescription": "アカウントの準備が整いました。ダッシュボードに移動します…"
+      },
+      "errors": {
+        "invalidCredentials": "メールアドレス、パスワード、または会社情報が正しくありません。",
+        "invalidToken": "招待が無効か、有効期限が切れています。",
+        "generic": "問題が発生しました。もう一度お試しください。"
+      },
+      "tagline": "レンタル、ドキュメント、リクエストを一箇所で管理できます。"
+    },
+    "dashboard": {
+      "title": "ダッシュボード",
+      "welcome": "おかえりなさい、{{name}} さん",
+      "currentRentals": "現在のレンタル",
+      "upcomingRentals": "今後のレンタル",
+      "unreadMessages": "未読メッセージ",
+      "pendingSignatures": "保留中の署名",
+      "pendingExtensions": "保留中の延長リクエスト",
+      "recentRentals": "最近のレンタル",
+      "viewAll": "すべて表示",
+      "noRentals": "まだレンタルがありません"
+    },
+    "rentals": {
+      "title": "レンタル",
+      "backToList": "レンタル一覧に戻る",
+      "searchPlaceholder": "レンタルを検索…",
+      "filterStatus": "ステータス",
+      "allStatuses": "すべてのステータス",
+      "detailTitle": "レンタル {{number}}",
+      "period": "レンタル期間",
+      "items": "機材",
+      "timeline": "タイムライン",
+      "documents": "ドキュメント",
+      "downloadAllDocuments": "すべてのドキュメントをダウンロード（.zip）",
+      "qrCode": "QRコード",
+      "showQrCode": "QRコードを表示",
+      "requestExtension": "延長をリクエスト",
+      "reportDamage": "損傷を報告",
+      "extensionRequests": "延長リクエスト",
+      "damageReports": "損傷報告",
+      "noRentals": "レンタルが見つかりません",
+      "quantity": "数量",
+      "statuses": {
+        "DRAFT": "下書き",
+        "QUOTE": "見積り",
+        "RESERVED": "予約済み",
+        "ACTIVE": "進行中",
+        "RETURNED": "返却済み",
+        "COMPLETED": "完了",
+        "CANCELLED": "キャンセル済み"
+      }
+    },
+    "calendar": {
+      "title": "レンタルカレンダー",
+      "empty": "この期間にレンタルはありません"
+    },
+    "extensionRequests": {
+      "title": "延長をリクエスト",
+      "currentEnd": "現在の終了日",
+      "newEndDate": "新しい終了日",
+      "message": "メッセージ（任意）",
+      "submit": "リクエストを送信",
+      "submitting": "送信中…",
+      "submitted": "延長リクエストを送信しました。",
+      "responseFrom": "回答",
+      "statuses": {
+        "PENDING": "保留中",
+        "APPROVED": "承認済み",
+        "REJECTED": "却下済み",
+        "CANCELLED": "キャンセル済み"
+      }
+    },
+    "damageReports": {
+      "title": "損傷を報告",
+      "description": "説明",
+      "descriptionPlaceholder": "発生した状況を記入してください…",
+      "asset": "機材（任意）",
+      "anyEquipment": "不明・全般",
+      "photos": "写真",
+      "addPhoto": "写真を追加",
+      "uploading": "アップロード中…",
+      "submit": "報告を送信",
+      "submitting": "送信中…",
+      "submitted": "損傷報告を送信しました。",
+      "statuses": {
+        "SUBMITTED": "送信済み",
+        "REVIEWED": "確認済み",
+        "RESOLVED": "解決済み",
+        "CONVERTED_TO_DOCUMENT": "文書化済み"
+      }
+    },
+    "documents": {
+      "title": "ドキュメント",
+      "backToList": "ドキュメント一覧に戻る",
+      "filterStatus": "ステータス",
+      "allStatuses": "すべてのステータス",
+      "preview": "プレビュー",
+      "download": "PDFをダウンロード",
+      "sign": "ドキュメントに署名",
+      "signing": "署名中…",
+      "signed": "このドキュメントに署名しました。",
+      "pendingSignature": "署名待ちです",
+      "noDocuments": "ドキュメントが見つかりません",
+      "signatureRequests": "署名依頼"
+    },
+    "messages": {
+      "title": "メッセージ",
+      "placeholder": "メッセージを入力…",
+      "send": "送信",
+      "sending": "送信中…",
+      "empty": "まだメッセージはありません",
+      "generalThread": "全般"
+    },
+    "notifications": {
+      "title": "通知",
+      "markAllRead": "すべて既読にする",
+      "empty": "新しい通知はありません",
+      "types": {
+        "MESSAGE": "新着メッセージ",
+        "DOCUMENT_SHARED": "ドキュメントが共有されました",
+        "SIGNATURE_REQUESTED": "署名が依頼されました",
+        "EXTENSION_RESPONSE": "延長リクエストの更新",
+        "RENTAL_UPDATE": "レンタルの更新",
+        "DAMAGE_REPORT_UPDATE": "損傷報告の更新"
+      }
+    },
+    "assets": {
+      "title": "機材",
+      "manufacturer": "メーカー",
+      "model": "モデル",
+      "condition": "状態に関するメモ"
+    },
+    "darkMode": {
+      "toggle": "ダークモードを切り替え"
+    }
+  },
+  "timeline": {
+    "title": "タイムライン",
+    "empty": "まだ記録された活動はありません",
+    "searchPlaceholder": "タイムラインを検索…",
+    "today": "今日",
+    "yesterday": "昨日",
+    "hint": "入力して検索、↑/↓ でイベント間を移動"
+  }
+}

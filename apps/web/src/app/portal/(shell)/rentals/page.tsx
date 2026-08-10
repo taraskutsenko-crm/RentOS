@@ -11,6 +11,7 @@ import {
   type DataTableColumn,
 } from "../../../../components/data-table";
 import { usePortalRentals } from "../../../../hooks/use-portal-rentals";
+import { formatDate } from "../../../../lib/date-format";
 import { formatMoney } from "../../../../lib/money";
 import type { PortalRentalListItem } from "../../../../types/portal";
 import type { RentalStatus } from "../../../../types/rental";
@@ -26,7 +27,7 @@ const STATUSES: RentalStatus[] = [
 ];
 
 export default function PortalRentalsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [status, setStatus] = useState<RentalStatus | "">("");
 
   const table = useDataTableState({ initialSortBy: "createdAt", initialSortDirection: "desc" });
@@ -56,13 +57,13 @@ export default function PortalRentalsPage() {
       id: "plannedStart",
       header: t("rental.fields.plannedStart"),
       sortable: true,
-      cell: (rental) => new Date(rental.plannedStart).toLocaleDateString(),
+      cell: (rental) => formatDate(rental.plannedStart, i18n.language),
     },
     {
       id: "plannedEnd",
       header: t("rental.fields.plannedEnd"),
       sortable: true,
-      cell: (rental) => new Date(rental.plannedEnd).toLocaleDateString(),
+      cell: (rental) => formatDate(rental.plannedEnd, i18n.language),
     },
     {
       id: "total",

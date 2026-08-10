@@ -56,4 +56,22 @@ describe("formatMoney", () => {
     expect(formatMoney(null, "USD")).toBe("—");
     expect(formatMoney(1000, null)).toBe("—");
   });
+
+  it("keeps currency independent from the display locale (PRODUCT_BIBLE.md §28)", () => {
+    // A Polish-UI tenant invoicing in USD, and an English-UI tenant
+    // invoicing in PLN, are both valid — the currency code is never
+    // inferred from the locale string, only ever passed explicitly.
+    const usdInPolish = formatMoney(150000, "USD", "pl");
+    const plnInEnglish = formatMoney(150000, "PLN", "en");
+    expect(usdInPolish).toMatch(/\$|USD/);
+    expect(plnInEnglish).toMatch(/PLN|zł/);
+  });
+
+  it("formats digit grouping per the given locale, independent of currency", () => {
+    // de-DE groups with "." and uses "," as the decimal separator; en-US is
+    // the reverse — same amount, same currency, different locale.
+    const german = formatMoney(123456789, "EUR", "de-DE");
+    const american = formatMoney(123456789, "EUR", "en-US");
+    expect(german).not.toBe(american);
+  });
 });

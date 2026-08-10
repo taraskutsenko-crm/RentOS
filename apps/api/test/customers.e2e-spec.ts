@@ -230,6 +230,41 @@ describe("Customers E2E", () => {
     expect(response.body.items[0].company).toBe("Acme Inc");
   });
 
+  it("searches correctly across non-Latin and accented Unicode names (globalization Section 12)", async () => {
+    // Representative of the 14 shipped UI locales' scripts — French accents,
+    // Polish diacritics, Ukrainian Cyrillic, German umlauts, and CJK ideographs
+    // — verifying Prisma's `contains`+`mode:"insensitive"` (Postgres ILIKE)
+    // matches correctly without any locale-specific search logic.
+    await createCustomer({
+      firstName: "François",
+      lastName: "Kowalski",
+      company: "Société Général",
+    });
+    await createCustomer({ firstName: "Małgorzata", lastName: "Żółć", company: "Zażółć Sp." });
+    await createCustomer({ firstName: "Олена", lastName: "Шевченко", company: "Компанія" });
+    await createCustomer({ firstName: "Jürgen", lastName: "Müller", company: "Größe GmbH" });
+    await createCustomer({ firstName: "田中", lastName: "太郎", company: "株式会社" });
+
+    const cases: Array<{ search: string; expectedCompany: string }> = [
+      { search: "françois", expectedCompany: "Société Général" },
+      { search: "żółć", expectedCompany: "Zażółć Sp." },
+      { search: "шевченко", expectedCompany: "Компанія" },
+      { search: "müller", expectedCompany: "Größe GmbH" },
+      { search: "太郎", expectedCompany: "株式会社" },
+    ];
+
+    for (const { search, expectedCompany } of cases) {
+      const response = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/customers`)
+        .query({ search })
+        .set("Cookie", accessCookie)
+        .expect(200);
+
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].company).toBe(expectedCompany);
+    }
+  });
+
   it("filters by status", async () => {
     await createCustomer({ firstName: "Active", status: "ACTIVE" });
     await createCustomer({ firstName: "Inactive", status: "INACTIVE" });

@@ -180,6 +180,7 @@ function buildService(tenantOverrides: { defaultLanguage?: string } = {}) {
       findUnique: vi.fn().mockResolvedValue({
         name: "Acme Rentals",
         defaultLanguage: tenantOverrides.defaultLanguage ?? "en",
+        timezone: "UTC",
       }),
     },
     quoteDocument: {

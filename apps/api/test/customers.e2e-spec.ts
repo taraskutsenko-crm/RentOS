@@ -265,6 +265,90 @@ describe("Customers E2E", () => {
     }
   });
 
+  it("allows creating two customers with the same email, VAT number, and company (no uniqueness rule)", async () => {
+    // Regression test for a reported "Something went wrong" customer-
+    // creation failure: the actual root cause was a stale frontend tenant
+    // context (see apps/web/src/hooks/use-ensure-tenant-context.ts), never
+    // a duplicate-data rejection — Customer has no @unique constraint on
+    // email/vatNumber/company/name (schema.prisma), and CustomersService
+    // .create() performs no pre-check. This test documents that intentional
+    // behavior so a future change doesn't accidentally introduce one.
+    const first = await createCustomer({
+      firstName: "Dima",
+      lastName: "Demchenko",
+      company: "UnitCore",
+      email: "unitcore@gmail.com",
+      vatNumber: "9542784422",
+    }).expect(201);
+
+    const second = await createCustomer({
+      firstName: "Dima",
+      lastName: "Demchenko",
+      company: "UnitCore",
+      email: "unitcore@gmail.com",
+      vatNumber: "9542784422",
+    }).expect(201);
+
+    expect(second.body.id).not.toBe(first.body.id);
+
+    const list = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/customers`)
+      .query({ search: "unitcore@gmail.com" })
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(list.body.items).toHaveLength(2);
+  });
+
+  it("a newly created customer appears in the list immediately (no caching/visibility lag)", async () => {
+    const created = await createCustomer({ firstName: "Fresh", lastName: "Record" }).expect(201);
+
+    const list = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/customers`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(list.body.items.map((item: { id: string }) => item.id)).toContain(created.body.id);
+  });
+
+  it("never leaks a customer across tenants — a second tenant's registration cannot see or recreate it", async () => {
+    await createCustomer({
+      firstName: "Dima",
+      lastName: "Demchenko",
+      email: "cross-tenant@example.com",
+    }).expect(201);
+
+    const otherTenant = await request(app.getHttpServer())
+      .post("/auth/register")
+      .send({ ...validRegisterPayload, email: "second-owner@example.com" })
+      .expect(201);
+    const otherTenantId = (otherTenant.body as RegisterResponseBody).tenant.id;
+    const otherCookie = extractCookie(otherTenant.headers, "rentos_access_token");
+
+    const otherList = await request(app.getHttpServer())
+      .get(`/tenants/${otherTenantId}/customers`)
+      .set("Cookie", otherCookie)
+      .expect(200);
+    expect(otherList.body.items).toHaveLength(0);
+
+    // The same email/name creates a distinct record under the new tenant —
+    // tenant isolation, not a cross-tenant uniqueness rule.
+    const otherCreated = await request(app.getHttpServer())
+      .post(`/tenants/${otherTenantId}/customers`)
+      .set("Cookie", otherCookie)
+      .send({ firstName: "Dima", lastName: "Demchenko", email: "cross-tenant@example.com" })
+      .expect(201);
+    expect(otherCreated.body.tenantId).toBe(otherTenantId);
+
+    // And the original tenant's request using the second tenant's id (a
+    // literal reproduction of the reported bug's request shape) is
+    // rejected, never silently redirected to the wrong tenant's data.
+    await request(app.getHttpServer())
+      .post(`/tenants/${otherTenantId}/customers`)
+      .set("Cookie", accessCookie)
+      .send({ firstName: "Should", lastName: "Fail" })
+      .expect(403);
+  });
+
   it("filters by status", async () => {
     await createCustomer({ firstName: "Active", status: "ACTIVE" });
     await createCustomer({ firstName: "Inactive", status: "INACTIVE" });

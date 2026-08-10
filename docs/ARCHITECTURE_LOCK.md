@@ -278,7 +278,10 @@ behavior explicitly — not leave it implicit.
 - Every customer-visible and staff-visible string lives in
   `packages/localization/src/locales/<lang>/common.json` — never a
   hardcoded literal in a component.
-- All **six** shipped languages (`en`, `ru`, `uk`, `de`, `pl`, `es`)
+- All **14** shipped languages (`en`, `pl`, `de`, `uk`, `ru`, `es`,
+  `fr`, `it`, `pt-BR`, `nl`, `cs`, `zh-CN`, `ja`, `ko` — see
+  `packages/localization/src/index.ts`'s `localeRegistry`, the single
+  authoritative source for supported-locale metadata as of D-057)
   must carry the same key structure for every module (D-011). This
   has been verified manually/by ad hoc script per task so far; see
   Part 4 below for the CI check now added to make this automatic.

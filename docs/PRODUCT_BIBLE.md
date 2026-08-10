@@ -64,6 +64,10 @@ most abstract question (why Havelio exists) to the most concrete one
 26. [Ten-Year Rule](#26-ten-year-rule)
 27. [Product Quality Checklist](#27-product-quality-checklist)
 
+**Part E — Global Readiness**
+
+28. [Global By Design](#28-global-by-design)
+
 ---
 
 # Part A — Vision & Identity
@@ -906,7 +910,7 @@ A feature is not complete until:
   `UX_PRINCIPLES.md` and `UI_PATTERNS.md`'s per-component keyboard
   notes).
 - Responsive (verified at real breakpoints, not assumed from desktop).
-- Localized (all six shipped languages, key-parity verified —
+- Localized (all 14 shipped languages, key-parity verified —
   `ARCHITECTURE_LOCK.md` §1.14).
 - Dark mode verified (not just "the tokens should work").
 - **Universal** — checked against Section 3's test (would this still
@@ -929,3 +933,80 @@ run, exact commit/push/CI sequence). This section exists so the
 _reason_ for that checklist — a feature that skips any line of it is
 not actually finished, regardless of how complete it looks — is
 stated at the product level, not only the process level.
+
+---
+
+# Part E — Global Readiness
+
+## 28. Global By Design
+
+Section 3's Universal Rental Philosophy asks whether a feature holds
+for any rental vertical. This section asks the companion question:
+does it hold for any country, language, currency, or timezone? Both
+are the same underlying commitment — **One Platform. Every Asset.**
+(Section 1) — read against a second axis. A feature that only makes
+sense for one industry is not universal; a feature that only makes
+sense for one country is not global. Neither ships as core logic.
+
+**The permanent principle:** no feature may assume one language, one
+country, one currency, one timezone, one date/number format, one
+address format, one tax-identifier format, one document language, one
+name format, or one measurement convention. This is a durable
+architectural constraint, evaluated the same way Section 3's
+three-industry test is — before adding a schema column, a hardcoded
+list, or a business-logic branch, ask whether it would break for a
+tenant operating in a different country, a customer in a different
+country, or an interface language different from either.
+
+**Language, country, currency, and timezone are four separate
+settings — never conflated:**
+
+- **UI language** (`i18n.language`) is a per-user display preference.
+- **Company/tenant country** and **customer country** are business
+  facts, independent of UI language and of each other.
+- **Currency** is set per transaction/tenant (an ISO 4217 code) and
+  must never be inferred from UI language or country — `formatMoney()`
+  (`apps/web/src/lib/money.ts`) already takes a currency code as an
+  explicit parameter, never derives one.
+- **Document language** (Section 8's concern, `ARCHITECTURE_LOCK.md`
+  and `DECISIONS.md` record its exact current state) is conceptually
+  independent of UI language — a staff member working in Ukrainian
+  must be able to generate a German-language contract for a German
+  customer.
+- **Timezone** distinguishes the user's browser timezone from the
+  tenant's business timezone from a stored UTC timestamp — the
+  existing UTC-storage discipline (`ARCHITECTURE_LOCK.md` §1.8) is
+  the seam this depends on; a user-facing timezone _display_
+  preference is a legitimate, honest future gap, not something to
+  fabricate.
+
+**What this looks like, concretely:** never write `country === "PL"
+→ language = "pl"` or `language === "de" → currency = "EUR"`
+anywhere in the codebase. A Polish rental company may run the staff
+UI in Ukrainian, rent to a German customer, generate that customer's
+contract in German, and invoice in EUR — every one of those four
+facts is independently selected, never inferred from another.
+
+**Locale metadata lives in one place:** every supported UI language is
+declared once, in `packages/localization/src/index.ts`'s locale
+registry (code, display name, native name, BCP-47 tag, text
+direction) — never duplicated as a second hardcoded list inside a
+component. A language selector, a settings page, or a parity check
+all read the same registry; adding a future language is registering
+one entry and its translation file, not hunting for every place a
+language list was copy-pasted.
+
+**What this does not require:** multi-currency accounting, exchange
+rates, a tax-compliance engine, country-specific legal-document
+generation, automatic translation, or a full RTL redesign. Global by
+Design is about not hardcoding an assumption that breaks for a
+different country or language — it is not a mandate to build every
+piece of infrastructure a truly global business might eventually need
+before a real requirement exists (Section 7, Simplicity Rule; Section
+22's anti-pattern against speculative platform infrastructure applies
+here exactly as it does to plugins and marketplaces). A genuine
+country- or jurisdiction-specific gap (a tax-ID format Havelio doesn't
+validate yet, a currency Havelio doesn't format correctly) is
+documented as a known limitation, never silently ignored and never
+faked with a hardcoded assumption that happens to work for one
+country.

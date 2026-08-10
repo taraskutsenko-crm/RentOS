@@ -110,11 +110,13 @@ un-labelled `<div>`s; responsive utility classes (`grid-cols-2`,
 localization is not a follow-up task.
 
 **In implementation:** every module's rollout, including this
-stabilization task's new UI strings, adds keys to **all six** locale
-files (`en`, `ru`, `uk`, `de`, `pl`, `es`) in the same commit, with
-key-structure parity verified before commit (a small Node script diffing
-flattened key sets across languages — see the workflow used in prior
-tasks' verification steps).
+stabilization task's new UI strings, adds keys to **all 14** locale
+files (`en`, `pl`, `de`, `uk`, `ru`, `es`, `fr`, `it`, `pt-BR`, `nl`,
+`cs`, `zh-CN`, `ja`, `ko` — see `packages/localization/src/index.ts`'s
+`localeRegistry`) in the same commit, with key-structure parity
+verified before commit (`scripts/check-i18n-parity.mjs`, which
+auto-discovers locale folders — adding a language requires no change
+to the script itself).
 
 ## Consistent design system
 

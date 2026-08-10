@@ -19,24 +19,57 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `7caa4e8` — TASK-0010 Part 2 Chapter 9
-  (Documents & Contracts Workspace) is complete and CI-green (GitHub
-  Actions run #36, `completed successfully`). Sits on top of `457585f`
-  (docs: Chapter 9), `00a6ca3` (test: Chapter 9), `213e6e4` (feat:
-  Chapter 9), the Chapter 8 commits (Quote Workspace), `8960a17` (docs:
-  verified commit hash for Chapter 7), `12c0567` (feat: Rental
-  Workspace & Rental Lifecycle), `952bddf` (PRODUCT_BIBLE.md expanded
-  into the platform constitution), `00a410a` (Chapter 5 — Productivity
-  Layer), `e177d14` (Chapter 4 — dashboard experience), `1a251fe`
-  (Chapter 3 — universal data views), `1ba4fc4` (Chapter 2 — premium
-  authentication experience), and `ec06729`/`5157e2c` (Chapter 1 —
-  application shell redesign). Note: `7caa4e8` itself (D-056, raising
-  the e2e `hookTimeout`/`testTimeout` from 20s to 40s) is a
-  test-infrastructure-only fix for a CI-runner timeout flake unrelated
-  to the Chapter 9 feature work in `213e6e4`/`00a6ca3`/`457585f` — see
-  D-056 for the full diagnosis (4/4 local reproductions passed
-  unmodified before the fix was made).
-- **What shipped (Chapter 9):** a Documents & Contracts Workspace
+- **Latest verified commit:** pending push — Pre-Chapter 10
+  Globalization & Internationalization Foundation (D-057) is complete
+  locally, quality gates green, Docker-verified in the browser across
+  6+ locales; commit hash recorded here once pushed and CI-confirmed
+  green (see the follow-up "record verified commit hash" commit, same
+  convention as Chapter 9/`8960a17`). Sits on top of `7caa4e8` — TASK-0010
+  Part 2 Chapter 9 (Documents & Contracts Workspace, CI-green, GitHub
+  Actions run #36).
+- **What shipped (Pre-Chapter 10 — Globalization Foundation, D-057):**
+  explicit HARD STOP before Chapter 10 to harden Havelio's global
+  readiness rather than add a new feature. Consolidated all locale
+  metadata (code/englishName/nativeName/direction) into one
+  `localeRegistry` in `packages/localization/src/index.ts`, replacing a
+  hardcoded array duplicated in `user-menu.tsx`. Expanded shipped UI
+  locales from 6 to **14** (`en/pl/de/uk/ru/es` + new `fr/it/pt-BR/nl/
+cs/zh-CN/ja/ko`) with real, natural translations across all 16
+  namespaces — key-structure parity verified
+  (`scripts/check-i18n-parity.mjs`, unmodified, auto-discovers locale
+  folders). Added `apps/web/src/lib/date-format.ts`
+  (`formatDate`/`formatDateTime`/`formatMonthYear`, `Intl`-based,
+  explicit `locale` param) and gave `formatMoney()` an optional
+  `locale` param, then replaced ~20 remaining `.toLocaleDateString()`/
+  `.toLocaleString()` call sites app-wide with locale-aware equivalents.
+  Wired the real (previously-dead) `Tenant.timezone` column into
+  `quote-pdf.service.ts`/`variable-resolver.service.ts`'s date
+  formatting in place of hardcoded `"UTC"`. Extended
+  `useLanguagePreference()` to sync `document.documentElement.dir` from
+  the registry's `direction` field alongside `lang`, proving the RTL
+  pipeline end-to-end (all 14 shipped locales remain `ltr` — no
+  Arabic/Hebrew added). Registration's `defaultLanguage` field is now a
+  real `<select>` sourced from the registry with client+server
+  validation, replacing a free-text input. Added a
+  `formatDate`/`localeRegistry`/`i18next`-fallback/`useLanguagePreference`
+  test suite (5 new files, 30 tests) plus a representative-Unicode
+  customer-search e2e test (French accents, Polish diacritics,
+  Ukrainian Cyrillic, German umlauts, CJK). Audited and confirmed
+  already-sound without code changes: the font stack (Inter +
+  `ui-sans-serif`/`system-ui`/`-apple-system` fallback already renders
+  CJK via standard per-glyph browser fallback — no Noto Sans CJK
+  bundled, deliberately), address/VAT/postal fields (already free-text,
+  no country-specific format assumptions), and Unicode substring search
+  (Postgres `ILIKE` via Prisma `contains`+`mode:"insensitive"`).
+  Document/DocumentTemplate rendering language remains coupled to
+  `tenant.defaultLanguage` — audited and deliberately left as a
+  documented gap (D-057) rather than a narrow field that wouldn't
+  actually deliver a translated contract, since the real fix needs
+  either multiple active templates per `(tenantId, documentType,
+language)` or per-template conditional logic, both out of the
+  explicit "no template designer" scope. See D-057 for the full
+  decision record.
+- **Previous chapter — what shipped (Chapter 9):** a Documents & Contracts Workspace
   built entirely on existing platform-document infrastructure — no
   second document system, no Invoice type, no real e-signature/SMTP.
   Two additive backend extensions (D-054): `AssetsService.findOne()`

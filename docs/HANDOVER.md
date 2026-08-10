@@ -19,19 +19,23 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** pending — TASK-0010 Part 2 Chapter 9
-  (Documents & Contracts Workspace) is complete locally (quality gates,
-  Docker rebuild, and manual browser verification all green); this
-  line is updated by a small follow-up commit once this chapter's
-  commits are pushed and CI is confirmed green, mirroring the
-  Chapter 7/8 pattern. Sits on top of the Chapter 8 commits (Quote
-  Workspace), `8960a17` (docs: verified commit hash for Chapter 7),
-  `12c0567` (feat: Rental Workspace & Rental Lifecycle), `952bddf`
-  (PRODUCT_BIBLE.md expanded into the platform constitution),
-  `00a410a` (Chapter 5 — Productivity Layer), `e177d14` (Chapter 4 —
-  dashboard experience), `1a251fe` (Chapter 3 — universal data views),
-  `1ba4fc4` (Chapter 2 — premium authentication experience), and
-  `ec06729`/`5157e2c` (Chapter 1 — application shell redesign).
+- **Latest verified commit:** `7caa4e8` — TASK-0010 Part 2 Chapter 9
+  (Documents & Contracts Workspace) is complete and CI-green (GitHub
+  Actions run #36, `completed successfully`). Sits on top of `457585f`
+  (docs: Chapter 9), `00a6ca3` (test: Chapter 9), `213e6e4` (feat:
+  Chapter 9), the Chapter 8 commits (Quote Workspace), `8960a17` (docs:
+  verified commit hash for Chapter 7), `12c0567` (feat: Rental
+  Workspace & Rental Lifecycle), `952bddf` (PRODUCT_BIBLE.md expanded
+  into the platform constitution), `00a410a` (Chapter 5 — Productivity
+  Layer), `e177d14` (Chapter 4 — dashboard experience), `1a251fe`
+  (Chapter 3 — universal data views), `1ba4fc4` (Chapter 2 — premium
+  authentication experience), and `ec06729`/`5157e2c` (Chapter 1 —
+  application shell redesign). Note: `7caa4e8` itself (D-056, raising
+  the e2e `hookTimeout`/`testTimeout` from 20s to 40s) is a
+  test-infrastructure-only fix for a CI-runner timeout flake unrelated
+  to the Chapter 9 feature work in `213e6e4`/`00a6ca3`/`457585f` — see
+  D-056 for the full diagnosis (4/4 local reproductions passed
+  unmodified before the fix was made).
 - **What shipped (Chapter 9):** a Documents & Contracts Workspace
   built entirely on existing platform-document infrastructure — no
   second document system, no Invoice type, no real e-signature/SMTP.
@@ -172,10 +176,15 @@ prior conversations.
   `[object Object]` for any status-badge column — fixed, and the fix
   was re-verified live on the Documents, Rentals, and Quotes mobile
   cards, all now showing their real colored status badge.
-- **GitHub Actions (Chapter 9):** not yet checked — this chapter's
-  commits have not been pushed yet as of this update; see the next
-  HANDOVER update (or the final Chapter 9 report) for the verified run
-  result.
+- **GitHub Actions (Chapter 9):** confirmed green. Run #35 (commit
+  `457585f`, the feat/test/docs commits) failed on a `hookTimeout`
+  inside `rental-numbering.e2e-spec.ts`'s heaviest concurrency test
+  (25 simultaneous requests), which then raced the next test's
+  `cleanDatabase()` against an in-flight write — a CI-runner
+  contention flake, not a Chapter 9 regression (that spec touches no
+  file Chapter 9 changed, and passed 4/4 local runs unmodified). D-056
+  raised the e2e `hookTimeout`/`testTimeout` from 20s to 40s in a
+  follow-up commit (`7caa4e8`); run #36 then `completed successfully`.
 - **Previous chapter's quality gates/verification (Chapter 8):**
   format/lint/typecheck/build green across all 6 packages; 477 backend
   - 328 frontend tests passing (805 total). Docker/browser

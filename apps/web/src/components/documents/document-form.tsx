@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useAssets } from "../../hooks/use-assets";
 import { useCustomers } from "../../hooks/use-customers";
 import { useCurrentTenantId } from "../../hooks/use-current-tenant";
+import { useRentals } from "../../hooks/use-rentals";
 import { documentSchema, type DocumentFormValues } from "../../lib/validation";
 import type { DocumentType } from "../../types/document";
 
@@ -27,6 +28,14 @@ export interface DocumentFormProps {
   errorMessage?: string | null;
   submitLabel: string;
   submittingLabel: string;
+  /**
+   * Pre-fills the form when arriving from a "Generate document" link on the
+   * Rental/Quote Workspace (see rentals/[id]/page.tsx, quotes/[id]/page.tsx)
+   * — this is the actual fix for the reported blank rental.number/total/
+   * start/end bug: those placeholders were only ever blank because no UI
+   * path ever set `rentalId` on document creation at all.
+   */
+  initialValues?: Partial<DocumentFormValues> | undefined;
 }
 
 export function DocumentForm({
@@ -35,11 +44,13 @@ export function DocumentForm({
   errorMessage,
   submitLabel,
   submittingLabel,
+  initialValues,
 }: DocumentFormProps) {
   const { t } = useTranslation();
   const [tenantId] = useCurrentTenantId();
   const { data: customers } = useCustomers(tenantId, { pageSize: 100 });
   const { data: assets } = useAssets(tenantId, { pageSize: 100 });
+  const { data: rentals } = useRentals(tenantId, { pageSize: 100 });
 
   const {
     register,
@@ -54,6 +65,8 @@ export function DocumentForm({
       title: "",
       customerId: "",
       assetId: "",
+      rentalId: "",
+      ...initialValues,
     },
   });
 
@@ -115,6 +128,23 @@ export function DocumentForm({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="rentalId">{t("rental.title")}</Label>
+        <select
+          id="rentalId"
+          className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+          {...register("rentalId")}
+        >
+          <option value="">{t("document.fields.none")}</option>
+          {rentals?.items.map((rental) => (
+            <option key={rental.id} value={rental.id}>
+              {rental.rentalNumber}
+            </option>
+          ))}
+        </select>
+        <p className="text-muted-foreground text-xs">{t("document.fields.rentalHint")}</p>
       </div>
 
       <div className="flex flex-col gap-1.5">

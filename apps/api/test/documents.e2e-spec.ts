@@ -151,6 +151,100 @@ describe("Documents E2E (TASK-0008 Part 1 — Document Management Platform)", ()
     expect(response.body.versions[0].finalizedAt).toBeNull();
   });
 
+  it("auto-inherits customerId from the linked Rental when customerId is omitted", async () => {
+    const response = await createDocument({ customerId: undefined, rentalId }).expect(201);
+    expect(response.body.rentalId).toBe(rentalId);
+    expect(response.body.customerId).toBe(customerId);
+  });
+
+  it("auto-populates quoteId from the Rental's sourceQuoteId when quoteId is omitted", async () => {
+    const quoteResponse = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId,
+        validUntil: dateOffset(30),
+        plannedStart: dateOffset(1),
+        plannedEnd: dateOffset(4),
+        items: [
+          {
+            itemType: "ASSET",
+            assetId,
+            name: "Generator A",
+            billingMode: "DAILY",
+            dailyPriceMinor: 1000,
+          },
+        ],
+      })
+      .expect(201);
+    const quoteId = quoteResponse.body.id as string;
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/send`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/accept`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    const converted = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/convert-to-rental`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    const convertedRentalId = converted.body.rental.id as string;
+
+    // The actual fix for the reported blank rental.number/total/start/end
+    // bug: linking rentalId is what makes those variables resolve at all
+    // (see DECISIONS.md D-060) — and the Quote this Rental was converted
+    // from is now traceable automatically via the pre-existing
+    // Document.quoteId FK, with zero new relation models.
+    const response = await createDocument({
+      customerId: undefined,
+      rentalId: convertedRentalId,
+    }).expect(201);
+    expect(response.body.rentalId).toBe(convertedRentalId);
+    expect(response.body.quoteId).toBe(quoteId);
+  });
+
+  it("respects an explicitly provided quoteId over the Rental's own sourceQuoteId", async () => {
+    const otherQuote = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId,
+        validUntil: dateOffset(30),
+        plannedStart: dateOffset(1),
+        plannedEnd: dateOffset(4),
+        items: [
+          {
+            itemType: "ASSET",
+            assetId,
+            name: "Generator A",
+            billingMode: "DAILY",
+            dailyPriceMinor: 1000,
+          },
+        ],
+      })
+      .expect(201);
+
+    // rentalId (from beforeEach) has no sourceQuote at all; an explicit
+    // quoteId must still be honored (never overwritten by a null
+    // rental.sourceQuoteId).
+    const response = await createDocument({ rentalId, quoteId: otherQuote.body.id }).expect(201);
+    expect(response.body.quoteId).toBe(otherQuote.body.id);
+  });
+
+  it("defaults employeeUserId to the creating staff user when omitted", async () => {
+    const me = await request(app.getHttpServer())
+      .get("/auth/me")
+      .set("Cookie", accessCookie)
+      .expect(200);
+    const response = await createDocument().expect(201);
+    expect(response.body.employeeUserId).toBe(me.body.user.id);
+  });
+
   it("rejects a CUSTOM document with no customTypeName", async () => {
     await createDocument({ documentType: "CUSTOM", customTypeName: undefined }).expect(400);
   });

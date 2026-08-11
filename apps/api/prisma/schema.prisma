@@ -294,17 +294,26 @@ model User {
 /// Multi-tenancy foundation: the tenant/organization boundary every future
 /// business entity will reference for isolation. Not a business module.
 model Tenant {
-  id              String    @id @default(uuid())
-  name            String
-  slug            String    @unique
-  countryCode     String    @db.VarChar(2)
-  defaultLanguage String    @default("en") @db.VarChar(10)
-  defaultCurrency String    @db.VarChar(3)
-  timezone        String
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
+  id                 String    @id @default(uuid())
+  name               String
+  slug               String    @unique
+  countryCode        String    @db.VarChar(2)
+  defaultLanguage    String    @default("en") @db.VarChar(10)
+  defaultCurrency    String    @db.VarChar(3)
+  timezone           String
+  /// Legal-identity fields for rendering into commercial documents (the
+  /// Contract "Parties" section, etc.) — all optional/nullable since a
+  /// tenant may not have filled them in yet; VariableResolverService
+  /// renders "" when null, exactly like every other optional variable.
+  /// Edited via the Company Profile settings page (PATCH /tenants/:id).
+  registrationNumber String?
+  taxNumber          String?
+  address            String?
+  phone              String?
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime?
 
   memberships   TenantMembership[]
   refreshTokens RefreshToken[]
@@ -1242,23 +1251,37 @@ model DocumentVersion {
   /// column itself accepts any JSON object.
   businessDataSnapshot Json
 
-  templateId  String?
-  isFinal     Boolean   @default(false)
-  finalizedAt DateTime?
+  templateId        String?
+  /// Which exact DocumentTemplateVersion was current when this version was
+  /// created — captured once, at creation time, the same "capture now"
+  /// pattern businessDataSnapshot already uses. DocumentRendererService
+  /// resolves this pinned version unconditionally when set, so a later
+  /// edit to the template (which always creates a NEW
+  /// DocumentTemplateVersion, never mutates one in place) can never
+  /// silently change how an already-generated document re-renders — the
+  /// actual enforcement of the "finalized forever" promise ARCHITECTURE_LOCK
+  /// §1.6 and D-022 already make. Null on every DocumentVersion created
+  /// before this column existed, which keeps resolving the template's
+  /// current version exactly as before (fully backward compatible, no
+  /// backfill).
+  templateVersionId String?
+  isFinal           Boolean   @default(false)
+  finalizedAt       DateTime?
   /// Why this version was created — required for every version after the
   /// first (a correction must explain itself); null for the initial version
   /// created alongside the Document.
-  reason      String?
+  reason            String?
 
   createdByUserId String
   createdAt       DateTime @default(now())
 
-  tenant        Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  document      Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  parentVersion DocumentVersion?  @relation("DocumentVersionParent", fields: [parentVersionId], references: [id])
-  childVersions DocumentVersion[] @relation("DocumentVersionParent")
-  template      DocumentTemplate? @relation(fields: [templateId], references: [id])
-  createdByUser User              @relation("DocumentVersionCreatedBy", fields: [createdByUserId], references: [id])
+  tenant                Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  document              Document                 @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  parentVersion         DocumentVersion?         @relation("DocumentVersionParent", fields: [parentVersionId], references: [id])
+  childVersions         DocumentVersion[]        @relation("DocumentVersionParent")
+  template              DocumentTemplate?        @relation(fields: [templateId], references: [id])
+  pinnedTemplateVersion DocumentTemplateVersion? @relation("DocumentVersionPinnedTemplateVersion", fields: [templateVersionId], references: [id])
+  createdByUser         User                     @relation("DocumentVersionCreatedBy", fields: [createdByUserId], references: [id])
 
   files             DocumentFile[]
   shareLinks        DocumentShareLink[]
@@ -1311,8 +1334,16 @@ model DocumentTemplate {
   documentType         DocumentType
   name                 String
   description          String?
+  /// The document-language this template's content is authored in (a
+  /// SupportedLanguage code from packages/localization, e.g. "de") — null
+  /// means "any/tenant default", the behavior every template had before
+  /// this field existed. Conceptually independent from a staff member's
+  /// UI language (see PRODUCT_BIBLE.md §28) — a Ukrainian-UI staff member
+  /// can generate a German-language contract for a German customer by
+  /// activating a `language: "de"` CONTRACT template.
+  language             String?
   /// Draft while being authored; at most one ACTIVE template per
-  /// (tenantId, documentType) — enforced transactionally in
+  /// (tenantId, documentType, language) — enforced transactionally in
   /// DocumentTemplatesService.activate (mirrors AssetFilesService's
   /// isPrimary-image enforcement) and by a partial unique index for
   /// defense in depth. Archived templates are retained for history but
@@ -1358,18 +1389,24 @@ model DocumentTemplateVersion {
   /// (see apps/api/src/documents/rendering/base-document.css) — null uses
   /// the base styling unmodified.
   css             String?
-  /// Declarative list of variable paths this template references, purely
-  /// for the template editor UI (shows which placeholders are in use /
-  /// available) — never validated against at render time, since the
-  /// variable system is deliberately open-ended (see Part 2 of ADR 0011).
+  /// Purely for the template editor UI, never validated against at render
+  /// time (the variable system is deliberately open-ended — see Part 2 of
+  /// ADR 0011). Historically an unused declarative variable-path list;
+  /// the no-code template builder repurposes this same column to persist
+  /// its block-editor structure as `{ editorFormat: "blocks-v1", blocks:
+  /// [...] }` so a template can be reopened for visual editing — a
+  /// template whose `variablesSchema` doesn't match that shape (including
+  /// every pre-existing template) simply opens in Advanced/Code mode,
+  /// which edits `htmlContent`/`css` directly exactly as before.
   variablesSchema Json?
 
   createdByUserId String
   createdAt       DateTime @default(now())
 
-  tenant        Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  template      DocumentTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  createdByUser User             @relation("DocumentTemplateVersionCreatedBy", fields: [createdByUserId], references: [id])
+  tenant                   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  template                 DocumentTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  createdByUser            User              @relation("DocumentTemplateVersionCreatedBy", fields: [createdByUserId], references: [id])
+  pinnedByDocumentVersions DocumentVersion[] @relation("DocumentVersionPinnedTemplateVersion")
 
   @@unique([templateId, versionNumber])
   @@index([tenantId, templateId])

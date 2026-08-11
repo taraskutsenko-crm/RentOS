@@ -26,7 +26,10 @@ import {
 } from "../../../../hooks/use-rentals";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatDate, formatDateTime } from "../../../../lib/date-format";
-import { getRentalDocumentChecklist } from "../../../../lib/document-completeness-intelligence";
+import {
+  CHECKLIST_ITEM_DOCUMENT_TYPE,
+  getRentalDocumentChecklist,
+} from "../../../../lib/document-completeness-intelligence";
 import { formatMoney } from "../../../../lib/money";
 import {
   estimateItemLineTotalMinor,
@@ -77,6 +80,7 @@ export default function RentalDetailPage() {
   const canStart = usePermission("rentals.start");
   const canReturnAction = usePermission("rentals.return");
   const canCancel = usePermission("rentals.cancel");
+  const canCreateDocument = usePermission("documents.create");
 
   usePageBreadcrumbs(
     rental
@@ -376,30 +380,50 @@ export default function RentalDetailPage() {
               </CardHeader>
               <CardContent>
                 <ul className="flex flex-col gap-2 text-sm">
-                  {getRentalDocumentChecklist(rental).map((item) => (
-                    <li key={item.key} className="flex items-center justify-between">
-                      <span>{t(`rental.documentChecklist.items.${item.key}`)}</span>
-                      <span
-                        className={
-                          item.state === "present"
-                            ? "text-success"
-                            : item.state === "missing"
-                              ? "text-warning"
-                              : "text-muted-foreground"
-                        }
-                      >
-                        {t(`rental.documentChecklist.states.${item.state}`)}
-                      </span>
-                    </li>
-                  ))}
+                  {getRentalDocumentChecklist(rental).map((item) => {
+                    const generateDocumentType = CHECKLIST_ITEM_DOCUMENT_TYPE[item.key];
+                    return (
+                      <li key={item.key} className="flex items-center justify-between">
+                        <span>{t(`rental.documentChecklist.items.${item.key}`)}</span>
+                        {item.state === "missing" && generateDocumentType && canCreateDocument ? (
+                          <Link
+                            href={`/app/documents/new?rentalId=${rental.id}&documentType=${generateDocumentType}`}
+                            className="text-primary text-sm hover:underline"
+                          >
+                            {t("rental.documentChecklist.generate")}
+                          </Link>
+                        ) : (
+                          <span
+                            className={
+                              item.state === "present"
+                                ? "text-success"
+                                : item.state === "missing"
+                                  ? "text-warning"
+                                  : "text-muted-foreground"
+                            }
+                          >
+                            {t(`rental.documentChecklist.states.${item.state}`)}
+                          </span>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </CardContent>
             </Card>
           )}
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t("rental.sections.documents")}</CardTitle>
+              {canCreateDocument && (
+                <Link
+                  href={`/app/documents/new?rentalId=${rental.id}`}
+                  className="text-primary text-sm hover:underline"
+                >
+                  {t("rental.documents.generate")}
+                </Link>
+              )}
             </CardHeader>
             <CardContent>
               {!rental.sourceQuote && rental.documents.length === 0 ? (

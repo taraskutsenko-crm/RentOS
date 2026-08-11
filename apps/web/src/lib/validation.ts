@@ -281,6 +281,7 @@ export const documentSchema = z
     title: z.string().max(200),
     customerId: z.string(),
     assetId: z.string(),
+    rentalId: z.string(),
   })
   .refine((data) => data.documentType !== "CUSTOM" || data.customTypeName.trim().length > 0, {
     path: ["customTypeName"],

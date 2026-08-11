@@ -446,10 +446,12 @@
       "documents": "Documents"
     },
     "documents": {
-      "empty": "No documents linked to this rental yet"
+      "empty": "No documents linked to this rental yet",
+      "generate": "Generate document"
     },
     "documentChecklist": {
       "title": "Document checklist",
+      "generate": "Generate",
       "items": {
         "commercialOffer": "Commercial offer",
         "contract": "Rental contract",
@@ -584,7 +586,8 @@
       "documents": "Documents"
     },
     "documents": {
-      "empty": "No documents linked to this quote yet"
+      "empty": "No documents linked to this quote yet",
+      "generate": "Generate document"
     },
     "summary": {
       "quoteValue": "Quote value",
@@ -755,6 +758,7 @@
       "createdAt": "Created",
       "customer": "Customer",
       "rental": "Rental",
+      "rentalHint": "Linking a rental makes its number, dates, price, and assets available to the document template.",
       "quote": "Quote",
       "asset": "Asset"
     },

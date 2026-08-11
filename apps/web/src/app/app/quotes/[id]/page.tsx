@@ -83,6 +83,7 @@ export default function QuoteDetailPage() {
   const canConvert = usePermission("quotes.convert");
   const canDuplicate = usePermission("quotes.duplicate");
   const canDownload = usePermission("quotes.download");
+  const canCreateDocument = usePermission("documents.create");
 
   if (isLoading) {
     return <p className="text-muted-foreground text-sm">{t("common.loading")}</p>;
@@ -414,8 +415,16 @@ export default function QuoteDetailPage() {
           </Card>
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t("quote.sections.documents")}</CardTitle>
+              {canCreateDocument && (
+                <Link
+                  href={`/app/documents/new?quoteId=${quote.id}&documentType=QUOTE`}
+                  className="text-primary text-sm hover:underline"
+                >
+                  {t("quote.documents.generate")}
+                </Link>
+              )}
             </CardHeader>
             <CardContent>
               {!quote.convertedRental && quote.platformDocuments.length === 0 ? (

@@ -91,8 +91,26 @@ export class DocumentsService {
   ): Promise<DocumentDetailView> {
     this.assertCustomTypeName(dto.documentType, dto.customTypeName);
     if (dto.customerId) await this.assertCustomerBelongsToTenant(tenantId, dto.customerId);
-    if (dto.rentalId) await this.assertRentalBelongsToTenant(tenantId, dto.rentalId);
-    if (dto.quoteId) await this.assertQuoteBelongsToTenant(tenantId, dto.quoteId);
+
+    // Fetching the Rental's own customerId/sourceQuoteId (rather than just
+    // checking existence) lets a document created from the Rental
+    // Workspace auto-inherit its customer and, when the Rental originated
+    // from a Quote, its source Quote too — real Quote -> Rental -> Contract
+    // traceability using the Document.quoteId FK that already exists,
+    // with zero new relation models (see DECISIONS.md D-060) — and it's
+    // what actually fixes the reported blank rental.number/total/start/end
+    // bug: those placeholders were only ever blank because nothing in the
+    // UI set rentalId at all, not because of a resolver/template defect.
+    let rental: { customerId: string; sourceQuoteId: string | null } | null = null;
+    if (dto.rentalId) {
+      rental = await this.prisma.rental.findFirst({
+        where: { id: dto.rentalId, tenantId, deletedAt: null },
+        select: { customerId: true, sourceQuoteId: true },
+      });
+      if (!rental) throw new NotFoundException("Rental not found");
+    }
+    const quoteId = dto.quoteId ?? rental?.sourceQuoteId ?? undefined;
+    if (quoteId) await this.assertQuoteBelongsToTenant(tenantId, quoteId);
     if (dto.assetId) await this.assertAssetBelongsToTenant(tenantId, dto.assetId);
     if (dto.employeeUserId) await this.assertUserIsTenantMember(tenantId, dto.employeeUserId);
     const items = dto.items ?? [];
@@ -114,11 +132,11 @@ export class DocumentsService {
           documentNumber,
           status: "DRAFT",
           title: dto.title ?? null,
-          customerId: dto.customerId ?? null,
+          customerId: dto.customerId ?? rental?.customerId ?? null,
           rentalId: dto.rentalId ?? null,
-          quoteId: dto.quoteId ?? null,
+          quoteId: quoteId ?? null,
           assetId: dto.assetId ?? null,
-          employeeUserId: dto.employeeUserId ?? null,
+          employeeUserId: dto.employeeUserId ?? actorUserId,
           currentVersionNumber: 1,
           createdByUserId: actorUserId,
         },

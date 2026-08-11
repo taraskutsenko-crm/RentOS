@@ -3,6 +3,23 @@ import type { RentalDocument, RentalSourceQuote, RentalStatus } from "../types/r
 export type DocumentChecklistItemKey =
   "commercialOffer" | "contract" | "handoverProtocol" | "returnProtocol";
 
+/**
+ * Which real Document.documentType each checklist row corresponds to —
+ * used to link a "missing" row straight to the "Generate document" flow
+ * (`/app/documents/new?rentalId=...&documentType=...`) pre-filled with the
+ * right type, turning the checklist from informational into actionable.
+ * `commercialOffer` has no entry: it is never "missing" (see below), only
+ * "present"/"notRequired", so there is nothing to generate for it here —
+ * a Quote is created from the Customer/Quotes workspace, not this page.
+ */
+export const CHECKLIST_ITEM_DOCUMENT_TYPE: Partial<
+  Record<DocumentChecklistItemKey, RentalDocument["documentType"]>
+> = {
+  contract: "CONTRACT",
+  handoverProtocol: "HANDOVER_PROTOCOL",
+  returnProtocol: "RETURN_PROTOCOL",
+};
+
 export type DocumentChecklistState = "present" | "missing" | "notRequired";
 
 export interface DocumentChecklistItem {

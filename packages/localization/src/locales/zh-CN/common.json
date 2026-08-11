@@ -446,7 +446,8 @@
       "documents": "文档"
     },
     "documents": {
-      "empty": "该租赁尚未关联任何文档"
+      "empty": "该租赁尚未关联任何文档",
+      "generate": "生成文档"
     },
     "documentChecklist": {
       "title": "文档核对清单",
@@ -460,7 +461,8 @@
         "present": "已关联",
         "missing": "缺失",
         "notRequired": "暂不需要"
-      }
+      },
+      "generate": "生成"
     },
     "timeIntelligence": {
       "starts_today": "今天开始",
@@ -584,7 +586,8 @@
       "documents": "文档"
     },
     "documents": {
-      "empty": "该报价单尚未关联任何文档"
+      "empty": "该报价单尚未关联任何文档",
+      "generate": "生成文档"
     },
     "summary": {
       "quoteValue": "报价金额",
@@ -756,7 +759,8 @@
       "customer": "客户",
       "rental": "租赁",
       "quote": "报价单",
-      "asset": "资产"
+      "asset": "资产",
+      "rentalHint": "关联租赁后，其编号、日期、价格和资产将可用于文档模板。"
     },
     "summary": {
       "total": "文档总数",

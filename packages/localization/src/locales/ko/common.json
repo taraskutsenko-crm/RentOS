@@ -446,7 +446,8 @@
       "documents": "문서"
     },
     "documents": {
-      "empty": "이 대여와 연결된 문서가 아직 없습니다"
+      "empty": "이 대여와 연결된 문서가 아직 없습니다",
+      "generate": "문서 생성"
     },
     "documentChecklist": {
       "title": "문서 체크리스트",
@@ -460,7 +461,8 @@
         "present": "연결됨",
         "missing": "누락됨",
         "notRequired": "아직 필요 없음"
-      }
+      },
+      "generate": "생성"
     },
     "timeIntelligence": {
       "starts_today": "오늘 시작",
@@ -584,7 +586,8 @@
       "documents": "문서"
     },
     "documents": {
-      "empty": "이 견적서와 연결된 문서가 아직 없습니다"
+      "empty": "이 견적서와 연결된 문서가 아직 없습니다",
+      "generate": "문서 생성"
     },
     "summary": {
       "quoteValue": "견적 금액",
@@ -756,7 +759,8 @@
       "customer": "고객",
       "rental": "대여",
       "quote": "견적서",
-      "asset": "자산"
+      "asset": "자산",
+      "rentalHint": "렌탈을 연결하면 번호, 날짜, 가격 및 자산이 문서 템플릿에서 사용 가능해집니다."
     },
     "summary": {
       "total": "총 문서 수",

@@ -446,7 +446,8 @@
       "documents": "ドキュメント"
     },
     "documents": {
-      "empty": "このレンタルに関連付けられたドキュメントはまだありません"
+      "empty": "このレンタルに関連付けられたドキュメントはまだありません",
+      "generate": "ドキュメントを生成"
     },
     "documentChecklist": {
       "title": "ドキュメントチェックリスト",
@@ -460,7 +461,8 @@
         "present": "関連付け済み",
         "missing": "未作成",
         "notRequired": "まだ不要"
-      }
+      },
+      "generate": "生成"
     },
     "timeIntelligence": {
       "starts_today": "本日開始",
@@ -584,7 +586,8 @@
       "documents": "ドキュメント"
     },
     "documents": {
-      "empty": "この見積書に関連付けられたドキュメントはまだありません"
+      "empty": "この見積書に関連付けられたドキュメントはまだありません",
+      "generate": "ドキュメントを生成"
     },
     "summary": {
       "quoteValue": "見積金額",
@@ -756,7 +759,8 @@
       "customer": "顧客",
       "rental": "レンタル",
       "quote": "見積書",
-      "asset": "資産"
+      "asset": "資産",
+      "rentalHint": "レンタルをリンクすると、その番号、日付、料金、資産がドキュメントテンプレートで利用できるようになります。"
     },
     "summary": {
       "total": "ドキュメント総数",

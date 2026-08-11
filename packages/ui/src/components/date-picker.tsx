@@ -153,7 +153,7 @@ export function DatePicker({
   function moveFocus(fromIndex: number, deltaDays: number) {
     const cells = gridRef.current?.querySelectorAll<HTMLButtonElement>("[data-day-cell]");
     if (!cells) return;
-    let targetIndex = fromIndex + deltaDays;
+    const targetIndex = fromIndex + deltaDays;
     if (targetIndex < 0 || targetIndex >= days.length) {
       // Crossed into an adjacent month — shift the view and keep going.
       setViewedMonth((current) => addMonths(current, deltaDays < 0 ? -1 : 1));

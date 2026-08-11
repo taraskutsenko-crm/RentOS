@@ -446,7 +446,8 @@
       "documents": "Documents"
     },
     "documents": {
-      "empty": "Aucun document lié à cette location pour l'instant"
+      "empty": "Aucun document lié à cette location pour l'instant",
+      "generate": "Générer un document"
     },
     "documentChecklist": {
       "title": "Liste de contrôle des documents",
@@ -460,7 +461,8 @@
         "present": "Lié",
         "missing": "Manquant",
         "notRequired": "Pas encore requis"
-      }
+      },
+      "generate": "Générer"
     },
     "timeIntelligence": {
       "starts_today": "Débute aujourd'hui",
@@ -584,7 +586,8 @@
       "documents": "Documents"
     },
     "documents": {
-      "empty": "Aucun document lié à ce devis pour l'instant"
+      "empty": "Aucun document lié à ce devis pour l'instant",
+      "generate": "Générer un document"
     },
     "summary": {
       "quoteValue": "Valeur du devis",
@@ -756,7 +759,8 @@
       "customer": "Client",
       "rental": "Location",
       "quote": "Devis",
-      "asset": "Actif"
+      "asset": "Actif",
+      "rentalHint": "Lier une location rend son numéro, ses dates, son prix et ses actifs disponibles dans le modèle de document."
     },
     "summary": {
       "total": "Total des documents",

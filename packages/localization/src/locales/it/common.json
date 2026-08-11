@@ -446,7 +446,8 @@
       "documents": "Documenti"
     },
     "documents": {
-      "empty": "Ancora nessun documento collegato a questo noleggio"
+      "empty": "Ancora nessun documento collegato a questo noleggio",
+      "generate": "Genera documento"
     },
     "documentChecklist": {
       "title": "Elenco documenti",
@@ -460,7 +461,8 @@
         "present": "Collegato",
         "missing": "Mancante",
         "notRequired": "Non ancora richiesto"
-      }
+      },
+      "generate": "Genera"
     },
     "timeIntelligence": {
       "starts_today": "Inizia oggi",
@@ -584,7 +586,8 @@
       "documents": "Documenti"
     },
     "documents": {
-      "empty": "Ancora nessun documento collegato a questo preventivo"
+      "empty": "Ancora nessun documento collegato a questo preventivo",
+      "generate": "Genera documento"
     },
     "summary": {
       "quoteValue": "Valore del preventivo",
@@ -756,7 +759,8 @@
       "customer": "Cliente",
       "rental": "Noleggio",
       "quote": "Preventivo",
-      "asset": "Bene"
+      "asset": "Bene",
+      "rentalHint": "Collegare un noleggio rende il suo numero, le date, il prezzo e i beni disponibili nel modello di documento."
     },
     "summary": {
       "total": "Documenti totali",

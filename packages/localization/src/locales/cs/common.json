@@ -446,7 +446,8 @@
       "documents": "Dokumenty"
     },
     "documents": {
-      "empty": "K tomuto pronájmu zatím nejsou přiřazeny žádné dokumenty"
+      "empty": "K tomuto pronájmu zatím nejsou přiřazeny žádné dokumenty",
+      "generate": "Vygenerovat dokument"
     },
     "documentChecklist": {
       "title": "Kontrolní seznam dokumentů",
@@ -460,7 +461,8 @@
         "present": "Přiřazeno",
         "missing": "Chybí",
         "notRequired": "Zatím nevyžadováno"
-      }
+      },
+      "generate": "Vygenerovat"
     },
     "timeIntelligence": {
       "starts_today": "Začíná dnes",
@@ -584,7 +586,8 @@
       "documents": "Dokumenty"
     },
     "documents": {
-      "empty": "K této nabídce zatím nejsou přiřazeny žádné dokumenty"
+      "empty": "K této nabídce zatím nejsou přiřazeny žádné dokumenty",
+      "generate": "Vygenerovat dokument"
     },
     "summary": {
       "quoteValue": "Hodnota nabídky",
@@ -756,7 +759,8 @@
       "customer": "Zákazník",
       "rental": "Pronájem",
       "quote": "Nabídka",
-      "asset": "Majetek"
+      "asset": "Majetek",
+      "rentalHint": "Propojení pronájmu zpřístupní jeho číslo, data, cenu a vybavení šabloně dokumentu."
     },
     "summary": {
       "total": "Celkem dokumentů",

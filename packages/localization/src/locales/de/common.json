@@ -446,7 +446,8 @@
       "documents": "Dokumente"
     },
     "documents": {
-      "empty": "Dieser Vermietung sind noch keine Dokumente zugeordnet"
+      "empty": "Dieser Vermietung sind noch keine Dokumente zugeordnet",
+      "generate": "Dokument erstellen"
     },
     "documentChecklist": {
       "title": "Dokumenten-Checkliste",
@@ -460,7 +461,8 @@
         "present": "Verknüpft",
         "missing": "Fehlt",
         "notRequired": "Noch nicht erforderlich"
-      }
+      },
+      "generate": "Generieren"
     },
     "timeIntelligence": {
       "starts_today": "Beginnt heute",
@@ -584,7 +586,8 @@
       "documents": "Dokumente"
     },
     "documents": {
-      "empty": "Diesem Angebot sind noch keine Dokumente zugeordnet"
+      "empty": "Diesem Angebot sind noch keine Dokumente zugeordnet",
+      "generate": "Dokument erstellen"
     },
     "summary": {
       "quoteValue": "Angebotswert",
@@ -756,7 +759,8 @@
       "customer": "Kunde",
       "rental": "Vermietung",
       "quote": "Angebot",
-      "asset": "Anlagegut"
+      "asset": "Anlagegut",
+      "rentalHint": "Durch die Verknüpfung einer Miete werden ihre Nummer, Daten, ihr Preis und ihre Assets in der Dokumentvorlage verfügbar."
     },
     "summary": {
       "total": "Dokumente gesamt",

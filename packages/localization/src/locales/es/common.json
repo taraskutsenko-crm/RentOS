@@ -446,7 +446,8 @@
       "documents": "Documentos"
     },
     "documents": {
-      "empty": "Todavía no hay documentos vinculados a este alquiler"
+      "empty": "Todavía no hay documentos vinculados a este alquiler",
+      "generate": "Generar documento"
     },
     "documentChecklist": {
       "title": "Lista de verificación de documentos",
@@ -460,7 +461,8 @@
         "present": "Vinculado",
         "missing": "Falta",
         "notRequired": "Aún no requerido"
-      }
+      },
+      "generate": "Generar"
     },
     "timeIntelligence": {
       "starts_today": "Comienza hoy",
@@ -584,7 +586,8 @@
       "documents": "Documentos"
     },
     "documents": {
-      "empty": "Todavía no hay documentos vinculados a este presupuesto"
+      "empty": "Todavía no hay documentos vinculados a este presupuesto",
+      "generate": "Generar documento"
     },
     "summary": {
       "quoteValue": "Valor del presupuesto",
@@ -756,7 +759,8 @@
       "customer": "Cliente",
       "rental": "Alquiler",
       "quote": "Presupuesto",
-      "asset": "Activo"
+      "asset": "Activo",
+      "rentalHint": "Vincular un alquiler pone su número, fechas, precio y activos a disposición de la plantilla del documento."
     },
     "summary": {
       "total": "Documentos totales",

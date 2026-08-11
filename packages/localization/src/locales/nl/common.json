@@ -446,7 +446,8 @@
       "documents": "Documenten"
     },
     "documents": {
-      "empty": "Nog geen documenten gekoppeld aan deze verhuur"
+      "empty": "Nog geen documenten gekoppeld aan deze verhuur",
+      "generate": "Document genereren"
     },
     "documentChecklist": {
       "title": "Documentenchecklist",
@@ -460,7 +461,8 @@
         "present": "Gekoppeld",
         "missing": "Ontbreekt",
         "notRequired": "Nog niet vereist"
-      }
+      },
+      "generate": "Genereren"
     },
     "timeIntelligence": {
       "starts_today": "Start vandaag",
@@ -584,7 +586,8 @@
       "documents": "Documenten"
     },
     "documents": {
-      "empty": "Nog geen documenten gekoppeld aan deze offerte"
+      "empty": "Nog geen documenten gekoppeld aan deze offerte",
+      "generate": "Document genereren"
     },
     "summary": {
       "quoteValue": "Offertewaarde",
@@ -756,7 +759,8 @@
       "customer": "Klant",
       "rental": "Verhuur",
       "quote": "Offerte",
-      "asset": "Bezit"
+      "asset": "Bezit",
+      "rentalHint": "Door een verhuur te koppelen, worden het nummer, de data, de prijs en de activa beschikbaar in de documentsjabloon."
     },
     "summary": {
       "total": "Totaal aantal documenten",

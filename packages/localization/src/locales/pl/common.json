@@ -446,7 +446,8 @@
       "documents": "Dokumenty"
     },
     "documents": {
-      "empty": "Do tego wynajmu nie przypisano jeszcze żadnych dokumentów"
+      "empty": "Do tego wynajmu nie przypisano jeszcze żadnych dokumentów",
+      "generate": "Generuj dokument"
     },
     "documentChecklist": {
       "title": "Lista kontrolna dokumentów",
@@ -460,7 +461,8 @@
         "present": "Powiązany",
         "missing": "Brak",
         "notRequired": "Jeszcze niewymagany"
-      }
+      },
+      "generate": "Generuj"
     },
     "timeIntelligence": {
       "starts_today": "Rozpoczyna się dzisiaj",
@@ -584,7 +586,8 @@
       "documents": "Dokumenty"
     },
     "documents": {
-      "empty": "Do tej oferty nie przypisano jeszcze żadnych dokumentów"
+      "empty": "Do tej oferty nie przypisano jeszcze żadnych dokumentów",
+      "generate": "Generuj dokument"
     },
     "summary": {
       "quoteValue": "Wartość oferty",
@@ -756,7 +759,8 @@
       "customer": "Klient",
       "rental": "Wynajem",
       "quote": "Oferta",
-      "asset": "Zasób"
+      "asset": "Zasób",
+      "rentalHint": "Powiązanie wynajmu udostępnia jego numer, daty, cenę i zasoby w szablonie dokumentu."
     },
     "summary": {
       "total": "Wszystkie dokumenty",

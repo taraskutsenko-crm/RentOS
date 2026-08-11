@@ -733,7 +733,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .expect(200);
     await request(app.getHttpServer())
-      .post(`/tenants/${tenantId}/document-templates/${active.body[0].id}/activate`)
+      .post(`/tenants/${tenantId}/document-templates/${active.body.items[0].id}/activate`)
       .set("Cookie", accessCookie)
       .send({})
       .expect(201);
@@ -780,7 +780,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .expect(200);
     await request(app.getHttpServer())
-      .post(`/tenants/${tenantId}/document-templates/${templates.body[0].id}/activate`)
+      .post(`/tenants/${tenantId}/document-templates/${templates.body.items[0].id}/activate`)
       .set("Cookie", accessCookie)
       .send({})
       .expect(201);
@@ -839,7 +839,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .expect(200);
     await request(app.getHttpServer())
-      .post(`/tenants/${tenantId}/document-templates/${templates.body[0].id}/activate`)
+      .post(`/tenants/${tenantId}/document-templates/${templates.body.items[0].id}/activate`)
       .set("Cookie", accessCookie)
       .send({})
       .expect(201);

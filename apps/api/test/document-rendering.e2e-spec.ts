@@ -723,9 +723,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
         customerId: customer.body.id,
         plannedStart: "2027-01-10T09:30:00.000Z",
         plannedEnd: "2027-01-12T17:00:00.000Z",
-        items: [
-          { assetId, billingMode: "DAILY", dailyPriceMinor: 5000, depositMinor: 10000 },
-        ],
+        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 5000, depositMinor: 10000 }],
       })
       .expect(201);
 
@@ -749,7 +747,9 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .expect(200);
 
-    expect(preview.body.html).toContain("HRB 12345|DE123456789|Musterstrasse 1, Berlin|+49 30 1234567");
+    expect(preview.body.html).toContain(
+      "HRB 12345|DE123456789|Musterstrasse 1, Berlin|+49 30 1234567",
+    );
     expect(preview.body.html).toContain("DE999999999");
     expect(preview.body.html).toContain("$100.00");
     expect(preview.body.html).toContain("Generator A");

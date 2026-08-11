@@ -999,6 +999,61 @@ let a user select an end date before the chosen start date.
 side-by-side range layout, which doesn't fit a small viewport);
 otherwise the same bottom-sheet treatment as Dropdowns.
 
+**Status:** built (`packages/ui/src/components/date-picker.tsx`,
+`DatePicker`) — single-date mode only; Rental/Quote planned start/end
+each use two independent `DatePicker`s (paired with a Time picker, see
+below) rather than one range picker, since start and end are two
+separate fields with independent validation, not one atomic range
+selection.
+
+---
+
+## Time pickers
+
+**Purpose:** select a time of day (Rental/Quote planned start/end,
+alongside their date — see Date pickers above).
+
+**When to use:** any time-of-day input — never a bare free-text time
+field as the _only_ way to set a value.
+
+**When NOT to use:** N/A — every rental/quote start/end already
+carries a real time component in the database (`DateTime`, not
+date-only); this pattern is the UI catching up to data that already
+existed.
+
+**Visual behavior:** a `--shadow-popover` list of every 15-minute slot
+in the day ("00:00" through "23:45"), the current value highlighted in
+`Primary`, plus a small free-text "HH:MM" field pinned above the list
+for a precise value not on the 15-minute grid (e.g. a delivery agreed
+at 09:10) — selecting from the list is the primary interaction; typing
+is the deliberate escape hatch, not the default path.
+
+**Keyboard behavior:** `Tab` reaches the free-text field first, then
+the list; `Enter` in the text field commits a valid `HH:MM` value and
+closes; clicking/`Enter`-ing a list row selects it and closes;
+`Escape` closes without changing the value.
+
+**Loading state:** N/A — pure client-side, no fetch.
+
+**Empty state:** N/A.
+
+**Error state:** an unparsable free-text value is simply never
+committed (the picker keeps showing the last valid value) rather than
+surfacing a separate error state.
+
+**Disabled state:** matches `Input`'s existing disabled treatment;
+also auto-disabled while its paired date field has no value yet (there
+is nothing to combine a time with).
+
+**Mobile behavior:** same bottom-sheet treatment as Dropdowns/Date
+pickers.
+
+**Status:** built (`packages/ui/src/components/time-picker.tsx`,
+`TimePicker`, paired with `DatePicker` via
+`packages/ui/src/components/date-time-field.tsx`'s `DateTimeField` —
+used by the Rental/Quote wizards in place of the previous raw
+`<input type="datetime-local">`).
+
 ---
 
 ## File upload

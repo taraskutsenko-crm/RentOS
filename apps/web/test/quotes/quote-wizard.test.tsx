@@ -68,14 +68,21 @@ describe("QuoteWizard", () => {
   it("shows assets on the assets step after selecting a customer and dates", async () => {
     setup();
     const user = userEvent.setup();
-    renderWithProviders(<QuoteWizard tenantId="tenant-1" onSubmit={vi.fn()} isPending={false} />);
+    renderWithProviders(
+      <QuoteWizard
+        tenantId="tenant-1"
+        onSubmit={vi.fn()}
+        isPending={false}
+        initialValues={{
+          plannedStart: "2026-08-01T00:00",
+          plannedEnd: "2026-08-04T00:00",
+          validUntil: "2026-09-01T00:00",
+        }}
+      />,
+    );
 
     await user.click(screen.getByLabelText("Jane Doe"));
     await user.click(screen.getByRole("button", { name: /next/i })); // -> dates
-
-    await user.type(screen.getByLabelText(/planned start/i), "2026-08-01T00:00");
-    await user.type(screen.getByLabelText(/planned end/i), "2026-08-04T00:00");
-    await user.type(screen.getByLabelText(/valid until/i), "2026-09-01T00:00");
     await user.click(screen.getByRole("button", { name: /next/i })); // -> assets
 
     expect(await screen.findByText(/generator a/i)).toBeInTheDocument();
@@ -84,14 +91,21 @@ describe("QuoteWizard", () => {
   it("adds a non-asset service line item on the services step", async () => {
     setup();
     const user = userEvent.setup();
-    renderWithProviders(<QuoteWizard tenantId="tenant-1" onSubmit={vi.fn()} isPending={false} />);
+    renderWithProviders(
+      <QuoteWizard
+        tenantId="tenant-1"
+        onSubmit={vi.fn()}
+        isPending={false}
+        initialValues={{
+          plannedStart: "2026-08-01T00:00",
+          plannedEnd: "2026-08-04T00:00",
+          validUntil: "2026-09-01T00:00",
+        }}
+      />,
+    );
 
     await user.click(screen.getByLabelText("Jane Doe"));
-    await goToStep(user, 1); // -> dates
-    await user.type(screen.getByLabelText(/planned start/i), "2026-08-01T00:00");
-    await user.type(screen.getByLabelText(/planned end/i), "2026-08-04T00:00");
-    await user.type(screen.getByLabelText(/valid until/i), "2026-09-01T00:00");
-    await goToStep(user, 2); // -> assets -> services
+    await goToStep(user, 3); // -> dates -> assets -> services
 
     await user.click(screen.getByRole("button", { name: /add product or service/i }));
 
@@ -101,14 +115,21 @@ describe("QuoteWizard", () => {
   it("shows a daily-price field and the CALENDAR_MONTH breakdown for a MONTHLY asset item", async () => {
     setup();
     const user = userEvent.setup();
-    renderWithProviders(<QuoteWizard tenantId="tenant-1" onSubmit={vi.fn()} isPending={false} />);
+    renderWithProviders(
+      <QuoteWizard
+        tenantId="tenant-1"
+        onSubmit={vi.fn()}
+        isPending={false}
+        initialValues={{
+          plannedStart: "2031-01-15T00:00",
+          plannedEnd: "2031-03-20T00:00",
+          validUntil: "2031-04-01T00:00",
+        }}
+      />,
+    );
 
     await user.click(screen.getByLabelText("Jane Doe"));
-    await goToStep(user, 1); // -> dates
-    await user.type(screen.getByLabelText(/planned start/i), "2031-01-15T00:00");
-    await user.type(screen.getByLabelText(/planned end/i), "2031-03-20T00:00");
-    await user.type(screen.getByLabelText(/valid until/i), "2031-04-01T00:00");
-    await goToStep(user, 1); // -> assets
+    await goToStep(user, 2); // -> dates -> assets
 
     await user.click(await screen.findByRole("checkbox"));
     await goToStep(user, 2); // -> services -> pricing

@@ -1,7 +1,16 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, AlertDescription, Button, Card, CardContent, Input, Label } from "@rentos/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  DateTimeField,
+  Input,
+  Label,
+} from "@rentos/ui";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -77,7 +86,7 @@ export function RentalWizard({
   isPending,
   errorMessage,
 }: RentalWizardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [stepIndex, setStepIndex] = useState(0);
   const [items, setItems] = useState<RentalItemFormValues[]>(initialItems ?? []);
   const [assetSearch, setAssetSearch] = useState("");
@@ -87,6 +96,7 @@ export function RentalWizard({
     register,
     watch,
     trigger,
+    setValue,
     formState: { errors },
   } = useForm<RentalFormValues>({
     resolver: zodResolver(rentalSchema),
@@ -308,11 +318,28 @@ export function RentalWizard({
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="plannedStart">{t("rental.fields.plannedStart")}</Label>
-                <Input id="plannedStart" type="datetime-local" {...register("plannedStart")} />
+                <DateTimeField
+                  id="plannedStart"
+                  value={values.plannedStart}
+                  onChange={(value) =>
+                    setValue("plannedStart", value, { shouldValidate: true, shouldDirty: true })
+                  }
+                  locale={i18n.language}
+                  aria-invalid={!!errors.plannedStart}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="plannedEnd">{t("rental.fields.plannedEnd")}</Label>
-                <Input id="plannedEnd" type="datetime-local" {...register("plannedEnd")} />
+                <DateTimeField
+                  id="plannedEnd"
+                  value={values.plannedEnd}
+                  onChange={(value) =>
+                    setValue("plannedEnd", value, { shouldValidate: true, shouldDirty: true })
+                  }
+                  locale={i18n.language}
+                  minDate={values.plannedStart ? values.plannedStart.slice(0, 10) : undefined}
+                  aria-invalid={!!errors.plannedEnd}
+                />
               </div>
             </div>
             {errors.plannedStart && (

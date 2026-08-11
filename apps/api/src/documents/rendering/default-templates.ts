@@ -81,24 +81,100 @@ const assetSection = `
     </table>
   </div>`;
 
-const rentalSummarySection = `
-  <div class="doc-section">
-    <div class="doc-section__title">Rental</div>
-    <div class="doc-card">
-      <div class="doc-grid">
-        <div class="doc-field"><div class="doc-field__label">Rental number</div><div class="doc-field__value">{{rental.number}}</div></div>
-        <div class="doc-field"><div class="doc-field__label">Total</div><div class="doc-field__value">{{rental.total}}</div></div>
-        <div class="doc-field"><div class="doc-field__label">Start</div><div class="doc-field__value">{{rental.start}}</div></div>
-        <div class="doc-field"><div class="doc-field__label">End</div><div class="doc-field__value">{{rental.end}}</div></div>
-      </div>
-    </div>
-  </div>`;
-
 const notesSection = `
   <div class="doc-section">
     <div class="doc-section__title">Notes</div>
     <p class="doc-notes">{{notes}}</p>
   </div>`;
+
+/**
+ * Generic, tenant-editable clause text, not jurisdiction-specific legal
+ * advice — see PRODUCT_BIBLE §28's existing scope boundary (Havelio ships
+ * a customizable business document, never a guaranteed-compliant legal
+ * contract). Every tenant can edit this content freely once the no-code
+ * builder (Part E) ships; this is the starting point, not a final text.
+ */
+function contractClauseSection(title: string, html: string): string {
+  return `
+  <div class="doc-section">
+    <div class="doc-section__title">${title}</div>
+    ${html}
+  </div>`;
+}
+
+/** The 18-section professional Rental Contract body — see docs/UI_REDESIGN_PLAN.md Pre-Chapter 10 section. */
+const rentalContractBody = `${partiesSection}
+  <div class="doc-section">
+    <div class="doc-section__title">Subject of the Contract — Rented Assets</div>
+    {{rental.assetsTableHtml}}
+  </div>
+  <div class="doc-section">
+    <div class="doc-section__title">Rental Period</div>
+    <div class="doc-card">
+      <div class="doc-grid">
+        <div class="doc-field"><div class="doc-field__label">Start</div><div class="doc-field__value">{{rental.startDateTime}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">End</div><div class="doc-field__value">{{rental.endDateTime}}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-section">
+    <div class="doc-section__title">Price</div>
+    <div class="doc-card">
+      <div class="doc-grid">
+        <div class="doc-field"><div class="doc-field__label">Rental total</div><div class="doc-field__value">{{rental.total}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">Security deposit</div><div class="doc-field__value">{{rental.deposit}}</div></div>
+      </div>
+    </div>
+  </div>
+  ${contractClauseSection(
+    "Payment Terms",
+    `<p class="doc-clause">The Customer agrees to pay the Rental total of {{rental.total}} according to the payment schedule agreed with {{company.name}}. Any security deposit stated above is held for the duration of the rental and is refundable subject to the return conditions described below.</p>`,
+  )}
+  ${contractClauseSection(
+    "Delivery and Handover",
+    `<p class="doc-clause">The rented assets are handed over to the Customer at the start of the Rental Period in the condition recorded in the accompanying Handover Protocol, if one is issued. The Customer is responsible for inspecting the assets at handover and reporting any pre-existing damage immediately.</p>`,
+  )}
+  ${contractClauseSection(
+    "Return",
+    `<p class="doc-clause">The Customer must return the rented assets to {{company.name}} by the End of the Rental Period stated above, in the same condition as received, ordinary wear and tear excepted. Condition at return is recorded in the accompanying Return Protocol, if one is issued.</p>`,
+  )}
+  ${contractClauseSection(
+    "Customer Responsibilities",
+    `<p class="doc-clause">The Customer shall use the rented assets only for their intended purpose, in accordance with any operating instructions provided, and shall not sublet, lend, or transfer the assets to any third party without {{company.name}}'s prior written consent.</p>`,
+  )}
+  ${contractClauseSection(
+    "Damage and Loss",
+    `<p class="doc-clause">The Customer is responsible for any damage to or loss of the rented assets occurring during the Rental Period, beyond ordinary wear and tear, and agrees to reimburse {{company.name}} for repair or replacement costs as documented in a Damage Report.</p>`,
+  )}
+  ${contractClauseSection(
+    "Late Return",
+    `<p class="doc-clause">If the rented assets are not returned by the End of the Rental Period, {{company.name}} may charge an additional fee for each day of late return, and reserves the right to recover the assets at the Customer's expense.</p>`,
+  )}
+  ${contractClauseSection(
+    "Non-Payment",
+    `<p class="doc-clause">If any amount due under this Contract is not paid when due, {{company.name}} reserves the right to suspend the rental, withhold the security deposit, and pursue collection of the outstanding balance.</p>`,
+  )}
+  ${contractClauseSection(
+    "Termination",
+    `<p class="doc-clause">Either party may terminate this Contract early by written notice in the event the other party materially breaches its obligations under this Contract and fails to remedy that breach within a reasonable period after notice.</p>`,
+  )}
+  ${contractClauseSection(
+    "Additional Costs",
+    `<p class="doc-clause">Costs not included in the Rental total above — such as delivery, collection, fuel, cleaning, or consumables — are the Customer's responsibility and will be invoiced separately unless otherwise agreed in writing.</p>`,
+  )}
+  ${contractClauseSection(
+    "Notices",
+    `<p class="doc-clause">Any notice under this Contract shall be sent to {{company.name}} at {{company.address}} or to the Customer at the address stated above.</p>`,
+  )}
+  ${contractClauseSection(
+    "Applicable Terms and Jurisdiction",
+    `<p class="doc-clause">This Contract is governed by the terms agreed between the parties. Any dispute arising from this Contract shall be resolved in accordance with the jurisdiction applicable to {{company.name}}, as customized by {{company.name}} for this template.</p>`,
+  )}
+  ${contractClauseSection(
+    "Additional Conditions",
+    `<p class="doc-clause">Any additional conditions specific to this rental can be added here.</p>
+    <p class="doc-notes">{{notes}}</p>`,
+  )}`;
 
 export const DEFAULT_TEMPLATES: Record<DocumentType, DefaultTemplate> = {
   QUOTE: {
@@ -118,11 +194,7 @@ export const DEFAULT_TEMPLATES: Record<DocumentType, DefaultTemplate> = {
   },
   CONTRACT: {
     title: "Rental Contract",
-    htmlContent: documentShell(
-      "Rental Contract",
-      "{{rental.number}}",
-      `${partiesSection}${assetSection}${rentalSummarySection}${notesSection}`,
-    ),
+    htmlContent: documentShell("Rental Contract", "{{rental.number}}", rentalContractBody),
   },
   HANDOVER_PROTOCOL: {
     title: "Handover Protocol",

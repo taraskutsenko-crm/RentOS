@@ -258,7 +258,7 @@ export class VariableResolverService {
       .join("");
 
     return (
-      `<table class="doc-variable-table"><thead><tr>` +
+      `<table class="doc-table"><thead><tr>` +
       `<th>${escapeHtml(labels.asset)}</th><th>${escapeHtml(labels.quantity)}</th><th>${escapeHtml(labels.unitPrice)}</th>` +
       `</tr></thead><tbody>${rows}</tbody></table>`
     );
@@ -295,7 +295,7 @@ export class VariableResolverService {
       .join("");
 
     return (
-      `<table class="doc-variable-table"><thead><tr>` +
+      `<table class="doc-table"><thead><tr>` +
       `<th>${escapeHtml(labels.service)}</th><th>${escapeHtml(labels.quantity)}</th><th>${escapeHtml(labels.total)}</th>` +
       `</tr></thead><tbody>${rows}</tbody></table>`
     );

@@ -214,4 +214,16 @@ table.doc-table tr:last-child td {
   white-space: pre-wrap;
   color: var(--doc-ink-muted);
 }
+
+.doc-clause {
+  color: var(--doc-ink-muted);
+  margin: 0;
+}
+
+/* Keeps a clause/table row from being split across a PDF page boundary
+   (TASK-0008 Part 2 follow-up: the 18-section contract template). */
+.doc-section,
+table.doc-table tr {
+  page-break-inside: avoid;
+}
 `;

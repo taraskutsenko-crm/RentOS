@@ -218,6 +218,39 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     expect(preview.body.html).toContain("Handle with care");
   });
 
+  it("built-in default CONTRACT template renders all 18 sections", async () => {
+    const created = await createDocument().expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${created.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    const expectedSections = [
+      "Rental Contract", // 1. Title
+      "Parties", // 2.
+      "Subject of the Contract", // 3.
+      "Rental Period", // 4.
+      "Price", // 5.
+      "Payment Terms", // 6.
+      "Delivery and Handover", // 7.
+      "Return", // 8.
+      "Customer Responsibilities", // 9.
+      "Damage and Loss", // 10.
+      "Late Return", // 11.
+      "Non-Payment", // 12.
+      "Termination", // 13.
+      "Additional Costs", // 14.
+      "Notices", // 15.
+      "Applicable Terms and Jurisdiction", // 16.
+      "Additional Conditions", // 17.
+      // 18. Signatures — rendered by the shared documentShell, checked separately below.
+    ];
+    for (const section of expectedSections) {
+      expect(preview.body.html).toContain(section);
+    }
+    expect(preview.body.html).toContain("doc-signature-block");
+  });
+
   it("renders the tenant's ACTIVE template instead of the built-in default once one is activated", async () => {
     const template = await createTemplate({
       name: "Branded Contract",

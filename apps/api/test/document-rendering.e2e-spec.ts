@@ -662,4 +662,198 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     expect(actions).toContain("document.email_sent");
     expect(actions).toContain("document.signature_requested");
   }, 30000);
+
+  // ---------------------------------------------------------------------
+  // Variable resolver extensions (Pre-Chapter 10 Part C)
+  // ---------------------------------------------------------------------
+
+  const RESOLVER_TEMPLATE_HTML =
+    '<div class="doc-page">' +
+    "<p>{{company.registrationNumber}}|{{company.taxNumber}}|{{company.address}}|{{company.phone}}</p>" +
+    "<p>{{customer.taxNumber}}</p>" +
+    "<p>{{rental.startTime}}|{{rental.endTime}}|{{rental.deposit}}</p>" +
+    "{{rental.assetsTableHtml}}" +
+    "{{quote.servicesTableHtml}}" +
+    "</div>";
+
+  async function createAssetCategory() {
+    const response = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/asset-categories`)
+      .set("Cookie", accessCookie)
+      .send({ name: "Generators" })
+      .expect(201);
+    return response.body.id as string;
+  }
+
+  async function createAsset(categoryId: string, name: string, internalNumber: string) {
+    const response = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/assets`)
+      .set("Cookie", accessCookie)
+      .send({ name, internalNumber, categoryId })
+      .expect(201);
+    return response.body.id as string;
+  }
+
+  it("resolves company/customer identity fields and rental time/deposit variables", async () => {
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .send({
+        name: "Acme Rentals",
+        registrationNumber: "HRB 12345",
+        taxNumber: "DE123456789",
+        address: "Musterstrasse 1, Berlin",
+        phone: "+49 30 1234567",
+      })
+      .expect(200);
+
+    const customer = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/customers`)
+      .set("Cookie", accessCookie)
+      .send({ firstName: "Vat", lastName: "Customer", vatNumber: "DE999999999" })
+      .expect(201);
+
+    const categoryId = await createAssetCategory();
+    const assetId = await createAsset(categoryId, "Generator A", "GEN-0001");
+
+    const rental = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId: customer.body.id,
+        plannedStart: "2027-01-10T09:30:00.000Z",
+        plannedEnd: "2027-01-12T17:00:00.000Z",
+        items: [
+          { assetId, billingMode: "DAILY", dailyPriceMinor: 5000, depositMinor: 10000 },
+        ],
+      })
+      .expect(201);
+
+    await createTemplate({ htmlContent: RESOLVER_TEMPLATE_HTML }).expect(201);
+    const active = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/document-templates`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${active.body[0].id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const document = await createDocument({
+      customerId: customer.body.id,
+      rentalId: rental.body.id,
+    }).expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(preview.body.html).toContain("HRB 12345|DE123456789|Musterstrasse 1, Berlin|+49 30 1234567");
+    expect(preview.body.html).toContain("DE999999999");
+    expect(preview.body.html).toContain("$100.00");
+    expect(preview.body.html).toContain("Generator A");
+  });
+
+  it("builds rental.assetsTableHtml with one row per rental item and empty string when there is no rental", async () => {
+    const categoryId = await createAssetCategory();
+    const assetAId = await createAsset(categoryId, "Generator A", "GEN-A");
+    const assetBId = await createAsset(categoryId, "Ladder B", "LAD-B");
+
+    const rental = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId,
+        plannedStart: "2027-01-10T09:00:00.000Z",
+        plannedEnd: "2027-01-12T09:00:00.000Z",
+        items: [
+          { assetId: assetAId, billingMode: "DAILY", dailyPriceMinor: 5000 },
+          { assetId: assetBId, billingMode: "WEEKLY", weeklyPriceMinor: 3000 },
+        ],
+      })
+      .expect(201);
+
+    await createTemplate({ htmlContent: "<div>{{rental.assetsTableHtml}}</div>" }).expect(201);
+    const templates = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/document-templates`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templates.body[0].id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const withRental = await createDocument({ customerId, rentalId: rental.body.id }).expect(201);
+    const previewWithRental = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${withRental.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(previewWithRental.body.html).toContain("Generator A");
+    expect(previewWithRental.body.html).toContain("Ladder B");
+    expect(previewWithRental.body.html).toContain("<table");
+
+    const withoutRental = await createDocument({ customerId }).expect(201);
+    const previewWithoutRental = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${withoutRental.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(previewWithoutRental.body.html).not.toContain("<table");
+  });
+
+  it("builds quote.servicesTableHtml from non-ASSET quote items only, escaping cell content", async () => {
+    const categoryId = await createAssetCategory();
+    const assetId = await createAsset(categoryId, "Generator A", "GEN-Q");
+
+    const quote = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId,
+        validUntil: "2027-02-01T00:00:00.000Z",
+        plannedStart: "2027-01-10T00:00:00.000Z",
+        plannedEnd: "2027-01-12T00:00:00.000Z",
+        items: [
+          {
+            itemType: "ASSET",
+            assetId,
+            name: "Generator A",
+            billingMode: "DAILY",
+            dailyPriceMinor: 5000,
+          },
+          {
+            itemType: "SERVICE",
+            name: '<img src=x onerror="alert(1)">',
+            billingMode: "FLAT",
+            unitPriceMinor: 2000,
+            quantity: 1,
+          },
+        ],
+      })
+      .expect(201);
+
+    await createTemplate({ htmlContent: "<div>{{quote.servicesTableHtml}}</div>" }).expect(201);
+    const templates = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/document-templates`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templates.body[0].id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const document = await createDocument({ customerId, quoteId: quote.body.id }).expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(preview.body.html).toContain("<table");
+    expect(preview.body.html).not.toContain("Generator A");
+    expect(preview.body.html).not.toContain("<img src=x onerror");
+    expect(preview.body.html).toContain("&lt;img src=x onerror=");
+    expect(preview.body.html).toContain("$20.00");
+  });
 });

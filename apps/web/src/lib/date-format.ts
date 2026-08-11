@@ -12,16 +12,34 @@ function toDate(value: Date | string | number): Date {
   return value instanceof Date ? value : new Date(value);
 }
 
-/** e.g. "8/10/2026" (en) / "10.08.2026" (de) — locale-appropriate digits only. */
-export function formatDate(value: Date | string | number, locale: string): string {
-  return new Intl.DateTimeFormat(locale).format(toDate(value));
+/**
+ * e.g. "8/10/2026" (en) / "10.08.2026" (de) — locale-appropriate digits
+ * only. `timeZone` is optional (mirrors `formatMoney`'s explicit-currency
+ * pattern) — omitted, `Intl` falls back to the executing browser's local
+ * timezone exactly as before this parameter existed. Pass the tenant's own
+ * `Tenant.timezone` (already used server-side by quote-pdf.service.ts/
+ * variable-resolver.service.ts) wherever a Rental/Quote date is displayed,
+ * so the web app agrees with the PDF instead of silently using whichever
+ * timezone the viewing browser happens to be in (see DECISIONS.md).
+ */
+export function formatDate(
+  value: Date | string | number,
+  locale: string,
+  timeZone?: string,
+): string {
+  return new Intl.DateTimeFormat(locale, timeZone ? { timeZone } : undefined).format(toDate(value));
 }
 
-/** Date + time, e.g. "8/10/2026, 2:30 PM". */
-export function formatDateTime(value: Date | string | number, locale: string): string {
+/** Date + time, e.g. "8/10/2026, 2:30 PM". See `formatDate` for `timeZone`. */
+export function formatDateTime(
+  value: Date | string | number,
+  locale: string,
+  timeZone?: string,
+): string {
   return new Intl.DateTimeFormat(locale, {
     dateStyle: "short",
     timeStyle: "short",
+    ...(timeZone ? { timeZone } : {}),
   }).format(toDate(value));
 }
 

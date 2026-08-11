@@ -12,7 +12,7 @@ import { PageHeader } from "../../../../components/shell/page-header";
 import { PinButton } from "../../../../components/shell/pin-button";
 import { Timeline } from "../../../../components/timeline/timeline";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
-import { usePermission } from "../../../../hooks/use-current-tenant-role";
+import { usePermission, useTenantTimezone } from "../../../../hooks/use-current-tenant-role";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
   quotePdfUrl,
@@ -84,6 +84,7 @@ export default function QuoteDetailPage() {
   const canDuplicate = usePermission("quotes.duplicate");
   const canDownload = usePermission("quotes.download");
   const canCreateDocument = usePermission("documents.create");
+  const timeZone = useTenantTimezone();
 
   if (isLoading) {
     return <p className="text-muted-foreground text-sm">{t("common.loading")}</p>;
@@ -145,7 +146,8 @@ export default function QuoteDetailPage() {
               {t(`quote.validityIntelligence.${validity.kind}`, { count: validity.days })}
             </span>
             <span className="text-muted-foreground">
-              {t("quote.fields.validUntil")}: {formatDate(quote.validUntil, i18n.language)}
+              {t("quote.fields.validUntil")}:{" "}
+              {formatDate(quote.validUntil, i18n.language, timeZone)}
             </span>
           </div>
         }
@@ -303,19 +305,19 @@ export default function QuoteDetailPage() {
             <CardContent className="grid grid-cols-2 gap-3 text-sm">
               <InfoRow
                 label={t("rental.fields.plannedStart")}
-                value={formatDateTime(quote.plannedStart, i18n.language)}
+                value={formatDateTime(quote.plannedStart, i18n.language, timeZone)}
               />
               <InfoRow
                 label={t("rental.fields.plannedEnd")}
-                value={formatDateTime(quote.plannedEnd, i18n.language)}
+                value={formatDateTime(quote.plannedEnd, i18n.language, timeZone)}
               />
               <InfoRow
                 label={t("quote.fields.issueDate")}
-                value={formatDate(quote.issueDate, i18n.language)}
+                value={formatDate(quote.issueDate, i18n.language, timeZone)}
               />
               <InfoRow
                 label={t("quote.fields.validUntil")}
-                value={formatDateTime(quote.validUntil, i18n.language)}
+                value={formatDateTime(quote.validUntil, i18n.language, timeZone)}
               />
               <InfoRow label={t("quote.fields.customerNotes")} value={quote.customerNotes ?? "—"} />
               <InfoRow
@@ -505,6 +507,7 @@ export default function QuoteDetailPage() {
               isLoading={!timeline}
               emptyLabel={t("timeline.empty")}
               searchPlaceholder={t("timeline.searchPlaceholder")}
+              timeZone={timeZone}
               getHref={(event) =>
                 event.type === "converted" && quote.convertedRental
                   ? `/app/rentals/${quote.convertedRental.id}`

@@ -22,3 +22,16 @@ export function usePermission(permission: Permission): boolean {
   const { data } = useCurrentTenantRole();
   return roleHasPermission(data?.role, permission);
 }
+
+/**
+ * The tenant's own IANA timezone, for displaying Rental/Quote/Document
+ * dates the same way regardless of which timezone the viewing browser
+ * happens to be in — matching what quote-pdf.service.ts/variable-resolver
+ * .service.ts already do server-side (see DECISIONS.md). `undefined` while
+ * loading/absent lets every `formatDate`/`formatDateTime` call site fall
+ * back to the browser's local timezone exactly as before this existed.
+ */
+export function useTenantTimezone(): string | undefined {
+  const { data } = useCurrentTenantRole();
+  return data?.tenant.timezone;
+}

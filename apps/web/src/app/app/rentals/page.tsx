@@ -16,7 +16,7 @@ import {
   type DataTableColumn,
 } from "../../../components/data-table";
 import { useCurrentTenantId } from "../../../hooks/use-current-tenant";
-import { usePermission } from "../../../hooks/use-current-tenant-role";
+import { usePermission, useTenantTimezone } from "../../../hooks/use-current-tenant-role";
 import { useRentals } from "../../../hooks/use-rentals";
 import { formatDate } from "../../../lib/date-format";
 import { formatMoney } from "../../../lib/money";
@@ -37,6 +37,7 @@ export default function RentalsPage() {
   const [tenantId] = useCurrentTenantId();
 
   const canCreate = usePermission("rentals.create");
+  const timeZone = useTenantTimezone();
   const table = useDataTableState({ initialSortBy: "createdAt", initialSortDirection: "desc" });
   const [status, setStatus] = useState<RentalStatus | "">("");
 
@@ -73,13 +74,13 @@ export default function RentalsPage() {
       id: "plannedStart",
       header: t("rental.fields.plannedStart"),
       sortable: true,
-      cell: (rental) => formatDate(rental.plannedStart, i18n.language),
+      cell: (rental) => formatDate(rental.plannedStart, i18n.language, timeZone),
     },
     {
       id: "plannedEnd",
       header: t("rental.fields.plannedEnd"),
       sortable: true,
-      cell: (rental) => formatDate(rental.plannedEnd, i18n.language),
+      cell: (rental) => formatDate(rental.plannedEnd, i18n.language, timeZone),
     },
     {
       id: "total",

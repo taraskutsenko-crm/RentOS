@@ -13,6 +13,7 @@ vi.mock("../../src/hooks/use-current-tenant", () => ({
 const usePermissionMock = vi.fn();
 vi.mock("../../src/hooks/use-current-tenant-role", () => ({
   usePermission: (...args: unknown[]) => usePermissionMock(...args),
+  useTenantTimezone: () => undefined,
 }));
 
 const useRentalsMock = vi.fn();

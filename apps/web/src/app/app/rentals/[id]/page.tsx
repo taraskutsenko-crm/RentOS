@@ -13,7 +13,7 @@ import { PageHeader } from "../../../../components/shell/page-header";
 import { PinButton } from "../../../../components/shell/pin-button";
 import { Timeline } from "../../../../components/timeline/timeline";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
-import { usePermission } from "../../../../hooks/use-current-tenant-role";
+import { usePermission, useTenantTimezone } from "../../../../hooks/use-current-tenant-role";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
   useCancelRental,
@@ -81,6 +81,7 @@ export default function RentalDetailPage() {
   const canReturnAction = usePermission("rentals.return");
   const canCancel = usePermission("rentals.cancel");
   const canCreateDocument = usePermission("documents.create");
+  const timeZone = useTenantTimezone();
 
   usePageBreadcrumbs(
     rental
@@ -138,8 +139,8 @@ export default function RentalDetailPage() {
               })}
             </span>
             <span className="text-muted-foreground">
-              {formatDate(rental.plannedStart, i18n.language)} –{" "}
-              {formatDate(rental.plannedEnd, i18n.language)}
+              {formatDate(rental.plannedStart, i18n.language, timeZone)} –{" "}
+              {formatDate(rental.plannedEnd, i18n.language, timeZone)}
             </span>
           </div>
         }
@@ -363,7 +364,9 @@ export default function RentalDetailPage() {
                         <td className="p-3">{item.quantity}</td>
                         <td className="p-3">{formatMoney(lineTotalMinor, rental.currency)}</td>
                         <td className="p-3">
-                          {item.returnedAt ? formatDateTime(item.returnedAt, i18n.language) : "—"}
+                          {item.returnedAt
+                            ? formatDateTime(item.returnedAt, i18n.language, timeZone)
+                            : "—"}
                         </td>
                       </tr>
                     );
@@ -471,19 +474,25 @@ export default function RentalDetailPage() {
             <CardContent className="grid grid-cols-2 gap-3 text-sm">
               <InfoRow
                 label={t("rental.fields.plannedStart")}
-                value={formatDateTime(rental.plannedStart, i18n.language)}
+                value={formatDateTime(rental.plannedStart, i18n.language, timeZone)}
               />
               <InfoRow
                 label={t("rental.fields.plannedEnd")}
-                value={formatDateTime(rental.plannedEnd, i18n.language)}
+                value={formatDateTime(rental.plannedEnd, i18n.language, timeZone)}
               />
               <InfoRow
                 label={t("rental.fields.actualStart")}
-                value={rental.actualStart ? formatDateTime(rental.actualStart, i18n.language) : "—"}
+                value={
+                  rental.actualStart
+                    ? formatDateTime(rental.actualStart, i18n.language, timeZone)
+                    : "—"
+                }
               />
               <InfoRow
                 label={t("rental.fields.actualEnd")}
-                value={rental.actualEnd ? formatDateTime(rental.actualEnd, i18n.language) : "—"}
+                value={
+                  rental.actualEnd ? formatDateTime(rental.actualEnd, i18n.language, timeZone) : "—"
+                }
               />
               <InfoRow label={t("customer.notes")} value={rental.notes ?? "—"} />
               <InfoRow
@@ -529,6 +538,7 @@ export default function RentalDetailPage() {
               isLoading={!timeline}
               emptyLabel={t("timeline.empty")}
               searchPlaceholder={t("timeline.searchPlaceholder")}
+              timeZone={timeZone}
             />
           </CardContent>
         </Card>

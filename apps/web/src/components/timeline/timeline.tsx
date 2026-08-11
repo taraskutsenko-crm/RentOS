@@ -19,13 +19,13 @@ const TONE_CLASSES: Record<NonNullable<TimelineEventConfig["tone"]>, string> = {
 };
 
 /** "Today"/"Yesterday" beat a bare date for anything recent — everything older groups by locale date. */
-function groupKeyForDate(occurredAt: string, now: Date, locale: string): string {
+function groupKeyForDate(occurredAt: string, now: Date, locale: string, timeZone?: string): string {
   const date = new Date(occurredAt);
   const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   const diffDays = Math.round((startOfDay(now) - startOfDay(date)) / 86_400_000);
   if (diffDays === 0) return "today";
   if (diffDays === 1) return "yesterday";
-  return formatDate(date, locale);
+  return formatDate(date, locale, timeZone);
 }
 
 /**
@@ -46,6 +46,7 @@ export function Timeline<TType extends string>({
   emptyLabel,
   searchPlaceholder,
   getHref,
+  timeZone,
 }: {
   events: TimelineEvent<TType>[] | undefined;
   registry: Record<TType, TimelineEventConfig>;
@@ -53,6 +54,8 @@ export function Timeline<TType extends string>({
   emptyLabel: string;
   searchPlaceholder: string;
   getHref?: (event: TimelineEvent<TType>) => string | undefined;
+  /** The tenant's own timezone — see lib/date-format.ts. Omitted = browser-local, unchanged. */
+  timeZone?: string | undefined;
 }) {
   const { t, i18n } = useTranslation();
   const [query, setQuery] = useState("");
@@ -85,7 +88,7 @@ export function Timeline<TType extends string>({
     const map = new Map<string, typeof filtered>();
     for (let i = filtered.length - 1; i >= 0; i -= 1) {
       const item = filtered[i]!;
-      const key = groupKeyForDate(item.event.occurredAt, now, i18n.language);
+      const key = groupKeyForDate(item.event.occurredAt, now, i18n.language, timeZone);
       const bucket = map.get(key);
       if (bucket) {
         bucket.push(item);
@@ -95,7 +98,7 @@ export function Timeline<TType extends string>({
       }
     }
     return order.map((key) => [key, map.get(key)!] as const);
-  }, [filtered, i18n.language]);
+  }, [filtered, i18n.language, timeZone]);
 
   function handleKeyDown(event: KeyboardEvent<HTMLOListElement>) {
     if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
@@ -167,7 +170,7 @@ export function Timeline<TType extends string>({
                     <span className="flex flex-col gap-0.5">
                       <span className="text-sm font-medium">{label}</span>
                       <span className="text-muted-foreground text-xs">
-                        {formatDateTime(event.occurredAt, i18n.language)}
+                        {formatDateTime(event.occurredAt, i18n.language, timeZone)}
                       </span>
                     </span>
                   </>

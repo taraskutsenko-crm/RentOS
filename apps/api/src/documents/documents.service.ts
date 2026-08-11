@@ -84,6 +84,34 @@ export class DocumentsService {
     private readonly auditService: AuditService,
   ) {}
 
+  /**
+   * Captures, at the moment a DocumentVersion is created, which specific
+   * template version is currently active for this document type — the
+   * same "capture now" pattern as businessDataSnapshot. Once stored, this
+   * pin never changes: editing or archiving the template later must never
+   * retroactively alter an already-generated document's rendered content
+   * (ARCHITECTURE_LOCK §1.6 / D-022 "finalized forever"). Returns nulls
+   * when no ACTIVE template exists yet — DocumentRendererService then
+   * falls back to the built-in default, exactly as it does today.
+   */
+  private async resolveTemplatePin(
+    tx: Prisma.TransactionClient,
+    tenantId: string,
+    documentType: DocumentType,
+  ): Promise<{ templateId: string | null; templateVersionId: string | null }> {
+    const active = await tx.documentTemplate.findFirst({
+      where: { tenantId, documentType, status: "ACTIVE" },
+      select: { id: true, currentVersionNumber: true },
+    });
+    if (!active) return { templateId: null, templateVersionId: null };
+
+    const currentVersion = await tx.documentTemplateVersion.findFirst({
+      where: { templateId: active.id, versionNumber: active.currentVersionNumber },
+      select: { id: true },
+    });
+    return { templateId: active.id, templateVersionId: currentVersion?.id ?? null };
+  }
+
   async create(
     tenantId: string,
     actorUserId: string,
@@ -142,6 +170,7 @@ export class DocumentsService {
         },
       });
 
+      const templatePin = await this.resolveTemplatePin(tx, tenantId, dto.documentType);
       await tx.documentVersion.create({
         data: {
           tenantId,
@@ -150,6 +179,8 @@ export class DocumentsService {
           businessDataSnapshot: (dto.businessData ?? {}) as never,
           isFinal: false,
           createdByUserId: actorUserId,
+          templateId: templatePin.templateId,
+          templateVersionId: templatePin.templateVersionId,
         },
       });
 
@@ -369,6 +400,7 @@ export class DocumentsService {
         },
       });
 
+      const templatePin = await this.resolveTemplatePin(tx, tenantId, source.documentType);
       await tx.documentVersion.create({
         data: {
           tenantId,
@@ -377,6 +409,8 @@ export class DocumentsService {
           businessDataSnapshot: sourceVersion.businessDataSnapshot as never,
           isFinal: false,
           createdByUserId: actorUserId,
+          templateId: templatePin.templateId,
+          templateVersionId: templatePin.templateVersionId,
         },
       });
 
@@ -576,6 +610,7 @@ export class DocumentsService {
       dto.businessData ?? (currentVersion.businessDataSnapshot as Record<string, unknown>);
 
     await this.prisma.$transaction(async (tx) => {
+      const templatePin = await this.resolveTemplatePin(tx, tenantId, current.documentType);
       await tx.documentVersion.create({
         data: {
           tenantId,
@@ -586,6 +621,8 @@ export class DocumentsService {
           isFinal: false,
           reason: dto.reason,
           createdByUserId: actorUserId,
+          templateId: templatePin.templateId,
+          templateVersionId: templatePin.templateVersionId,
         },
       });
 

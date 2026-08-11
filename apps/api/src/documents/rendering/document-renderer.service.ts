@@ -71,9 +71,18 @@ ${bodyHtml}
   }> {
     if (version.templateId) {
       const template = await this.templatesService.findOne(tenantId, version.templateId);
-      const current = template.versions.find(
-        (v) => v.versionNumber === template.currentVersionNumber,
-      )!;
+      // A version.templateVersionId pins the exact template content that
+      // existed at the moment this Document version was created — editing
+      // or archiving the template afterward must never change how an
+      // already-generated document re-renders (see resolveTemplatePin in
+      // DocumentsService and ARCHITECTURE_LOCK §1.6). Rows created before
+      // this pinning existed have templateVersionId === null and keep
+      // resolving the template's current version, exactly as before.
+      const pinned = version.templateVersionId
+        ? template.versions.find((v) => v.id === version.templateVersionId)
+        : undefined;
+      const current =
+        pinned ?? template.versions.find((v) => v.versionNumber === template.currentVersionNumber)!;
       return {
         htmlContent: current.htmlContent,
         css: current.css,

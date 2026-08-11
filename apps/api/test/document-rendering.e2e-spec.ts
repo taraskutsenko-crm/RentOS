@@ -272,6 +272,66 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     expect(preview.body.html).toContain("BRANDED: Jane Doe");
   });
 
+  it("pins a document version to the template version active at creation time — editing the template afterward never changes an already-generated document", async () => {
+    const template = await createTemplate({
+      name: "Branded Contract",
+      htmlContent: "<div>V1: {{customer.name}}</div>",
+    }).expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${template.body.id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const created = await createDocument().expect(201);
+    const beforeEdit = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${created.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(beforeEdit.body.html).toContain("V1: Jane Doe");
+
+    // The template stays ACTIVE while gaining a new version — the exact
+    // "edit an active template" scenario the pin exists to protect against.
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${template.body.id}/versions`)
+      .set("Cookie", accessCookie)
+      .send({ htmlContent: "<div>V2: {{customer.name}}</div>" })
+      .expect(201);
+
+    const afterEdit = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${created.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(afterEdit.body.html).toContain("V1: Jane Doe");
+    expect(afterEdit.body.html).not.toContain("V2:");
+
+    // A document created after the template edit follows the new version.
+    const createdAfter = await createDocument().expect(201);
+    const afterEditPreview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${createdAfter.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(afterEditPreview.body.html).toContain("V2: Jane Doe");
+
+    // A correction version (createVersion) is a new authoring event and
+    // picks up whatever is active now, same as a fresh create.
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents/${created.body.id}/ready`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents/${created.body.id}/versions`)
+      .set("Cookie", accessCookie)
+      .send({ reason: "correction" })
+      .expect(201);
+    const afterCorrection = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${created.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(afterCorrection.body.html).toContain("V2: Jane Doe");
+  });
+
   it("HTML-escapes resolved variable values in the rendered output (no XSS injection)", async () => {
     const created = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/documents`)

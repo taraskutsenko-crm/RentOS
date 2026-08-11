@@ -147,7 +147,24 @@
     "noTenants": "まだどの会社にも所属していません",
     "role": "役割",
     "errors": {
-      "noAccess": "この会社のワークスペースへのアクセス権がなくなりました。別のワークスペースを選択してください。"
+      "noAccess": "この会社のワークスペースへのアクセス権がなくなりました。別のワークスペースを選択してください。",
+      "nameRequired": "会社名は必須です"
+    },
+    "companyProfile": {
+      "navLabel": "会社プロフィール",
+      "title": "会社プロフィール",
+      "subtitle": "この情報は生成された契約書やその他のドキュメントに表示されます",
+      "cardTitle": "会社詳細",
+      "save": "保存",
+      "saving": "保存中...",
+      "saved": "会社プロフィールを保存しました",
+      "fields": {
+        "name": "会社名",
+        "registrationNumber": "登録番号",
+        "taxNumber": "税番号／VAT番号",
+        "address": "住所",
+        "phone": "電話番号"
+      }
     }
   },
   "country": {

@@ -19,6 +19,10 @@ export interface Tenant {
   defaultLanguage: string;
   defaultCurrency: string;
   timezone: string;
+  registrationNumber: string | null;
+  taxNumber: string | null;
+  address: string | null;
+  phone: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

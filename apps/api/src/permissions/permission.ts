@@ -116,12 +116,22 @@ export const DOCUMENT_PERMISSIONS = [
  */
 export const CUSTOMER_PORTAL_PERMISSIONS = ["customers.portal.manage"] as const;
 
+/**
+ * Gates `PATCH /tenants/:tenantId` — editing the tenant's company-identity
+ * fields (name, registration/tax numbers, address, phone) shown on
+ * generated documents/contracts. OWNER/ADMIN only, same tier as
+ * `rental_settings.manage`/`asset_categories.manage` (tenant-wide
+ * configuration, not a per-record operational action).
+ */
+export const TENANT_PERMISSIONS = ["tenant.manage"] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
   ...QUOTE_PERMISSIONS,
   ...DOCUMENT_PERMISSIONS,
   ...CUSTOMER_PORTAL_PERMISSIONS,
+  ...TENANT_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];

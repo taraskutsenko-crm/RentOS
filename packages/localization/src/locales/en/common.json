@@ -147,7 +147,24 @@
     "noTenants": "You don't belong to any company yet",
     "role": "Role",
     "errors": {
-      "noAccess": "You don't have access to this company workspace anymore. Please select a different one."
+      "noAccess": "You don't have access to this company workspace anymore. Please select a different one.",
+      "nameRequired": "Company name is required"
+    },
+    "companyProfile": {
+      "navLabel": "Company Profile",
+      "title": "Company Profile",
+      "subtitle": "This information appears on generated contracts and other documents",
+      "cardTitle": "Company details",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Company profile saved",
+      "fields": {
+        "name": "Company name",
+        "registrationNumber": "Registration number",
+        "taxNumber": "Tax / VAT number",
+        "address": "Address",
+        "phone": "Phone"
+      }
     }
   },
   "country": {

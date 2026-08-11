@@ -147,7 +147,24 @@
     "noTenants": "Vous n'appartenez encore à aucune entreprise",
     "role": "Rôle",
     "errors": {
-      "noAccess": "Vous n'avez plus accès à cet espace de travail de l'entreprise. Veuillez en sélectionner un autre."
+      "noAccess": "Vous n'avez plus accès à cet espace de travail de l'entreprise. Veuillez en sélectionner un autre.",
+      "nameRequired": "Le nom de l'entreprise est requis"
+    },
+    "companyProfile": {
+      "navLabel": "Profil de l'entreprise",
+      "title": "Profil de l'entreprise",
+      "subtitle": "Ces informations apparaissent sur les contrats générés et autres documents",
+      "cardTitle": "Coordonnées de l'entreprise",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "saved": "Profil de l'entreprise enregistré",
+      "fields": {
+        "name": "Nom de l'entreprise",
+        "registrationNumber": "Numéro d'immatriculation",
+        "taxNumber": "Numéro fiscal / TVA",
+        "address": "Adresse",
+        "phone": "Téléphone"
+      }
     }
   },
   "country": {

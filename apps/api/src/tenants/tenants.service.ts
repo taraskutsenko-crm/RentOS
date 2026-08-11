@@ -1,8 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import type { Prisma, Tenant } from "@prisma/client";
 
+import { AuditService } from "../audit/audit.service";
 import { slugify, withRandomSuffix } from "../common/slug.util";
 import { PrismaService } from "../prisma/prisma.service";
+import type { UpdateTenantDto } from "./dto/update-tenant.dto";
 
 export interface CreateTenantInput {
   name: string;
@@ -14,7 +16,10 @@ export interface CreateTenantInput {
 
 @Injectable()
 export class TenantsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditService: AuditService,
+  ) {}
 
   /** Must be called within a transaction, using the same `tx` for the uniqueness check and insert. */
   async create(tx: Prisma.TransactionClient, input: CreateTenantInput): Promise<Tenant> {
@@ -37,6 +42,48 @@ export class TenantsService {
       },
       orderBy: { createdAt: "asc" },
     });
+  }
+
+  /** Powers the Company Profile settings page. Empty strings on the optional identity fields are stored as null. */
+  async update(tenantId: string, actorUserId: string, dto: UpdateTenantDto): Promise<Tenant> {
+    const previous = await this.prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } });
+
+    const tenant = await this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: {
+        name: dto.name,
+        registrationNumber: dto.registrationNumber || null,
+        taxNumber: dto.taxNumber || null,
+        address: dto.address || null,
+        phone: dto.phone || null,
+      },
+    });
+
+    await this.auditService.log({
+      tenantId,
+      userId: actorUserId,
+      action: "tenant.company_profile.updated",
+      entityType: "Tenant",
+      entityId: tenant.id,
+      metadata: {
+        from: {
+          name: previous.name,
+          registrationNumber: previous.registrationNumber,
+          taxNumber: previous.taxNumber,
+          address: previous.address,
+          phone: previous.phone,
+        },
+        to: {
+          name: tenant.name,
+          registrationNumber: tenant.registrationNumber,
+          taxNumber: tenant.taxNumber,
+          address: tenant.address,
+          phone: tenant.phone,
+        },
+      },
+    });
+
+    return tenant;
   }
 
   private async generateUniqueSlug(tx: Prisma.TransactionClient, name: string): Promise<string> {

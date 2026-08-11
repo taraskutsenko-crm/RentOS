@@ -147,7 +147,24 @@
     "noTenants": "Je hoort nog bij geen enkel bedrijf",
     "role": "Rol",
     "errors": {
-      "noAccess": "U heeft geen toegang meer tot deze bedrijfswerkruimte. Selecteer een andere."
+      "noAccess": "U heeft geen toegang meer tot deze bedrijfswerkruimte. Selecteer een andere.",
+      "nameRequired": "Bedrijfsnaam is verplicht"
+    },
+    "companyProfile": {
+      "navLabel": "Bedrijfsprofiel",
+      "title": "Bedrijfsprofiel",
+      "subtitle": "Deze gegevens verschijnen op gegenereerde contracten en andere documenten",
+      "cardTitle": "Bedrijfsgegevens",
+      "save": "Opslaan",
+      "saving": "Opslaan...",
+      "saved": "Bedrijfsprofiel opgeslagen",
+      "fields": {
+        "name": "Bedrijfsnaam",
+        "registrationNumber": "Registratienummer",
+        "taxNumber": "Btw-/belastingnummer",
+        "address": "Adres",
+        "phone": "Telefoon"
+      }
     }
   },
   "country": {

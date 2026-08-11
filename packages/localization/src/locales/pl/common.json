@@ -147,7 +147,24 @@
     "noTenants": "Nie należysz jeszcze do żadnej firmy",
     "role": "Rola",
     "errors": {
-      "noAccess": "Nie masz już dostępu do tego obszaru roboczego firmy. Wybierz inny."
+      "noAccess": "Nie masz już dostępu do tego obszaru roboczego firmy. Wybierz inny.",
+      "nameRequired": "Nazwa firmy jest wymagana"
+    },
+    "companyProfile": {
+      "navLabel": "Profil firmy",
+      "title": "Profil firmy",
+      "subtitle": "Te dane pojawiają się na generowanych umowach i innych dokumentach",
+      "cardTitle": "Dane firmy",
+      "save": "Zapisz",
+      "saving": "Zapisywanie...",
+      "saved": "Profil firmy zapisany",
+      "fields": {
+        "name": "Nazwa firmy",
+        "registrationNumber": "Numer rejestracyjny",
+        "taxNumber": "NIP / numer VAT",
+        "address": "Adres",
+        "phone": "Telefon"
+      }
     }
   },
   "country": {

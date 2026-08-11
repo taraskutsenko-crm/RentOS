@@ -147,7 +147,24 @@
     "noTenants": "Non appartieni ancora a nessuna azienda",
     "role": "Ruolo",
     "errors": {
-      "noAccess": "Non hai più accesso a quest'area di lavoro aziendale. Seleziona un'altra."
+      "noAccess": "Non hai più accesso a quest'area di lavoro aziendale. Seleziona un'altra.",
+      "nameRequired": "Il nome dell'azienda è obbligatorio"
+    },
+    "companyProfile": {
+      "navLabel": "Profilo aziendale",
+      "title": "Profilo aziendale",
+      "subtitle": "Queste informazioni appaiono nei contratti generati e in altri documenti",
+      "cardTitle": "Dati aziendali",
+      "save": "Salva",
+      "saving": "Salvataggio...",
+      "saved": "Profilo aziendale salvato",
+      "fields": {
+        "name": "Nome dell'azienda",
+        "registrationNumber": "Numero di registrazione",
+        "taxNumber": "Codice fiscale / Partita IVA",
+        "address": "Indirizzo",
+        "phone": "Telefono"
+      }
     }
   },
   "country": {

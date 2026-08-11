@@ -191,6 +191,16 @@ export const rentalBillingSettingsSchema = z
 
 export type RentalBillingSettingsFormValues = z.infer<typeof rentalBillingSettingsSchema>;
 
+export const companyProfileSchema = z.object({
+  name: z.string().min(1, "tenant.errors.nameRequired").max(200),
+  registrationNumber: z.string().max(100),
+  taxNumber: z.string().max(100),
+  address: z.string().max(500),
+  phone: z.string().max(50),
+});
+
+export type CompanyProfileFormValues = z.infer<typeof companyProfileSchema>;
+
 export type RentalItemFormValues = z.infer<typeof rentalItemFormSchema>;
 
 export const rentalSchema = z

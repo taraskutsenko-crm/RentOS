@@ -147,7 +147,24 @@
     "noTenants": "您尚未加入任何公司",
     "role": "角色",
     "errors": {
-      "noAccess": "您已无权访问此公司工作区。请选择其他工作区。"
+      "noAccess": "您已无权访问此公司工作区。请选择其他工作区。",
+      "nameRequired": "公司名称为必填项"
+    },
+    "companyProfile": {
+      "navLabel": "公司资料",
+      "title": "公司资料",
+      "subtitle": "此信息将显示在生成的合同和其他文档中",
+      "cardTitle": "公司详情",
+      "save": "保存",
+      "saving": "保存中...",
+      "saved": "公司资料已保存",
+      "fields": {
+        "name": "公司名称",
+        "registrationNumber": "注册号",
+        "taxNumber": "税号/增值税号",
+        "address": "地址",
+        "phone": "电话"
+      }
     }
   },
   "country": {

@@ -147,7 +147,24 @@
     "noTenants": "Você ainda não pertence a nenhuma empresa",
     "role": "Função",
     "errors": {
-      "noAccess": "Você não tem mais acesso a este espaço de trabalho da empresa. Selecione outro."
+      "noAccess": "Você não tem mais acesso a este espaço de trabalho da empresa. Selecione outro.",
+      "nameRequired": "O nome da empresa é obrigatório"
+    },
+    "companyProfile": {
+      "navLabel": "Perfil da empresa",
+      "title": "Perfil da empresa",
+      "subtitle": "Essas informações aparecem em contratos gerados e outros documentos",
+      "cardTitle": "Dados da empresa",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "saved": "Perfil da empresa salvo",
+      "fields": {
+        "name": "Nome da empresa",
+        "registrationNumber": "Número de registro",
+        "taxNumber": "CNPJ / número de imposto",
+        "address": "Endereço",
+        "phone": "Telefone"
+      }
     }
   },
   "country": {

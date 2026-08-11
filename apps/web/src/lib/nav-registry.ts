@@ -1,5 +1,6 @@
 import {
   Boxes,
+  Building2,
   CalendarRange,
   CreditCard,
   FileStack,
@@ -93,6 +94,13 @@ export const NAV_GROUPS: NavGroup[] = [
     id: "settings",
     labelKey: "app.nav.settingsGroup",
     items: [
+      {
+        id: "company-profile",
+        href: "/app/settings/company-profile",
+        labelKey: "tenant.companyProfile.navLabel",
+        icon: Building2,
+        permission: "tenant.manage",
+      },
       {
         id: "asset-categories",
         href: "/app/settings/asset-categories",

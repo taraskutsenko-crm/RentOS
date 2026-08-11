@@ -1,12 +1,14 @@
 import { Module } from "@nestjs/common";
 
+import { AuditModule } from "../audit/audit.module";
 import { MembershipsModule } from "../memberships/memberships.module";
+import { PermissionsModule } from "../permissions/permissions.module";
 import { TenantGuard } from "./tenant.guard";
 import { TenantsController } from "./tenants.controller";
 import { TenantsService } from "./tenants.service";
 
 @Module({
-  imports: [MembershipsModule],
+  imports: [MembershipsModule, AuditModule, PermissionsModule],
   controllers: [TenantsController],
   providers: [TenantsService, TenantGuard],
   // Re-export MembershipsModule: any module that imports TenantsModule to

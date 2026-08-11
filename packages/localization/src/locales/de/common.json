@@ -147,7 +147,24 @@
     "noTenants": "Sie gehören noch keinem Unternehmen an",
     "role": "Rolle",
     "errors": {
-      "noAccess": "Sie haben keinen Zugriff mehr auf diesen Firmenbereich. Bitte wählen Sie einen anderen aus."
+      "noAccess": "Sie haben keinen Zugriff mehr auf diesen Firmenbereich. Bitte wählen Sie einen anderen aus.",
+      "nameRequired": "Firmenname ist erforderlich"
+    },
+    "companyProfile": {
+      "navLabel": "Unternehmensprofil",
+      "title": "Unternehmensprofil",
+      "subtitle": "Diese Angaben erscheinen auf generierten Verträgen und anderen Dokumenten",
+      "cardTitle": "Unternehmensdaten",
+      "save": "Speichern",
+      "saving": "Speichern...",
+      "saved": "Unternehmensprofil gespeichert",
+      "fields": {
+        "name": "Firmenname",
+        "registrationNumber": "Handelsregisternummer",
+        "taxNumber": "Steuer-/USt-IdNr.",
+        "address": "Adresse",
+        "phone": "Telefon"
+      }
     }
   },
   "country": {

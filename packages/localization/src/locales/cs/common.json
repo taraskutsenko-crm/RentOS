@@ -147,7 +147,24 @@
     "noTenants": "Zatím nepatříte k žádné firmě",
     "role": "Role",
     "errors": {
-      "noAccess": "Již nemáte přístup k tomuto firemnímu pracovnímu prostoru. Vyberte prosím jiný."
+      "noAccess": "Již nemáte přístup k tomuto firemnímu pracovnímu prostoru. Vyberte prosím jiný.",
+      "nameRequired": "Název společnosti je povinný"
+    },
+    "companyProfile": {
+      "navLabel": "Profil společnosti",
+      "title": "Profil společnosti",
+      "subtitle": "Tyto údaje se zobrazují na generovaných smlouvách a dalších dokumentech",
+      "cardTitle": "Údaje o společnosti",
+      "save": "Uložit",
+      "saving": "Ukládání...",
+      "saved": "Profil společnosti byl uložen",
+      "fields": {
+        "name": "Název společnosti",
+        "registrationNumber": "Registrační číslo",
+        "taxNumber": "DIČ / IČ DPH",
+        "address": "Adresa",
+        "phone": "Telefon"
+      }
     }
   },
   "country": {

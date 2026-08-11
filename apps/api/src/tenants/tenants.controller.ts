@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Patch, Post, Res, UseGuards } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { ApiEnv } from "@rentos/shared";
 import type { Response } from "express";
@@ -9,7 +9,10 @@ import {
   type CurrentTenantContext,
 } from "../auth/decorators/current-tenant.decorator";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { PermissionsGuard } from "../permissions/permissions.guard";
+import { RequirePermissions } from "../permissions/require-permissions.decorator";
 import type { PublicUser } from "../users/user.mapper";
+import { UpdateTenantDto } from "./dto/update-tenant.dto";
 import { TenantGuard } from "./tenant.guard";
 import { TenantsService } from "./tenants.service";
 
@@ -42,5 +45,17 @@ export class TenantsController {
   @Get(":tenantId")
   get(@CurrentTenant() context: CurrentTenantContext) {
     return { tenant: context.tenant, role: context.membership.role };
+  }
+
+  @UseGuards(TenantGuard, PermissionsGuard)
+  @RequirePermissions("tenant.manage")
+  @Patch(":tenantId")
+  async update(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @CurrentUser() user: PublicUser,
+    @Body() dto: UpdateTenantDto,
+  ) {
+    const updated = await this.tenantsService.update(tenant.id, user.id, dto);
+    return { tenant: updated };
   }
 }

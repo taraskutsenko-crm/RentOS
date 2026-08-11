@@ -62,12 +62,15 @@ export const DOCUMENT_PERMISSIONS = [
 
 export const CUSTOMER_PORTAL_PERMISSIONS = ["customers.portal.manage"] as const;
 
+export const TENANT_PERMISSIONS = ["tenant.manage"] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
   ...QUOTE_PERMISSIONS,
   ...DOCUMENT_PERMISSIONS,
   ...CUSTOMER_PORTAL_PERMISSIONS,
+  ...TENANT_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];

@@ -77,7 +77,10 @@ ${bodyHtml}
       // already-generated document re-renders (see resolveTemplatePin in
       // DocumentsService and ARCHITECTURE_LOCK §1.6). Rows created before
       // this pinning existed have templateVersionId === null and keep
-      // resolving the template's current version, exactly as before.
+      // resolving the template's current version, exactly as before. This
+      // is still the tenant's active template as of creation time — not a
+      // distinct "explicit assignment" feature (none exists) — so it keeps
+      // the same "tenant_active" source label the caller already expects.
       const pinned = version.templateVersionId
         ? template.versions.find((v) => v.id === version.templateVersionId)
         : undefined;
@@ -87,7 +90,7 @@ ${bodyHtml}
         htmlContent: current.htmlContent,
         css: current.css,
         templateId: template.id,
-        templateSource: "explicit",
+        templateSource: "tenant_active",
       };
     }
 

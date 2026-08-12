@@ -41,6 +41,7 @@ export class DocumentTemplatesService {
           documentType: dto.documentType,
           name: dto.name,
           description: dto.description ?? null,
+          language: dto.language ?? null,
           status: "DRAFT",
           currentVersionNumber: 1,
           createdByUserId: actorUserId,
@@ -124,15 +125,47 @@ export class DocumentTemplatesService {
     return template;
   }
 
-  /** Resolves the tenant's currently ACTIVE template for a document type, or null if none is active yet. */
+  /**
+   * Resolves the tenant's ACTIVE template for a document type. When
+   * `language` is given (including `null` for "tenant default / no
+   * language set"), resolves exactly that language bucket — the
+   * (tenantId, documentType, language) uniqueness activate() enforces
+   * guarantees at most one match. When `language` is omitted, resolves
+   * unambiguously only if exactly one ACTIVE template exists for the type
+   * regardless of language; if 2+ languages are active, returns null
+   * rather than guessing — the caller (DocumentsService/DocumentRenderer)
+   * then falls back to the built-in default, and the frontend's
+   * "Generate document" flow should show a language picker fed by
+   * activeLanguagesForType instead of leaving language unspecified.
+   */
   async findActiveForType(
     tenantId: string,
     documentType: DocumentType,
+    language?: string | null,
   ): Promise<DocumentTemplateDetailView | null> {
-    return this.prisma.documentTemplate.findFirst({
+    if (language !== undefined) {
+      return this.prisma.documentTemplate.findFirst({
+        where: { tenantId, documentType, status: "ACTIVE", language },
+        include: DOCUMENT_TEMPLATE_DETAIL_INCLUDE,
+      });
+    }
+    const candidates = await this.prisma.documentTemplate.findMany({
       where: { tenantId, documentType, status: "ACTIVE" },
       include: DOCUMENT_TEMPLATE_DETAIL_INCLUDE,
     });
+    return candidates.length === 1 ? candidates[0]! : null;
+  }
+
+  /** The languages (including `null`) with an ACTIVE template for this type — feeds the "Generate document" language picker. */
+  async activeLanguagesForType(
+    tenantId: string,
+    documentType: DocumentType,
+  ): Promise<Array<string | null>> {
+    const active = await this.prisma.documentTemplate.findMany({
+      where: { tenantId, documentType, status: "ACTIVE" },
+      select: { language: true },
+    });
+    return active.map((t) => t.language);
   }
 
   async updateMeta(
@@ -146,6 +179,7 @@ export class DocumentTemplatesService {
       data: {
         ...(dto.name !== undefined ? { name: dto.name } : {}),
         ...(dto.description !== undefined ? { description: dto.description } : {}),
+        ...(dto.language !== undefined ? { language: dto.language } : {}),
       },
     });
     if (result.count === 0) {
@@ -255,8 +289,16 @@ export class DocumentTemplatesService {
     }
 
     await this.prisma.$transaction(async (tx) => {
+      // Scoped by language too — activating a French contract template
+      // must not demote an unrelated already-active English one; the
+      // uniqueness this mirrors is (tenantId, documentType, language).
       await tx.documentTemplate.updateMany({
-        where: { tenantId, documentType: target.documentType, status: "ACTIVE" },
+        where: {
+          tenantId,
+          documentType: target.documentType,
+          language: target.language,
+          status: "ACTIVE",
+        },
         data: { status: "DRAFT" },
       });
       const result = await tx.documentTemplate.updateMany({
@@ -343,6 +385,7 @@ export class DocumentTemplatesService {
       documentType: source.documentType,
       name: `${source.name} (copy)`,
       description: source.description,
+      language: source.language,
       htmlContent: currentVersion.htmlContent,
       css: currentVersion.css,
       ...(currentVersion.variablesSchema

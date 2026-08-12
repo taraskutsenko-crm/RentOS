@@ -1,4 +1,5 @@
-import { IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { supportedLanguages } from "@rentos/localization";
+import { IsIn, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 import { EmptyToNull } from "../../common/empty-to-null.transform";
 
@@ -15,4 +16,11 @@ export class UpdateDocumentTemplateDto {
   @IsString()
   @MaxLength(2000)
   description?: string | null;
+
+  @EmptyToNull()
+  @IsOptional()
+  @IsIn(supportedLanguages, {
+    message: `language must be one of: ${supportedLanguages.join(", ")}`,
+  })
+  language?: string | null;
 }

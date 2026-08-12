@@ -98,11 +98,25 @@ export class DocumentsService {
     tx: Prisma.TransactionClient,
     tenantId: string,
     documentType: DocumentType,
+    language?: string | null,
   ): Promise<{ templateId: string | null; templateVersionId: string | null }> {
-    const active = await tx.documentTemplate.findFirst({
-      where: { tenantId, documentType, status: "ACTIVE" },
-      select: { id: true, currentVersionNumber: true },
-    });
+    let active: { id: string; currentVersionNumber: number } | null;
+    if (language !== undefined) {
+      active = await tx.documentTemplate.findFirst({
+        where: { tenantId, documentType, status: "ACTIVE", language },
+        select: { id: true, currentVersionNumber: true },
+      });
+    } else {
+      // Unspecified language: resolve only if it's unambiguous (0 or 1
+      // ACTIVE template for this type). With 2+ languages active, this
+      // returns null rather than guessing — same policy as
+      // DocumentTemplatesService.findActiveForType.
+      const candidates = await tx.documentTemplate.findMany({
+        where: { tenantId, documentType, status: "ACTIVE" },
+        select: { id: true, currentVersionNumber: true },
+      });
+      active = candidates.length === 1 ? candidates[0]! : null;
+    }
     if (!active) return { templateId: null, templateVersionId: null };
 
     const currentVersion = await tx.documentTemplateVersion.findFirst({
@@ -170,7 +184,12 @@ export class DocumentsService {
         },
       });
 
-      const templatePin = await this.resolveTemplatePin(tx, tenantId, dto.documentType);
+      const templatePin = await this.resolveTemplatePin(
+        tx,
+        tenantId,
+        dto.documentType,
+        dto.templateLanguage,
+      );
       await tx.documentVersion.create({
         data: {
           tenantId,

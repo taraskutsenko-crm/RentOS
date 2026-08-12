@@ -1,9 +1,11 @@
+import { supportedLanguages } from "@rentos/localization";
 import { DocumentType } from "@prisma/client";
 import { Type } from "class-transformer";
 import {
   ArrayMaxSize,
   IsArray,
   IsEnum,
+  IsIn,
   IsObject,
   IsOptional,
   IsString,
@@ -67,4 +69,15 @@ export class CreateDocumentDto {
   @ValidateNested({ each: true })
   @Type(() => DocumentItemDto)
   items?: DocumentItemDto[];
+
+  /**
+   * Which of the tenant's ACTIVE templates for this documentType to pin —
+   * only meaningful (and only ever shown by the frontend) when 2+ ACTIVE
+   * templates exist across different languages; omit otherwise. See
+   * DocumentTemplatesService.findActiveForType/activeLanguagesForType.
+   */
+  @EmptyToNull()
+  @IsOptional()
+  @IsIn(supportedLanguages)
+  templateLanguage?: string | null;
 }

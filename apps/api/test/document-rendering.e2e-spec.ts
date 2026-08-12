@@ -160,6 +160,106 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     expect(refreshedA.body.status).toBe("DRAFT");
   });
 
+  it("allows an ACTIVE template per (documentType, language) — activating one language never demotes another", async () => {
+    const templateEn = await createTemplate({ name: "English Contract", language: "en" }).expect(
+      201,
+    );
+    const templateEs = await createTemplate({ name: "Spanish Contract", language: "es" }).expect(
+      201,
+    );
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templateEn.body.id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templateEs.body.id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const refreshedEn = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/document-templates/${templateEn.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(refreshedEn.body.status).toBe("ACTIVE");
+
+    const languages = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/document-templates/active-languages?documentType=CONTRACT`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(languages.body.languages.sort()).toEqual(["en", "es"]);
+  });
+
+  it("activating a template still demotes a previously-active template in the same language bucket", async () => {
+    const templateEn1 = await createTemplate({ name: "English Contract 1", language: "en" }).expect(
+      201,
+    );
+    const templateEn2 = await createTemplate({ name: "English Contract 2", language: "en" }).expect(
+      201,
+    );
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templateEn1.body.id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    // Activating the second same-language template demotes the first —
+    // exactly the intra-bucket demotion behavior, proving the uniqueness
+    // scope is truly (documentType, language) and not just documentType.
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templateEn2.body.id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const refreshedEn1 = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/document-templates/${templateEn1.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(refreshedEn1.body.status).toBe("DRAFT");
+  });
+
+  it("picks the requested templateLanguage when creating a document, and falls back to the built-in default when ambiguous", async () => {
+    const templateEn = await createTemplate({
+      name: "English Contract",
+      language: "en",
+      htmlContent: "<div>EN: {{customer.name}}</div>",
+    }).expect(201);
+    const templateEs = await createTemplate({
+      name: "Spanish Contract",
+      language: "es",
+      htmlContent: "<div>ES: {{customer.name}}</div>",
+    }).expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templateEn.body.id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templateEs.body.id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const spanishDoc = await createDocument({ templateLanguage: "es" }).expect(201);
+    const spanishPreview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${spanishDoc.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(spanishPreview.body.html).toContain("ES: Jane Doe");
+
+    // No templateLanguage given and two languages are active — ambiguous,
+    // falls back to the built-in default rather than guessing.
+    const ambiguousDoc = await createDocument().expect(201);
+    const ambiguousPreview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${ambiguousDoc.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(ambiguousPreview.body.templateSource).toBe("built_in_default");
+  });
+
   it("archives and restores a template", async () => {
     const created = await createTemplate().expect(201);
     const archived = await request(app.getHttpServer())

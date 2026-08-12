@@ -21,6 +21,7 @@ import { TenantGuard } from "../tenants/tenant.guard";
 import type { PublicUser } from "../users/user.mapper";
 import { DocumentTemplatesService } from "./document-templates.service";
 import { CreateDocumentTemplateDto } from "./dto/create-document-template.dto";
+import { QueryActiveLanguagesDto } from "./dto/query-active-languages.dto";
 import { QueryDocumentTemplatesDto } from "./dto/query-document-templates.dto";
 import { UpdateDocumentTemplateContentDto } from "./dto/update-document-template-content.dto";
 import { UpdateDocumentTemplateDto } from "./dto/update-document-template.dto";
@@ -53,6 +54,25 @@ export class DocumentTemplatesController {
     @Query() query: QueryDocumentTemplatesDto,
   ) {
     return this.templatesService.findMany(tenant.id, query);
+  }
+
+  /**
+   * Feeds the "Generate document" flow's language picker — gated by
+   * documents.create (not documents.templates.view), since anyone who can
+   * create a document needs to know whether a language choice is required,
+   * regardless of whether they can manage templates themselves. Must be
+   * declared before the :id route below or Nest would match "active-languages"
+   * as an :id param instead.
+   */
+  @RequirePermissions("documents.create")
+  @Get("active-languages")
+  activeLanguages(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @Query() query: QueryActiveLanguagesDto,
+  ) {
+    return this.templatesService
+      .activeLanguagesForType(tenant.id, query.documentType)
+      .then((languages) => ({ languages }));
   }
 
   @RequirePermissions("documents.templates.view")

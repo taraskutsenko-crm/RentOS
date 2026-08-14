@@ -1177,15 +1177,17 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .expect(200);
 
-    // company.logo is permanently empty by design (no tenant branding field
-    // exists yet, see variable-resolver.service.ts) — every other path must
+    // company.logo and company.email are permanently empty by design (no
+    // tenant branding/company-email field exists yet, see hardcoded ""
+    // values in variable-resolver.service.ts) — every other path must
     // resolve to real, non-empty content given this fully-populated document.
+    const permanentlyEmpty = new Set(["company.logo", "company.email"]);
     for (const varPath of DOCUMENT_VARIABLE_PATHS) {
       const match = new RegExp(`${varPath.replace(/\./g, "\\.")}::(.*?)::end`, "s").exec(
         preview.body.html,
       );
       expect(match, `path "${varPath}" did not appear in rendered output`).not.toBeNull();
-      if (varPath === "company.logo") continue;
+      if (permanentlyEmpty.has(varPath)) continue;
       expect(match![1]!.trim(), `path "${varPath}" resolved to empty content`).not.toBe("");
     }
   });

@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
+import { DOCUMENT_VARIABLE_PATHS } from "../src/documents/rendering/document-variable-registry";
 import { cleanDatabase } from "./db.util";
 import { extractCookie, validRegisterPayload } from "./fixtures";
 import { createTestApp } from "./test-app";
@@ -1048,5 +1049,133 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     expect(preview.body.html).not.toContain("<img src=x onerror");
     expect(preview.body.html).toContain("&lt;img src=x onerror=");
     expect(preview.body.html).toContain("$20.00");
+  });
+
+  it("every path in DOCUMENT_VARIABLE_PATHS resolves to real content on a fully-populated document", async () => {
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .send({
+        name: "Acme Rentals",
+        registrationNumber: "HRB 12345",
+        taxNumber: "DE123456789",
+        address: "Musterstrasse 1, Berlin",
+        phone: "+49 30 1234567",
+      })
+      .expect(200);
+
+    const customer = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/customers`)
+      .set("Cookie", accessCookie)
+      .send({
+        firstName: "Vat",
+        lastName: "Customer",
+        company: "Vat Co",
+        address: "1 Customer Street",
+        phone: "+1 555 0100",
+        email: "vat@example.com",
+        vatNumber: "DE999999999",
+      })
+      .expect(201);
+
+    const categoryId = await createAssetCategory();
+    const assetId = await createAsset(categoryId, "Generator A", "GEN-VAR");
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}/assets/${assetId}`)
+      .set("Cookie", accessCookie)
+      .send({ serialNumber: "SN-001", currentLocationText: "Warehouse 1" })
+      .expect(200);
+
+    const quote = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId: customer.body.id,
+        validUntil: "2027-02-01T00:00:00.000Z",
+        plannedStart: "2027-01-10T09:30:00.000Z",
+        plannedEnd: "2027-01-12T17:00:00.000Z",
+        items: [
+          {
+            itemType: "ASSET",
+            assetId,
+            name: "Generator A",
+            billingMode: "DAILY",
+            dailyPriceMinor: 5000,
+          },
+          {
+            itemType: "SERVICE",
+            name: "Setup service",
+            billingMode: "FLAT",
+            unitPriceMinor: 2000,
+            quantity: 1,
+          },
+        ],
+      })
+      .expect(201);
+    const quoteId = quote.body.id as string;
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/send`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/accept`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    const converted = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/convert-to-rental`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    const rentalId = converted.body.rental.id as string;
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}/rentals/${rentalId}`)
+      .set("Cookie", accessCookie)
+      .send({
+        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 5000, depositMinor: 10000 }],
+      })
+      .expect(200);
+
+    const templateHtml =
+      '<div class="doc-page">' +
+      DOCUMENT_VARIABLE_PATHS.map((varPath) => `<div>${varPath}::{{${varPath}}}::end</div>`).join(
+        "",
+      ) +
+      "</div>";
+    await createTemplate({ htmlContent: templateHtml }).expect(201);
+    const templates = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/document-templates`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templates.body.items[0].id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const document = await createDocument({
+      customerId: customer.body.id,
+      rentalId,
+      assetId,
+      title: "Full-coverage title",
+      businessData: { notes: "A note that must appear" },
+    }).expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    // company.logo is permanently empty by design (no tenant branding field
+    // exists yet, see variable-resolver.service.ts) — every other path must
+    // resolve to real, non-empty content given this fully-populated document.
+    for (const varPath of DOCUMENT_VARIABLE_PATHS) {
+      const match = new RegExp(`${varPath.replace(/\./g, "\\.")}::(.*?)::end`, "s").exec(
+        preview.body.html,
+      );
+      expect(match, `path "${varPath}" did not appear in rendered output`).not.toBeNull();
+      if (varPath === "company.logo") continue;
+      expect(match![1]!.trim(), `path "${varPath}" resolved to empty content`).not.toBe("");
+    }
   });
 });

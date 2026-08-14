@@ -20,7 +20,8 @@
     "check:i18n-parity": "node scripts/check-i18n-parity.mjs",
     "check:permission-sync": "node scripts/check-permission-sync.mjs",
     "check:doc-links": "node scripts/check-doc-links.mjs",
-    "check:governance": "pnpm check:i18n-parity && pnpm check:permission-sync && pnpm check:doc-links",
+    "check:document-variable-parity": "node scripts/check-document-variable-parity.mjs",
+    "check:governance": "pnpm check:i18n-parity && pnpm check:permission-sync && pnpm check:doc-links && pnpm check:document-variable-parity",
     "test:governance-checks": "node --test scripts/governance-checks.test.mjs"
   },
   "devDependencies": {

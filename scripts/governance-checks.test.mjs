@@ -10,6 +10,11 @@ import { fileURLToPath } from "node:url";
 import { flattenKeys, checkI18nParity } from "./check-i18n-parity.mjs";
 import { parsePermissionFile, comparePermissionRegistries } from "./check-permission-sync.mjs";
 import { checkLinksInFile, collectMarkdownFiles } from "./check-doc-links.mjs";
+import {
+  parseBackendVariableFile,
+  parseFrontendVariableFile,
+  compareVariableRegistries,
+} from "./check-document-variable-parity.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(__dirname, "..");
@@ -112,6 +117,43 @@ test("comparePermissionRegistries passes when registries match exactly", () => {
     rolePermissions: { OWNER: ["a.write", "a.read"] },
   };
   const result = comparePermissionRegistries(backend, frontend);
+  assert.equal(result.ok, true);
+});
+
+// --- document variable parity --------------------------------------------
+
+test("parseBackendVariableFile + parseFrontendVariableFile pass on the real repo's registries", () => {
+  const backendPaths = parseBackendVariableFile(
+    path.join(
+      repoRoot,
+      "apps",
+      "api",
+      "src",
+      "documents",
+      "rendering",
+      "document-variable-registry.ts",
+    ),
+  );
+  const frontendPaths = parseFrontendVariableFile(
+    path.join(repoRoot, "apps", "web", "src", "lib", "document-variable-registry.ts"),
+  );
+  const result = compareVariableRegistries(backendPaths, frontendPaths);
+  assert.equal(result.ok, true, result.errors.join("\n"));
+  assert.ok(backendPaths.length > 0);
+});
+
+test("compareVariableRegistries fails when a path exists only on one side", () => {
+  const backendPaths = ["company.name", "customer.name"];
+  const frontendPaths = ["company.name"];
+  const result = compareVariableRegistries(backendPaths, frontendPaths);
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some((e) => e.includes("customer.name")));
+});
+
+test("compareVariableRegistries passes regardless of declaration order", () => {
+  const backendPaths = ["company.name", "customer.name"];
+  const frontendPaths = ["customer.name", "company.name"];
+  const result = compareVariableRegistries(backendPaths, frontendPaths);
   assert.equal(result.ok, true);
 });
 

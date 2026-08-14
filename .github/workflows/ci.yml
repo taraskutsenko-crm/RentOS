@@ -57,7 +57,7 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Architecture governance checks (i18n parity, permission sync, doc links)
+      - name: Architecture governance checks (i18n parity, permission sync, doc links, document variable parity)
         run: pnpm check:governance
 
       - name: Governance checks unit tests

@@ -1092,6 +1092,23 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .expect(201);
     const assetId = assetResponse.body.id as string;
 
+    // A directly-created Rental (DRAFT — items/depositMinor stay fully
+    // editable) plus a separately accepted Quote (never converted) covers
+    // both rental.* and quote.* variables without fighting RentalsService's
+    // "items/dates only editable while DRAFT or QUOTE" rule that a
+    // converted (RESERVED) rental would trigger.
+    const rental = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId: customer.body.id,
+        plannedStart: "2027-01-10T09:30:00.000Z",
+        plannedEnd: "2027-01-12T17:00:00.000Z",
+        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 5000, depositMinor: 10000 }],
+      })
+      .expect(201);
+    const rentalId = rental.body.id as string;
+
     const quote = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/quotes`)
       .set("Cookie", accessCookie)
@@ -1129,19 +1146,6 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .send({})
       .expect(201);
-    const converted = await request(app.getHttpServer())
-      .post(`/tenants/${tenantId}/quotes/${quoteId}/convert-to-rental`)
-      .set("Cookie", accessCookie)
-      .send({})
-      .expect(201);
-    const rentalId = converted.body.rental.id as string;
-    await request(app.getHttpServer())
-      .patch(`/tenants/${tenantId}/rentals/${rentalId}`)
-      .set("Cookie", accessCookie)
-      .send({
-        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 5000, depositMinor: 10000 }],
-      })
-      .expect(200);
 
     const templateHtml =
       '<div class="doc-page">' +
@@ -1163,6 +1167,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     const document = await createDocument({
       customerId: customer.body.id,
       rentalId,
+      quoteId,
       assetId,
       title: "Full-coverage title",
       businessData: { notes: "A note that must appear" },

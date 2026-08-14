@@ -329,6 +329,85 @@ describe("RentalDetailPage", () => {
     expect(screen.getByRole("button", { name: /return all/i })).toBeInTheDocument();
   });
 
+  // Pre-Chapter 10 workflow continuity: PageHeader primary action derived
+  // from getRentalNextAction, never fabricating a step with no backend
+  // capability.
+  it("shows Generate contract as the primary action when no contract is linked yet", () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "documents.create");
+    useRentalMock.mockReturnValue({ data: baseRental("DRAFT"), isLoading: false });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    const link = screen.getByRole("link", { name: "Generate contract" });
+    expect(link).toHaveAttribute(
+      "href",
+      "/app/documents/new?rentalId=rental-1&documentType=CONTRACT",
+    );
+  });
+
+  it("shows Prepare handover protocol as the primary action once ACTIVE with a contract but no handover protocol", () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "documents.create");
+    useRentalMock.mockReturnValue({
+      data: {
+        ...baseRental("ACTIVE"),
+        documents: [
+          {
+            id: "doc-1",
+            documentType: "CONTRACT",
+            customTypeName: null,
+            documentNumber: "CON-000001",
+            status: "SIGNED",
+            title: null,
+            createdAt: "2026-08-01T00:00:00Z",
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    const link = screen.getByRole("link", { name: "Prepare handover protocol" });
+    expect(link).toHaveAttribute(
+      "href",
+      "/app/documents/new?rentalId=rental-1&documentType=HANDOVER_PROTOCOL",
+    );
+  });
+
+  it("shows Return all as the primary action (and not duplicated in secondary actions) once ACTIVE with contract and handover protocol both present", () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "rentals.return");
+    useRentalMock.mockReturnValue({
+      data: {
+        ...baseRental("ACTIVE"),
+        documents: [
+          {
+            id: "doc-1",
+            documentType: "CONTRACT",
+            customTypeName: null,
+            documentNumber: "CON-000001",
+            status: "SIGNED",
+            title: null,
+            createdAt: "2026-08-01T00:00:00Z",
+          },
+          {
+            id: "doc-2",
+            documentType: "HANDOVER_PROTOCOL",
+            customTypeName: null,
+            documentNumber: "HND-000001",
+            status: "SIGNED",
+            title: null,
+            createdAt: "2026-08-01T00:00:00Z",
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    expect(screen.getAllByRole("button", { name: /return all/i })).toHaveLength(1);
+  });
+
   // 9. Permission-based controls: no action buttons without any permission
   it("hides every lifecycle action when the user has no rental permissions", () => {
     usePermissionMock.mockReturnValue(false);

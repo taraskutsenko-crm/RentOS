@@ -35,6 +35,7 @@ import {
   estimateItemLineTotalMinor,
   estimateMonthlyBreakdown,
 } from "../../../../lib/rental-pricing";
+import { getRentalNextAction } from "../../../../lib/rental-next-action";
 import { getRentalTimeIntelligence } from "../../../../lib/rental-time-intelligence";
 import { RENTAL_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 
@@ -124,12 +125,37 @@ export default function RentalDetailPage() {
     rental.plannedEnd,
     nowMs,
   );
+  const nextAction = getRentalNextAction(rental);
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={rental.rentalNumber}
         subtitle={`${rental.customer.firstName} ${rental.customer.lastName}`}
+        primaryAction={
+          nextAction.kind === "GENERATE_CONTRACT" && canCreateDocument ? (
+            <Button asChild size="sm">
+              <Link href={`/app/documents/new?rentalId=${rental.id}&documentType=CONTRACT`}>
+                {t("rental.nextAction.generateContract")}
+              </Link>
+            </Button>
+          ) : nextAction.kind === "PREPARE_HANDOVER" && canCreateDocument ? (
+            <Button asChild size="sm">
+              <Link
+                href={`/app/documents/new?rentalId=${rental.id}&documentType=HANDOVER_PROTOCOL`}
+              >
+                {t("rental.nextAction.prepareHandover")}
+              </Link>
+            </Button>
+          ) : nextAction.kind === "RETURN_ASSET" && canReturnAction ? (
+            <Button
+              size="sm"
+              onClick={() => void runAction(() => returnRental.mutateAsync({ id: rental.id }))}
+            >
+              {t("rental.actions.returnAll")}
+            </Button>
+          ) : undefined
+        }
         contextInfo={
           <div className="flex flex-wrap items-center gap-3">
             <RentalStatusBadge status={rental.status} />
@@ -173,14 +199,16 @@ export default function RentalDetailPage() {
                 {t("rental.actions.start")}
               </Button>
             )}
-            {canReturnAction && rental.status === "ACTIVE" && (
-              <Button
-                size="sm"
-                onClick={() => void runAction(() => returnRental.mutateAsync({ id: rental.id }))}
-              >
-                {t("rental.actions.returnAll")}
-              </Button>
-            )}
+            {canReturnAction &&
+              rental.status === "ACTIVE" &&
+              nextAction.kind !== "RETURN_ASSET" && (
+                <Button
+                  size="sm"
+                  onClick={() => void runAction(() => returnRental.mutateAsync({ id: rental.id }))}
+                >
+                  {t("rental.actions.returnAll")}
+                </Button>
+              )}
             {canCancel && CANCELLABLE_STATUSES.has(rental.status) && (
               <Button
                 size="sm"

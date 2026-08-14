@@ -574,6 +574,10 @@
           "description": "Définissez combien de jours facturables composent une unité de facturation mensuelle."
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "Générer le contrat",
+      "prepareHandover": "Préparer le procès-verbal de remise"
     }
   },
   "quote": {

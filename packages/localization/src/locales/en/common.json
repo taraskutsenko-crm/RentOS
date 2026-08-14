@@ -574,6 +574,10 @@
           "description": "Define how many billable days make up one monthly billing unit."
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "Generate contract",
+      "prepareHandover": "Prepare handover protocol"
     }
   },
   "quote": {

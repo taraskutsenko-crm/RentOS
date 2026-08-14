@@ -574,6 +574,10 @@
           "description": "Legen Sie fest, wie viele abrechenbare Tage eine monatliche Abrechnungseinheit ergeben."
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "Vertrag erstellen",
+      "prepareHandover": "Übergabeprotokoll vorbereiten"
     }
   },
   "quote": {

@@ -574,6 +574,10 @@
           "description": "Bepaal hoeveel factureerbare dagen één maandelijkse factureringseenheid vormen."
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "Contract genereren",
+      "prepareHandover": "Overdrachtsprotocol voorbereiden"
     }
   },
   "quote": {

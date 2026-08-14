@@ -574,6 +574,10 @@
           "description": "Defina quantos dias cobráveis compõem uma unidade de cobrança mensal."
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "Gerar contrato",
+      "prepareHandover": "Preparar termo de entrega"
     }
   },
   "quote": {

@@ -574,6 +574,10 @@
           "description": "定义多少个可计费天数构成一个月度计费单位。"
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "生成合同",
+      "prepareHandover": "准备交接记录"
     }
   },
   "quote": {

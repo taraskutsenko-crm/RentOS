@@ -30,6 +30,7 @@ import {
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatDate, formatDateTime } from "../../../../lib/date-format";
 import { formatMoney } from "../../../../lib/money";
+import { getQuoteNextAction } from "../../../../lib/quote-next-action";
 import { getQuoteValidityIntelligence } from "../../../../lib/quote-validity-intelligence";
 import { estimateMonthlyBreakdown } from "../../../../lib/rental-pricing";
 import { QUOTE_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
@@ -132,7 +133,8 @@ export default function QuoteDetailPage() {
   }
 
   const validity = getQuoteValidityIntelligence(quote.status, quote.validUntil, nowMs);
-  const canConvertNow = canConvert && quote.status === "ACCEPTED";
+  const nextAction = getQuoteNextAction(quote);
+  const canConvertNow = canConvert && nextAction.kind === "CONVERT_QUOTE";
 
   return (
     <div className="flex flex-col gap-6">

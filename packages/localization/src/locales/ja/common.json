@@ -574,6 +574,10 @@
           "description": "1つの月額請求単位を構成する請求対象日数を定義します。"
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "契約書を作成",
+      "prepareHandover": "引き渡し記録書を準備"
     }
   },
   "quote": {

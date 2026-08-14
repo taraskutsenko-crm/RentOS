@@ -268,6 +268,21 @@ describe("QuoteDetailPage", () => {
     expect(screen.getByRole("button", { name: /convert to rental/i })).toBeInTheDocument();
   });
 
+  it("hides the convert action for an ACCEPTED quote that already has a converted rental", () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "quotes.convert");
+    useQuoteMock.mockReturnValue({
+      data: {
+        ...baseQuote("ACCEPTED"),
+        convertedRental: { id: "rental-1", rentalNumber: "RNT-000001" },
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<QuoteDetailPage />);
+
+    expect(screen.queryByRole("button", { name: /convert to rental/i })).not.toBeInTheDocument();
+  });
+
   it("hides every lifecycle action when the user has no quote permissions", () => {
     usePermissionMock.mockReturnValue(false);
     useQuoteMock.mockReturnValue({ data: baseQuote("SENT"), isLoading: false });

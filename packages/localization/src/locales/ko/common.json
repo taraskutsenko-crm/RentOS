@@ -574,6 +574,10 @@
           "description": "하나의 월간 청구 단위를 구성하는 청구 가능 일수를 정의하세요."
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "계약서 생성",
+      "prepareHandover": "인도 기록서 준비"
     }
   },
   "quote": {

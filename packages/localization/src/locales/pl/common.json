@@ -574,6 +574,10 @@
           "description": "Określ, ile rozliczanych dni składa się na jedną jednostkę rozliczeniową miesiąca."
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "Wygeneruj umowę",
+      "prepareHandover": "Przygotuj protokół przekazania"
     }
   },
   "quote": {

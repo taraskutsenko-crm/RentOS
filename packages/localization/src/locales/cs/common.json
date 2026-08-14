@@ -574,6 +574,10 @@
           "description": "Definujte, kolik fakturovatelných dní tvoří jednu měsíční fakturační jednotku."
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "Vygenerovat smlouvu",
+      "prepareHandover": "Připravit předávací protokol"
     }
   },
   "quote": {

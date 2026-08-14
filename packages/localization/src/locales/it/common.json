@@ -574,6 +574,10 @@
           "description": "Definisci quanti giorni fatturabili compongono un'unità di fatturazione mensile."
         }
       }
+    },
+    "nextAction": {
+      "generateContract": "Genera contratto",
+      "prepareHandover": "Prepara verbale di consegna"
     }
   },
   "quote": {

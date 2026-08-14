@@ -903,7 +903,8 @@
       "duplicate": "Duplikovat",
       "saveAsNewVersion": "Uložit jako novou verzi",
       "restoreVersion": "Obnovit tuto verzi",
-      "refreshPreview": "Obnovit náhled"
+      "refreshPreview": "Obnovit náhled",
+      "startFromTemplate": "Začít se šablonou Havelio nájemní smlouva"
     },
     "sections": {
       "metadata": "Podrobnosti",
@@ -915,7 +916,11 @@
       "visual": "Vizuální editor",
       "advanced": "Pokročilé (HTML/CSS)"
     },
-    "previewSampleDataHint": "Náhled používá ukázková data — skutečné hodnoty se zobrazí, jakmile bude tato šablona použita na reálném dokumentu."
+    "previewSampleDataHint": "Náhled používá ukázková data — skutečné hodnoty se zobrazí, jakmile bude tato šablona použita na reálném dokumentu.",
+    "startFromTemplateConfirm": {
+      "title": "Nahradit aktuální obsah?",
+      "description": "Tímto se nahradí veškerý obsah ve vizuálním editoru kompletní šablonou Havelio nájemní smlouva (18 sekcí). Tuto akci nelze vrátit zpět."
+    }
   },
   "share": {
     "title": "Veřejné sdílené odkazy",

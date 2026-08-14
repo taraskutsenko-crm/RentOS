@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -47,5 +47,38 @@ describe("NewDocumentTemplatePage preview wiring", () => {
 
     const iframe = (await screen.findByTitle("Preview")) as HTMLIFrameElement;
     expect(iframe.srcdoc).toContain("Acme Rentals");
+  });
+
+  it("applies the starter template directly when the canvas is still untouched", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<NewDocumentTemplatePage />);
+
+    await user.click(
+      screen.getByRole("button", { name: "Start from Havelio Rental Contract template" }),
+    );
+
+    // No confirmation dialog since nothing had been typed yet.
+    expect(screen.queryByText("Replace current content?")).not.toBeInTheDocument();
+    const canvas = document.querySelector(".doc-builder-canvas") as HTMLElement;
+    expect(await within(canvas).findByText("Parties")).toBeInTheDocument();
+  });
+
+  it("confirms before overwriting an already-edited canvas with the starter template", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<NewDocumentTemplatePage />);
+
+    await user.click(await screen.findByText("Insert field"));
+    await user.click(await screen.findByRole("menuitem", { name: "Rental total" }));
+
+    await user.click(
+      screen.getByRole("button", { name: "Start from Havelio Rental Contract template" }),
+    );
+    expect(await screen.findByText("Replace current content?")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+
+    const canvas = document.querySelector(".doc-builder-canvas") as HTMLElement;
+    expect(await within(canvas).findByText("Parties")).toBeInTheDocument();
+    expect(screen.queryByText("Replace current content?")).not.toBeInTheDocument();
   });
 });

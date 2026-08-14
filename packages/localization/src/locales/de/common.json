@@ -903,7 +903,8 @@
       "duplicate": "Duplizieren",
       "saveAsNewVersion": "Als neue Version speichern",
       "restoreVersion": "Diese Version wiederherstellen",
-      "refreshPreview": "Vorschau aktualisieren"
+      "refreshPreview": "Vorschau aktualisieren",
+      "startFromTemplate": "Mit Havelio-Mietvertragsvorlage starten"
     },
     "sections": {
       "metadata": "Details",
@@ -915,7 +916,11 @@
       "visual": "Visueller Editor",
       "advanced": "Erweitert (HTML/CSS)"
     },
-    "previewSampleDataHint": "Die Vorschau verwendet Beispieldaten — echte Werte erscheinen erst, wenn diese Vorlage für ein tatsächliches Dokument verwendet wird."
+    "previewSampleDataHint": "Die Vorschau verwendet Beispieldaten — echte Werte erscheinen erst, wenn diese Vorlage für ein tatsächliches Dokument verwendet wird.",
+    "startFromTemplateConfirm": {
+      "title": "Aktuellen Inhalt ersetzen?",
+      "description": "Dadurch wird der gesamte Inhalt im visuellen Editor durch die vollständige Havelio-Mietvertragsvorlage (18 Abschnitte) ersetzt. Dies kann nicht rückgängig gemacht werden."
+    }
   },
   "share": {
     "title": "Öffentliche Freigabelinks",

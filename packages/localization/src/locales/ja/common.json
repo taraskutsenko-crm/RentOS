@@ -903,7 +903,8 @@
       "duplicate": "複製",
       "saveAsNewVersion": "新しいバージョンとして保存",
       "restoreVersion": "このバージョンを復元",
-      "refreshPreview": "プレビューを更新"
+      "refreshPreview": "プレビューを更新",
+      "startFromTemplate": "Havelioレンタル契約テンプレートから開始"
     },
     "sections": {
       "metadata": "詳細",
@@ -915,7 +916,11 @@
       "visual": "ビジュアルエディタ",
       "advanced": "詳細設定（HTML/CSS）"
     },
-    "previewSampleDataHint": "プレビューにはサンプルデータが使用されています。実際の値は、このテンプレートが実際の文書で使用されると表示されます。"
+    "previewSampleDataHint": "プレビューにはサンプルデータが使用されています。実際の値は、このテンプレートが実際の文書で使用されると表示されます。",
+    "startFromTemplateConfirm": {
+      "title": "現在の内容を置き換えますか？",
+      "description": "ビジュアルエディタ内のすべての内容が、Havelioレンタル契約の完全なテンプレート（18セクション）に置き換えられます。この操作は元に戻せません。"
+    }
   },
   "share": {
     "title": "公開共有リンク",

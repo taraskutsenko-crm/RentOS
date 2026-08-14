@@ -903,7 +903,8 @@
       "duplicate": "복제",
       "saveAsNewVersion": "새 버전으로 저장",
       "restoreVersion": "이 버전 복원",
-      "refreshPreview": "미리보기 새로고침"
+      "refreshPreview": "미리보기 새로고침",
+      "startFromTemplate": "Havelio 렌탈 계약 템플릿으로 시작"
     },
     "sections": {
       "metadata": "세부 정보",
@@ -915,7 +916,11 @@
       "visual": "비주얼 편집기",
       "advanced": "고급 (HTML/CSS)"
     },
-    "previewSampleDataHint": "미리보기는 샘플 데이터를 사용합니다 — 이 템플릿이 실제 문서에 사용되면 실제 값이 표시됩니다."
+    "previewSampleDataHint": "미리보기는 샘플 데이터를 사용합니다 — 이 템플릿이 실제 문서에 사용되면 실제 값이 표시됩니다.",
+    "startFromTemplateConfirm": {
+      "title": "현재 내용을 교체하시겠습니까?",
+      "description": "비주얼 편집기의 모든 내용이 전체 Havelio 렌탈 계약 템플릿(18개 섹션)으로 교체됩니다. 이 작업은 되돌릴 수 없습니다."
+    }
   },
   "share": {
     "title": "공개 공유 링크",

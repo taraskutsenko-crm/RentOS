@@ -903,7 +903,8 @@
       "duplicate": "Dupliceren",
       "saveAsNewVersion": "Opslaan als nieuwe versie",
       "restoreVersion": "Deze versie herstellen",
-      "refreshPreview": "Voorbeeld vernieuwen"
+      "refreshPreview": "Voorbeeld vernieuwen",
+      "startFromTemplate": "Beginnen met Havelio Huurovereenkomst-sjabloon"
     },
     "sections": {
       "metadata": "Details",
@@ -915,7 +916,11 @@
       "visual": "Visuele editor",
       "advanced": "Geavanceerd (HTML/CSS)"
     },
-    "previewSampleDataHint": "Het voorbeeld gebruikt voorbeeldgegevens — echte waarden verschijnen zodra dit sjabloon op een echt document wordt gebruikt."
+    "previewSampleDataHint": "Het voorbeeld gebruikt voorbeeldgegevens — echte waarden verschijnen zodra dit sjabloon op een echt document wordt gebruikt.",
+    "startFromTemplateConfirm": {
+      "title": "Huidige inhoud vervangen?",
+      "description": "Hiermee wordt alle inhoud in de visuele editor vervangen door de volledige Havelio Huurovereenkomst-sjabloon (18 secties). Dit kan niet ongedaan worden gemaakt."
+    }
   },
   "share": {
     "title": "Openbare deellinks",

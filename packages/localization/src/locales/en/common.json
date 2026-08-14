@@ -903,7 +903,8 @@
       "duplicate": "Duplicate",
       "saveAsNewVersion": "Save as new version",
       "restoreVersion": "Restore this version",
-      "refreshPreview": "Refresh preview"
+      "refreshPreview": "Refresh preview",
+      "startFromTemplate": "Start from Havelio Rental Contract template"
     },
     "sections": {
       "metadata": "Details",
@@ -915,7 +916,11 @@
       "visual": "Visual editor",
       "advanced": "Advanced (HTML/CSS)"
     },
-    "previewSampleDataHint": "Preview uses sample data — real values appear once this template is used on an actual document."
+    "previewSampleDataHint": "Preview uses sample data — real values appear once this template is used on an actual document.",
+    "startFromTemplateConfirm": {
+      "title": "Replace current content?",
+      "description": "This will replace everything in the visual editor with the full Havelio Rental Contract template (18 sections). This cannot be undone."
+    }
   },
   "documentTemplateBuilder": {
     "insertField": "Insert field",

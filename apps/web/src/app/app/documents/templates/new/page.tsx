@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { TemplateBuilder } from "../../../../../components/documents/template-builder/template-builder";
+import { ConfirmDialog } from "../../../../../components/data-table/confirm-dialog";
 import {
   useCreateDocumentTemplate,
   usePreviewDocumentTemplate,
@@ -13,11 +14,31 @@ import {
 import { useCurrentTenantId } from "../../../../../hooks/use-current-tenant";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
 import type { BlockNode } from "../../../../../lib/contract-section-library";
-import { renderBlocksToHtml } from "../../../../../lib/contract-section-library";
+import {
+  fullContractBlocks,
+  renderBlocksToHtml,
+} from "../../../../../lib/contract-section-library";
 import { toBlocksV1Schema } from "../../../../../lib/document-template-editor-format";
 import type { DocumentType } from "../../../../../types/document";
 
 type EditorMode = "visual" | "advanced";
+
+/**
+ * Tiptap normalizes its content once at mount to satisfy the schema (e.g.
+ * an empty starting section gets an implicit empty paragraph), which fires
+ * `onChange` even though the user hasn't typed anything — so `blocks` alone
+ * can't tell "untouched" from "edited." Stripped rendered text is a more
+ * reliable signal: still empty after normalization, non-empty once the
+ * user types or inserts a field/section.
+ */
+function isBlocksEffectivelyEmpty(blocks: BlockNode[] | null): boolean {
+  if (!blocks || blocks.length === 0) return true;
+  return (
+    renderBlocksToHtml(blocks)
+      .replace(/<[^>]*>/g, "")
+      .trim().length === 0
+  );
+}
 
 const DOCUMENT_TYPES: DocumentType[] = [
   "QUOTE",
@@ -47,6 +68,25 @@ export default function NewDocumentTemplatePage() {
   const [css, setCss] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [showStarterConfirm, setShowStarterConfirm] = useState(false);
+  // Bumped whenever the starter template is applied, forcing TemplateBuilder
+  // to remount — its Tiptap editor only reads `initialBlocks` at mount time,
+  // so replacing `blocks` alone wouldn't refresh the already-rendered canvas.
+  const [builderKey, setBuilderKey] = useState(0);
+
+  function applyStarterTemplate(): void {
+    setBlocks(fullContractBlocks());
+    setBuilderKey((key) => key + 1);
+    setShowStarterConfirm(false);
+  }
+
+  function handleStartFromTemplate(): void {
+    if (isBlocksEffectivelyEmpty(blocks)) {
+      applyStarterTemplate();
+    } else {
+      setShowStarterConfirm(true);
+    }
+  }
 
   async function handlePreview(): Promise<void> {
     setError(null);
@@ -149,10 +189,15 @@ export default function NewDocumentTemplatePage() {
             >
               {t("documentTemplate.editorMode.advanced")}
             </Button>
+            {mode === "visual" && documentType === "CONTRACT" && (
+              <Button type="button" size="sm" variant="outline" onClick={handleStartFromTemplate}>
+                {t("documentTemplate.actions.startFromTemplate")}
+              </Button>
+            )}
           </div>
 
           {mode === "visual" ? (
-            <TemplateBuilder initialBlocks={blocks} onChange={setBlocks} />
+            <TemplateBuilder key={builderKey} initialBlocks={blocks} onChange={setBlocks} />
           ) : (
             <>
               <div className="flex flex-col gap-1.5">
@@ -211,6 +256,15 @@ export default function NewDocumentTemplatePage() {
           </Button>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={showStarterConfirm}
+        onOpenChange={setShowStarterConfirm}
+        title={t("documentTemplate.startFromTemplateConfirm.title")}
+        description={t("documentTemplate.startFromTemplateConfirm.description")}
+        destructive
+        onConfirm={applyStarterTemplate}
+      />
     </div>
   );
 }

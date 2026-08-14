@@ -903,7 +903,8 @@
       "duplicate": "Duplicar",
       "saveAsNewVersion": "Guardar como nueva versión",
       "restoreVersion": "Restaurar esta versión",
-      "refreshPreview": "Actualizar vista previa"
+      "refreshPreview": "Actualizar vista previa",
+      "startFromTemplate": "Empezar con la plantilla de contrato de alquiler de Havelio"
     },
     "sections": {
       "metadata": "Detalles",
@@ -915,7 +916,11 @@
       "visual": "Editor visual",
       "advanced": "Avanzado (HTML/CSS)"
     },
-    "previewSampleDataHint": "La vista previa usa datos de ejemplo — los valores reales aparecerán cuando esta plantilla se use en un documento real."
+    "previewSampleDataHint": "La vista previa usa datos de ejemplo — los valores reales aparecerán cuando esta plantilla se use en un documento real.",
+    "startFromTemplateConfirm": {
+      "title": "¿Reemplazar el contenido actual?",
+      "description": "Esto reemplazará todo el contenido del editor visual con la plantilla completa de contrato de alquiler de Havelio (18 secciones). Esta acción no se puede deshacer."
+    }
   },
   "share": {
     "title": "Enlaces públicos",

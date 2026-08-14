@@ -903,7 +903,8 @@
       "duplicate": "Duplicar",
       "saveAsNewVersion": "Salvar como nova versão",
       "restoreVersion": "Restaurar esta versão",
-      "refreshPreview": "Atualizar pré-visualização"
+      "refreshPreview": "Atualizar pré-visualização",
+      "startFromTemplate": "Começar com o modelo de contrato de locação Havelio"
     },
     "sections": {
       "metadata": "Detalhes",
@@ -915,7 +916,11 @@
       "visual": "Editor visual",
       "advanced": "Avançado (HTML/CSS)"
     },
-    "previewSampleDataHint": "A pré-visualização usa dados de exemplo — os valores reais aparecerão quando este modelo for usado em um documento real."
+    "previewSampleDataHint": "A pré-visualização usa dados de exemplo — os valores reais aparecerão quando este modelo for usado em um documento real.",
+    "startFromTemplateConfirm": {
+      "title": "Substituir o conteúdo atual?",
+      "description": "Isso substituirá todo o conteúdo no editor visual pelo modelo completo de contrato de locação Havelio (18 seções). Esta ação não pode ser desfeita."
+    }
   },
   "share": {
     "title": "Links públicos de compartilhamento",

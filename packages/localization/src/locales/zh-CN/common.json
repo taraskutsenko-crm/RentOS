@@ -903,7 +903,8 @@
       "duplicate": "复制",
       "saveAsNewVersion": "另存为新版本",
       "restoreVersion": "恢复此版本",
-      "refreshPreview": "刷新预览"
+      "refreshPreview": "刷新预览",
+      "startFromTemplate": "从 Havelio 租赁合同模板开始"
     },
     "sections": {
       "metadata": "详情",
@@ -915,7 +916,11 @@
       "visual": "可视化编辑器",
       "advanced": "高级（HTML/CSS）"
     },
-    "previewSampleDataHint": "预览使用示例数据——当此模板用于实际文档时将显示真实值。"
+    "previewSampleDataHint": "预览使用示例数据——当此模板用于实际文档时将显示真实值。",
+    "startFromTemplateConfirm": {
+      "title": "替换当前内容？",
+      "description": "这将用完整的 Havelio 租赁合同模板（18 个章节）替换可视化编辑器中的所有内容。此操作无法撤销。"
+    }
   },
   "share": {
     "title": "公开共享链接",

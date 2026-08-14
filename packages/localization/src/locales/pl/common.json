@@ -903,7 +903,8 @@
       "duplicate": "Duplikuj",
       "saveAsNewVersion": "Zapisz jako nową wersję",
       "restoreVersion": "Przywróć tę wersję",
-      "refreshPreview": "Odśwież podgląd"
+      "refreshPreview": "Odśwież podgląd",
+      "startFromTemplate": "Rozpocznij od szablonu umowy najmu Havelio"
     },
     "sections": {
       "metadata": "Szczegóły",
@@ -915,7 +916,11 @@
       "visual": "Edytor wizualny",
       "advanced": "Zaawansowany (HTML/CSS)"
     },
-    "previewSampleDataHint": "Podgląd wykorzystuje przykładowe dane — rzeczywiste wartości pojawią się, gdy ten szablon zostanie użyty w rzeczywistym dokumencie."
+    "previewSampleDataHint": "Podgląd wykorzystuje przykładowe dane — rzeczywiste wartości pojawią się, gdy ten szablon zostanie użyty w rzeczywistym dokumencie.",
+    "startFromTemplateConfirm": {
+      "title": "Zastąpić bieżącą zawartość?",
+      "description": "Spowoduje to zastąpienie całej zawartości w edytorze wizualnym pełnym szablonem umowy najmu Havelio (18 sekcji). Tej czynności nie można cofnąć."
+    }
   },
   "share": {
     "title": "Publiczne linki udostępniania",

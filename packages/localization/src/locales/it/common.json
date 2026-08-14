@@ -903,7 +903,8 @@
       "duplicate": "Duplica",
       "saveAsNewVersion": "Salva come nuova versione",
       "restoreVersion": "Ripristina questa versione",
-      "refreshPreview": "Aggiorna anteprima"
+      "refreshPreview": "Aggiorna anteprima",
+      "startFromTemplate": "Inizia con il modello di contratto di noleggio Havelio"
     },
     "sections": {
       "metadata": "Dettagli",
@@ -915,7 +916,11 @@
       "visual": "Editor visuale",
       "advanced": "Avanzato (HTML/CSS)"
     },
-    "previewSampleDataHint": "L'anteprima utilizza dati di esempio — i valori reali appariranno quando questo modello sarà utilizzato su un documento reale."
+    "previewSampleDataHint": "L'anteprima utilizza dati di esempio — i valori reali appariranno quando questo modello sarà utilizzato su un documento reale.",
+    "startFromTemplateConfirm": {
+      "title": "Sostituire il contenuto attuale?",
+      "description": "Questa azione sostituirà tutto il contenuto nell'editor visuale con il modello completo del contratto di noleggio Havelio (18 sezioni). Questa azione non può essere annullata."
+    }
   },
   "share": {
     "title": "Link di condivisione pubblici",

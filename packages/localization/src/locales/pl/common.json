@@ -909,6 +909,10 @@
       "content": "Zawartość",
       "preview": "Podgląd",
       "versions": "Historia wersji"
+    },
+    "editorMode": {
+      "visual": "Edytor wizualny",
+      "advanced": "Zaawansowany (HTML/CSS)"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "Dziś",
     "yesterday": "Wczoraj",
     "hint": "Wpisz, aby wyszukać, użyj ↑/↓, aby przechodzić między zdarzeniami"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "Wstaw pole",
+    "addSection": "Dodaj sekcję",
+    "moveUp": "Przenieś w górę",
+    "moveDown": "Przenieś w dół",
+    "removeBlock": "Usuń",
+    "untitledBlock": "Sekcja bez nazwy"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "Firma",
+      "customer": "Klient",
+      "employee": "Pracownik",
+      "asset": "Sprzęt",
+      "rental": "Wynajem",
+      "quote": "Oferta",
+      "document": "Dokument",
+      "signature": "Podpis",
+      "other": "Inne"
+    },
+    "company": {
+      "name": "Nazwa firmy",
+      "logo": "Logo firmy",
+      "email": "E-mail firmy",
+      "registrationNumber": "Numer rejestracyjny",
+      "taxNumber": "NIP",
+      "address": "Adres firmy",
+      "phone": "Telefon firmy"
+    },
+    "customer": {
+      "name": "Imię i nazwisko klienta",
+      "firstName": "Imię klienta",
+      "lastName": "Nazwisko klienta",
+      "company": "Firma klienta",
+      "address": "Adres klienta",
+      "phone": "Telefon klienta",
+      "email": "E-mail klienta",
+      "taxNumber": "NIP klienta"
+    },
+    "employee": {
+      "name": "Imię i nazwisko pracownika",
+      "position": "Stanowisko pracownika"
+    },
+    "asset": {
+      "name": "Nazwa sprzętu",
+      "serial": "Numer seryjny",
+      "location": "Lokalizacja sprzętu",
+      "category": "Kategoria sprzętu"
+    },
+    "rental": {
+      "number": "Numer wynajmu",
+      "start": "Data rozpoczęcia wynajmu",
+      "end": "Data zakończenia wynajmu",
+      "startTime": "Godzina rozpoczęcia wynajmu",
+      "endTime": "Godzina zakończenia wynajmu",
+      "startDateTime": "Data i godzina rozpoczęcia wynajmu",
+      "endDateTime": "Data i godzina zakończenia wynajmu",
+      "total": "Kwota wynajmu razem",
+      "deposit": "Kaucja",
+      "assetsTableHtml": "Tabela wynajętego sprzętu"
+    },
+    "quote": {
+      "number": "Numer oferty",
+      "total": "Kwota oferty razem",
+      "servicesTableHtml": "Tabela usług dodatkowych"
+    },
+    "other": {
+      "today": "Dzisiejsza data",
+      "notes": "Uwagi"
+    },
+    "signature": {
+      "company": "Osoba podpisująca ze strony firmy",
+      "employee": "Osoba podpisująca ze strony pracownika"
+    },
+    "document": {
+      "number": "Numer dokumentu",
+      "title": "Tytuł dokumentu",
+      "type": "Typ dokumentu",
+      "status": "Status dokumentu"
+    }
+  },
+  "contractSection": {
+    "parties": "Strony umowy",
+    "subjectAssets": "Przedmiot umowy — wynajęty sprzęt",
+    "rentalPeriod": "Okres wynajmu",
+    "price": "Cena",
+    "paymentTerms": "Warunki płatności",
+    "deliveryHandover": "Przekazanie",
+    "return": "Zwrot",
+    "customerResponsibilities": "Obowiązki klienta",
+    "damageAndLoss": "Uszkodzenie i utrata",
+    "lateReturn": "Opóźniony zwrot",
+    "nonPayment": "Brak płatności",
+    "termination": "Rozwiązanie umowy",
+    "additionalCosts": "Dodatkowe koszty",
+    "notices": "Zawiadomienia",
+    "jurisdiction": "Prawo właściwe i jurysdykcja",
+    "additionalConditions": "Dodatkowe warunki"
   }
 }

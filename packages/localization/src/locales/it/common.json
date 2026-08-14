@@ -909,6 +909,10 @@
       "content": "Contenuto",
       "preview": "Anteprima",
       "versions": "Cronologia versioni"
+    },
+    "editorMode": {
+      "visual": "Editor visuale",
+      "advanced": "Avanzato (HTML/CSS)"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "Oggi",
     "yesterday": "Ieri",
     "hint": "Digita per cercare, usa ↑/↓ per spostarti tra gli eventi"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "Inserisci campo",
+    "addSection": "Aggiungi sezione",
+    "moveUp": "Sposta su",
+    "moveDown": "Sposta giù",
+    "removeBlock": "Rimuovi",
+    "untitledBlock": "Sezione senza titolo"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "Azienda",
+      "customer": "Cliente",
+      "employee": "Dipendente",
+      "asset": "Attrezzatura",
+      "rental": "Noleggio",
+      "quote": "Preventivo",
+      "document": "Documento",
+      "signature": "Firma",
+      "other": "Altro"
+    },
+    "company": {
+      "name": "Nome dell'azienda",
+      "logo": "Logo dell'azienda",
+      "email": "Email dell'azienda",
+      "registrationNumber": "Numero di registrazione",
+      "taxNumber": "Partita IVA",
+      "address": "Indirizzo dell'azienda",
+      "phone": "Telefono dell'azienda"
+    },
+    "customer": {
+      "name": "Nome del cliente",
+      "firstName": "Nome di battesimo del cliente",
+      "lastName": "Cognome del cliente",
+      "company": "Azienda del cliente",
+      "address": "Indirizzo del cliente",
+      "phone": "Telefono del cliente",
+      "email": "Email del cliente",
+      "taxNumber": "Partita IVA del cliente"
+    },
+    "employee": {
+      "name": "Nome del dipendente",
+      "position": "Posizione del dipendente"
+    },
+    "asset": {
+      "name": "Nome dell'attrezzatura",
+      "serial": "Numero di serie",
+      "location": "Ubicazione dell'attrezzatura",
+      "category": "Categoria dell'attrezzatura"
+    },
+    "rental": {
+      "number": "Numero di noleggio",
+      "start": "Data di inizio noleggio",
+      "end": "Data di fine noleggio",
+      "startTime": "Ora di inizio noleggio",
+      "endTime": "Ora di fine noleggio",
+      "startDateTime": "Data e ora di inizio noleggio",
+      "endDateTime": "Data e ora di fine noleggio",
+      "total": "Totale noleggio",
+      "deposit": "Deposito cauzionale",
+      "assetsTableHtml": "Tabella dell'attrezzatura noleggiata"
+    },
+    "quote": {
+      "number": "Numero preventivo",
+      "total": "Totale preventivo",
+      "servicesTableHtml": "Tabella dei servizi aggiuntivi"
+    },
+    "other": {
+      "today": "Data odierna",
+      "notes": "Note"
+    },
+    "signature": {
+      "company": "Firmatario per l'azienda",
+      "employee": "Firmatario dipendente"
+    },
+    "document": {
+      "number": "Numero documento",
+      "title": "Titolo del documento",
+      "type": "Tipo di documento",
+      "status": "Stato del documento"
+    }
+  },
+  "contractSection": {
+    "parties": "Parti",
+    "subjectAssets": "Oggetto del contratto — Attrezzatura noleggiata",
+    "rentalPeriod": "Periodo di noleggio",
+    "price": "Prezzo",
+    "paymentTerms": "Termini di pagamento",
+    "deliveryHandover": "Consegna",
+    "return": "Restituzione",
+    "customerResponsibilities": "Responsabilità del cliente",
+    "damageAndLoss": "Danni e perdite",
+    "lateReturn": "Restituzione tardiva",
+    "nonPayment": "Mancato pagamento",
+    "termination": "Risoluzione",
+    "additionalCosts": "Costi aggiuntivi",
+    "notices": "Comunicazioni",
+    "jurisdiction": "Legge applicabile e foro competente",
+    "additionalConditions": "Condizioni aggiuntive"
   }
 }

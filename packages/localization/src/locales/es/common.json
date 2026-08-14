@@ -909,6 +909,10 @@
       "content": "Contenido",
       "preview": "Vista previa",
       "versions": "Historial de versiones"
+    },
+    "editorMode": {
+      "visual": "Editor visual",
+      "advanced": "Avanzado (HTML/CSS)"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "Hoy",
     "yesterday": "Ayer",
     "hint": "Escribe para buscar, usa ↑/↓ para moverte entre eventos"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "Insertar campo",
+    "addSection": "Añadir sección",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "removeBlock": "Eliminar",
+    "untitledBlock": "Sección sin título"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "Empresa",
+      "customer": "Cliente",
+      "employee": "Empleado",
+      "asset": "Equipo",
+      "rental": "Alquiler",
+      "quote": "Presupuesto",
+      "document": "Documento",
+      "signature": "Firma",
+      "other": "Otros"
+    },
+    "company": {
+      "name": "Nombre de la empresa",
+      "logo": "Logo de la empresa",
+      "email": "Correo de la empresa",
+      "registrationNumber": "Número de registro",
+      "taxNumber": "NIF",
+      "address": "Dirección de la empresa",
+      "phone": "Teléfono de la empresa"
+    },
+    "customer": {
+      "name": "Nombre del cliente",
+      "firstName": "Nombre de pila del cliente",
+      "lastName": "Apellido del cliente",
+      "company": "Empresa del cliente",
+      "address": "Dirección del cliente",
+      "phone": "Teléfono del cliente",
+      "email": "Correo del cliente",
+      "taxNumber": "NIF del cliente"
+    },
+    "employee": {
+      "name": "Nombre del empleado",
+      "position": "Cargo del empleado"
+    },
+    "asset": {
+      "name": "Nombre del equipo",
+      "serial": "Número de serie",
+      "location": "Ubicación del equipo",
+      "category": "Categoría del equipo"
+    },
+    "rental": {
+      "number": "Número de alquiler",
+      "start": "Fecha de inicio del alquiler",
+      "end": "Fecha de fin del alquiler",
+      "startTime": "Hora de inicio del alquiler",
+      "endTime": "Hora de fin del alquiler",
+      "startDateTime": "Fecha y hora de inicio del alquiler",
+      "endDateTime": "Fecha y hora de fin del alquiler",
+      "total": "Total del alquiler",
+      "deposit": "Depósito de seguridad",
+      "assetsTableHtml": "Tabla de equipos alquilados"
+    },
+    "quote": {
+      "number": "Número de presupuesto",
+      "total": "Total del presupuesto",
+      "servicesTableHtml": "Tabla de servicios adicionales"
+    },
+    "other": {
+      "today": "Fecha de hoy",
+      "notes": "Notas"
+    },
+    "signature": {
+      "company": "Firmante por la empresa",
+      "employee": "Firmante empleado"
+    },
+    "document": {
+      "number": "Número de documento",
+      "title": "Título del documento",
+      "type": "Tipo de documento",
+      "status": "Estado del documento"
+    }
+  },
+  "contractSection": {
+    "parties": "Partes",
+    "subjectAssets": "Objeto del contrato — Equipos alquilados",
+    "rentalPeriod": "Período de alquiler",
+    "price": "Precio",
+    "paymentTerms": "Condiciones de pago",
+    "deliveryHandover": "Entrega",
+    "return": "Devolución",
+    "customerResponsibilities": "Responsabilidades del cliente",
+    "damageAndLoss": "Daños y pérdidas",
+    "lateReturn": "Devolución tardía",
+    "nonPayment": "Impago",
+    "termination": "Terminación",
+    "additionalCosts": "Costes adicionales",
+    "notices": "Notificaciones",
+    "jurisdiction": "Legislación aplicable y jurisdicción",
+    "additionalConditions": "Condiciones adicionales"
   }
 }

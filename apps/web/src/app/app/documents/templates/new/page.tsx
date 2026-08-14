@@ -5,10 +5,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { TemplateBuilder } from "../../../../../components/documents/template-builder/template-builder";
 import { useCreateDocumentTemplate } from "../../../../../hooks/use-document-templates";
 import { useCurrentTenantId } from "../../../../../hooks/use-current-tenant";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
+import type { BlockNode } from "../../../../../lib/contract-section-library";
+import { renderBlocksToHtml } from "../../../../../lib/contract-section-library";
+import { toBlocksV1Schema } from "../../../../../lib/document-template-editor-format";
 import type { DocumentType } from "../../../../../types/document";
+
+type EditorMode = "visual" | "advanced";
 
 const DOCUMENT_TYPES: DocumentType[] = [
   "QUOTE",
@@ -29,6 +35,8 @@ export default function NewDocumentTemplatePage() {
   const [documentType, setDocumentType] = useState<DocumentType>("CONTRACT");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [mode, setMode] = useState<EditorMode>("visual");
+  const [blocks, setBlocks] = useState<BlockNode[] | null>(null);
   const [htmlContent, setHtmlContent] = useState(
     "<h1>{{company.name}}</h1>\n<p>{{customer.name}}</p>\n<p>{{today}}</p>",
   );
@@ -38,18 +46,31 @@ export default function NewDocumentTemplatePage() {
   async function handleSubmit(): Promise<void> {
     setError(null);
     try {
-      const template = await createTemplate.mutateAsync({
-        documentType,
-        name,
-        description: description || null,
-        htmlContent,
-        css: css || null,
-      });
+      const template = await createTemplate.mutateAsync(
+        mode === "visual"
+          ? {
+              documentType,
+              name,
+              description: description || null,
+              htmlContent: renderBlocksToHtml(blocks ?? []),
+              css: null,
+              variablesSchema: toBlocksV1Schema(blocks ?? []),
+            }
+          : {
+              documentType,
+              name,
+              description: description || null,
+              htmlContent,
+              css: css || null,
+            },
+      );
       router.push(`/app/documents/templates/${template.id}`);
     } catch (submitError) {
       setError(apiErrorMessage(submitError, t("common.error")));
     }
   }
+
+  const contentIsEmpty = mode === "visual" ? !blocks?.length : !htmlContent;
 
   return (
     <div className="flex justify-center">
@@ -92,28 +113,53 @@ export default function NewDocumentTemplatePage() {
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="htmlContent">{t("documentTemplate.fields.htmlContent")}</Label>
-            <textarea
-              id="htmlContent"
-              className="border-input min-h-64 rounded-md border bg-transparent px-3 py-2 font-mono text-xs shadow-xs"
-              value={htmlContent}
-              onChange={(event) => setHtmlContent(event.target.value)}
-            />
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant={mode === "visual" ? "default" : "outline"}
+              onClick={() => setMode("visual")}
+            >
+              {t("documentTemplate.editorMode.visual")}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={mode === "advanced" ? "default" : "outline"}
+              onClick={() => setMode("advanced")}
+            >
+              {t("documentTemplate.editorMode.advanced")}
+            </Button>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="css">{t("documentTemplate.fields.css")}</Label>
-            <textarea
-              id="css"
-              className="border-input min-h-32 rounded-md border bg-transparent px-3 py-2 font-mono text-xs shadow-xs"
-              value={css}
-              onChange={(event) => setCss(event.target.value)}
-            />
-          </div>
+          {mode === "visual" ? (
+            <TemplateBuilder initialBlocks={blocks} onChange={setBlocks} />
+          ) : (
+            <>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="htmlContent">{t("documentTemplate.fields.htmlContent")}</Label>
+                <textarea
+                  id="htmlContent"
+                  className="border-input min-h-64 rounded-md border bg-transparent px-3 py-2 font-mono text-xs shadow-xs"
+                  value={htmlContent}
+                  onChange={(event) => setHtmlContent(event.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="css">{t("documentTemplate.fields.css")}</Label>
+                <textarea
+                  id="css"
+                  className="border-input min-h-32 rounded-md border bg-transparent px-3 py-2 font-mono text-xs shadow-xs"
+                  value={css}
+                  onChange={(event) => setCss(event.target.value)}
+                />
+              </div>
+            </>
+          )}
 
           <Button
-            disabled={!name || !htmlContent || createTemplate.isPending}
+            disabled={!name || contentIsEmpty || createTemplate.isPending}
             onClick={() => void handleSubmit()}
           >
             {createTemplate.isPending ? t("documentTemplate.saving") : t("documentTemplate.save")}

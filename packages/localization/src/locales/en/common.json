@@ -909,7 +909,110 @@
       "content": "Content",
       "preview": "Preview",
       "versions": "Version history"
+    },
+    "editorMode": {
+      "visual": "Visual editor",
+      "advanced": "Advanced (HTML/CSS)"
     }
+  },
+  "documentTemplateBuilder": {
+    "insertField": "Insert field",
+    "addSection": "Add section",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "removeBlock": "Remove",
+    "untitledBlock": "Untitled section"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "Company",
+      "customer": "Customer",
+      "employee": "Employee",
+      "asset": "Asset",
+      "rental": "Rental",
+      "quote": "Quote",
+      "document": "Document",
+      "signature": "Signature",
+      "other": "Other"
+    },
+    "company": {
+      "name": "Company name",
+      "logo": "Company logo",
+      "email": "Company email",
+      "registrationNumber": "Registration number",
+      "taxNumber": "Tax number",
+      "address": "Company address",
+      "phone": "Company phone"
+    },
+    "customer": {
+      "name": "Customer name",
+      "firstName": "Customer first name",
+      "lastName": "Customer last name",
+      "company": "Customer company",
+      "address": "Customer address",
+      "phone": "Customer phone",
+      "email": "Customer email",
+      "taxNumber": "Customer tax number"
+    },
+    "employee": {
+      "name": "Employee name",
+      "position": "Employee position"
+    },
+    "asset": {
+      "name": "Asset name",
+      "serial": "Asset serial number",
+      "location": "Asset location",
+      "category": "Asset category"
+    },
+    "rental": {
+      "number": "Rental number",
+      "start": "Rental start date",
+      "end": "Rental end date",
+      "startTime": "Rental start time",
+      "endTime": "Rental end time",
+      "startDateTime": "Rental start date & time",
+      "endDateTime": "Rental end date & time",
+      "total": "Rental total",
+      "deposit": "Security deposit",
+      "assetsTableHtml": "Rented assets table"
+    },
+    "quote": {
+      "number": "Quote number",
+      "total": "Quote total",
+      "servicesTableHtml": "Additional services table"
+    },
+    "other": {
+      "today": "Today's date",
+      "notes": "Notes"
+    },
+    "signature": {
+      "company": "Company signatory",
+      "employee": "Employee signatory"
+    },
+    "document": {
+      "number": "Document number",
+      "title": "Document title",
+      "type": "Document type",
+      "status": "Document status"
+    }
+  },
+  "contractSection": {
+    "parties": "Parties",
+    "subjectAssets": "Subject of the Contract — Rented Assets",
+    "rentalPeriod": "Rental Period",
+    "price": "Price",
+    "paymentTerms": "Payment Terms",
+    "deliveryHandover": "Delivery and Handover",
+    "return": "Return",
+    "customerResponsibilities": "Customer Responsibilities",
+    "damageAndLoss": "Damage and Loss",
+    "lateReturn": "Late Return",
+    "nonPayment": "Non-Payment",
+    "termination": "Termination",
+    "additionalCosts": "Additional Costs",
+    "notices": "Notices",
+    "jurisdiction": "Applicable Terms and Jurisdiction",
+    "additionalConditions": "Additional Conditions"
   },
   "share": {
     "title": "Public share links",

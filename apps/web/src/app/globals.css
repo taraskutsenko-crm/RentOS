@@ -1,3 +1,38 @@
 @import "tailwindcss";
 @import "@rentos/ui/styles/theme.css";
 @source "../../../../packages/ui/src";
+
+/*
+ * Visual chrome for the Tiptap-based no-code document template builder
+ * (apps/web/src/components/documents/template-builder/). These classes only
+ * style the in-editor authoring experience — they are unrelated to the
+ * `.doc-section`/`.doc-clause` classes that DocumentRendererService emits
+ * into the actual saved template HTML (see apps/api/.../base-document-css.ts),
+ * which the editor deliberately keeps decoupled from by using
+ * `data-doc-section`/`data-doc-section-title` attribute selectors here.
+ */
+@layer components {
+  .doc-builder-canvas {
+    @apply border-input min-h-64 rounded-md border bg-transparent px-4 py-3 text-sm leading-relaxed focus-within:outline-none;
+  }
+
+  .doc-builder-canvas [data-doc-section] {
+    @apply border-border mb-4 border-b pb-4 last:mb-0 last:border-b-0 last:pb-0;
+  }
+
+  .doc-builder-canvas [data-doc-section-title] {
+    @apply mb-2 text-sm font-semibold;
+  }
+
+  .doc-builder-canvas p {
+    @apply mb-2 last:mb-0;
+  }
+
+  .doc-builder-chip {
+    @apply bg-primary/10 text-primary mx-0.5 inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium;
+  }
+
+  .doc-builder-block {
+    @apply border-border bg-muted text-muted-foreground my-2 flex items-center justify-center rounded-md border border-dashed px-3 py-2 text-xs font-medium;
+  }
+}

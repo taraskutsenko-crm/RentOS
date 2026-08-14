@@ -909,6 +909,10 @@
       "content": "Inhoud",
       "preview": "Voorbeeld",
       "versions": "Versiegeschiedenis"
+    },
+    "editorMode": {
+      "visual": "Visuele editor",
+      "advanced": "Geavanceerd (HTML/CSS)"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "Vandaag",
     "yesterday": "Gisteren",
     "hint": "Typ om te zoeken, gebruik ↑/↓ om tussen gebeurtenissen te navigeren"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "Veld invoegen",
+    "addSection": "Sectie toevoegen",
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag",
+    "removeBlock": "Verwijderen",
+    "untitledBlock": "Naamloze sectie"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "Bedrijf",
+      "customer": "Klant",
+      "employee": "Medewerker",
+      "asset": "Materiaal",
+      "rental": "Verhuur",
+      "quote": "Offerte",
+      "document": "Document",
+      "signature": "Handtekening",
+      "other": "Overig"
+    },
+    "company": {
+      "name": "Bedrijfsnaam",
+      "logo": "Bedrijfslogo",
+      "email": "Bedrijfs-e-mail",
+      "registrationNumber": "Registratienummer",
+      "taxNumber": "Btw-nummer",
+      "address": "Bedrijfsadres",
+      "phone": "Bedrijfstelefoon"
+    },
+    "customer": {
+      "name": "Naam klant",
+      "firstName": "Voornaam klant",
+      "lastName": "Achternaam klant",
+      "company": "Bedrijf klant",
+      "address": "Adres klant",
+      "phone": "Telefoon klant",
+      "email": "E-mail klant",
+      "taxNumber": "Btw-nummer klant"
+    },
+    "employee": {
+      "name": "Naam medewerker",
+      "position": "Functie medewerker"
+    },
+    "asset": {
+      "name": "Naam materiaal",
+      "serial": "Serienummer",
+      "location": "Locatie materiaal",
+      "category": "Categorie materiaal"
+    },
+    "rental": {
+      "number": "Verhuurnummer",
+      "start": "Startdatum verhuur",
+      "end": "Einddatum verhuur",
+      "startTime": "Starttijd verhuur",
+      "endTime": "Eindtijd verhuur",
+      "startDateTime": "Startdatum en -tijd verhuur",
+      "endDateTime": "Einddatum en -tijd verhuur",
+      "total": "Totaalbedrag verhuur",
+      "deposit": "Borg",
+      "assetsTableHtml": "Tabel gehuurd materiaal"
+    },
+    "quote": {
+      "number": "Offertenummer",
+      "total": "Totaalbedrag offerte",
+      "servicesTableHtml": "Tabel aanvullende diensten"
+    },
+    "other": {
+      "today": "Datum van vandaag",
+      "notes": "Notities"
+    },
+    "signature": {
+      "company": "Ondertekenaar bedrijf",
+      "employee": "Ondertekenaar medewerker"
+    },
+    "document": {
+      "number": "Documentnummer",
+      "title": "Documenttitel",
+      "type": "Documenttype",
+      "status": "Documentstatus"
+    }
+  },
+  "contractSection": {
+    "parties": "Partijen",
+    "subjectAssets": "Onderwerp van de overeenkomst — gehuurd materiaal",
+    "rentalPeriod": "Huurperiode",
+    "price": "Prijs",
+    "paymentTerms": "Betalingsvoorwaarden",
+    "deliveryHandover": "Overdracht",
+    "return": "Retour",
+    "customerResponsibilities": "Verantwoordelijkheden van de klant",
+    "damageAndLoss": "Schade en verlies",
+    "lateReturn": "Te late teruggave",
+    "nonPayment": "Niet-betaling",
+    "termination": "Beëindiging",
+    "additionalCosts": "Bijkomende kosten",
+    "notices": "Kennisgevingen",
+    "jurisdiction": "Toepasselijk recht en bevoegde rechter",
+    "additionalConditions": "Aanvullende voorwaarden"
   }
 }

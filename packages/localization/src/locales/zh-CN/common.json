@@ -909,6 +909,10 @@
       "content": "内容",
       "preview": "预览",
       "versions": "版本历史"
+    },
+    "editorMode": {
+      "visual": "可视化编辑器",
+      "advanced": "高级（HTML/CSS）"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "今天",
     "yesterday": "昨天",
     "hint": "输入以搜索，使用 ↑/↓ 在事件间移动"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "插入字段",
+    "addSection": "添加章节",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "removeBlock": "移除",
+    "untitledBlock": "未命名章节"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "公司",
+      "customer": "客户",
+      "employee": "员工",
+      "asset": "资产",
+      "rental": "租赁",
+      "quote": "报价",
+      "document": "文档",
+      "signature": "签署",
+      "other": "其他"
+    },
+    "company": {
+      "name": "公司名称",
+      "logo": "公司徽标",
+      "email": "公司邮箱",
+      "registrationNumber": "注册号",
+      "taxNumber": "税号",
+      "address": "公司地址",
+      "phone": "公司电话"
+    },
+    "customer": {
+      "name": "客户姓名",
+      "firstName": "客户名字",
+      "lastName": "客户姓氏",
+      "company": "客户公司",
+      "address": "客户地址",
+      "phone": "客户电话",
+      "email": "客户邮箱",
+      "taxNumber": "客户税号"
+    },
+    "employee": {
+      "name": "员工姓名",
+      "position": "员工职位"
+    },
+    "asset": {
+      "name": "资产名称",
+      "serial": "序列号",
+      "location": "资产位置",
+      "category": "资产类别"
+    },
+    "rental": {
+      "number": "租赁编号",
+      "start": "租赁开始日期",
+      "end": "租赁结束日期",
+      "startTime": "租赁开始时间",
+      "endTime": "租赁结束时间",
+      "startDateTime": "租赁开始日期和时间",
+      "endDateTime": "租赁结束日期和时间",
+      "total": "租赁总额",
+      "deposit": "押金",
+      "assetsTableHtml": "租赁资产表"
+    },
+    "quote": {
+      "number": "报价编号",
+      "total": "报价总额",
+      "servicesTableHtml": "附加服务表"
+    },
+    "other": {
+      "today": "今天日期",
+      "notes": "备注"
+    },
+    "signature": {
+      "company": "公司签署人",
+      "employee": "员工签署人"
+    },
+    "document": {
+      "number": "文档编号",
+      "title": "文档标题",
+      "type": "文档类型",
+      "status": "文档状态"
+    }
+  },
+  "contractSection": {
+    "parties": "各方",
+    "subjectAssets": "合同标的 — 租赁资产",
+    "rentalPeriod": "租赁期限",
+    "price": "价格",
+    "paymentTerms": "付款条款",
+    "deliveryHandover": "交付",
+    "return": "归还",
+    "customerResponsibilities": "客户责任",
+    "damageAndLoss": "损坏与丢失",
+    "lateReturn": "逾期归还",
+    "nonPayment": "未付款",
+    "termination": "终止",
+    "additionalCosts": "额外费用",
+    "notices": "通知",
+    "jurisdiction": "适用法律与管辖权",
+    "additionalConditions": "附加条件"
   }
 }

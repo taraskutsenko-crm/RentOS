@@ -909,6 +909,10 @@
       "content": "Contenu",
       "preview": "Aperçu",
       "versions": "Historique des versions"
+    },
+    "editorMode": {
+      "visual": "Éditeur visuel",
+      "advanced": "Avancé (HTML/CSS)"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "hint": "Tapez pour rechercher, utilisez ↑/↓ pour naviguer entre les événements"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "Insérer un champ",
+    "addSection": "Ajouter une section",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "removeBlock": "Supprimer",
+    "untitledBlock": "Section sans titre"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "Entreprise",
+      "customer": "Client",
+      "employee": "Employé",
+      "asset": "Matériel",
+      "rental": "Location",
+      "quote": "Devis",
+      "document": "Document",
+      "signature": "Signature",
+      "other": "Autre"
+    },
+    "company": {
+      "name": "Nom de l'entreprise",
+      "logo": "Logo de l'entreprise",
+      "email": "E-mail de l'entreprise",
+      "registrationNumber": "Numéro d'immatriculation",
+      "taxNumber": "Numéro de TVA",
+      "address": "Adresse de l'entreprise",
+      "phone": "Téléphone de l'entreprise"
+    },
+    "customer": {
+      "name": "Nom du client",
+      "firstName": "Prénom du client",
+      "lastName": "Nom de famille du client",
+      "company": "Entreprise du client",
+      "address": "Adresse du client",
+      "phone": "Téléphone du client",
+      "email": "E-mail du client",
+      "taxNumber": "Numéro de TVA du client"
+    },
+    "employee": {
+      "name": "Nom de l'employé",
+      "position": "Poste de l'employé"
+    },
+    "asset": {
+      "name": "Nom du matériel",
+      "serial": "Numéro de série",
+      "location": "Emplacement du matériel",
+      "category": "Catégorie du matériel"
+    },
+    "rental": {
+      "number": "Numéro de location",
+      "start": "Date de début de location",
+      "end": "Date de fin de location",
+      "startTime": "Heure de début de location",
+      "endTime": "Heure de fin de location",
+      "startDateTime": "Date et heure de début de location",
+      "endDateTime": "Date et heure de fin de location",
+      "total": "Total de la location",
+      "deposit": "Caution",
+      "assetsTableHtml": "Tableau du matériel loué"
+    },
+    "quote": {
+      "number": "Numéro de devis",
+      "total": "Total du devis",
+      "servicesTableHtml": "Tableau des services additionnels"
+    },
+    "other": {
+      "today": "Date du jour",
+      "notes": "Notes"
+    },
+    "signature": {
+      "company": "Signataire pour l'entreprise",
+      "employee": "Signataire employé"
+    },
+    "document": {
+      "number": "Numéro de document",
+      "title": "Titre du document",
+      "type": "Type de document",
+      "status": "Statut du document"
+    }
+  },
+  "contractSection": {
+    "parties": "Parties",
+    "subjectAssets": "Objet du contrat — Matériel loué",
+    "rentalPeriod": "Période de location",
+    "price": "Prix",
+    "paymentTerms": "Modalités de paiement",
+    "deliveryHandover": "Remise",
+    "return": "Retour",
+    "customerResponsibilities": "Responsabilités du client",
+    "damageAndLoss": "Dommages et pertes",
+    "lateReturn": "Retour tardif",
+    "nonPayment": "Non-paiement",
+    "termination": "Résiliation",
+    "additionalCosts": "Frais supplémentaires",
+    "notices": "Notifications",
+    "jurisdiction": "Droit applicable et juridiction",
+    "additionalConditions": "Conditions supplémentaires"
   }
 }

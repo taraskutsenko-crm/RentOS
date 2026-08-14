@@ -909,6 +909,10 @@
       "content": "Conteúdo",
       "preview": "Pré-visualização",
       "versions": "Histórico de versões"
+    },
+    "editorMode": {
+      "visual": "Editor visual",
+      "advanced": "Avançado (HTML/CSS)"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "Hoje",
     "yesterday": "Ontem",
     "hint": "Digite para pesquisar, use ↑/↓ para navegar entre os eventos"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "Inserir campo",
+    "addSection": "Adicionar seção",
+    "moveUp": "Mover para cima",
+    "moveDown": "Mover para baixo",
+    "removeBlock": "Remover",
+    "untitledBlock": "Seção sem título"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "Empresa",
+      "customer": "Cliente",
+      "employee": "Funcionário",
+      "asset": "Equipamento",
+      "rental": "Locação",
+      "quote": "Orçamento",
+      "document": "Documento",
+      "signature": "Assinatura",
+      "other": "Outros"
+    },
+    "company": {
+      "name": "Nome da empresa",
+      "logo": "Logotipo da empresa",
+      "email": "E-mail da empresa",
+      "registrationNumber": "Número de registro",
+      "taxNumber": "CNPJ",
+      "address": "Endereço da empresa",
+      "phone": "Telefone da empresa"
+    },
+    "customer": {
+      "name": "Nome do cliente",
+      "firstName": "Primeiro nome do cliente",
+      "lastName": "Sobrenome do cliente",
+      "company": "Empresa do cliente",
+      "address": "Endereço do cliente",
+      "phone": "Telefone do cliente",
+      "email": "E-mail do cliente",
+      "taxNumber": "CPF/CNPJ do cliente"
+    },
+    "employee": {
+      "name": "Nome do funcionário",
+      "position": "Cargo do funcionário"
+    },
+    "asset": {
+      "name": "Nome do equipamento",
+      "serial": "Número de série",
+      "location": "Localização do equipamento",
+      "category": "Categoria do equipamento"
+    },
+    "rental": {
+      "number": "Número da locação",
+      "start": "Data de início da locação",
+      "end": "Data de término da locação",
+      "startTime": "Hora de início da locação",
+      "endTime": "Hora de término da locação",
+      "startDateTime": "Data e hora de início da locação",
+      "endDateTime": "Data e hora de término da locação",
+      "total": "Total da locação",
+      "deposit": "Caução",
+      "assetsTableHtml": "Tabela de equipamentos locados"
+    },
+    "quote": {
+      "number": "Número do orçamento",
+      "total": "Total do orçamento",
+      "servicesTableHtml": "Tabela de serviços adicionais"
+    },
+    "other": {
+      "today": "Data de hoje",
+      "notes": "Observações"
+    },
+    "signature": {
+      "company": "Signatário da empresa",
+      "employee": "Signatário funcionário"
+    },
+    "document": {
+      "number": "Número do documento",
+      "title": "Título do documento",
+      "type": "Tipo de documento",
+      "status": "Status do documento"
+    }
+  },
+  "contractSection": {
+    "parties": "Partes",
+    "subjectAssets": "Objeto do contrato — Equipamentos locados",
+    "rentalPeriod": "Período de locação",
+    "price": "Preço",
+    "paymentTerms": "Condições de pagamento",
+    "deliveryHandover": "Entrega",
+    "return": "Devolução",
+    "customerResponsibilities": "Responsabilidades do cliente",
+    "damageAndLoss": "Danos e perdas",
+    "lateReturn": "Devolução tardia",
+    "nonPayment": "Inadimplência",
+    "termination": "Rescisão",
+    "additionalCosts": "Custos adicionais",
+    "notices": "Notificações",
+    "jurisdiction": "Legislação aplicável e foro",
+    "additionalConditions": "Condições adicionais"
   }
 }

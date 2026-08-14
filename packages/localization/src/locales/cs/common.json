@@ -909,6 +909,10 @@
       "content": "Obsah",
       "preview": "Náhled",
       "versions": "Historie verzí"
+    },
+    "editorMode": {
+      "visual": "Vizuální editor",
+      "advanced": "Pokročilé (HTML/CSS)"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "Dnes",
     "yesterday": "Včera",
     "hint": "Pište pro hledání, použijte ↑/↓ pro pohyb mezi událostmi"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "Vložit pole",
+    "addSection": "Přidat sekci",
+    "moveUp": "Posunout nahoru",
+    "moveDown": "Posunout dolů",
+    "removeBlock": "Odebrat",
+    "untitledBlock": "Nepojmenovaná sekce"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "Společnost",
+      "customer": "Zákazník",
+      "employee": "Zaměstnanec",
+      "asset": "Vybavení",
+      "rental": "Pronájem",
+      "quote": "Nabídka",
+      "document": "Dokument",
+      "signature": "Podpis",
+      "other": "Ostatní"
+    },
+    "company": {
+      "name": "Název společnosti",
+      "logo": "Logo společnosti",
+      "email": "E-mail společnosti",
+      "registrationNumber": "Registrační číslo",
+      "taxNumber": "DIČ",
+      "address": "Adresa společnosti",
+      "phone": "Telefon společnosti"
+    },
+    "customer": {
+      "name": "Jméno zákazníka",
+      "firstName": "Křestní jméno zákazníka",
+      "lastName": "Příjmení zákazníka",
+      "company": "Společnost zákazníka",
+      "address": "Adresa zákazníka",
+      "phone": "Telefon zákazníka",
+      "email": "E-mail zákazníka",
+      "taxNumber": "DIČ zákazníka"
+    },
+    "employee": {
+      "name": "Jméno zaměstnance",
+      "position": "Pozice zaměstnance"
+    },
+    "asset": {
+      "name": "Název vybavení",
+      "serial": "Sériové číslo",
+      "location": "Umístění vybavení",
+      "category": "Kategorie vybavení"
+    },
+    "rental": {
+      "number": "Číslo pronájmu",
+      "start": "Datum zahájení pronájmu",
+      "end": "Datum ukončení pronájmu",
+      "startTime": "Čas zahájení pronájmu",
+      "endTime": "Čas ukončení pronájmu",
+      "startDateTime": "Datum a čas zahájení pronájmu",
+      "endDateTime": "Datum a čas ukončení pronájmu",
+      "total": "Celková částka pronájmu",
+      "deposit": "Jistota",
+      "assetsTableHtml": "Tabulka pronajatého vybavení"
+    },
+    "quote": {
+      "number": "Číslo nabídky",
+      "total": "Celková částka nabídky",
+      "servicesTableHtml": "Tabulka doplňkových služeb"
+    },
+    "other": {
+      "today": "Dnešní datum",
+      "notes": "Poznámky"
+    },
+    "signature": {
+      "company": "Podepisující za společnost",
+      "employee": "Podepisující zaměstnanec"
+    },
+    "document": {
+      "number": "Číslo dokumentu",
+      "title": "Název dokumentu",
+      "type": "Typ dokumentu",
+      "status": "Stav dokumentu"
+    }
+  },
+  "contractSection": {
+    "parties": "Smluvní strany",
+    "subjectAssets": "Předmět smlouvy — pronajaté vybavení",
+    "rentalPeriod": "Doba pronájmu",
+    "price": "Cena",
+    "paymentTerms": "Platební podmínky",
+    "deliveryHandover": "Předání",
+    "return": "Vrácení",
+    "customerResponsibilities": "Povinnosti zákazníka",
+    "damageAndLoss": "Poškození a ztráta",
+    "lateReturn": "Pozdní vrácení",
+    "nonPayment": "Neuhrazení platby",
+    "termination": "Ukončení smlouvy",
+    "additionalCosts": "Dodatečné náklady",
+    "notices": "Oznámení",
+    "jurisdiction": "Rozhodné právo a příslušnost",
+    "additionalConditions": "Další podmínky"
   }
 }

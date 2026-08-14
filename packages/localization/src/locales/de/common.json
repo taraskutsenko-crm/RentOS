@@ -909,6 +909,10 @@
       "content": "Inhalt",
       "preview": "Vorschau",
       "versions": "Versionsverlauf"
+    },
+    "editorMode": {
+      "visual": "Visueller Editor",
+      "advanced": "Erweitert (HTML/CSS)"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "Heute",
     "yesterday": "Gestern",
     "hint": "Tippen zum Suchen, ↑/↓ zum Wechseln zwischen Ereignissen"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "Feld einfügen",
+    "addSection": "Abschnitt hinzufügen",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "removeBlock": "Entfernen",
+    "untitledBlock": "Unbenannter Abschnitt"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "Unternehmen",
+      "customer": "Kunde",
+      "employee": "Mitarbeiter",
+      "asset": "Ausrüstung",
+      "rental": "Miete",
+      "quote": "Angebot",
+      "document": "Dokument",
+      "signature": "Unterschrift",
+      "other": "Sonstiges"
+    },
+    "company": {
+      "name": "Firmenname",
+      "logo": "Firmenlogo",
+      "email": "Firmen-E-Mail",
+      "registrationNumber": "Handelsregisternummer",
+      "taxNumber": "Steuernummer",
+      "address": "Firmenadresse",
+      "phone": "Firmentelefon"
+    },
+    "customer": {
+      "name": "Kundenname",
+      "firstName": "Vorname des Kunden",
+      "lastName": "Nachname des Kunden",
+      "company": "Firma des Kunden",
+      "address": "Adresse des Kunden",
+      "phone": "Telefon des Kunden",
+      "email": "E-Mail des Kunden",
+      "taxNumber": "Steuernummer des Kunden"
+    },
+    "employee": {
+      "name": "Name des Mitarbeiters",
+      "position": "Position des Mitarbeiters"
+    },
+    "asset": {
+      "name": "Name der Ausrüstung",
+      "serial": "Seriennummer",
+      "location": "Standort der Ausrüstung",
+      "category": "Kategorie der Ausrüstung"
+    },
+    "rental": {
+      "number": "Mietnummer",
+      "start": "Mietbeginn (Datum)",
+      "end": "Mietende (Datum)",
+      "startTime": "Mietbeginn (Uhrzeit)",
+      "endTime": "Mietende (Uhrzeit)",
+      "startDateTime": "Mietbeginn (Datum & Uhrzeit)",
+      "endDateTime": "Mietende (Datum & Uhrzeit)",
+      "total": "Mietgesamtbetrag",
+      "deposit": "Kaution",
+      "assetsTableHtml": "Tabelle der gemieteten Ausrüstung"
+    },
+    "quote": {
+      "number": "Angebotsnummer",
+      "total": "Angebotsgesamtbetrag",
+      "servicesTableHtml": "Tabelle zusätzlicher Leistungen"
+    },
+    "other": {
+      "today": "Heutiges Datum",
+      "notes": "Notizen"
+    },
+    "signature": {
+      "company": "Unterzeichner Unternehmen",
+      "employee": "Unterzeichner Mitarbeiter"
+    },
+    "document": {
+      "number": "Dokumentnummer",
+      "title": "Dokumenttitel",
+      "type": "Dokumenttyp",
+      "status": "Dokumentstatus"
+    }
+  },
+  "contractSection": {
+    "parties": "Vertragsparteien",
+    "subjectAssets": "Vertragsgegenstand — Gemietete Ausrüstung",
+    "rentalPeriod": "Mietzeitraum",
+    "price": "Preis",
+    "paymentTerms": "Zahlungsbedingungen",
+    "deliveryHandover": "Übergabe",
+    "return": "Rückgabe",
+    "customerResponsibilities": "Pflichten des Kunden",
+    "damageAndLoss": "Schaden und Verlust",
+    "lateReturn": "Verspätete Rückgabe",
+    "nonPayment": "Zahlungsverzug",
+    "termination": "Kündigung",
+    "additionalCosts": "Zusätzliche Kosten",
+    "notices": "Mitteilungen",
+    "jurisdiction": "Anwendbares Recht und Gerichtsstand",
+    "additionalConditions": "Zusätzliche Bedingungen"
   }
 }

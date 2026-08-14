@@ -909,6 +909,10 @@
       "content": "콘텐츠",
       "preview": "미리보기",
       "versions": "버전 기록"
+    },
+    "editorMode": {
+      "visual": "비주얼 편집기",
+      "advanced": "고급 (HTML/CSS)"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "오늘",
     "yesterday": "어제",
     "hint": "입력하여 검색, ↑/↓ 키로 이벤트 간 이동"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "필드 삽입",
+    "addSection": "섹션 추가",
+    "moveUp": "위로 이동",
+    "moveDown": "아래로 이동",
+    "removeBlock": "제거",
+    "untitledBlock": "제목 없는 섹션"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "회사",
+      "customer": "고객",
+      "employee": "직원",
+      "asset": "자산",
+      "rental": "렌탈",
+      "quote": "견적",
+      "document": "문서",
+      "signature": "서명",
+      "other": "기타"
+    },
+    "company": {
+      "name": "회사명",
+      "logo": "회사 로고",
+      "email": "회사 이메일",
+      "registrationNumber": "등록 번호",
+      "taxNumber": "세금 번호",
+      "address": "회사 주소",
+      "phone": "회사 전화번호"
+    },
+    "customer": {
+      "name": "고객명",
+      "firstName": "고객 이름",
+      "lastName": "고객 성",
+      "company": "고객 회사",
+      "address": "고객 주소",
+      "phone": "고객 전화번호",
+      "email": "고객 이메일",
+      "taxNumber": "고객 세금 번호"
+    },
+    "employee": {
+      "name": "직원 이름",
+      "position": "직원 직책"
+    },
+    "asset": {
+      "name": "자산 이름",
+      "serial": "일련번호",
+      "location": "자산 위치",
+      "category": "자산 카테고리"
+    },
+    "rental": {
+      "number": "렌탈 번호",
+      "start": "렌탈 시작일",
+      "end": "렌탈 종료일",
+      "startTime": "렌탈 시작 시간",
+      "endTime": "렌탈 종료 시간",
+      "startDateTime": "렌탈 시작 일시",
+      "endDateTime": "렌탈 종료 일시",
+      "total": "렌탈 총액",
+      "deposit": "보증금",
+      "assetsTableHtml": "렌탈 자산 표"
+    },
+    "quote": {
+      "number": "견적 번호",
+      "total": "견적 총액",
+      "servicesTableHtml": "추가 서비스 표"
+    },
+    "other": {
+      "today": "오늘 날짜",
+      "notes": "비고"
+    },
+    "signature": {
+      "company": "회사 서명자",
+      "employee": "직원 서명자"
+    },
+    "document": {
+      "number": "문서 번호",
+      "title": "문서 제목",
+      "type": "문서 유형",
+      "status": "문서 상태"
+    }
+  },
+  "contractSection": {
+    "parties": "당사자",
+    "subjectAssets": "계약 목적물 — 렌탈 자산",
+    "rentalPeriod": "렌탈 기간",
+    "price": "가격",
+    "paymentTerms": "결제 조건",
+    "deliveryHandover": "인도",
+    "return": "반납",
+    "customerResponsibilities": "고객의 책임",
+    "damageAndLoss": "손상 및 분실",
+    "lateReturn": "반납 지연",
+    "nonPayment": "미납",
+    "termination": "계약 해지",
+    "additionalCosts": "추가 비용",
+    "notices": "통지",
+    "jurisdiction": "준거법 및 관할",
+    "additionalConditions": "추가 조건"
   }
 }

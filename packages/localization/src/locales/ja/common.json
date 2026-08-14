@@ -909,6 +909,10 @@
       "content": "コンテンツ",
       "preview": "プレビュー",
       "versions": "バージョン履歴"
+    },
+    "editorMode": {
+      "visual": "ビジュアルエディタ",
+      "advanced": "詳細設定（HTML/CSS）"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "今日",
     "yesterday": "昨日",
     "hint": "入力して検索、↑/↓ でイベント間を移動"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "項目を挿入",
+    "addSection": "セクションを追加",
+    "moveUp": "上へ移動",
+    "moveDown": "下へ移動",
+    "removeBlock": "削除",
+    "untitledBlock": "無題のセクション"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "会社",
+      "customer": "顧客",
+      "employee": "従業員",
+      "asset": "資産",
+      "rental": "レンタル",
+      "quote": "見積もり",
+      "document": "ドキュメント",
+      "signature": "署名",
+      "other": "その他"
+    },
+    "company": {
+      "name": "会社名",
+      "logo": "会社ロゴ",
+      "email": "会社のメールアドレス",
+      "registrationNumber": "登録番号",
+      "taxNumber": "税番号",
+      "address": "会社住所",
+      "phone": "会社電話番号"
+    },
+    "customer": {
+      "name": "顧客名",
+      "firstName": "顧客の名",
+      "lastName": "顧客の姓",
+      "company": "顧客の会社名",
+      "address": "顧客住所",
+      "phone": "顧客電話番号",
+      "email": "顧客メールアドレス",
+      "taxNumber": "顧客の税番号"
+    },
+    "employee": {
+      "name": "従業員名",
+      "position": "従業員の役職"
+    },
+    "asset": {
+      "name": "資産名",
+      "serial": "シリアル番号",
+      "location": "資産の所在地",
+      "category": "資産カテゴリー"
+    },
+    "rental": {
+      "number": "レンタル番号",
+      "start": "レンタル開始日",
+      "end": "レンタル終了日",
+      "startTime": "レンタル開始時刻",
+      "endTime": "レンタル終了時刻",
+      "startDateTime": "レンタル開始日時",
+      "endDateTime": "レンタル終了日時",
+      "total": "レンタル合計金額",
+      "deposit": "保証金",
+      "assetsTableHtml": "レンタル資産一覧表"
+    },
+    "quote": {
+      "number": "見積番号",
+      "total": "見積合計金額",
+      "servicesTableHtml": "追加サービス一覧表"
+    },
+    "other": {
+      "today": "本日の日付",
+      "notes": "備考"
+    },
+    "signature": {
+      "company": "会社側署名者",
+      "employee": "従業員側署名者"
+    },
+    "document": {
+      "number": "書類番号",
+      "title": "書類タイトル",
+      "type": "書類種別",
+      "status": "書類ステータス"
+    }
+  },
+  "contractSection": {
+    "parties": "当事者",
+    "subjectAssets": "契約の目的物 — レンタル資産",
+    "rentalPeriod": "レンタル期間",
+    "price": "料金",
+    "paymentTerms": "支払条件",
+    "deliveryHandover": "引き渡し",
+    "return": "返却",
+    "customerResponsibilities": "顧客の責任",
+    "damageAndLoss": "損傷および紛失",
+    "lateReturn": "返却遅延",
+    "nonPayment": "未払い",
+    "termination": "契約解除",
+    "additionalCosts": "追加費用",
+    "notices": "通知",
+    "jurisdiction": "準拠法および管轄",
+    "additionalConditions": "追加条件"
   }
 }

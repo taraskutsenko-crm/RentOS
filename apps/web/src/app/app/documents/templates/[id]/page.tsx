@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { TemplateBuilder } from "../../../../../components/documents/template-builder/template-builder";
 import { useCurrentTenantId } from "../../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../../hooks/use-current-tenant-role";
 import {
@@ -19,8 +20,16 @@ import {
   useUpdateDocumentTemplateMeta,
 } from "../../../../../hooks/use-document-templates";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
+import type { BlockNode } from "../../../../../lib/contract-section-library";
+import { renderBlocksToHtml } from "../../../../../lib/contract-section-library";
 import { formatDateTime } from "../../../../../lib/date-format";
+import {
+  readBlocksV1Schema,
+  toBlocksV1Schema,
+} from "../../../../../lib/document-template-editor-format";
 import type { DocumentTemplate } from "../../../../../types/document";
+
+type EditorMode = "visual" | "advanced";
 
 export default function DocumentTemplateDetailPage() {
   const { t } = useTranslation();
@@ -75,6 +84,18 @@ function TemplateEditor({
   const [htmlContent, setHtmlContent] = useState(currentVersion?.htmlContent ?? "");
   const [css, setCss] = useState(currentVersion?.css ?? "");
 
+  // A version only opens in Visual mode if its variablesSchema is
+  // recognized blocks-v1 JSON (authored by this same builder). Any other
+  // shape — including every template created before this feature, and any
+  // template whose content was last saved via the raw Advanced textarea —
+  // has no block model to show, so it opens Advanced-only with no toggle,
+  // per the plan's explicit "no destructive reverse-parsing of arbitrary
+  // HTML" backward-compatibility rule.
+  const initialVersionBlocks = readBlocksV1Schema(currentVersion?.variablesSchema);
+  const supportsVisualMode = initialVersionBlocks !== null;
+  const [mode, setMode] = useState<EditorMode>(supportsVisualMode ? "visual" : "advanced");
+  const [blocks, setBlocks] = useState<BlockNode[] | null>(initialVersionBlocks);
+
   async function runAction(action: () => Promise<unknown>): Promise<void> {
     setActionError(null);
     try {
@@ -95,9 +116,23 @@ function TemplateEditor({
 
   async function handleSaveContent(): Promise<void> {
     await runAction(() =>
-      updateContent.mutateAsync({ id: template.id, input: { htmlContent, css: css || null } }),
+      updateContent.mutateAsync({
+        id: template.id,
+        input:
+          mode === "visual"
+            ? {
+                htmlContent: renderBlocksToHtml(blocks ?? []),
+                css: null,
+                variablesSchema: toBlocksV1Schema(blocks ?? []),
+              }
+            : { htmlContent, css: css || null },
+      }),
     );
   }
+
+  const contentIsEmpty = mode === "visual" ? !blocks?.length : !htmlContent;
+  const previewHtml = mode === "visual" ? renderBlocksToHtml(blocks ?? []) : htmlContent;
+  const previewCss = mode === "visual" ? "" : css;
 
   async function handleDuplicate(): Promise<void> {
     await runAction(async () => {
@@ -192,28 +227,67 @@ function TemplateEditor({
               <CardTitle>{t("documentTemplate.sections.content")}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="htmlContent">{t("documentTemplate.fields.htmlContent")}</Label>
-                <textarea
-                  id="htmlContent"
-                  className="border-input min-h-64 rounded-md border bg-transparent px-3 py-2 font-mono text-xs shadow-xs"
-                  value={htmlContent}
-                  onChange={(event) => setHtmlContent(event.target.value)}
+              {supportsVisualMode && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={mode === "visual" ? "default" : "outline"}
+                    disabled={!canManage}
+                    onClick={() => setMode("visual")}
+                  >
+                    {t("documentTemplate.editorMode.visual")}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={mode === "advanced" ? "default" : "outline"}
+                    disabled={!canManage}
+                    onClick={() => setMode("advanced")}
+                  >
+                    {t("documentTemplate.editorMode.advanced")}
+                  </Button>
+                </div>
+              )}
+
+              {mode === "visual" ? (
+                <TemplateBuilder
+                  initialBlocks={blocks}
+                  onChange={setBlocks}
                   disabled={!canManage}
                 />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="css">{t("documentTemplate.fields.css")}</Label>
-                <textarea
-                  id="css"
-                  className="border-input min-h-32 rounded-md border bg-transparent px-3 py-2 font-mono text-xs shadow-xs"
-                  value={css}
-                  onChange={(event) => setCss(event.target.value)}
-                  disabled={!canManage}
-                />
-              </div>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="htmlContent">{t("documentTemplate.fields.htmlContent")}</Label>
+                    <textarea
+                      id="htmlContent"
+                      className="border-input min-h-64 rounded-md border bg-transparent px-3 py-2 font-mono text-xs shadow-xs"
+                      value={htmlContent}
+                      onChange={(event) => setHtmlContent(event.target.value)}
+                      disabled={!canManage}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="css">{t("documentTemplate.fields.css")}</Label>
+                    <textarea
+                      id="css"
+                      className="border-input min-h-32 rounded-md border bg-transparent px-3 py-2 font-mono text-xs shadow-xs"
+                      value={css}
+                      onChange={(event) => setCss(event.target.value)}
+                      disabled={!canManage}
+                    />
+                  </div>
+                </>
+              )}
+
               {canManage && (
-                <Button size="sm" className="self-start" onClick={() => void handleSaveContent()}>
+                <Button
+                  size="sm"
+                  className="self-start"
+                  disabled={contentIsEmpty}
+                  onClick={() => void handleSaveContent()}
+                >
                   {t("documentTemplate.actions.saveAsNewVersion")}
                 </Button>
               )}
@@ -227,7 +301,7 @@ function TemplateEditor({
             <CardContent>
               <iframe
                 title={t("documentTemplate.sections.preview")}
-                srcDoc={`<style>${css}</style>${htmlContent}`}
+                srcDoc={`<style>${previewCss}</style>${previewHtml}`}
                 className="h-[500px] w-full rounded-md border bg-white"
               />
             </CardContent>

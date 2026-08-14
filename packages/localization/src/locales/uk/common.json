@@ -909,6 +909,10 @@
       "content": "Вміст",
       "preview": "Попередній перегляд",
       "versions": "Історія версій"
+    },
+    "editorMode": {
+      "visual": "Візуальний редактор",
+      "advanced": "Розширений (HTML/CSS)"
     }
   },
   "share": {
@@ -1129,5 +1133,104 @@
     "today": "Сьогодні",
     "yesterday": "Учора",
     "hint": "Введіть текст для пошуку, використовуйте ↑/↓ для переходу між подіями"
+  },
+  "documentTemplateBuilder": {
+    "insertField": "Вставити поле",
+    "addSection": "Додати розділ",
+    "moveUp": "Перемістити вгору",
+    "moveDown": "Перемістити вниз",
+    "removeBlock": "Видалити",
+    "untitledBlock": "Розділ без назви"
+  },
+  "documentVariable": {
+    "group": {
+      "company": "Компанія",
+      "customer": "Клієнт",
+      "employee": "Співробітник",
+      "asset": "Обладнання",
+      "rental": "Оренда",
+      "quote": "Комерційна пропозиція",
+      "document": "Документ",
+      "signature": "Підпис",
+      "other": "Інше"
+    },
+    "company": {
+      "name": "Назва компанії",
+      "logo": "Логотип компанії",
+      "email": "Email компанії",
+      "registrationNumber": "Реєстраційний номер",
+      "taxNumber": "ІПН",
+      "address": "Адреса компанії",
+      "phone": "Телефон компанії"
+    },
+    "customer": {
+      "name": "Ім'я клієнта",
+      "firstName": "Ім'я клієнта",
+      "lastName": "Прізвище клієнта",
+      "company": "Компанія клієнта",
+      "address": "Адреса клієнта",
+      "phone": "Телефон клієнта",
+      "email": "Email клієнта",
+      "taxNumber": "ІПН клієнта"
+    },
+    "employee": {
+      "name": "Ім'я співробітника",
+      "position": "Посада співробітника"
+    },
+    "asset": {
+      "name": "Назва обладнання",
+      "serial": "Серійний номер",
+      "location": "Місцезнаходження обладнання",
+      "category": "Категорія обладнання"
+    },
+    "rental": {
+      "number": "Номер оренди",
+      "start": "Дата початку оренди",
+      "end": "Дата закінчення оренди",
+      "startTime": "Час початку оренди",
+      "endTime": "Час закінчення оренди",
+      "startDateTime": "Дата і час початку оренди",
+      "endDateTime": "Дата і час закінчення оренди",
+      "total": "Загальна сума оренди",
+      "deposit": "Застава",
+      "assetsTableHtml": "Таблиця орендованого обладнання"
+    },
+    "quote": {
+      "number": "Номер пропозиції",
+      "total": "Загальна сума пропозиції",
+      "servicesTableHtml": "Таблиця додаткових послуг"
+    },
+    "other": {
+      "today": "Сьогоднішня дата",
+      "notes": "Примітки"
+    },
+    "signature": {
+      "company": "Підписант від компанії",
+      "employee": "Підписант-співробітник"
+    },
+    "document": {
+      "number": "Номер документа",
+      "title": "Назва документа",
+      "type": "Тип документа",
+      "status": "Статус документа"
+    }
+  },
+  "contractSection": {
+    "parties": "Сторони",
+    "subjectAssets": "Предмет договору — орендоване обладнання",
+    "rentalPeriod": "Строк оренди",
+    "price": "Ціна",
+    "paymentTerms": "Умови оплати",
+    "deliveryHandover": "Передача",
+    "return": "Повернення",
+    "customerResponsibilities": "Обов'язки клієнта",
+    "damageAndLoss": "Пошкодження та втрата",
+    "lateReturn": "Прострочення повернення",
+    "nonPayment": "Несплата",
+    "termination": "Розірвання договору",
+    "additionalCosts": "Додаткові витрати",
+    "notices": "Повідомлення",
+    "jurisdiction": "Застосовне право та юрисдикція",
+    "additionalConditions": "Додаткові умови"
   }
 }

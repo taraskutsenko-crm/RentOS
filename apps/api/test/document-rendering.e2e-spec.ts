@@ -327,10 +327,13 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     // (correctly so) — set them here so this "every path" coverage test
     // matches how the equivalent real-render coverage test below already
     // populates the tenant before asserting non-empty output.
+    // UpdateTenantDto requires the full form on every submit, so `name`
+    // must be resent too even though it's already non-empty.
     await request(app.getHttpServer())
       .patch(`/tenants/${tenantId}`)
       .set("Cookie", accessCookie)
       .send({
+        name: validRegisterPayload.companyName,
         registrationNumber: "HRB 12345",
         taxNumber: "DE123456789",
         address: "Musterstrasse 1, Berlin",

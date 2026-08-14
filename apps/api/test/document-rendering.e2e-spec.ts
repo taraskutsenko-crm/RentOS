@@ -1079,12 +1079,18 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .expect(201);
 
     const categoryId = await createAssetCategory();
-    const assetId = await createAsset(categoryId, "Generator A", "GEN-VAR");
-    await request(app.getHttpServer())
-      .patch(`/tenants/${tenantId}/assets/${assetId}`)
+    const assetResponse = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/assets`)
       .set("Cookie", accessCookie)
-      .send({ serialNumber: "SN-001", currentLocationText: "Warehouse 1" })
-      .expect(200);
+      .send({
+        name: "Generator A",
+        internalNumber: "GEN-VAR",
+        categoryId,
+        serialNumber: "SN-001",
+        currentLocationText: "Warehouse 1",
+      })
+      .expect(201);
+    const assetId = assetResponse.body.id as string;
 
     const quote = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/quotes`)

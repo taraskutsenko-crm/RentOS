@@ -968,11 +968,17 @@ settings — never conflated:**
   must never be inferred from UI language or country — `formatMoney()`
   (`apps/web/src/lib/money.ts`) already takes a currency code as an
   explicit parameter, never derives one.
-- **Document language** (Section 8's concern, `ARCHITECTURE_LOCK.md`
-  and `DECISIONS.md` record its exact current state) is conceptually
-  independent of UI language — a staff member working in Ukrainian
-  must be able to generate a German-language contract for a German
-  customer.
+- **Document language** (`DECISIONS.md` D-062 records its exact
+  current state) is conceptually independent of UI language — a staff
+  member working in Ukrainian can generate a German-language contract
+  for a German customer. Implemented via nullable
+  `DocumentTemplate.language` plus per-`(tenant, documentType,
+language)` active-template uniqueness: a tenant maintains one
+  template per language it needs, and the "Generate document" flow
+  shows a language picker only when 2+ active templates exist for that
+  document type. This is deliberately not automatic translation —
+  each language's template prose is authored (or edited via the
+  no-code builder) by the tenant.
 - **Timezone** distinguishes the user's browser timezone from the
   tenant's business timezone from a stored UTC timestamp — the
   existing UTC-storage discipline (`ARCHITECTURE_LOCK.md` §1.8) is

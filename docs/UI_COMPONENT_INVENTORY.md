@@ -15,26 +15,29 @@ built on top of it.
 
 ## Shared primitives (`packages/ui/src/components/`) — current as of Chapter 3
 
-| Component                                                                                           | File                | Notes                                                                                                                                                                                                                                                                                                                          |
-| --------------------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Button`                                                                                            | `button.tsx`        | `cva`-based variants (`default`/`destructive`/`outline`/`secondary`/`ghost`/`link`) x sizes (`default`/`sm`/`lg`/`icon`).                                                                                                                                                                                                      |
-| `Input`                                                                                             | `input.tsx`         | Native `<input>` wrapper, `aria-invalid` styling, disabled state.                                                                                                                                                                                                                                                              |
-| `Label`                                                                                             | `label.tsx`         | Native `<label>` wrapper.                                                                                                                                                                                                                                                                                                      |
-| `Card`/`CardHeader`/`CardTitle`/`CardDescription`/`CardContent`/`CardFooter`                        | `card.tsx`          | Plain composable div wrappers.                                                                                                                                                                                                                                                                                                 |
-| `Alert`/`AlertDescription`                                                                          | `alert.tsx`         | `default`/`destructive`/`success`/`warning`/`info` variants (Chapter 2 added the last three).                                                                                                                                                                                                                                  |
-| `Skeleton`                                                                                          | `skeleton.tsx`      | Added Chapter 1. **Now used by `DataTable`'s loading state** (Chapter 3) — real per-column-width skeleton rows, replacing every list page's hand-rolled `bg-muted` div.                                                                                                                                                        |
-| `DropdownMenu` (+ `Trigger`/`Content`/`Item`/`Label`/`Separator`/`Group`)                           | `dropdown-menu.tsx` | Added Chapter 1. **Now used for row-level table actions** (Chapter 3's `RowActionsMenu` + `DataTable`'s column-visibility menu) — see `UI_AUDIT.md` finding #18.                                                                                                                                                               |
-| `Dialog` (+ `Trigger`/`Portal`/`Close`/`Overlay`/`Content`/`Header`/`Footer`/`Title`/`Description`) | `dialog.tsx`        | Added Chapter 1; `Header`/`Footer` + default `p-6` padding added Chapter 3 for `ConfirmDialog`, its first "standard content dialog" consumer (`command-palette.tsx` stays a bespoke `p-0` layout). **Now used for destructive-action confirmation** — see `UI_AUDIT.md` finding #20 and the "Bugs found and fixed" note below. |
-| `Checkbox`                                                                                          | `checkbox.tsx`      | Added Chapter 3. Radix-based, indeterminate-state support, for row selection.                                                                                                                                                                                                                                                  |
-| `Select`                                                                                            | `select.tsx`        | Added Chapter 3. Styled native `<select>` wrapper — kept native (not a Radix combobox) since no filter needs custom option rendering.                                                                                                                                                                                          |
+| Component                                                                                           | File                  | Notes                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Button`                                                                                            | `button.tsx`          | `cva`-based variants (`default`/`destructive`/`outline`/`secondary`/`ghost`/`link`) x sizes (`default`/`sm`/`lg`/`icon`).                                                                                                                                                                                                      |
+| `Input`                                                                                             | `input.tsx`           | Native `<input>` wrapper, `aria-invalid` styling, disabled state.                                                                                                                                                                                                                                                              |
+| `Label`                                                                                             | `label.tsx`           | Native `<label>` wrapper.                                                                                                                                                                                                                                                                                                      |
+| `Card`/`CardHeader`/`CardTitle`/`CardDescription`/`CardContent`/`CardFooter`                        | `card.tsx`            | Plain composable div wrappers.                                                                                                                                                                                                                                                                                                 |
+| `Alert`/`AlertDescription`                                                                          | `alert.tsx`           | `default`/`destructive`/`success`/`warning`/`info` variants (Chapter 2 added the last three).                                                                                                                                                                                                                                  |
+| `Skeleton`                                                                                          | `skeleton.tsx`        | Added Chapter 1. **Now used by `DataTable`'s loading state** (Chapter 3) — real per-column-width skeleton rows, replacing every list page's hand-rolled `bg-muted` div.                                                                                                                                                        |
+| `DropdownMenu` (+ `Trigger`/`Content`/`Item`/`Label`/`Separator`/`Group`)                           | `dropdown-menu.tsx`   | Added Chapter 1. **Now used for row-level table actions** (Chapter 3's `RowActionsMenu` + `DataTable`'s column-visibility menu) — see `UI_AUDIT.md` finding #18.                                                                                                                                                               |
+| `Dialog` (+ `Trigger`/`Portal`/`Close`/`Overlay`/`Content`/`Header`/`Footer`/`Title`/`Description`) | `dialog.tsx`          | Added Chapter 1; `Header`/`Footer` + default `p-6` padding added Chapter 3 for `ConfirmDialog`, its first "standard content dialog" consumer (`command-palette.tsx` stays a bespoke `p-0` layout). **Now used for destructive-action confirmation** — see `UI_AUDIT.md` finding #20 and the "Bugs found and fixed" note below. |
+| `Checkbox`                                                                                          | `checkbox.tsx`        | Added Chapter 3. Radix-based, indeterminate-state support, for row selection.                                                                                                                                                                                                                                                  |
+| `Select`                                                                                            | `select.tsx`          | Added Chapter 3. Styled native `<select>` wrapper — kept native (not a Radix combobox) since no filter needs custom option rendering.                                                                                                                                                                                          |
+| `DatePicker`                                                                                        | `date-picker.tsx`     | Added Pre-Chapter 10 (Part B). Single-date mode, two-month desktop / bottom-sheet mobile.                                                                                                                                                                                                                                      |
+| `TimePicker`                                                                                        | `time-picker.tsx`     | Added Pre-Chapter 10 (Part B). 15-minute-interval `<select>`/combobox plus free-text entry for a value not on the grid.                                                                                                                                                                                                        |
+| `DateTimeField`                                                                                     | `date-time-field.tsx` | Added Pre-Chapter 10 (Part B). Composes `DatePicker` + `TimePicker`; replaced every `<input type="datetime-local">` in the Rental/Quote wizards.                                                                                                                                                                               |
 
 **Still not built in `@rentos/ui`**, despite being specified in
-`UI_PATTERNS.md`: `Tabs`, `DatePicker`, `Toast`, `Tooltip`. `Table`
-was deliberately built at the `apps/web` app layer instead
-(`components/data-table/`, see below) rather than as a generic
-`packages/ui` primitive, since every real consumer needed
-tenant/permission-aware business logic (row hrefs, permission-gated
-actions) that doesn't belong in a presentation-only shared package.
+`UI_PATTERNS.md`: `Tabs`, `Toast`, `Tooltip`. `Table` was deliberately
+built at the `apps/web` app layer instead (`components/data-table/`,
+see below) rather than as a generic `packages/ui` primitive, since
+every real consumer needed tenant/permission-aware business logic (row
+hrefs, permission-gated actions) that doesn't belong in a
+presentation-only shared package.
 
 ## The `DataTable` system (`apps/web/src/components/data-table/`) — added Chapter 3
 
@@ -411,9 +414,10 @@ the research this was built on.
 - **Real SMTP/SES/SendGrid email delivery** — `LoggingEmailProvider`
   remains the bound implementation; a real provider is a future
   `useClass` swap behind the existing `EmailProvider` interface.
-- **A drag-and-drop template designer** — the existing raw HTML/CSS
+- ~~A drag-and-drop template designer — the existing raw HTML/CSS
   template editor already satisfies "templates exist and are
-  editable"; a richer editor was not requested.
+  editable"; a richer editor was not requested.~~ **Superseded by
+  Pre-Chapter 10** — see "No-Code Document Template Builder" below.
 - **A tenant-wide "documents awaiting signature" KPI or a background
   reminder job** — no cross-document aggregation beyond the per-status
   counts `useDocumentsSummary()` already composes exists; a scheduled
@@ -422,6 +426,55 @@ the research this was built on.
 - **A new keyboard shortcut or a separate Documents search provider**
   — Documents were already fully wired into the Chapter 5 keyboard
   registry and search-provider architecture; nothing needed adding.
+
+## No-Code Document Template Builder — added Pre-Chapter 10
+
+A Tiptap/ProseMirror-based visual block editor so a normal Havelio
+user can author a professional contract template without HTML/CSS/
+template-syntax knowledge — see `UI_PATTERNS.md`'s "Document Template
+Builder" pattern for the full interaction spec and
+`UI_REDESIGN_PLAN.md`'s Pre-Chapter 10 section for the design
+rationale. Directly supersedes the "drag-and-drop template designer"
+documented gap from Chapter 9 above.
+
+| File                                                                                              | Purpose                                                                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/src/lib/document-variable-registry.ts` (+ backend twin)                                 | Centralized, parity-checked (`scripts/check-document-variable-parity.mjs`) catalog of every resolver-backed `{{dot.path}}` variable, grouped for the Insert field picker — mirrors the `permission.ts`/`permissions.ts` dual-registry convention. |
+| `apps/web/src/lib/contract-section-library.ts`                                                    | 18 reusable section blocks (Parties, Rental Period, Payment Terms, ...) as ProseMirror-JSON fragments, plus `renderBlocksToHtml()`/`fullContractBlocks()`.                                                                                        |
+| `components/documents/template-builder/template-builder.tsx`                                      | `TemplateBuilder` — the Tiptap `useEditor()` wiring, move-up/down/remove block reordering via direct `Fragment`/`replaceWith` transactions, top-level append via a position-based insert.                                                         |
+| `components/documents/template-builder/extensions.ts`                                             | Custom Tiptap nodes: `DocSection`/`DocSectionTitle` (block container), `VariableChip` (inline, atom), `VariableBlock` (block-level, atom, for raw-HTML table variables).                                                                          |
+| `components/documents/template-builder/variable-node-views.tsx`                                   | React node views rendering `VariableChip`/`VariableBlock` as readable, non-editable labels instead of `{{path}}`.                                                                                                                                 |
+| `components/documents/template-builder/insert-field-menu.tsx`                                     | `InsertFieldMenu` — grouped popover over `document-variable-registry.ts`, a plain custom dropdown (no new Radix dependency).                                                                                                                      |
+| `components/documents/template-builder/section-list.tsx`                                          | `SectionList` — the reorder/remove control list for top-level blocks.                                                                                                                                                                             |
+| `lib/document-template-editor-format.ts`                                                          | `readBlocksV1Schema()`/`toBlocksV1Schema()` — recognizes/produces the `{editorFormat:"blocks-v1", blocks:[...]}` shape persisted in `DocumentTemplateVersion.variablesSchema`.                                                                    |
+| Backend: `documents/rendering/variable-resolver.service.ts#buildPreviewContext`                   | Synthetic sample-data context (real tenant company data + clearly-labeled synthetic customer/asset/rental/quote data) for previewing a draft with no persisted Document.                                                                          |
+| Backend: `documents/rendering/document-renderer.service.ts#renderPreviewHtml`                     | Renders draft HTML/CSS against the synthetic context via the same `resolveVariables`/document-shell pipeline a real render uses.                                                                                                                  |
+| Backend: `documents/dto/preview-document-template.dto.ts` + `POST .../document-templates/preview` | Gated by `documents.templates.view` (read-only render, not `.manage`) so a viewer can preview a saved template too.                                                                                                                               |
+| `apps/web/src/lib/rental-next-action.ts` / `quote-next-action.ts`                                 | Pure `getRentalNextAction()`/`getQuoteNextAction()`, mirroring the existing `getRentalTimeIntelligence`/`getQuoteValidityIntelligence` pattern; wired into each Workspace's `PageHeader` `primaryAction`.                                         |
+
+`ConfirmDialog` (Chapter 3's `DataTable` system, see above) is
+**reused, not re-built**, for the New Template page's "Start from
+Havelio Rental Contract template" starter flow, confirming before
+overwriting canvas content the user has actually started editing.
+
+### What the no-code builder does not build (documented gaps, not fabricated)
+
+- **Drag-and-drop block reordering** — deliberately simple move-up/
+  move-down/remove buttons instead, per the approved plan's explicit
+  preference; no drag-and-drop library was added.
+- **Reverse-parsing arbitrary saved HTML into blocks** — any template
+  whose current version's `variablesSchema` isn't recognized
+  `blocks-v1` JSON (every template that predates this feature, or one
+  last saved via the raw Advanced textarea) opens Advanced-only, with
+  no Visual-mode toggle offered at all.
+- **A loop/repeat/conditional template-engine feature** — the two new
+  raw-HTML block variables (`rental.assetsTableHtml`,
+  `quote.servicesTableHtml`) are a small, explicit, server-built
+  allowlist, not a general templating primitive a tenant could invoke
+  for arbitrary data.
+- **Automatic legal translation of contract prose** — `DocumentTemplate.language`
+  (D-062) lets a tenant maintain multiple language-specific templates;
+  nothing auto-translates one template's prose into another language.
 
 ## Icons
 

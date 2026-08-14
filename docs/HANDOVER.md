@@ -19,20 +19,66 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `591ee4e` (docs: record globalization
-  foundation decisions) — Pre-Chapter 10 Globalization &
-  Internationalization Foundation (D-057) is complete and CI-green.
-  Sits on top of `9ee9ade` (test: globalization coverage for locale
-  registry, formatting, and fallback) and `1339cbc` (feat: globalize
-  locale registry, expand to 14 UI locales, wire timezone and RTL),
-  which sit on top of `7caa4e8` — TASK-0010 Part 2 Chapter 9 (Documents
-  & Contracts Workspace, CI-green, GitHub Actions run #36). GitHub
-  Actions came back green after one re-run of the same
-  `rental-numbering.e2e-spec.ts` concurrency flake documented for
-  Chapter 9/D-056 (a CI-runner contention flake, not a regression in
-  this chapter's own locale/formatting/timezone changes) — same known
-  flake, not a new failure mode.
-- **What shipped (Pre-Chapter 10 — Globalization Foundation, D-057):**
+- **Latest verified commit:** `8e1f4f9` (feat: add
+  getRentalNextAction/getQuoteNextAction workflow-continuity utilities)
+  — Pre-Chapter 10 Rental Workflow, Contract System & No-Code Document
+  Template Builder (D-060–D-064) is complete and CI-green. Chapter 10
+  itself was **not** started, per the arc's explicit hard-stop
+  instruction. Every commit in this arc pushed to `main` individually
+  and was confirmed CI-green before the next was started (no batched,
+  unverified pushes); the arc sits on top of `591ee4e` (docs: record
+  globalization foundation decisions) — Pre-Chapter 10 Globalization &
+  Internationalization Foundation (D-057).
+- **What shipped (Pre-Chapter 10 — Rental Workflow, Contract System &
+  No-Code Document Template Builder, D-060–D-064):** two combined
+  specs completed incrementally (implement → test → verify →
+  commit/push → confirm CI → continue), each subtask CI-verified before
+  the next began. **Part A (D-060):** fixed the real blank-contract bug
+  — every generated Document had `rentalId: null` because the
+  "Generate document" flow had no rental picker, even though the
+  backend already supported linking one; added "Generate Contract"/
+  "Generate document" actions on the Rental/Quote Workspaces with
+  pre-filled `rentalId`/`quoteId`/`documentType`/`employeeUserId`.
+  **Part D (D-061):** `DocumentVersion.templateVersionId` pins each
+  version to the template content active at creation time, fixing a
+  real immutability gap where editing an ACTIVE template silently
+  changed how an already-SIGNED document re-rendered. **Part E
+  (D-062):** `DocumentTemplate.language` + per-`(tenant, documentType,
+language)` active-template uniqueness closes the document-language
+  gap D-057 explicitly left open. **Parts B/C (D-063):** Tenant
+  company-identity fields + Company Profile settings page; `DatePicker`/
+  `TimePicker`/`DateTimeField` (`packages/ui`) replacing raw
+  `datetime-local` inputs in the Rental/Quote wizards; tenant-timezone
+  threaded through every Rental/Quote date **display** site; new
+  time-aware/multi-asset-table resolver variables
+  (`rental.startDateTime`, `rental.assetsTableHtml`,
+  `quote.servicesTableHtml`, `rental.deposit`); the default Rental
+  Contract template rewritten to all 18 requested sections. **Parts E/F
+  (D-064, the largest piece):** a Tiptap/ProseMirror-based no-code
+  document template builder
+  (`apps/web/src/components/documents/template-builder/`) — insert-
+  field chips driven by a new parity-checked `document-variable-
+registry.ts`, an 18-section `contract-section-library.ts` ("Add
+  section"), move-up/down/remove block reordering, `renderBlocksToHtml()`
+  compiling to the exact same `{{dot.path}}` HTML string
+  `DocumentRendererService` already renders (zero backend rendering
+  changes), a Visual/Advanced mode toggle with backward-compatible
+  Advanced-only fallback for legacy templates, a
+  `POST .../document-templates/preview` endpoint rendering unsaved
+  drafts against synthetic sample data, a "Start from Havelio Rental
+  Contract template" starter, and pure `getRentalNextAction()`/
+  `getQuoteNextAction()` utilities surfaced as each Workspace's
+  `PageHeader` primary action. Testing caught and fixed one real bug
+  before it shipped (a ProseMirror section-nesting bug in "Add
+  section"). All 14 locales translated and parity-verified throughout;
+  full backend/frontend test suites green after every commit (verified
+  via CI — Docker Desktop was down on the development machine for this
+  entire arc, so backend/e2e tests could only be verified through CI,
+  never locally; **Docker rebuild + full manual browser walkthrough
+  (the plan's final verification step) has NOT been performed** and
+  remains an open item for whoever restores Docker on this machine
+  next). See D-060 through D-064 for full per-part decision records.
+- **Previous state (Pre-Chapter 10 — Globalization Foundation, D-057):**
   explicit HARD STOP before Chapter 10 to harden Havelio's global
   readiness rather than add a new feature. Consolidated all locale
   metadata (code/englishName/nativeName/direction) into one
@@ -66,14 +112,13 @@ cs/zh-CN/ja/ko`) with real, natural translations across all 16
   bundled, deliberately), address/VAT/postal fields (already free-text,
   no country-specific format assumptions), and Unicode substring search
   (Postgres `ILIKE` via Prisma `contains`+`mode:"insensitive"`).
-  Document/DocumentTemplate rendering language remains coupled to
-  `tenant.defaultLanguage` — audited and deliberately left as a
-  documented gap (D-057) rather than a narrow field that wouldn't
-  actually deliver a translated contract, since the real fix needs
-  either multiple active templates per `(tenantId, documentType,
-language)` or per-template conditional logic, both out of the
-  explicit "no template designer" scope. See D-057 for the full
-  decision record.
+  Document/DocumentTemplate rendering language was, at the time,
+  coupled to `tenant.defaultLanguage` — audited and deliberately left
+  as a documented gap (D-057) rather than a narrow field that wouldn't
+  actually deliver a translated contract. **This gap is now closed by
+  D-062** (`DocumentTemplate.language` + per-language active-template
+  uniqueness), part of the Pre-Chapter 10 arc described above. See
+  D-057 and D-062 for the full decision records.
 - **Previous chapter — what shipped (Chapter 9):** a Documents & Contracts Workspace
   built entirely on existing platform-document infrastructure — no
   second document system, no Invoice type, no real e-signature/SMTP.

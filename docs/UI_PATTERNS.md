@@ -22,10 +22,12 @@ Authentication Experience), `Alert` additionally has `success`/
 `warning`/`info` variants (previously only `default`/`destructive`),
 and every real account-entry screen shares the `Authentication`
 pattern below, under `apps/web/src/components/auth/`. Every other
-pattern below (Table, Tabs, DatePicker, Toast, Tooltip, Confirmation
-dialog as a real component) is still per-page hand-written markup, not
-yet a shared component; each pattern names its current state where
-relevant.
+pattern below (Table, Tabs, Toast, Tooltip, Confirmation dialog as a
+real component) is still per-page hand-written markup, not yet a
+shared component; each pattern names its current state where relevant.
+`DatePicker`/`TimePicker`/`DateTimeField` (see below) and `ConfirmDialog`
+(`apps/web/src/components/data-table/confirm-dialog.tsx`) are already
+built, real shared components.
 
 For every pattern: **Purpose**, **When to use**, **When NOT to use**,
 **Visual behavior**, **Keyboard behavior**, **Loading state**,
@@ -1053,6 +1055,85 @@ pickers.
 `packages/ui/src/components/date-time-field.tsx`'s `DateTimeField` —
 used by the Rental/Quote wizards in place of the previous raw
 `<input type="datetime-local">`).
+
+---
+
+## Document Template Builder
+
+**Purpose:** let a normal, non-technical Havelio user author a
+professional contract/document template without ever touching HTML,
+CSS, or `{{dot.path}}` template syntax — the Pre-Chapter 10 no-code
+requirement.
+
+**When to use:** the New/Edit Document Template pages
+(`/app/documents/templates/new`, `/app/documents/templates/[id]`), in
+Visual mode.
+
+**When NOT to use:** editing a legacy template whose saved content
+isn't recognized block-JSON (see Status below) — those open in
+Advanced/Code mode only, the pre-existing raw HTML/CSS `<textarea>`
+editor, unchanged. No reverse-parsing of arbitrary HTML into blocks is
+ever attempted.
+
+**Visual behavior:** a Tiptap/ProseMirror rich-text canvas
+(`.doc-builder-canvas`) containing top-level "section" blocks. An
+**Insert field** button opens a grouped popover (Company/Customer/
+Employee/Asset/Rental/Quote/Document/Signature/Other, driven by the
+centralized `document-variable-registry.ts`); picking a field inserts
+a small, non-editable, readable chip (e.g. "Rental total") at the
+cursor — never the raw `{{rental.total}}` syntax. An **Add section**
+`<select>` inserts a full pre-written section (Parties, Rental Period,
+Payment Terms, ...) from the 18-entry `contract-section-library.ts` as
+a new top-level block, appended after the last existing section (never
+nested inside it). Each top-level section gets its own row in a
+reorder list with Move up/Move down/Remove buttons — deliberately
+simple buttons, not drag-and-drop.
+
+**Keyboard behavior:** standard rich-text editing (typing, selection,
+formatting) inside the canvas; Insert field/Add section/reorder
+controls are ordinary focusable buttons and a `<select>`.
+
+**Loading state:** N/A (client-side only until Save/Preview).
+
+**Empty state:** a brand-new template starts with one blank section
+title, ready to type into.
+
+**Error state:** surfaced by the page around the builder (e.g. a
+disabled Save button while the canvas is empty), not by the builder
+itself.
+
+**Mode toggle:** each page also offers **Visual editor** / **Advanced
+(HTML/CSS)** buttons. Visual is the default for a brand-new template.
+For an existing template, the toggle only appears if the current
+version's `variablesSchema` already has the recognized
+`{editorFormat: "blocks-v1", blocks: [...]}` shape (i.e. it was last
+saved by this same builder); otherwise the template opens Advanced-only,
+with no toggle, since there's no safe way to turn arbitrary saved HTML
+back into blocks.
+
+**Preview:** a **Preview**/**Refresh preview** button renders the
+current draft (Visual-mode blocks converted to HTML via
+`renderBlocksToHtml()`, or the Advanced-mode HTML/CSS as typed) through
+the real `resolveVariables` rendering pipeline against synthetic sample
+data (`POST .../document-templates/preview`) — the same document shell
+and substitution engine a real generated document uses, so the preview
+is an honest approximation, not a second rendering system. A caption
+next to the button makes clear the preview uses sample data.
+
+**Starter template:** the New Template page additionally offers "Start
+from Havelio Rental Contract template" for CONTRACT-type templates in
+Visual mode, populating the canvas with the full 18-section
+`fullContractBlocks()` starter. Confirms via the shared `ConfirmDialog`
+before overwriting canvas content the user has actually started
+editing (a blank/untouched canvas replaces silently).
+
+**Status:** built
+(`apps/web/src/components/documents/template-builder/`, `TemplateBuilder`
+
+- `InsertFieldMenu` + `SectionList` + Tiptap `extensions.ts`/
+  `variable-node-views.tsx`), wired into both
+  `apps/web/src/app/app/documents/templates/new/page.tsx` and
+  `apps/web/src/app/app/documents/templates/[id]/page.tsx`.
 
 ---
 

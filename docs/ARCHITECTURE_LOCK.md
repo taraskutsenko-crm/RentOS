@@ -365,6 +365,20 @@ an ADR or violating anything in Part 1:
   `DocumentType` enum's "universal, no type-specific columns" model —
   a genuinely new document _category_ still fits without a schema
   change, since content lives in JSON.
+- The no-code document template builder's block model (Pre-Chapter 10,
+  D-064): the block JSON is a ProseMirror/Tiptap-compatible structure
+  persisted in the pre-existing `DocumentTemplateVersion.variablesSchema`
+  column as `{editorFormat: "blocks-v1", blocks: [...]}` — a UI-authoring
+  representation only, never itself interpreted by the render pipeline.
+  `renderBlocksToHtml()` compiles it down to the same `{{dot.path}}`-
+  templated HTML string `DocumentRendererService` already renders, so
+  adding new block types or a richer editor UI on top of this
+  representation is an extensible-area change, not a locked one — as
+  long as the compiled output stays plain `{{dot.path}}` HTML through
+  the existing `resolveVariables` engine. One ACTIVE template per
+  `(tenantId, documentType, language)` (D-062) is the current uniqueness
+  invariant; loosening it further (e.g. per-customer template variants)
+  would need a new ADR.
 - New `StorageAdapter` / `EmailProvider` / `DocumentSignatureProvider`
   implementations behind the existing interfaces.
 - New in-app notification triggers using the existing

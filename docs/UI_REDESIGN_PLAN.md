@@ -2088,11 +2088,14 @@ rental/quote/asset`, `asset.sections.platformDocuments`,
   remains the bound implementation; a real provider is a future
   `useClass` swap behind the existing `EmailProvider` interface, not
   something to build speculatively this chapter.
-- **A drag-and-drop template designer or WYSIWYG editor** — the
+- ~~A drag-and-drop template designer or WYSIWYG editor — the
   existing raw HTML/CSS `<textarea>` template editor (pre-existing,
   untouched) already satisfies "templates exist and are editable";
   building a richer editor was not requested and is a substantially
-  larger undertaking than this chapter's scope.
+  larger undertaking than this chapter's scope.~~ **Superseded by
+  Pre-Chapter 10** (below) — a Tiptap-based no-code block editor now
+  exists; the raw `<textarea>` editor remains, as Advanced/Code mode,
+  for legacy templates and power users.
 - **Customer Portal document-signing flows beyond what already
   exists** — the portal's own `customerSign()` flow (TASK-0009,
   unchanged) already lets a customer sign from inside the portal; no
@@ -2108,6 +2111,106 @@ rental/quote/asset`, `asset.sections.platformDocuments`,
   — Documents were already fully wired into the Chapter 5 keyboard-
   shortcut registry, Quick Create, and search-provider architecture;
   nothing needed adding.
+
+## Pre-Chapter 10 — Rental Workflow, Contract System & No-Code Template Builder
+
+**A note on numbering:** this section sits between Chapter 9 and
+Chapter 10 by design — a "PRE-CHAPTER-10" hard-stop initiative
+covering two combined specs (Rental Business Workflow/Date-Time/
+Contract System, and the No-Code Document Template Builder), not a
+renumbered Chapter 10. Chapter 10 itself (Forms & Wizards, below) was
+not started.
+
+**Scope:** manual testing surfaced that the Customer→Quote→Rental→
+Contract→Handover→Return journey had no visible "what's next," Rental/
+Quote date entry was raw browser chrome with no dedicated picker, and
+the generated Rental Contract was a thin one-section document that
+could render with blank Rental number/Total/Start/End — a real bug,
+traced to `document-form.tsx` never having a rental-picker field even
+though the backend already supported linking one. A parallel report
+asked that the Document Template editor stop requiring raw HTML/CSS as
+the primary authoring path.
+
+### Step 3 — Design Rationale
+
+1. **Fix the root cause first, not the symptom.** The blank-contract
+   bug (D-060) wasn't a resolver defect — `VariableResolverService`'s
+   `{{rental.*}}` output already matched the seeded template's
+   placeholders exactly. The fix was a missing "Generate Contract"
+   affordance on the Rental/Quote Workspaces, pre-filling `rentalId`/
+   `quoteId`/`documentType` via query params the backend already
+   accepted end-to-end.
+2. **Immutability and language independence as additive migrations,
+   not new subsystems.** `DocumentVersion.templateVersionId` (D-061)
+   pins each version to the exact template content active at creation
+   time — closing a real gap where editing an ACTIVE template silently
+   changed how an already-SIGNED document re-rendered. `DocumentTemplate.language`
+   (D-062) lets a tenant maintain one active template per `(tenantId,
+documentType, language)` instead of one globally — both are
+   nullable, additive columns; every pre-existing template keeps
+   working unchanged.
+3. **The no-code builder compiles down to the existing rendering
+   pipeline, it doesn't replace it.** The Tiptap/ProseMirror block
+   editor's entire backend integration surface is
+   `renderBlocksToHtml()` producing the same `{{dot.path}}`-templated
+   HTML string `DocumentRendererService` already renders — zero
+   backend rendering changes. Block JSON is persisted by repurposing
+   the previously-dormant `DocumentTemplateVersion.variablesSchema`
+   column, so no new column was needed either.
+4. **Backward compatibility via mode detection, not migration.** A
+   template's current version either has recognized `blocks-v1` JSON
+   (opens in Visual mode) or it doesn't (opens Advanced-only, no
+   toggle) — determined at render time from the data already there,
+   with no backfill and no destructive reverse-parsing of arbitrary
+   saved HTML.
+5. **Preview reuses the real renderer against synthetic data, rather
+   than building a second rendering system.** `POST .../document-templates/preview`
+   calls the same `resolveVariables` substitution engine and document
+   shell a real Document render uses, with a `buildPreviewContext()`
+   that mixes real tenant company data with clearly-labeled synthetic
+   customer/asset/rental/quote data — "preview before any Document
+   exists" needed exactly one new context builder, not a parallel
+   preview engine.
+6. **Workflow continuity surfaces only real backend capability.**
+   `getRentalNextAction()`/`getQuoteNextAction()` (mirroring the
+   existing time/validity-intelligence pattern) derive a single
+   `PageHeader` primary action from real status/checklist state —
+   `GENERATE_CONTRACT`/`PREPARE_HANDOVER`/`RETURN_ASSET`/
+   `CONVERT_QUOTE`/`NONE`. The Rental Workspace's document checklist
+   (Chapter 9) already linked its "missing" rows to the generate-
+   document flow, so this closed the remaining gap: a single, obvious
+   next step at the top of each Workspace, never a fabricated one.
+7. **Testing this arc caught a real bug before it shipped.** The
+   no-code builder's "Add section" originally used
+   `.focus("end").insertContent()`, which — because `docSection` is an
+   `isolating` ProseMirror node — resolved _inside_ the last section
+   instead of after it, nesting new sections instead of appending them
+   as siblings. Replaced with the same position-based top-level
+   `Fragment` insert the move/remove reorder helpers already used.
+
+### What Pre-Chapter 10 does not build (documented gaps, not fabricated)
+
+- **Drag-and-drop block reordering** — simple move-up/move-down/remove
+  buttons instead, per the plan's explicit stated preference.
+- **A general loop/repeat/conditional template-engine feature** — the
+  two new raw-HTML block variables (`rental.assetsTableHtml`,
+  `quote.servicesTableHtml`) are a small, explicit, server-built
+  allowlist, not a templating primitive a tenant can invoke for
+  arbitrary data.
+- **Automatic legal translation of contract prose** —
+  `DocumentTemplate.language` lets a tenant maintain multiple
+  language-specific templates; nothing auto-translates one template's
+  text into another language.
+- **A per-user timezone override** — only `Tenant.timezone` exists and
+  remains the single source of truth for date/time display; the
+  date/time input widgets still capture a value interpreted in the
+  browser's local timezone at entry time, unchanged from before.
+- **A drag-and-drop template designer's WYSIWYG "what you see is
+  literally the PDF" fidelity** — the Visual-mode canvas shows the
+  content structure (chips, sections) with light chrome styling; the
+  actual rendered look (via `.doc-section`/`.doc-clause` CSS) is only
+  visible in Preview/PDF, matching how the pre-existing raw HTML/CSS
+  editor already worked.
 
 ## Later chapters (named, not detailed — scoped when reached)
 

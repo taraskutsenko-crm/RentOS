@@ -322,6 +322,22 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
   });
 
   it("every path in DOCUMENT_VARIABLE_PATHS resolves to non-empty synthetic content in a draft preview", async () => {
+    // registrationNumber/taxNumber/address/phone are nullable Tenant
+    // columns that are empty by default on a freshly-registered tenant
+    // (correctly so) — set them here so this "every path" coverage test
+    // matches how the equivalent real-render coverage test below already
+    // populates the tenant before asserting non-empty output.
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .send({
+        registrationNumber: "HRB 12345",
+        taxNumber: "DE123456789",
+        address: "Musterstrasse 1, Berlin",
+        phone: "+49 30 1234567",
+      })
+      .expect(200);
+
     const markers = DOCUMENT_VARIABLE_PATHS.map(
       (varPath) => `<div>${varPath}::{{${varPath}}}::end</div>`,
     ).join("");

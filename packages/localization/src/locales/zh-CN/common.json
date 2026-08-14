@@ -902,7 +902,8 @@
       "restore": "恢复",
       "duplicate": "复制",
       "saveAsNewVersion": "另存为新版本",
-      "restoreVersion": "恢复此版本"
+      "restoreVersion": "恢复此版本",
+      "refreshPreview": "刷新预览"
     },
     "sections": {
       "metadata": "详情",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "可视化编辑器",
       "advanced": "高级（HTML/CSS）"
-    }
+    },
+    "previewSampleDataHint": "预览使用示例数据——当此模板用于实际文档时将显示真实值。"
   },
   "share": {
     "title": "公开共享链接",

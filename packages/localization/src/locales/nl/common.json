@@ -902,7 +902,8 @@
       "restore": "Herstellen",
       "duplicate": "Dupliceren",
       "saveAsNewVersion": "Opslaan als nieuwe versie",
-      "restoreVersion": "Deze versie herstellen"
+      "restoreVersion": "Deze versie herstellen",
+      "refreshPreview": "Voorbeeld vernieuwen"
     },
     "sections": {
       "metadata": "Details",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "Visuele editor",
       "advanced": "Geavanceerd (HTML/CSS)"
-    }
+    },
+    "previewSampleDataHint": "Het voorbeeld gebruikt voorbeeldgegevens — echte waarden verschijnen zodra dit sjabloon op een echt document wordt gebruikt."
   },
   "share": {
     "title": "Openbare deellinks",

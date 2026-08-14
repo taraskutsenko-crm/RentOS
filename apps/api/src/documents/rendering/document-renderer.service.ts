@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import type { DocumentType } from "@prisma/client";
 
 import { DocumentTemplatesService } from "../document-templates.service";
 import type { DocumentDetailView, DocumentVersionWithFiles } from "../document.types";
@@ -40,23 +41,27 @@ export class DocumentRendererService {
 
     const context = await this.variableResolver.buildContext(tenantId, document, version);
     const bodyHtml = resolveVariables(htmlContent, context);
-
-    const html = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>${escapeHtmlAttribute(document.documentNumber)}</title>
-<style>
-${BASE_DOCUMENT_CSS}
-${css ?? ""}
-</style>
-</head>
-<body>
-${bodyHtml}
-</body>
-</html>`;
+    const html = wrapDocumentHtml(document.documentNumber, css, bodyHtml);
 
     return { html, templateId, templateSource };
+  }
+
+  /**
+   * Renders unsaved draft HTML/CSS (the no-code builder's live preview,
+   * before any Document exists) against synthetic sample data — same
+   * substitution engine (`resolveVariables`) and the same document shell as
+   * a real render, just a synthetic context instead of one built from a
+   * persisted Document (see VariableResolverService#buildPreviewContext).
+   */
+  async renderPreviewHtml(
+    tenantId: string,
+    documentType: DocumentType,
+    htmlContent: string,
+    css: string | null,
+  ): Promise<{ html: string }> {
+    const context = await this.variableResolver.buildPreviewContext(tenantId, documentType);
+    const bodyHtml = resolveVariables(htmlContent, context);
+    return { html: wrapDocumentHtml("PREVIEW", css, bodyHtml) };
   }
 
   private async resolveTemplateContent(
@@ -117,4 +122,21 @@ ${bodyHtml}
 
 function escapeHtmlAttribute(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+function wrapDocumentHtml(title: string, css: string | null, bodyHtml: string): string {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>${escapeHtmlAttribute(title)}</title>
+<style>
+${BASE_DOCUMENT_CSS}
+${css ?? ""}
+</style>
+</head>
+<body>
+${bodyHtml}
+</body>
+</html>`;
 }

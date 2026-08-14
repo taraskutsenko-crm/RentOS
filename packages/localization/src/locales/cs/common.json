@@ -902,7 +902,8 @@
       "restore": "Obnovit",
       "duplicate": "Duplikovat",
       "saveAsNewVersion": "Uložit jako novou verzi",
-      "restoreVersion": "Obnovit tuto verzi"
+      "restoreVersion": "Obnovit tuto verzi",
+      "refreshPreview": "Obnovit náhled"
     },
     "sections": {
       "metadata": "Podrobnosti",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "Vizuální editor",
       "advanced": "Pokročilé (HTML/CSS)"
-    }
+    },
+    "previewSampleDataHint": "Náhled používá ukázková data — skutečné hodnoty se zobrazí, jakmile bude tato šablona použita na reálném dokumentu."
   },
   "share": {
     "title": "Veřejné sdílené odkazy",

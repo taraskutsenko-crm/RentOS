@@ -902,7 +902,8 @@
       "restore": "復元",
       "duplicate": "複製",
       "saveAsNewVersion": "新しいバージョンとして保存",
-      "restoreVersion": "このバージョンを復元"
+      "restoreVersion": "このバージョンを復元",
+      "refreshPreview": "プレビューを更新"
     },
     "sections": {
       "metadata": "詳細",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "ビジュアルエディタ",
       "advanced": "詳細設定（HTML/CSS）"
-    }
+    },
+    "previewSampleDataHint": "プレビューにはサンプルデータが使用されています。実際の値は、このテンプレートが実際の文書で使用されると表示されます。"
   },
   "share": {
     "title": "公開共有リンク",

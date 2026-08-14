@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import type { DocumentType } from "@prisma/client";
 
 import { PrismaService } from "../../prisma/prisma.service";
 import type { DocumentDetailView, DocumentVersionWithFiles } from "../document.types";
@@ -188,6 +189,110 @@ export class VariableResolverService {
       // open-ended escape hatch for anything not covered by a named
       // variable above (see ADR 0011).
       data: businessData,
+    };
+  }
+
+  /**
+   * The variable context for previewing an *unsaved* draft template — no
+   * Document exists yet, so there's nothing real to load for customer/
+   * employee/asset/rental/quote. Company data comes from the real tenant
+   * (a preview should look like this tenant's actual letterhead); every
+   * other field is clearly-labeled sample data covering every registered
+   * path (see document-variable-registry.ts) so a template author sees
+   * every variable resolve to *something* before saving. Reuses the same
+   * `resolveVariables` substitution engine as a real render — only the
+   * context differs (see DocumentRendererService#renderPreviewHtml).
+   */
+  async buildPreviewContext(tenantId: string, documentType: DocumentType): Promise<RenderContext> {
+    const tenant = await this.prisma.tenant.findUniqueOrThrow({
+      where: { id: tenantId },
+      select: {
+        name: true,
+        defaultLanguage: true,
+        defaultCurrency: true,
+        timezone: true,
+        registrationNumber: true,
+        taxNumber: true,
+        address: true,
+        phone: true,
+      },
+    });
+
+    const language = tenant.defaultLanguage;
+    const timezone = tenant.timezone;
+    const currency = tenant.defaultCurrency ?? CURRENCY_FALLBACK;
+    const labels = tableLabels(language);
+    const now = new Date();
+    const later = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    const employeeName = "Sample Employee";
+
+    return {
+      company: {
+        name: tenant.name,
+        logo: "",
+        email: "",
+        registrationNumber: tenant.registrationNumber ?? "",
+        taxNumber: tenant.taxNumber ?? "",
+        address: tenant.address ?? "",
+        phone: tenant.phone ?? "",
+      },
+      customer: {
+        name: "Sample Customer",
+        firstName: "Sample",
+        lastName: "Customer",
+        company: "Sample Customer Co.",
+        address: "123 Sample Street, Sample City",
+        phone: "+1 555 0100",
+        email: "customer@example.com",
+        taxNumber: "SAMPLE-TAX-001",
+      },
+      employee: {
+        name: employeeName,
+        position: "Staff",
+      },
+      asset: {
+        name: "Sample Asset",
+        serial: "SN-000001",
+        location: "Main Warehouse",
+        category: "Sample Category",
+        customFields: {},
+      },
+      rental: {
+        number: "R-000001",
+        start: formatDate(now, language, timezone),
+        end: formatDate(later, language, timezone),
+        startTime: formatTime(now, language, timezone),
+        endTime: formatTime(later, language, timezone),
+        startDateTime: formatDateTime(now, language, timezone),
+        endDateTime: formatDateTime(later, language, timezone),
+        total: formatMoney(50000, currency, language),
+        deposit: formatMoney(10000, currency, language),
+        assetsTableHtml: sampleTableHtml(labels.asset, labels.quantity, labels.unitPrice, [
+          ["Sample Asset A", "1", `${formatMoney(15000, currency, language)} / ${labels.day}`],
+          ["Sample Asset B", "2", `${formatMoney(5000, currency, language)} / ${labels.day}`],
+        ]),
+      },
+      quote: {
+        number: "Q-000001",
+        total: formatMoney(50000, currency, language),
+        servicesTableHtml: sampleTableHtml(labels.service, labels.quantity, labels.total, [
+          ["Sample Delivery Service", "1", formatMoney(5000, currency, language)],
+        ]),
+      },
+      today: formatDate(now, language, timezone),
+      signature: {
+        company: tenant.name,
+        employee: employeeName,
+      },
+      notes: "Sample notes for preview purposes.",
+      document: {
+        number: "DOC-000001",
+        title: "Sample Document",
+        type: documentType,
+        status: "DRAFT",
+      },
+      data: {},
     };
   }
 
@@ -540,6 +645,26 @@ const TABLE_LABELS: Record<string, TableLabels> = {
 
 function tableLabels(language: string): TableLabels {
   return TABLE_LABELS[language] ?? TABLE_LABELS.en!;
+}
+
+/** Same `.doc-table` markup shape as buildAssetsTableHtml/buildServicesTableHtml, built from literal sample rows (see buildPreviewContext). */
+function sampleTableHtml(
+  col1: string,
+  col2: string,
+  col3: string,
+  rows: [string, string, string][],
+): string {
+  const body = rows
+    .map(
+      ([a, b, c]) =>
+        `<tr><td>${escapeHtml(a)}</td><td>${escapeHtml(b)}</td><td>${escapeHtml(c)}</td></tr>`,
+    )
+    .join("");
+  return (
+    `<table class="doc-table"><thead><tr>` +
+    `<th>${escapeHtml(col1)}</th><th>${escapeHtml(col2)}</th><th>${escapeHtml(col3)}</th>` +
+    `</tr></thead><tbody>${body}</tbody></table>`
+  );
 }
 
 function periodLabel(billingMode: string, labels: TableLabels): string {

@@ -902,7 +902,8 @@
       "restore": "Restore",
       "duplicate": "Duplicate",
       "saveAsNewVersion": "Save as new version",
-      "restoreVersion": "Restore this version"
+      "restoreVersion": "Restore this version",
+      "refreshPreview": "Refresh preview"
     },
     "sections": {
       "metadata": "Details",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "Visual editor",
       "advanced": "Advanced (HTML/CSS)"
-    }
+    },
+    "previewSampleDataHint": "Preview uses sample data — real values appear once this template is used on an actual document."
   },
   "documentTemplateBuilder": {
     "insertField": "Insert field",

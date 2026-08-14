@@ -21,10 +21,12 @@ import { TenantGuard } from "../tenants/tenant.guard";
 import type { PublicUser } from "../users/user.mapper";
 import { DocumentTemplatesService } from "./document-templates.service";
 import { CreateDocumentTemplateDto } from "./dto/create-document-template.dto";
+import { PreviewDocumentTemplateDto } from "./dto/preview-document-template.dto";
 import { QueryActiveLanguagesDto } from "./dto/query-active-languages.dto";
 import { QueryDocumentTemplatesDto } from "./dto/query-document-templates.dto";
 import { UpdateDocumentTemplateContentDto } from "./dto/update-document-template-content.dto";
 import { UpdateDocumentTemplateDto } from "./dto/update-document-template.dto";
+import { DocumentRendererService } from "./rendering/document-renderer.service";
 
 /**
  * Template management (TASK-0008 Part 2) — `documents.templates.view` for
@@ -35,7 +37,10 @@ import { UpdateDocumentTemplateDto } from "./dto/update-document-template.dto";
 @UseGuards(TenantGuard, PermissionsGuard)
 @Controller("tenants/:tenantId/document-templates")
 export class DocumentTemplatesController {
-  constructor(private readonly templatesService: DocumentTemplatesService) {}
+  constructor(
+    private readonly templatesService: DocumentTemplatesService,
+    private readonly documentRenderer: DocumentRendererService,
+  ) {}
 
   @RequirePermissions("documents.templates.manage")
   @Post()
@@ -54,6 +59,31 @@ export class DocumentTemplatesController {
     @Query() query: QueryDocumentTemplatesDto,
   ) {
     return this.templatesService.findMany(tenant.id, query);
+  }
+
+  /**
+   * Renders unsaved draft HTML/CSS from the no-code builder against
+   * synthetic sample data — lets a template author preview before any real
+   * Document exists, and before the draft is even saved as a version. Must
+   * be declared before the :id route below, same reason as
+   * "active-languages". Gated by `documents.templates.view` (not
+   * `documents.templates.manage`) so a read-only viewer on the template
+   * detail page can preview the saved content too, not only someone
+   * actively editing it — and not `documents.render`, which is scoped to
+   * real Document instances.
+   */
+  @RequirePermissions("documents.templates.view")
+  @Post("preview")
+  preview(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @Body() dto: PreviewDocumentTemplateDto,
+  ) {
+    return this.documentRenderer.renderPreviewHtml(
+      tenant.id,
+      dto.documentType,
+      dto.htmlContent,
+      dto.css ?? null,
+    );
   }
 
   /**

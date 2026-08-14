@@ -902,7 +902,8 @@
       "restore": "Ripristina",
       "duplicate": "Duplica",
       "saveAsNewVersion": "Salva come nuova versione",
-      "restoreVersion": "Ripristina questa versione"
+      "restoreVersion": "Ripristina questa versione",
+      "refreshPreview": "Aggiorna anteprima"
     },
     "sections": {
       "metadata": "Dettagli",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "Editor visuale",
       "advanced": "Avanzato (HTML/CSS)"
-    }
+    },
+    "previewSampleDataHint": "L'anteprima utilizza dati di esempio — i valori reali appariranno quando questo modello sarà utilizzato su un documento reale."
   },
   "share": {
     "title": "Link di condivisione pubblici",

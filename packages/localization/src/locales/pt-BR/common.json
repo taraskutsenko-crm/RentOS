@@ -902,7 +902,8 @@
       "restore": "Restaurar",
       "duplicate": "Duplicar",
       "saveAsNewVersion": "Salvar como nova versão",
-      "restoreVersion": "Restaurar esta versão"
+      "restoreVersion": "Restaurar esta versão",
+      "refreshPreview": "Atualizar pré-visualização"
     },
     "sections": {
       "metadata": "Detalhes",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "Editor visual",
       "advanced": "Avançado (HTML/CSS)"
-    }
+    },
+    "previewSampleDataHint": "A pré-visualização usa dados de exemplo — os valores reais aparecerão quando este modelo for usado em um documento real."
   },
   "share": {
     "title": "Links públicos de compartilhamento",

@@ -3,7 +3,7 @@
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { TemplateBuilder } from "../../../../../components/documents/template-builder/template-builder";
@@ -14,6 +14,7 @@ import {
   useArchiveDocumentTemplate,
   useDocumentTemplate,
   useDuplicateDocumentTemplate,
+  usePreviewDocumentTemplate,
   useRestoreDocumentTemplate,
   useRestoreDocumentTemplateVersion,
   useUpdateDocumentTemplateContent,
@@ -67,6 +68,7 @@ function TemplateEditor({
   const archive = useArchiveDocumentTemplate(tenantId);
   const restore = useRestoreDocumentTemplate(tenantId);
   const duplicate = useDuplicateDocumentTemplate(tenantId);
+  const previewTemplate = usePreviewDocumentTemplate(tenantId);
 
   const canManage = usePermission("documents.templates.manage");
 
@@ -131,8 +133,27 @@ function TemplateEditor({
   }
 
   const contentIsEmpty = mode === "visual" ? !blocks?.length : !htmlContent;
-  const previewHtml = mode === "visual" ? renderBlocksToHtml(blocks ?? []) : htmlContent;
-  const previewCss = mode === "visual" ? "" : css;
+  const draftHtml = mode === "visual" ? renderBlocksToHtml(blocks ?? []) : htmlContent;
+  const draftCss = mode === "visual" ? null : css || null;
+
+  function handlePreview(): void {
+    previewTemplate.mutate({
+      documentType: template.documentType,
+      htmlContent: draftHtml,
+      css: draftCss,
+    });
+  }
+
+  // Refresh the preview once when a template first loads, so the Preview
+  // card shows resolved content immediately rather than staying empty
+  // until the user clicks "Refresh preview". `mutate` (not `mutateAsync`)
+  // reports its own pending/data/error via the mutation object itself
+  // rather than a setState call we'd author here, which is what
+  // react-hooks/set-state-in-effect requires of effect bodies.
+  useEffect(() => {
+    handlePreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-runs when a different template loads
+  }, [template.id]);
 
   async function handleDuplicate(): Promise<void> {
     await runAction(async () => {
@@ -298,10 +319,31 @@ function TemplateEditor({
             <CardHeader>
               <CardTitle>{t("documentTemplate.sections.preview")}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={contentIsEmpty || previewTemplate.isPending}
+                  onClick={handlePreview}
+                >
+                  {previewTemplate.isPending
+                    ? t("common.loading")
+                    : t("documentTemplate.actions.refreshPreview")}
+                </Button>
+                <p className="text-muted-foreground text-xs">
+                  {t("documentTemplate.previewSampleDataHint")}
+                </p>
+              </div>
+              {previewTemplate.isError && (
+                <p className="text-destructive text-sm">
+                  {apiErrorMessage(previewTemplate.error, t("common.error"))}
+                </p>
+              )}
               <iframe
                 title={t("documentTemplate.sections.preview")}
-                srcDoc={`<style>${previewCss}</style>${previewHtml}`}
+                srcDoc={previewTemplate.data?.html ?? ""}
                 className="h-[500px] w-full rounded-md border bg-white"
               />
             </CardContent>

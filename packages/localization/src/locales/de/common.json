@@ -902,7 +902,8 @@
       "restore": "Wiederherstellen",
       "duplicate": "Duplizieren",
       "saveAsNewVersion": "Als neue Version speichern",
-      "restoreVersion": "Diese Version wiederherstellen"
+      "restoreVersion": "Diese Version wiederherstellen",
+      "refreshPreview": "Vorschau aktualisieren"
     },
     "sections": {
       "metadata": "Details",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "Visueller Editor",
       "advanced": "Erweitert (HTML/CSS)"
-    }
+    },
+    "previewSampleDataHint": "Die Vorschau verwendet Beispieldaten — echte Werte erscheinen erst, wenn diese Vorlage für ein tatsächliches Dokument verwendet wird."
   },
   "share": {
     "title": "Öffentliche Freigabelinks",

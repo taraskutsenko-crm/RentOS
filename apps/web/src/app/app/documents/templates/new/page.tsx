@@ -6,7 +6,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { TemplateBuilder } from "../../../../../components/documents/template-builder/template-builder";
-import { useCreateDocumentTemplate } from "../../../../../hooks/use-document-templates";
+import {
+  useCreateDocumentTemplate,
+  usePreviewDocumentTemplate,
+} from "../../../../../hooks/use-document-templates";
 import { useCurrentTenantId } from "../../../../../hooks/use-current-tenant";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
 import type { BlockNode } from "../../../../../lib/contract-section-library";
@@ -31,6 +34,7 @@ export default function NewDocumentTemplatePage() {
   const router = useRouter();
   const [tenantId] = useCurrentTenantId();
   const createTemplate = useCreateDocumentTemplate(tenantId);
+  const previewTemplate = usePreviewDocumentTemplate(tenantId);
 
   const [documentType, setDocumentType] = useState<DocumentType>("CONTRACT");
   const [name, setName] = useState("");
@@ -42,6 +46,21 @@ export default function NewDocumentTemplatePage() {
   );
   const [css, setCss] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+
+  async function handlePreview(): Promise<void> {
+    setError(null);
+    try {
+      const result = await previewTemplate.mutateAsync(
+        mode === "visual"
+          ? { documentType, htmlContent: renderBlocksToHtml(blocks ?? []), css: null }
+          : { documentType, htmlContent, css: css || null },
+      );
+      setPreviewHtml(result.html);
+    } catch (previewError) {
+      setError(apiErrorMessage(previewError, t("common.error")));
+    }
+  }
 
   async function handleSubmit(): Promise<void> {
     setError(null);
@@ -157,6 +176,32 @@ export default function NewDocumentTemplatePage() {
               </div>
             </>
           )}
+
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={contentIsEmpty || previewTemplate.isPending}
+                onClick={() => void handlePreview()}
+              >
+                {previewTemplate.isPending
+                  ? t("common.loading")
+                  : t("documentTemplate.sections.preview")}
+              </Button>
+              <p className="text-muted-foreground text-xs">
+                {t("documentTemplate.previewSampleDataHint")}
+              </p>
+            </div>
+            {previewHtml && (
+              <iframe
+                title={t("documentTemplate.sections.preview")}
+                srcDoc={previewHtml}
+                className="h-[500px] w-full rounded-md border bg-white"
+              />
+            )}
+          </div>
 
           <Button
             disabled={!name || contentIsEmpty || createTemplate.isPending}

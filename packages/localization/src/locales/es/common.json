@@ -902,7 +902,8 @@
       "restore": "Restaurar",
       "duplicate": "Duplicar",
       "saveAsNewVersion": "Guardar como nueva versión",
-      "restoreVersion": "Restaurar esta versión"
+      "restoreVersion": "Restaurar esta versión",
+      "refreshPreview": "Actualizar vista previa"
     },
     "sections": {
       "metadata": "Detalles",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "Editor visual",
       "advanced": "Avanzado (HTML/CSS)"
-    }
+    },
+    "previewSampleDataHint": "La vista previa usa datos de ejemplo — los valores reales aparecerán cuando esta plantilla se use en un documento real."
   },
   "share": {
     "title": "Enlaces públicos",

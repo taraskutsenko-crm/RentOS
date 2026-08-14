@@ -902,7 +902,8 @@
       "restore": "복원",
       "duplicate": "복제",
       "saveAsNewVersion": "새 버전으로 저장",
-      "restoreVersion": "이 버전 복원"
+      "restoreVersion": "이 버전 복원",
+      "refreshPreview": "미리보기 새로고침"
     },
     "sections": {
       "metadata": "세부 정보",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "비주얼 편집기",
       "advanced": "고급 (HTML/CSS)"
-    }
+    },
+    "previewSampleDataHint": "미리보기는 샘플 데이터를 사용합니다 — 이 템플릿이 실제 문서에 사용되면 실제 값이 표시됩니다."
   },
   "share": {
     "title": "공개 공유 링크",

@@ -902,7 +902,8 @@
       "restore": "Przywróć",
       "duplicate": "Duplikuj",
       "saveAsNewVersion": "Zapisz jako nową wersję",
-      "restoreVersion": "Przywróć tę wersję"
+      "restoreVersion": "Przywróć tę wersję",
+      "refreshPreview": "Odśwież podgląd"
     },
     "sections": {
       "metadata": "Szczegóły",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "Edytor wizualny",
       "advanced": "Zaawansowany (HTML/CSS)"
-    }
+    },
+    "previewSampleDataHint": "Podgląd wykorzystuje przykładowe dane — rzeczywiste wartości pojawią się, gdy ten szablon zostanie użyty w rzeczywistym dokumencie."
   },
   "share": {
     "title": "Publiczne linki udostępniania",

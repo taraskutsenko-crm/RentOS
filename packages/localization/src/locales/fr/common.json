@@ -902,7 +902,8 @@
       "restore": "Restaurer",
       "duplicate": "Dupliquer",
       "saveAsNewVersion": "Enregistrer comme nouvelle version",
-      "restoreVersion": "Restaurer cette version"
+      "restoreVersion": "Restaurer cette version",
+      "refreshPreview": "Actualiser l'aperçu"
     },
     "sections": {
       "metadata": "Détails",
@@ -913,7 +914,8 @@
     "editorMode": {
       "visual": "Éditeur visuel",
       "advanced": "Avancé (HTML/CSS)"
-    }
+    },
+    "previewSampleDataHint": "L'aperçu utilise des données d'exemple — les valeurs réelles apparaîtront une fois ce modèle utilisé sur un document réel."
   },
   "share": {
     "title": "Liens de partage publics",

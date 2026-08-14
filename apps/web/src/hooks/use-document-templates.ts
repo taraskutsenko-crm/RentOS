@@ -38,6 +38,12 @@ export interface UpdateDocumentTemplateContentInput {
   variablesSchema?: Record<string, unknown> | undefined;
 }
 
+export interface PreviewDocumentTemplateInput {
+  documentType: DocumentType;
+  htmlContent: string;
+  css?: string | null | undefined;
+}
+
 const BASE_KEY = "document-templates";
 
 export function useDocumentTemplates(
@@ -149,4 +155,17 @@ export function useRestoreDocumentTemplate(tenantId: string | null) {
 
 export function useDuplicateDocumentTemplate(tenantId: string | null) {
   return useDocumentTemplateAction(tenantId, "duplicate");
+}
+
+/**
+ * Renders unsaved draft HTML/CSS against synthetic sample data — the
+ * no-code builder's "preview" action, usable before the template (or even
+ * this version) has ever been saved. Not a query: the caller triggers it
+ * on demand (a "Refresh preview" action), not on every keystroke.
+ */
+export function usePreviewDocumentTemplate(tenantId: string | null) {
+  return useMutation({
+    mutationFn: (input: PreviewDocumentTemplateInput) =>
+      apiClient.post<{ html: string }>(`/tenants/${tenantId}/document-templates/preview`, input),
+  });
 }

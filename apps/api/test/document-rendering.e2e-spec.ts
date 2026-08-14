@@ -301,6 +301,75 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
   });
 
   // ---------------------------------------------------------------------
+  // Draft preview against synthetic sample data (task #280) — lets the
+  // no-code builder preview unsaved content before any real Document
+  // exists, using the same resolveVariables substitution engine as a real
+  // render.
+  // ---------------------------------------------------------------------
+
+  it("renders unsaved draft HTML against synthetic sample data, using the real tenant's company name", async () => {
+    const response = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/preview`)
+      .set("Cookie", accessCookie)
+      .send({
+        documentType: "CONTRACT",
+        htmlContent: "<h1>{{company.name}}</h1><p>{{customer.name}}</p><p>{{today}}</p>",
+      })
+      .expect(201);
+
+    expect(response.body.html).toContain(validRegisterPayload.companyName);
+    expect(response.body.html).not.toContain("{{");
+  });
+
+  it("every path in DOCUMENT_VARIABLE_PATHS resolves to non-empty synthetic content in a draft preview", async () => {
+    const markers = DOCUMENT_VARIABLE_PATHS.map(
+      (varPath) => `<div>${varPath}::{{${varPath}}}::end</div>`,
+    ).join("");
+    const response = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/preview`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "CONTRACT", htmlContent: markers })
+      .expect(201);
+
+    // company.logo/company.email are permanently hardcoded to "" in the
+    // resolver (no tenant branding/company-email field exists yet) — same
+    // documented exception as the real-render coverage test below.
+    const permanentlyEmpty = new Set(["company.logo", "company.email"]);
+    for (const varPath of DOCUMENT_VARIABLE_PATHS) {
+      const match = new RegExp(`${varPath.replace(/\./g, "\\.")}::(.*?)::end`, "s").exec(
+        response.body.html,
+      );
+      expect(match, `path "${varPath}" did not appear in rendered output`).not.toBeNull();
+      if (permanentlyEmpty.has(varPath)) continue;
+      expect(match![1]!.trim(), `path "${varPath}" resolved to empty content`).not.toBe("");
+    }
+  });
+
+  it("allows a VIEWER (documents.templates.view only) to preview, but blocks a role with neither view nor manage", async () => {
+    const viewerCookie = await createMemberWithRole("VIEWER", "viewer-preview@example.com");
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/preview`)
+      .set("Cookie", viewerCookie)
+      .send({ documentType: "CONTRACT", htmlContent: "<p>{{customer.name}}</p>" })
+      .expect(201);
+
+    const technicianCookie = await createMemberWithRole("TECHNICIAN", "tech-preview@example.com");
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/preview`)
+      .set("Cookie", technicianCookie)
+      .send({ documentType: "CONTRACT", htmlContent: "<p>{{customer.name}}</p>" })
+      .expect(403);
+  });
+
+  it("rejects a draft preview missing required fields", async () => {
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/preview`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "CONTRACT" })
+      .expect(400);
+  });
+
+  // ---------------------------------------------------------------------
   // Variable resolution + rendering (Parts 2-3)
   // ---------------------------------------------------------------------
 

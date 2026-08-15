@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, AlertDescription, Button, Input, Label } from "@rentos/ui";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -56,6 +57,7 @@ export function DocumentForm({
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema),
@@ -69,6 +71,24 @@ export function DocumentForm({
       ...initialValues,
     },
   });
+
+  // `defaultValues.customerId/assetId/rentalId` above only takes effect if a
+  // matching <option> already exists in the DOM at the moment RHF registers
+  // the native <select> — but customers/assets/rentals load asynchronously
+  // (see useCustomers/useAssets/useRentals below), so a pre-filled rentalId
+  // arriving via a "Generate document" link (see rentals/[id]/page.tsx)
+  // silently reset to empty once the real <option> list rendered, one
+  // render after the browser had already applied the (then-optionless)
+  // default. Re-apply any pre-filled ids once all three lists have loaded.
+  const appliedAsyncInitialValues = useRef(false);
+  useEffect(() => {
+    if (appliedAsyncInitialValues.current) return;
+    if (!customers || !assets || !rentals) return;
+    if (initialValues?.customerId) setValue("customerId", initialValues.customerId);
+    if (initialValues?.assetId) setValue("assetId", initialValues.assetId);
+    if (initialValues?.rentalId) setValue("rentalId", initialValues.rentalId);
+    appliedAsyncInitialValues.current = true;
+  }, [customers, assets, rentals, initialValues, setValue]);
 
   const documentType = watch("documentType");
 

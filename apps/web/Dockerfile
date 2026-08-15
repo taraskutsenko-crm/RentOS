@@ -15,7 +15,7 @@ COPY packages/ui/package.json ./packages/ui/package.json
 COPY packages/localization/package.json ./packages/localization/package.json
 COPY apps/web/package.json ./apps/web/package.json
 COPY apps/api/package.json ./apps/api/package.json
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --trust-lockfile
 
 FROM deps AS builder
 COPY . .

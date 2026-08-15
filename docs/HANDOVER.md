@@ -72,12 +72,29 @@ registry.ts`, an 18-section `contract-section-library.ts` ("Add
   before it shipped (a ProseMirror section-nesting bug in "Add
   section"). All 14 locales translated and parity-verified throughout;
   full backend/frontend test suites green after every commit (verified
-  via CI — Docker Desktop was down on the development machine for this
-  entire arc, so backend/e2e tests could only be verified through CI,
-  never locally; **Docker rebuild + full manual browser walkthrough
-  (the plan's final verification step) has NOT been performed** and
-  remains an open item for whoever restores Docker on this machine
-  next). See D-060 through D-064 for full per-part decision records.
+  via CI throughout the arc, since Docker Desktop was down on the
+  development machine at the time). **Follow-up (D-065):** with Docker
+  Desktop back up, attempted the plan's final
+  Docker-image-rebuild + manual-browser-walkthrough step; the image
+  build itself was blocked for several hours by severe registry-network
+  degradation on this specific host (confirmed via direct latency
+  tests: normal sub-second `registry.npmjs.org` requests took 7-20s+,
+  both from the host and from inside a container, for the duration of
+  this session) — not a Docker-availability or code problem. Found and
+  fixed one genuine, unrelated build-performance issue in the process
+  (`--trust-lockfile`, D-065) but the raw package-download layer itself
+  never completed even after 4 full rebuild attempts and two different
+  pnpm-flag mitigations. As a substitute, ran the full backend suite
+  (`vitest`, unit + e2e, 31 files / 509 tests) locally against the
+  already-running Postgres/Redis containers, and the full frontend
+  suite (73 files / 442 tests) — both green — plus every quality gate
+  (`format`, `lint`, `typecheck`, `build`, `check:governance`) locally.
+  **The literal Docker-image rebuild + manual browser click-through has
+  still NOT been performed** and remains an open item — retry once
+  registry connectivity from this host recovers; nothing about this gap
+  is specific to the arc's own code (CI, which builds on GitHub-hosted
+  runners, is unaffected by this local network condition). See D-060
+  through D-065 for full per-part decision records.
 - **Previous state (Pre-Chapter 10 — Globalization Foundation, D-057):**
   explicit HARD STOP before Chapter 10 to harden Havelio's global
   readiness rather than add a new feature. Consolidated all locale

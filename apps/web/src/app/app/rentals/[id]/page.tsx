@@ -25,7 +25,11 @@ import {
   useStartRental,
 } from "../../../../hooks/use-rentals";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
-import { formatDate, formatDateTime } from "../../../../lib/date-format";
+import {
+  formatBusinessDate,
+  formatBusinessDateTime,
+  formatDateTime,
+} from "../../../../lib/date-format";
 import {
   CHECKLIST_ITEM_DOCUMENT_TYPE,
   getRentalDocumentChecklist,
@@ -165,8 +169,8 @@ export default function RentalDetailPage() {
               })}
             </span>
             <span className="text-muted-foreground">
-              {formatDate(rental.plannedStart, i18n.language, timeZone)} –{" "}
-              {formatDate(rental.plannedEnd, i18n.language, timeZone)}
+              {formatBusinessDate(rental.plannedStart, i18n.language)} –{" "}
+              {formatBusinessDate(rental.plannedEnd, i18n.language)}
             </span>
           </div>
         }
@@ -502,11 +506,11 @@ export default function RentalDetailPage() {
             <CardContent className="grid grid-cols-2 gap-3 text-sm">
               <InfoRow
                 label={t("rental.fields.plannedStart")}
-                value={formatDateTime(rental.plannedStart, i18n.language, timeZone)}
+                value={formatBusinessDateTime(rental.plannedStart, i18n.language)}
               />
               <InfoRow
                 label={t("rental.fields.plannedEnd")}
-                value={formatDateTime(rental.plannedEnd, i18n.language, timeZone)}
+                value={formatBusinessDateTime(rental.plannedEnd, i18n.language)}
               />
               <InfoRow
                 label={t("rental.fields.actualStart")}

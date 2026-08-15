@@ -144,15 +144,24 @@ export class VariableResolverService {
             customFields: assetCustomFields,
           }
         : {},
+      // Rental.plannedStart/plannedEnd are Prisma DateTime columns mapped to
+      // Postgres "timestamp without time zone" — floating wall-clock values
+      // with no real-world instant attached (the digits typed into the
+      // picker pass straight through unchanged, since the API server runs
+      // with TZ=UTC). Formatting these with the tenant's real IANA zone
+      // (`timezone` — correct for genuine instants like `today` below) would
+      // re-interpret those already-literal digits as a true UTC instant and
+      // shift them again by the tenant's offset — format as "UTC" instead
+      // to read the literal stored digits back exactly (see D-066).
       rental: document.rental
         ? {
             number: document.rental.rentalNumber,
-            start: formatDate(document.rental.plannedStart, language, timezone),
-            end: formatDate(document.rental.plannedEnd, language, timezone),
-            startTime: formatTime(document.rental.plannedStart, language, timezone),
-            endTime: formatTime(document.rental.plannedEnd, language, timezone),
-            startDateTime: formatDateTime(document.rental.plannedStart, language, timezone),
-            endDateTime: formatDateTime(document.rental.plannedEnd, language, timezone),
+            start: formatDate(document.rental.plannedStart, language, "UTC"),
+            end: formatDate(document.rental.plannedEnd, language, "UTC"),
+            startTime: formatTime(document.rental.plannedStart, language, "UTC"),
+            endTime: formatTime(document.rental.plannedEnd, language, "UTC"),
+            startDateTime: formatDateTime(document.rental.plannedStart, language, "UTC"),
+            endDateTime: formatDateTime(document.rental.plannedEnd, language, "UTC"),
             total: formatMoney(
               document.rental.totalMinor,
               document.rental.currency ?? CURRENCY_FALLBACK,

@@ -1037,6 +1037,71 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     expect(preview.body.html).toContain("Generator A");
   });
 
+  it("resolves rental.start/end/startTime/endTime/startDateTime/endDateTime to the literal entered digits, not shifted by the tenant's timezone (D-066)", async () => {
+    // Rental.plannedStart/plannedEnd are Prisma DateTime columns mapped to
+    // "timestamp without time zone" — a floating wall-clock value with no
+    // real-world instant attached. The test tenant (validRegisterPayload)
+    // is registered with timezone "America/New_York" (EST = UTC-5 in
+    // January): formatting a "02:00" UTC-labeled value with that real zone
+    // previously shifted it to "21:00 the PREVIOUS day" — every generated
+    // contract's rental period was silently wrong (both the date and the
+    // time) for any tenant not on UTC. Times are picked close to midnight
+    // UTC specifically so the bug's day-boundary shift is also caught, not
+    // just the hour shift.
+    const customer = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/customers`)
+      .set("Cookie", accessCookie)
+      .send({ firstName: "Time", lastName: "Customer" })
+      .expect(201);
+
+    const categoryId = await createAssetCategory();
+    const assetId = await createAsset(categoryId, "Generator B", "GEN-TZ");
+
+    const rental = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId: customer.body.id,
+        plannedStart: "2027-01-10T02:00:00.000Z",
+        plannedEnd: "2027-01-12T02:00:00.000Z",
+        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 5000 }],
+      })
+      .expect(201);
+
+    await createTemplate({
+      htmlContent:
+        "<p>{{rental.start}}|{{rental.end}}|{{rental.startTime}}|{{rental.endTime}}|" +
+        "{{rental.startDateTime}}|{{rental.endDateTime}}</p>",
+    }).expect(201);
+    const templates = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/document-templates`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templates.body.items[0].id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const document = await createDocument({
+      customerId: customer.body.id,
+      rentalId: rental.body.id,
+    }).expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(preview.body.html).toContain("01/10/2027");
+    expect(preview.body.html).toContain("01/12/2027");
+    expect(preview.body.html).toContain("02:00 AM");
+    // The double-shifted (buggy) values this regresses against — the
+    // previous calendar day, at 9 PM (02:00 UTC minus the EST -5 offset).
+    expect(preview.body.html).not.toContain("01/09/2027");
+    expect(preview.body.html).not.toContain("01/11/2027");
+    expect(preview.body.html).not.toContain("09:00 PM");
+  });
+
   it("builds rental.assetsTableHtml with one row per rental item and empty string when there is no rental", async () => {
     const categoryId = await createAssetCategory();
     const assetAId = await createAsset(categoryId, "Generator A", "GEN-A");

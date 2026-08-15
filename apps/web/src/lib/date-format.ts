@@ -47,3 +47,28 @@ export function formatDateTime(
 export function formatMonthYear(value: Date | string | number, locale: string): string {
   return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(toDate(value));
 }
+
+/**
+ * Rental/Quote `plannedStart`/`plannedEnd`/`issueDate`/`validUntil` are
+ * Prisma `DateTime` columns mapped to Postgres "timestamp without time
+ * zone" — a floating wall-clock value with no real-world instant attached.
+ * The digits typed into the date/time picker pass straight through
+ * unchanged (the API server runs with `TZ=UTC`, so `new Date("...T08:00")`
+ * preserves the literal digits as a UTC-labeled `Date`). Formatting one of
+ * these fields with the tenant's real IANA zone (`formatDate(value,
+ * locale, tenant.timezone)`) re-interprets those already-literal digits as
+ * a true UTC instant and shifts them again by the tenant's offset — a
+ * double conversion that silently shows the wrong time for any tenant not
+ * on UTC (see DECISIONS.md D-066). These two helpers read the literal
+ * stored digits back exactly by formatting as UTC — use them for these
+ * four naive fields specifically; real-instant fields (`actualStart`,
+ * `returnedAt`, audit-log `occurredAt`, etc.) should keep using
+ * `formatDate`/`formatDateTime` with the tenant's real timezone.
+ */
+export function formatBusinessDate(value: Date | string | number, locale: string): string {
+  return formatDate(value, locale, "UTC");
+}
+
+export function formatBusinessDateTime(value: Date | string | number, locale: string): string {
+  return formatDateTime(value, locale, "UTC");
+}

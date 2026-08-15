@@ -16,9 +16,9 @@ import {
   type DataTableColumn,
 } from "../../../components/data-table";
 import { useCurrentTenantId } from "../../../hooks/use-current-tenant";
-import { usePermission, useTenantTimezone } from "../../../hooks/use-current-tenant-role";
+import { usePermission } from "../../../hooks/use-current-tenant-role";
 import { useQuotes } from "../../../hooks/use-quotes";
-import { formatDate } from "../../../lib/date-format";
+import { formatBusinessDate } from "../../../lib/date-format";
 import { formatMoney } from "../../../lib/money";
 import type { QuoteListItem, QuoteStatus } from "../../../types/quote";
 
@@ -39,7 +39,6 @@ export default function QuotesPage() {
   const [status, setStatus] = useState<QuoteStatus | "">("");
 
   const canCreate = usePermission("quotes.create");
-  const timeZone = useTenantTimezone();
   const table = useDataTableState({ initialSortBy: "createdAt", initialSortDirection: "desc" });
   const { data, isLoading, isError, refetch } = useQuotes(tenantId, {
     page: table.page,
@@ -74,7 +73,7 @@ export default function QuotesPage() {
       id: "validUntil",
       header: t("quote.fields.validUntil"),
       sortable: true,
-      cell: (quote) => formatDate(quote.validUntil, i18n.language, timeZone),
+      cell: (quote) => formatBusinessDate(quote.validUntil, i18n.language),
     },
     {
       id: "total",

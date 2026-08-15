@@ -28,7 +28,7 @@ import {
   useSendQuote,
 } from "../../../../hooks/use-quotes";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
-import { formatDate, formatDateTime } from "../../../../lib/date-format";
+import { formatBusinessDate, formatBusinessDateTime } from "../../../../lib/date-format";
 import { formatMoney } from "../../../../lib/money";
 import { getQuoteNextAction } from "../../../../lib/quote-next-action";
 import { getQuoteValidityIntelligence } from "../../../../lib/quote-validity-intelligence";
@@ -148,8 +148,7 @@ export default function QuoteDetailPage() {
               {t(`quote.validityIntelligence.${validity.kind}`, { count: validity.days })}
             </span>
             <span className="text-muted-foreground">
-              {t("quote.fields.validUntil")}:{" "}
-              {formatDate(quote.validUntil, i18n.language, timeZone)}
+              {t("quote.fields.validUntil")}: {formatBusinessDate(quote.validUntil, i18n.language)}
             </span>
           </div>
         }
@@ -307,19 +306,19 @@ export default function QuoteDetailPage() {
             <CardContent className="grid grid-cols-2 gap-3 text-sm">
               <InfoRow
                 label={t("rental.fields.plannedStart")}
-                value={formatDateTime(quote.plannedStart, i18n.language, timeZone)}
+                value={formatBusinessDateTime(quote.plannedStart, i18n.language)}
               />
               <InfoRow
                 label={t("rental.fields.plannedEnd")}
-                value={formatDateTime(quote.plannedEnd, i18n.language, timeZone)}
+                value={formatBusinessDateTime(quote.plannedEnd, i18n.language)}
               />
               <InfoRow
                 label={t("quote.fields.issueDate")}
-                value={formatDate(quote.issueDate, i18n.language, timeZone)}
+                value={formatBusinessDate(quote.issueDate, i18n.language)}
               />
               <InfoRow
                 label={t("quote.fields.validUntil")}
-                value={formatDateTime(quote.validUntil, i18n.language, timeZone)}
+                value={formatBusinessDateTime(quote.validUntil, i18n.language)}
               />
               <InfoRow label={t("quote.fields.customerNotes")} value={quote.customerNotes ?? "—"} />
               <InfoRow

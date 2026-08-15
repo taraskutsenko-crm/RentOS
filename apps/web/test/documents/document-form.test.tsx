@@ -5,7 +5,7 @@ import { I18nextProvider } from "react-i18next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DocumentForm } from "../../src/components/documents/document-form";
-import i18n from "../../src/lib/i18n";
+import i18n, { createI18nInstance } from "../../src/lib/i18n";
 import type { DocumentFormValues } from "../../src/lib/validation";
 
 const useCurrentTenantIdMock = vi.fn();
@@ -125,6 +125,47 @@ describe("DocumentForm document-language picker (D-068)", () => {
     const optionLabels = Array.from(select.options).map((option) => option.textContent);
     expect(optionLabels).toEqual(["Tenant default", "English", "Russian"]);
     // Defaults to the "Tenant default" (empty-string, EmptyToNull) option.
+    expect(select.value).toBe("");
+  });
+});
+
+describe("Document language stays independent of UI language (D-069 regression)", () => {
+  beforeEach(() => {
+    useCurrentTenantIdMock.mockReturnValue(["tenant-1", vi.fn()]);
+    useCustomersMock.mockReturnValue({ data: { items: [] } });
+    useAssetsMock.mockReturnValue({ data: { items: [] } });
+    useRentalsMock.mockReturnValue({ data: { items: [] } });
+    useActiveDocumentTemplateLanguagesMock.mockReturnValue({
+      data: { languages: [null, "en", "ru"] },
+    });
+  });
+
+  it("still offers the same document-language options and default selection when the UI language is Russian", async () => {
+    // The i18n SSR/hydration fix (D-069) introduced createI18nInstance and
+    // per-mount i18next instances — this proves that swap didn't couple the
+    // Document.templateLanguage field to whichever UI language is active.
+    const russianUi = createI18nInstance("ru");
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <I18nextProvider i18n={russianUi}>
+          <DocumentForm
+            onSubmit={vi.fn()}
+            isPending={false}
+            submitLabel="Save"
+            submittingLabel="Saving"
+            initialValues={{ documentType: "CONTRACT" }}
+          />
+        </I18nextProvider>
+      </QueryClientProvider>,
+    );
+
+    const select = (await screen.findByLabelText("Язык документа")) as HTMLSelectElement;
+    const optionLabels = Array.from(select.options).map((option) => option.textContent);
+    // Language *names* in the picker are always shown in English by design
+    // (getLocaleMetadata().englishName) — independent of the surrounding UI
+    // language, which only translates the field's own label/hint text.
+    expect(optionLabels).toEqual(["Значение арендатора по умолчанию", "English", "Russian"]);
     expect(select.value).toBe("");
   });
 });

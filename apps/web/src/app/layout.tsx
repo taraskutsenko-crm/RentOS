@@ -1,7 +1,10 @@
+import { getLocaleMetadata } from "@rentos/localization";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 
 import { I18nProvider } from "../components/i18n-provider";
+import { LANGUAGE_COOKIE_NAME, resolveSupportedLanguage } from "../lib/i18n";
 import { QueryProvider } from "../lib/query-provider";
 import "./globals.css";
 
@@ -26,15 +29,23 @@ export const metadata: Metadata = {
   description: "One Platform. Every Asset.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // The persisted UI-locale cookie (see DECISIONS.md D-069) is the single
+  // source of truth for both this server render and the client's hydration
+  // pass — reading it here (rather than defaulting to English) is what
+  // eliminates the React #418 hydration mismatch for non-English locales.
+  const cookieStore = await cookies();
+  const language = resolveSupportedLanguage(cookieStore.get(LANGUAGE_COOKIE_NAME)?.value);
+  const { direction } = getLocaleMetadata(language);
+
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang={language} dir={direction} className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="font-sans antialiased">
-        <I18nProvider>
+        <I18nProvider initialLanguage={language}>
           <QueryProvider>{children}</QueryProvider>
         </I18nProvider>
       </body>

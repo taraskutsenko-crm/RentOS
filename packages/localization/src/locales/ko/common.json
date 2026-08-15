@@ -781,6 +781,9 @@
       "rental": "대여",
       "quote": "견적서",
       "asset": "자산",
+      "templateLanguage": "문서 언어",
+      "templateLanguageHint": "이 문서 유형에는 언어별 활성 템플릿이 두 개 이상 있습니다. 사용할 템플릿을 선택하세요.",
+      "templateLanguageDefault": "테넌트 기본값",
       "rentalHint": "렌탈을 연결하면 번호, 날짜, 가격 및 자산이 문서 템플릿에서 사용 가능해집니다."
     },
     "summary": {

@@ -50,6 +50,7 @@ export default function NewDocumentPage() {
       assetId: values.assetId || undefined,
       rentalId: values.rentalId || undefined,
       quoteId: quoteIdParam ?? undefined,
+      templateLanguage: values.templateLanguage || undefined,
     });
     router.push(`/app/documents/${created.id}`);
   }

@@ -781,6 +781,9 @@
       "rental": "Vermietung",
       "quote": "Angebot",
       "asset": "Anlagegut",
+      "templateLanguage": "Dokumentsprache",
+      "templateLanguageHint": "Für diesen Dokumenttyp sind mehrere sprachspezifische Vorlagen aktiv — wählen Sie aus, welche verwendet werden soll.",
+      "templateLanguageDefault": "Mandantenstandard",
       "rentalHint": "Durch die Verknüpfung einer Miete werden ihre Nummer, Daten, ihr Preis und ihre Assets in der Dokumentvorlage verfügbar."
     },
     "summary": {

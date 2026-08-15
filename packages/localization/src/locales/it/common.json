@@ -781,6 +781,9 @@
       "rental": "Noleggio",
       "quote": "Preventivo",
       "asset": "Bene",
+      "templateLanguage": "Lingua del documento",
+      "templateLanguageHint": "Questo tipo di documento ha più di un modello attivo specifico per lingua: scegli quale utilizzare.",
+      "templateLanguageDefault": "Predefinito del tenant",
       "rentalHint": "Collegare un noleggio rende il suo numero, le date, il prezzo e i beni disponibili nel modello di documento."
     },
     "summary": {

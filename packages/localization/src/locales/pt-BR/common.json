@@ -781,6 +781,9 @@
       "rental": "Locação",
       "quote": "Orçamento",
       "asset": "Ativo",
+      "templateLanguage": "Idioma do documento",
+      "templateLanguageHint": "Este tipo de documento tem mais de um modelo ativo específico de idioma — escolha qual usar.",
+      "templateLanguageDefault": "Padrão do inquilino",
       "rentalHint": "Vincular uma locação disponibiliza seu número, datas, preço e ativos ao modelo de documento."
     },
     "summary": {

@@ -781,6 +781,9 @@
       "rental": "Alquiler",
       "quote": "Presupuesto",
       "asset": "Activo",
+      "templateLanguage": "Idioma del documento",
+      "templateLanguageHint": "Este tipo de documento tiene más de una plantilla activa específica de idioma: elige cuál usar.",
+      "templateLanguageDefault": "Predeterminado del inquilino",
       "rentalHint": "Vincular un alquiler pone su número, fechas, precio y activos a disposición de la plantilla del documento."
     },
     "summary": {

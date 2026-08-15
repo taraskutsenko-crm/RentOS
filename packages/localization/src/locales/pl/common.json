@@ -781,6 +781,9 @@
       "rental": "Wynajem",
       "quote": "Oferta",
       "asset": "Zasób",
+      "templateLanguage": "Język dokumentu",
+      "templateLanguageHint": "Ten typ dokumentu ma więcej niż jeden aktywny szablon dla danego języka — wybierz, którego użyć.",
+      "templateLanguageDefault": "Domyślny dla najemcy",
       "rentalHint": "Powiązanie wynajmu udostępnia jego numer, daty, cenę i zasoby w szablonie dokumentu."
     },
     "summary": {

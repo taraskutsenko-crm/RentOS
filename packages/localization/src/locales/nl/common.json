@@ -781,6 +781,9 @@
       "rental": "Verhuur",
       "quote": "Offerte",
       "asset": "Bezit",
+      "templateLanguage": "Documenttaal",
+      "templateLanguageHint": "Dit documenttype heeft meerdere actieve taalspecifieke sjablonen — kies welke u wilt gebruiken.",
+      "templateLanguageDefault": "Standaard van tenant",
       "rentalHint": "Door een verhuur te koppelen, worden het nummer, de data, de prijs en de activa beschikbaar in de documentsjabloon."
     },
     "summary": {

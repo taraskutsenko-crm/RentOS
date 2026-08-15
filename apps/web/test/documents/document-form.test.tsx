@@ -28,6 +28,12 @@ vi.mock("../../src/hooks/use-rentals", () => ({
   useRentals: (...args: unknown[]) => useRentalsMock(...args),
 }));
 
+const useActiveDocumentTemplateLanguagesMock = vi.fn();
+vi.mock("../../src/hooks/use-document-templates", () => ({
+  useActiveDocumentTemplateLanguages: (...args: unknown[]) =>
+    useActiveDocumentTemplateLanguagesMock(...args),
+}));
+
 function renderForm(
   queryClient: QueryClient,
   initialValues: Partial<DocumentFormValues>,
@@ -52,6 +58,7 @@ describe("DocumentForm async pre-fill (D-067)", () => {
     useCurrentTenantIdMock.mockReturnValue(["tenant-1", vi.fn()]);
     useCustomersMock.mockReturnValue({ data: { items: [] } });
     useAssetsMock.mockReturnValue({ data: { items: [] } });
+    useActiveDocumentTemplateLanguagesMock.mockReturnValue({ data: { languages: [] } });
   });
 
   it("applies a pre-filled rentalId once the async rental list resolves, even though it was still empty at mount", async () => {
@@ -86,5 +93,38 @@ describe("DocumentForm async pre-fill (D-067)", () => {
 
     const select = screen.getByLabelText("Rentals") as HTMLSelectElement;
     await waitFor(() => expect(select.value).toBe(""));
+  });
+});
+
+describe("DocumentForm document-language picker (D-068)", () => {
+  beforeEach(() => {
+    useCurrentTenantIdMock.mockReturnValue(["tenant-1", vi.fn()]);
+    useCustomersMock.mockReturnValue({ data: { items: [] } });
+    useAssetsMock.mockReturnValue({ data: { items: [] } });
+    useRentalsMock.mockReturnValue({ data: { items: [] } });
+  });
+
+  it("hides the language picker when at most one active template exists for the document type", async () => {
+    useActiveDocumentTemplateLanguagesMock.mockReturnValue({ data: { languages: ["en"] } });
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(renderForm(queryClient, { documentType: "CONTRACT" }));
+
+    expect(screen.queryByLabelText("Document language")).not.toBeInTheDocument();
+  });
+
+  it("shows a language picker with a Tenant default option when 2+ active templates exist", async () => {
+    useActiveDocumentTemplateLanguagesMock.mockReturnValue({
+      data: { languages: [null, "en", "ru"] },
+    });
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(renderForm(queryClient, { documentType: "CONTRACT" }));
+
+    const select = (await screen.findByLabelText("Document language")) as HTMLSelectElement;
+    const optionLabels = Array.from(select.options).map((option) => option.textContent);
+    expect(optionLabels).toEqual(["Tenant default", "English", "Russian"]);
+    // Defaults to the "Tenant default" (empty-string, EmptyToNull) option.
+    expect(select.value).toBe("");
   });
 });

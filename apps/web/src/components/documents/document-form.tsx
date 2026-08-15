@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getLocaleMetadata, isSupportedLanguage } from "@rentos/localization";
 import { Alert, AlertDescription, Button, Input, Label } from "@rentos/ui";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -9,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { useAssets } from "../../hooks/use-assets";
 import { useCustomers } from "../../hooks/use-customers";
 import { useCurrentTenantId } from "../../hooks/use-current-tenant";
+import { useActiveDocumentTemplateLanguages } from "../../hooks/use-document-templates";
 import { useRentals } from "../../hooks/use-rentals";
 import { documentSchema, type DocumentFormValues } from "../../lib/validation";
 import type { DocumentType } from "../../types/document";
@@ -68,6 +70,7 @@ export function DocumentForm({
       customerId: "",
       assetId: "",
       rentalId: "",
+      templateLanguage: "",
       ...initialValues,
     },
   });
@@ -92,6 +95,15 @@ export function DocumentForm({
 
   const documentType = watch("documentType");
 
+  // Only meaningful (and only ever shown) when 2+ ACTIVE templates exist for
+  // this documentType across different languages — see
+  // DocumentTemplatesService.findActiveForType: with a single active
+  // template, or none, the backend already resolves it unambiguously and a
+  // picker would just be noise. See DECISIONS.md D-062/D-067.
+  const { data: activeLanguages } = useActiveDocumentTemplateLanguages(tenantId, documentType);
+  const languages = activeLanguages?.languages ?? [];
+  const showLanguagePicker = languages.length >= 2;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
       {errorMessage && (
@@ -114,6 +126,33 @@ export function DocumentForm({
           ))}
         </select>
       </div>
+
+      {showLanguagePicker && (
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="templateLanguage">{t("document.fields.templateLanguage")}</Label>
+          <select
+            id="templateLanguage"
+            className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+            {...register("templateLanguage")}
+          >
+            {languages.includes(null) && (
+              <option value="">{t("document.fields.templateLanguageDefault")}</option>
+            )}
+            {languages
+              .filter((language): language is string => language !== null)
+              .map((language) => (
+                <option key={language} value={language}>
+                  {isSupportedLanguage(language)
+                    ? getLocaleMetadata(language).englishName
+                    : language}
+                </option>
+              ))}
+          </select>
+          <p className="text-muted-foreground text-xs">
+            {t("document.fields.templateLanguageHint")}
+          </p>
+        </div>
+      )}
 
       {documentType === "CUSTOM" && (
         <div className="flex flex-col gap-1.5">

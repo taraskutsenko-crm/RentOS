@@ -292,6 +292,7 @@ export const documentSchema = z
     customerId: z.string(),
     assetId: z.string(),
     rentalId: z.string(),
+    templateLanguage: z.string(),
   })
   .refine((data) => data.documentType !== "CUSTOM" || data.customTypeName.trim().length > 0, {
     path: ["customTypeName"],

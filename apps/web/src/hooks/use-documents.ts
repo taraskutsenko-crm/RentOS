@@ -51,6 +51,7 @@ export interface DocumentInput {
   employeeUserId?: string | undefined;
   businessData?: Record<string, unknown> | undefined;
   items?: DocumentItemInput[] | undefined;
+  templateLanguage?: string | undefined;
 }
 
 const BASE_KEY = "documents";

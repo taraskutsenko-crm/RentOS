@@ -781,7 +781,10 @@
       "rental": "Rental",
       "rentalHint": "Linking a rental makes its number, dates, price, and assets available to the document template.",
       "quote": "Quote",
-      "asset": "Asset"
+      "asset": "Asset",
+      "templateLanguage": "Document language",
+      "templateLanguageHint": "This document type has more than one active language-specific template — choose which one to use.",
+      "templateLanguageDefault": "Tenant default"
     },
     "summary": {
       "total": "Total documents",

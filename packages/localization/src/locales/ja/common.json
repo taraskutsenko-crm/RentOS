@@ -781,6 +781,9 @@
       "rental": "レンタル",
       "quote": "見積書",
       "asset": "資産",
+      "templateLanguage": "書類の言語",
+      "templateLanguageHint": "このドキュメントタイプには、言語ごとに有効なテンプレートが複数あります。使用するテンプレートを選択してください。",
+      "templateLanguageDefault": "テナントの既定値",
       "rentalHint": "レンタルをリンクすると、その番号、日付、料金、資産がドキュメントテンプレートで利用できるようになります。"
     },
     "summary": {

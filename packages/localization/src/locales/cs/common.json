@@ -781,6 +781,9 @@
       "rental": "Pronájem",
       "quote": "Nabídka",
       "asset": "Majetek",
+      "templateLanguage": "Jazyk dokumentu",
+      "templateLanguageHint": "Tento typ dokumentu má aktivních více jazykově specifických šablon — vyberte, kterou použít.",
+      "templateLanguageDefault": "Výchozí nastavení nájemce",
       "rentalHint": "Propojení pronájmu zpřístupní jeho číslo, data, cenu a vybavení šabloně dokumentu."
     },
     "summary": {

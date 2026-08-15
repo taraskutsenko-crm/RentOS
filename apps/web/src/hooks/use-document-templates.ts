@@ -68,6 +68,27 @@ export function useDocumentTemplate(tenantId: string | null, id: string | null) 
   });
 }
 
+/**
+ * Feeds the "Generate document" flow's language picker (see
+ * DocumentTemplatesService.activeLanguagesForType) — resolves unambiguously
+ * without a picker when 0 or 1 languages are active; the caller shows a
+ * picker only when 2+ are returned.
+ */
+export function useActiveDocumentTemplateLanguages(
+  tenantId: string | null,
+  documentType: DocumentType | null,
+) {
+  return useQuery({
+    queryKey: [BASE_KEY, tenantId, "active-languages", documentType],
+    queryFn: () =>
+      apiClient.get<{ languages: Array<string | null> }>(
+        `/tenants/${tenantId}/document-templates/active-languages`,
+        { documentType: documentType ?? undefined },
+      ),
+    enabled: !!tenantId && !!documentType,
+  });
+}
+
 export function useCreateDocumentTemplate(tenantId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({

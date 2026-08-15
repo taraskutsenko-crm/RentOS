@@ -781,6 +781,9 @@
       "rental": "Location",
       "quote": "Devis",
       "asset": "Actif",
+      "templateLanguage": "Langue du document",
+      "templateLanguageHint": "Ce type de document dispose de plusieurs modèles actifs propres à une langue — choisissez lequel utiliser.",
+      "templateLanguageDefault": "Valeur par défaut du locataire",
       "rentalHint": "Lier une location rend son numéro, ses dates, son prix et ses actifs disponibles dans le modèle de document."
     },
     "summary": {

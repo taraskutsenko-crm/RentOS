@@ -19,10 +19,10 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `8e1f4f9` (feat: add
-  getRentalNextAction/getQuoteNextAction workflow-continuity utilities)
-  — Pre-Chapter 10 Rental Workflow, Contract System & No-Code Document
-  Template Builder (D-060–D-064) is complete and CI-green. Chapter 10
+- **Latest verified commit:** `9dea605` (fix: skip redundant registry
+  policy re-check in Docker image installs, D-065) — Pre-Chapter 10
+  Rental Workflow, Contract System & No-Code Document Template Builder
+  (D-060–D-065) is complete and CI-green. Chapter 10
   itself was **not** started, per the arc's explicit hard-stop
   instruction. Every commit in this arc pushed to `main` individually
   and was confirmed CI-green before the next was started (no batched,

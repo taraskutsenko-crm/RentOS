@@ -5,7 +5,10 @@ import {
   estimateDurationInDays,
   estimateQuoteItemPricing,
   estimateQuoteTotals,
+  getMissingQuoteItemPriceFields,
+  getRequiredQuoteItemPriceFields,
   type EstimatedQuoteItemInput,
+  type QuoteItemPriceDisplayValues,
 } from "../../src/lib/quote-pricing";
 
 function item(overrides: Partial<EstimatedQuoteItemInput> = {}): EstimatedQuoteItemInput {
@@ -167,5 +170,97 @@ describe("estimateQuoteTotals", () => {
     const result = estimateQuoteTotals([], "2026-08-01T00:00:00Z", "2026-08-02T00:00:00Z", null, 0);
     expect(result.subtotalMinor).toBe(0);
     expect(result.totalMinor).toBe(0);
+  });
+});
+
+function priceDisplay(
+  overrides: Partial<QuoteItemPriceDisplayValues> = {},
+): QuoteItemPriceDisplayValues {
+  return {
+    billingMode: "DAILY",
+    unitPriceDisplay: "",
+    dailyPriceDisplay: "",
+    weeklyPriceDisplay: "",
+    monthlyPriceDisplay: "",
+    customPriceDisplay: "",
+    ...overrides,
+  };
+}
+
+// Regression coverage for the manual-testing bug: MONTHLY quote items
+// reached Review with a missing daily-remainder rate and failed at the API
+// with the raw backend field name `dailyPriceMinor`. These mirror
+// apps/api/src/quotes/quote-pricing.util.ts's
+// assertQuoteBillingModePriceProvided field-by-field.
+describe("getRequiredQuoteItemPriceFields / getMissingQuoteItemPriceFields", () => {
+  it("requires only dailyPriceDisplay for DAILY", () => {
+    expect(getRequiredQuoteItemPriceFields("DAILY")).toEqual(["dailyPriceDisplay"]);
+  });
+
+  it("requires only weeklyPriceDisplay for WEEKLY", () => {
+    expect(getRequiredQuoteItemPriceFields("WEEKLY")).toEqual(["weeklyPriceDisplay"]);
+  });
+
+  it("requires both monthlyPriceDisplay and dailyPriceDisplay for MONTHLY", () => {
+    expect(getRequiredQuoteItemPriceFields("MONTHLY")).toEqual([
+      "monthlyPriceDisplay",
+      "dailyPriceDisplay",
+    ]);
+  });
+
+  it("requires only customPriceDisplay for CUSTOM", () => {
+    expect(getRequiredQuoteItemPriceFields("CUSTOM")).toEqual(["customPriceDisplay"]);
+  });
+
+  it("requires only unitPriceDisplay for FLAT", () => {
+    expect(getRequiredQuoteItemPriceFields("FLAT")).toEqual(["unitPriceDisplay"]);
+  });
+
+  it("flags a MONTHLY item as missing its daily remainder rate when only the monthly price is filled in — the exact manual-testing bug", () => {
+    const item = priceDisplay({ billingMode: "MONTHLY", monthlyPriceDisplay: "500" });
+    expect(getMissingQuoteItemPriceFields(item)).toEqual(["dailyPriceDisplay"]);
+  });
+
+  it("flags a MONTHLY item as missing both prices when neither is filled in", () => {
+    const item = priceDisplay({ billingMode: "MONTHLY" });
+    expect(getMissingQuoteItemPriceFields(item)).toEqual([
+      "monthlyPriceDisplay",
+      "dailyPriceDisplay",
+    ]);
+  });
+
+  it("reports no missing fields for a fully-priced MONTHLY item, even when the daily remainder rate is explicitly zero", () => {
+    const item = priceDisplay({
+      billingMode: "MONTHLY",
+      monthlyPriceDisplay: "500",
+      dailyPriceDisplay: "0",
+    });
+    expect(getMissingQuoteItemPriceFields(item)).toEqual([]);
+  });
+
+  it("treats a whitespace-only value as missing", () => {
+    const item = priceDisplay({
+      billingMode: "MONTHLY",
+      monthlyPriceDisplay: "500",
+      dailyPriceDisplay: "   ",
+    });
+    expect(getMissingQuoteItemPriceFields(item)).toEqual(["dailyPriceDisplay"]);
+  });
+
+  it("reports no missing fields for a correctly-priced DAILY/WEEKLY/CUSTOM/FLAT item", () => {
+    expect(getMissingQuoteItemPriceFields(priceDisplay({ dailyPriceDisplay: "50" }))).toEqual([]);
+    expect(
+      getMissingQuoteItemPriceFields(
+        priceDisplay({ billingMode: "WEEKLY", weeklyPriceDisplay: "300" }),
+      ),
+    ).toEqual([]);
+    expect(
+      getMissingQuoteItemPriceFields(
+        priceDisplay({ billingMode: "CUSTOM", customPriceDisplay: "1200" }),
+      ),
+    ).toEqual([]);
+    expect(
+      getMissingQuoteItemPriceFields(priceDisplay({ billingMode: "FLAT", unitPriceDisplay: "75" })),
+    ).toEqual([]);
   });
 });

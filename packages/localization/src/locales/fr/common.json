@@ -517,7 +517,8 @@
       "endBeforeStart": "La fin prévue doit être après le début prévu",
       "assetRequired": "Sélectionnez un actif",
       "selectAtLeastOneAsset": "Sélectionnez au moins un actif",
-      "customMonthLengthRequired": "Saisissez un nombre de jours entre 1 et 365"
+      "customMonthLengthRequired": "Saisissez un nombre de jours entre 1 et 365",
+      "priceFieldRequired": "{{field}} est obligatoire"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "Saisissez un nom pour cet article",
       "quantityMustBePositive": "La quantité doit être d'au moins 1",
       "noItems": "Ajoutez au moins un article",
-      "onlyDraftEditable": "Seuls les devis en brouillon peuvent être modifiés — dupliquez plutôt ce devis"
+      "onlyDraftEditable": "Seuls les devis en brouillon peuvent être modifiés — dupliquez plutôt ce devis",
+      "priceFieldRequired": "{{field}} est obligatoire"
     },
     "wizard": {
       "steps": {

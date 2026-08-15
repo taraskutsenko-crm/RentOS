@@ -24,7 +24,9 @@ import { formatMoney } from "../../lib/money";
 import {
   estimateMonthlyBreakdown,
   estimateRentalTotals,
+  getMissingRentalItemPriceFields,
   type EstimatedMonthlyItemInput,
+  type RentalItemPriceFieldKey,
 } from "../../lib/rental-pricing";
 import {
   rentalSchema,
@@ -34,6 +36,29 @@ import {
 import type { RentalBillingMode } from "../../types/rental";
 
 const STEPS = ["customer", "assets", "dates", "pricing", "review"] as const;
+
+/**
+ * Which translated label a missing price field's error message quotes —
+ * the MONTHLY remainder field is presented as "Daily price (for remaining
+ * days)" (rental.fields.dailyPriceForRemainder), not the generic "Daily
+ * price" label DAILY billing mode uses for the same dailyPriceDisplay
+ * value, so the error must match whichever label is actually visible.
+ */
+function priceFieldLabelKey(
+  field: RentalItemPriceFieldKey,
+  billingMode: RentalBillingMode,
+): string {
+  if (field === "dailyPriceDisplay" && billingMode === "MONTHLY") {
+    return "rental.fields.dailyPriceForRemainder";
+  }
+  const labelKeys: Record<RentalItemPriceFieldKey, string> = {
+    dailyPriceDisplay: "rental.fields.dailyPrice",
+    weeklyPriceDisplay: "rental.fields.weeklyPrice",
+    monthlyPriceDisplay: "rental.fields.monthlyPrice",
+    customPriceDisplay: "rental.fields.customPrice",
+  };
+  return labelKeys[field];
+}
 
 export interface RentalWizardProps {
   tenantId: string | null;
@@ -91,6 +116,7 @@ export function RentalWizard({
   const [items, setItems] = useState<RentalItemFormValues[]>(initialItems ?? []);
   const [assetSearch, setAssetSearch] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
+  const [pricingValidationAttempted, setPricingValidationAttempted] = useState(false);
 
   const {
     register,
@@ -173,11 +199,19 @@ export function RentalWizard({
     (customer) => customer.id === values.customerId,
   );
 
+  function isItemsPricingValid(): boolean {
+    return items.every((item) => getMissingRentalItemPriceFields(item).length === 0);
+  }
+
   async function goNext(): Promise<void> {
     const step = STEPS[stepIndex];
     if (step === "customer" && !(await trigger("customerId"))) return;
     if (step === "assets" && items.length === 0) return;
     if (step === "dates" && !(await trigger(["plannedStart", "plannedEnd"]))) return;
+    if (step === "pricing") {
+      setPricingValidationAttempted(true);
+      if (!isItemsPricingValid()) return;
+    }
     setStepIndex((current) => Math.min(STEPS.length - 1, current + 1));
   }
 
@@ -200,6 +234,12 @@ export function RentalWizard({
   }
 
   async function handleCreate(): Promise<void> {
+    if (!isItemsPricingValid()) {
+      setPricingValidationAttempted(true);
+      setStepIndex(STEPS.indexOf("pricing"));
+      return;
+    }
+
     await onSubmit({
       customerId: values.customerId,
       plannedStart: values.plannedStart,
@@ -376,6 +416,15 @@ export function RentalWizard({
           <CardContent className="flex flex-col gap-4 p-4">
             {items.map((item) => {
               const asset = assetsData?.items.find((a) => a.id === item.assetId);
+              const missingPriceFields = pricingValidationAttempted
+                ? getMissingRentalItemPriceFields(item)
+                : [];
+              const priceFieldError = (field: RentalItemPriceFieldKey): string | null => {
+                if (!missingPriceFields.includes(field)) return null;
+                return t("rental.errors.priceFieldRequired", {
+                  field: t(priceFieldLabelKey(field, item.billingMode)),
+                });
+              };
               return (
                 <div key={item.assetId} className="flex flex-col gap-3 rounded-md border p-3">
                   <span className="font-medium">{asset?.name ?? item.assetId}</span>
@@ -415,10 +464,16 @@ export function RentalWizard({
                           type="number"
                           step="0.01"
                           value={item.dailyPriceDisplay}
+                          aria-invalid={!!priceFieldError("dailyPriceDisplay")}
                           onChange={(event) =>
                             updateItem(item.assetId, { dailyPriceDisplay: event.target.value })
                           }
                         />
+                        {priceFieldError("dailyPriceDisplay") && (
+                          <p className="text-destructive text-xs">
+                            {priceFieldError("dailyPriceDisplay")}
+                          </p>
+                        )}
                       </div>
                     )}
                     {item.billingMode === "WEEKLY" && (
@@ -428,10 +483,16 @@ export function RentalWizard({
                           type="number"
                           step="0.01"
                           value={item.weeklyPriceDisplay}
+                          aria-invalid={!!priceFieldError("weeklyPriceDisplay")}
                           onChange={(event) =>
                             updateItem(item.assetId, { weeklyPriceDisplay: event.target.value })
                           }
                         />
+                        {priceFieldError("weeklyPriceDisplay") && (
+                          <p className="text-destructive text-xs">
+                            {priceFieldError("weeklyPriceDisplay")}
+                          </p>
+                        )}
                       </div>
                     )}
                     {item.billingMode === "MONTHLY" && (
@@ -442,10 +503,16 @@ export function RentalWizard({
                             type="number"
                             step="0.01"
                             value={item.monthlyPriceDisplay}
+                            aria-invalid={!!priceFieldError("monthlyPriceDisplay")}
                             onChange={(event) =>
                               updateItem(item.assetId, { monthlyPriceDisplay: event.target.value })
                             }
                           />
+                          {priceFieldError("monthlyPriceDisplay") && (
+                            <p className="text-destructive text-xs">
+                              {priceFieldError("monthlyPriceDisplay")}
+                            </p>
+                          )}
                         </div>
                         <div className="flex flex-col gap-1.5">
                           <Label>{t("rental.fields.dailyPriceForRemainder")}</Label>
@@ -453,10 +520,16 @@ export function RentalWizard({
                             type="number"
                             step="0.01"
                             value={item.dailyPriceDisplay}
+                            aria-invalid={!!priceFieldError("dailyPriceDisplay")}
                             onChange={(event) =>
                               updateItem(item.assetId, { dailyPriceDisplay: event.target.value })
                             }
                           />
+                          {priceFieldError("dailyPriceDisplay") && (
+                            <p className="text-destructive text-xs">
+                              {priceFieldError("dailyPriceDisplay")}
+                            </p>
+                          )}
                         </div>
                         <div className="text-muted-foreground col-span-2 text-sm">
                           {monthlyBreakdown.completeUnits === 0 &&
@@ -493,10 +566,16 @@ export function RentalWizard({
                           type="number"
                           step="0.01"
                           value={item.customPriceDisplay}
+                          aria-invalid={!!priceFieldError("customPriceDisplay")}
                           onChange={(event) =>
                             updateItem(item.assetId, { customPriceDisplay: event.target.value })
                           }
                         />
+                        {priceFieldError("customPriceDisplay") && (
+                          <p className="text-destructive text-xs">
+                            {priceFieldError("customPriceDisplay")}
+                          </p>
+                        )}
                       </div>
                     )}
                     <div className="flex flex-col gap-1.5">

@@ -517,7 +517,8 @@
       "endBeforeStart": "O fim previsto deve ser depois do início previsto",
       "assetRequired": "Selecione um ativo",
       "selectAtLeastOneAsset": "Selecione pelo menos um ativo",
-      "customMonthLengthRequired": "Digite um número de dias entre 1 e 365"
+      "customMonthLengthRequired": "Digite um número de dias entre 1 e 365",
+      "priceFieldRequired": "{{field}} é obrigatório"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "Digite um nome para este item",
       "quantityMustBePositive": "A quantidade deve ser pelo menos 1",
       "noItems": "Adicione pelo menos um item",
-      "onlyDraftEditable": "Apenas orçamentos em rascunho podem ser editados — duplique este orçamento em vez disso"
+      "onlyDraftEditable": "Apenas orçamentos em rascunho podem ser editados — duplique este orçamento em vez disso",
+      "priceFieldRequired": "{{field}} é obrigatório"
     },
     "wizard": {
       "steps": {

@@ -517,7 +517,8 @@
       "endBeforeStart": "Das geplante Ende muss nach dem geplanten Beginn liegen",
       "assetRequired": "Wählen Sie eine Anlage",
       "selectAtLeastOneAsset": "Wählen Sie mindestens eine Anlage",
-      "customMonthLengthRequired": "Geben Sie eine Anzahl Tage zwischen 1 und 365 ein"
+      "customMonthLengthRequired": "Geben Sie eine Anzahl Tage zwischen 1 und 365 ein",
+      "priceFieldRequired": "{{field}} ist erforderlich"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "Geben Sie einen Namen für diese Position ein",
       "quantityMustBePositive": "Die Menge muss mindestens 1 sein",
       "noItems": "Fügen Sie mindestens eine Position hinzu",
-      "onlyDraftEditable": "Nur Entwürfe können bearbeitet werden — duplizieren Sie dieses Angebot stattdessen"
+      "onlyDraftEditable": "Nur Entwürfe können bearbeitet werden — duplizieren Sie dieses Angebot stattdessen",
+      "priceFieldRequired": "{{field}} ist erforderlich"
     },
     "wizard": {
       "steps": {

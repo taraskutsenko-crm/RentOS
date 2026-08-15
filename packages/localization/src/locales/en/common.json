@@ -517,7 +517,8 @@
       "endBeforeStart": "Planned end must be after planned start",
       "assetRequired": "Select an asset",
       "selectAtLeastOneAsset": "Select at least one asset",
-      "customMonthLengthRequired": "Enter a number of days between 1 and 365"
+      "customMonthLengthRequired": "Enter a number of days between 1 and 365",
+      "priceFieldRequired": "{{field}} is required"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "Enter a name for this item",
       "quantityMustBePositive": "Quantity must be at least 1",
       "noItems": "Add at least one item",
-      "onlyDraftEditable": "Only draft quotes can be edited — duplicate this quote instead"
+      "onlyDraftEditable": "Only draft quotes can be edited — duplicate this quote instead",
+      "priceFieldRequired": "{{field}} is required"
     },
     "wizard": {
       "steps": {

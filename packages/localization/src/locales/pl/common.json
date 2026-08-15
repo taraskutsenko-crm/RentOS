@@ -517,7 +517,8 @@
       "endBeforeStart": "Planowany koniec musi być późniejszy niż planowany początek",
       "assetRequired": "Wybierz aktywo",
       "selectAtLeastOneAsset": "Wybierz co najmniej jedno aktywo",
-      "customMonthLengthRequired": "Wprowadź liczbę dni od 1 do 365"
+      "customMonthLengthRequired": "Wprowadź liczbę dni od 1 do 365",
+      "priceFieldRequired": "Pole {{field}} jest wymagane"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "Podaj nazwę tej pozycji",
       "quantityMustBePositive": "Ilość musi wynosić co najmniej 1",
       "noItems": "Dodaj co najmniej jedną pozycję",
-      "onlyDraftEditable": "Edytować można tylko szkice — zamiast tego zduplikuj tę ofertę"
+      "onlyDraftEditable": "Edytować można tylko szkice — zamiast tego zduplikuj tę ofertę",
+      "priceFieldRequired": "Pole {{field}} jest wymagane"
     },
     "wizard": {
       "steps": {

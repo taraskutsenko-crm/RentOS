@@ -517,7 +517,8 @@
       "endBeforeStart": "Плановий кінець має бути пізніше планового початку",
       "assetRequired": "Оберіть актив",
       "selectAtLeastOneAsset": "Оберіть принаймні один актив",
-      "customMonthLengthRequired": "Введіть кількість днів від 1 до 365"
+      "customMonthLengthRequired": "Введіть кількість днів від 1 до 365",
+      "priceFieldRequired": "Поле «{{field}}» є обов'язковим"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "Введіть назву позиції",
       "quantityMustBePositive": "Кількість має бути не менше 1",
       "noItems": "Додайте принаймні одну позицію",
-      "onlyDraftEditable": "Редагувати можна лише чернетки — натомість продублюйте кошторис"
+      "onlyDraftEditable": "Редагувати можна лише чернетки — натомість продублюйте кошторис",
+      "priceFieldRequired": "Поле «{{field}}» є обов'язковим"
     },
     "wizard": {
       "steps": {

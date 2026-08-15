@@ -140,4 +140,64 @@ describe("QuoteWizard", () => {
     expect(screen.getByText(/daily price \(for remaining days\)/i)).toBeInTheDocument();
     expect(await screen.findByText(/2 calendar months × .*5 days ×/i)).toBeInTheDocument();
   });
+
+  describe("MONTHLY pricing validation before Review (manual-testing bug fix)", () => {
+    async function reachMonthlyPricingStep(
+      user: ReturnType<typeof userEvent.setup>,
+    ): Promise<void> {
+      renderWithProviders(
+        <QuoteWizard
+          tenantId="tenant-1"
+          onSubmit={vi.fn()}
+          isPending={false}
+          initialValues={{
+            plannedStart: "2031-01-15T00:00",
+            plannedEnd: "2031-03-20T00:00",
+            validUntil: "2031-04-01T00:00",
+          }}
+        />,
+      );
+
+      await user.click(screen.getByLabelText("Jane Doe"));
+      await goToStep(user, 2); // -> dates -> assets
+      await user.click(await screen.findByRole("checkbox"));
+      await goToStep(user, 2); // -> services -> pricing
+
+      const billingModeSelect = screen.getByDisplayValue(/daily/i);
+      await user.selectOptions(billingModeSelect, "MONTHLY");
+    }
+
+    it("blocks advancing past Prices when a MONTHLY item's daily rate for the partial month is left blank, and shows a localized error instead of the internal field name", async () => {
+      setup();
+      const user = userEvent.setup();
+      await reachMonthlyPricingStep(user);
+
+      // Fill only the monthly price, leave the daily-remainder rate blank.
+      const spinbuttons = screen.getAllByRole("spinbutton");
+      await user.type(spinbuttons[1]!, "500");
+
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      // Still on Prices — the Terms step's field never appears.
+      expect(screen.queryByLabelText(/customer notes/i)).not.toBeInTheDocument();
+
+      // Human-readable, localized error — never the raw backend field name.
+      expect(screen.getByText("Daily price (for remaining days) is required")).toBeInTheDocument();
+      expect(screen.queryByText(/dailyPriceMinor/)).not.toBeInTheDocument();
+    });
+
+    it("allows advancing past Prices once both the monthly price and the daily remainder rate are filled in", async () => {
+      setup();
+      const user = userEvent.setup();
+      await reachMonthlyPricingStep(user);
+
+      const spinbuttons = screen.getAllByRole("spinbutton");
+      await user.type(spinbuttons[1]!, "500"); // monthly price
+      await user.type(spinbuttons[2]!, "20"); // daily rate for remainder
+
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      expect(await screen.findByLabelText(/customer notes/i)).toBeInTheDocument();
+    });
+  });
 });

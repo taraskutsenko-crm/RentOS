@@ -5,8 +5,14 @@ import {
   estimateMonthlyBreakdown,
   estimateMonthsInRange,
   estimateRentalTotals,
+  getMissingRentalItemPriceFields,
+  getRequiredRentalItemPriceFields,
 } from "../../src/lib/rental-pricing";
-import type { EstimatedItemInput, EstimatedMonthlyItemInput } from "../../src/lib/rental-pricing";
+import type {
+  EstimatedItemInput,
+  EstimatedMonthlyItemInput,
+  RentalItemPriceDisplayValues,
+} from "../../src/lib/rental-pricing";
 
 describe("estimateItemLineTotalMinor", () => {
   it("computes a DAILY total across a 3-day span", () => {
@@ -205,5 +211,81 @@ describe("estimateRentalTotals", () => {
     );
     expect(result.subtotalMinor).toBe(4500);
     expect(result.totalMinor).toBe(4500 - 200 + 100);
+  });
+});
+
+function priceDisplay(
+  overrides: Partial<RentalItemPriceDisplayValues> = {},
+): RentalItemPriceDisplayValues {
+  return {
+    billingMode: "DAILY",
+    dailyPriceDisplay: "",
+    weeklyPriceDisplay: "",
+    monthlyPriceDisplay: "",
+    customPriceDisplay: "",
+    ...overrides,
+  };
+}
+
+// Regression coverage for the manual-testing bug: a direct Rental with a
+// MONTHLY item reached Review with a missing daily-remainder rate and
+// failed at the API with the raw backend field name `dailyPriceMinor`.
+// These mirror apps/api/src/rentals/rental-pricing.util.ts's
+// assertBillingModePriceProvided field-by-field — unlike Quotes, Rental has
+// no legacy escape hatch, so MONTHLY always requires both fields.
+describe("getRequiredRentalItemPriceFields / getMissingRentalItemPriceFields", () => {
+  it("requires only dailyPriceDisplay for DAILY", () => {
+    expect(getRequiredRentalItemPriceFields("DAILY")).toEqual(["dailyPriceDisplay"]);
+  });
+
+  it("requires only weeklyPriceDisplay for WEEKLY", () => {
+    expect(getRequiredRentalItemPriceFields("WEEKLY")).toEqual(["weeklyPriceDisplay"]);
+  });
+
+  it("requires both monthlyPriceDisplay and dailyPriceDisplay for MONTHLY", () => {
+    expect(getRequiredRentalItemPriceFields("MONTHLY")).toEqual([
+      "monthlyPriceDisplay",
+      "dailyPriceDisplay",
+    ]);
+  });
+
+  it("requires only customPriceDisplay for CUSTOM", () => {
+    expect(getRequiredRentalItemPriceFields("CUSTOM")).toEqual(["customPriceDisplay"]);
+  });
+
+  it("flags a MONTHLY item as missing its daily remainder rate when only the monthly price is filled in — the exact manual-testing bug", () => {
+    const item = priceDisplay({ billingMode: "MONTHLY", monthlyPriceDisplay: "500" });
+    expect(getMissingRentalItemPriceFields(item)).toEqual(["dailyPriceDisplay"]);
+  });
+
+  it("flags a MONTHLY item as missing both prices when neither is filled in", () => {
+    const item = priceDisplay({ billingMode: "MONTHLY" });
+    expect(getMissingRentalItemPriceFields(item)).toEqual([
+      "monthlyPriceDisplay",
+      "dailyPriceDisplay",
+    ]);
+  });
+
+  it("reports no missing fields for a fully-priced MONTHLY item, even when the daily remainder rate is explicitly zero", () => {
+    const item = priceDisplay({
+      billingMode: "MONTHLY",
+      monthlyPriceDisplay: "500",
+      dailyPriceDisplay: "0",
+    });
+    expect(getMissingRentalItemPriceFields(item)).toEqual([]);
+  });
+
+  it("reports no missing fields for a correctly-priced DAILY/WEEKLY/CUSTOM item", () => {
+    expect(getMissingRentalItemPriceFields(priceDisplay({ dailyPriceDisplay: "50" }))).toEqual([]);
+    expect(
+      getMissingRentalItemPriceFields(
+        priceDisplay({ billingMode: "WEEKLY", weeklyPriceDisplay: "300" }),
+      ),
+    ).toEqual([]);
+    expect(
+      getMissingRentalItemPriceFields(
+        priceDisplay({ billingMode: "CUSTOM", customPriceDisplay: "1200" }),
+      ),
+    ).toEqual([]);
   });
 });

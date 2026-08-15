@@ -517,7 +517,8 @@
       "endBeforeStart": "Plánovaný konec musí být po plánovaném začátku",
       "assetRequired": "Vyberte majetek",
       "selectAtLeastOneAsset": "Vyberte alespoň jeden majetek",
-      "customMonthLengthRequired": "Zadejte počet dní mezi 1 a 365"
+      "customMonthLengthRequired": "Zadejte počet dní mezi 1 a 365",
+      "priceFieldRequired": "Pole {{field}} je povinné"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "Zadejte název této položky",
       "quantityMustBePositive": "Množství musí být alespoň 1",
       "noItems": "Přidejte alespoň jednu položku",
-      "onlyDraftEditable": "Upravovat lze pouze koncepty nabídek — místo toho tuto nabídku duplikujte"
+      "onlyDraftEditable": "Upravovat lze pouze koncepty nabídek — místo toho tuto nabídku duplikujte",
+      "priceFieldRequired": "Pole {{field}} je povinné"
     },
     "wizard": {
       "steps": {

@@ -3,11 +3,37 @@
 import { Input, Label } from "@rentos/ui";
 import { useTranslation } from "react-i18next";
 
+import {
+  getMissingQuoteItemPriceFields,
+  type QuoteItemPriceFieldKey,
+} from "../../lib/quote-pricing";
 import { formatMoney } from "../../lib/money";
 import { estimateMonthlyBreakdown } from "../../lib/rental-pricing";
 import type { QuoteItemFormValues } from "../../lib/validation";
 import type { QuoteBillingMode, QuoteDiscountType, QuoteItemType } from "../../types/quote";
 import type { MonthlyBillingStrategy } from "../../types/rental";
+
+/**
+ * Which translated label a missing price field's error message quotes —
+ * the MONTHLY remainder field is presented to the user as "Daily price (for
+ * remaining days)" (rental.fields.dailyPriceForRemainder), not the generic
+ * "Daily price" label DAILY billing mode uses for the same underlying
+ * dailyPriceDisplay value, so the error text must match whichever label is
+ * actually visible above the input.
+ */
+function priceFieldLabelKey(field: QuoteItemPriceFieldKey, billingMode: QuoteBillingMode): string {
+  if (field === "dailyPriceDisplay" && billingMode === "MONTHLY") {
+    return "rental.fields.dailyPriceForRemainder";
+  }
+  const labelKeys: Record<QuoteItemPriceFieldKey, string> = {
+    unitPriceDisplay: "quote.fields.unitPrice",
+    dailyPriceDisplay: "quote.fields.dailyPrice",
+    weeklyPriceDisplay: "quote.fields.weeklyPrice",
+    monthlyPriceDisplay: "quote.fields.monthlyPrice",
+    customPriceDisplay: "quote.fields.customPrice",
+  };
+  return labelKeys[field];
+}
 
 const NON_ASSET_ITEM_TYPES: QuoteItemType[] = [
   "SERVICE",
@@ -35,6 +61,13 @@ export interface QuoteItemRowProps {
   /** The tenant's current monthly billing strategy — see use-rental-billing-settings.ts. */
   monthlyBillingStrategy: MonthlyBillingStrategy;
   customMonthLengthDays: number | null;
+  /**
+   * Shows missing-required-price errors inline once the user has tried to
+   * leave the Prices step (see quote-wizard.tsx) — mirrors RHF's own
+   * "validate on submit, not on first keystroke" convention used for every
+   * other field in this wizard, rather than showing errors immediately.
+   */
+  showErrors: boolean;
 }
 
 /**
@@ -61,6 +94,7 @@ export function QuoteItemRow({
   currency,
   monthlyBillingStrategy,
   customMonthLengthDays,
+  showErrors,
 }: QuoteItemRowProps) {
   const { t } = useTranslation();
   const isAsset = item.itemType === "ASSET";
@@ -70,6 +104,14 @@ export function QuoteItemRow({
     plannedStart,
     plannedEnd,
   );
+  const missingPriceFields = showErrors ? getMissingQuoteItemPriceFields(item) : [];
+
+  function priceFieldError(field: QuoteItemPriceFieldKey): string | null {
+    if (!missingPriceFields.includes(field)) return null;
+    return t("quote.errors.priceFieldRequired", {
+      field: t(priceFieldLabelKey(field, item.billingMode)),
+    });
+  }
 
   return (
     <div className="flex flex-col gap-3 rounded-md border p-3">
@@ -157,8 +199,12 @@ export function QuoteItemRow({
               type="number"
               step="0.01"
               value={item.dailyPriceDisplay}
+              aria-invalid={!!priceFieldError("dailyPriceDisplay")}
               onChange={(event) => onChange({ dailyPriceDisplay: event.target.value })}
             />
+            {priceFieldError("dailyPriceDisplay") && (
+              <p className="text-destructive text-xs">{priceFieldError("dailyPriceDisplay")}</p>
+            )}
           </div>
         )}
         {item.billingMode === "WEEKLY" && (
@@ -168,8 +214,12 @@ export function QuoteItemRow({
               type="number"
               step="0.01"
               value={item.weeklyPriceDisplay}
+              aria-invalid={!!priceFieldError("weeklyPriceDisplay")}
               onChange={(event) => onChange({ weeklyPriceDisplay: event.target.value })}
             />
+            {priceFieldError("weeklyPriceDisplay") && (
+              <p className="text-destructive text-xs">{priceFieldError("weeklyPriceDisplay")}</p>
+            )}
           </div>
         )}
         {item.billingMode === "MONTHLY" && (
@@ -180,8 +230,12 @@ export function QuoteItemRow({
                 type="number"
                 step="0.01"
                 value={item.monthlyPriceDisplay}
+                aria-invalid={!!priceFieldError("monthlyPriceDisplay")}
                 onChange={(event) => onChange({ monthlyPriceDisplay: event.target.value })}
               />
+              {priceFieldError("monthlyPriceDisplay") && (
+                <p className="text-destructive text-xs">{priceFieldError("monthlyPriceDisplay")}</p>
+              )}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>{t("rental.fields.dailyPriceForRemainder")}</Label>
@@ -189,8 +243,12 @@ export function QuoteItemRow({
                 type="number"
                 step="0.01"
                 value={item.dailyPriceDisplay}
+                aria-invalid={!!priceFieldError("dailyPriceDisplay")}
                 onChange={(event) => onChange({ dailyPriceDisplay: event.target.value })}
               />
+              {priceFieldError("dailyPriceDisplay") && (
+                <p className="text-destructive text-xs">{priceFieldError("dailyPriceDisplay")}</p>
+              )}
             </div>
             <div className="text-muted-foreground col-span-2 text-sm">
               {monthlyBreakdown.completeUnits === 0 && monthlyBreakdown.remainingDays === 0
@@ -220,8 +278,12 @@ export function QuoteItemRow({
               type="number"
               step="0.01"
               value={item.customPriceDisplay}
+              aria-invalid={!!priceFieldError("customPriceDisplay")}
               onChange={(event) => onChange({ customPriceDisplay: event.target.value })}
             />
+            {priceFieldError("customPriceDisplay") && (
+              <p className="text-destructive text-xs">{priceFieldError("customPriceDisplay")}</p>
+            )}
           </div>
         )}
         {item.billingMode === "FLAT" && (
@@ -231,8 +293,12 @@ export function QuoteItemRow({
               type="number"
               step="0.01"
               value={item.unitPriceDisplay}
+              aria-invalid={!!priceFieldError("unitPriceDisplay")}
               onChange={(event) => onChange({ unitPriceDisplay: event.target.value })}
             />
+            {priceFieldError("unitPriceDisplay") && (
+              <p className="text-destructive text-xs">{priceFieldError("unitPriceDisplay")}</p>
+            )}
           </div>
         )}
 

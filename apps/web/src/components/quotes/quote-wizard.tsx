@@ -21,7 +21,7 @@ import { useRentalBillingSettings } from "../../hooks/use-rental-billing-setting
 import { useAvailability } from "../../hooks/use-rentals";
 import type { QuoteInput, QuoteItemInput } from "../../hooks/use-quotes";
 import { formatMoney } from "../../lib/money";
-import { estimateQuoteTotals } from "../../lib/quote-pricing";
+import { estimateQuoteTotals, getMissingQuoteItemPriceFields } from "../../lib/quote-pricing";
 import { quoteSchema, type QuoteFormValues, type QuoteItemFormValues } from "../../lib/validation";
 import type { QuoteItemType } from "../../types/quote";
 import { QuoteItemRow } from "./quote-item-row";
@@ -112,6 +112,7 @@ export function QuoteWizard({
   const [items, setItems] = useState<QuoteItemFormValues[]>(initialItems ?? []);
   const [assetSearch, setAssetSearch] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
+  const [pricingValidationAttempted, setPricingValidationAttempted] = useState(false);
 
   const {
     register,
@@ -194,10 +195,18 @@ export function QuoteWizard({
     (customer) => customer.id === values.customerId,
   );
 
+  function isItemsPricingValid(): boolean {
+    return items.every((item) => getMissingQuoteItemPriceFields(item).length === 0);
+  }
+
   async function goNext(): Promise<void> {
     const step = STEPS[stepIndex];
     if (step === "customer" && !(await trigger("customerId"))) return;
     if (step === "dates" && !(await trigger(["plannedStart", "plannedEnd", "validUntil"]))) return;
+    if (step === "pricing") {
+      setPricingValidationAttempted(true);
+      if (items.length === 0 || !isItemsPricingValid()) return;
+    }
     setStepIndex((current) => Math.min(STEPS.length - 1, current + 1));
   }
 
@@ -226,6 +235,12 @@ export function QuoteWizard({
   }
 
   async function handleCreate(): Promise<void> {
+    if (items.length === 0 || !isItemsPricingValid()) {
+      setPricingValidationAttempted(true);
+      setStepIndex(STEPS.indexOf("pricing"));
+      return;
+    }
+
     const itemInputs: QuoteItemInput[] = items.map((item, index) => ({
       itemType: item.itemType,
       ...(item.itemType === "ASSET" ? { assetId: item.assetId } : {}),
@@ -491,6 +506,7 @@ export function QuoteWizard({
                 currency={values.currency}
                 monthlyBillingStrategy={monthlyStrategy}
                 customMonthLengthDays={customMonthLengthDays}
+                showErrors={pricingValidationAttempted}
               />
             ))}
 

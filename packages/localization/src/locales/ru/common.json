@@ -517,7 +517,8 @@
       "endBeforeStart": "Плановое окончание должно быть позже планового начала",
       "assetRequired": "Выберите актив",
       "selectAtLeastOneAsset": "Выберите хотя бы один актив",
-      "customMonthLengthRequired": "Введите число дней от 1 до 365"
+      "customMonthLengthRequired": "Введите число дней от 1 до 365",
+      "priceFieldRequired": "Поле «{{field}}» обязательно для заполнения"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "Введите название позиции",
       "quantityMustBePositive": "Количество должно быть не менее 1",
       "noItems": "Добавьте хотя бы одну позицию",
-      "onlyDraftEditable": "Редактировать можно только черновики — вместо этого продублируйте смету"
+      "onlyDraftEditable": "Редактировать можно только черновики — вместо этого продублируйте смету",
+      "priceFieldRequired": "Поле «{{field}}» обязательно для заполнения"
     },
     "wizard": {
       "steps": {

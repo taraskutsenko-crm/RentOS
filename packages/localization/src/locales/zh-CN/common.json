@@ -517,7 +517,8 @@
       "endBeforeStart": "计划结束时间必须晚于计划开始时间",
       "assetRequired": "请选择资产",
       "selectAtLeastOneAsset": "请至少选择一项资产",
-      "customMonthLengthRequired": "请输入 1 到 365 之间的天数"
+      "customMonthLengthRequired": "请输入 1 到 365 之间的天数",
+      "priceFieldRequired": "{{field}}为必填项"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "请输入该项目的名称",
       "quantityMustBePositive": "数量必须至少为 1",
       "noItems": "请至少添加一个项目",
-      "onlyDraftEditable": "只有草稿状态的报价单可以编辑——请改为复制此报价单"
+      "onlyDraftEditable": "只有草稿状态的报价单可以编辑——请改为复制此报价单",
+      "priceFieldRequired": "{{field}}为必填项"
     },
     "wizard": {
       "steps": {

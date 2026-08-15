@@ -206,6 +206,51 @@ export function estimateItemLineTotalMinor(
   return Math.max(0, unitPriceMinor * units * item.quantity - item.discountMinor);
 }
 
+export type RentalItemPriceFieldKey =
+  "dailyPriceDisplay" | "weeklyPriceDisplay" | "monthlyPriceDisplay" | "customPriceDisplay";
+
+export interface RentalItemPriceDisplayValues {
+  billingMode: RentalBillingMode;
+  dailyPriceDisplay: string;
+  weeklyPriceDisplay: string;
+  monthlyPriceDisplay: string;
+  customPriceDisplay: string;
+}
+
+/**
+ * Mirrors apps/api/src/rentals/rental-pricing.util.ts's
+ * assertBillingModePriceProvided field-by-field. MONTHLY unconditionally
+ * requires both monthlyPriceDisplay and dailyPriceDisplay — unlike Quotes,
+ * RentalItem has no legacy escape hatch at all, so every MONTHLY rental
+ * item always needs both.
+ */
+export function getRequiredRentalItemPriceFields(
+  billingMode: RentalBillingMode,
+): RentalItemPriceFieldKey[] {
+  switch (billingMode) {
+    case "DAILY":
+      return ["dailyPriceDisplay"];
+    case "WEEKLY":
+      return ["weeklyPriceDisplay"];
+    case "MONTHLY":
+      return ["monthlyPriceDisplay", "dailyPriceDisplay"];
+    case "CUSTOM":
+      return ["customPriceDisplay"];
+  }
+}
+
+/**
+ * Required price fields left blank for this item's billing mode — used by
+ * the Prices step to block advancing (and block Create) while a required
+ * price is missing, instead of letting the item reach Review and fail at
+ * the API with an internal field name (see DECISIONS.md D-070).
+ */
+export function getMissingRentalItemPriceFields(
+  item: RentalItemPriceDisplayValues,
+): RentalItemPriceFieldKey[] {
+  return getRequiredRentalItemPriceFields(item.billingMode).filter((field) => !item[field].trim());
+}
+
 export function estimateRentalTotals(
   items: (EstimatedItemInput | EstimatedMonthlyItemInput)[],
   plannedStart: string,

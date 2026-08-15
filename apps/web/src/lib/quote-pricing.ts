@@ -118,6 +118,63 @@ export function estimateQuoteItemPricing(
   return { lineSubtotalMinor, discountTotalMinor, taxTotalMinor, lineTotalMinor };
 }
 
+export type QuoteItemPriceFieldKey =
+  | "unitPriceDisplay"
+  | "dailyPriceDisplay"
+  | "weeklyPriceDisplay"
+  | "monthlyPriceDisplay"
+  | "customPriceDisplay";
+
+export interface QuoteItemPriceDisplayValues {
+  billingMode: QuoteBillingMode;
+  unitPriceDisplay: string;
+  dailyPriceDisplay: string;
+  weeklyPriceDisplay: string;
+  monthlyPriceDisplay: string;
+  customPriceDisplay: string;
+}
+
+/**
+ * Mirrors apps/api/src/quotes/quote-pricing.util.ts's
+ * assertQuoteBillingModePriceProvided field-by-field: the price display
+ * field(s) a given billing mode requires before the item can be priced.
+ * MONTHLY requires both monthlyPriceDisplay and dailyPriceDisplay — the
+ * server always stamps a monthlyBillingStrategy onto every MONTHLY item
+ * created through this wizard (see quotes.service.ts's
+ * withMonthlyBillingSettings), which makes the daily remainder rate
+ * mandatory in practice for any item actually created here, even though the
+ * backend DTO leaves it technically optional for pre-existing legacy items
+ * written before that engine existed.
+ */
+export function getRequiredQuoteItemPriceFields(
+  billingMode: QuoteBillingMode,
+): QuoteItemPriceFieldKey[] {
+  switch (billingMode) {
+    case "DAILY":
+      return ["dailyPriceDisplay"];
+    case "WEEKLY":
+      return ["weeklyPriceDisplay"];
+    case "MONTHLY":
+      return ["monthlyPriceDisplay", "dailyPriceDisplay"];
+    case "CUSTOM":
+      return ["customPriceDisplay"];
+    case "FLAT":
+      return ["unitPriceDisplay"];
+  }
+}
+
+/**
+ * Required price fields left blank for this item's billing mode — used by
+ * the Prices step to block advancing (and block Create) while a required
+ * price is missing, instead of letting the item reach Review and fail at
+ * the API with an internal field name (see DECISIONS.md D-070).
+ */
+export function getMissingQuoteItemPriceFields(
+  item: QuoteItemPriceDisplayValues,
+): QuoteItemPriceFieldKey[] {
+  return getRequiredQuoteItemPriceFields(item.billingMode).filter((field) => !item[field].trim());
+}
+
 export interface EstimatedQuoteTotals {
   subtotalMinor: number;
   discountTotalMinor: number;

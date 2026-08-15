@@ -517,7 +517,8 @@
       "endBeforeStart": "終了予定日は開始予定日より後にしてください",
       "assetRequired": "資産を選択してください",
       "selectAtLeastOneAsset": "少なくとも1つの資産を選択してください",
-      "customMonthLengthRequired": "1〜365の範囲で日数を入力してください"
+      "customMonthLengthRequired": "1〜365の範囲で日数を入力してください",
+      "priceFieldRequired": "{{field}}は必須です"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "この品目の名前を入力してください",
       "quantityMustBePositive": "数量は1以上にしてください",
       "noItems": "少なくとも1つの品目を追加してください",
-      "onlyDraftEditable": "編集できるのは下書き状態の見積書のみです — 代わりにこの見積書を複製してください"
+      "onlyDraftEditable": "編集できるのは下書き状態の見積書のみです — 代わりにこの見積書を複製してください",
+      "priceFieldRequired": "{{field}}は必須です"
     },
     "wizard": {
       "steps": {

@@ -517,7 +517,8 @@
       "endBeforeStart": "La fine prevista deve essere successiva all'inizio previsto",
       "assetRequired": "Seleziona un bene",
       "selectAtLeastOneAsset": "Seleziona almeno un bene",
-      "customMonthLengthRequired": "Inserisci un numero di giorni tra 1 e 365"
+      "customMonthLengthRequired": "Inserisci un numero di giorni tra 1 e 365",
+      "priceFieldRequired": "{{field}} è obbligatorio"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "Inserisci un nome per questo articolo",
       "quantityMustBePositive": "La quantità deve essere almeno 1",
       "noItems": "Aggiungi almeno un articolo",
-      "onlyDraftEditable": "Solo i preventivi in bozza possono essere modificati — duplica invece questo preventivo"
+      "onlyDraftEditable": "Solo i preventivi in bozza possono essere modificati — duplica invece questo preventivo",
+      "priceFieldRequired": "{{field}} è obbligatorio"
     },
     "wizard": {
       "steps": {

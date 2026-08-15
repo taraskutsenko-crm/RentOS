@@ -517,7 +517,8 @@
       "endBeforeStart": "Het geplande einde moet na de geplande start liggen",
       "assetRequired": "Selecteer een bezit",
       "selectAtLeastOneAsset": "Selecteer ten minste één bezit",
-      "customMonthLengthRequired": "Voer een aantal dagen tussen 1 en 365 in"
+      "customMonthLengthRequired": "Voer een aantal dagen tussen 1 en 365 in",
+      "priceFieldRequired": "{{field}} is verplicht"
     },
     "wizard": {
       "steps": {
@@ -711,7 +712,8 @@
       "itemNameRequired": "Voer een naam in voor dit item",
       "quantityMustBePositive": "Het aantal moet minimaal 1 zijn",
       "noItems": "Voeg ten minste één item toe",
-      "onlyDraftEditable": "Alleen conceptoffertes kunnen worden bewerkt — dupliceer deze offerte in plaats daarvan"
+      "onlyDraftEditable": "Alleen conceptoffertes kunnen worden bewerkt — dupliceer deze offerte in plaats daarvan",
+      "priceFieldRequired": "{{field}} is verplicht"
     },
     "wizard": {
       "steps": {

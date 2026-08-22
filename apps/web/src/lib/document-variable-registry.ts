@@ -45,6 +45,43 @@ export const DOCUMENT_VARIABLES: DocumentVariableMeta[] = [
   { path: "company.taxNumber", group: "company", labelKey: "documentVariable.company.taxNumber" },
   { path: "company.address", group: "company", labelKey: "documentVariable.company.address" },
   { path: "company.phone", group: "company", labelKey: "documentVariable.company.phone" },
+  { path: "company.bank.label", group: "company", labelKey: "documentVariable.company.bank.label" },
+  {
+    path: "company.bank.bankName",
+    group: "company",
+    labelKey: "documentVariable.company.bank.bankName",
+  },
+  {
+    path: "company.bank.accountHolder",
+    group: "company",
+    labelKey: "documentVariable.company.bank.accountHolder",
+  },
+  {
+    path: "company.bank.accountNumber",
+    group: "company",
+    labelKey: "documentVariable.company.bank.accountNumber",
+  },
+  { path: "company.bank.iban", group: "company", labelKey: "documentVariable.company.bank.iban" },
+  {
+    path: "company.bank.swiftBic",
+    group: "company",
+    labelKey: "documentVariable.company.bank.swiftBic",
+  },
+  {
+    path: "company.bank.currency",
+    group: "company",
+    labelKey: "documentVariable.company.bank.currency",
+  },
+  {
+    path: "company.bank.bankAddress",
+    group: "company",
+    labelKey: "documentVariable.company.bank.bankAddress",
+  },
+  {
+    path: "company.bank.paymentReference",
+    group: "company",
+    labelKey: "documentVariable.company.bank.paymentReference",
+  },
 
   { path: "customer.name", group: "customer", labelKey: "documentVariable.customer.name" },
   {

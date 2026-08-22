@@ -9,6 +9,9 @@ import {
   Keyboard,
   LayoutDashboard,
   ListChecks,
+  Plug,
+  Receipt,
+  Landmark,
   Tags,
   ToggleLeft,
   Users,
@@ -88,6 +91,13 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: FolderOpen,
         permission: "documents.view",
       },
+      {
+        id: "invoices",
+        href: "/app/invoices",
+        labelKey: "invoice.title",
+        icon: Receipt,
+        permission: "invoices.view",
+      },
     ],
   },
   {
@@ -100,6 +110,13 @@ export const NAV_GROUPS: NavGroup[] = [
         labelKey: "tenant.companyProfile.navLabel",
         icon: Building2,
         permission: "tenant.manage",
+      },
+      {
+        id: "company-banking",
+        href: "/app/settings/company-banking",
+        labelKey: "bankAccount.settings.navLabel",
+        icon: Landmark,
+        permission: "bankAccounts.view",
       },
       {
         id: "asset-categories",
@@ -135,6 +152,13 @@ export const NAV_GROUPS: NavGroup[] = [
         labelKey: "documentTemplate.title",
         icon: FileStack,
         permission: "documents.templates.view",
+      },
+      {
+        id: "integrations",
+        href: "/app/settings/integrations",
+        labelKey: "integration.settings.navLabel",
+        icon: Plug,
+        permission: "integrations.view",
       },
       {
         id: "shortcuts",

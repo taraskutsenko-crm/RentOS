@@ -64,6 +64,22 @@ export const CUSTOMER_PORTAL_PERMISSIONS = ["customers.portal.manage"] as const;
 
 export const TENANT_PERMISSIONS = ["tenant.manage"] as const;
 
+export const INVOICE_PERMISSIONS = [
+  "invoices.view",
+  "invoices.create",
+  "invoices.update",
+  "invoices.issue",
+  "invoices.send",
+  "invoices.cancel",
+  "invoices.download",
+] as const;
+
+export const PAYMENT_PERMISSIONS = ["payments.view", "payments.record"] as const;
+
+export const BANK_ACCOUNT_PERMISSIONS = ["bankAccounts.view", "bankAccounts.manage"] as const;
+
+export const INTEGRATION_PERMISSIONS = ["integrations.view", "integrations.manage"] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
@@ -71,6 +87,10 @@ export const ALL_PERMISSIONS = [
   ...DOCUMENT_PERMISSIONS,
   ...CUSTOMER_PORTAL_PERMISSIONS,
   ...TENANT_PERMISSIONS,
+  ...INVOICE_PERMISSIONS,
+  ...PAYMENT_PERMISSIONS,
+  ...BANK_ACCOUNT_PERMISSIONS,
+  ...INTEGRATION_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
@@ -89,6 +109,9 @@ const DOCUMENT_READ_ONLY: Permission[] = [
   "documents.download",
   "documents.templates.view",
 ];
+const INVOICE_READ_ONLY: Permission[] = ["invoices.view", "invoices.download"];
+const PAYMENT_READ_ONLY: Permission[] = ["payments.view"];
+const BANK_ACCOUNT_READ_ONLY: Permission[] = ["bankAccounts.view"];
 
 /**
  * Mirrors apps/api/src/permissions/permission.ts. This is a UX convenience
@@ -137,6 +160,16 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "documents.render",
     "documents.share",
     "customers.portal.manage",
+    "invoices.view",
+    "invoices.create",
+    "invoices.update",
+    "invoices.issue",
+    "invoices.send",
+    "invoices.cancel",
+    "invoices.download",
+    "payments.view",
+    "payments.record",
+    "bankAccounts.view",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -156,8 +189,31 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "documents.download",
     "documents.render",
   ],
-  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY, ...DOCUMENT_READ_ONLY],
-  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY, ...DOCUMENT_READ_ONLY],
+  ACCOUNTANT: [
+    ...ASSET_READ_ONLY,
+    ...RENTAL_READ_ONLY,
+    ...QUOTE_READ_ONLY,
+    ...DOCUMENT_READ_ONLY,
+    "invoices.view",
+    "invoices.create",
+    "invoices.update",
+    "invoices.issue",
+    "invoices.send",
+    "invoices.cancel",
+    "invoices.download",
+    "payments.view",
+    "payments.record",
+    "bankAccounts.view",
+  ],
+  VIEWER: [
+    ...ASSET_READ_ONLY,
+    ...RENTAL_READ_ONLY,
+    ...QUOTE_READ_ONLY,
+    ...DOCUMENT_READ_ONLY,
+    ...INVOICE_READ_ONLY,
+    ...PAYMENT_READ_ONLY,
+    ...BANK_ACCOUNT_READ_ONLY,
+  ],
 };
 
 export function roleHasPermission(

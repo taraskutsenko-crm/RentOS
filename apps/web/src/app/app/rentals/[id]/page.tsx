@@ -7,6 +7,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { DashboardGrid, DashboardMetric } from "../../../../components/dashboard";
+import { InvoiceStatusBadge } from "../../../../components/invoices/invoice-status-badge";
 import { RentalStatusBadge } from "../../../../components/rentals/rental-status-badge";
 import { usePageBreadcrumbs } from "../../../../components/shell/breadcrumb-context";
 import { PageHeader } from "../../../../components/shell/page-header";
@@ -14,6 +15,7 @@ import { PinButton } from "../../../../components/shell/pin-button";
 import { Timeline } from "../../../../components/timeline/timeline";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission, useTenantTimezone } from "../../../../hooks/use-current-tenant-role";
+import { useInvoices } from "../../../../hooks/use-invoices";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
   useCancelRental,
@@ -60,6 +62,7 @@ export default function RentalDetailPage() {
 
   const { data: rental, isLoading, isError } = useRental(tenantId, params.id);
   const { data: timeline } = useRentalTimeline(tenantId, params.id);
+  const { data: rentalInvoices } = useInvoices(tenantId, { rentalId: params.id, pageSize: 50 });
   const trackRecentItem = useTrackRecentItem();
 
   useEffect(() => {
@@ -87,6 +90,7 @@ export default function RentalDetailPage() {
   const canReturnAction = usePermission("rentals.return");
   const canCancel = usePermission("rentals.cancel");
   const canCreateDocument = usePermission("documents.create");
+  const canCreateInvoice = usePermission("invoices.create");
   const timeZone = useTenantTimezone();
 
   usePageBreadcrumbs(
@@ -524,6 +528,44 @@ export default function RentalDetailPage() {
                         className="text-primary hover:underline"
                       >
                         {document.documentNumber}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>{t("rental.sections.invoices")}</CardTitle>
+              {canCreateInvoice && (
+                <Link
+                  href={`/app/invoices/new?rentalId=${rental.id}`}
+                  className="text-primary text-sm hover:underline"
+                >
+                  {t("rental.invoices.create")}
+                </Link>
+              )}
+            </CardHeader>
+            <CardContent>
+              {!rentalInvoices || rentalInvoices.data.length === 0 ? (
+                <p className="text-muted-foreground text-sm">{t("rental.invoices.empty")}</p>
+              ) : (
+                <ul className="flex flex-col gap-2 text-sm">
+                  {rentalInvoices.data.map((invoice) => (
+                    <li key={invoice.id} className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-2">
+                        <InvoiceStatusBadge status={invoice.status} />
+                        <span>{formatMoney(invoice.totalMinor, invoice.currency)}</span>
+                      </span>
+                      <Link
+                        href={`/app/invoices/${invoice.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {invoice.status === "DRAFT"
+                          ? t("invoice.draftLabel")
+                          : invoice.invoiceNumber}
                       </Link>
                     </li>
                   ))}

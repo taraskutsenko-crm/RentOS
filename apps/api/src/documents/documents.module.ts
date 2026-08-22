@@ -57,6 +57,10 @@ import { LocalMockSignatureProvider } from "./signature/local-mock-signature.pro
     DocumentPdfService,
     DocumentSharingService,
     DocumentSignatureService,
+    // Exported so InvoicesModule can reuse the same Puppeteer-backed PDF
+    // engine for invoice PDFs (see invoice-pdf.service.ts) instead of
+    // launching a second browser instance.
+    PdfRendererService,
   ],
 })
 export class DocumentsModule {}

@@ -48,6 +48,7 @@ services:
       REFRESH_TOKEN_TTL_DAYS: ${REFRESH_TOKEN_TTL_DAYS:-30}
       COOKIE_DOMAIN: ${COOKIE_DOMAIN:-}
       STORAGE_LOCAL_DIR: /app/storage-uploads
+      KSEF_ENCRYPTION_KEY: ${KSEF_ENCRYPTION_KEY:-467bc28bf643d5e05d8f7bb4b03b2e531be5659d65c009d64b7ef188828393e4}
     ports:
       - "${API_PORT:-4000}:4000"
     volumes:

@@ -29,6 +29,14 @@ export const apiEnvSchema = z.object({
   // is implemented today — see docs/adr/0007-asset-file-storage-strategy.md
   // for the S3-compatible interface this is designed to swap into.
   STORAGE_LOCAL_DIR: z.string().min(1).default("./storage-uploads"),
+  // Encrypts country-specific e-invoice provider credentials at rest (e.g.
+  // a Poland KSeF token/certificate — see EInvoiceConnection.
+  // encryptedCredentials and EncryptionService). AES-256-GCM, so this must
+  // be exactly 32 bytes — accepted as a 64-character hex string. Never
+  // logged, never returned by any API response.
+  KSEF_ENCRYPTION_KEY: z
+    .string()
+    .length(64, "KSEF_ENCRYPTION_KEY must be a 64-character hex string (32 bytes for AES-256)"),
 });
 export type ApiEnv = z.infer<typeof apiEnvSchema>;
 

@@ -125,6 +125,49 @@ export const CUSTOMER_PORTAL_PERMISSIONS = ["customers.portal.manage"] as const;
  */
 export const TENANT_PERMISSIONS = ["tenant.manage"] as const;
 
+/**
+ * Granular permissions for the Invoice domain (PRE-CHAPTER-10 invoicing
+ * addition — see docs/DECISIONS.md). `invoices.issue` gates the one-way
+ * DRAFT -> ISSUED transition that freezes an invoice's snapshots;
+ * `invoices.cancel` gates voiding an already-issued invoice. There is
+ * deliberately no `invoices.delete` — an issued invoice is a legal record
+ * and is never deleted, only cancelled (mirrors Document's
+ * "never delete a finalized version" policy).
+ */
+export const INVOICE_PERMISSIONS = [
+  "invoices.view",
+  "invoices.create",
+  "invoices.update",
+  "invoices.issue",
+  "invoices.send",
+  "invoices.cancel",
+  "invoices.download",
+] as const;
+
+/**
+ * `payments.record` gates POST-ing a new Payment row against an Invoice.
+ * There is deliberately no update/delete — Payment is an append-only
+ * ledger (see docs/DECISIONS.md); correcting a mistaken entry means
+ * recording an equal-and-opposite entry, not editing history.
+ */
+export const PAYMENT_PERMISSIONS = ["payments.view", "payments.record"] as const;
+
+/**
+ * Gates the Company Profile "Banking" settings page (multiple
+ * CompanyBankAccount rows). `bankAccounts.manage` is tenant-wide financial
+ * configuration, same tier as `tenant.manage`/`rental_settings.manage` —
+ * OWNER/ADMIN only.
+ */
+export const BANK_ACCOUNT_PERMISSIONS = ["bankAccounts.view", "bankAccounts.manage"] as const;
+
+/**
+ * Gates Settings -> Integrations (the country-specific e-invoice provider
+ * boundary, e.g. Poland's KSeF — see docs/DECISIONS.md). OWNER/ADMIN only:
+ * connecting/disconnecting an e-invoicing provider is tenant-wide
+ * compliance configuration, not an operational action.
+ */
+export const INTEGRATION_PERMISSIONS = ["integrations.view", "integrations.manage"] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
@@ -132,6 +175,10 @@ export const ALL_PERMISSIONS = [
   ...DOCUMENT_PERMISSIONS,
   ...CUSTOMER_PORTAL_PERMISSIONS,
   ...TENANT_PERMISSIONS,
+  ...INVOICE_PERMISSIONS,
+  ...PAYMENT_PERMISSIONS,
+  ...BANK_ACCOUNT_PERMISSIONS,
+  ...INTEGRATION_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
@@ -154,6 +201,12 @@ const DOCUMENT_READ_ONLY: Permission[] = [
   "documents.download",
   "documents.templates.view",
 ];
+
+const INVOICE_READ_ONLY: Permission[] = ["invoices.view", "invoices.download"];
+
+const PAYMENT_READ_ONLY: Permission[] = ["payments.view"];
+
+const BANK_ACCOUNT_READ_ONLY: Permission[] = ["bankAccounts.view"];
 
 /**
  * Default role -> permission mapping. OWNER and ADMIN get every permission.
@@ -203,6 +256,21 @@ const DOCUMENT_READ_ONLY: Permission[] = [
  * get `documents.templates.view` (read-only visibility into what templates
  * exist), same read-only-everywhere pattern as the rest of this file.
  *
+ * Invoicing (PRE-CHAPTER-10 addition): ACCOUNTANT — previously read-only
+ * everywhere — gets real operational control here (`invoices.view/create/
+ * update/issue/send/download/cancel`, `payments.view/record`,
+ * `bankAccounts.view`), since invoicing/payment-tracking is exactly this
+ * role's job; it does not get `bankAccounts.manage`/`integrations.manage`
+ * (tenant-wide financial configuration, reserved for OWNER/ADMIN, same
+ * tier as `tenant.manage`). MANAGER gets the same operational invoice/
+ * payment set as ACCOUNTANT (consistent with its full commercial control
+ * elsewhere) plus `bankAccounts.view` but not `.manage`/`integrations.*`.
+ * TECHNICIAN gets no invoice/payment/bank-account permissions at all — a
+ * commercial/financial document is never something the equipment-handling
+ * role creates or approves, same reasoning as its lack of quote
+ * permissions. VIEWER is read-only (`invoices.view/download`,
+ * `payments.view`, `bankAccounts.view`).
+ *
  * Known limitation: the permission model is resource-level, not field- or
  * value-level (e.g. TECHNICIAN's asset `update` isn't restricted to only
  * condition/location fields). See ADR references in each module's
@@ -250,6 +318,16 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "documents.render",
     "documents.share",
     "customers.portal.manage",
+    "invoices.view",
+    "invoices.create",
+    "invoices.update",
+    "invoices.issue",
+    "invoices.send",
+    "invoices.cancel",
+    "invoices.download",
+    "payments.view",
+    "payments.record",
+    "bankAccounts.view",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -269,8 +347,31 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "documents.download",
     "documents.render",
   ],
-  ACCOUNTANT: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY, ...DOCUMENT_READ_ONLY],
-  VIEWER: [...ASSET_READ_ONLY, ...RENTAL_READ_ONLY, ...QUOTE_READ_ONLY, ...DOCUMENT_READ_ONLY],
+  ACCOUNTANT: [
+    ...ASSET_READ_ONLY,
+    ...RENTAL_READ_ONLY,
+    ...QUOTE_READ_ONLY,
+    ...DOCUMENT_READ_ONLY,
+    "invoices.view",
+    "invoices.create",
+    "invoices.update",
+    "invoices.issue",
+    "invoices.send",
+    "invoices.cancel",
+    "invoices.download",
+    "payments.view",
+    "payments.record",
+    "bankAccounts.view",
+  ],
+  VIEWER: [
+    ...ASSET_READ_ONLY,
+    ...RENTAL_READ_ONLY,
+    ...QUOTE_READ_ONLY,
+    ...DOCUMENT_READ_ONLY,
+    ...INVOICE_READ_ONLY,
+    ...PAYMENT_READ_ONLY,
+    ...BANK_ACCOUNT_READ_ONLY,
+  ],
 };
 
 export function roleHasPermission(role: MembershipRole, permission: Permission): boolean {

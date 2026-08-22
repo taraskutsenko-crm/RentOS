@@ -252,6 +252,366 @@ enum DocumentEmailStatus {
   FAILED
 }
 
+// ===========================================================================
+// Invoicing, Bank Details & E-Invoice Architecture (PRE-CHAPTER-10 addition).
+// Invoice is deliberately a standalone business model, NOT a Document row —
+// it has its own numbering scheme, its own line-item/tax shape, its own
+// payment-tracking relations, and its own KSeF/e-invoice fields, none of
+// which fit the generic Document platform's businessDataSnapshot without
+// widening DocumentType and every exhaustive switch over it. Invoice PDF
+// rendering reuses PdfRendererService.renderPdf(html) directly (the same
+// Puppeteer engine Document uses) via a dedicated invoice-renderer, so no
+// second PDF engine is introduced. See docs/DECISIONS.md.
+// ===========================================================================
+
+/// A tenant's bank account for receiving payment — structured, not a single
+/// free-text field, so individual parts (IBAN, SWIFT/BIC, ...) can be
+/// resolved as their own document variables and validated independently. A
+/// tenant may have several (e.g. one per currency); `isDefault` marks the
+/// one prefilled onto new invoices, enforced single-per-tenant in
+/// CompanyBankAccountsService (mirrors AssetFilesService's isPrimary-image
+/// pattern), never at the DB level, since "no default yet" is also valid.
+model CompanyBankAccount {
+  id               String    @id @default(uuid())
+  tenantId         String
+  /// Tenant-chosen label for this account (e.g. "PLN account", "EUR — main")
+  /// — never a generated/internal identifier shown to users.
+  label            String
+  bankName         String?
+  accountHolder    String?
+  accountNumber    String?
+  iban             String?
+  swiftBic         String?
+  currency         String    @db.VarChar(3)
+  bankAddress      String?
+  /// A fixed reference/note tenants ask customers to quote when paying
+  /// (e.g. a company-wide reference code) — distinct from a per-invoice
+  /// payment reference.
+  paymentReference String?
+  isDefault        Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoices Invoice[]
+
+  @@index([tenantId, isActive])
+  @@index([tenantId, deletedAt])
+  @@map("company_bank_accounts")
+}
+
+/// STANDARD is a normal invoice; PROFORMA is a non-fiscal preview issued
+/// before payment/delivery; CORRECTION is named now as a documented future
+/// value (mirrors DocumentFileFormat.DOCX/XML's "reserve the enum value,
+/// build the workflow later" convention) — a full correction/credit-note
+/// workflow (see InvoiceStatus.CORRECTED) is explicitly out of scope for
+/// this pass; today nothing ever creates a CORRECTION-typed Invoice.
+enum InvoiceType {
+  STANDARD
+  PROFORMA
+  CORRECTION
+}
+
+/// DRAFT (editable, prefilled from a Rental, not yet legally issued) ->
+/// ISSUED (finalized, snapshots frozen) -> SENT (delivered to the
+/// customer) -> PARTIALLY_PAID/PAID (derived from recorded Payments, see
+/// PaymentsService) -> OVERDUE (derived: past dueDate, not fully paid) ->
+/// CANCELLED (an issued invoice voided without payment) or CORRECTED
+/// (superseded by a correction — see InvoiceType.CORRECTION; no code path
+/// sets this yet, reserved for that future workflow).
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  CORRECTED
+}
+
+/// Where a Payment came from. OTHER is the generic escape hatch, matching
+/// every other tenant-facing enum's CUSTOM/OTHER convention in this schema.
+enum PaymentMethod {
+  BANK_TRANSFER
+  CASH
+  CARD
+  OTHER
+}
+
+/// The e-invoice submission state for one Invoice, tracked entirely
+/// separately from InvoiceStatus (see docs/DECISIONS.md) so a Havelio
+/// invoice's own business lifecycle is never overloaded with a specific
+/// country's compliance-system lifecycle. NOT_SENT is the default for
+/// every tenant/country, including ones with no e-invoicing obligation at
+/// all — nothing here assumes Poland/KSeF.
+enum EInvoiceStatus {
+  NOT_SENT
+  PENDING
+  ACCEPTED
+  REJECTED
+  ERROR
+}
+
+/// A country-specific e-invoicing system Havelio can integrate with. KSEF
+/// is the only value today (Poland's Krajowy System e-Faktur); the type is
+/// deliberately open-ended so a future country's system is a new enum
+/// value and a new EInvoiceProvider implementation, never a change to the
+/// core Invoice model (see docs/DECISIONS.md, "provider-neutral
+/// architecture").
+enum EInvoiceProviderType {
+  KSEF
+}
+
+enum EInvoiceConnectionStatus {
+  NOT_CONNECTED
+  CONNECTED
+  ERROR
+}
+
+/// A tenant's connection to one country-specific e-invoicing provider — the
+/// Settings -> Integrations boundary (see docs/DECISIONS.md). Deliberately
+/// holds no real KSeF endpoint calls; this pass ships the provider
+/// boundary/settings architecture only (see EInvoiceProvider,
+/// KsefProvider), never a faked "connected" state. `encryptedCredentials`
+/// is AES-256-GCM ciphertext (ivBase64.authTagBase64.ciphertextBase64, see
+/// EncryptionService) — the plaintext token/certificate is never persisted,
+/// never logged, and never returned by any API response.
+model EInvoiceConnection {
+  id                   String                   @id @default(uuid())
+  tenantId             String
+  provider             EInvoiceProviderType
+  status               EInvoiceConnectionStatus @default(NOT_CONNECTED)
+  /// Provider-defined environment label (e.g. "test" | "production" for
+  /// KSeF) — free text so a future provider's own environment vocabulary
+  /// never requires a schema change.
+  environment          String?
+  encryptedCredentials String?
+  lastError            String?
+  connectedAt          DateTime?
+  lastCheckedAt        DateTime?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, provider])
+  @@map("einvoice_connections")
+}
+
+/// A first-class business object — NOT a generic Document row (see the
+/// section banner above). `sellerSnapshot`/`buyerSnapshot`/`bankSnapshot`
+/// freeze the legally relevant Tenant/Customer/CompanyBankAccount data at
+/// creation time, the same "capture now" pattern
+/// DocumentVersion.businessDataSnapshot already uses — a later edit to the
+/// Company Profile, the Customer record, or the bank account can never
+/// retroactively change an already-issued invoice. `documentLanguage` is
+/// resolved once via resolveDefaultDocumentLanguage (company-country-first,
+/// same resolver Contract/Handover/Return use) at creation time and frozen
+/// for the same reason. One Rental may have any number of Invoices —
+/// `rentalId` is a plain nullable FK, never unique — supporting upfront,
+/// after-return, per-period, deposit-separate, and services-separate
+/// invoicing patterns (see docs/DECISIONS.md).
+model Invoice {
+  id            String        @id @default(uuid())
+  tenantId      String
+  invoiceNumber String
+  type          InvoiceType   @default(STANDARD)
+  status        InvoiceStatus @default(DRAFT)
+
+  issueDate        DateTime
+  /// Date goods/services were sold or delivered — distinct from issueDate
+  /// in several jurisdictions (e.g. Poland's "Data sprzedaży"). Null when a
+  /// tenant's locale draws no such distinction.
+  saleDate         DateTime?
+  dueDate          DateTime?
+  /// When this invoice was marked SENT — kept as its own timestamp,
+  /// separate from `status`, because `status` moves on to
+  /// PARTIALLY_PAID/PAID/OVERDUE once payment begins, which would
+  /// otherwise make "was this ever sent to the customer" unrecoverable
+  /// without scanning InvoiceStatusHistory.
+  sentAt           DateTime?
+  currency         String    @db.VarChar(3)
+  /// Frozen at creation time via resolveDefaultDocumentLanguage — see the
+  /// model doc comment above.
+  documentLanguage String    @db.VarChar(10)
+
+  customerId    String
+  rentalId      String?
+  sourceQuoteId String?
+  bankAccountId String?
+
+  sellerSnapshot Json
+  buyerSnapshot  Json
+  bankSnapshot   Json?
+
+  subtotalMinor Int @default(0)
+  discountMinor Int @default(0)
+  taxMinor      Int @default(0)
+  totalMinor    Int @default(0)
+
+  /// Informational only — the method the tenant expects/requests, never
+  /// used to infer that payment has actually happened (see Payment below).
+  preferredPaymentMethod PaymentMethod?
+  /// Per-invoice reference the customer is asked to quote when paying —
+  /// distinct from CompanyBankAccount.paymentReference (that one is
+  /// account-wide).
+  paymentReference       String?
+  notes                  String?
+
+  eInvoiceStatus          EInvoiceStatus @default(NOT_SENT)
+  eInvoiceReferenceNumber String?
+  eInvoiceSubmittedAt     DateTime?
+  eInvoiceProcessedAt     DateTime?
+  eInvoiceError           String?
+
+  createdByUserId String
+  updatedByUserId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  tenant        Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer      Customer            @relation(fields: [customerId], references: [id])
+  rental        Rental?             @relation(fields: [rentalId], references: [id])
+  sourceQuote   Quote?              @relation(fields: [sourceQuoteId], references: [id])
+  bankAccount   CompanyBankAccount? @relation(fields: [bankAccountId], references: [id])
+  createdByUser User                @relation("InvoiceCreatedBy", fields: [createdByUserId], references: [id])
+  updatedByUser User?               @relation("InvoiceUpdatedBy", fields: [updatedByUserId], references: [id])
+
+  items         InvoiceItem[]
+  payments      Payment[]
+  statusHistory InvoiceStatusHistory[]
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, rentalId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, dueDate])
+  @@index([tenantId, deletedAt])
+  @@map("invoices")
+}
+
+/// One line on an Invoice — description/quantity/unit/unitNetPrice/discount/
+/// taxRate with net/tax/gross totals computed via invoice-pricing.util.ts
+/// (which reuses resolveDiscountMinor/resolveTaxMinor from
+/// quote-pricing.util.ts rather than reinventing the arithmetic). Generic
+/// enough for a rented asset, delivery, pickup, installation, cleaning,
+/// fuel, transport, a damage charge, a late fee, or any other goods/service
+/// — never limited to asset lines.
+model InvoiceItem {
+  id          String  @id @default(uuid())
+  tenantId    String
+  invoiceId   String
+  description String
+  quantity    Int     @default(1)
+  unit        String?
+
+  unitNetPriceMinor Int @default(0)
+  discountMinor     Int @default(0)
+  /// Integer basis points (2300 = 23.00%), matching QuoteItem.taxRateBp —
+  /// never a float rate.
+  taxRateBp         Int @default(0)
+  netTotalMinor     Int @default(0)
+  taxTotalMinor     Int @default(0)
+  grossTotalMinor   Int @default(0)
+  sortOrder         Int @default(0)
+
+  /// Optional traceability back to the RentalItem a "create from Rental"
+  /// prefill copied this line from — null for delivery/damage/late-fee/
+  /// ad-hoc lines that never had a RentalItem.
+  sourceRentalItemId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant           Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoice          Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  sourceRentalItem RentalItem? @relation(fields: [sourceRentalItemId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, invoiceId])
+  @@index([tenantId, sourceRentalItemId])
+  @@map("invoice_items")
+}
+
+/// Backs concurrency-safe invoice-number generation — one counter row per
+/// (tenantId, year, month), mirroring QuoteSequence's proven
+/// `INSERT ... ON CONFLICT DO UPDATE ... RETURNING` pattern (see
+/// invoice-numbering.util.ts). Month-scoped (not just year, unlike
+/// QuoteSequence) so the default format can naturally reset monthly (e.g.
+/// "INV-2026-08-000001") the way many jurisdictions' invoice numbering
+/// conventions expect — this is a DEFAULT format only, not hard-coded
+/// Polish numbering: a tenant-configurable numbering format is documented
+/// future work (see docs/DECISIONS.md).
+model InvoiceSequence {
+  id         String @id @default(uuid())
+  tenantId   String
+  year       Int
+  month      Int
+  lastNumber Int    @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, year, month])
+  @@map("invoice_sequences")
+}
+
+/// One recorded payment against an Invoice — the minimal payment-tracking
+/// domain (see docs/DECISIONS.md). Deliberately an explicit, staff-recorded
+/// action; Invoice.status is never inferred merely because an Invoice was
+/// created (see PaymentsService, which derives PARTIALLY_PAID/PAID by
+/// summing an invoice's Payment rows). Append-only — a mistaken payment is
+/// corrected by recording an equal-and-opposite negative-amount entry
+/// (documented, see docs/DECISIONS.md), never by editing/deleting history.
+model Payment {
+  id          String        @id @default(uuid())
+  tenantId    String
+  invoiceId   String
+  amountMinor Int
+  currency    String        @db.VarChar(3)
+  paymentDate DateTime
+  method      PaymentMethod @default(BANK_TRANSFER)
+  reference   String?
+  notes       String?
+
+  createdByUserId String
+  createdAt       DateTime @default(now())
+
+  tenant        Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoice       Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  createdByUser User    @relation("PaymentRecordedBy", fields: [createdByUserId], references: [id])
+
+  @@index([tenantId, invoiceId])
+  @@map("payments")
+}
+
+/// Append-only history of Invoice.status transitions, written atomically
+/// with the status change itself — mirrors RentalStatusHistory/
+/// QuoteStatusHistory exactly. changedByUserId is nullable because some
+/// transitions are system-derived from Payment totals or the current date
+/// (PARTIALLY_PAID/PAID/OVERDUE), not a direct staff action, the same
+/// reason QuoteStatusHistory's changedByUserId is nullable for the public
+/// accept/reject flow.
+model InvoiceStatusHistory {
+  id              String         @id @default(uuid())
+  tenantId        String
+  invoiceId       String
+  fromStatus      InvoiceStatus?
+  toStatus        InvoiceStatus
+  changedByUserId String?
+  reason          String?
+  createdAt       DateTime       @default(now())
+
+  tenant        Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoice       Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  changedByUser User?   @relation("InvoiceStatusHistoryChangedBy", fields: [changedByUserId], references: [id])
+
+  @@index([tenantId, invoiceId, createdAt])
+  @@map("invoice_status_history")
+}
+
 /// Platform user identity. Not tenant-scoped — a user may belong to
 /// multiple tenants via TenantMembership.
 model User {
@@ -302,6 +662,11 @@ model User {
   sentPortalMessages         CustomerPortalMessage[]  @relation("CustomerPortalMessageSentBy")
   respondedExtensionRequests RentalExtensionRequest[] @relation("RentalExtensionRequestRespondedBy")
   reviewedDamageReports      RentalDamageReport[]     @relation("RentalDamageReportReviewedBy")
+
+  createdInvoices      Invoice[]              @relation("InvoiceCreatedBy")
+  updatedInvoices      Invoice[]              @relation("InvoiceUpdatedBy")
+  invoiceStatusChanges InvoiceStatusHistory[] @relation("InvoiceStatusHistoryChangedBy")
+  recordedPayments     Payment[]              @relation("PaymentRecordedBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -376,6 +741,14 @@ model Tenant {
   rentalExtensionRequests     RentalExtensionRequest[]
   rentalDamageReports         RentalDamageReport[]
   rentalDamageReportPhotos    RentalDamageReportPhoto[]
+
+  companyBankAccounts  CompanyBankAccount[]
+  invoices             Invoice[]
+  invoiceItems         InvoiceItem[]
+  invoiceSequences     InvoiceSequence[]
+  payments             Payment[]
+  invoiceStatusHistory InvoiceStatusHistory[]
+  eInvoiceConnections  EInvoiceConnection[]
 
   @@index([deletedAt])
   @@map("tenants")
@@ -483,6 +856,7 @@ model Customer {
   rentals   Rental[]
   quotes    Quote[]
   documents Document[]
+  invoices  Invoice[]
 
   portalRefreshTokens CustomerRefreshToken[]
   portalMessages      CustomerPortalMessage[]
@@ -827,6 +1201,7 @@ model Rental {
   items         RentalItem[]
   statusHistory RentalStatusHistory[]
   documents     Document[]
+  invoices      Invoice[]
 
   portalMessages    CustomerPortalMessage[]
   extensionRequests RentalExtensionRequest[]
@@ -883,6 +1258,7 @@ model RentalItem {
   asset  Asset  @relation(fields: [assetId], references: [id])
 
   documentItems DocumentItem[]
+  invoiceItems  InvoiceItem[]
 
   @@index([tenantId, rentalId])
   @@index([tenantId, assetId])
@@ -1024,6 +1400,7 @@ model Quote {
   /// this accepted quote) — distinct from `documents` above (QuoteDocument:
   /// this quote's own generated PDF).
   platformDocuments Document[]
+  invoices          Invoice[]
 
   @@unique([tenantId, quoteNumber])
   @@index([tenantId, status])

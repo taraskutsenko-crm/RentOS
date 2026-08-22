@@ -72,6 +72,10 @@ export class VariableResolverService {
       ? await this.resolveAssetCustomFields(tenantId, document.asset.id)
       : {};
 
+    const defaultBankAccount = await this.prisma.companyBankAccount.findFirst({
+      where: { tenantId, deletedAt: null, isActive: true, isDefault: true },
+    });
+
     const language = resolveDefaultDocumentLanguage(tenant);
     const timezone = tenant.timezone;
     const employeeName = employeeUser
@@ -118,6 +122,19 @@ export class VariableResolverService {
         taxNumber: tenant.taxNumber ?? "",
         address: tenant.address ?? "",
         phone: tenant.phone ?? "",
+        bank: defaultBankAccount
+          ? {
+              label: defaultBankAccount.label,
+              bankName: defaultBankAccount.bankName ?? "",
+              accountHolder: defaultBankAccount.accountHolder ?? "",
+              accountNumber: defaultBankAccount.accountNumber ?? "",
+              iban: defaultBankAccount.iban ?? "",
+              swiftBic: defaultBankAccount.swiftBic ?? "",
+              currency: defaultBankAccount.currency,
+              bankAddress: defaultBankAccount.bankAddress ?? "",
+              paymentReference: defaultBankAccount.paymentReference ?? "",
+            }
+          : {},
       },
       customer: document.customer
         ? {
@@ -238,6 +255,9 @@ export class VariableResolverService {
     const later = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
     const employeeName = "Sample Employee";
+    const defaultBankAccount = await this.prisma.companyBankAccount.findFirst({
+      where: { tenantId, deletedAt: null, isActive: true, isDefault: true },
+    });
 
     return {
       company: {
@@ -248,6 +268,29 @@ export class VariableResolverService {
         taxNumber: tenant.taxNumber ?? "",
         address: tenant.address ?? "",
         phone: tenant.phone ?? "",
+        bank: defaultBankAccount
+          ? {
+              label: defaultBankAccount.label,
+              bankName: defaultBankAccount.bankName ?? "",
+              accountHolder: defaultBankAccount.accountHolder ?? "",
+              accountNumber: defaultBankAccount.accountNumber ?? "",
+              iban: defaultBankAccount.iban ?? "",
+              swiftBic: defaultBankAccount.swiftBic ?? "",
+              currency: defaultBankAccount.currency,
+              bankAddress: defaultBankAccount.bankAddress ?? "",
+              paymentReference: defaultBankAccount.paymentReference ?? "",
+            }
+          : {
+              label: "Sample Account",
+              bankName: "Sample Bank",
+              accountHolder: tenant.name,
+              accountNumber: "00 0000 0000 0000 0000 0000 0000",
+              iban: "PL00 0000 0000 0000 0000 0000 0000",
+              swiftBic: "SAMPLEXX",
+              currency,
+              bankAddress: "1 Sample Street, Sample City",
+              paymentReference: "Sample payment reference",
+            },
       },
       customer: {
         name: "Sample Customer",

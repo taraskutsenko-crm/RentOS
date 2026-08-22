@@ -11,10 +11,14 @@ import { AssetFilesModule } from "./asset-files/asset-files.module";
 import { AssetStatusesModule } from "./asset-statuses/asset-statuses.module";
 import { AssetsModule } from "./assets/assets.module";
 import { AuthModule } from "./auth/auth.module";
+import { CompanyBankAccountsModule } from "./bank-accounts/company-bank-accounts.module";
 import { CustomerPortalModule } from "./customer-portal/customer-portal.module";
 import { CustomersModule } from "./customers/customers.module";
 import { DocumentsModule } from "./documents/documents.module";
+import { EInvoiceModule } from "./einvoice/einvoice.module";
 import { HealthModule } from "./health/health.module";
+import { InvoicesModule } from "./invoices/invoices.module";
+import { PaymentsModule } from "./payments/payments.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { QuotesModule } from "./quotes/quotes.module";
 import { RentalBillingSettingsModule } from "./rental-billing-settings/rental-billing-settings.module";
@@ -49,6 +53,10 @@ import { TenantsModule } from "./tenants/tenants.module";
     QuotesModule,
     DocumentsModule,
     CustomerPortalModule,
+    CompanyBankAccountsModule,
+    InvoicesModule,
+    PaymentsModule,
+    EInvoiceModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

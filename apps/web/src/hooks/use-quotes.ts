@@ -14,6 +14,7 @@ import type {
   QuoteTimelineEvent,
   SendQuoteResult,
 } from "../types/quote";
+import type { PartialMonthPolicy } from "../types/rental";
 
 export interface QuoteListParams {
   page?: number | undefined;
@@ -55,6 +56,8 @@ export interface QuoteItemInput {
   depositMinor?: number | undefined;
   sortOrder?: number | undefined;
   notes?: string | null | undefined;
+  /** Only meaningful for MONTHLY — see DECISIONS.md D-072. */
+  partialMonthPolicy?: PartialMonthPolicy | undefined;
 }
 
 export interface QuoteInput {

@@ -121,6 +121,7 @@ describe("RentalWizard", () => {
             depositDisplay: "",
             discountDisplay: "",
             notes: "",
+            partialMonthPolicy: "PRORATE_BY_DAY",
           },
         ]}
         onSubmit={vi.fn()}
@@ -155,6 +156,7 @@ describe("RentalWizard", () => {
             depositDisplay: "",
             discountDisplay: "",
             notes: "",
+            partialMonthPolicy: "PRORATE_BY_DAY",
           },
         ]}
         submitLabelKey="rental.save"
@@ -216,6 +218,116 @@ describe("RentalWizard", () => {
       const spinbuttons = screen.getAllByRole("spinbutton");
       await user.type(spinbuttons[1]!, "500"); // monthly price
       await user.type(spinbuttons[2]!, "20"); // daily rate for remainder
+
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      expect(await screen.findByText(/planned start/i)).toBeInTheDocument();
+    });
+  });
+
+  describe("partial-month billing policy selector (D-072)", () => {
+    it("defaults a new MONTHLY item to the tenant's configured partial-month policy", async () => {
+      setup();
+      useRentalBillingSettingsMock.mockReturnValue({
+        data: {
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          customMonthLengthDays: null,
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        },
+      });
+      const user = userEvent.setup();
+      renderWithProviders(
+        <RentalWizard
+          tenantId="tenant-1"
+          initialValues={{ plannedStart: "2026-01-15T00:00", plannedEnd: "2026-03-20T00:00" }}
+          onSubmit={vi.fn()}
+          isPending={false}
+        />,
+      );
+
+      await user.click(screen.getByLabelText("Jane Doe"));
+      await user.click(screen.getByRole("button", { name: /next/i })); // -> assets
+      await user.click(await screen.findByRole("checkbox"));
+      await user.click(screen.getByRole("button", { name: /next/i })); // -> dates
+      await user.click(screen.getByRole("button", { name: /next/i })); // -> pricing
+
+      const billingModeSelect = screen.getByDisplayValue(/daily/i);
+      await user.selectOptions(billingModeSelect, "MONTHLY");
+
+      expect(screen.getByDisplayValue("Charge started month as full month")).toBeInTheDocument();
+      expect(screen.queryByText(/daily price \(for remaining days\)/i)).not.toBeInTheDocument();
+    });
+
+    it("switching to 'charge proportionally by day' shows and requires the daily remainder field", async () => {
+      setup();
+      useRentalBillingSettingsMock.mockReturnValue({
+        data: {
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          customMonthLengthDays: null,
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        },
+      });
+      const user = userEvent.setup();
+      renderWithProviders(
+        <RentalWizard
+          tenantId="tenant-1"
+          initialValues={{ plannedStart: "2026-01-15T00:00", plannedEnd: "2026-03-20T00:00" }}
+          onSubmit={vi.fn()}
+          isPending={false}
+        />,
+      );
+
+      await user.click(screen.getByLabelText("Jane Doe"));
+      await user.click(screen.getByRole("button", { name: /next/i })); // -> assets
+      await user.click(await screen.findByRole("checkbox"));
+      await user.click(screen.getByRole("button", { name: /next/i })); // -> dates
+      await user.click(screen.getByRole("button", { name: /next/i })); // -> pricing
+
+      const billingModeSelect = screen.getByDisplayValue(/daily/i);
+      await user.selectOptions(billingModeSelect, "MONTHLY");
+
+      const policySelect = screen.getByDisplayValue("Charge started month as full month");
+      await user.selectOptions(policySelect, "PRORATE_BY_DAY");
+
+      expect(await screen.findByText(/daily price \(for remaining days\)/i)).toBeInTheDocument();
+
+      const spinbuttons = screen.getAllByRole("spinbutton");
+      await user.type(spinbuttons[1]!, "600");
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      expect(screen.getByText("Daily price (for remaining days) is required")).toBeInTheDocument();
+    });
+
+    it("ROUND_UP_TO_FULL_MONTH never blocks advancing past Prices with no daily-price value", async () => {
+      setup();
+      useRentalBillingSettingsMock.mockReturnValue({
+        data: {
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          customMonthLengthDays: null,
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        },
+      });
+      const user = userEvent.setup();
+      renderWithProviders(
+        <RentalWizard
+          tenantId="tenant-1"
+          initialValues={{ plannedStart: "2026-01-15T00:00", plannedEnd: "2026-03-20T00:00" }}
+          onSubmit={vi.fn()}
+          isPending={false}
+        />,
+      );
+
+      await user.click(screen.getByLabelText("Jane Doe"));
+      await user.click(screen.getByRole("button", { name: /next/i })); // -> assets
+      await user.click(await screen.findByRole("checkbox"));
+      await user.click(screen.getByRole("button", { name: /next/i })); // -> dates
+      await user.click(screen.getByRole("button", { name: /next/i })); // -> pricing
+
+      const billingModeSelect = screen.getByDisplayValue(/daily/i);
+      await user.selectOptions(billingModeSelect, "MONTHLY");
+
+      const spinbuttons = screen.getAllByRole("spinbutton");
+      await user.type(spinbuttons[1]!, "600");
 
       await user.click(screen.getByRole("button", { name: /next/i }));
 

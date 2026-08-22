@@ -10,6 +10,9 @@ export type RentalBillingMode = "DAILY" | "WEEKLY" | "MONTHLY" | "CUSTOM";
 /** See docs/adr/0008-configurable-monthly-billing-strategies.md. */
 export type MonthlyBillingStrategy = "CALENDAR_MONTH" | "FIXED_30_DAYS" | "CUSTOM";
 
+/** How a MONTHLY item's leftover partial period is charged. See DECISIONS.md D-072. */
+export type PartialMonthPolicy = "PRORATE_BY_DAY" | "ROUND_UP_TO_FULL_MONTH";
+
 export interface RentalItem {
   id: string;
   tenantId: string;
@@ -24,6 +27,8 @@ export interface RentalItem {
   /** Snapshot of the monthly billing settings used when this item was last priced — null unless billingMode is MONTHLY. */
   monthlyBillingStrategy: MonthlyBillingStrategy | null;
   customMonthLengthDays: number | null;
+  /** Snapshot of how this item's leftover partial month is charged — null unless billingMode is MONTHLY. */
+  partialMonthPolicy: PartialMonthPolicy | null;
   depositMinor: number;
   discountMinor: number;
   notes: string | null;
@@ -37,6 +42,8 @@ export interface RentalBillingSettings {
   tenantId: string;
   monthlyBillingStrategy: MonthlyBillingStrategy;
   customMonthLengthDays: number | null;
+  /** Tenant-wide default partial-month policy — see PartialMonthPolicy. */
+  partialMonthPolicy: PartialMonthPolicy;
   isDefault: boolean;
   updatedAt: string | null;
 }

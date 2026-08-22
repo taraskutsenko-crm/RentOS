@@ -176,7 +176,7 @@ describe("Rentals E2E", () => {
       await request(app.getHttpServer())
         .patch(`/tenants/${tenantId}/rental-billing-settings`)
         .set("Cookie", accessCookie)
-        .send({ monthlyBillingStrategy: "FIXED_30_DAYS" })
+        .send({ monthlyBillingStrategy: "FIXED_30_DAYS", partialMonthPolicy: "PRORATE_BY_DAY" })
         .expect(200);
 
       const start = "2030-01-01T00:00:00.000Z";
@@ -200,7 +200,11 @@ describe("Rentals E2E", () => {
       await request(app.getHttpServer())
         .patch(`/tenants/${tenantId}/rental-billing-settings`)
         .set("Cookie", accessCookie)
-        .send({ monthlyBillingStrategy: "CUSTOM", customMonthLengthDays: 28 })
+        .send({
+          monthlyBillingStrategy: "CUSTOM",
+          customMonthLengthDays: 28,
+          partialMonthPolicy: "PRORATE_BY_DAY",
+        })
         .expect(200);
 
       const start = "2030-01-01T00:00:00.000Z";
@@ -239,7 +243,7 @@ describe("Rentals E2E", () => {
       await request(app.getHttpServer())
         .patch(`/tenants/${tenantId}/rental-billing-settings`)
         .set("Cookie", accessCookie)
-        .send({ monthlyBillingStrategy: "FIXED_30_DAYS" })
+        .send({ monthlyBillingStrategy: "FIXED_30_DAYS", partialMonthPolicy: "PRORATE_BY_DAY" })
         .expect(200);
 
       const refetched = await request(app.getHttpServer())
@@ -276,7 +280,7 @@ describe("Rentals E2E", () => {
       await request(app.getHttpServer())
         .patch(`/tenants/${tenantId}/rental-billing-settings`)
         .set("Cookie", accessCookie)
-        .send({ monthlyBillingStrategy: "FIXED_30_DAYS" })
+        .send({ monthlyBillingStrategy: "FIXED_30_DAYS", partialMonthPolicy: "PRORATE_BY_DAY" })
         .expect(200);
 
       // Jan 15 -> Mar 20 is 64 days -> under FIXED_30_DAYS: 2 x 30-day units + 4 remaining.

@@ -89,6 +89,22 @@ enum MonthlyBillingStrategy {
   CUSTOM
 }
 
+/// How a MONTHLY item's leftover partial period (after MonthlyBillingStrategy
+/// splits the range into complete units + remaining days) is actually
+/// charged. See DECISIONS.md D-072.
+///  - PRORATE_BY_DAY: the remaining days are billed at the item's own
+///    dailyPriceMinor rate — the original, still-default behavior.
+///  - ROUND_UP_TO_FULL_MONTH: any started remaining period is billed as one
+///    more full monthlyPriceMinor unit; dailyPriceMinor is not required.
+/// A null value on RentalItem/QuoteItem (pre-existing rows written before
+/// this policy existed) behaves exactly like PRORATE_BY_DAY — the
+/// calculation those rows were actually priced under — never silently
+/// recalculated (mirrors the existing MonthlyBillingStrategy null-handling).
+enum PartialMonthPolicy {
+  PRORATE_BY_DAY
+  ROUND_UP_TO_FULL_MONTH
+}
+
 /// Quote lifecycle: DRAFT -> SENT -> VIEWED -> ACCEPTED -> CONVERTED, with
 /// REJECTED/EXPIRED reachable from SENT/VIEWED and CANCELLED reachable from
 /// DRAFT/SENT. See docs/adr/0007-quotes-and-commercial-offers.md.
@@ -849,6 +865,12 @@ model RentalItem {
   /// monthly-unit/remaining-day split on demand.
   monthlyBillingStrategy MonthlyBillingStrategy?
   customMonthLengthDays  Int?
+  /// Snapshot of how this item's leftover partial month is charged — see
+  /// PartialMonthPolicy and DECISIONS.md D-072. Same freeze-at-write-time
+  /// rule as monthlyBillingStrategy above; null (pre-existing rows) behaves
+  /// as PRORATE_BY_DAY, the calculation those rows were actually priced
+  /// under.
+  partialMonthPolicy     PartialMonthPolicy?
   depositMinor           Int                     @default(0)
   discountMinor          Int                     @default(0)
   notes                  String?
@@ -886,6 +908,12 @@ model RentalBillingSettings {
   /// same row are more brittle to evolve than application-layer validation
   /// here, consistent with how QuoteItem's type-dependent fields are handled.
   customMonthLengthDays  Int?
+  /// Tenant-wide default for how a MONTHLY item's leftover partial period is
+  /// charged — see PartialMonthPolicy. Individual Quote/Rental items may
+  /// override this per item at creation time (see DECISIONS.md D-072);
+  /// this is only the pre-filled default. PRORATE_BY_DAY preserves the
+  /// original behavior for every tenant that existed before this field.
+  partialMonthPolicy     PartialMonthPolicy     @default(PRORATE_BY_DAY)
   createdAt              DateTime               @default(now())
   updatedAt              DateTime               @updatedAt
 
@@ -1047,6 +1075,10 @@ model QuoteItem {
   /// item's stored totals.
   monthlyBillingStrategy MonthlyBillingStrategy?
   customMonthLengthDays  Int?
+  /// Snapshot of how this item's leftover partial month is charged — see
+  /// PartialMonthPolicy and DECISIONS.md D-072. Same null-means-legacy
+  /// freeze-at-write-time rule as monthlyBillingStrategy above.
+  partialMonthPolicy     PartialMonthPolicy?
   discountType           QuoteDiscountType?
   discountValue          Int                     @default(0)
   discountTotalMinor     Int                     @default(0)

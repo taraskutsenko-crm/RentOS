@@ -5,7 +5,14 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import type { Asset, MonthlyBillingStrategy, Prisma, QuoteItem, QuoteStatus } from "@prisma/client";
+import type {
+  Asset,
+  MonthlyBillingStrategy,
+  PartialMonthPolicy,
+  Prisma,
+  QuoteItem,
+  QuoteStatus,
+} from "@prisma/client";
 import type { ApiEnv } from "@rentos/shared";
 
 import { AuditService } from "../audit/audit.service";
@@ -52,9 +59,10 @@ import type { QuoteTimelineEvent, QuoteTimelineEventType } from "./timeline.type
  * directly from a client — mirrors RentalItemSource in rentals.service.ts.
  * See docs/adr/0008-configurable-monthly-billing-strategies.md.
  */
-type QuoteItemSource = QuoteItemDto & {
+type QuoteItemSource = Omit<QuoteItemDto, "partialMonthPolicy"> & {
   monthlyBillingStrategy?: MonthlyBillingStrategy | null;
   customMonthLengthDays?: number | null;
+  partialMonthPolicy?: PartialMonthPolicy | null;
 };
 
 /** Items and dates are editable only while DRAFT — mirrors Rentals' EDITABLE_STATUSES intent. */
@@ -803,6 +811,7 @@ export class QuotesService {
             // section and ADR 0008's note on this decision).
             monthlyBillingStrategy: item.monthlyBillingStrategy,
             customMonthLengthDays: item.customMonthLengthDays,
+            partialMonthPolicy: item.partialMonthPolicy,
             discountType: item.discountType,
             discountValue: item.discountValue,
             discountTotalMinor: pricing.discountTotalMinor,
@@ -1006,9 +1015,11 @@ export class QuotesService {
             // quote was priced under — the Rental's own totals are still
             // copied verbatim from the Quote's totals above, never
             // recomputed from this item, but the item-level breakdown
-            // must still be reproducible post-conversion (see ADR 0008).
+            // must still be reproducible post-conversion (see ADR 0008,
+            // D-072).
             monthlyBillingStrategy: item.monthlyBillingStrategy,
             customMonthLengthDays: item.customMonthLengthDays,
+            partialMonthPolicy: item.partialMonthPolicy,
             depositMinor: item.depositMinor,
             discountMinor: item.discountTotalMinor,
             notes: item.notes,
@@ -1396,6 +1407,7 @@ export class QuotesService {
           customPriceMinor: item.customPriceMinor,
           monthlyBillingStrategy: item.monthlyBillingStrategy,
           customMonthLengthDays: item.customMonthLengthDays,
+          partialMonthPolicy: item.partialMonthPolicy,
           discountTotalMinor: item.discountTotalMinor,
           taxTotalMinor: item.taxTotalMinor,
           depositMinor: item.depositMinor,
@@ -1436,7 +1448,10 @@ export class QuotesService {
     }
   }
 
-  private async assertItemsValid(tenantId: string, items: QuoteItemDto[]): Promise<void> {
+  private async assertItemsValid(
+    tenantId: string,
+    items: Pick<QuoteItemDto, "itemType" | "assetId" | "billingMode">[],
+  ): Promise<void> {
     const assetIds = new Set<string>();
     for (const item of items) {
       if (item.itemType === "ASSET") {
@@ -1550,6 +1565,10 @@ function withMonthlyBillingSettings(
       ...item,
       monthlyBillingStrategy: settings!.monthlyBillingStrategy,
       customMonthLengthDays: settings!.customMonthLengthDays,
+      // The client may explicitly choose a per-item partial-month policy
+      // (see the Prices step); the tenant's setting is only the default
+      // when it doesn't (see DECISIONS.md D-072).
+      partialMonthPolicy: item.partialMonthPolicy ?? settings!.partialMonthPolicy,
     };
   });
 }
@@ -1569,6 +1588,7 @@ function toPricedItemInput(item: QuoteItemSource): PricedQuoteItemInput {
     depositMinor: item.depositMinor ?? 0,
     monthlyBillingStrategy: item.monthlyBillingStrategy ?? null,
     customMonthLengthDays: item.customMonthLengthDays ?? null,
+    partialMonthPolicy: item.partialMonthPolicy ?? null,
   };
 }
 
@@ -1587,6 +1607,7 @@ function toPricedItemInputFromExisting(item: QuoteItem): PricedQuoteItemInput {
     depositMinor: item.depositMinor,
     monthlyBillingStrategy: item.monthlyBillingStrategy,
     customMonthLengthDays: item.customMonthLengthDays,
+    partialMonthPolicy: item.partialMonthPolicy,
   };
 }
 
@@ -1612,6 +1633,7 @@ function fromExistingItem(item: QuoteItem): QuoteItemSource {
     ...(item.notes !== null ? { notes: item.notes } : {}),
     monthlyBillingStrategy: item.monthlyBillingStrategy,
     customMonthLengthDays: item.customMonthLengthDays,
+    partialMonthPolicy: item.partialMonthPolicy,
   };
 }
 
@@ -1640,6 +1662,7 @@ function toQuoteItemCreateData(
       item.billingMode === "MONTHLY" ? (item.monthlyBillingStrategy ?? null) : null,
     customMonthLengthDays:
       item.billingMode === "MONTHLY" ? (item.customMonthLengthDays ?? null) : null,
+    partialMonthPolicy: item.billingMode === "MONTHLY" ? (item.partialMonthPolicy ?? null) : null,
     discountType: item.discountType ?? null,
     discountValue: item.discountValue ?? 0,
     discountTotalMinor: pricing.discountTotalMinor,

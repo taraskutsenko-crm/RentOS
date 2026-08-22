@@ -27,9 +27,10 @@ import {
   rentalBillingSettingsSchema,
   type RentalBillingSettingsFormValues,
 } from "../../../../lib/validation";
-import type { MonthlyBillingStrategy } from "../../../../types/rental";
+import type { MonthlyBillingStrategy, PartialMonthPolicy } from "../../../../types/rental";
 
 const STRATEGIES: MonthlyBillingStrategy[] = ["CALENDAR_MONTH", "FIXED_30_DAYS", "CUSTOM"];
+const PARTIAL_MONTH_POLICIES: PartialMonthPolicy[] = ["PRORATE_BY_DAY", "ROUND_UP_TO_FULL_MONTH"];
 
 export default function RentalBillingSettingsPage() {
   const { t } = useTranslation();
@@ -50,6 +51,7 @@ export default function RentalBillingSettingsPage() {
     defaultValues: {
       monthlyBillingStrategy: "CALENDAR_MONTH",
       customMonthLengthDays: "",
+      partialMonthPolicy: "PRORATE_BY_DAY",
     },
   });
 
@@ -59,11 +61,13 @@ export default function RentalBillingSettingsPage() {
         monthlyBillingStrategy: settings.monthlyBillingStrategy,
         customMonthLengthDays:
           settings.customMonthLengthDays !== null ? String(settings.customMonthLengthDays) : "",
+        partialMonthPolicy: settings.partialMonthPolicy,
       });
     }
   }, [settings, reset]);
 
   const strategy = watch("monthlyBillingStrategy");
+  const partialMonthPolicy = watch("partialMonthPolicy");
 
   async function onSubmit(values: RentalBillingSettingsFormValues): Promise<void> {
     setJustSaved(false);
@@ -71,6 +75,7 @@ export default function RentalBillingSettingsPage() {
       monthlyBillingStrategy: values.monthlyBillingStrategy,
       customMonthLengthDays:
         values.monthlyBillingStrategy === "CUSTOM" ? Number(values.customMonthLengthDays) : null,
+      partialMonthPolicy: values.partialMonthPolicy,
     });
     setJustSaved(true);
   }
@@ -153,6 +158,33 @@ export default function RentalBillingSettingsPage() {
                   )}
                 </div>
               )}
+            </fieldset>
+
+            <fieldset className="flex flex-col gap-3" disabled={!canManage}>
+              <legend className="text-sm font-medium">
+                {t("rental.billingSettings.partialMonthPolicy.title")}
+              </legend>
+              {PARTIAL_MONTH_POLICIES.map((value) => (
+                <label
+                  key={value}
+                  className={`flex items-start gap-3 rounded-md border p-3 ${partialMonthPolicy === value ? "border-primary" : ""} ${!canManage ? "opacity-70" : "cursor-pointer"}`}
+                >
+                  <input
+                    type="radio"
+                    className="mt-1"
+                    value={value}
+                    {...register("partialMonthPolicy")}
+                  />
+                  <span className="flex flex-col gap-1">
+                    <span className="font-medium">
+                      {t(`rental.billingSettings.partialMonthPolicy.options.${value}.label`)}
+                    </span>
+                    <span className="text-muted-foreground text-sm">
+                      {t(`rental.billingSettings.partialMonthPolicy.options.${value}.description`)}
+                    </span>
+                  </span>
+                </label>
+              ))}
             </fieldset>
 
             {canManage && (

@@ -1,4 +1,9 @@
-import { QuoteBillingMode, QuoteDiscountType, QuoteItemType } from "@prisma/client";
+import {
+  PartialMonthPolicy,
+  QuoteBillingMode,
+  QuoteDiscountType,
+  QuoteItemType,
+} from "@prisma/client";
 import { IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from "class-validator";
 
 import { EmptyToNull } from "../../common/empty-to-null.transform";
@@ -62,6 +67,11 @@ export class QuoteItemDto {
   @IsInt()
   @Min(0)
   customPriceMinor?: number;
+
+  /** Meaningful only when billingMode is MONTHLY — how the leftover partial month is charged. Defaults to the tenant's setting when omitted (see quotes.service.ts). */
+  @IsOptional()
+  @IsEnum(PartialMonthPolicy)
+  partialMonthPolicy?: PartialMonthPolicy;
 
   @IsOptional()
   @IsEnum(QuoteDiscountType)

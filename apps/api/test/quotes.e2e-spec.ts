@@ -181,6 +181,7 @@ describe("Quotes E2E", () => {
         .set("Cookie", accessCookie)
         .send({
           monthlyBillingStrategy: strategy,
+          partialMonthPolicy: "PRORATE_BY_DAY",
           ...(customMonthLengthDays !== undefined ? { customMonthLengthDays } : {}),
         })
         .expect(200);
@@ -220,6 +221,27 @@ describe("Quotes E2E", () => {
           },
         ],
       }).expect(400);
+    });
+
+    it("ROUND_UP_TO_FULL_MONTH never requires dailyPriceMinor and rounds any started remainder up to a full month", async () => {
+      const response = await createQuote({
+        plannedStart: "2030-01-15T00:00:00.000Z",
+        plannedEnd: "2030-03-20T00:00:00.000Z",
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 20000,
+            partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+          },
+        ],
+      }).expect(201);
+
+      // 2 complete months + a started remainder -> rounds up to 3 full months.
+      expect(response.body.subtotalMinor).toBe(20000 * 3);
+      expect(response.body.items[0].partialMonthPolicy).toBe("ROUND_UP_TO_FULL_MONTH");
     });
 
     it("uses FIXED_30_DAYS once configured on tenant settings", async () => {
@@ -426,6 +448,45 @@ describe("Quotes E2E", () => {
       });
     });
 
+    it("quote-to-rental conversion preserves a ROUND_UP_TO_FULL_MONTH item's frozen policy and total verbatim", async () => {
+      const quoteId = (
+        await createAndSendQuote({
+          plannedStart: "2030-08-18T00:00:00.000Z",
+          plannedEnd: "2030-09-19T00:00:00.000Z", // 1 month + 1 day
+          items: [
+            {
+              itemType: "ASSET",
+              assetId: assetAId,
+              name: "Generator A",
+              billingMode: "MONTHLY",
+              monthlyPriceMinor: 60000,
+              partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+            },
+          ],
+        })
+      ).quoteId;
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/quotes/${quoteId}/accept`)
+        .set("Cookie", accessCookie)
+        .send({ acceptedBy: "Jane" })
+        .expect(201);
+
+      const quote = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/quotes/${quoteId}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(quote.body.totalMinor).toBe(60000 * 2); // rounded up to 2 full months
+
+      const converted = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/quotes/${quoteId}/convert-to-rental`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      expect(converted.body.rental.totalMinor).toBe(quote.body.totalMinor);
+      expect(converted.body.rental.items[0].partialMonthPolicy).toBe("ROUND_UP_TO_FULL_MONTH");
+    });
+
     it("a legacy MONTHLY item with no stored strategy (pre-dating this feature) is still readable and reproduces its original whole-month-rounding total on an unrelated edit", async () => {
       // Jan 31 -> Feb 28: under the OLD whole-month-rounding rule this is
       // exactly 1 month with 0 remainder, same total either engine would
@@ -479,6 +540,66 @@ describe("Quotes E2E", () => {
     }).expect(201);
 
     expect(response.body.subtotalMinor).toBe(5000);
+  });
+
+  it("a Delivery line item is fully included in the commercial total alongside a MONTHLY rental item, and survives Quote -> Rental conversion (manual-testing bug fix)", async () => {
+    // Real example from manual testing: Rental = 600 PLN/month, Delivery = 700 x 2.
+    const created = await createQuote({
+      plannedStart: "2030-08-18T00:00:00.000Z",
+      plannedEnd: "2030-09-18T00:00:00.000Z", // exactly 1 calendar month
+      items: [
+        {
+          itemType: "ASSET",
+          assetId: assetAId,
+          name: "Generator A",
+          billingMode: "MONTHLY",
+          monthlyPriceMinor: 60000,
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        },
+        {
+          itemType: "DELIVERY",
+          name: "Delivery",
+          billingMode: "FLAT",
+          unitPriceMinor: 70000,
+          quantity: 2,
+        },
+      ],
+    }).expect(201);
+
+    expect(created.body.items).toHaveLength(2);
+    const deliveryItem = created.body.items.find(
+      (item: { itemType: string }) => item.itemType === "DELIVERY",
+    );
+    expect(deliveryItem.lineTotalMinor).toBe(70000 * 2);
+    expect(created.body.subtotalMinor).toBe(60000 + 70000 * 2);
+    expect(created.body.totalMinor).toBe(60000 + 70000 * 2);
+
+    // Persisted Quote and Quote detail both reflect the same total.
+    const refetched = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/quotes/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(refetched.body.totalMinor).toBe(60000 + 70000 * 2);
+
+    // Rental after conversion preserves the same commercial total, with the
+    // Delivery item still present and correctly valued.
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${created.body.id}/send`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${created.body.id}/accept`)
+      .set("Cookie", accessCookie)
+      .send({ acceptedBy: "Jane" })
+      .expect(201);
+    const converted = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${created.body.id}/convert-to-rental`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    expect(converted.body.rental.totalMinor).toBe(60000 + 70000 * 2);
   });
 
   it("applies per-line percentage discount, per-line tax, quote-level fixed discount, and sums deposits", async () => {

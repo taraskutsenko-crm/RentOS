@@ -200,4 +200,125 @@ describe("QuoteWizard", () => {
       expect(await screen.findByLabelText(/customer notes/i)).toBeInTheDocument();
     });
   });
+
+  describe("partial-month billing policy selector (D-072)", () => {
+    it("defaults a new MONTHLY item to the tenant's configured partial-month policy", async () => {
+      setup();
+      useRentalBillingSettingsMock.mockReturnValue({
+        data: {
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          customMonthLengthDays: null,
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        },
+      });
+      const user = userEvent.setup();
+      renderWithProviders(
+        <QuoteWizard
+          tenantId="tenant-1"
+          onSubmit={vi.fn()}
+          isPending={false}
+          initialValues={{
+            plannedStart: "2031-01-15T00:00",
+            plannedEnd: "2031-03-20T00:00",
+            validUntil: "2031-04-01T00:00",
+          }}
+        />,
+      );
+
+      await user.click(screen.getByLabelText("Jane Doe"));
+      await goToStep(user, 2); // -> dates -> assets
+      await user.click(await screen.findByRole("checkbox"));
+      await goToStep(user, 2); // -> services -> pricing
+
+      const billingModeSelect = screen.getByDisplayValue(/daily/i);
+      await user.selectOptions(billingModeSelect, "MONTHLY");
+
+      // Rounds up to a full month by default — no daily remainder field shown.
+      expect(screen.getByDisplayValue("Charge started month as full month")).toBeInTheDocument();
+      expect(screen.queryByText(/daily price \(for remaining days\)/i)).not.toBeInTheDocument();
+    });
+
+    it("switching to 'charge proportionally by day' shows the daily remainder field and requires it before Review", async () => {
+      setup();
+      useRentalBillingSettingsMock.mockReturnValue({
+        data: {
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          customMonthLengthDays: null,
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        },
+      });
+      const user = userEvent.setup();
+      renderWithProviders(
+        <QuoteWizard
+          tenantId="tenant-1"
+          onSubmit={vi.fn()}
+          isPending={false}
+          initialValues={{
+            plannedStart: "2031-01-15T00:00",
+            plannedEnd: "2031-03-20T00:00",
+            validUntil: "2031-04-01T00:00",
+          }}
+        />,
+      );
+
+      await user.click(screen.getByLabelText("Jane Doe"));
+      await goToStep(user, 2); // -> dates -> assets
+      await user.click(await screen.findByRole("checkbox"));
+      await goToStep(user, 2); // -> services -> pricing
+
+      const billingModeSelect = screen.getByDisplayValue(/daily/i);
+      await user.selectOptions(billingModeSelect, "MONTHLY");
+
+      const policySelect = screen.getByDisplayValue("Charge started month as full month");
+      await user.selectOptions(policySelect, "PRORATE_BY_DAY");
+
+      expect(await screen.findByText(/daily price \(for remaining days\)/i)).toBeInTheDocument();
+
+      // Fill only the monthly price, leave the now-required daily remainder blank.
+      const spinbuttons = screen.getAllByRole("spinbutton");
+      await user.type(spinbuttons[1]!, "600");
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      expect(screen.getByText("Daily price (for remaining days) is required")).toBeInTheDocument();
+    });
+
+    it("ROUND_UP_TO_FULL_MONTH never blocks advancing past Prices, even with no daily-price value entered", async () => {
+      setup();
+      useRentalBillingSettingsMock.mockReturnValue({
+        data: {
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          customMonthLengthDays: null,
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        },
+      });
+      const user = userEvent.setup();
+      renderWithProviders(
+        <QuoteWizard
+          tenantId="tenant-1"
+          onSubmit={vi.fn()}
+          isPending={false}
+          initialValues={{
+            plannedStart: "2031-01-15T00:00",
+            plannedEnd: "2031-03-20T00:00",
+            validUntil: "2031-04-01T00:00",
+          }}
+        />,
+      );
+
+      await user.click(screen.getByLabelText("Jane Doe"));
+      await goToStep(user, 2); // -> dates -> assets
+      await user.click(await screen.findByRole("checkbox"));
+      await goToStep(user, 2); // -> services -> pricing
+
+      const billingModeSelect = screen.getByDisplayValue(/daily/i);
+      await user.selectOptions(billingModeSelect, "MONTHLY");
+
+      const spinbuttons = screen.getAllByRole("spinbutton");
+      await user.type(spinbuttons[1]!, "600"); // monthly price only
+
+      await user.click(screen.getByRole("button", { name: /next/i }));
+
+      expect(await screen.findByLabelText(/customer notes/i)).toBeInTheDocument();
+    });
+  });
 });

@@ -24,6 +24,7 @@ import { formatMoney } from "../../lib/money";
 import { estimateQuoteTotals, getMissingQuoteItemPriceFields } from "../../lib/quote-pricing";
 import { quoteSchema, type QuoteFormValues, type QuoteItemFormValues } from "../../lib/validation";
 import type { QuoteItemType } from "../../types/quote";
+import type { PartialMonthPolicy } from "../../types/rental";
 import { QuoteItemRow } from "./quote-item-row";
 
 const STEPS = ["customer", "dates", "assets", "services", "pricing", "terms", "review"] as const;
@@ -53,7 +54,11 @@ function toMinor(display: string): number {
   return Number.isFinite(value) ? Math.round(value * 100) : 0;
 }
 
-function emptyAssetItemForm(assetId: string, name: string): QuoteItemFormValues {
+function emptyAssetItemForm(
+  assetId: string,
+  name: string,
+  partialMonthPolicy: PartialMonthPolicy,
+): QuoteItemFormValues {
   return {
     itemType: "ASSET",
     assetId,
@@ -72,10 +77,11 @@ function emptyAssetItemForm(assetId: string, name: string): QuoteItemFormValues 
     taxRateDisplay: "",
     depositDisplay: "",
     notes: "",
+    partialMonthPolicy,
   };
 }
 
-function emptyServiceItemForm(): QuoteItemFormValues {
+function emptyServiceItemForm(partialMonthPolicy: PartialMonthPolicy): QuoteItemFormValues {
   return {
     itemType: "SERVICE",
     assetId: "",
@@ -94,6 +100,7 @@ function emptyServiceItemForm(): QuoteItemFormValues {
     taxRateDisplay: "",
     depositDisplay: "",
     notes: "",
+    partialMonthPolicy,
   };
 }
 
@@ -182,7 +189,11 @@ export function QuoteWizard({
       taxRateBp: toMinor(item.taxRateDisplay),
       depositMinor: toMinor(item.depositDisplay),
       ...(item.billingMode === "MONTHLY"
-        ? { monthlyBillingStrategy: monthlyStrategy, customMonthLengthDays }
+        ? {
+            monthlyBillingStrategy: monthlyStrategy,
+            customMonthLengthDays,
+            partialMonthPolicy: item.partialMonthPolicy,
+          }
         : {}),
     })),
     values.plannedStart,
@@ -218,12 +229,22 @@ export function QuoteWizard({
     setItems((current) =>
       current.some((item) => item.assetId === assetId && item.itemType === "ASSET")
         ? current.filter((item) => !(item.assetId === assetId && item.itemType === "ASSET"))
-        : [...current, emptyAssetItemForm(assetId, name)],
+        : [
+            ...current,
+            emptyAssetItemForm(
+              assetId,
+              name,
+              billingSettings?.partialMonthPolicy ?? "PRORATE_BY_DAY",
+            ),
+          ],
     );
   }
 
   function addServiceItem(): void {
-    setItems((current) => [...current, emptyServiceItemForm()]);
+    setItems((current) => [
+      ...current,
+      emptyServiceItemForm(billingSettings?.partialMonthPolicy ?? "PRORATE_BY_DAY"),
+    ]);
   }
 
   function updateItemAt(index: number, patch: Partial<QuoteItemFormValues>): void {
@@ -255,6 +276,7 @@ export function QuoteWizard({
       ...(item.monthlyPriceDisplay ? { monthlyPriceMinor: toMinor(item.monthlyPriceDisplay) } : {}),
       ...(item.customPriceDisplay ? { customPriceMinor: toMinor(item.customPriceDisplay) } : {}),
       ...(item.discountType ? { discountType: item.discountType } : {}),
+      ...(item.billingMode === "MONTHLY" ? { partialMonthPolicy: item.partialMonthPolicy } : {}),
       discountValue: toMinor(item.discountValueDisplay),
       taxRateBp: toMinor(item.taxRateDisplay),
       depositMinor: toMinor(item.depositDisplay),

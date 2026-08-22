@@ -1,10 +1,13 @@
 import { BadRequestException } from "@nestjs/common";
-import type { MonthlyBillingStrategy, RentalBillingMode } from "@prisma/client";
+import type { MonthlyBillingStrategy, PartialMonthPolicy, RentalBillingMode } from "@prisma/client";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export const MIN_CUSTOM_MONTH_LENGTH_DAYS = 1;
 export const MAX_CUSTOM_MONTH_LENGTH_DAYS = 365;
+
+/** A null/legacy policy behaves exactly like PRORATE_BY_DAY — see PartialMonthPolicy's schema doc comment. */
+export const DEFAULT_PARTIAL_MONTH_POLICY: PartialMonthPolicy = "PRORATE_BY_DAY";
 
 export interface PricedRentalItemInput {
   billingMode: RentalBillingMode;
@@ -14,10 +17,12 @@ export interface PricedRentalItemInput {
   monthlyPriceMinor?: number | null;
   customPriceMinor?: number | null;
   discountMinor: number;
-  /** Required (together with dailyPriceMinor) only when billingMode is MONTHLY — see computeMonthlyBreakdown. */
+  /** Required (together with dailyPriceMinor, when partialMonthPolicy is PRORATE_BY_DAY) only when billingMode is MONTHLY — see computeMonthlyBreakdown. */
   monthlyBillingStrategy?: MonthlyBillingStrategy | null;
   /** Required only when monthlyBillingStrategy is CUSTOM; ignored otherwise. */
   customMonthLengthDays?: number | null;
+  /** How the item's leftover partial month is charged — see PartialMonthPolicy. Null/legacy behaves as PRORATE_BY_DAY. */
+  partialMonthPolicy?: PartialMonthPolicy | null;
 }
 
 /** Rentals spanning any part of a day count that whole day — a same-day rental is 1 day, never 0. */
@@ -180,20 +185,53 @@ export function computeMonthlyBreakdown(
 }
 
 /**
+ * Applies a MONTHLY item's partial-month policy to a breakdown, returning
+ * the monthly-portion charge (before quantity/discount) — see
+ * PartialMonthPolicy's schema doc comment:
+ *  - PRORATE_BY_DAY (default/legacy): complete units at monthlyPriceMinor,
+ *    plus the remaining days at dailyPriceMinor.
+ *  - ROUND_UP_TO_FULL_MONTH: any started remaining period rounds up to one
+ *    more full monthlyPriceMinor unit; dailyPriceMinor is never read.
+ * Shared by both Rentals and Quotes (see quote-pricing.util.ts) — the one
+ * source of truth for this calculation.
+ */
+export function applyPartialMonthPolicy(
+  breakdown: Pick<MonthlyBreakdown, "completeUnits" | "remainingDays">,
+  monthlyPriceMinor: number,
+  dailyPriceMinor: number | null | undefined,
+  policy: PartialMonthPolicy | null | undefined,
+): number {
+  if ((policy ?? DEFAULT_PARTIAL_MONTH_POLICY) === "ROUND_UP_TO_FULL_MONTH") {
+    const units = breakdown.completeUnits + (breakdown.remainingDays > 0 ? 1 : 0);
+    return monthlyPriceMinor * units;
+  }
+  return (
+    monthlyPriceMinor * breakdown.completeUnits + (dailyPriceMinor ?? 0) * breakdown.remainingDays
+  );
+}
+
+/**
  * Validates that the price field(s) matching `billingMode` are present and
  * non-negative (CUSTOM uses customPriceMinor as a flat total, ignoring
- * duration/quantity of days entirely). MONTHLY requires both
- * monthlyPriceMinor (for complete units) and dailyPriceMinor (for the
- * remainder days every strategy can produce), plus a monthlyBillingStrategy.
+ * duration/quantity of days entirely). MONTHLY always requires
+ * monthlyPriceMinor (for complete units) and a monthlyBillingStrategy;
+ * dailyPriceMinor (for the remainder days) is required only when the
+ * item's partialMonthPolicy resolves to PRORATE_BY_DAY — a
+ * ROUND_UP_TO_FULL_MONTH item never needs a daily rate at all (see
+ * DECISIONS.md D-072).
  */
 export function assertBillingModePriceProvided(item: PricedRentalItemInput): void {
   if (item.billingMode === "MONTHLY") {
     if (item.monthlyPriceMinor === undefined || item.monthlyPriceMinor === null) {
       throw new BadRequestException("monthlyPriceMinor is required when billingMode is MONTHLY");
     }
-    if (item.dailyPriceMinor === undefined || item.dailyPriceMinor === null) {
+    const policy = item.partialMonthPolicy ?? DEFAULT_PARTIAL_MONTH_POLICY;
+    if (
+      policy === "PRORATE_BY_DAY" &&
+      (item.dailyPriceMinor === undefined || item.dailyPriceMinor === null)
+    ) {
       throw new BadRequestException(
-        "dailyPriceMinor is required when billingMode is MONTHLY (used for any partial-month remainder)",
+        "dailyPriceMinor is required when billingMode is MONTHLY and partialMonthPolicy is PRORATE_BY_DAY (used for any partial-month remainder)",
       );
     }
     if (!item.monthlyBillingStrategy) {
@@ -231,15 +269,19 @@ export function computeItemLineTotalMinor(
   }
 
   if (item.billingMode === "MONTHLY") {
-    const { completeUnits, remainingDays } = computeMonthlyBreakdown(
+    const breakdown = computeMonthlyBreakdown(
       item.monthlyBillingStrategy!,
       item.customMonthLengthDays,
       plannedStart,
       plannedEnd,
     );
-    const grossMinor =
-      (item.monthlyPriceMinor! * completeUnits + item.dailyPriceMinor! * remainingDays) *
-      item.quantity;
+    const monthlyChargeMinor = applyPartialMonthPolicy(
+      breakdown,
+      item.monthlyPriceMinor!,
+      item.dailyPriceMinor,
+      item.partialMonthPolicy,
+    );
+    const grossMinor = monthlyChargeMinor * item.quantity;
     return Math.max(0, grossMinor - item.discountMinor);
   }
 

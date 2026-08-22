@@ -1,4 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
+import type { PartialMonthPolicy } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -241,6 +242,144 @@ describe("computeQuoteItemPricing", () => {
       );
       expect(result.lineSubtotalMinor).toBe(20_000 * 3);
     });
+
+    it("ROUND_UP_TO_FULL_MONTH: any started remaining period rounds up to one more full month, never requiring dailyPriceMinor", () => {
+      // Jan 15 -> Mar 20: 2 complete months + a started remainder -> 3 full months
+      const monthlyStart = new Date("2026-01-15T00:00:00Z");
+      const end = new Date("2026-03-20T00:00:00Z");
+      const result = computeQuoteItemPricing(
+        item({
+          billingMode: "MONTHLY",
+          monthlyPriceMinor: 20_000,
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        }),
+        monthlyStart,
+        end,
+      );
+      expect(result.lineSubtotalMinor).toBe(20_000 * 3);
+    });
+
+    it("ROUND_UP_TO_FULL_MONTH with no remainder charges exactly the complete months", () => {
+      const monthlyStart = new Date("2026-08-18T00:00:00Z");
+      const end = new Date("2026-09-18T00:00:00Z"); // exactly 1 calendar month
+      const result = computeQuoteItemPricing(
+        item({
+          billingMode: "MONTHLY",
+          monthlyPriceMinor: 60_000,
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        }),
+        monthlyStart,
+        end,
+      );
+      expect(result.lineSubtotalMinor).toBe(60_000);
+    });
+
+    it("throws for a missing partialMonthPolicy default (PRORATE_BY_DAY) but not for an explicit ROUND_UP_TO_FULL_MONTH, same inputs", () => {
+      const monthlyStart = new Date("2026-08-18T00:00:00Z");
+      const end = new Date("2026-09-19T00:00:00Z"); // 1 month + 1 day
+      const withoutDaily = () =>
+        computeQuoteItemPricing(
+          item({
+            billingMode: "MONTHLY",
+            monthlyPriceMinor: 60_000,
+            monthlyBillingStrategy: "CALENDAR_MONTH",
+          }),
+          monthlyStart,
+          end,
+        );
+      expect(withoutDaily).toThrow(BadRequestException);
+
+      const roundedUp = computeQuoteItemPricing(
+        item({
+          billingMode: "MONTHLY",
+          monthlyPriceMinor: 60_000,
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        }),
+        monthlyStart,
+        end,
+      );
+      expect(roundedUp.lineSubtotalMinor).toBe(60_000 * 2);
+    });
+
+    describe("regression matrix (600 PLN/month, 18 Aug start)", () => {
+      const monthlyStart = new Date("2026-08-18T00:00:00Z");
+      const monthlyPriceMinor = 60_000;
+      const dailyPriceMinor = 2_000;
+
+      function monthlyItem(partialMonthPolicy: PartialMonthPolicy): PricedQuoteItemInput {
+        return item({
+          billingMode: "MONTHLY",
+          monthlyPriceMinor,
+          dailyPriceMinor,
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          partialMonthPolicy,
+        });
+      }
+
+      it("exactly 1 month: both policies charge exactly one full month", () => {
+        const end = new Date("2026-09-18T00:00:00Z");
+        expect(
+          computeQuoteItemPricing(monthlyItem("PRORATE_BY_DAY"), monthlyStart, end)
+            .lineSubtotalMinor,
+        ).toBe(monthlyPriceMinor);
+        expect(
+          computeQuoteItemPricing(monthlyItem("ROUND_UP_TO_FULL_MONTH"), monthlyStart, end)
+            .lineSubtotalMinor,
+        ).toBe(monthlyPriceMinor);
+      });
+
+      it("1 month + 1 day", () => {
+        const end = new Date("2026-09-19T00:00:00Z");
+        expect(
+          computeQuoteItemPricing(monthlyItem("PRORATE_BY_DAY"), monthlyStart, end)
+            .lineSubtotalMinor,
+        ).toBe(monthlyPriceMinor + dailyPriceMinor * 1);
+        expect(
+          computeQuoteItemPricing(monthlyItem("ROUND_UP_TO_FULL_MONTH"), monthlyStart, end)
+            .lineSubtotalMinor,
+        ).toBe(monthlyPriceMinor * 2);
+      });
+
+      it("1 month + 11 days", () => {
+        const end = new Date("2026-09-29T00:00:00Z");
+        expect(
+          computeQuoteItemPricing(monthlyItem("PRORATE_BY_DAY"), monthlyStart, end)
+            .lineSubtotalMinor,
+        ).toBe(monthlyPriceMinor + dailyPriceMinor * 11);
+        expect(
+          computeQuoteItemPricing(monthlyItem("ROUND_UP_TO_FULL_MONTH"), monthlyStart, end)
+            .lineSubtotalMinor,
+        ).toBe(monthlyPriceMinor * 2);
+      });
+
+      it("almost 2 months (one day short)", () => {
+        const end = new Date("2026-10-17T00:00:00Z");
+        // 1 complete month (Aug18->Sep18) + 29 remaining days (Sep18->Oct17, September has 30 days)
+        expect(
+          computeQuoteItemPricing(monthlyItem("PRORATE_BY_DAY"), monthlyStart, end)
+            .lineSubtotalMinor,
+        ).toBe(monthlyPriceMinor + dailyPriceMinor * 29);
+        expect(
+          computeQuoteItemPricing(monthlyItem("ROUND_UP_TO_FULL_MONTH"), monthlyStart, end)
+            .lineSubtotalMinor,
+        ).toBe(monthlyPriceMinor * 2);
+      });
+
+      it("exactly 2 months: both policies charge exactly two full months", () => {
+        const end = new Date("2026-10-18T00:00:00Z");
+        expect(
+          computeQuoteItemPricing(monthlyItem("PRORATE_BY_DAY"), monthlyStart, end)
+            .lineSubtotalMinor,
+        ).toBe(monthlyPriceMinor * 2);
+        expect(
+          computeQuoteItemPricing(monthlyItem("ROUND_UP_TO_FULL_MONTH"), monthlyStart, end)
+            .lineSubtotalMinor,
+        ).toBe(monthlyPriceMinor * 2);
+      });
+    });
   });
 
   it("computes a CUSTOM line as a flat price, ignoring duration and quantity", () => {
@@ -380,5 +519,47 @@ describe("computeQuoteTotals", () => {
     expect(result.items).toHaveLength(2);
     expect(result.items[0]?.lineSubtotalMinor).toBe(3_000);
     expect(result.items[1]?.lineSubtotalMinor).toBe(250);
+  });
+
+  describe("additional billable line items (e.g. Delivery) participate in the commercial total", () => {
+    it("a Delivery FLAT item (quantity x price) is fully included in subtotal and total, alongside a MONTHLY rental item", () => {
+      // Real example from manual testing: Rental = 600 PLN/month (exactly 1
+      // month, no remainder), Delivery = 700 PLN x 2.
+      const monthlyStart = new Date("2026-08-18T00:00:00Z");
+      const end = new Date("2026-09-18T00:00:00Z");
+      const items: PricedQuoteItemInput[] = [
+        item({
+          billingMode: "MONTHLY",
+          monthlyPriceMinor: 60_000,
+          monthlyBillingStrategy: "CALENDAR_MONTH",
+          partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+        }),
+        item({ billingMode: "FLAT", unitPriceMinor: 70_000, quantity: 2 }),
+      ];
+      const result = computeQuoteTotals(items, monthlyStart, end, null, 0);
+      expect(result.items[1]?.lineSubtotalMinor).toBe(70_000 * 2);
+      expect(result.subtotalMinor).toBe(60_000 + 70_000 * 2);
+      expect(result.totalMinor).toBe(60_000 + 70_000 * 2);
+    });
+
+    it("a Delivery item's own discount and tax are reflected in the aggregate totals", () => {
+      const end = new Date("2026-08-02T00:00:00Z");
+      const items: PricedQuoteItemInput[] = [
+        item({
+          billingMode: "FLAT",
+          unitPriceMinor: 70_000,
+          quantity: 2,
+          discountType: "FIXED",
+          discountValue: 10_000,
+          taxRateBp: 2_000,
+        }),
+      ];
+      const result = computeQuoteTotals(items, start, end, null, 0);
+      // subtotal(gross)=140000, -10000 discount=130000, +20% tax=26000 -> line total 156000
+      expect(result.items[0]?.lineTotalMinor).toBe(156_000);
+      expect(result.taxTotalMinor).toBe(26_000);
+      expect(result.subtotalMinor).toBe(156_000);
+      expect(result.totalMinor).toBe(156_000);
+    });
   });
 });

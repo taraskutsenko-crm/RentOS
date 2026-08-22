@@ -50,6 +50,7 @@ export default function EditQuotePage() {
     taxRateDisplay: item.taxRateBp ? String(item.taxRateBp / 100) : "",
     depositDisplay: fromMinorUnits(item.depositMinor),
     notes: item.notes ?? "",
+    partialMonthPolicy: item.partialMonthPolicy ?? "PRORATE_BY_DAY",
   }));
 
   return (

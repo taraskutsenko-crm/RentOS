@@ -33,9 +33,10 @@ import {
   type RentalFormValues,
   type RentalItemFormValues,
 } from "../../lib/validation";
-import type { RentalBillingMode } from "../../types/rental";
+import type { PartialMonthPolicy, RentalBillingMode } from "../../types/rental";
 
 const STEPS = ["customer", "assets", "dates", "pricing", "review"] as const;
+const PARTIAL_MONTH_POLICIES: PartialMonthPolicy[] = ["PRORATE_BY_DAY", "ROUND_UP_TO_FULL_MONTH"];
 
 /**
  * Which translated label a missing price field's error message quotes —
@@ -86,7 +87,10 @@ function toMinor(display: string): number {
   return Number.isFinite(value) ? Math.round(value * 100) : 0;
 }
 
-function emptyItemForm(assetId: string): RentalItemFormValues {
+function emptyItemForm(
+  assetId: string,
+  partialMonthPolicy: PartialMonthPolicy,
+): RentalItemFormValues {
   return {
     assetId,
     billingMode: "DAILY",
@@ -98,6 +102,7 @@ function emptyItemForm(assetId: string): RentalItemFormValues {
     depositDisplay: "",
     discountDisplay: "",
     notes: "",
+    partialMonthPolicy,
   };
 }
 
@@ -175,7 +180,11 @@ export function RentalWizard({
       customPriceMinor: toMinor(item.customPriceDisplay),
       discountMinor: toMinor(item.discountDisplay),
       ...(item.billingMode === "MONTHLY"
-        ? { monthlyBillingStrategy: monthlyStrategy, customMonthLengthDays }
+        ? {
+            monthlyBillingStrategy: monthlyStrategy,
+            customMonthLengthDays,
+            partialMonthPolicy: item.partialMonthPolicy,
+          }
         : {}),
     } as EstimatedMonthlyItemInput;
   }
@@ -223,7 +232,10 @@ export function RentalWizard({
     setItems((current) =>
       current.some((item) => item.assetId === assetId)
         ? current.filter((item) => item.assetId !== assetId)
-        : [...current, emptyItemForm(assetId)],
+        : [
+            ...current,
+            emptyItemForm(assetId, billingSettings?.partialMonthPolicy ?? "PRORATE_BY_DAY"),
+          ],
     );
   }
 
@@ -262,6 +274,7 @@ export function RentalWizard({
         depositMinor: toMinor(item.depositDisplay),
         discountMinor: toMinor(item.discountDisplay),
         notes: item.notes || null,
+        ...(item.billingMode === "MONTHLY" ? { partialMonthPolicy: item.partialMonthPolicy } : {}),
       })),
     });
   }
@@ -515,22 +528,42 @@ export function RentalWizard({
                           )}
                         </div>
                         <div className="flex flex-col gap-1.5">
-                          <Label>{t("rental.fields.dailyPriceForRemainder")}</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={item.dailyPriceDisplay}
-                            aria-invalid={!!priceFieldError("dailyPriceDisplay")}
+                          <Label>{t("rental.fields.partialMonthPolicy")}</Label>
+                          <select
+                            className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+                            value={item.partialMonthPolicy}
                             onChange={(event) =>
-                              updateItem(item.assetId, { dailyPriceDisplay: event.target.value })
+                              updateItem(item.assetId, {
+                                partialMonthPolicy: event.target.value as PartialMonthPolicy,
+                              })
                             }
-                          />
-                          {priceFieldError("dailyPriceDisplay") && (
-                            <p className="text-destructive text-xs">
-                              {priceFieldError("dailyPriceDisplay")}
-                            </p>
-                          )}
+                          >
+                            {PARTIAL_MONTH_POLICIES.map((policy) => (
+                              <option key={policy} value={policy}>
+                                {t(`rental.partialMonthPolicyOptions.${policy}`)}
+                              </option>
+                            ))}
+                          </select>
                         </div>
+                        {item.partialMonthPolicy === "PRORATE_BY_DAY" && (
+                          <div className="flex flex-col gap-1.5">
+                            <Label>{t("rental.fields.dailyPriceForRemainder")}</Label>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={item.dailyPriceDisplay}
+                              aria-invalid={!!priceFieldError("dailyPriceDisplay")}
+                              onChange={(event) =>
+                                updateItem(item.assetId, { dailyPriceDisplay: event.target.value })
+                              }
+                            />
+                            {priceFieldError("dailyPriceDisplay") && (
+                              <p className="text-destructive text-xs">
+                                {priceFieldError("dailyPriceDisplay")}
+                              </p>
+                            )}
+                          </div>
+                        )}
                         <div className="text-muted-foreground col-span-2 text-sm">
                           {monthlyBreakdown.completeUnits === 0 &&
                           monthlyBreakdown.remainingDays === 0
@@ -546,13 +579,20 @@ export function RentalWizard({
                                     ),
                                   }),
                                 monthlyBreakdown.remainingDays > 0 &&
-                                  t("rental.wizard.monthlyBreakdown.days", {
-                                    count: monthlyBreakdown.remainingDays,
-                                    price: formatMoney(
-                                      toMinor(item.dailyPriceDisplay),
-                                      values.currency,
-                                    ),
-                                  }),
+                                  (item.partialMonthPolicy === "ROUND_UP_TO_FULL_MONTH"
+                                    ? t("rental.wizard.monthlyBreakdown.roundedUpMonth", {
+                                        price: formatMoney(
+                                          toMinor(item.monthlyPriceDisplay),
+                                          values.currency,
+                                        ),
+                                      })
+                                    : t("rental.wizard.monthlyBreakdown.days", {
+                                        count: monthlyBreakdown.remainingDays,
+                                        price: formatMoney(
+                                          toMinor(item.dailyPriceDisplay),
+                                          values.currency,
+                                        ),
+                                      })),
                               ]
                                 .filter(Boolean)
                                 .join(" + ")}

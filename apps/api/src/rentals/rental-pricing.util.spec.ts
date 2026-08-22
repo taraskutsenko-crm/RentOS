@@ -1,7 +1,10 @@
 import { BadRequestException } from "@nestjs/common";
+import type { PartialMonthPolicy } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 
 import {
+  applyPartialMonthPolicy,
+  assertBillingModePriceProvided,
   computeItemLineTotalMinor,
   computeMonthlyBreakdown,
   computeRentalTotals,
@@ -433,6 +436,210 @@ describe("computeItemLineTotalMinor", () => {
     expect(() => computeItemLineTotalMinor(item({ billingMode: "DAILY" }), start, end)).toThrow(
       BadRequestException,
     );
+  });
+});
+
+describe("applyPartialMonthPolicy", () => {
+  it("PRORATE_BY_DAY: complete units at monthlyPrice plus remaining days at dailyPrice", () => {
+    expect(
+      applyPartialMonthPolicy(
+        { completeUnits: 1, remainingDays: 14 },
+        20000,
+        1000,
+        "PRORATE_BY_DAY",
+      ),
+    ).toBe(20000 * 1 + 1000 * 14);
+  });
+
+  it("PRORATE_BY_DAY with no remaining days ignores dailyPriceMinor entirely", () => {
+    expect(
+      applyPartialMonthPolicy(
+        { completeUnits: 2, remainingDays: 0 },
+        20000,
+        null,
+        "PRORATE_BY_DAY",
+      ),
+    ).toBe(40000);
+  });
+
+  it("ROUND_UP_TO_FULL_MONTH: any started remaining period counts as one more full unit", () => {
+    expect(
+      applyPartialMonthPolicy(
+        { completeUnits: 1, remainingDays: 14 },
+        20000,
+        null,
+        "ROUND_UP_TO_FULL_MONTH",
+      ),
+    ).toBe(20000 * 2);
+  });
+
+  it("ROUND_UP_TO_FULL_MONTH never reads dailyPriceMinor, even if provided", () => {
+    expect(
+      applyPartialMonthPolicy(
+        { completeUnits: 1, remainingDays: 1 },
+        20000,
+        999_999_999,
+        "ROUND_UP_TO_FULL_MONTH",
+      ),
+    ).toBe(20000 * 2);
+  });
+
+  it("ROUND_UP_TO_FULL_MONTH with 0 remaining days charges exactly the complete units, no rounding up", () => {
+    expect(
+      applyPartialMonthPolicy(
+        { completeUnits: 2, remainingDays: 0 },
+        20000,
+        null,
+        "ROUND_UP_TO_FULL_MONTH",
+      ),
+    ).toBe(40000);
+  });
+
+  it("a null/undefined policy behaves exactly like PRORATE_BY_DAY (legacy rows)", () => {
+    const breakdown = { completeUnits: 1, remainingDays: 14 };
+    expect(applyPartialMonthPolicy(breakdown, 20000, 1000, null)).toBe(
+      applyPartialMonthPolicy(breakdown, 20000, 1000, "PRORATE_BY_DAY"),
+    );
+    expect(applyPartialMonthPolicy(breakdown, 20000, 1000, undefined)).toBe(
+      applyPartialMonthPolicy(breakdown, 20000, 1000, "PRORATE_BY_DAY"),
+    );
+  });
+});
+
+describe("assertBillingModePriceProvided (partial-month policy interaction)", () => {
+  function monthlyItem(overrides: Partial<PricedRentalItemInput> = {}): PricedRentalItemInput {
+    return {
+      billingMode: "MONTHLY",
+      quantity: 1,
+      discountMinor: 0,
+      monthlyPriceMinor: 60000,
+      monthlyBillingStrategy: "CALENDAR_MONTH",
+      ...overrides,
+    };
+  }
+
+  it("PRORATE_BY_DAY requires dailyPriceMinor", () => {
+    expect(() =>
+      assertBillingModePriceProvided(monthlyItem({ partialMonthPolicy: "PRORATE_BY_DAY" })),
+    ).toThrow(BadRequestException);
+    expect(() =>
+      assertBillingModePriceProvided(
+        monthlyItem({ partialMonthPolicy: "PRORATE_BY_DAY", dailyPriceMinor: 2000 }),
+      ),
+    ).not.toThrow();
+  });
+
+  it("a missing/legacy partialMonthPolicy defaults to PRORATE_BY_DAY and still requires dailyPriceMinor", () => {
+    expect(() => assertBillingModePriceProvided(monthlyItem())).toThrow(BadRequestException);
+  });
+
+  it("ROUND_UP_TO_FULL_MONTH never requires dailyPriceMinor", () => {
+    expect(() =>
+      assertBillingModePriceProvided(monthlyItem({ partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH" })),
+    ).not.toThrow();
+  });
+
+  it("ROUND_UP_TO_FULL_MONTH still requires monthlyPriceMinor", () => {
+    expect(() =>
+      assertBillingModePriceProvided(
+        monthlyItem({ partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH", monthlyPriceMinor: null }),
+      ),
+    ).toThrow(BadRequestException);
+  });
+});
+
+describe("computeItemLineTotalMinor: MONTHLY partial-month policy regression matrix (600 PLN/month, 18 Aug start)", () => {
+  const monthlyStart = new Date("2026-08-18T00:00:00Z");
+  const monthlyPriceMinor = 60000; // 600.00 PLN in minor units
+  const dailyPriceMinor = 2000; // 20.00 PLN/day remainder rate
+
+  function endAfterDays(days: number): Date {
+    return new Date(monthlyStart.getTime() + days * 24 * 60 * 60 * 1000);
+  }
+
+  function monthlyItem(partialMonthPolicy: PartialMonthPolicy): PricedRentalItemInput {
+    return {
+      billingMode: "MONTHLY",
+      quantity: 1,
+      discountMinor: 0,
+      monthlyPriceMinor,
+      dailyPriceMinor,
+      monthlyBillingStrategy: "CALENDAR_MONTH",
+      partialMonthPolicy,
+    };
+  }
+
+  it("exactly 1 month (18 Aug -> 18 Sep): both policies charge exactly one full month, no remainder", () => {
+    const end = endAfterDays(31); // Aug has 31 days: 18 Aug -> 18 Sep is exactly 1 calendar month
+    expect(computeItemLineTotalMinor(monthlyItem("PRORATE_BY_DAY"), monthlyStart, end)).toBe(
+      monthlyPriceMinor,
+    );
+    expect(
+      computeItemLineTotalMinor(monthlyItem("ROUND_UP_TO_FULL_MONTH"), monthlyStart, end),
+    ).toBe(monthlyPriceMinor);
+  });
+
+  it("1 month + 1 day: PRORATE_BY_DAY charges 1 day extra, ROUND_UP_TO_FULL_MONTH charges a full 2nd month", () => {
+    const end = new Date("2026-09-19T00:00:00Z"); // 18 Sep + 1 day
+    expect(computeItemLineTotalMinor(monthlyItem("PRORATE_BY_DAY"), monthlyStart, end)).toBe(
+      monthlyPriceMinor + dailyPriceMinor * 1,
+    );
+    expect(
+      computeItemLineTotalMinor(monthlyItem("ROUND_UP_TO_FULL_MONTH"), monthlyStart, end),
+    ).toBe(monthlyPriceMinor * 2);
+  });
+
+  it("1 month + 11 days: PRORATE_BY_DAY charges 11 days extra, ROUND_UP_TO_FULL_MONTH still only charges 2 full months", () => {
+    const end = new Date("2026-09-29T00:00:00Z"); // 18 Sep + 11 days
+    expect(computeItemLineTotalMinor(monthlyItem("PRORATE_BY_DAY"), monthlyStart, end)).toBe(
+      monthlyPriceMinor + dailyPriceMinor * 11,
+    );
+    expect(
+      computeItemLineTotalMinor(monthlyItem("ROUND_UP_TO_FULL_MONTH"), monthlyStart, end),
+    ).toBe(monthlyPriceMinor * 2);
+  });
+
+  it("almost 2 months (18 Sep -> 17 Oct, one day short): PRORATE_BY_DAY charges the September-length remainder, ROUND_UP_TO_FULL_MONTH still rounds up to 2 full months", () => {
+    const end = new Date("2026-10-17T00:00:00Z"); // 1 day short of 18 Oct (2 full calendar months)
+    // 1 complete month (Aug18->Sep18) + 29 remaining days (Sep18->Oct17, September has 30 days)
+    expect(computeItemLineTotalMinor(monthlyItem("PRORATE_BY_DAY"), monthlyStart, end)).toBe(
+      monthlyPriceMinor + dailyPriceMinor * 29,
+    );
+    expect(
+      computeItemLineTotalMinor(monthlyItem("ROUND_UP_TO_FULL_MONTH"), monthlyStart, end),
+    ).toBe(monthlyPriceMinor * 2);
+  });
+
+  it("exactly 2 months (18 Aug -> 18 Oct): both policies charge exactly two full months, no remainder", () => {
+    const end = new Date("2026-10-18T00:00:00Z");
+    expect(computeItemLineTotalMinor(monthlyItem("PRORATE_BY_DAY"), monthlyStart, end)).toBe(
+      monthlyPriceMinor * 2,
+    );
+    expect(
+      computeItemLineTotalMinor(monthlyItem("ROUND_UP_TO_FULL_MONTH"), monthlyStart, end),
+    ).toBe(monthlyPriceMinor * 2);
+  });
+
+  it("ROUND_UP_TO_FULL_MONTH never throws for a missing dailyPriceMinor", () => {
+    const end = endAfterDays(45);
+    expect(() =>
+      computeItemLineTotalMinor(
+        { ...monthlyItem("ROUND_UP_TO_FULL_MONTH"), dailyPriceMinor: null },
+        monthlyStart,
+        end,
+      ),
+    ).not.toThrow();
+  });
+
+  it("PRORATE_BY_DAY throws when dailyPriceMinor is missing and there is a remainder", () => {
+    const end = endAfterDays(45);
+    expect(() =>
+      computeItemLineTotalMinor(
+        { ...monthlyItem("PRORATE_BY_DAY"), dailyPriceMinor: null },
+        monthlyStart,
+        end,
+      ),
+    ).toThrow(BadRequestException);
   });
 });
 

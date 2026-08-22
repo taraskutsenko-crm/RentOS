@@ -1,8 +1,15 @@
 import { BadRequestException } from "@nestjs/common";
-import type { MonthlyBillingStrategy, QuoteBillingMode, QuoteDiscountType } from "@prisma/client";
+import type {
+  MonthlyBillingStrategy,
+  PartialMonthPolicy,
+  QuoteBillingMode,
+  QuoteDiscountType,
+} from "@prisma/client";
 
 import {
+  applyPartialMonthPolicy,
   computeMonthlyBreakdown,
+  DEFAULT_PARTIAL_MONTH_POLICY,
   durationInDays,
   monthsInRange,
 } from "../rentals/rental-pricing.util";
@@ -33,6 +40,8 @@ export interface PricedQuoteItemInput {
    */
   monthlyBillingStrategy?: MonthlyBillingStrategy | null;
   customMonthLengthDays?: number | null;
+  /** How the item's leftover partial month is charged — see PartialMonthPolicy (DECISIONS.md D-072). Null/legacy behaves as PRORATE_BY_DAY. */
+  partialMonthPolicy?: PartialMonthPolicy | null;
 }
 
 export interface QuoteItemPricingResult {
@@ -94,23 +103,27 @@ export function resolveTaxMinor(baseMinor: number, taxRateBp: number): number {
  *
  * MONTHLY always requires monthlyPriceMinor. It additionally requires
  * dailyPriceMinor (for any partial-unit remainder) only when
- * `monthlyBillingStrategy` is set — i.e. for an item actually being priced
- * under the tenant-configurable strategy engine. A legacy item with no
- * strategy (created before this validation existed) is intentionally not
- * required to have a daily price, since it's never run through the new
- * complete-units-plus-remainder calculation — see `computeQuoteItemPricing`.
+ * `monthlyBillingStrategy` is set (i.e. for an item actually being priced
+ * under the tenant-configurable strategy engine — a legacy item with no
+ * strategy is never run through the complete-units-plus-remainder
+ * calculation at all, see `computeQuoteItemPricing`) AND the item's
+ * `partialMonthPolicy` resolves to PRORATE_BY_DAY — a
+ * ROUND_UP_TO_FULL_MONTH item never needs a daily rate (see DECISIONS.md
+ * D-072).
  */
 export function assertQuoteBillingModePriceProvided(item: PricedQuoteItemInput): void {
   if (item.billingMode === "MONTHLY") {
     if (item.monthlyPriceMinor === undefined || item.monthlyPriceMinor === null) {
       throw new BadRequestException("monthlyPriceMinor is required when billingMode is MONTHLY");
     }
+    const policy = item.partialMonthPolicy ?? DEFAULT_PARTIAL_MONTH_POLICY;
     if (
       item.monthlyBillingStrategy &&
+      policy === "PRORATE_BY_DAY" &&
       (item.dailyPriceMinor === undefined || item.dailyPriceMinor === null)
     ) {
       throw new BadRequestException(
-        "dailyPriceMinor is required when billingMode is MONTHLY (used for any partial-month remainder)",
+        "dailyPriceMinor is required when billingMode is MONTHLY and partialMonthPolicy is PRORATE_BY_DAY (used for any partial-month remainder)",
       );
     }
     return;
@@ -140,14 +153,16 @@ export function assertQuoteBillingModePriceProvided(item: PricedQuoteItemInput):
  * calendar-accurate duration math unchanged.
  *
  * MONTHLY shares the exact same tenant-configurable strategy engine
- * Rentals uses (`computeMonthlyBreakdown` — complete monthly units at
- * `monthlyPriceMinor` plus a remainder in days at `dailyPriceMinor`) when
- * `item.monthlyBillingStrategy` is set. When it is not set — a MONTHLY
- * item written before this engine existed — this falls back to the
- * original whole-month-rounding formula (`monthsInRange`) that item was
- * actually priced under, so its historical total is reproduced exactly
- * rather than silently recalculated under a strategy it never used (see
- * docs/adr/0008-configurable-monthly-billing-strategies.md).
+ * Rentals uses (`computeMonthlyBreakdown` — complete monthly units, plus a
+ * remainder period charged per `item.partialMonthPolicy`, either
+ * PRORATE_BY_DAY at `dailyPriceMinor` or rounded up to one more
+ * `monthlyPriceMinor` unit — see `applyPartialMonthPolicy` and
+ * DECISIONS.md D-072) when `item.monthlyBillingStrategy` is set. When it is
+ * not set — a MONTHLY item written before this engine existed — this falls
+ * back to the original whole-month-rounding formula (`monthsInRange`) that
+ * item was actually priced under, so its historical total is reproduced
+ * exactly rather than silently recalculated under a strategy it never used
+ * (see docs/adr/0008-configurable-monthly-billing-strategies.md).
  */
 export function computeQuoteItemPricing(
   item: PricedQuoteItemInput,
@@ -163,15 +178,19 @@ export function computeQuoteItemPricing(
     lineSubtotalMinor = item.unitPriceMinor! * item.quantity;
   } else if (item.billingMode === "MONTHLY") {
     if (item.monthlyBillingStrategy) {
-      const { completeUnits, remainingDays } = computeMonthlyBreakdown(
+      const breakdown = computeMonthlyBreakdown(
         item.monthlyBillingStrategy,
         item.customMonthLengthDays,
         plannedStart,
         plannedEnd,
       );
-      lineSubtotalMinor =
-        (item.monthlyPriceMinor! * completeUnits + (item.dailyPriceMinor ?? 0) * remainingDays) *
-        item.quantity;
+      const monthlyChargeMinor = applyPartialMonthPolicy(
+        breakdown,
+        item.monthlyPriceMinor!,
+        item.dailyPriceMinor,
+        item.partialMonthPolicy,
+      );
+      lineSubtotalMinor = monthlyChargeMinor * item.quantity;
     } else {
       // Legacy path — see the function-level doc comment above.
       lineSubtotalMinor =

@@ -45,6 +45,7 @@ describe("RentalBillingSettingsPage", () => {
         tenantId: "tenant-1",
         monthlyBillingStrategy: "CALENDAR_MONTH",
         customMonthLengthDays: null,
+        partialMonthPolicy: "PRORATE_BY_DAY",
         isDefault: true,
         updatedAt: null,
       },
@@ -66,6 +67,7 @@ describe("RentalBillingSettingsPage", () => {
         tenantId: "tenant-1",
         monthlyBillingStrategy: "CALENDAR_MONTH",
         customMonthLengthDays: null,
+        partialMonthPolicy: "PRORATE_BY_DAY",
         isDefault: true,
         updatedAt: null,
       },
@@ -89,6 +91,7 @@ describe("RentalBillingSettingsPage", () => {
         tenantId: "tenant-1",
         monthlyBillingStrategy: "CUSTOM",
         customMonthLengthDays: 28,
+        partialMonthPolicy: "PRORATE_BY_DAY",
         isDefault: false,
         updatedAt: null,
       },
@@ -116,6 +119,7 @@ describe("RentalBillingSettingsPage", () => {
         tenantId: "tenant-1",
         monthlyBillingStrategy: "CALENDAR_MONTH",
         customMonthLengthDays: null,
+        partialMonthPolicy: "PRORATE_BY_DAY",
         isDefault: true,
         updatedAt: null,
       },
@@ -133,9 +137,41 @@ describe("RentalBillingSettingsPage", () => {
       expect(mutateAsync).toHaveBeenCalledWith({
         monthlyBillingStrategy: "FIXED_30_DAYS",
         customMonthLengthDays: null,
+        partialMonthPolicy: "PRORATE_BY_DAY",
       }),
     );
     expect(await screen.findByText(/billing settings saved/i)).toBeInTheDocument();
+  });
+
+  it("submits a changed partial-month policy alongside the unchanged monthly strategy", async () => {
+    usePermissionMock.mockReturnValue(true);
+    useRentalBillingSettingsMock.mockReturnValue({
+      data: {
+        tenantId: "tenant-1",
+        monthlyBillingStrategy: "CALENDAR_MONTH",
+        customMonthLengthDays: null,
+        partialMonthPolicy: "PRORATE_BY_DAY",
+        isDefault: true,
+        updatedAt: null,
+      },
+      isLoading: false,
+    });
+    mutateAsync.mockResolvedValue({});
+
+    const user = userEvent.setup();
+    renderWithProviders(<RentalBillingSettingsPage />);
+
+    expect(screen.getByText("Charge proportionally by day")).toBeInTheDocument();
+    await user.click(screen.getByText("Charge started month as full month"));
+    await user.click(screen.getByRole("button", { name: /^save$/i }));
+
+    await waitFor(() =>
+      expect(mutateAsync).toHaveBeenCalledWith({
+        monthlyBillingStrategy: "CALENDAR_MONTH",
+        customMonthLengthDays: null,
+        partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+      }),
+    );
   });
 
   it("shows the backend error message on failure", () => {
@@ -145,6 +181,7 @@ describe("RentalBillingSettingsPage", () => {
         tenantId: "tenant-1",
         monthlyBillingStrategy: "CALENDAR_MONTH",
         customMonthLengthDays: null,
+        partialMonthPolicy: "PRORATE_BY_DAY",
         isDefault: true,
         updatedAt: null,
       },
@@ -170,6 +207,7 @@ describe("RentalBillingSettingsPage", () => {
         tenantId: "tenant-1",
         monthlyBillingStrategy: "CALENDAR_MONTH",
         customMonthLengthDays: null,
+        partialMonthPolicy: "PRORATE_BY_DAY",
         isDefault: true,
         updatedAt: null,
       },

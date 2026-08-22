@@ -7,6 +7,7 @@ import {
 import type {
   Asset,
   MonthlyBillingStrategy,
+  PartialMonthPolicy,
   Prisma,
   RentalItem,
   RentalStatus,
@@ -43,9 +44,10 @@ import type { RentalTimelineEvent } from "./timeline.types";
  * items on a partial update). Never accepted directly from a client — see
  * docs/adr/0008-configurable-monthly-billing-strategies.md.
  */
-type RentalItemSource = RentalItemDto & {
+type RentalItemSource = Omit<RentalItemDto, "partialMonthPolicy"> & {
   monthlyBillingStrategy?: MonthlyBillingStrategy | null;
   customMonthLengthDays?: number | null;
+  partialMonthPolicy?: PartialMonthPolicy | null;
 };
 
 /** Statuses in which the item list and planned dates may still be edited. */
@@ -844,6 +846,10 @@ function withMonthlyBillingSettings(
       ...item,
       monthlyBillingStrategy: settings!.monthlyBillingStrategy,
       customMonthLengthDays: settings!.customMonthLengthDays,
+      // The client may explicitly choose a per-item partial-month policy
+      // (see the Prices step); the tenant's setting is only the default
+      // when it doesn't (see DECISIONS.md D-072).
+      partialMonthPolicy: item.partialMonthPolicy ?? settings!.partialMonthPolicy,
     };
   });
 }
@@ -859,6 +865,7 @@ function toPricedItemInput(item: RentalItemSource): PricedRentalItemInput {
     discountMinor: item.discountMinor ?? 0,
     monthlyBillingStrategy: item.monthlyBillingStrategy ?? null,
     customMonthLengthDays: item.customMonthLengthDays ?? null,
+    partialMonthPolicy: item.partialMonthPolicy ?? null,
   };
 }
 
@@ -876,6 +883,7 @@ function fromExistingItem(item: RentalItem): RentalItemSource {
     notes: item.notes,
     monthlyBillingStrategy: item.monthlyBillingStrategy,
     customMonthLengthDays: item.customMonthLengthDays,
+    partialMonthPolicy: item.partialMonthPolicy,
   };
 }
 
@@ -901,5 +909,6 @@ function toRentalItemCreateData(
       item.billingMode === "MONTHLY" ? (item.monthlyBillingStrategy ?? null) : null,
     customMonthLengthDays:
       item.billingMode === "MONTHLY" ? (item.customMonthLengthDays ?? null) : null,
+    partialMonthPolicy: item.billingMode === "MONTHLY" ? (item.partialMonthPolicy ?? null) : null,
   };
 }

@@ -6,6 +6,7 @@ import { apiClient } from "../lib/api-client";
 import type {
   AssetAvailabilityResult,
   PaginatedRentals,
+  PartialMonthPolicy,
   Rental,
   RentalBillingMode,
   RentalStatus,
@@ -34,6 +35,8 @@ export interface RentalItemInput {
   depositMinor?: number;
   discountMinor?: number;
   notes?: string | null;
+  /** Only meaningful for MONTHLY — see DECISIONS.md D-072. */
+  partialMonthPolicy?: PartialMonthPolicy;
 }
 
 export interface RentalInput {

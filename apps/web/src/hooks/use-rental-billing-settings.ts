@@ -3,11 +3,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { apiClient } from "../lib/api-client";
-import type { MonthlyBillingStrategy, RentalBillingSettings } from "../types/rental";
+import type {
+  MonthlyBillingStrategy,
+  PartialMonthPolicy,
+  RentalBillingSettings,
+} from "../types/rental";
 
 export interface RentalBillingSettingsInput {
   monthlyBillingStrategy: MonthlyBillingStrategy;
   customMonthLengthDays?: number | null;
+  partialMonthPolicy: PartialMonthPolicy;
 }
 
 const BASE_KEY = "rental-billing-settings";

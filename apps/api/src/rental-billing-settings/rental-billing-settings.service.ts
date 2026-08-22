@@ -12,6 +12,7 @@ import type {
 const DEFAULT_SETTINGS: EffectiveRentalBillingSettings = {
   monthlyBillingStrategy: "CALENDAR_MONTH",
   customMonthLengthDays: null,
+  partialMonthPolicy: "PRORATE_BY_DAY",
 };
 
 @Injectable()
@@ -35,6 +36,7 @@ export class RentalBillingSettingsService {
     return {
       monthlyBillingStrategy: settings.monthlyBillingStrategy,
       customMonthLengthDays: settings.customMonthLengthDays,
+      partialMonthPolicy: settings.partialMonthPolicy,
     };
   }
 
@@ -48,6 +50,7 @@ export class RentalBillingSettingsService {
       tenantId,
       monthlyBillingStrategy: settings.monthlyBillingStrategy,
       customMonthLengthDays: settings.customMonthLengthDays,
+      partialMonthPolicy: settings.partialMonthPolicy,
       isDefault: false,
       updatedAt: settings.updatedAt.toISOString(),
     };
@@ -70,10 +73,12 @@ export class RentalBillingSettingsService {
         tenantId,
         monthlyBillingStrategy: dto.monthlyBillingStrategy,
         customMonthLengthDays,
+        partialMonthPolicy: dto.partialMonthPolicy,
       },
       update: {
         monthlyBillingStrategy: dto.monthlyBillingStrategy,
         customMonthLengthDays,
+        partialMonthPolicy: dto.partialMonthPolicy,
       },
     });
 
@@ -88,6 +93,7 @@ export class RentalBillingSettingsService {
         to: {
           monthlyBillingStrategy: settings.monthlyBillingStrategy,
           customMonthLengthDays: settings.customMonthLengthDays,
+          partialMonthPolicy: settings.partialMonthPolicy,
         },
       },
     });
@@ -96,6 +102,7 @@ export class RentalBillingSettingsService {
       tenantId,
       monthlyBillingStrategy: settings.monthlyBillingStrategy,
       customMonthLengthDays: settings.customMonthLengthDays,
+      partialMonthPolicy: settings.partialMonthPolicy,
       isDefault: false,
       updatedAt: settings.updatedAt.toISOString(),
     };

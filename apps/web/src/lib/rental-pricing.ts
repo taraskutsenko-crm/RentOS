@@ -1,9 +1,16 @@
-import type { MonthlyBillingStrategy, RentalBillingMode } from "../types/rental";
+import type {
+  MonthlyBillingStrategy,
+  PartialMonthPolicy,
+  RentalBillingMode,
+} from "../types/rental";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export const MIN_CUSTOM_MONTH_LENGTH_DAYS = 1;
 export const MAX_CUSTOM_MONTH_LENGTH_DAYS = 365;
+
+/** A null/legacy policy behaves exactly like PRORATE_BY_DAY — mirrors apps/api/src/rentals/rental-pricing.util.ts. */
+export const DEFAULT_PARTIAL_MONTH_POLICY: PartialMonthPolicy = "PRORATE_BY_DAY";
 
 export interface EstimatedItemInput {
   billingMode: RentalBillingMode;
@@ -166,6 +173,32 @@ export interface EstimatedMonthlyItemInput extends EstimatedItemInput {
   billingMode: "MONTHLY";
   monthlyBillingStrategy: MonthlyBillingStrategy;
   customMonthLengthDays?: number | null | undefined;
+  partialMonthPolicy?: PartialMonthPolicy | null | undefined;
+}
+
+/**
+ * Applies a MONTHLY item's partial-month policy to a breakdown, returning
+ * the monthly-portion charge (before quantity/discount) — mirrors
+ * apps/api/src/rentals/rental-pricing.util.ts's `applyPartialMonthPolicy`
+ * exactly (see DECISIONS.md D-072):
+ *  - PRORATE_BY_DAY (default/legacy): complete units at monthlyPriceMinor,
+ *    plus the remaining days at dailyPriceMinor.
+ *  - ROUND_UP_TO_FULL_MONTH: any started remaining period rounds up to one
+ *    more full monthlyPriceMinor unit; dailyPriceMinor is never read.
+ */
+export function applyPartialMonthPolicy(
+  breakdown: Pick<MonthlyBreakdown, "completeUnits" | "remainingDays">,
+  monthlyPriceMinor: number,
+  dailyPriceMinor: number | null | undefined,
+  policy: PartialMonthPolicy | null | undefined,
+): number {
+  if ((policy ?? DEFAULT_PARTIAL_MONTH_POLICY) === "ROUND_UP_TO_FULL_MONTH") {
+    const units = breakdown.completeUnits + (breakdown.remainingDays > 0 ? 1 : 0);
+    return monthlyPriceMinor * units;
+  }
+  return (
+    monthlyPriceMinor * breakdown.completeUnits + (dailyPriceMinor ?? 0) * breakdown.remainingDays
+  );
 }
 
 export function estimateItemLineTotalMinor(
@@ -179,16 +212,19 @@ export function estimateItemLineTotalMinor(
 
   if (item.billingMode === "MONTHLY") {
     const monthlyItem = item as EstimatedMonthlyItemInput;
-    const { completeUnits, remainingDays } = estimateMonthlyBreakdown(
+    const breakdown = estimateMonthlyBreakdown(
       monthlyItem.monthlyBillingStrategy,
       monthlyItem.customMonthLengthDays,
       plannedStart,
       plannedEnd,
     );
-    const gross =
-      ((item.monthlyPriceMinor ?? 0) * completeUnits +
-        (item.dailyPriceMinor ?? 0) * remainingDays) *
-      item.quantity;
+    const monthlyChargeMinor = applyPartialMonthPolicy(
+      breakdown,
+      item.monthlyPriceMinor ?? 0,
+      item.dailyPriceMinor,
+      monthlyItem.partialMonthPolicy,
+    );
+    const gross = monthlyChargeMinor * item.quantity;
     return Math.max(0, gross - item.discountMinor);
   }
 
@@ -215,17 +251,21 @@ export interface RentalItemPriceDisplayValues {
   weeklyPriceDisplay: string;
   monthlyPriceDisplay: string;
   customPriceDisplay: string;
+  /** Only meaningful for MONTHLY — see getRequiredRentalItemPriceFields. */
+  partialMonthPolicy?: PartialMonthPolicy | null | undefined;
 }
 
 /**
  * Mirrors apps/api/src/rentals/rental-pricing.util.ts's
- * assertBillingModePriceProvided field-by-field. MONTHLY unconditionally
- * requires both monthlyPriceDisplay and dailyPriceDisplay — unlike Quotes,
- * RentalItem has no legacy escape hatch at all, so every MONTHLY rental
- * item always needs both.
+ * assertBillingModePriceProvided field-by-field. MONTHLY always requires
+ * monthlyPriceDisplay; dailyPriceDisplay (for the partial-month remainder)
+ * is required only when the resolved partialMonthPolicy is PRORATE_BY_DAY —
+ * a ROUND_UP_TO_FULL_MONTH item never needs a daily rate (see DECISIONS.md
+ * D-072).
  */
 export function getRequiredRentalItemPriceFields(
   billingMode: RentalBillingMode,
+  partialMonthPolicy?: PartialMonthPolicy | null | undefined,
 ): RentalItemPriceFieldKey[] {
   switch (billingMode) {
     case "DAILY":
@@ -233,7 +273,9 @@ export function getRequiredRentalItemPriceFields(
     case "WEEKLY":
       return ["weeklyPriceDisplay"];
     case "MONTHLY":
-      return ["monthlyPriceDisplay", "dailyPriceDisplay"];
+      return (partialMonthPolicy ?? DEFAULT_PARTIAL_MONTH_POLICY) === "ROUND_UP_TO_FULL_MONTH"
+        ? ["monthlyPriceDisplay"]
+        : ["monthlyPriceDisplay", "dailyPriceDisplay"];
     case "CUSTOM":
       return ["customPriceDisplay"];
   }
@@ -243,12 +285,14 @@ export function getRequiredRentalItemPriceFields(
  * Required price fields left blank for this item's billing mode — used by
  * the Prices step to block advancing (and block Create) while a required
  * price is missing, instead of letting the item reach Review and fail at
- * the API with an internal field name (see DECISIONS.md D-070).
+ * the API with an internal field name (see DECISIONS.md D-070, D-072).
  */
 export function getMissingRentalItemPriceFields(
   item: RentalItemPriceDisplayValues,
 ): RentalItemPriceFieldKey[] {
-  return getRequiredRentalItemPriceFields(item.billingMode).filter((field) => !item[field].trim());
+  return getRequiredRentalItemPriceFields(item.billingMode, item.partialMonthPolicy).filter(
+    (field) => !item[field].trim(),
+  );
 }
 
 export function estimateRentalTotals(

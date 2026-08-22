@@ -11,7 +11,9 @@ import { formatMoney } from "../../lib/money";
 import { estimateMonthlyBreakdown } from "../../lib/rental-pricing";
 import type { QuoteItemFormValues } from "../../lib/validation";
 import type { QuoteBillingMode, QuoteDiscountType, QuoteItemType } from "../../types/quote";
-import type { MonthlyBillingStrategy } from "../../types/rental";
+import type { MonthlyBillingStrategy, PartialMonthPolicy } from "../../types/rental";
+
+const PARTIAL_MONTH_POLICIES: PartialMonthPolicy[] = ["PRORATE_BY_DAY", "ROUND_UP_TO_FULL_MONTH"];
 
 /**
  * Which translated label a missing price field's error message quotes —
@@ -238,18 +240,36 @@ export function QuoteItemRow({
               )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>{t("rental.fields.dailyPriceForRemainder")}</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={item.dailyPriceDisplay}
-                aria-invalid={!!priceFieldError("dailyPriceDisplay")}
-                onChange={(event) => onChange({ dailyPriceDisplay: event.target.value })}
-              />
-              {priceFieldError("dailyPriceDisplay") && (
-                <p className="text-destructive text-xs">{priceFieldError("dailyPriceDisplay")}</p>
-              )}
+              <Label>{t("rental.fields.partialMonthPolicy")}</Label>
+              <select
+                className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+                value={item.partialMonthPolicy}
+                onChange={(event) =>
+                  onChange({ partialMonthPolicy: event.target.value as PartialMonthPolicy })
+                }
+              >
+                {PARTIAL_MONTH_POLICIES.map((policy) => (
+                  <option key={policy} value={policy}>
+                    {t(`rental.partialMonthPolicyOptions.${policy}`)}
+                  </option>
+                ))}
+              </select>
             </div>
+            {item.partialMonthPolicy === "PRORATE_BY_DAY" && (
+              <div className="flex flex-col gap-1.5">
+                <Label>{t("rental.fields.dailyPriceForRemainder")}</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={item.dailyPriceDisplay}
+                  aria-invalid={!!priceFieldError("dailyPriceDisplay")}
+                  onChange={(event) => onChange({ dailyPriceDisplay: event.target.value })}
+                />
+                {priceFieldError("dailyPriceDisplay") && (
+                  <p className="text-destructive text-xs">{priceFieldError("dailyPriceDisplay")}</p>
+                )}
+              </div>
+            )}
             <div className="text-muted-foreground col-span-2 text-sm">
               {monthlyBreakdown.completeUnits === 0 && monthlyBreakdown.remainingDays === 0
                 ? t("rental.wizard.monthlyBreakdown.pending")
@@ -261,10 +281,14 @@ export function QuoteItemRow({
                         price: formatMoney(toMinor(item.monthlyPriceDisplay), currency),
                       }),
                     monthlyBreakdown.remainingDays > 0 &&
-                      t("rental.wizard.monthlyBreakdown.days", {
-                        count: monthlyBreakdown.remainingDays,
-                        price: formatMoney(toMinor(item.dailyPriceDisplay), currency),
-                      }),
+                      (item.partialMonthPolicy === "ROUND_UP_TO_FULL_MONTH"
+                        ? t("rental.wizard.monthlyBreakdown.roundedUpMonth", {
+                            price: formatMoney(toMinor(item.monthlyPriceDisplay), currency),
+                          })
+                        : t("rental.wizard.monthlyBreakdown.days", {
+                            count: monthlyBreakdown.remainingDays,
+                            price: formatMoney(toMinor(item.dailyPriceDisplay), currency),
+                          })),
                   ]
                     .filter(Boolean)
                     .join(" + ")}

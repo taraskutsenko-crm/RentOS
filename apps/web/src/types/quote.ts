@@ -1,7 +1,7 @@
 import type { Asset } from "./asset";
 import type { Customer } from "./customer";
 import type { DocumentStatus, DocumentType } from "./document";
-import type { MonthlyBillingStrategy } from "./rental";
+import type { MonthlyBillingStrategy, PartialMonthPolicy } from "./rental";
 import type { TimelineEvent } from "./timeline";
 
 export interface QuotePlatformDocument {
@@ -55,6 +55,8 @@ export interface QuoteItem {
   /** Snapshot of the monthly billing settings used when this item was last priced — null unless billingMode is MONTHLY, or the item pre-dates this feature. */
   monthlyBillingStrategy: MonthlyBillingStrategy | null;
   customMonthLengthDays: number | null;
+  /** Snapshot of how this item's leftover partial month is charged — null unless billingMode is MONTHLY. */
+  partialMonthPolicy: PartialMonthPolicy | null;
   discountType: QuoteDiscountType | null;
   discountValue: number;
   discountTotalMinor: number;
@@ -170,6 +172,7 @@ export interface PublicQuoteItem {
   customPriceMinor: number | null;
   monthlyBillingStrategy: MonthlyBillingStrategy | null;
   customMonthLengthDays: number | null;
+  partialMonthPolicy: PartialMonthPolicy | null;
   discountTotalMinor: number;
   taxTotalMinor: number;
   depositMinor: number;

@@ -1,4 +1,4 @@
-import { MonthlyBillingStrategy } from "@prisma/client";
+import { MonthlyBillingStrategy, PartialMonthPolicy } from "@prisma/client";
 import { IsEnum, IsInt, IsOptional, Max, Min } from "class-validator";
 
 export class UpdateRentalBillingSettingsDto {
@@ -11,4 +11,7 @@ export class UpdateRentalBillingSettingsDto {
   @Min(1)
   @Max(365)
   customMonthLengthDays?: number;
+
+  @IsEnum(PartialMonthPolicy)
+  partialMonthPolicy!: PartialMonthPolicy;
 }

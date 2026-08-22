@@ -170,12 +170,15 @@ export const rentalItemFormSchema = z.object({
   depositDisplay: z.string(),
   discountDisplay: z.string(),
   notes: z.string().max(2000),
+  /** Only meaningful for MONTHLY — see DECISIONS.md D-072. */
+  partialMonthPolicy: z.enum(["PRORATE_BY_DAY", "ROUND_UP_TO_FULL_MONTH"]),
 });
 
 export const rentalBillingSettingsSchema = z
   .object({
     monthlyBillingStrategy: z.enum(["CALENDAR_MONTH", "FIXED_30_DAYS", "CUSTOM"]),
     customMonthLengthDays: z.string(),
+    partialMonthPolicy: z.enum(["PRORATE_BY_DAY", "ROUND_UP_TO_FULL_MONTH"]),
   })
   .refine(
     (data) => {
@@ -248,6 +251,8 @@ export const quoteItemFormSchema = z.object({
   taxRateDisplay: z.string(),
   depositDisplay: z.string(),
   notes: z.string().max(2000),
+  /** Only meaningful for MONTHLY — see DECISIONS.md D-072. */
+  partialMonthPolicy: z.enum(["PRORATE_BY_DAY", "ROUND_UP_TO_FULL_MONTH"]),
 });
 
 export type QuoteItemFormValues = z.infer<typeof quoteItemFormSchema>;

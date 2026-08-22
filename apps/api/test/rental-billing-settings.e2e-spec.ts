@@ -82,7 +82,7 @@ describe("Rental Billing Settings E2E", () => {
     await request(app.getHttpServer())
       .patch(`/tenants/${tenantId}/rental-billing-settings`)
       .set("Cookie", accessCookie)
-      .send({ monthlyBillingStrategy: "FIXED_30_DAYS" })
+      .send({ monthlyBillingStrategy: "FIXED_30_DAYS", partialMonthPolicy: "PRORATE_BY_DAY" })
       .expect(200);
 
     const response = await request(app.getHttpServer())
@@ -101,7 +101,11 @@ describe("Rental Billing Settings E2E", () => {
     const response = await request(app.getHttpServer())
       .patch(`/tenants/${tenantId}/rental-billing-settings`)
       .set("Cookie", accessCookie)
-      .send({ monthlyBillingStrategy: "CUSTOM", customMonthLengthDays: 28 })
+      .send({
+        monthlyBillingStrategy: "CUSTOM",
+        customMonthLengthDays: 28,
+        partialMonthPolicy: "PRORATE_BY_DAY",
+      })
       .expect(200);
 
     expect(response.body).toMatchObject({
@@ -114,7 +118,7 @@ describe("Rental Billing Settings E2E", () => {
     await request(app.getHttpServer())
       .patch(`/tenants/${tenantId}/rental-billing-settings`)
       .set("Cookie", accessCookie)
-      .send({ monthlyBillingStrategy: "CUSTOM" })
+      .send({ monthlyBillingStrategy: "CUSTOM", partialMonthPolicy: "PRORATE_BY_DAY" })
       .expect(400);
   });
 
@@ -123,7 +127,11 @@ describe("Rental Billing Settings E2E", () => {
       await request(app.getHttpServer())
         .patch(`/tenants/${tenantId}/rental-billing-settings`)
         .set("Cookie", accessCookie)
-        .send({ monthlyBillingStrategy: "CUSTOM", customMonthLengthDays: value })
+        .send({
+          monthlyBillingStrategy: "CUSTOM",
+          customMonthLengthDays: value,
+          partialMonthPolicy: "PRORATE_BY_DAY",
+        })
         .expect(400);
     }
   });
@@ -132,7 +140,11 @@ describe("Rental Billing Settings E2E", () => {
     const response = await request(app.getHttpServer())
       .patch(`/tenants/${tenantId}/rental-billing-settings`)
       .set("Cookie", accessCookie)
-      .send({ monthlyBillingStrategy: "CALENDAR_MONTH", customMonthLengthDays: 28 })
+      .send({
+        monthlyBillingStrategy: "CALENDAR_MONTH",
+        customMonthLengthDays: 28,
+        partialMonthPolicy: "PRORATE_BY_DAY",
+      })
       .expect(200);
 
     expect(response.body.customMonthLengthDays).toBeNull();
@@ -146,11 +158,57 @@ describe("Rental Billing Settings E2E", () => {
       .expect(400);
   });
 
+  it("defaults an existing tenant with no stored row to PRORATE_BY_DAY (D-072)", async () => {
+    const response = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/rental-billing-settings`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(response.body.partialMonthPolicy).toBe("PRORATE_BY_DAY");
+  });
+
+  it("updates the partial-month policy to ROUND_UP_TO_FULL_MONTH and persists it", async () => {
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}/rental-billing-settings`)
+      .set("Cookie", accessCookie)
+      .send({
+        monthlyBillingStrategy: "CALENDAR_MONTH",
+        partialMonthPolicy: "ROUND_UP_TO_FULL_MONTH",
+      })
+      .expect(200);
+
+    const response = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/rental-billing-settings`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(response.body.partialMonthPolicy).toBe("ROUND_UP_TO_FULL_MONTH");
+  });
+
+  it("rejects a missing partialMonthPolicy", async () => {
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}/rental-billing-settings`)
+      .set("Cookie", accessCookie)
+      .send({ monthlyBillingStrategy: "CALENDAR_MONTH" })
+      .expect(400);
+  });
+
+  it("rejects an unsupported partialMonthPolicy value", async () => {
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}/rental-billing-settings`)
+      .set("Cookie", accessCookie)
+      .send({
+        monthlyBillingStrategy: "CALENDAR_MONTH",
+        partialMonthPolicy: "SPLIT_THE_DIFFERENCE",
+      })
+      .expect(400);
+  });
+
   it("writes an audit log entry on update", async () => {
     await request(app.getHttpServer())
       .patch(`/tenants/${tenantId}/rental-billing-settings`)
       .set("Cookie", accessCookie)
-      .send({ monthlyBillingStrategy: "FIXED_30_DAYS" })
+      .send({ monthlyBillingStrategy: "FIXED_30_DAYS", partialMonthPolicy: "PRORATE_BY_DAY" })
       .expect(200);
 
     const logs = await prisma.auditLog.findMany({

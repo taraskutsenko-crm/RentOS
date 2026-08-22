@@ -39,6 +39,7 @@ export default function EditRentalPage() {
     depositDisplay: fromMinorUnits(item.depositMinor),
     discountDisplay: fromMinorUnits(item.discountMinor),
     notes: item.notes ?? "",
+    partialMonthPolicy: item.partialMonthPolicy ?? "PRORATE_BY_DAY",
   }));
 
   return (

@@ -2,6 +2,7 @@ import type {
   Customer,
   Document,
   MonthlyBillingStrategy,
+  PartialMonthPolicy,
   Prisma,
   Quote,
   Rental,
@@ -91,6 +92,7 @@ export interface PublicQuoteItemView {
   customPriceMinor: number | null;
   monthlyBillingStrategy: MonthlyBillingStrategy | null;
   customMonthLengthDays: number | null;
+  partialMonthPolicy: PartialMonthPolicy | null;
   discountTotalMinor: number;
   taxTotalMinor: number;
   depositMinor: number;

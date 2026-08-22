@@ -1181,6 +1181,53 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     expect(previewWithoutRental.body.html).not.toContain("<table");
   });
 
+  it("renders rental.assetsTableHtml labels and money in the company-country language, never the tenant's UI-adjacent defaultLanguage (regression — bug found during PRE-CHAPTER-10 manual verification)", async () => {
+    // A Polish company staffed by a Russian-speaking user: defaultLanguage
+    // was previously used directly for this content, leaking Russian table
+    // headers into an otherwise English/company-country-language document.
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: { countryCode: "PL", defaultLanguage: "ru" },
+    });
+
+    const categoryId = await createAssetCategory();
+    const assetId = await createAsset(categoryId, "Generator A", "GEN-PL");
+    const rental = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId,
+        plannedStart: "2027-01-10T09:00:00.000Z",
+        plannedEnd: "2027-01-12T09:00:00.000Z",
+        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 5000 }],
+      })
+      .expect(201);
+
+    await createTemplate({ htmlContent: "<div>{{rental.assetsTableHtml}}</div>" }).expect(201);
+    const templates = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/document-templates`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templates.body.items[0].id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const document = await createDocument({ customerId, rentalId: rental.body.id }).expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    // Polish (from countryCode: "PL"), not Russian (tenant.defaultLanguage).
+    expect(preview.body.html).toContain("Sprzęt");
+    expect(preview.body.html).toContain("Ilość");
+    expect(preview.body.html).toContain("Cena jednostkowa");
+    expect(preview.body.html).not.toContain("Оборудование");
+    expect(preview.body.html).not.toContain("Кол-во");
+  });
+
   it("builds quote.servicesTableHtml from non-ASSET quote items only, escaping cell content", async () => {
     const categoryId = await createAssetCategory();
     const assetId = await createAsset(categoryId, "Generator A", "GEN-Q");

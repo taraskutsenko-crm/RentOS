@@ -3,6 +3,7 @@ import type { DocumentType } from "@prisma/client";
 
 import { PrismaService } from "../../prisma/prisma.service";
 import type { DocumentDetailView, DocumentVersionWithFiles } from "../document.types";
+import { resolveDefaultDocumentLanguage } from "./document-language-resolver.util";
 
 /**
  * The resolved variable context for one render — a plain nested object.
@@ -38,6 +39,7 @@ export class VariableResolverService {
       where: { id: tenantId },
       select: {
         name: true,
+        countryCode: true,
         defaultLanguage: true,
         defaultCurrency: true,
         timezone: true,
@@ -70,7 +72,7 @@ export class VariableResolverService {
       ? await this.resolveAssetCustomFields(tenantId, document.asset.id)
       : {};
 
-    const language = tenant.defaultLanguage;
+    const language = resolveDefaultDocumentLanguage(tenant);
     const timezone = tenant.timezone;
     const employeeName = employeeUser
       ? fullName(employeeUser.firstName, employeeUser.lastName)
@@ -217,6 +219,7 @@ export class VariableResolverService {
       where: { id: tenantId },
       select: {
         name: true,
+        countryCode: true,
         defaultLanguage: true,
         defaultCurrency: true,
         timezone: true,
@@ -227,7 +230,7 @@ export class VariableResolverService {
       },
     });
 
-    const language = tenant.defaultLanguage;
+    const language = resolveDefaultDocumentLanguage(tenant);
     const timezone = tenant.timezone;
     const currency = tenant.defaultCurrency ?? CURRENCY_FALLBACK;
     const labels = tableLabels(language);
@@ -492,8 +495,9 @@ interface TableLabels {
  * blocks — these are server-rendered document content, not app UI chrome,
  * so they're a small local dictionary rather than routed through
  * packages/localization, but still cover all 14 supported locales for
- * consistency. Keyed by tenant.defaultLanguage until per-document language
- * (DocumentTemplate.language) is wired into rendering.
+ * consistency. Keyed by the resolved document language (see
+ * resolveDefaultDocumentLanguage — company country first, never the
+ * viewer's UI locale or the raw tenant.defaultLanguage field).
  */
 const TABLE_LABELS: Record<string, TableLabels> = {
   en: {

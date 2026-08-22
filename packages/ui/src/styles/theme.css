@@ -273,12 +273,20 @@
   }
   .havelio-pop[data-state="closed"] {
     animation: havelio-pop-out var(--duration-fast) var(--ease-standard);
+    /* Some layout conditions (e.g. Popper repositioning while the exit
+     * animation runs) can prevent `animationend` from ever firing, which
+     * leaves Radix's Presence unable to unmount the node — it then sits
+     * fully opaque and on top of the page, intercepting clicks meant for
+     * whatever is underneath. Closed content must never be interactive,
+     * regardless of whether the exit animation completes. */
+    pointer-events: none;
   }
   .havelio-fade[data-state="open"] {
     animation: havelio-fade-in var(--duration-slow) var(--ease-standard);
   }
   .havelio-fade[data-state="closed"] {
     animation: havelio-fade-out var(--duration-base) var(--ease-standard);
+    pointer-events: none;
   }
 }
 

@@ -1404,6 +1404,22 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       })
       .expect(200);
 
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/bank-accounts`)
+      .set("Cookie", accessCookie)
+      .send({
+        label: "Main account",
+        bankName: "Deutsche Bank",
+        accountHolder: "Acme Rentals GmbH",
+        accountNumber: "1234567890",
+        iban: "DE89370400440532013000",
+        swiftBic: "DEUTDEFF",
+        currency: "EUR",
+        bankAddress: "Taunusanlage 12, Frankfurt",
+        paymentReference: "Invoice payment",
+      })
+      .expect(201);
+
     const customer = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/customers`)
       .set("Cookie", accessCookie)

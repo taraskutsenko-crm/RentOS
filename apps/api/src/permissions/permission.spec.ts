@@ -16,17 +16,33 @@ describe("ROLE_PERMISSIONS", () => {
     }
   });
 
-  it("restricts ACCOUNTANT and VIEWER to read-only permissions", () => {
+  it("restricts VIEWER to read-only permissions", () => {
     // .download is included as read-only-safe: retrieving a generated PDF
     // never mutates anything, unlike every other quotes.* permission.
-    for (const role of ["ACCOUNTANT", "VIEWER"] as const) {
-      for (const permission of ROLE_PERMISSIONS[role]) {
-        expect(
-          permission.endsWith(".read") ||
-            permission.endsWith(".view") ||
-            permission.endsWith(".download"),
-        ).toBe(true);
-      }
+    for (const permission of ROLE_PERMISSIONS.VIEWER) {
+      expect(
+        permission.endsWith(".read") ||
+          permission.endsWith(".view") ||
+          permission.endsWith(".download"),
+      ).toBe(true);
+    }
+  });
+
+  it("restricts ACCOUNTANT to read-only everywhere except invoicing/payments (its real operational job)", () => {
+    const invoicingException = [
+      "invoices.create",
+      "invoices.update",
+      "invoices.issue",
+      "invoices.send",
+      "invoices.cancel",
+      "payments.record",
+    ];
+    for (const permission of ROLE_PERMISSIONS.ACCOUNTANT) {
+      const isReadOnly =
+        permission.endsWith(".read") ||
+        permission.endsWith(".view") ||
+        permission.endsWith(".download");
+      expect(isReadOnly || invoicingException.includes(permission)).toBe(true);
     }
   });
 
@@ -227,5 +243,55 @@ describe("ROLE_PERMISSIONS", () => {
     for (const permission of DOCUMENT_PERMISSIONS) {
       expect(ALL_PERMISSIONS).toContain(permission);
     }
+  });
+
+  it("grants ACCOUNTANT and MANAGER full operational invoice/payment control", () => {
+    for (const role of ["ACCOUNTANT", "MANAGER"] as const) {
+      for (const permission of [
+        "invoices.view",
+        "invoices.create",
+        "invoices.update",
+        "invoices.issue",
+        "invoices.send",
+        "invoices.cancel",
+        "invoices.download",
+        "payments.view",
+        "payments.record",
+      ] as const) {
+        expect(roleHasPermission(role, permission)).toBe(true);
+      }
+    }
+  });
+
+  it("grants TECHNICIAN no invoice, payment, or bank-account permissions at all", () => {
+    for (const permission of [
+      "invoices.view",
+      "invoices.create",
+      "payments.view",
+      "payments.record",
+      "bankAccounts.view",
+    ] as const) {
+      expect(roleHasPermission("TECHNICIAN", permission)).toBe(false);
+    }
+  });
+
+  it("only OWNER/ADMIN can manage bank accounts or e-invoice integrations", () => {
+    for (const permission of ["bankAccounts.manage", "integrations.manage"] as const) {
+      expect(roleHasPermission("OWNER", permission)).toBe(true);
+      expect(roleHasPermission("ADMIN", permission)).toBe(true);
+      expect(roleHasPermission("MANAGER", permission)).toBe(false);
+      expect(roleHasPermission("ACCOUNTANT", permission)).toBe(false);
+      expect(roleHasPermission("TECHNICIAN", permission)).toBe(false);
+      expect(roleHasPermission("VIEWER", permission)).toBe(false);
+    }
+  });
+
+  it("VIEWER can see invoices/payments/bank accounts but never mutate them", () => {
+    expect(roleHasPermission("VIEWER", "invoices.view")).toBe(true);
+    expect(roleHasPermission("VIEWER", "invoices.download")).toBe(true);
+    expect(roleHasPermission("VIEWER", "payments.view")).toBe(true);
+    expect(roleHasPermission("VIEWER", "bankAccounts.view")).toBe(true);
+    expect(roleHasPermission("VIEWER", "invoices.create")).toBe(false);
+    expect(roleHasPermission("VIEWER", "payments.record")).toBe(false);
   });
 });

@@ -10,6 +10,7 @@ import { AuditService } from "../audit/audit.service";
 import type { PaginatedResult } from "../customers/customers.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { generateDocumentNumber } from "./document-numbering.util";
+import { resolveDefaultDocumentLanguage } from "./rendering/document-language-resolver.util";
 import {
   DOCUMENT_DETAIL_INCLUDE,
   type DocumentDetailView,
@@ -107,15 +108,30 @@ export class DocumentsService {
         select: { id: true, currentVersionNumber: true },
       });
     } else {
-      // Unspecified language: resolve only if it's unambiguous (0 or 1
-      // ACTIVE template for this type). With 2+ languages active, this
-      // returns null rather than guessing — same policy as
-      // DocumentTemplatesService.findActiveForType.
-      const candidates = await tx.documentTemplate.findMany({
-        where: { tenantId, documentType, status: "ACTIVE" },
+      // No explicit language: try the tenant's company-country-derived
+      // default first (see DECISIONS.md D-071 — UI language never factors
+      // in here, only business identity) — if an ACTIVE template exists
+      // for exactly that language, use it without asking. Otherwise fall
+      // back to the pre-existing "unambiguous only" policy (0 or 1 ACTIVE
+      // template for this type; with 2+ candidates and no usable default,
+      // this returns null rather than guessing — same policy as
+      // DocumentTemplatesService.findActiveForType).
+      const tenant = await tx.tenant.findUniqueOrThrow({
+        where: { id: tenantId },
+        select: { countryCode: true, defaultLanguage: true },
+      });
+      const defaultDocumentLanguage = resolveDefaultDocumentLanguage(tenant);
+      active = await tx.documentTemplate.findFirst({
+        where: { tenantId, documentType, status: "ACTIVE", language: defaultDocumentLanguage },
         select: { id: true, currentVersionNumber: true },
       });
-      active = candidates.length === 1 ? candidates[0]! : null;
+      if (!active) {
+        const candidates = await tx.documentTemplate.findMany({
+          where: { tenantId, documentType, status: "ACTIVE" },
+          select: { id: true, currentVersionNumber: true },
+        });
+        active = candidates.length === 1 ? candidates[0]! : null;
+      }
     }
     if (!active) return { templateId: null, templateVersionId: null };
 

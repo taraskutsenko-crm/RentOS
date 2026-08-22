@@ -100,9 +100,7 @@ export class DocumentTemplatesController {
     @CurrentTenant() { tenant }: CurrentTenantContext,
     @Query() query: QueryActiveLanguagesDto,
   ) {
-    return this.templatesService
-      .activeLanguagesForType(tenant.id, query.documentType)
-      .then((languages) => ({ languages }));
+    return this.templatesService.activeLanguagesForType(tenant.id, query.documentType);
   }
 
   @RequirePermissions("documents.templates.view")

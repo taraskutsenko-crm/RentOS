@@ -13,6 +13,7 @@ import type { CreateDocumentTemplateDto } from "./dto/create-document-template.d
 import type { QueryDocumentTemplatesDto } from "./dto/query-document-templates.dto";
 import type { UpdateDocumentTemplateContentDto } from "./dto/update-document-template-content.dto";
 import type { UpdateDocumentTemplateDto } from "./dto/update-document-template.dto";
+import { resolveDefaultDocumentLanguage } from "./rendering/document-language-resolver.util";
 
 /**
  * DRAFT <-> ACTIVE <-> ARCHIVED. Unlike Document's linear lifecycle, a
@@ -156,16 +157,32 @@ export class DocumentTemplatesService {
     return candidates.length === 1 ? candidates[0]! : null;
   }
 
-  /** The languages (including `null`) with an ACTIVE template for this type — feeds the "Generate document" language picker. */
+  /**
+   * The languages (including `null`) with an ACTIVE template for this
+   * type, plus the tenant's resolved default document language (company
+   * country -> tenant.defaultLanguage -> "en"; see DECISIONS.md D-071) —
+   * feeds the "Generate document" language picker, which pre-selects
+   * `defaultLanguage` when it's one of `languages`, and otherwise falls
+   * back to the "Tenant default" (null) bucket exactly as before.
+   */
   async activeLanguagesForType(
     tenantId: string,
     documentType: DocumentType,
-  ): Promise<Array<string | null>> {
-    const active = await this.prisma.documentTemplate.findMany({
-      where: { tenantId, documentType, status: "ACTIVE" },
-      select: { language: true },
-    });
-    return active.map((t) => t.language);
+  ): Promise<{ languages: Array<string | null>; defaultLanguage: string }> {
+    const [active, tenant] = await Promise.all([
+      this.prisma.documentTemplate.findMany({
+        where: { tenantId, documentType, status: "ACTIVE" },
+        select: { language: true },
+      }),
+      this.prisma.tenant.findUniqueOrThrow({
+        where: { id: tenantId },
+        select: { countryCode: true, defaultLanguage: true },
+      }),
+    ]);
+    return {
+      languages: active.map((t) => t.language),
+      defaultLanguage: resolveDefaultDocumentLanguage(tenant),
+    };
   }
 
   async updateMeta(

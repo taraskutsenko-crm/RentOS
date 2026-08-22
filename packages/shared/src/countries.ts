@@ -12,9 +12,14 @@ export interface CountryConfig {
 }
 
 /**
- * Minimal country configuration foundation. Deliberately small (6 entries)
- * for this task — not a full ISO 3166 list, and no tax-identifier metadata
- * yet (a later task).
+ * Country configuration foundation. Extended (PRE-CHAPTER-10, see
+ * DECISIONS.md D-071) to cover a representative country for every one of
+ * the 14 shipped UI locales (`packages/localization`'s `localeRegistry`) —
+ * `defaultLanguage` here doubles as the "company's country default
+ * business/document language" used to resolve a sensible default Contract
+ * language (see `apps/api/src/documents/rendering/document-language-resolver.util.ts`),
+ * reusing this single table rather than inventing a second country→language
+ * map. Still not a full ISO 3166 list, and no tax-identifier metadata yet.
  */
 export const countries: readonly CountryConfig[] = [
   {
@@ -58,6 +63,69 @@ export const countries: readonly CountryConfig[] = [
     defaultCurrency: "GBP",
     timezones: ["Europe/London"],
     defaultLanguage: "en",
+  },
+  {
+    code: "FR",
+    displayNameKey: "country.FR",
+    defaultCurrency: "EUR",
+    timezones: ["Europe/Paris"],
+    defaultLanguage: "fr",
+  },
+  {
+    code: "IT",
+    displayNameKey: "country.IT",
+    defaultCurrency: "EUR",
+    timezones: ["Europe/Rome"],
+    defaultLanguage: "it",
+  },
+  {
+    code: "NL",
+    displayNameKey: "country.NL",
+    defaultCurrency: "EUR",
+    timezones: ["Europe/Amsterdam"],
+    defaultLanguage: "nl",
+  },
+  {
+    code: "CZ",
+    displayNameKey: "country.CZ",
+    defaultCurrency: "CZK",
+    timezones: ["Europe/Prague"],
+    defaultLanguage: "cs",
+  },
+  {
+    code: "BR",
+    displayNameKey: "country.BR",
+    defaultCurrency: "BRL",
+    timezones: ["America/Sao_Paulo", "America/Manaus"],
+    defaultLanguage: "pt-BR",
+  },
+  {
+    code: "RU",
+    displayNameKey: "country.RU",
+    defaultCurrency: "RUB",
+    timezones: ["Europe/Moscow"],
+    defaultLanguage: "ru",
+  },
+  {
+    code: "JP",
+    displayNameKey: "country.JP",
+    defaultCurrency: "JPY",
+    timezones: ["Asia/Tokyo"],
+    defaultLanguage: "ja",
+  },
+  {
+    code: "KR",
+    displayNameKey: "country.KR",
+    defaultCurrency: "KRW",
+    timezones: ["Asia/Seoul"],
+    defaultLanguage: "ko",
+  },
+  {
+    code: "CN",
+    displayNameKey: "country.CN",
+    defaultCurrency: "CNY",
+    timezones: ["Asia/Shanghai"],
+    defaultLanguage: "zh-CN",
   },
 ] as const;
 

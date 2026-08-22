@@ -72,7 +72,10 @@ export function useDocumentTemplate(tenantId: string | null, id: string | null) 
  * Feeds the "Generate document" flow's language picker (see
  * DocumentTemplatesService.activeLanguagesForType) — resolves unambiguously
  * without a picker when 0 or 1 languages are active; the caller shows a
- * picker only when 2+ are returned.
+ * picker only when 2+ are returned. `defaultLanguage` is the tenant's
+ * resolved default document language (company country -> tenant default ->
+ * "en", never the UI language — see DECISIONS.md D-071); the caller
+ * pre-selects it in the picker when it's one of `languages`.
  */
 export function useActiveDocumentTemplateLanguages(
   tenantId: string | null,
@@ -81,7 +84,7 @@ export function useActiveDocumentTemplateLanguages(
   return useQuery({
     queryKey: [BASE_KEY, tenantId, "active-languages", documentType],
     queryFn: () =>
-      apiClient.get<{ languages: Array<string | null> }>(
+      apiClient.get<{ languages: Array<string | null>; defaultLanguage: string }>(
         `/tenants/${tenantId}/document-templates/active-languages`,
         { documentType: documentType ?? undefined },
       ),

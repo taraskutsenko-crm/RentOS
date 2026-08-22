@@ -222,7 +222,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     expect(refreshedEn1.body.status).toBe("DRAFT");
   });
 
-  it("picks the requested templateLanguage when creating a document, and falls back to the built-in default when ambiguous", async () => {
+  it("picks the requested templateLanguage when creating a document, resolves the tenant's default language when none is given, and falls back to the built-in default only when even that isn't active", async () => {
     const templateEn = await createTemplate({
       name: "English Contract",
       language: "en",
@@ -251,8 +251,40 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .expect(200);
     expect(spanishPreview.body.html).toContain("ES: Jane Doe");
 
-    // No templateLanguage given and two languages are active — ambiguous,
-    // falls back to the built-in default rather than guessing.
+    // No templateLanguage given, but the test tenant's resolved default
+    // document language (its country code -> "en", see DECISIONS.md D-071)
+    // has an ACTIVE template among the 2+ candidates — picks it rather than
+    // falling back to the generic built-in template (this is the actual
+    // fix for the reported RU-UI/PL-company Contract-defaults-to-English
+    // bug: never guessing among the 2+, but also never ignoring a genuine,
+    // resolvable default).
+    const defaultDoc = await createDocument().expect(201);
+    const defaultPreview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${defaultDoc.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(defaultPreview.body.templateSource).toBe("tenant_active");
+    expect(defaultPreview.body.html).toContain("EN: Jane Doe");
+
+    // Archive the resolved-default (EN) template too — now genuinely
+    // ambiguous (ES only, doesn't match the resolved default) with no
+    // usable default, so the original "don't guess" fallback still holds.
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templateEn.body.id}/archive`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    const templateFr = await createTemplate({
+      name: "French Contract",
+      language: "fr",
+      htmlContent: "<div>FR: {{customer.name}}</div>",
+    }).expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/document-templates/${templateFr.body.id}/activate`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
     const ambiguousDoc = await createDocument().expect(201);
     const ambiguousPreview = await request(app.getHttpServer())
       .get(`/tenants/${tenantId}/documents/${ambiguousDoc.body.id}/preview`)

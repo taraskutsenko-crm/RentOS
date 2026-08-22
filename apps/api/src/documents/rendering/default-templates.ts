@@ -107,6 +107,7 @@ const rentalContractBody = `${partiesSection}
   <div class="doc-section">
     <div class="doc-section__title">Subject of the Contract — Rented Assets</div>
     {{rental.assetsTableHtml}}
+    {{quote.servicesTableHtml}}
   </div>
   <div class="doc-section">
     <div class="doc-section__title">Rental Period</div>

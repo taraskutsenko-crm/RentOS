@@ -104,6 +104,26 @@ export function DocumentForm({
   const languages = activeLanguages?.languages ?? [];
   const showLanguagePicker = languages.length >= 2;
 
+  // Pre-selects the tenant's resolved default document language (company
+  // country, never UI language — see DECISIONS.md D-071) when the picker is
+  // shown, so a user who never touches this field still gets the right
+  // default instead of the ambiguous "Tenant default" bucket. Only applies
+  // once, and never overrides an explicit initialValues.templateLanguage
+  // (edit mode) or a value the user already picked.
+  const appliedDefaultLanguage = useRef(false);
+  useEffect(() => {
+    if (appliedDefaultLanguage.current) return;
+    if (initialValues?.templateLanguage) {
+      appliedDefaultLanguage.current = true;
+      return;
+    }
+    if (!activeLanguages) return;
+    if (languages.includes(activeLanguages.defaultLanguage)) {
+      setValue("templateLanguage", activeLanguages.defaultLanguage);
+    }
+    appliedDefaultLanguage.current = true;
+  }, [activeLanguages, languages, initialValues, setValue]);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
       {errorMessage && (

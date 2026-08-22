@@ -356,12 +356,24 @@ export function QuoteItemRow({
         </div>
         <div className="flex flex-col gap-1.5">
           <Label>{t("quote.fields.taxRatePercent")}</Label>
-          <Input
-            type="number"
-            step="0.01"
-            value={item.taxRateDisplay}
-            onChange={(event) => onChange({ taxRateDisplay: event.target.value })}
-          />
+          <div className="relative">
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              max="100"
+              className="pr-7"
+              aria-label={t("quote.fields.taxRatePercent")}
+              value={item.taxRateDisplay}
+              onChange={(event) => onChange({ taxRateDisplay: event.target.value })}
+            />
+            <span
+              className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm"
+              aria-hidden="true"
+            >
+              %
+            </span>
+          </div>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label>{t("quote.fields.deposit")}</Label>

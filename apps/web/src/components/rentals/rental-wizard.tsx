@@ -660,8 +660,25 @@ export function RentalWizard({
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="taxDisplay">{t("rental.fields.tax")}</Label>
-                <Input id="taxDisplay" type="number" step="0.01" {...register("taxDisplay")} />
+                <Label htmlFor="taxDisplay">{t("rental.fields.taxAmount")}</Label>
+                <div className="relative">
+                  <Input
+                    id="taxDisplay"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="pr-14"
+                    {...register("taxDisplay")}
+                  />
+                  {values.currency && (
+                    <span
+                      className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm"
+                      aria-hidden="true"
+                    >
+                      {values.currency}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 

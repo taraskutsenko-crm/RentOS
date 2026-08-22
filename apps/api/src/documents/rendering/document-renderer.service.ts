@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import type { DocumentType } from "@prisma/client";
 
+import { PrismaService } from "../../prisma/prisma.service";
 import { DocumentTemplatesService } from "../document-templates.service";
 import type { DocumentDetailView, DocumentVersionWithFiles } from "../document.types";
 import { BASE_DOCUMENT_CSS } from "./base-document-css";
-import { DEFAULT_TEMPLATES } from "./default-templates";
+import { resolveDefaultDocumentLanguage } from "./document-language-resolver.util";
+import { getDefaultTemplate } from "./default-templates";
 import { resolveVariables, VariableResolverService } from "./variable-resolver.service";
 
 export interface RenderedHtml {
@@ -24,6 +26,7 @@ export interface RenderedHtml {
 @Injectable()
 export class DocumentRendererService {
   constructor(
+    private readonly prisma: PrismaService,
     private readonly templatesService: DocumentTemplatesService,
     private readonly variableResolver: VariableResolverService,
   ) {}
@@ -99,7 +102,20 @@ export class DocumentRendererService {
       };
     }
 
-    const active = await this.templatesService.findActiveForType(tenantId, document.documentType);
+    // No pin was ever captured for this document version (no ACTIVE
+    // template existed for any usable language at document-creation time —
+    // see DocumentsService.resolveTemplatePin). Re-check now: a template
+    // created and activated afterward should still be picked up, using the
+    // exact same country-resolved-language-first policy as the pin itself
+    // (see DECISIONS.md D-071/D-077) so a re-render never disagrees with
+    // what a fresh document would have been pinned to.
+    const resolvedLanguage = await this.resolveDocumentLanguage(tenantId);
+    const active =
+      (await this.templatesService.findActiveForType(
+        tenantId,
+        document.documentType,
+        resolvedLanguage,
+      )) ?? (await this.templatesService.findActiveForType(tenantId, document.documentType));
     if (active) {
       const current = active.versions.find((v) => v.versionNumber === active.currentVersionNumber)!;
       return {
@@ -110,13 +126,22 @@ export class DocumentRendererService {
       };
     }
 
-    const fallback = DEFAULT_TEMPLATES[document.documentType];
+    const fallback = getDefaultTemplate(document.documentType, resolvedLanguage);
     return {
       htmlContent: fallback.htmlContent,
       css: null,
       templateId: null,
       templateSource: "built_in_default",
     };
+  }
+
+  /** Same resolution DocumentsService.resolveTemplatePin/VariableResolverService use — company country first, never the viewer's UI language (see DECISIONS.md D-071/D-075). */
+  private async resolveDocumentLanguage(tenantId: string) {
+    const tenant = await this.prisma.tenant.findUniqueOrThrow({
+      where: { id: tenantId },
+      select: { countryCode: true, defaultLanguage: true },
+    });
+    return resolveDefaultDocumentLanguage(tenant);
   }
 }
 

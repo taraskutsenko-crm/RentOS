@@ -1228,6 +1228,114 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     expect(preview.body.html).not.toContain("Кол-во");
   });
 
+  it("renders the entire built-in Contract body in Polish for a Poland-country tenant with no custom template active — not just table labels (regression — bug found during a later manual verification pass, see DECISIONS.md D-077)", async () => {
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: { countryCode: "PL", defaultLanguage: "ru" },
+    });
+
+    const document = await createDocument({ customerId, documentType: "CONTRACT" }).expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    // Real authored Polish prose in the section titles and clause bodies,
+    // not merely the resolver-driven table labels covered above.
+    expect(preview.body.html).toContain("Umowa najmu");
+    expect(preview.body.html).toContain("Strony");
+    expect(preview.body.html).toContain("Warunki płatności");
+    expect(preview.body.html).toContain("Dostawa i wydanie");
+    expect(preview.body.html).toContain("Obowiązki Najemcy");
+    // The previously-shipped English body must not leak through (raw HTML
+    // is title-case -- "Parties", not the CSS text-transform: uppercase
+    // visual rendering "PARTIES" a browser shows).
+    expect(preview.body.html).not.toContain(">Parties<");
+    expect(preview.body.html).not.toContain("Payment Terms");
+    expect(preview.body.html).not.toContain("Delivery and Handover");
+    expect(preview.body.html).not.toContain("Customer Responsibilities");
+    // And the UI-adjacent tenant.defaultLanguage (ru) must not leak either.
+    expect(preview.body.html).not.toContain("Стороны");
+  });
+
+  it("renders the entire built-in Handover Protocol body in Polish for a Poland-country tenant with no custom template active", async () => {
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: { countryCode: "PL", defaultLanguage: "ru" },
+    });
+
+    const document = await createDocument({
+      customerId,
+      documentType: "HANDOVER_PROTOCOL",
+    }).expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(preview.body.html).toContain("Protokół wydania");
+    expect(preview.body.html).toContain("Stan sprzętu odnotowany przy wydaniu");
+    expect(preview.body.html).toContain("Uwagi");
+    expect(preview.body.html).not.toContain("Handover Protocol");
+    expect(preview.body.html).not.toContain("Condition recorded at handover");
+  });
+
+  it("renders the entire built-in Return Protocol body in Polish for a Poland-country tenant with no custom template active", async () => {
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: { countryCode: "PL", defaultLanguage: "ru" },
+    });
+
+    const document = await createDocument({
+      customerId,
+      documentType: "RETURN_PROTOCOL",
+    }).expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(preview.body.html).toContain("Protokół zwrotu");
+    expect(preview.body.html).toContain("Stan sprzętu odnotowany przy zwrocie");
+    expect(preview.body.html).not.toContain("Return Protocol");
+    expect(preview.body.html).not.toContain("Condition recorded at return");
+  });
+
+  it("renders the entire built-in Commercial Offer (QUOTE) body in Polish for a Poland-country tenant with no custom template active", async () => {
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: { countryCode: "PL", defaultLanguage: "ru" },
+    });
+
+    const document = await createDocument({ customerId, documentType: "QUOTE" }).expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(preview.body.html).toContain("Oferta handlowa");
+    expect(preview.body.html).not.toContain("Commercial Offer");
+  });
+
+  it("falls back to the English built-in template for a language with no authored content, rather than mixing in an unfinished translation", async () => {
+    // German has no authored PL_STRINGS-style entry in TEMPLATES_BY_LANGUAGE
+    // yet -- getDefaultTemplate must fall back to the honest English
+    // original, never a half-translated or fabricated body.
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: { countryCode: "DE", defaultLanguage: "de" },
+    });
+
+    const document = await createDocument({ customerId, documentType: "CONTRACT" }).expect(201);
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(preview.body.html).toContain("Rental Contract");
+    expect(preview.body.html).toContain(">Parties<");
+  });
+
   it("builds quote.servicesTableHtml from non-ASSET quote items only, escaping cell content", async () => {
     const categoryId = await createAssetCategory();
     const assetId = await createAsset(categoryId, "Generator A", "GEN-Q");

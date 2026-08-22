@@ -413,6 +413,16 @@
       "searchable": "検索可能",
       "create": "フィールドを追加",
       "deleteConfirm": "このカスタムフィールド定義を削除しますか？"
+    },
+    "statuses": {
+      "AVAILABLE": "利用可能",
+      "RESERVED": "予約済み",
+      "RENTED": "貸出中",
+      "INSPECTION_REQUIRED": "点検が必要",
+      "MAINTENANCE": "メンテナンス中",
+      "REPAIR": "修理中",
+      "LOST": "紛失",
+      "RETIRED": "廃棄"
     }
   },
   "rental": {
@@ -458,6 +468,7 @@
       "itemDiscount": "品目割引",
       "discount": "割引",
       "tax": "税金",
+      "taxAmount": "税額",
       "subtotal": "小計",
       "total": "合計",
       "internalNotes": "内部メモ",
@@ -485,11 +496,16 @@
         "returnProtocol": "返却書"
       },
       "states": {
-        "present": "関連付け済み",
-        "missing": "未作成",
-        "notRequired": "まだ不要"
+        "notApplicable": "該当なし",
+        "sourceQuoteOnly": "見積のみ",
+        "notRequiredYet": "まだ不要",
+        "readyToGenerate": "生成可能",
+        "generated": "生成済み",
+        "sent": "送信済み",
+        "signed": "署名済み"
       },
-      "generate": "生成"
+      "generate": "生成",
+      "open": "開く"
     },
     "timeIntelligence": {
       "starts_today": "本日開始",

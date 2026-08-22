@@ -413,6 +413,16 @@
       "searchable": "Con búsqueda",
       "create": "Añadir campo",
       "deleteConfirm": "¿Eliminar esta definición de campo personalizado?"
+    },
+    "statuses": {
+      "AVAILABLE": "Disponible",
+      "RESERVED": "Reservado",
+      "RENTED": "Alquilado",
+      "INSPECTION_REQUIRED": "Inspección requerida",
+      "MAINTENANCE": "Mantenimiento",
+      "REPAIR": "Reparación",
+      "LOST": "Perdido",
+      "RETIRED": "Retirado"
     }
   },
   "rental": {
@@ -458,6 +468,7 @@
       "itemDiscount": "Descuento de la línea",
       "discount": "Descuento",
       "tax": "Impuesto",
+      "taxAmount": "Importe del impuesto",
       "subtotal": "Subtotal",
       "total": "Total",
       "internalNotes": "Notas internas",
@@ -485,11 +496,16 @@
         "returnProtocol": "Acta de devolución"
       },
       "states": {
-        "present": "Vinculado",
-        "missing": "Falta",
-        "notRequired": "Aún no requerido"
+        "notApplicable": "No aplicable",
+        "sourceQuoteOnly": "Solo presupuesto",
+        "notRequiredYet": "Aún no requerido",
+        "readyToGenerate": "Listo para generar",
+        "generated": "Generado",
+        "sent": "Enviado",
+        "signed": "Firmado"
       },
-      "generate": "Generar"
+      "generate": "Generar",
+      "open": "Abrir"
     },
     "timeIntelligence": {
       "starts_today": "Comienza hoy",

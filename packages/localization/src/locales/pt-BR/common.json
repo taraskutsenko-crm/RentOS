@@ -413,6 +413,16 @@
       "searchable": "Pesquisável",
       "create": "Adicionar campo",
       "deleteConfirm": "Excluir esta definição de campo personalizado?"
+    },
+    "statuses": {
+      "AVAILABLE": "Disponível",
+      "RESERVED": "Reservado",
+      "RENTED": "Alugado",
+      "INSPECTION_REQUIRED": "Inspeção necessária",
+      "MAINTENANCE": "Manutenção",
+      "REPAIR": "Reparo",
+      "LOST": "Perdido",
+      "RETIRED": "Desativado"
     }
   },
   "rental": {
@@ -458,6 +468,7 @@
       "itemDiscount": "Desconto no item",
       "discount": "Desconto",
       "tax": "Imposto",
+      "taxAmount": "Valor do imposto",
       "subtotal": "Subtotal",
       "total": "Total",
       "internalNotes": "Notas internas",
@@ -485,11 +496,16 @@
         "returnProtocol": "Protocolo de devolução"
       },
       "states": {
-        "present": "Vinculado",
-        "missing": "Ausente",
-        "notRequired": "Ainda não exigido"
+        "notApplicable": "Não aplicável",
+        "sourceQuoteOnly": "Apenas orçamento",
+        "notRequiredYet": "Ainda não necessário",
+        "readyToGenerate": "Pronto para gerar",
+        "generated": "Gerado",
+        "sent": "Enviado",
+        "signed": "Assinado"
       },
-      "generate": "Gerar"
+      "generate": "Gerar",
+      "open": "Abrir"
     },
     "timeIntelligence": {
       "starts_today": "Começa hoje",

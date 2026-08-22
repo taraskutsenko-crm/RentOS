@@ -413,6 +413,16 @@
       "searchable": "Доступне для пошуку",
       "create": "Додати поле",
       "deleteConfirm": "Видалити визначення цього додаткового поля?"
+    },
+    "statuses": {
+      "AVAILABLE": "Доступний",
+      "RESERVED": "Заброньований",
+      "RENTED": "В оренді",
+      "INSPECTION_REQUIRED": "Потрібен огляд",
+      "MAINTENANCE": "Обслуговування",
+      "REPAIR": "Ремонт",
+      "LOST": "Втрачений",
+      "RETIRED": "Списаний"
     }
   },
   "rental": {
@@ -458,6 +468,7 @@
       "itemDiscount": "Знижка на позицію",
       "discount": "Знижка",
       "tax": "Податок",
+      "taxAmount": "Сума податку",
       "subtotal": "Проміжний підсумок",
       "total": "Разом",
       "internalNotes": "Внутрішні нотатки",
@@ -485,11 +496,16 @@
         "returnProtocol": "Акт повернення"
       },
       "states": {
-        "present": "Є",
-        "missing": "Відсутній",
-        "notRequired": "Поки не потрібен"
+        "notApplicable": "Не застосовується",
+        "sourceQuoteOnly": "Лише кошторис",
+        "notRequiredYet": "Поки не потрібно",
+        "readyToGenerate": "Готово до створення",
+        "generated": "Створено",
+        "sent": "Надіслано",
+        "signed": "Підписано"
       },
-      "generate": "Створити"
+      "generate": "Створити",
+      "open": "Відкрити"
     },
     "timeIntelligence": {
       "starts_today": "Починається сьогодні",

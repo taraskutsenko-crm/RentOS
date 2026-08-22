@@ -413,6 +413,16 @@
       "searchable": "검색 가능",
       "create": "필드 추가",
       "deleteConfirm": "이 사용자 지정 필드 정의를 삭제하시겠습니까?"
+    },
+    "statuses": {
+      "AVAILABLE": "사용 가능",
+      "RESERVED": "예약됨",
+      "RENTED": "대여 중",
+      "INSPECTION_REQUIRED": "점검 필요",
+      "MAINTENANCE": "정비 중",
+      "REPAIR": "수리 중",
+      "LOST": "분실",
+      "RETIRED": "폐기"
     }
   },
   "rental": {
@@ -458,6 +468,7 @@
       "itemDiscount": "품목 할인",
       "discount": "할인",
       "tax": "세금",
+      "taxAmount": "세금 금액",
       "subtotal": "소계",
       "total": "합계",
       "internalNotes": "내부 메모",
@@ -485,11 +496,16 @@
         "returnProtocol": "반납 확인서"
       },
       "states": {
-        "present": "연결됨",
-        "missing": "누락됨",
-        "notRequired": "아직 필요 없음"
+        "notApplicable": "해당 없음",
+        "sourceQuoteOnly": "견적서만 있음",
+        "notRequiredYet": "아직 필요하지 않음",
+        "readyToGenerate": "생성 준비됨",
+        "generated": "생성됨",
+        "sent": "발송됨",
+        "signed": "서명됨"
       },
-      "generate": "생성"
+      "generate": "생성",
+      "open": "열기"
     },
     "timeIntelligence": {
       "starts_today": "오늘 시작",

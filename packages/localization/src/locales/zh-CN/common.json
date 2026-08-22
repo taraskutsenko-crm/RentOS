@@ -413,6 +413,16 @@
       "searchable": "可搜索",
       "create": "添加字段",
       "deleteConfirm": "确定要删除此自定义字段定义吗？"
+    },
+    "statuses": {
+      "AVAILABLE": "可用",
+      "RESERVED": "已预订",
+      "RENTED": "已出租",
+      "INSPECTION_REQUIRED": "需要检查",
+      "MAINTENANCE": "维护中",
+      "REPAIR": "维修中",
+      "LOST": "丢失",
+      "RETIRED": "已报废"
     }
   },
   "rental": {
@@ -458,6 +468,7 @@
       "itemDiscount": "单项折扣",
       "discount": "折扣",
       "tax": "税费",
+      "taxAmount": "税额",
       "subtotal": "小计",
       "total": "总计",
       "internalNotes": "内部备注",
@@ -485,11 +496,16 @@
         "returnProtocol": "归还单"
       },
       "states": {
-        "present": "已关联",
-        "missing": "缺失",
-        "notRequired": "暂不需要"
+        "notApplicable": "不适用",
+        "sourceQuoteOnly": "仅报价单",
+        "notRequiredYet": "尚不需要",
+        "readyToGenerate": "可生成",
+        "generated": "已生成",
+        "sent": "已发送",
+        "signed": "已签署"
       },
-      "generate": "生成"
+      "generate": "生成",
+      "open": "打开"
     },
     "timeIntelligence": {
       "starts_today": "今天开始",

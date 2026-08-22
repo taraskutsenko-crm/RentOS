@@ -413,6 +413,16 @@
       "searchable": "Vyhledávatelné",
       "create": "Přidat pole",
       "deleteConfirm": "Odstranit tuto definici vlastního pole?"
+    },
+    "statuses": {
+      "AVAILABLE": "Dostupný",
+      "RESERVED": "Rezervovaný",
+      "RENTED": "Pronajatý",
+      "INSPECTION_REQUIRED": "Vyžaduje kontrolu",
+      "MAINTENANCE": "Údržba",
+      "REPAIR": "Oprava",
+      "LOST": "Ztracený",
+      "RETIRED": "Vyřazený"
     }
   },
   "rental": {
@@ -458,6 +468,7 @@
       "itemDiscount": "Sleva na položku",
       "discount": "Sleva",
       "tax": "Daň",
+      "taxAmount": "Částka daně",
       "subtotal": "Mezisoučet",
       "total": "Celkem",
       "internalNotes": "Interní poznámky",
@@ -485,11 +496,16 @@
         "returnProtocol": "Protokol o vrácení"
       },
       "states": {
-        "present": "Přiřazeno",
-        "missing": "Chybí",
-        "notRequired": "Zatím nevyžadováno"
+        "notApplicable": "Netýká se",
+        "sourceQuoteOnly": "Pouze nabídka",
+        "notRequiredYet": "Zatím nevyžadováno",
+        "readyToGenerate": "Připraveno k vygenerování",
+        "generated": "Vygenerováno",
+        "sent": "Odesláno",
+        "signed": "Podepsáno"
       },
-      "generate": "Vygenerovat"
+      "generate": "Vygenerovat",
+      "open": "Otevřít"
     },
     "timeIntelligence": {
       "starts_today": "Začíná dnes",

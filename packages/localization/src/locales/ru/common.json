@@ -413,6 +413,16 @@
       "searchable": "Доступно для поиска",
       "create": "Добавить поле",
       "deleteConfirm": "Удалить определение этого дополнительного поля?"
+    },
+    "statuses": {
+      "AVAILABLE": "Доступен",
+      "RESERVED": "Забронирован",
+      "RENTED": "В аренде",
+      "INSPECTION_REQUIRED": "Требуется осмотр",
+      "MAINTENANCE": "Обслуживание",
+      "REPAIR": "Ремонт",
+      "LOST": "Утерян",
+      "RETIRED": "Списан"
     }
   },
   "rental": {
@@ -458,6 +468,7 @@
       "itemDiscount": "Скидка на позицию",
       "discount": "Скидка",
       "tax": "Налог",
+      "taxAmount": "Сумма налога",
       "subtotal": "Промежуточный итог",
       "total": "Итого",
       "internalNotes": "Внутренние заметки",
@@ -485,11 +496,16 @@
         "returnProtocol": "Акт возврата"
       },
       "states": {
-        "present": "Есть",
-        "missing": "Отсутствует",
-        "notRequired": "Пока не требуется"
+        "notApplicable": "Не применимо",
+        "sourceQuoteOnly": "Только смета",
+        "notRequiredYet": "Пока не требуется",
+        "readyToGenerate": "Готово к созданию",
+        "generated": "Создан",
+        "sent": "Отправлен",
+        "signed": "Подписан"
       },
-      "generate": "Создать"
+      "generate": "Создать",
+      "open": "Открыть"
     },
     "timeIntelligence": {
       "starts_today": "Начинается сегодня",

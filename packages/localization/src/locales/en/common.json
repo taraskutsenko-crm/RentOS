@@ -413,6 +413,16 @@
       "searchable": "Searchable",
       "create": "Add field",
       "deleteConfirm": "Delete this custom field definition?"
+    },
+    "statuses": {
+      "AVAILABLE": "Available",
+      "RESERVED": "Reserved",
+      "RENTED": "Rented",
+      "INSPECTION_REQUIRED": "Inspection required",
+      "MAINTENANCE": "Maintenance",
+      "REPAIR": "Repair",
+      "LOST": "Lost",
+      "RETIRED": "Retired"
     }
   },
   "rental": {
@@ -458,6 +468,7 @@
       "itemDiscount": "Item discount",
       "discount": "Discount",
       "tax": "Tax",
+      "taxAmount": "Tax amount",
       "subtotal": "Subtotal",
       "total": "Total",
       "internalNotes": "Internal notes",
@@ -486,10 +497,15 @@
         "returnProtocol": "Return protocol"
       },
       "states": {
-        "present": "Linked",
-        "missing": "Missing",
-        "notRequired": "Not required yet"
-      }
+        "notApplicable": "Not applicable",
+        "sourceQuoteOnly": "Quote only",
+        "notRequiredYet": "Not required yet",
+        "readyToGenerate": "Ready to generate",
+        "generated": "Generated",
+        "sent": "Sent",
+        "signed": "Signed"
+      },
+      "open": "Open"
     },
     "timeIntelligence": {
       "starts_today": "Starts today",

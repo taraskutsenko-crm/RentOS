@@ -413,6 +413,16 @@
       "searchable": "Doorzoekbaar",
       "create": "Veld toevoegen",
       "deleteConfirm": "Deze aangepaste velddefinitie verwijderen?"
+    },
+    "statuses": {
+      "AVAILABLE": "Beschikbaar",
+      "RESERVED": "Gereserveerd",
+      "RENTED": "Verhuurd",
+      "INSPECTION_REQUIRED": "Inspectie vereist",
+      "MAINTENANCE": "Onderhoud",
+      "REPAIR": "Reparatie",
+      "LOST": "Verloren",
+      "RETIRED": "Uit dienst"
     }
   },
   "rental": {
@@ -458,6 +468,7 @@
       "itemDiscount": "Korting op item",
       "discount": "Korting",
       "tax": "Belasting",
+      "taxAmount": "Belastingbedrag",
       "subtotal": "Subtotaal",
       "total": "Totaal",
       "internalNotes": "Interne notities",
@@ -485,11 +496,16 @@
         "returnProtocol": "Retourprotocol"
       },
       "states": {
-        "present": "Gekoppeld",
-        "missing": "Ontbreekt",
-        "notRequired": "Nog niet vereist"
+        "notApplicable": "Niet van toepassing",
+        "sourceQuoteOnly": "Alleen offerte",
+        "notRequiredYet": "Nog niet vereist",
+        "readyToGenerate": "Klaar om te genereren",
+        "generated": "Gegenereerd",
+        "sent": "Verzonden",
+        "signed": "Ondertekend"
       },
-      "generate": "Genereren"
+      "generate": "Genereren",
+      "open": "Openen"
     },
     "timeIntelligence": {
       "starts_today": "Start vandaag",

@@ -19,7 +19,78 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `9dea605` (fix: skip redundant registry
+- **Latest verified commit:** `fd09d91` (i18n: localize invoicing, bank
+  accounts & integrations UI) — PRE-CHAPTER-10 Invoicing, Bank Details &
+  E-Invoice Architecture is complete. Chapter 10 itself was **not**
+  started, per this arc's explicit hard-stop instruction.
+- **What shipped:** Invoice is a standalone first-class business object
+  (`Invoice`/`InvoiceItem`/`InvoiceSequence`/`Payment`/
+  `InvoiceStatusHistory`), never a generic `Document` row — its own
+  numbering (`InvoiceSequence`, month-scoped, `INV-YYYY-MM-NNNNNN`
+  default format, real number reserved only at issue time),
+  snapshot-at-issue immutability (`sellerSnapshot`/`buyerSnapshot`/
+  `bankSnapshot` frozen forever once ISSUED), and its own HTML/PDF
+  rendering (`invoice-renderer.service.ts`, real Polish/English
+  terminology, reuses `PdfRendererService`'s Puppeteer engine — no
+  second PDF engine). `CompanyBankAccount` is a structured model
+  (isDefault enforcement mirrors `AssetFilesService`'s isPrimary-image
+  pattern) exposed to documents via new `company.bank.*` variables in
+  the existing dual document-variable registry. "Create Invoice from
+  Rental" prefills customer/currency/bank account/line items, deriving
+  each line's tax rate from the Rental's own already-entered effective
+  rate rather than inventing one — multiple invoices per Rental are
+  fully supported (`rentalId` is a plain nullable FK). `Payment` is a
+  minimal append-only ledger; `PaymentsService` derives
+  PARTIALLY_PAID/PAID live from summed payments, never inferred at
+  creation; OVERDUE derives lazily on read (mirrors
+  `QuotesService.applyExpiryIfDue`). A country-neutral
+  `EInvoiceProvider` interface + `KsefProvider` stub backs Settings ->
+  Integrations (shown only for Poland-country tenants) — `testConnection`
+  always reports an honest not-implemented state, `submitInvoice`/
+  `checkSubmissionStatus` throw `NotImplementedException`; **no real
+  KSeF API call exists anywhere in this codebase**, per the task's
+  explicit "do not fake a working KSeF connection" constraint. A new
+  `EncryptionService` (AES-256-GCM, `KSEF_ENCRYPTION_KEY`) is the
+  codebase's first reversible-encryption primitive, protecting stored
+  provider credentials. ACCOUNTANT's permission set was deliberately
+  widened from fully-read-only to real invoice/payment operational
+  control (D-089). Full frontend: Rental Workspace Invoices card, global
+  Invoices module, invoice create/detail pages, Company Profile Banking
+  settings, Settings -> Integrations. All 14 locales translated and
+  parity-verified (including real Polish invoice terminology). See
+  D-081 through D-089 in [DECISIONS.md](DECISIONS.md) for full
+  rationale on each design decision.
+- **Verification:** full backend suite (36 files / 600 tests) and full
+  frontend suite (78 files / 516 tests) green; every quality gate
+  (`format`, `lint`, `typecheck`, `build`, `check:governance`) green;
+  Docker images rebuilt from scratch and all three acceptance scenarios
+  from the task walked through live in a real browser against the
+  rebuilt containers: (1) a Poland-country tenant with a complete
+  Company Profile + PLN bank account (IBAN/SWIFT) creates an Invoice
+  from a Rental Workspace (800 PLN, 23% VAT) — customer/company/rental/
+  items/tax/totals/bank-account all correctly prefilled, the document
+  language resolves to Polish independent of the staff user's Russian
+  UI, and the downloaded PDF's extracted text confirms real Polish
+  terminology (FAKTURA, Numer faktury, Sprzedawca, Nabywca, ...) with no
+  English leakage; issuing immediately shows the invoice back on the
+  same Rental; (2) a 1,000 PLN invoice receives a 400 PLN payment
+  (status -> PARTIALLY_PAID, remaining 600.00 PLN exactly) then the
+  remaining 600 PLN (status -> PAID, remaining 0.00 PLN exactly); (3) a
+  second, independent invoice (a 184.50 PLN late-return-fee line) is
+  created for the same Rental already carrying its first invoice — both
+  remain independently listed and accessible, proving no
+  one-invoice-per-Rental assumption exists anywhere. Two real bugs were
+  found and fixed live during this verification pass (not present in
+  the unit/e2e suites, which don't exercise the built Docker image's
+  bundled translations or a >100-row customer query): a `pageSize: 200`
+  customer-list request exceeding the API's `@Max(100)` cap silently
+  emptied the invoice-editor customer dropdown, and three dialog buttons
+  referenced `common.save`/`common.edit`/`common.remove` i18n keys that
+  never existed in the shared `common.*` namespace (fixed by adding all
+  three, in all 14 locales).
+- **Previous state (Pre-Chapter 10 — Rental Workflow, Contract System &
+  No-Code Document Template Builder, D-060–D-065):**
+  Latest verified commit: `9dea605` (fix: skip redundant registry
   policy re-check in Docker image installs, D-065) — Pre-Chapter 10
   Rental Workflow, Contract System & No-Code Document Template Builder
   (D-060–D-065) is complete and CI-green. Chapter 10

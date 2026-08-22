@@ -4,7 +4,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 
 import { I18nProvider } from "../components/i18n-provider";
-import { LANGUAGE_COOKIE_NAME, resolveSupportedLanguage } from "../lib/i18n";
+import { LANGUAGE_COOKIE_NAME, resolveSupportedLanguage } from "../lib/i18n-language";
 import { QueryProvider } from "../lib/query-provider";
 import "./globals.css";
 

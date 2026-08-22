@@ -1,31 +1,26 @@
 "use client";
 
-import {
-  defaultLanguage,
-  isSupportedLanguage,
-  resources,
-  type SupportedLanguage,
-} from "@rentos/localization";
+import { defaultLanguage, resources, type SupportedLanguage } from "@rentos/localization";
 import i18next, { type i18n as I18n } from "i18next";
 import { initReactI18next } from "react-i18next";
 
 /**
- * Legacy localStorage key (see DECISIONS.md D-057). No longer written going
- * forward — see D-069 — but still read once, client-side, to migrate any
- * pre-existing user's preference into the new cookie (see
- * use-language-preference.ts). Kept exported for that migration and for
- * existing tests.
+ * The cookie name/legacy-storage-key constants and resolveSupportedLanguage
+ * live in a separate, framework-dependency-free module
+ * (`lib/i18n-language.ts`) — layout.tsx (a Server Component) needs to call
+ * resolveSupportedLanguage and read LANGUAGE_COOKIE_NAME, and this file
+ * cannot be "use client" AND imported by a Server Component: react-i18next's
+ * initReactI18next reaches into `React.createContext`, which is unavailable
+ * in the server bundle and breaks `next build`'s page-data collection (see
+ * DECISIONS.md D-069 addendum) if this whole module is pulled server-side.
+ * Re-exported below so every existing `from "lib/i18n"` import keeps working
+ * unchanged.
  */
-export const LANGUAGE_STORAGE_KEY = "rentos_app_language";
-
-/**
- * Cookie name for the persisted UI locale (see DECISIONS.md D-069). Readable
- * by both the server (via `next/headers` `cookies()` in layout.tsx) and the
- * client (via `document.cookie` in use-language-preference.ts), so SSR and
- * client hydration always resolve the same language — the cookie is the
- * single source of truth.
- */
-export const LANGUAGE_COOKIE_NAME = "rentos_ui_lang";
+export {
+  LANGUAGE_COOKIE_NAME,
+  LANGUAGE_STORAGE_KEY,
+  resolveSupportedLanguage,
+} from "./i18n-language";
 
 const I18N_OPTIONS = {
   resources,
@@ -33,11 +28,6 @@ const I18N_OPTIONS = {
   defaultNS: "common",
   interpolation: { escapeValue: false },
 } as const;
-
-/** Validates an arbitrary (possibly absent/corrupt) cookie value against the 14 supported locales. */
-export function resolveSupportedLanguage(value: string | undefined | null): SupportedLanguage {
-  return value && isSupportedLanguage(value) ? value : defaultLanguage;
-}
 
 /**
  * Creates a fresh, independent i18next instance pre-initialized with

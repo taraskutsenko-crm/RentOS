@@ -204,7 +204,13 @@ export interface PortalAsset {
   createdAt: string;
   updatedAt: string;
   category: { id: string; name: string };
-  currentStatus: { id: string; name: string; colorToken: string | null };
+  currentStatus: {
+    id: string;
+    name: string;
+    code: string;
+    isSystem: boolean;
+    colorToken: string | null;
+  };
   images: { id: string; isPrimary: boolean; altText: string | null }[];
 }
 

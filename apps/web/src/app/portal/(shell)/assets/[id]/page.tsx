@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { portalAssetImageUrl, usePortalAsset } from "../../../../../hooks/use-portal-assets";
+import { getAssetStatusLabel } from "../../../../../lib/asset-status-label";
 
 export default function PortalAssetDetailPage() {
   const { t } = useTranslation();
@@ -48,7 +49,10 @@ export default function PortalAssetDetailPage() {
         <CardContent className="grid grid-cols-2 gap-3 text-sm">
           <InfoRow label={t("portal.assets.manufacturer")} value={asset.manufacturer ?? "—"} />
           <InfoRow label={t("portal.assets.model")} value={asset.model ?? "—"} />
-          <InfoRow label={t("rental.fields.status")} value={asset.currentStatus.name} />
+          <InfoRow
+            label={t("rental.fields.status")}
+            value={getAssetStatusLabel(t, asset.currentStatus)}
+          />
           <InfoRow label={t("portal.assets.condition")} value={asset.conditionNotes ?? "—"} />
         </CardContent>
       </Card>

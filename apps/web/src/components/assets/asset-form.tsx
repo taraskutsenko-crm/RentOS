@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useAssetCategories } from "../../hooks/use-asset-categories";
 import { useAssetCustomFieldsForCategory } from "../../hooks/use-asset-custom-fields";
 import { useAssetStatuses } from "../../hooks/use-asset-statuses";
+import { getAssetStatusLabel } from "../../lib/asset-status-label";
 import { toMinorUnits } from "../../lib/money";
 import { assetSchema, type AssetFormValues } from "../../lib/validation";
 import type { AssetInput } from "../../hooks/use-assets";
@@ -237,7 +238,7 @@ export function AssetForm({
             <option value="">{t("asset.fields.statusDefaultHint")}</option>
             {statuses?.map((status) => (
               <option key={status.id} value={status.id}>
-                {status.name}
+                {getAssetStatusLabel(t, status)}
               </option>
             ))}
           </select>

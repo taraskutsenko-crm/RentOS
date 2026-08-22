@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PageHeader } from "../../../components/shell/page-header";
+import { getAssetStatusLabel } from "../../../lib/asset-status-label";
 import {
   DataTable,
   DataTablePagination,
@@ -106,7 +107,7 @@ export default function AssetsPage() {
     {
       id: "status",
       header: t("asset.fields.status"),
-      cell: (asset) => asset.currentStatus.name,
+      cell: (asset) => getAssetStatusLabel(t, asset.currentStatus),
       mobileRole: "secondary",
     },
     {
@@ -164,7 +165,7 @@ export default function AssetsPage() {
           <option value="">{t("asset.allStatuses")}</option>
           {statuses?.map((status) => (
             <option key={status.id} value={status.id}>
-              {status.name}
+              {getAssetStatusLabel(t, status)}
             </option>
           ))}
         </select>
@@ -194,7 +195,8 @@ export default function AssetsPage() {
               <div className="flex flex-col">
                 <span className="font-medium">{asset.name}</span>
                 <span className="text-muted-foreground text-xs">
-                  {asset.internalNumber} · {asset.category.name} · {asset.currentStatus.name}
+                  {asset.internalNumber} · {asset.category.name} ·{" "}
+                  {getAssetStatusLabel(t, asset.currentStatus)}
                 </span>
               </div>
             </div>

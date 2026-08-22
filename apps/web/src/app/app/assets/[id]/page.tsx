@@ -22,6 +22,7 @@ import {
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
+import { getAssetStatusLabel } from "../../../../lib/asset-status-label";
 import { formatMoney } from "../../../../lib/money";
 import { ASSET_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 
@@ -99,7 +100,7 @@ export default function AssetDetailPage() {
             <span
               className={`rounded px-2 py-0.5 text-xs ${isUnavailable ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground"}`}
             >
-              {asset.currentStatus.name}
+              {getAssetStatusLabel(t, asset.currentStatus)}
             </span>
           </div>
           <p className="text-muted-foreground text-sm">{asset.internalNumber}</p>
@@ -271,7 +272,7 @@ export default function AssetDetailPage() {
                           ?.filter((status) => status.id !== asset.currentStatusId)
                           .map((status) => (
                             <option key={status.id} value={status.id}>
-                              {status.name}
+                              {getAssetStatusLabel(t, status)}
                             </option>
                           ))}
                       </select>

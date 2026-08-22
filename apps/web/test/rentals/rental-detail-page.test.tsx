@@ -246,9 +246,16 @@ describe("RentalDetailPage", () => {
 
     renderWithProviders(<RentalDetailPage />);
 
-    const quoteLink = screen.getByRole("link", { name: "Q-2026-000001" });
+    // Scoped to the "Documents" card specifically -- the Document checklist
+    // card (asserted separately) now also links the same source quote and
+    // document, by design (see the checklist regression test above).
+    const documentsCard = screen.getByText("Documents").closest("div")
+      ?.parentElement as HTMLElement;
+    const documentsSection = within(documentsCard);
+
+    const quoteLink = documentsSection.getByRole("link", { name: "Q-2026-000001" });
     expect(quoteLink).toHaveAttribute("href", "/app/quotes/quote-1");
-    const documentLink = screen.getByRole("link", { name: "DOC-000001" });
+    const documentLink = documentsSection.getByRole("link", { name: "DOC-000001" });
     expect(documentLink).toHaveAttribute("href", "/app/documents/doc-1");
   });
 
@@ -283,8 +290,16 @@ describe("RentalDetailPage", () => {
     expect(checklist.getByText("Commercial offer")).toBeInTheDocument();
     expect(checklist.getByText("Rental contract")).toBeInTheDocument();
     expect(checklist.getByText("Handover protocol")).toBeInTheDocument();
-    expect(checklist.getAllByText("Linked")).toHaveLength(2); // commercial offer + contract
-    expect(checklist.getByText("Missing")).toBeInTheDocument(); // handover protocol, since ACTIVE
+    // Commercial offer: sourceQuote exists but no QUOTE document was ever
+    // generated -- links to the source quote itself, not a fabricated "Linked".
+    const quoteLink = checklist.getByRole("link", { name: "Q-2026-000001" });
+    expect(quoteLink).toHaveAttribute("href", "/app/quotes/quote-1");
+    // Rental contract: a real signed CONTRACT document -- links straight to it.
+    const contractLink = checklist.getByRole("link", { name: "CON-000001" });
+    expect(contractLink).toHaveAttribute("href", "/app/documents/doc-1");
+    // Handover protocol: ACTIVE with no document yet, but no create permission
+    // -- plain "ready to generate" text, not a Generate link.
+    expect(checklist.getByText("Ready to generate")).toBeInTheDocument();
   });
 
   it("omits the document checklist card for a CANCELLED rental", () => {

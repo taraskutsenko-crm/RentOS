@@ -892,6 +892,192 @@ describe("Rentals E2E", () => {
     });
   });
 
+  // Regression: a Commercial Offer (QUOTE-type) document generated from the
+  // Quote workspace before conversion carries Document.quoteId, never
+  // Document.rentalId (the Rental didn't exist yet) -- the checklist could
+  // never distinguish "an offer document was actually generated" from
+  // "only the source Quote record exists" without this (see DECISIONS.md D-078).
+  it("GET /rentals/:id surfaces a Commercial Offer document generated before conversion via sourceQuoteId, not just rentalId", async () => {
+    const quote = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId,
+        validUntil: dateOffset(30),
+        plannedStart: dateOffset(1),
+        plannedEnd: dateOffset(4),
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "DAILY",
+            dailyPriceMinor: 1000,
+          },
+        ],
+      })
+      .expect(201);
+    const quoteId = quote.body.id as string;
+
+    // Generated from the Quotes workspace -- quoteId set, rentalId is not
+    // (and cannot be: no Rental exists yet at this point).
+    const offerDocument = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "QUOTE", customerId, quoteId })
+      .expect(201);
+    expect(offerDocument.body.rentalId).toBeNull();
+    expect(offerDocument.body.quoteId).toBe(quoteId);
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/send`)
+      .set("Cookie", accessCookie)
+      .send({ recipientEmail: "jane@example.com" })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/accept`)
+      .set("Cookie", accessCookie)
+      .send({ acceptedBy: "Jane" })
+      .expect(201);
+    const converted = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/convert-to-rental`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    const rentalId = converted.body.rental.id as string;
+
+    const rental = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(rental.body.sourceQuote).toMatchObject({ id: quoteId });
+    const documentIds = (rental.body.documents as Array<{ id: string }>).map((d) => d.id);
+    expect(documentIds).toContain(offerDocument.body.id);
+    const merged = (rental.body.documents as Array<{ id: string; documentType: string }>).find(
+      (d) => d.id === offerDocument.body.id,
+    );
+    expect(merged?.documentType).toBe("QUOTE");
+  });
+
+  it("does not duplicate a Commercial Offer document that is linked via both quoteId and rentalId", async () => {
+    const quote = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId,
+        validUntil: dateOffset(30),
+        plannedStart: dateOffset(1),
+        plannedEnd: dateOffset(4),
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "DAILY",
+            dailyPriceMinor: 1000,
+          },
+        ],
+      })
+      .expect(201);
+    const quoteId = quote.body.id as string;
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/send`)
+      .set("Cookie", accessCookie)
+      .send({ recipientEmail: "jane@example.com" })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/accept`)
+      .set("Cookie", accessCookie)
+      .send({ acceptedBy: "Jane" })
+      .expect(201);
+    const converted = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/convert-to-rental`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    const rentalId = converted.body.rental.id as string;
+
+    // Generated from the Rental Workspace after conversion -- both
+    // rentalId and (auto-inherited) quoteId are set on this one row.
+    const offerDocument = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents`)
+      .set("Cookie", accessCookie)
+      .send({ documentType: "QUOTE", customerId, rentalId })
+      .expect(201);
+    expect(offerDocument.body.quoteId).toBe(quoteId);
+
+    const rental = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    const matches = (rental.body.documents as Array<{ id: string }>).filter(
+      (d) => d.id === offerDocument.body.id,
+    );
+    expect(matches).toHaveLength(1);
+  });
+
+  it("never surfaces another tenant's document when merging quoteId-linked Commercial Offer documents", async () => {
+    const quote = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId,
+        validUntil: dateOffset(30),
+        plannedStart: dateOffset(1),
+        plannedEnd: dateOffset(4),
+        items: [
+          {
+            itemType: "ASSET",
+            assetId: assetAId,
+            name: "Generator A",
+            billingMode: "DAILY",
+            dailyPriceMinor: 1000,
+          },
+        ],
+      })
+      .expect(201);
+    const quoteId = quote.body.id as string;
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/send`)
+      .set("Cookie", accessCookie)
+      .send({ recipientEmail: "jane@example.com" })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/accept`)
+      .set("Cookie", accessCookie)
+      .send({ acceptedBy: "Jane" })
+      .expect(201);
+    const converted = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/${quoteId}/convert-to-rental`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    const rentalId = converted.body.rental.id as string;
+
+    const { tenantId: otherTenantId, cookie: otherCookie } = await registerSecondTenant();
+    const otherCustomer = await request(app.getHttpServer())
+      .post(`/tenants/${otherTenantId}/customers`)
+      .set("Cookie", otherCookie)
+      .send({ firstName: "Other", lastName: "Tenant" })
+      .expect(201);
+    // A document in a completely different tenant -- the merge query must
+    // stay tenantId-scoped and never leak this into the first tenant's
+    // rental checklist.
+    await request(app.getHttpServer())
+      .post(`/tenants/${otherTenantId}/documents`)
+      .set("Cookie", otherCookie)
+      .send({ documentType: "QUOTE", customerId: otherCustomer.body.id })
+      .expect(201);
+
+    const rental = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(rental.body.documents).toEqual([]);
+  });
+
   // 32. Pagination and filtering
   it("paginates and filters the rental list by status", async () => {
     for (let i = 0; i < 3; i += 1) {

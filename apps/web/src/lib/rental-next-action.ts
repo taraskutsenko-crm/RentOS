@@ -29,12 +29,12 @@ export function getRentalNextAction(rental: {
 
   const checklist = getRentalDocumentChecklist(rental);
   const contract = checklist.find((item) => item.key === "contract");
-  if (contract?.state === "missing") {
+  if (contract?.state === "readyToGenerate") {
     return { kind: "GENERATE_CONTRACT" };
   }
 
   const handoverProtocol = checklist.find((item) => item.key === "handoverProtocol");
-  if (handoverProtocol?.state === "missing") {
+  if (handoverProtocol?.state === "readyToGenerate") {
     return { kind: "PREPARE_HANDOVER" };
   }
 

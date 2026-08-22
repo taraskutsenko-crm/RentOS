@@ -25,6 +25,7 @@ import {
   useStartRental,
 } from "../../../../hooks/use-rentals";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
+import { getAssetStatusLabel } from "../../../../lib/asset-status-label";
 import {
   formatBusinessDate,
   formatBusinessDateTime,
@@ -362,7 +363,7 @@ export default function RentalDetailPage() {
                                 : "bg-muted text-muted-foreground"
                             }`}
                           >
-                            {item.asset.currentStatus.name}
+                            {getAssetStatusLabel(t, item.asset.currentStatus)}
                           </span>
                         </td>
                         <td className="p-3">
@@ -417,10 +418,42 @@ export default function RentalDetailPage() {
                 <ul className="flex flex-col gap-2 text-sm">
                   {getRentalDocumentChecklist(rental).map((item) => {
                     const generateDocumentType = CHECKLIST_ITEM_DOCUMENT_TYPE[item.key];
+                    const isGeneratedState =
+                      item.state === "generated" ||
+                      item.state === "sent" ||
+                      item.state === "signed";
+
+                    // Commercial Offer is never generated from this page — a
+                    // QUOTE document belongs to the Quote workspace (see
+                    // CHECKLIST_ITEM_DOCUMENT_TYPE's doc comment) — it can
+                    // only ever be opened (the source Quote, or a real
+                    // generated offer document), never generated here.
+                    const openHref =
+                      item.key === "commercialOffer"
+                        ? isGeneratedState
+                          ? `/app/documents/${item.document!.id}`
+                          : item.state === "sourceQuoteOnly"
+                            ? `/app/quotes/${rental.sourceQuote!.id}`
+                            : null
+                        : isGeneratedState
+                          ? `/app/documents/${item.document!.id}`
+                          : null;
+
                     return (
                       <li key={item.key} className="flex items-center justify-between">
                         <span>{t(`rental.documentChecklist.items.${item.key}`)}</span>
-                        {item.state === "missing" && generateDocumentType && canCreateDocument ? (
+                        {openHref ? (
+                          <Link href={openHref} className="text-primary text-sm hover:underline">
+                            {isGeneratedState
+                              ? (item.document?.documentNumber ??
+                                t("rental.documentChecklist.open"))
+                              : (rental.sourceQuote?.quoteNumber ??
+                                t("rental.documentChecklist.open"))}
+                          </Link>
+                        ) : item.state === "readyToGenerate" &&
+                          item.key !== "commercialOffer" &&
+                          generateDocumentType &&
+                          canCreateDocument ? (
                           <Link
                             href={`/app/documents/new?rentalId=${rental.id}&documentType=${generateDocumentType}`}
                             className="text-primary text-sm hover:underline"
@@ -430,9 +463,9 @@ export default function RentalDetailPage() {
                         ) : (
                           <span
                             className={
-                              item.state === "present"
+                              isGeneratedState
                                 ? "text-success"
-                                : item.state === "missing"
+                                : item.state === "readyToGenerate"
                                   ? "text-warning"
                                   : "text-muted-foreground"
                             }

@@ -31,6 +31,7 @@ import { generateRentalNumber } from "./rental-numbering.util";
 import { computeRentalTotals, type PricedRentalItemInput } from "./rental-pricing.util";
 import {
   RENTAL_DETAIL_INCLUDE,
+  RENTAL_DOCUMENT_SELECT,
   type RentalDetailView,
   type RentalListItemView,
 } from "./rental.types";
@@ -205,6 +206,34 @@ export class RentalsService {
     if (!rental) {
       throw new NotFoundException("Rental not found");
     }
+
+    // A Commercial Offer document is generated from the Quote workspace
+    // (Document.quoteId set) before the Quote is ever converted to a
+    // Rental, so it is never linked via Document.rentalId — without this,
+    // the Document Checklist could never distinguish "a Commercial Offer
+    // was actually generated for the source Quote" from "only the source
+    // Quote record exists" (see DECISIONS.md D-078). Additive only: merges
+    // in QUOTE-type documents reachable via the immutable sourceQuoteId
+    // link, deduplicated against anything already rentalId-linked.
+    if (rental.sourceQuoteId) {
+      const linkedIds = new Set(rental.documents.map((document) => document.id));
+      const quoteDocuments = await this.prisma.document.findMany({
+        where: {
+          tenantId,
+          quoteId: rental.sourceQuoteId,
+          documentType: "QUOTE",
+          deletedAt: null,
+          id: { notIn: [...linkedIds] },
+        },
+        select: RENTAL_DOCUMENT_SELECT,
+      });
+      if (quoteDocuments.length > 0) {
+        rental.documents = [...rental.documents, ...quoteDocuments].sort(
+          (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+        );
+      }
+    }
+
     return rental;
   }
 

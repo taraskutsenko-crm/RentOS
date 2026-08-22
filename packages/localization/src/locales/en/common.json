@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "Delete {{count}} customers?",
       "deleteConfirmDescription": "This permanently deletes the selected customers. This action cannot be undone.",
       "deletePartialFailure": "{{failed}} of {{total}} could not be deleted."
-    }
+    },
+    "save": "Save",
+    "edit": "Edit",
+    "remove": "Remove"
   },
   "nav": {
     "logout": "Log out",
@@ -481,11 +484,16 @@
       "items": "Assets",
       "financial": "Financial summary",
       "customer": "Customer",
-      "documents": "Documents"
+      "documents": "Documents",
+      "invoices": "Invoices"
     },
     "documents": {
       "empty": "No documents linked to this rental yet",
       "generate": "Generate document"
+    },
+    "invoices": {
+      "empty": "No invoices for this rental yet",
+      "create": "Create invoice"
     },
     "documentChecklist": {
       "title": "Document checklist",
@@ -1002,7 +1010,18 @@
       "registrationNumber": "Registration number",
       "taxNumber": "Tax number",
       "address": "Company address",
-      "phone": "Company phone"
+      "phone": "Company phone",
+      "bank": {
+        "label": "Bank account label",
+        "bankName": "Bank name",
+        "accountHolder": "Account holder",
+        "accountNumber": "Account number",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "Bank account currency",
+        "bankAddress": "Bank address",
+        "paymentReference": "Payment reference"
+      }
     },
     "customer": {
       "name": "Customer name",
@@ -1283,6 +1302,135 @@
     },
     "darkMode": {
       "toggle": "Toggle dark mode"
+    }
+  },
+  "invoice": {
+    "title": "Invoices",
+    "subtitle": "Track invoices, payment status, and amounts across every rental",
+    "newInvoice": "New invoice",
+    "create": "Create invoice",
+    "draftLabel": "Draft invoice",
+    "searchPlaceholder": "Search invoices…",
+    "allStatuses": "All statuses",
+    "noInvoices": "No invoices found",
+    "creatingFromRental": "Creating invoice from rental…",
+    "newInvoiceSubtitle": "Choose a customer to start a blank invoice, or create one directly from a Rental Workspace",
+    "newLineItem": "New line item",
+    "issue": "Issue invoice",
+    "send": "Mark as sent",
+    "cancel": "Cancel invoice",
+    "cancelConfirm": "Are you sure you want to cancel this invoice?",
+    "downloadPdf": "Download PDF",
+    "addLine": "Add line",
+    "statuses": {
+      "DRAFT": "Draft",
+      "ISSUED": "Issued",
+      "SENT": "Sent",
+      "PARTIALLY_PAID": "Partially paid",
+      "PAID": "Paid",
+      "OVERDUE": "Overdue",
+      "CANCELLED": "Cancelled",
+      "CORRECTED": "Corrected"
+    },
+    "summary": {
+      "total": "Total invoices",
+      "sent": "Sent",
+      "overdue": "Overdue",
+      "paid": "Paid"
+    },
+    "sections": {
+      "details": "Details",
+      "items": "Line items",
+      "totals": "Totals"
+    },
+    "fields": {
+      "invoiceNumber": "Invoice number",
+      "status": "Status",
+      "issueDate": "Issue date",
+      "saleDate": "Sale date",
+      "dueDate": "Due date",
+      "currency": "Currency",
+      "description": "Description",
+      "quantity": "Qty",
+      "unit": "Unit",
+      "unitPrice": "Unit price",
+      "taxRate": "VAT",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "tax": "VAT",
+      "total": "Total",
+      "paid": "Paid",
+      "remaining": "Remaining",
+      "notes": "Notes"
+    }
+  },
+  "bankAccount": {
+    "add": "Add bank account",
+    "edit": "Edit bank account",
+    "default": "Default",
+    "inactive": "Inactive",
+    "setDefault": "Set as default",
+    "setAsDefault": "Set as default account",
+    "deactivate": "Deactivate",
+    "deactivateConfirm": "Are you sure you want to deactivate this bank account?",
+    "empty": "No bank accounts added yet",
+    "settings": {
+      "title": "Bank accounts",
+      "subtitle": "Manage the accounts your company receives payments into — shown on invoices and other documents",
+      "navLabel": "Banking"
+    },
+    "fields": {
+      "label": "Label",
+      "bankName": "Bank name",
+      "accountHolder": "Account holder",
+      "accountNumber": "Account number",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "Currency",
+      "bankAddress": "Bank address",
+      "paymentReference": "Payment reference"
+    }
+  },
+  "payment": {
+    "title": "Payments",
+    "record": "Record payment",
+    "empty": "No payments recorded yet",
+    "invalidAmount": "Enter a valid payment amount",
+    "methods": {
+      "BANK_TRANSFER": "Bank transfer",
+      "CASH": "Cash",
+      "CARD": "Card",
+      "OTHER": "Other"
+    },
+    "fields": {
+      "amount": "Amount",
+      "date": "Date",
+      "method": "Method",
+      "reference": "Reference"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "Integrations",
+      "subtitle": "Connect country-specific e-invoicing systems",
+      "navLabel": "Integrations",
+      "noneAvailable": "No integrations are available for your company's country yet"
+    },
+    "status": {
+      "NOT_CONNECTED": "Not connected",
+      "CONNECTED": "Connected",
+      "ERROR": "Error"
+    },
+    "ksef": {
+      "title": "KSeF (Poland)",
+      "status": "Status",
+      "environment": "Environment",
+      "environmentTest": "Test",
+      "environmentProduction": "Production",
+      "credentials": "KSeF token",
+      "credentialsPlaceholder": "Paste your KSeF authorization token",
+      "connect": "Connect",
+      "disconnect": "Disconnect"
     }
   },
   "timeline": {

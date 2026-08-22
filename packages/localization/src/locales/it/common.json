@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "Eliminare {{count}} clienti?",
       "deleteConfirmDescription": "Questa azione elimina definitivamente i clienti selezionati e non può essere annullata.",
       "deletePartialFailure": "{{failed}} su {{total}} non è stato possibile eliminarli."
-    }
+    },
+    "save": "Salva",
+    "edit": "Modifica",
+    "remove": "Rimuovi"
   },
   "nav": {
     "logout": "Esci",
@@ -481,7 +484,8 @@
       "items": "Beni",
       "financial": "Riepilogo finanziario",
       "customer": "Cliente",
-      "documents": "Documenti"
+      "documents": "Documenti",
+      "invoices": "Fatture"
     },
     "documents": {
       "empty": "Ancora nessun documento collegato a questo noleggio",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "Addebita proporzionalmente al giorno",
       "ROUND_UP_TO_FULL_MONTH": "Addebita il mese iniziato come mese completo"
+    },
+    "invoices": {
+      "empty": "Nessuna fattura per questo noleggio finora",
+      "create": "Crea fattura"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "Numero di registrazione",
       "taxNumber": "Partita IVA",
       "address": "Indirizzo dell'azienda",
-      "phone": "Telefono dell'azienda"
+      "phone": "Telefono dell'azienda",
+      "bank": {
+        "label": "Etichetta conto bancario",
+        "bankName": "Nome della banca",
+        "accountHolder": "Intestatario del conto",
+        "accountNumber": "Numero di conto",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "Valuta del conto",
+        "bankAddress": "Indirizzo della banca",
+        "paymentReference": "Causale di pagamento"
+      }
     },
     "customer": {
       "name": "Nome del cliente",
@@ -1292,5 +1311,134 @@
     "notices": "Comunicazioni",
     "jurisdiction": "Legge applicabile e foro competente",
     "additionalConditions": "Condizioni aggiuntive"
+  },
+  "invoice": {
+    "title": "Fatture",
+    "subtitle": "Monitora fatture, stato dei pagamenti e importi per ogni noleggio",
+    "newInvoice": "Nuova fattura",
+    "create": "Crea fattura",
+    "draftLabel": "Bozza fattura",
+    "searchPlaceholder": "Cerca fatture…",
+    "allStatuses": "Tutti gli stati",
+    "noInvoices": "Nessuna fattura trovata",
+    "creatingFromRental": "Creazione fattura dal noleggio…",
+    "newInvoiceSubtitle": "Scegli un cliente per iniziare una fattura vuota, oppure creane una direttamente dall'area di lavoro del noleggio",
+    "newLineItem": "Nuova riga",
+    "issue": "Emetti fattura",
+    "send": "Segna come inviata",
+    "cancel": "Annulla fattura",
+    "cancelConfirm": "Vuoi davvero annullare questa fattura?",
+    "downloadPdf": "Scarica PDF",
+    "addLine": "Aggiungi riga",
+    "statuses": {
+      "DRAFT": "Bozza",
+      "ISSUED": "Emessa",
+      "SENT": "Inviata",
+      "PARTIALLY_PAID": "Parzialmente pagata",
+      "PAID": "Pagata",
+      "OVERDUE": "Scaduta",
+      "CANCELLED": "Annullata",
+      "CORRECTED": "Corretta"
+    },
+    "summary": {
+      "total": "Totale fatture",
+      "sent": "Inviate",
+      "overdue": "Scadute",
+      "paid": "Pagate"
+    },
+    "sections": {
+      "details": "Dettagli",
+      "items": "Righe",
+      "totals": "Totali"
+    },
+    "fields": {
+      "invoiceNumber": "Numero fattura",
+      "status": "Stato",
+      "issueDate": "Data di emissione",
+      "saleDate": "Data di vendita",
+      "dueDate": "Scadenza",
+      "currency": "Valuta",
+      "description": "Descrizione",
+      "quantity": "Qtà",
+      "unit": "Unità",
+      "unitPrice": "Prezzo unitario",
+      "taxRate": "IVA",
+      "subtotal": "Subtotale",
+      "discount": "Sconto",
+      "tax": "IVA",
+      "total": "Totale",
+      "paid": "Pagato",
+      "remaining": "Residuo",
+      "notes": "Note"
+    }
+  },
+  "bankAccount": {
+    "add": "Aggiungi conto bancario",
+    "edit": "Modifica conto bancario",
+    "default": "Predefinito",
+    "inactive": "Inattivo",
+    "setDefault": "Imposta come predefinito",
+    "setAsDefault": "Imposta come conto predefinito",
+    "deactivate": "Disattiva",
+    "deactivateConfirm": "Vuoi davvero disattivare questo conto bancario?",
+    "empty": "Nessun conto bancario aggiunto finora",
+    "settings": {
+      "title": "Conti bancari",
+      "subtitle": "Gestisci i conti su cui la tua azienda riceve i pagamenti, visibili su fatture e altri documenti",
+      "navLabel": "Dati bancari"
+    },
+    "fields": {
+      "label": "Etichetta",
+      "bankName": "Nome della banca",
+      "accountHolder": "Intestatario del conto",
+      "accountNumber": "Numero di conto",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "Valuta",
+      "bankAddress": "Indirizzo della banca",
+      "paymentReference": "Causale di pagamento"
+    }
+  },
+  "payment": {
+    "title": "Pagamenti",
+    "record": "Registra pagamento",
+    "empty": "Nessun pagamento registrato finora",
+    "invalidAmount": "Inserisci un importo di pagamento valido",
+    "methods": {
+      "BANK_TRANSFER": "Bonifico bancario",
+      "CASH": "Contanti",
+      "CARD": "Carta",
+      "OTHER": "Altro"
+    },
+    "fields": {
+      "amount": "Importo",
+      "date": "Data",
+      "method": "Metodo",
+      "reference": "Riferimento"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "Integrazioni",
+      "subtitle": "Collega sistemi di fatturazione elettronica specifici per paese",
+      "navLabel": "Integrazioni",
+      "noneAvailable": "Nessuna integrazione disponibile per il paese della tua azienda al momento"
+    },
+    "status": {
+      "NOT_CONNECTED": "Non connesso",
+      "CONNECTED": "Connesso",
+      "ERROR": "Errore"
+    },
+    "ksef": {
+      "title": "KSeF (Polonia)",
+      "status": "Stato",
+      "environment": "Ambiente",
+      "environmentTest": "Test",
+      "environmentProduction": "Produzione",
+      "credentials": "Token KSeF",
+      "credentialsPlaceholder": "Incolla il tuo token di autorizzazione KSeF",
+      "connect": "Connetti",
+      "disconnect": "Disconnetti"
+    }
   }
 }

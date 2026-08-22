@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "Видалити клієнтів ({{count}})?",
       "deleteConfirmDescription": "Це остаточно видалить вибраних клієнтів. Цю дію не можна скасувати.",
       "deletePartialFailure": "Не вдалося видалити {{failed}} із {{total}}."
-    }
+    },
+    "save": "Зберегти",
+    "edit": "Змінити",
+    "remove": "Видалити"
   },
   "nav": {
     "logout": "Вийти",
@@ -481,7 +484,8 @@
       "items": "Активи",
       "financial": "Фінансовий підсумок",
       "customer": "Клієнт",
-      "documents": "Документи"
+      "documents": "Документи",
+      "invoices": "Рахунки"
     },
     "documents": {
       "empty": "До цієї оренди ще не прив'язано жодного документа",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "Нараховувати пропорційно за дні",
       "ROUND_UP_TO_FULL_MONTH": "Нараховувати розпочатий місяць як повний"
+    },
+    "invoices": {
+      "empty": "Для цієї оренди поки що немає рахунків",
+      "create": "Створити рахунок"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "Реєстраційний номер",
       "taxNumber": "ІПН",
       "address": "Адреса компанії",
-      "phone": "Телефон компанії"
+      "phone": "Телефон компанії",
+      "bank": {
+        "label": "Назва банківського рахунку",
+        "bankName": "Назва банку",
+        "accountHolder": "Власник рахунку",
+        "accountNumber": "Номер рахунку",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "Валюта рахунку",
+        "bankAddress": "Адреса банку",
+        "paymentReference": "Призначення платежу"
+      }
     },
     "customer": {
       "name": "Ім'я клієнта",
@@ -1292,5 +1311,134 @@
     "notices": "Повідомлення",
     "jurisdiction": "Застосовне право та юрисдикція",
     "additionalConditions": "Додаткові умови"
+  },
+  "invoice": {
+    "title": "Рахунки",
+    "subtitle": "Відстежуйте рахунки, статус оплати та суми за кожною орендою",
+    "newInvoice": "Новий рахунок",
+    "create": "Створити рахунок",
+    "draftLabel": "Чернетка рахунку",
+    "searchPlaceholder": "Пошук рахунків…",
+    "allStatuses": "Усі статуси",
+    "noInvoices": "Рахунків не знайдено",
+    "creatingFromRental": "Створення рахунку на основі оренди…",
+    "newInvoiceSubtitle": "Виберіть клієнта, щоб почати з порожнього рахунку, або створіть його прямо з робочої області оренди",
+    "newLineItem": "Нова позиція",
+    "issue": "Виставити рахунок",
+    "send": "Позначити як надіслано",
+    "cancel": "Скасувати рахунок",
+    "cancelConfirm": "Ви впевнені, що хочете скасувати цей рахунок?",
+    "downloadPdf": "Завантажити PDF",
+    "addLine": "Додати позицію",
+    "statuses": {
+      "DRAFT": "Чернетка",
+      "ISSUED": "Виставлено",
+      "SENT": "Надіслано",
+      "PARTIALLY_PAID": "Частково оплачено",
+      "PAID": "Оплачено",
+      "OVERDUE": "Прострочено",
+      "CANCELLED": "Скасовано",
+      "CORRECTED": "Скориговано"
+    },
+    "summary": {
+      "total": "Усього рахунків",
+      "sent": "Надіслано",
+      "overdue": "Прострочено",
+      "paid": "Оплачено"
+    },
+    "sections": {
+      "details": "Деталі",
+      "items": "Позиції",
+      "totals": "Підсумки"
+    },
+    "fields": {
+      "invoiceNumber": "Номер рахунку",
+      "status": "Статус",
+      "issueDate": "Дата виставлення",
+      "saleDate": "Дата продажу",
+      "dueDate": "Термін оплати",
+      "currency": "Валюта",
+      "description": "Найменування",
+      "quantity": "Кількість",
+      "unit": "Од.",
+      "unitPrice": "Ціна за одиницю",
+      "taxRate": "ПДВ",
+      "subtotal": "Сума без ПДВ",
+      "discount": "Знижка",
+      "tax": "ПДВ",
+      "total": "Разом",
+      "paid": "Сплачено",
+      "remaining": "Залишок до сплати",
+      "notes": "Примітки"
+    }
+  },
+  "bankAccount": {
+    "add": "Додати банківський рахунок",
+    "edit": "Редагувати банківський рахунок",
+    "default": "За замовчуванням",
+    "inactive": "Неактивний",
+    "setDefault": "Зробити основним",
+    "setAsDefault": "Встановити як рахунок за замовчуванням",
+    "deactivate": "Деактивувати",
+    "deactivateConfirm": "Ви впевнені, що хочете деактивувати цей банківський рахунок?",
+    "empty": "Банківські рахунки ще не додано",
+    "settings": {
+      "title": "Банківські рахунки",
+      "subtitle": "Керуйте рахунками, на які ваша компанія отримує оплату — вони відображаються на рахунках та інших документах",
+      "navLabel": "Банківські реквізити"
+    },
+    "fields": {
+      "label": "Назва",
+      "bankName": "Назва банку",
+      "accountHolder": "Власник рахунку",
+      "accountNumber": "Номер рахунку",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "Валюта",
+      "bankAddress": "Адреса банку",
+      "paymentReference": "Призначення платежу"
+    }
+  },
+  "payment": {
+    "title": "Платежі",
+    "record": "Зареєструвати платіж",
+    "empty": "Платежі ще не зареєстровано",
+    "invalidAmount": "Введіть коректну суму платежу",
+    "methods": {
+      "BANK_TRANSFER": "Банківський переказ",
+      "CASH": "Готівка",
+      "CARD": "Картка",
+      "OTHER": "Інше"
+    },
+    "fields": {
+      "amount": "Сума",
+      "date": "Дата",
+      "method": "Спосіб",
+      "reference": "Призначення"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "Інтеграції",
+      "subtitle": "Підключіть системи електронного документообігу, специфічні для країни",
+      "navLabel": "Інтеграції",
+      "noneAvailable": "Для країни вашої компанії поки що немає доступних інтеграцій"
+    },
+    "status": {
+      "NOT_CONNECTED": "Не підключено",
+      "CONNECTED": "Підключено",
+      "ERROR": "Помилка"
+    },
+    "ksef": {
+      "title": "KSeF (Польща)",
+      "status": "Статус",
+      "environment": "Середовище",
+      "environmentTest": "Тестове",
+      "environmentProduction": "Промислове",
+      "credentials": "Токен KSeF",
+      "credentialsPlaceholder": "Вставте токен авторизації KSeF",
+      "connect": "Підключити",
+      "disconnect": "Відключити"
+    }
   }
 }

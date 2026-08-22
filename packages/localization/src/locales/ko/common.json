@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "고객 {{count}}명을 삭제하시겠습니까?",
       "deleteConfirmDescription": "선택한 고객을 완전히 삭제합니다. 이 작업은 취소할 수 없습니다.",
       "deletePartialFailure": "총 {{total}}개 중 {{failed}}개를 삭제하지 못했습니다."
-    }
+    },
+    "save": "저장",
+    "edit": "수정",
+    "remove": "제거"
   },
   "nav": {
     "logout": "로그아웃",
@@ -481,7 +484,8 @@
       "items": "자산",
       "financial": "재무 요약",
       "customer": "고객",
-      "documents": "문서"
+      "documents": "문서",
+      "invoices": "청구서"
     },
     "documents": {
       "empty": "이 대여와 연결된 문서가 아직 없습니다",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "일할 계산으로 청구",
       "ROUND_UP_TO_FULL_MONTH": "시작된 월을 전체 월로 청구"
+    },
+    "invoices": {
+      "empty": "이 대여 건에 대한 청구서가 아직 없습니다",
+      "create": "청구서 생성"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "등록 번호",
       "taxNumber": "세금 번호",
       "address": "회사 주소",
-      "phone": "회사 전화번호"
+      "phone": "회사 전화번호",
+      "bank": {
+        "label": "계좌 라벨",
+        "bankName": "은행명",
+        "accountHolder": "예금주",
+        "accountNumber": "계좌번호",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "계좌 통화",
+        "bankAddress": "은행 주소",
+        "paymentReference": "송금 참조번호"
+      }
     },
     "customer": {
       "name": "고객명",
@@ -1292,5 +1311,134 @@
     "notices": "통지",
     "jurisdiction": "준거법 및 관할",
     "additionalConditions": "추가 조건"
+  },
+  "invoice": {
+    "title": "청구서",
+    "subtitle": "각 대여 건의 청구서, 결제 상태, 금액을 추적하세요",
+    "newInvoice": "새 청구서",
+    "create": "청구서 생성",
+    "draftLabel": "임시 청구서",
+    "searchPlaceholder": "청구서 검색…",
+    "allStatuses": "모든 상태",
+    "noInvoices": "청구서를 찾을 수 없습니다",
+    "creatingFromRental": "대여 정보로 청구서를 생성하는 중…",
+    "newInvoiceSubtitle": "고객을 선택해 빈 청구서를 시작하거나, 대여 작업 공간에서 바로 생성하세요",
+    "newLineItem": "새 항목",
+    "issue": "청구서 발행",
+    "send": "발송됨으로 표시",
+    "cancel": "청구서 취소",
+    "cancelConfirm": "이 청구서를 취소하시겠습니까?",
+    "downloadPdf": "PDF 다운로드",
+    "addLine": "항목 추가",
+    "statuses": {
+      "DRAFT": "임시저장",
+      "ISSUED": "발행됨",
+      "SENT": "발송됨",
+      "PARTIALLY_PAID": "부분 결제됨",
+      "PAID": "결제 완료",
+      "OVERDUE": "연체됨",
+      "CANCELLED": "취소됨",
+      "CORRECTED": "정정됨"
+    },
+    "summary": {
+      "total": "전체 청구서",
+      "sent": "발송됨",
+      "overdue": "연체됨",
+      "paid": "결제 완료"
+    },
+    "sections": {
+      "details": "세부 정보",
+      "items": "항목",
+      "totals": "합계"
+    },
+    "fields": {
+      "invoiceNumber": "청구서 번호",
+      "status": "상태",
+      "issueDate": "발행일",
+      "saleDate": "판매일",
+      "dueDate": "결제 기한",
+      "currency": "통화",
+      "description": "품목",
+      "quantity": "수량",
+      "unit": "단위",
+      "unitPrice": "단가",
+      "taxRate": "세율",
+      "subtotal": "소계",
+      "discount": "할인",
+      "tax": "세금",
+      "total": "합계",
+      "paid": "결제됨",
+      "remaining": "미결제 잔액",
+      "notes": "메모"
+    }
+  },
+  "bankAccount": {
+    "add": "계좌 추가",
+    "edit": "계좌 수정",
+    "default": "기본",
+    "inactive": "비활성",
+    "setDefault": "기본으로 설정",
+    "setAsDefault": "기본 계좌로 설정",
+    "deactivate": "비활성화",
+    "deactivateConfirm": "이 계좌를 비활성화하시겠습니까?",
+    "empty": "아직 추가된 계좌가 없습니다",
+    "settings": {
+      "title": "은행 계좌",
+      "subtitle": "회사가 결제를 받는 계좌를 관리하세요 — 청구서 및 기타 문서에 표시됩니다",
+      "navLabel": "계좌 정보"
+    },
+    "fields": {
+      "label": "라벨",
+      "bankName": "은행명",
+      "accountHolder": "예금주",
+      "accountNumber": "계좌번호",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "통화",
+      "bankAddress": "은행 주소",
+      "paymentReference": "송금 참조번호"
+    }
+  },
+  "payment": {
+    "title": "결제",
+    "record": "결제 기록",
+    "empty": "아직 기록된 결제가 없습니다",
+    "invalidAmount": "올바른 결제 금액을 입력하세요",
+    "methods": {
+      "BANK_TRANSFER": "계좌이체",
+      "CASH": "현금",
+      "CARD": "카드",
+      "OTHER": "기타"
+    },
+    "fields": {
+      "amount": "금액",
+      "date": "날짜",
+      "method": "결제 방법",
+      "reference": "참조번호"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "연동",
+      "subtitle": "국가별 전자 세금계산서 시스템을 연결하세요",
+      "navLabel": "연동",
+      "noneAvailable": "회사가 위치한 국가에 대해 아직 이용 가능한 연동이 없습니다"
+    },
+    "status": {
+      "NOT_CONNECTED": "연결되지 않음",
+      "CONNECTED": "연결됨",
+      "ERROR": "오류"
+    },
+    "ksef": {
+      "title": "KSeF (폴란드)",
+      "status": "상태",
+      "environment": "환경",
+      "environmentTest": "테스트",
+      "environmentProduction": "운영",
+      "credentials": "KSeF 토큰",
+      "credentialsPlaceholder": "KSeF 인증 토큰을 붙여넣으세요",
+      "connect": "연결",
+      "disconnect": "연결 해제"
+    }
   }
 }

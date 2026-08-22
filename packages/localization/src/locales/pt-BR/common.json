@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "Excluir {{count}} clientes?",
       "deleteConfirmDescription": "Esta ação exclui permanentemente os clientes selecionados e não pode ser desfeita.",
       "deletePartialFailure": "{{failed}} de {{total}} não puderam ser excluídos."
-    }
+    },
+    "save": "Salvar",
+    "edit": "Editar",
+    "remove": "Remover"
   },
   "nav": {
     "logout": "Sair",
@@ -481,7 +484,8 @@
       "items": "Ativos",
       "financial": "Resumo financeiro",
       "customer": "Cliente",
-      "documents": "Documentos"
+      "documents": "Documentos",
+      "invoices": "Faturas"
     },
     "documents": {
       "empty": "Ainda não há documentos vinculados a esta locação",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "Cobrar proporcionalmente por dia",
       "ROUND_UP_TO_FULL_MONTH": "Cobrar o mês iniciado como mês completo"
+    },
+    "invoices": {
+      "empty": "Ainda não há faturas para esta locação",
+      "create": "Criar fatura"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "Número de registro",
       "taxNumber": "CNPJ",
       "address": "Endereço da empresa",
-      "phone": "Telefone da empresa"
+      "phone": "Telefone da empresa",
+      "bank": {
+        "label": "Rótulo da conta bancária",
+        "bankName": "Nome do banco",
+        "accountHolder": "Titular da conta",
+        "accountNumber": "Número da conta",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "Moeda da conta",
+        "bankAddress": "Endereço do banco",
+        "paymentReference": "Referência de pagamento"
+      }
     },
     "customer": {
       "name": "Nome do cliente",
@@ -1292,5 +1311,134 @@
     "notices": "Notificações",
     "jurisdiction": "Legislação aplicável e foro",
     "additionalConditions": "Condições adicionais"
+  },
+  "invoice": {
+    "title": "Faturas",
+    "subtitle": "Acompanhe faturas, status de pagamento e valores de cada locação",
+    "newInvoice": "Nova fatura",
+    "create": "Criar fatura",
+    "draftLabel": "Rascunho de fatura",
+    "searchPlaceholder": "Buscar faturas…",
+    "allStatuses": "Todos os status",
+    "noInvoices": "Nenhuma fatura encontrada",
+    "creatingFromRental": "Criando fatura a partir da locação…",
+    "newInvoiceSubtitle": "Escolha um cliente para iniciar uma fatura em branco, ou crie uma diretamente a partir do espaço de trabalho da locação",
+    "newLineItem": "Novo item",
+    "issue": "Emitir fatura",
+    "send": "Marcar como enviada",
+    "cancel": "Cancelar fatura",
+    "cancelConfirm": "Tem certeza de que deseja cancelar esta fatura?",
+    "downloadPdf": "Baixar PDF",
+    "addLine": "Adicionar item",
+    "statuses": {
+      "DRAFT": "Rascunho",
+      "ISSUED": "Emitida",
+      "SENT": "Enviada",
+      "PARTIALLY_PAID": "Parcialmente paga",
+      "PAID": "Paga",
+      "OVERDUE": "Vencida",
+      "CANCELLED": "Cancelada",
+      "CORRECTED": "Corrigida"
+    },
+    "summary": {
+      "total": "Total de faturas",
+      "sent": "Enviadas",
+      "overdue": "Vencidas",
+      "paid": "Pagas"
+    },
+    "sections": {
+      "details": "Detalhes",
+      "items": "Itens",
+      "totals": "Totais"
+    },
+    "fields": {
+      "invoiceNumber": "Número da fatura",
+      "status": "Status",
+      "issueDate": "Data de emissão",
+      "saleDate": "Data da venda",
+      "dueDate": "Data de vencimento",
+      "currency": "Moeda",
+      "description": "Descrição",
+      "quantity": "Qtd.",
+      "unit": "Unidade",
+      "unitPrice": "Preço unitário",
+      "taxRate": "Imposto",
+      "subtotal": "Subtotal",
+      "discount": "Desconto",
+      "tax": "Imposto",
+      "total": "Total",
+      "paid": "Pago",
+      "remaining": "Saldo devedor",
+      "notes": "Observações"
+    }
+  },
+  "bankAccount": {
+    "add": "Adicionar conta bancária",
+    "edit": "Editar conta bancária",
+    "default": "Padrão",
+    "inactive": "Inativa",
+    "setDefault": "Definir como padrão",
+    "setAsDefault": "Definir como conta padrão",
+    "deactivate": "Desativar",
+    "deactivateConfirm": "Tem certeza de que deseja desativar esta conta bancária?",
+    "empty": "Nenhuma conta bancária adicionada ainda",
+    "settings": {
+      "title": "Contas bancárias",
+      "subtitle": "Gerencie as contas nas quais sua empresa recebe pagamentos — exibidas em faturas e outros documentos",
+      "navLabel": "Dados bancários"
+    },
+    "fields": {
+      "label": "Rótulo",
+      "bankName": "Nome do banco",
+      "accountHolder": "Titular da conta",
+      "accountNumber": "Número da conta",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "Moeda",
+      "bankAddress": "Endereço do banco",
+      "paymentReference": "Referência de pagamento"
+    }
+  },
+  "payment": {
+    "title": "Pagamentos",
+    "record": "Registrar pagamento",
+    "empty": "Nenhum pagamento registrado ainda",
+    "invalidAmount": "Informe um valor de pagamento válido",
+    "methods": {
+      "BANK_TRANSFER": "Transferência bancária",
+      "CASH": "Dinheiro",
+      "CARD": "Cartão",
+      "OTHER": "Outro"
+    },
+    "fields": {
+      "amount": "Valor",
+      "date": "Data",
+      "method": "Método",
+      "reference": "Referência"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "Integrações",
+      "subtitle": "Conecte sistemas de nota fiscal eletrônica específicos de cada país",
+      "navLabel": "Integrações",
+      "noneAvailable": "Nenhuma integração disponível para o país da sua empresa ainda"
+    },
+    "status": {
+      "NOT_CONNECTED": "Não conectado",
+      "CONNECTED": "Conectado",
+      "ERROR": "Erro"
+    },
+    "ksef": {
+      "title": "KSeF (Polônia)",
+      "status": "Status",
+      "environment": "Ambiente",
+      "environmentTest": "Teste",
+      "environmentProduction": "Produção",
+      "credentials": "Token do KSeF",
+      "credentialsPlaceholder": "Cole seu token de autorização do KSeF",
+      "connect": "Conectar",
+      "disconnect": "Desconectar"
+    }
   }
 }

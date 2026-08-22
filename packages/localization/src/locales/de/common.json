@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "{{count}} Kunden löschen?",
       "deleteConfirmDescription": "Dadurch werden die ausgewählten Kunden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
       "deletePartialFailure": "{{failed}} von {{total}} konnten nicht gelöscht werden."
-    }
+    },
+    "save": "Speichern",
+    "edit": "Bearbeiten",
+    "remove": "Entfernen"
   },
   "nav": {
     "logout": "Abmelden",
@@ -481,7 +484,8 @@
       "items": "Anlagen",
       "financial": "Finanzübersicht",
       "customer": "Kunde",
-      "documents": "Dokumente"
+      "documents": "Dokumente",
+      "invoices": "Rechnungen"
     },
     "documents": {
       "empty": "Dieser Vermietung sind noch keine Dokumente zugeordnet",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "Anteilig nach Tagen berechnen",
       "ROUND_UP_TO_FULL_MONTH": "Angebrochenen Monat als vollen Monat berechnen"
+    },
+    "invoices": {
+      "empty": "Noch keine Rechnungen für diesen Mietvorgang",
+      "create": "Rechnung erstellen"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "Handelsregisternummer",
       "taxNumber": "Steuernummer",
       "address": "Firmenadresse",
-      "phone": "Firmentelefon"
+      "phone": "Firmentelefon",
+      "bank": {
+        "label": "Bankkonto-Bezeichnung",
+        "bankName": "Bankname",
+        "accountHolder": "Kontoinhaber",
+        "accountNumber": "Kontonummer",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "Kontowährung",
+        "bankAddress": "Bankadresse",
+        "paymentReference": "Zahlungsreferenz"
+      }
     },
     "customer": {
       "name": "Kundenname",
@@ -1292,5 +1311,134 @@
     "notices": "Mitteilungen",
     "jurisdiction": "Anwendbares Recht und Gerichtsstand",
     "additionalConditions": "Zusätzliche Bedingungen"
+  },
+  "invoice": {
+    "title": "Rechnungen",
+    "subtitle": "Rechnungen, Zahlungsstatus und Beträge über alle Mietvorgänge hinweg verfolgen",
+    "newInvoice": "Neue Rechnung",
+    "create": "Rechnung erstellen",
+    "draftLabel": "Rechnungsentwurf",
+    "searchPlaceholder": "Rechnungen durchsuchen…",
+    "allStatuses": "Alle Status",
+    "noInvoices": "Keine Rechnungen gefunden",
+    "creatingFromRental": "Rechnung wird aus Mietvorgang erstellt…",
+    "newInvoiceSubtitle": "Wählen Sie einen Kunden für eine leere Rechnung, oder erstellen Sie eine direkt aus dem Mietarbeitsbereich",
+    "newLineItem": "Neue Position",
+    "issue": "Rechnung ausstellen",
+    "send": "Als versendet markieren",
+    "cancel": "Rechnung stornieren",
+    "cancelConfirm": "Möchten Sie diese Rechnung wirklich stornieren?",
+    "downloadPdf": "PDF herunterladen",
+    "addLine": "Position hinzufügen",
+    "statuses": {
+      "DRAFT": "Entwurf",
+      "ISSUED": "Ausgestellt",
+      "SENT": "Versendet",
+      "PARTIALLY_PAID": "Teilweise bezahlt",
+      "PAID": "Bezahlt",
+      "OVERDUE": "Überfällig",
+      "CANCELLED": "Storniert",
+      "CORRECTED": "Korrigiert"
+    },
+    "summary": {
+      "total": "Rechnungen gesamt",
+      "sent": "Versendet",
+      "overdue": "Überfällig",
+      "paid": "Bezahlt"
+    },
+    "sections": {
+      "details": "Details",
+      "items": "Positionen",
+      "totals": "Summen"
+    },
+    "fields": {
+      "invoiceNumber": "Rechnungsnummer",
+      "status": "Status",
+      "issueDate": "Ausstellungsdatum",
+      "saleDate": "Verkaufsdatum",
+      "dueDate": "Fälligkeitsdatum",
+      "currency": "Währung",
+      "description": "Beschreibung",
+      "quantity": "Menge",
+      "unit": "Einheit",
+      "unitPrice": "Einzelpreis",
+      "taxRate": "MwSt.",
+      "subtotal": "Zwischensumme",
+      "discount": "Rabatt",
+      "tax": "MwSt.",
+      "total": "Gesamt",
+      "paid": "Bezahlt",
+      "remaining": "Offener Betrag",
+      "notes": "Notizen"
+    }
+  },
+  "bankAccount": {
+    "add": "Bankkonto hinzufügen",
+    "edit": "Bankkonto bearbeiten",
+    "default": "Standard",
+    "inactive": "Inaktiv",
+    "setDefault": "Als Standard festlegen",
+    "setAsDefault": "Als Standardkonto festlegen",
+    "deactivate": "Deaktivieren",
+    "deactivateConfirm": "Möchten Sie dieses Bankkonto wirklich deaktivieren?",
+    "empty": "Noch keine Bankkonten hinzugefügt",
+    "settings": {
+      "title": "Bankkonten",
+      "subtitle": "Verwalten Sie die Konten, auf die Ihr Unternehmen Zahlungen erhält — sichtbar auf Rechnungen und anderen Dokumenten",
+      "navLabel": "Bankverbindung"
+    },
+    "fields": {
+      "label": "Bezeichnung",
+      "bankName": "Bankname",
+      "accountHolder": "Kontoinhaber",
+      "accountNumber": "Kontonummer",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "Währung",
+      "bankAddress": "Bankadresse",
+      "paymentReference": "Zahlungsreferenz"
+    }
+  },
+  "payment": {
+    "title": "Zahlungen",
+    "record": "Zahlung erfassen",
+    "empty": "Noch keine Zahlungen erfasst",
+    "invalidAmount": "Geben Sie einen gültigen Zahlungsbetrag ein",
+    "methods": {
+      "BANK_TRANSFER": "Überweisung",
+      "CASH": "Bar",
+      "CARD": "Karte",
+      "OTHER": "Sonstige"
+    },
+    "fields": {
+      "amount": "Betrag",
+      "date": "Datum",
+      "method": "Methode",
+      "reference": "Referenz"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "Integrationen",
+      "subtitle": "Länderspezifische E-Rechnungssysteme verbinden",
+      "navLabel": "Integrationen",
+      "noneAvailable": "Für das Land Ihres Unternehmens sind noch keine Integrationen verfügbar"
+    },
+    "status": {
+      "NOT_CONNECTED": "Nicht verbunden",
+      "CONNECTED": "Verbunden",
+      "ERROR": "Fehler"
+    },
+    "ksef": {
+      "title": "KSeF (Polen)",
+      "status": "Status",
+      "environment": "Umgebung",
+      "environmentTest": "Test",
+      "environmentProduction": "Produktion",
+      "credentials": "KSeF-Token",
+      "credentialsPlaceholder": "KSeF-Autorisierungstoken einfügen",
+      "connect": "Verbinden",
+      "disconnect": "Trennen"
+    }
   }
 }

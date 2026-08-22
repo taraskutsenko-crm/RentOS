@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "Удалить клиентов ({{count}})?",
       "deleteConfirmDescription": "Выбранные клиенты будут удалены без возможности восстановления.",
       "deletePartialFailure": "Не удалось удалить {{failed}} из {{total}}."
-    }
+    },
+    "save": "Сохранить",
+    "edit": "Изменить",
+    "remove": "Удалить"
   },
   "nav": {
     "logout": "Выйти",
@@ -481,7 +484,8 @@
       "items": "Активы",
       "financial": "Финансовая сводка",
       "customer": "Клиент",
-      "documents": "Документы"
+      "documents": "Документы",
+      "invoices": "Счета"
     },
     "documents": {
       "empty": "К этой аренде пока не привязаны документы",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "Начислять пропорционально по дням",
       "ROUND_UP_TO_FULL_MONTH": "Начислять начатый месяц как полный"
+    },
+    "invoices": {
+      "empty": "Для этой аренды пока нет счетов",
+      "create": "Создать счёт"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "Регистрационный номер",
       "taxNumber": "ИНН",
       "address": "Адрес компании",
-      "phone": "Телефон компании"
+      "phone": "Телефон компании",
+      "bank": {
+        "label": "Название банковского счёта",
+        "bankName": "Название банка",
+        "accountHolder": "Владелец счёта",
+        "accountNumber": "Номер счёта",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "Валюта счёта",
+        "bankAddress": "Адрес банка",
+        "paymentReference": "Назначение платежа"
+      }
     },
     "customer": {
       "name": "Имя клиента",
@@ -1292,5 +1311,134 @@
     "notices": "Уведомления",
     "jurisdiction": "Применимое право и юрисдикция",
     "additionalConditions": "Дополнительные условия"
+  },
+  "invoice": {
+    "title": "Счета",
+    "subtitle": "Отслеживайте счета, статус оплаты и суммы по каждой аренде",
+    "newInvoice": "Новый счёт",
+    "create": "Создать счёт",
+    "draftLabel": "Черновик счёта",
+    "searchPlaceholder": "Поиск счетов…",
+    "allStatuses": "Все статусы",
+    "noInvoices": "Счета не найдены",
+    "creatingFromRental": "Создание счёта на основе аренды…",
+    "newInvoiceSubtitle": "Выберите клиента, чтобы начать с пустого счёта, или создайте счёт прямо из карточки аренды",
+    "newLineItem": "Новая позиция",
+    "issue": "Выставить счёт",
+    "send": "Отметить как отправленный",
+    "cancel": "Отменить счёт",
+    "cancelConfirm": "Вы уверены, что хотите отменить этот счёт?",
+    "downloadPdf": "Скачать PDF",
+    "addLine": "Добавить позицию",
+    "statuses": {
+      "DRAFT": "Черновик",
+      "ISSUED": "Выставлен",
+      "SENT": "Отправлен",
+      "PARTIALLY_PAID": "Частично оплачен",
+      "PAID": "Оплачен",
+      "OVERDUE": "Просрочен",
+      "CANCELLED": "Отменён",
+      "CORRECTED": "Скорректирован"
+    },
+    "summary": {
+      "total": "Всего счетов",
+      "sent": "Отправлено",
+      "overdue": "Просрочено",
+      "paid": "Оплачено"
+    },
+    "sections": {
+      "details": "Детали",
+      "items": "Позиции",
+      "totals": "Итоги"
+    },
+    "fields": {
+      "invoiceNumber": "Номер счёта",
+      "status": "Статус",
+      "issueDate": "Дата выставления",
+      "saleDate": "Дата продажи",
+      "dueDate": "Срок оплаты",
+      "currency": "Валюта",
+      "description": "Наименование",
+      "quantity": "Кол-во",
+      "unit": "Ед.",
+      "unitPrice": "Цена за единицу",
+      "taxRate": "НДС",
+      "subtotal": "Сумма без НДС",
+      "discount": "Скидка",
+      "tax": "НДС",
+      "total": "Итого",
+      "paid": "Оплачено",
+      "remaining": "Остаток к оплате",
+      "notes": "Примечания"
+    }
+  },
+  "bankAccount": {
+    "add": "Добавить банковский счёт",
+    "edit": "Редактировать банковский счёт",
+    "default": "По умолчанию",
+    "inactive": "Неактивен",
+    "setDefault": "Сделать основным",
+    "setAsDefault": "Установить как счёт по умолчанию",
+    "deactivate": "Деактивировать",
+    "deactivateConfirm": "Вы уверены, что хотите деактивировать этот банковский счёт?",
+    "empty": "Банковские счета ещё не добавлены",
+    "settings": {
+      "title": "Банковские счета",
+      "subtitle": "Управляйте счетами, на которые ваша компания получает оплату — они отображаются на счетах и других документах",
+      "navLabel": "Банковские реквизиты"
+    },
+    "fields": {
+      "label": "Название",
+      "bankName": "Название банка",
+      "accountHolder": "Владелец счёта",
+      "accountNumber": "Номер счёта",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "Валюта",
+      "bankAddress": "Адрес банка",
+      "paymentReference": "Назначение платежа"
+    }
+  },
+  "payment": {
+    "title": "Платежи",
+    "record": "Зарегистрировать платёж",
+    "empty": "Платежи ещё не зарегистрированы",
+    "invalidAmount": "Введите корректную сумму платежа",
+    "methods": {
+      "BANK_TRANSFER": "Банковский перевод",
+      "CASH": "Наличные",
+      "CARD": "Карта",
+      "OTHER": "Другое"
+    },
+    "fields": {
+      "amount": "Сумма",
+      "date": "Дата",
+      "method": "Способ",
+      "reference": "Назначение"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "Интеграции",
+      "subtitle": "Подключите системы электронного документооборота, специфичные для страны",
+      "navLabel": "Интеграции",
+      "noneAvailable": "Для страны вашей компании пока нет доступных интеграций"
+    },
+    "status": {
+      "NOT_CONNECTED": "Не подключено",
+      "CONNECTED": "Подключено",
+      "ERROR": "Ошибка"
+    },
+    "ksef": {
+      "title": "KSeF (Польша)",
+      "status": "Статус",
+      "environment": "Среда",
+      "environmentTest": "Тестовая",
+      "environmentProduction": "Промышленная",
+      "credentials": "Токен KSeF",
+      "credentialsPlaceholder": "Вставьте токен авторизации KSeF",
+      "connect": "Подключить",
+      "disconnect": "Отключить"
+    }
   }
 }

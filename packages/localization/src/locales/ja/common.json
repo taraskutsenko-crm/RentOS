@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "{{count}} 件の顧客を削除しますか？",
       "deleteConfirmDescription": "選択した顧客を完全に削除します。この操作は元に戻せません。",
       "deletePartialFailure": "{{total}} 件中 {{failed}} 件を削除できませんでした。"
-    }
+    },
+    "save": "保存",
+    "edit": "編集",
+    "remove": "削除"
   },
   "nav": {
     "logout": "ログアウト",
@@ -481,7 +484,8 @@
       "items": "資産",
       "financial": "財務概要",
       "customer": "顧客",
-      "documents": "ドキュメント"
+      "documents": "ドキュメント",
+      "invoices": "請求書"
     },
     "documents": {
       "empty": "このレンタルに関連付けられたドキュメントはまだありません",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "日割りで按分請求",
       "ROUND_UP_TO_FULL_MONTH": "開始した月を満月として請求"
+    },
+    "invoices": {
+      "empty": "このレンタルにはまだ請求書がありません",
+      "create": "請求書を作成"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "登録番号",
       "taxNumber": "税番号",
       "address": "会社住所",
-      "phone": "会社電話番号"
+      "phone": "会社電話番号",
+      "bank": {
+        "label": "銀行口座ラベル",
+        "bankName": "銀行名",
+        "accountHolder": "口座名義人",
+        "accountNumber": "口座番号",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "口座通貨",
+        "bankAddress": "銀行住所",
+        "paymentReference": "振込摘要"
+      }
     },
     "customer": {
       "name": "顧客名",
@@ -1292,5 +1311,134 @@
     "notices": "通知",
     "jurisdiction": "準拠法および管轄",
     "additionalConditions": "追加条件"
+  },
+  "invoice": {
+    "title": "請求書",
+    "subtitle": "レンタルごとの請求書、支払状況、金額を追跡します",
+    "newInvoice": "新規請求書",
+    "create": "請求書を作成",
+    "draftLabel": "下書き請求書",
+    "searchPlaceholder": "請求書を検索…",
+    "allStatuses": "すべてのステータス",
+    "noInvoices": "請求書が見つかりません",
+    "creatingFromRental": "レンタルから請求書を作成しています…",
+    "newInvoiceSubtitle": "顧客を選択して空の請求書を作成するか、レンタル画面から直接作成してください",
+    "newLineItem": "新しい明細行",
+    "issue": "請求書を発行",
+    "send": "送付済みにする",
+    "cancel": "請求書をキャンセル",
+    "cancelConfirm": "この請求書をキャンセルしてもよろしいですか?",
+    "downloadPdf": "PDFをダウンロード",
+    "addLine": "明細行を追加",
+    "statuses": {
+      "DRAFT": "下書き",
+      "ISSUED": "発行済み",
+      "SENT": "送付済み",
+      "PARTIALLY_PAID": "一部入金済み",
+      "PAID": "支払済み",
+      "OVERDUE": "支払期限超過",
+      "CANCELLED": "キャンセル済み",
+      "CORRECTED": "訂正済み"
+    },
+    "summary": {
+      "total": "請求書合計",
+      "sent": "送付済み",
+      "overdue": "期限超過",
+      "paid": "支払済み"
+    },
+    "sections": {
+      "details": "詳細",
+      "items": "明細",
+      "totals": "合計"
+    },
+    "fields": {
+      "invoiceNumber": "請求書番号",
+      "status": "ステータス",
+      "issueDate": "発行日",
+      "saleDate": "販売日",
+      "dueDate": "支払期限",
+      "currency": "通貨",
+      "description": "品目",
+      "quantity": "数量",
+      "unit": "単位",
+      "unitPrice": "単価",
+      "taxRate": "税率",
+      "subtotal": "小計",
+      "discount": "割引",
+      "tax": "消費税",
+      "total": "合計",
+      "paid": "入金済み",
+      "remaining": "残額",
+      "notes": "備考"
+    }
+  },
+  "bankAccount": {
+    "add": "銀行口座を追加",
+    "edit": "銀行口座を編集",
+    "default": "既定",
+    "inactive": "無効",
+    "setDefault": "既定に設定",
+    "setAsDefault": "既定の口座に設定",
+    "deactivate": "無効化",
+    "deactivateConfirm": "この銀行口座を無効化してもよろしいですか?",
+    "empty": "銀行口座はまだ追加されていません",
+    "settings": {
+      "title": "銀行口座",
+      "subtitle": "会社が支払いを受け取る口座を管理します — 請求書やその他の書類に表示されます",
+      "navLabel": "銀行情報"
+    },
+    "fields": {
+      "label": "ラベル",
+      "bankName": "銀行名",
+      "accountHolder": "口座名義人",
+      "accountNumber": "口座番号",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "通貨",
+      "bankAddress": "銀行住所",
+      "paymentReference": "振込摘要"
+    }
+  },
+  "payment": {
+    "title": "支払い",
+    "record": "支払いを記録",
+    "empty": "まだ支払いが記録されていません",
+    "invalidAmount": "有効な支払金額を入力してください",
+    "methods": {
+      "BANK_TRANSFER": "銀行振込",
+      "CASH": "現金",
+      "CARD": "カード",
+      "OTHER": "その他"
+    },
+    "fields": {
+      "amount": "金額",
+      "date": "日付",
+      "method": "支払方法",
+      "reference": "摘要"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "連携",
+      "subtitle": "国別の電子請求書システムと連携します",
+      "navLabel": "連携",
+      "noneAvailable": "貴社の所在国で利用可能な連携はまだありません"
+    },
+    "status": {
+      "NOT_CONNECTED": "未接続",
+      "CONNECTED": "接続済み",
+      "ERROR": "エラー"
+    },
+    "ksef": {
+      "title": "KSeF(ポーランド)",
+      "status": "ステータス",
+      "environment": "環境",
+      "environmentTest": "テスト",
+      "environmentProduction": "本番",
+      "credentials": "KSeFトークン",
+      "credentialsPlaceholder": "KSeFの認証トークンを貼り付けてください",
+      "connect": "接続",
+      "disconnect": "切断"
+    }
   }
 }

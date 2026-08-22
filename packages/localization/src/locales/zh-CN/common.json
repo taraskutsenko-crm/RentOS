@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "删除 {{count}} 个客户？",
       "deleteConfirmDescription": "此操作将永久删除所选客户，且无法撤销。",
       "deletePartialFailure": "{{total}} 个中有 {{failed}} 个未能删除。"
-    }
+    },
+    "save": "保存",
+    "edit": "编辑",
+    "remove": "移除"
   },
   "nav": {
     "logout": "退出登录",
@@ -481,7 +484,8 @@
       "items": "资产",
       "financial": "财务摘要",
       "customer": "客户",
-      "documents": "文档"
+      "documents": "文档",
+      "invoices": "发票"
     },
     "documents": {
       "empty": "该租赁尚未关联任何文档",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "按天比例收费",
       "ROUND_UP_TO_FULL_MONTH": "已开始的月份按整月收费"
+    },
+    "invoices": {
+      "empty": "此租赁暂无发票",
+      "create": "创建发票"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "注册号",
       "taxNumber": "税号",
       "address": "公司地址",
-      "phone": "公司电话"
+      "phone": "公司电话",
+      "bank": {
+        "label": "银行账户名称",
+        "bankName": "银行名称",
+        "accountHolder": "账户持有人",
+        "accountNumber": "账号",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "账户币种",
+        "bankAddress": "银行地址",
+        "paymentReference": "付款备注"
+      }
     },
     "customer": {
       "name": "客户姓名",
@@ -1292,5 +1311,134 @@
     "notices": "通知",
     "jurisdiction": "适用法律与管辖权",
     "additionalConditions": "附加条件"
+  },
+  "invoice": {
+    "title": "发票",
+    "subtitle": "跟踪每笔租赁的发票、付款状态和金额",
+    "newInvoice": "新建发票",
+    "create": "创建发票",
+    "draftLabel": "发票草稿",
+    "searchPlaceholder": "搜索发票…",
+    "allStatuses": "所有状态",
+    "noInvoices": "未找到发票",
+    "creatingFromRental": "正在根据租赁创建发票…",
+    "newInvoiceSubtitle": "选择客户以创建空白发票，或直接从租赁工作区创建",
+    "newLineItem": "新增行项目",
+    "issue": "开具发票",
+    "send": "标记为已发送",
+    "cancel": "取消发票",
+    "cancelConfirm": "确定要取消此发票吗？",
+    "downloadPdf": "下载 PDF",
+    "addLine": "添加行项目",
+    "statuses": {
+      "DRAFT": "草稿",
+      "ISSUED": "已开具",
+      "SENT": "已发送",
+      "PARTIALLY_PAID": "部分已付",
+      "PAID": "已付款",
+      "OVERDUE": "已逾期",
+      "CANCELLED": "已取消",
+      "CORRECTED": "已更正"
+    },
+    "summary": {
+      "total": "发票总数",
+      "sent": "已发送",
+      "overdue": "已逾期",
+      "paid": "已付款"
+    },
+    "sections": {
+      "details": "详情",
+      "items": "行项目",
+      "totals": "合计"
+    },
+    "fields": {
+      "invoiceNumber": "发票号码",
+      "status": "状态",
+      "issueDate": "开票日期",
+      "saleDate": "销售日期",
+      "dueDate": "到期日",
+      "currency": "币种",
+      "description": "品名",
+      "quantity": "数量",
+      "unit": "单位",
+      "unitPrice": "单价",
+      "taxRate": "税率",
+      "subtotal": "小计",
+      "discount": "折扣",
+      "tax": "税额",
+      "total": "合计",
+      "paid": "已付",
+      "remaining": "尚欠金额",
+      "notes": "备注"
+    }
+  },
+  "bankAccount": {
+    "add": "添加银行账户",
+    "edit": "编辑银行账户",
+    "default": "默认",
+    "inactive": "已停用",
+    "setDefault": "设为默认",
+    "setAsDefault": "设为默认账户",
+    "deactivate": "停用",
+    "deactivateConfirm": "确定要停用此银行账户吗？",
+    "empty": "尚未添加任何银行账户",
+    "settings": {
+      "title": "银行账户",
+      "subtitle": "管理贵公司用于接收付款的账户 — 会显示在发票及其他文件上",
+      "navLabel": "银行信息"
+    },
+    "fields": {
+      "label": "名称",
+      "bankName": "银行名称",
+      "accountHolder": "账户持有人",
+      "accountNumber": "账号",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "币种",
+      "bankAddress": "银行地址",
+      "paymentReference": "付款备注"
+    }
+  },
+  "payment": {
+    "title": "付款",
+    "record": "记录付款",
+    "empty": "尚未记录任何付款",
+    "invalidAmount": "请输入有效的付款金额",
+    "methods": {
+      "BANK_TRANSFER": "银行转账",
+      "CASH": "现金",
+      "CARD": "银行卡",
+      "OTHER": "其他"
+    },
+    "fields": {
+      "amount": "金额",
+      "date": "日期",
+      "method": "付款方式",
+      "reference": "备注"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "集成",
+      "subtitle": "连接特定国家/地区的电子发票系统",
+      "navLabel": "集成",
+      "noneAvailable": "贵公司所在国家/地区暂无可用的集成"
+    },
+    "status": {
+      "NOT_CONNECTED": "未连接",
+      "CONNECTED": "已连接",
+      "ERROR": "错误"
+    },
+    "ksef": {
+      "title": "KSeF（波兰）",
+      "status": "状态",
+      "environment": "环境",
+      "environmentTest": "测试",
+      "environmentProduction": "生产",
+      "credentials": "KSeF 令牌",
+      "credentialsPlaceholder": "粘贴您的 KSeF 授权令牌",
+      "connect": "连接",
+      "disconnect": "断开连接"
+    }
   }
 }

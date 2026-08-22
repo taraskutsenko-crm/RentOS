@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "Supprimer {{count}} clients ?",
       "deleteConfirmDescription": "Cette action supprime définitivement les clients sélectionnés. Elle est irréversible.",
       "deletePartialFailure": "{{failed}} sur {{total}} n'ont pas pu être supprimés."
-    }
+    },
+    "save": "Enregistrer",
+    "edit": "Modifier",
+    "remove": "Supprimer"
   },
   "nav": {
     "logout": "Déconnexion",
@@ -481,7 +484,8 @@
       "items": "Actifs",
       "financial": "Résumé financier",
       "customer": "Client",
-      "documents": "Documents"
+      "documents": "Documents",
+      "invoices": "Factures"
     },
     "documents": {
       "empty": "Aucun document lié à cette location pour l'instant",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "Facturer au prorata par jour",
       "ROUND_UP_TO_FULL_MONTH": "Facturer le mois entamé comme un mois complet"
+    },
+    "invoices": {
+      "empty": "Aucune facture pour cette location pour le moment",
+      "create": "Créer une facture"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "Numéro d'immatriculation",
       "taxNumber": "Numéro de TVA",
       "address": "Adresse de l'entreprise",
-      "phone": "Téléphone de l'entreprise"
+      "phone": "Téléphone de l'entreprise",
+      "bank": {
+        "label": "Libellé du compte bancaire",
+        "bankName": "Nom de la banque",
+        "accountHolder": "Titulaire du compte",
+        "accountNumber": "Numéro de compte",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "Devise du compte",
+        "bankAddress": "Adresse de la banque",
+        "paymentReference": "Référence de paiement"
+      }
     },
     "customer": {
       "name": "Nom du client",
@@ -1292,5 +1311,134 @@
     "notices": "Notifications",
     "jurisdiction": "Droit applicable et juridiction",
     "additionalConditions": "Conditions supplémentaires"
+  },
+  "invoice": {
+    "title": "Factures",
+    "subtitle": "Suivez les factures, le statut des paiements et les montants pour chaque location",
+    "newInvoice": "Nouvelle facture",
+    "create": "Créer une facture",
+    "draftLabel": "Facture brouillon",
+    "searchPlaceholder": "Rechercher des factures…",
+    "allStatuses": "Tous les statuts",
+    "noInvoices": "Aucune facture trouvée",
+    "creatingFromRental": "Création de la facture à partir de la location…",
+    "newInvoiceSubtitle": "Choisissez un client pour démarrer une facture vierge, ou créez-en une directement depuis l'espace de location",
+    "newLineItem": "Nouvelle ligne",
+    "issue": "Émettre la facture",
+    "send": "Marquer comme envoyée",
+    "cancel": "Annuler la facture",
+    "cancelConfirm": "Voulez-vous vraiment annuler cette facture ?",
+    "downloadPdf": "Télécharger le PDF",
+    "addLine": "Ajouter une ligne",
+    "statuses": {
+      "DRAFT": "Brouillon",
+      "ISSUED": "Émise",
+      "SENT": "Envoyée",
+      "PARTIALLY_PAID": "Partiellement payée",
+      "PAID": "Payée",
+      "OVERDUE": "En retard",
+      "CANCELLED": "Annulée",
+      "CORRECTED": "Corrigée"
+    },
+    "summary": {
+      "total": "Total des factures",
+      "sent": "Envoyées",
+      "overdue": "En retard",
+      "paid": "Payées"
+    },
+    "sections": {
+      "details": "Détails",
+      "items": "Lignes",
+      "totals": "Totaux"
+    },
+    "fields": {
+      "invoiceNumber": "Numéro de facture",
+      "status": "Statut",
+      "issueDate": "Date d'émission",
+      "saleDate": "Date de vente",
+      "dueDate": "Date d'échéance",
+      "currency": "Devise",
+      "description": "Description",
+      "quantity": "Qté",
+      "unit": "Unité",
+      "unitPrice": "Prix unitaire",
+      "taxRate": "TVA",
+      "subtotal": "Sous-total",
+      "discount": "Remise",
+      "tax": "TVA",
+      "total": "Total",
+      "paid": "Payé",
+      "remaining": "Restant dû",
+      "notes": "Notes"
+    }
+  },
+  "bankAccount": {
+    "add": "Ajouter un compte bancaire",
+    "edit": "Modifier le compte bancaire",
+    "default": "Par défaut",
+    "inactive": "Inactif",
+    "setDefault": "Définir par défaut",
+    "setAsDefault": "Définir comme compte par défaut",
+    "deactivate": "Désactiver",
+    "deactivateConfirm": "Voulez-vous vraiment désactiver ce compte bancaire ?",
+    "empty": "Aucun compte bancaire ajouté pour le moment",
+    "settings": {
+      "title": "Comptes bancaires",
+      "subtitle": "Gérez les comptes sur lesquels votre entreprise reçoit les paiements — affichés sur les factures et autres documents",
+      "navLabel": "Coordonnées bancaires"
+    },
+    "fields": {
+      "label": "Libellé",
+      "bankName": "Nom de la banque",
+      "accountHolder": "Titulaire du compte",
+      "accountNumber": "Numéro de compte",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "Devise",
+      "bankAddress": "Adresse de la banque",
+      "paymentReference": "Référence de paiement"
+    }
+  },
+  "payment": {
+    "title": "Paiements",
+    "record": "Enregistrer un paiement",
+    "empty": "Aucun paiement enregistré pour le moment",
+    "invalidAmount": "Saisissez un montant de paiement valide",
+    "methods": {
+      "BANK_TRANSFER": "Virement bancaire",
+      "CASH": "Espèces",
+      "CARD": "Carte",
+      "OTHER": "Autre"
+    },
+    "fields": {
+      "amount": "Montant",
+      "date": "Date",
+      "method": "Méthode",
+      "reference": "Référence"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "Intégrations",
+      "subtitle": "Connectez des systèmes de facturation électronique spécifiques à un pays",
+      "navLabel": "Intégrations",
+      "noneAvailable": "Aucune intégration disponible pour le pays de votre entreprise pour le moment"
+    },
+    "status": {
+      "NOT_CONNECTED": "Non connecté",
+      "CONNECTED": "Connecté",
+      "ERROR": "Erreur"
+    },
+    "ksef": {
+      "title": "KSeF (Pologne)",
+      "status": "Statut",
+      "environment": "Environnement",
+      "environmentTest": "Test",
+      "environmentProduction": "Production",
+      "credentials": "Jeton KSeF",
+      "credentialsPlaceholder": "Collez votre jeton d'autorisation KSeF",
+      "connect": "Connecter",
+      "disconnect": "Déconnecter"
+    }
   }
 }

@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "Usunąć {{count}} klientów?",
       "deleteConfirmDescription": "Spowoduje to trwałe usunięcie wybranych klientów. Tej czynności nie można cofnąć.",
       "deletePartialFailure": "Nie udało się usunąć {{failed}} z {{total}}."
-    }
+    },
+    "save": "Zapisz",
+    "edit": "Edytuj",
+    "remove": "Usuń"
   },
   "nav": {
     "logout": "Wyloguj się",
@@ -481,7 +484,8 @@
       "items": "Aktywa",
       "financial": "Podsumowanie finansowe",
       "customer": "Klient",
-      "documents": "Dokumenty"
+      "documents": "Dokumenty",
+      "invoices": "Faktury"
     },
     "documents": {
       "empty": "Do tego wynajmu nie przypisano jeszcze żadnych dokumentów",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "Naliczaj proporcjonalnie za dzień",
       "ROUND_UP_TO_FULL_MONTH": "Naliczaj rozpoczęty miesiąc jako pełny"
+    },
+    "invoices": {
+      "empty": "Brak faktur dla tego wynajmu",
+      "create": "Utwórz fakturę"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "Numer rejestracyjny",
       "taxNumber": "NIP",
       "address": "Adres firmy",
-      "phone": "Telefon firmy"
+      "phone": "Telefon firmy",
+      "bank": {
+        "label": "Nazwa rachunku bankowego",
+        "bankName": "Nazwa banku",
+        "accountHolder": "Właściciel rachunku",
+        "accountNumber": "Numer rachunku",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "Waluta rachunku",
+        "bankAddress": "Adres banku",
+        "paymentReference": "Tytuł przelewu"
+      }
     },
     "customer": {
       "name": "Imię i nazwisko klienta",
@@ -1292,5 +1311,134 @@
     "notices": "Zawiadomienia",
     "jurisdiction": "Prawo właściwe i jurysdykcja",
     "additionalConditions": "Dodatkowe warunki"
+  },
+  "invoice": {
+    "title": "Faktury",
+    "subtitle": "Śledź faktury, status płatności i kwoty dla każdego wynajmu",
+    "newInvoice": "Nowa faktura",
+    "create": "Utwórz fakturę",
+    "draftLabel": "Faktura robocza",
+    "searchPlaceholder": "Szukaj faktur…",
+    "allStatuses": "Wszystkie statusy",
+    "noInvoices": "Nie znaleziono faktur",
+    "creatingFromRental": "Tworzenie faktury z wynajmu…",
+    "newInvoiceSubtitle": "Wybierz klienta, aby rozpocząć pustą fakturę, lub utwórz ją bezpośrednio z widoku wynajmu",
+    "newLineItem": "Nowa pozycja",
+    "issue": "Wystaw fakturę",
+    "send": "Oznacz jako wysłaną",
+    "cancel": "Anuluj fakturę",
+    "cancelConfirm": "Czy na pewno chcesz anulować tę fakturę?",
+    "downloadPdf": "Pobierz PDF",
+    "addLine": "Dodaj pozycję",
+    "statuses": {
+      "DRAFT": "Robocza",
+      "ISSUED": "Wystawiona",
+      "SENT": "Wysłana",
+      "PARTIALLY_PAID": "Częściowo opłacona",
+      "PAID": "Opłacona",
+      "OVERDUE": "Przeterminowana",
+      "CANCELLED": "Anulowana",
+      "CORRECTED": "Skorygowana"
+    },
+    "summary": {
+      "total": "Wszystkie faktury",
+      "sent": "Wysłane",
+      "overdue": "Przeterminowane",
+      "paid": "Opłacone"
+    },
+    "sections": {
+      "details": "Szczegóły",
+      "items": "Pozycje",
+      "totals": "Podsumowanie"
+    },
+    "fields": {
+      "invoiceNumber": "Numer faktury",
+      "status": "Status",
+      "issueDate": "Data wystawienia",
+      "saleDate": "Data sprzedaży",
+      "dueDate": "Termin płatności",
+      "currency": "Waluta",
+      "description": "Nazwa towaru/usługi",
+      "quantity": "Ilość",
+      "unit": "J.m.",
+      "unitPrice": "Cena jednostkowa",
+      "taxRate": "VAT",
+      "subtotal": "Razem netto",
+      "discount": "Rabat",
+      "tax": "VAT",
+      "total": "Razem",
+      "paid": "Zapłacono",
+      "remaining": "Do zapłaty",
+      "notes": "Uwagi"
+    }
+  },
+  "bankAccount": {
+    "add": "Dodaj rachunek bankowy",
+    "edit": "Edytuj rachunek bankowy",
+    "default": "Domyślny",
+    "inactive": "Nieaktywny",
+    "setDefault": "Ustaw jako domyślny",
+    "setAsDefault": "Ustaw jako domyślny rachunek",
+    "deactivate": "Dezaktywuj",
+    "deactivateConfirm": "Czy na pewno chcesz dezaktywować ten rachunek bankowy?",
+    "empty": "Nie dodano jeszcze żadnego rachunku bankowego",
+    "settings": {
+      "title": "Rachunki bankowe",
+      "subtitle": "Zarządzaj rachunkami, na które Twoja firma przyjmuje płatności — widoczne na fakturach i innych dokumentach",
+      "navLabel": "Bankowość"
+    },
+    "fields": {
+      "label": "Nazwa",
+      "bankName": "Nazwa banku",
+      "accountHolder": "Właściciel rachunku",
+      "accountNumber": "Numer rachunku",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "Waluta",
+      "bankAddress": "Adres banku",
+      "paymentReference": "Tytuł przelewu"
+    }
+  },
+  "payment": {
+    "title": "Płatności",
+    "record": "Zarejestruj płatność",
+    "empty": "Nie zarejestrowano jeszcze żadnej płatności",
+    "invalidAmount": "Podaj prawidłową kwotę płatności",
+    "methods": {
+      "BANK_TRANSFER": "Przelew bankowy",
+      "CASH": "Gotówka",
+      "CARD": "Karta",
+      "OTHER": "Inne"
+    },
+    "fields": {
+      "amount": "Kwota",
+      "date": "Data",
+      "method": "Metoda",
+      "reference": "Tytuł"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "Integracje",
+      "subtitle": "Połącz systemy e-fakturowania właściwe dla Twojego kraju",
+      "navLabel": "Integracje",
+      "noneAvailable": "Brak dostępnych integracji dla kraju Twojej firmy"
+    },
+    "status": {
+      "NOT_CONNECTED": "Niepołączono",
+      "CONNECTED": "Połączono",
+      "ERROR": "Błąd"
+    },
+    "ksef": {
+      "title": "KSeF (Polska)",
+      "status": "Status",
+      "environment": "Środowisko",
+      "environmentTest": "Testowe",
+      "environmentProduction": "Produkcyjne",
+      "credentials": "Token KSeF",
+      "credentialsPlaceholder": "Wklej token autoryzacyjny KSeF",
+      "connect": "Połącz",
+      "disconnect": "Rozłącz"
+    }
   }
 }

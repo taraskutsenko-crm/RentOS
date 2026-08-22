@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "Odstranit {{count}} zákazníků?",
       "deleteConfirmDescription": "Tato akce trvale odstraní vybrané zákazníky. Nelze ji vrátit zpět.",
       "deletePartialFailure": "{{failed}} z {{total}} nebylo možné odstranit."
-    }
+    },
+    "save": "Uložit",
+    "edit": "Upravit",
+    "remove": "Odebrat"
   },
   "nav": {
     "logout": "Odhlásit se",
@@ -481,7 +484,8 @@
       "items": "Majetek",
       "financial": "Finanční přehled",
       "customer": "Zákazník",
-      "documents": "Dokumenty"
+      "documents": "Dokumenty",
+      "invoices": "Faktury"
     },
     "documents": {
       "empty": "K tomuto pronájmu zatím nejsou přiřazeny žádné dokumenty",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "Účtovat poměrně podle dnů",
       "ROUND_UP_TO_FULL_MONTH": "Účtovat započatý měsíc jako celý"
+    },
+    "invoices": {
+      "empty": "Pro tento pronájem zatím nejsou žádné faktury",
+      "create": "Vytvořit fakturu"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "Registrační číslo",
       "taxNumber": "DIČ",
       "address": "Adresa společnosti",
-      "phone": "Telefon společnosti"
+      "phone": "Telefon společnosti",
+      "bank": {
+        "label": "Označení bankovního účtu",
+        "bankName": "Název banky",
+        "accountHolder": "Majitel účtu",
+        "accountNumber": "Číslo účtu",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "Měna účtu",
+        "bankAddress": "Adresa banky",
+        "paymentReference": "Variabilní symbol"
+      }
     },
     "customer": {
       "name": "Jméno zákazníka",
@@ -1292,5 +1311,134 @@
     "notices": "Oznámení",
     "jurisdiction": "Rozhodné právo a příslušnost",
     "additionalConditions": "Další podmínky"
+  },
+  "invoice": {
+    "title": "Faktury",
+    "subtitle": "Sledujte faktury, stav platby a částky napříč pronájmy",
+    "newInvoice": "Nová faktura",
+    "create": "Vytvořit fakturu",
+    "draftLabel": "Návrh faktury",
+    "searchPlaceholder": "Hledat faktury…",
+    "allStatuses": "Všechny stavy",
+    "noInvoices": "Nebyly nalezeny žádné faktury",
+    "creatingFromRental": "Vytváření faktury z pronájmu…",
+    "newInvoiceSubtitle": "Vyberte zákazníka a začněte s prázdnou fakturou, nebo ji vytvořte přímo z pracovního prostoru pronájmu",
+    "newLineItem": "Nová položka",
+    "issue": "Vystavit fakturu",
+    "send": "Označit jako odesláno",
+    "cancel": "Zrušit fakturu",
+    "cancelConfirm": "Opravdu chcete tuto fakturu zrušit?",
+    "downloadPdf": "Stáhnout PDF",
+    "addLine": "Přidat položku",
+    "statuses": {
+      "DRAFT": "Návrh",
+      "ISSUED": "Vystavena",
+      "SENT": "Odeslána",
+      "PARTIALLY_PAID": "Částečně uhrazena",
+      "PAID": "Uhrazena",
+      "OVERDUE": "Po splatnosti",
+      "CANCELLED": "Zrušena",
+      "CORRECTED": "Opravena"
+    },
+    "summary": {
+      "total": "Celkem faktur",
+      "sent": "Odesláno",
+      "overdue": "Po splatnosti",
+      "paid": "Uhrazeno"
+    },
+    "sections": {
+      "details": "Podrobnosti",
+      "items": "Položky",
+      "totals": "Součty"
+    },
+    "fields": {
+      "invoiceNumber": "Číslo faktury",
+      "status": "Stav",
+      "issueDate": "Datum vystavení",
+      "saleDate": "Datum uskutečnění plnění",
+      "dueDate": "Datum splatnosti",
+      "currency": "Měna",
+      "description": "Popis",
+      "quantity": "Množství",
+      "unit": "Jednotka",
+      "unitPrice": "Jednotková cena",
+      "taxRate": "DPH",
+      "subtotal": "Mezisoučet",
+      "discount": "Sleva",
+      "tax": "DPH",
+      "total": "Celkem",
+      "paid": "Uhrazeno",
+      "remaining": "Zbývá uhradit",
+      "notes": "Poznámky"
+    }
+  },
+  "bankAccount": {
+    "add": "Přidat bankovní účet",
+    "edit": "Upravit bankovní účet",
+    "default": "Výchozí",
+    "inactive": "Neaktivní",
+    "setDefault": "Nastavit jako výchozí",
+    "setAsDefault": "Nastavit jako výchozí účet",
+    "deactivate": "Deaktivovat",
+    "deactivateConfirm": "Opravdu chcete tento bankovní účet deaktivovat?",
+    "empty": "Zatím nebyl přidán žádný bankovní účet",
+    "settings": {
+      "title": "Bankovní účty",
+      "subtitle": "Spravujte účty, na které vaše firma přijímá platby — zobrazují se na fakturách a dalších dokumentech",
+      "navLabel": "Bankovní spojení"
+    },
+    "fields": {
+      "label": "Označení",
+      "bankName": "Název banky",
+      "accountHolder": "Majitel účtu",
+      "accountNumber": "Číslo účtu",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "Měna",
+      "bankAddress": "Adresa banky",
+      "paymentReference": "Variabilní symbol"
+    }
+  },
+  "payment": {
+    "title": "Platby",
+    "record": "Zaznamenat platbu",
+    "empty": "Zatím nebyla zaznamenána žádná platba",
+    "invalidAmount": "Zadejte platnou částku platby",
+    "methods": {
+      "BANK_TRANSFER": "Bankovní převod",
+      "CASH": "Hotovost",
+      "CARD": "Karta",
+      "OTHER": "Jiné"
+    },
+    "fields": {
+      "amount": "Částka",
+      "date": "Datum",
+      "method": "Způsob",
+      "reference": "Reference"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "Integrace",
+      "subtitle": "Propojte systémy elektronické fakturace specifické pro danou zemi",
+      "navLabel": "Integrace",
+      "noneAvailable": "Pro zemi vaší firmy zatím nejsou k dispozici žádné integrace"
+    },
+    "status": {
+      "NOT_CONNECTED": "Nepřipojeno",
+      "CONNECTED": "Připojeno",
+      "ERROR": "Chyba"
+    },
+    "ksef": {
+      "title": "KSeF (Polsko)",
+      "status": "Stav",
+      "environment": "Prostředí",
+      "environmentTest": "Testovací",
+      "environmentProduction": "Produkční",
+      "credentials": "Token KSeF",
+      "credentialsPlaceholder": "Vložte svůj autorizační token KSeF",
+      "connect": "Připojit",
+      "disconnect": "Odpojit"
+    }
   }
 }

@@ -91,7 +91,10 @@
       "deleteConfirmTitle": "{{count}} klanten verwijderen?",
       "deleteConfirmDescription": "Dit verwijdert de geselecteerde klanten permanent. Dit kan niet ongedaan worden gemaakt.",
       "deletePartialFailure": "{{failed}} van {{total}} konden niet worden verwijderd."
-    }
+    },
+    "save": "Opslaan",
+    "edit": "Bewerken",
+    "remove": "Verwijderen"
   },
   "nav": {
     "logout": "Uitloggen",
@@ -481,7 +484,8 @@
       "items": "Bezittingen",
       "financial": "Financieel overzicht",
       "customer": "Klant",
-      "documents": "Documenten"
+      "documents": "Documenten",
+      "invoices": "Facturen"
     },
     "documents": {
       "empty": "Nog geen documenten gekoppeld aan deze verhuur",
@@ -623,6 +627,10 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "Naar rato per dag berekenen",
       "ROUND_UP_TO_FULL_MONTH": "Begonnen maand als volledige maand berekenen"
+    },
+    "invoices": {
+      "empty": "Nog geen facturen voor deze verhuur",
+      "create": "Factuur aanmaken"
     }
   },
   "quote": {
@@ -1221,7 +1229,18 @@
       "registrationNumber": "Registratienummer",
       "taxNumber": "Btw-nummer",
       "address": "Bedrijfsadres",
-      "phone": "Bedrijfstelefoon"
+      "phone": "Bedrijfstelefoon",
+      "bank": {
+        "label": "Label bankrekening",
+        "bankName": "Banknaam",
+        "accountHolder": "Rekeninghouder",
+        "accountNumber": "Rekeningnummer",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "currency": "Valuta van de rekening",
+        "bankAddress": "Adres van de bank",
+        "paymentReference": "Betalingskenmerk"
+      }
     },
     "customer": {
       "name": "Naam klant",
@@ -1292,5 +1311,134 @@
     "notices": "Kennisgevingen",
     "jurisdiction": "Toepasselijk recht en bevoegde rechter",
     "additionalConditions": "Aanvullende voorwaarden"
+  },
+  "invoice": {
+    "title": "Facturen",
+    "subtitle": "Volg facturen, betaalstatus en bedragen voor elke verhuur",
+    "newInvoice": "Nieuwe factuur",
+    "create": "Factuur aanmaken",
+    "draftLabel": "Conceptfactuur",
+    "searchPlaceholder": "Facturen zoeken…",
+    "allStatuses": "Alle statussen",
+    "noInvoices": "Geen facturen gevonden",
+    "creatingFromRental": "Factuur wordt aangemaakt vanuit verhuur…",
+    "newInvoiceSubtitle": "Kies een klant om met een lege factuur te beginnen, of maak er direct één aan vanuit de verhuurwerkruimte",
+    "newLineItem": "Nieuwe regel",
+    "issue": "Factuur uitgeven",
+    "send": "Markeren als verzonden",
+    "cancel": "Factuur annuleren",
+    "cancelConfirm": "Weet u zeker dat u deze factuur wilt annuleren?",
+    "downloadPdf": "PDF downloaden",
+    "addLine": "Regel toevoegen",
+    "statuses": {
+      "DRAFT": "Concept",
+      "ISSUED": "Uitgegeven",
+      "SENT": "Verzonden",
+      "PARTIALLY_PAID": "Gedeeltelijk betaald",
+      "PAID": "Betaald",
+      "OVERDUE": "Achterstallig",
+      "CANCELLED": "Geannuleerd",
+      "CORRECTED": "Gecorrigeerd"
+    },
+    "summary": {
+      "total": "Totaal facturen",
+      "sent": "Verzonden",
+      "overdue": "Achterstallig",
+      "paid": "Betaald"
+    },
+    "sections": {
+      "details": "Details",
+      "items": "Regels",
+      "totals": "Totalen"
+    },
+    "fields": {
+      "invoiceNumber": "Factuurnummer",
+      "status": "Status",
+      "issueDate": "Factuurdatum",
+      "saleDate": "Verkoopdatum",
+      "dueDate": "Vervaldatum",
+      "currency": "Valuta",
+      "description": "Omschrijving",
+      "quantity": "Aantal",
+      "unit": "Eenheid",
+      "unitPrice": "Stukprijs",
+      "taxRate": "Btw",
+      "subtotal": "Subtotaal",
+      "discount": "Korting",
+      "tax": "Btw",
+      "total": "Totaal",
+      "paid": "Betaald",
+      "remaining": "Openstaand",
+      "notes": "Notities"
+    }
+  },
+  "bankAccount": {
+    "add": "Bankrekening toevoegen",
+    "edit": "Bankrekening bewerken",
+    "default": "Standaard",
+    "inactive": "Inactief",
+    "setDefault": "Als standaard instellen",
+    "setAsDefault": "Als standaardrekening instellen",
+    "deactivate": "Deactiveren",
+    "deactivateConfirm": "Weet u zeker dat u deze bankrekening wilt deactiveren?",
+    "empty": "Nog geen bankrekeningen toegevoegd",
+    "settings": {
+      "title": "Bankrekeningen",
+      "subtitle": "Beheer de rekeningen waarop uw bedrijf betalingen ontvangt — zichtbaar op facturen en andere documenten",
+      "navLabel": "Bankgegevens"
+    },
+    "fields": {
+      "label": "Label",
+      "bankName": "Banknaam",
+      "accountHolder": "Rekeninghouder",
+      "accountNumber": "Rekeningnummer",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT/BIC",
+      "currency": "Valuta",
+      "bankAddress": "Adres van de bank",
+      "paymentReference": "Betalingskenmerk"
+    }
+  },
+  "payment": {
+    "title": "Betalingen",
+    "record": "Betaling registreren",
+    "empty": "Nog geen betalingen geregistreerd",
+    "invalidAmount": "Voer een geldig betaalbedrag in",
+    "methods": {
+      "BANK_TRANSFER": "Bankoverschrijving",
+      "CASH": "Contant",
+      "CARD": "Kaart",
+      "OTHER": "Anders"
+    },
+    "fields": {
+      "amount": "Bedrag",
+      "date": "Datum",
+      "method": "Methode",
+      "reference": "Referentie"
+    }
+  },
+  "integration": {
+    "settings": {
+      "title": "Integraties",
+      "subtitle": "Verbind landspecifieke e-facturatiesystemen",
+      "navLabel": "Integraties",
+      "noneAvailable": "Er zijn nog geen integraties beschikbaar voor het land van uw bedrijf"
+    },
+    "status": {
+      "NOT_CONNECTED": "Niet verbonden",
+      "CONNECTED": "Verbonden",
+      "ERROR": "Fout"
+    },
+    "ksef": {
+      "title": "KSeF (Polen)",
+      "status": "Status",
+      "environment": "Omgeving",
+      "environmentTest": "Test",
+      "environmentProduction": "Productie",
+      "credentials": "KSeF-token",
+      "credentialsPlaceholder": "Plak uw KSeF-autorisatietoken",
+      "connect": "Verbinden",
+      "disconnect": "Verbinding verbreken"
+    }
   }
 }

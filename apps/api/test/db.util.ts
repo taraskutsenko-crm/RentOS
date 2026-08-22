@@ -1,7 +1,7 @@
-import type { PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 
 /** Deletes all rows in dependency order. Test database only. */
-export async function cleanDatabase(prisma: PrismaClient): Promise<void> {
+async function deleteAllRows(prisma: PrismaClient): Promise<void> {
   await prisma.auditLog.deleteMany();
   await prisma.rentalDamageReportPhoto.deleteMany();
   await prisma.rentalDamageReport.deleteMany();
@@ -44,4 +44,37 @@ export async function cleanDatabase(prisma: PrismaClient): Promise<void> {
   await prisma.tenantMembership.deleteMany();
   await prisma.tenant.deleteMany();
   await prisma.user.deleteMany();
+}
+
+const FOREIGN_KEY_VIOLATION = "P2003";
+const MAX_ATTEMPTS = 3;
+
+/**
+ * Deletes every row in dependency order, retrying the whole pass on a
+ * foreign-key violation (Prisma error P2003). The delete order above is
+ * correct as written, but a previous test's async side effect can very
+ * rarely still be landing in Postgres after its own `Promise.all(...)` of
+ * HTTP requests has already resolved (seen on a loaded CI runner, not
+ * locally — e.g. a high-concurrency rental-creation test) — a stray
+ * `RentalItem` insert arriving between this function's own
+ * `rentalItem.deleteMany()` and `asset.deleteMany()` calls, for instance,
+ * would otherwise fail the whole suite on nothing but timing. A second
+ * pass re-deletes everything (now including whatever just slipped in) and
+ * succeeds once that write has settled, without weakening isolation
+ * between tests — every row is still gone before the next test starts.
+ */
+export async function cleanDatabase(prisma: PrismaClient): Promise<void> {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
+    try {
+      await deleteAllRows(prisma);
+      return;
+    } catch (error) {
+      const isForeignKeyRace =
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === FOREIGN_KEY_VIOLATION;
+      if (!isForeignKeyRace || attempt === MAX_ATTEMPTS) {
+        throw error;
+      }
+    }
+  }
 }

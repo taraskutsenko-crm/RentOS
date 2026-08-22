@@ -173,7 +173,16 @@
     "DE": "Germany",
     "UA": "Ukraine",
     "ES": "Spain",
-    "GB": "United Kingdom"
+    "GB": "United Kingdom",
+    "FR": "France",
+    "IT": "Italy",
+    "NL": "Netherlands",
+    "CZ": "Czechia",
+    "BR": "Brazil",
+    "RU": "Russia",
+    "JP": "Japan",
+    "KR": "South Korea",
+    "CN": "China"
   },
   "customer": {
     "title": "Customers",
@@ -453,7 +462,8 @@
       "total": "Total",
       "internalNotes": "Internal notes",
       "returnedAt": "Returned at",
-      "sourceQuote": "Source quote"
+      "sourceQuote": "Source quote",
+      "partialMonthPolicy": "Partial month billing"
     },
     "sections": {
       "details": "Details",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "{{count}} fixed 30-day periods × {{price}}",
         "CUSTOM": "{{count}} custom {{length}}-day periods × {{price}}",
         "days": "{{count}} days × {{price}}",
-        "pending": "Enter valid dates and prices to see the pricing breakdown"
+        "pending": "Enter valid dates and prices to see the pricing breakdown",
+        "roundedUpMonth": "+1 additional full month × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "Custom period",
           "description": "Define how many billable days make up one monthly billing unit."
         }
+      },
+      "partialMonthPolicy": {
+        "title": "Partial month billing",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "Charge proportionally by day",
+            "description": "Full months are billed at the monthly price; any remaining days are billed at the daily rate."
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "Charge started month as full month",
+            "description": "Any started additional month is billed as one complete month — no separate daily rate is needed."
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "Generate contract",
       "prepareHandover": "Prepare handover protocol"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "Charge proportionally by day",
+      "ROUND_UP_TO_FULL_MONTH": "Charge started month as full month"
     }
   },
   "quote": {

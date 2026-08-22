@@ -173,7 +173,16 @@
     "DE": "Německo",
     "UA": "Ukrajina",
     "ES": "Španělsko",
-    "GB": "Spojené království"
+    "GB": "Spojené království",
+    "FR": "Francie",
+    "IT": "Itálie",
+    "NL": "Nizozemsko",
+    "CZ": "Česko",
+    "BR": "Brazílie",
+    "RU": "Rusko",
+    "JP": "Japonsko",
+    "KR": "Jižní Korea",
+    "CN": "Čína"
   },
   "customer": {
     "title": "Zákazníci",
@@ -453,7 +462,8 @@
       "total": "Celkem",
       "internalNotes": "Interní poznámky",
       "returnedAt": "Vráceno dne",
-      "sourceQuote": "Zdrojová nabídka"
+      "sourceQuote": "Zdrojová nabídka",
+      "partialMonthPolicy": "Účtování neúplného měsíce"
     },
     "sections": {
       "details": "Podrobnosti",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "{{count}} pevných 30denních období × {{price}}",
         "CUSTOM": "{{count}} vlastních {{length}}denních období × {{price}}",
         "days": "{{count}} dní × {{price}}",
-        "pending": "Zadejte platná data a ceny pro zobrazení rozpisu cen"
+        "pending": "Zadejte platná data a ceny pro zobrazení rozpisu cen",
+        "roundedUpMonth": "+1 další celý měsíc × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "Vlastní období",
           "description": "Definujte, kolik fakturovatelných dní tvoří jednu měsíční fakturační jednotku."
         }
+      },
+      "partialMonthPolicy": {
+        "title": "Účtování neúplného měsíce",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "Účtovat poměrně podle dnů",
+            "description": "Celé měsíce se účtují za měsíční cenu; zbývající dny se účtují za denní sazbu."
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "Účtovat započatý měsíc jako celý",
+            "description": "Každý započatý další měsíc se účtuje jako celý měsíc — samostatná denní sazba není potřeba."
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "Vygenerovat smlouvu",
       "prepareHandover": "Připravit předávací protokol"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "Účtovat poměrně podle dnů",
+      "ROUND_UP_TO_FULL_MONTH": "Účtovat započatý měsíc jako celý"
     }
   },
   "quote": {

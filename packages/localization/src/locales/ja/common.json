@@ -173,7 +173,16 @@
     "DE": "ドイツ",
     "UA": "ウクライナ",
     "ES": "スペイン",
-    "GB": "イギリス"
+    "GB": "イギリス",
+    "FR": "フランス",
+    "IT": "イタリア",
+    "NL": "オランダ",
+    "CZ": "チェコ",
+    "BR": "ブラジル",
+    "RU": "ロシア",
+    "JP": "日本",
+    "KR": "韓国",
+    "CN": "中国"
   },
   "customer": {
     "title": "顧客",
@@ -453,7 +462,8 @@
       "total": "合計",
       "internalNotes": "内部メモ",
       "returnedAt": "返却日",
-      "sourceQuote": "元の見積書"
+      "sourceQuote": "元の見積書",
+      "partialMonthPolicy": "端数月の請求方法"
     },
     "sections": {
       "details": "詳細",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "固定30日間 × {{count}} 期間 × {{price}}",
         "CUSTOM": "カスタム{{length}}日間 × {{count}} 期間 × {{price}}",
         "days": "{{count}} 日 × {{price}}",
-        "pending": "有効な日程と料金を入力すると、料金の内訳が表示されます"
+        "pending": "有効な日程と料金を入力すると、料金の内訳が表示されます",
+        "roundedUpMonth": "+1追加の満月分 × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "カスタム期間",
           "description": "1つの月額請求単位を構成する請求対象日数を定義します。"
         }
+      },
+      "partialMonthPolicy": {
+        "title": "端数月の請求方法",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "日割りで按分請求",
+            "description": "満月分は月額料金で請求され、残りの日数は日額料金で請求されます。"
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "開始した月を満月として請求",
+            "description": "開始された追加の月はすべて満月として請求されます。別途日額料金は不要です。"
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "契約書を作成",
       "prepareHandover": "引き渡し記録書を準備"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "日割りで按分請求",
+      "ROUND_UP_TO_FULL_MONTH": "開始した月を満月として請求"
     }
   },
   "quote": {

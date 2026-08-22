@@ -173,7 +173,16 @@
     "DE": "Duitsland",
     "UA": "Oekraïne",
     "ES": "Spanje",
-    "GB": "Verenigd Koninkrijk"
+    "GB": "Verenigd Koninkrijk",
+    "FR": "Frankrijk",
+    "IT": "Italië",
+    "NL": "Nederland",
+    "CZ": "Tsjechië",
+    "BR": "Brazilië",
+    "RU": "Rusland",
+    "JP": "Japan",
+    "KR": "Zuid-Korea",
+    "CN": "China"
   },
   "customer": {
     "title": "Klanten",
@@ -453,7 +462,8 @@
       "total": "Totaal",
       "internalNotes": "Interne notities",
       "returnedAt": "Geretourneerd op",
-      "sourceQuote": "Bron-offerte"
+      "sourceQuote": "Bron-offerte",
+      "partialMonthPolicy": "Facturering van gedeeltelijke maand"
     },
     "sections": {
       "details": "Details",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "{{count}} vaste periodes van 30 dagen × {{price}}",
         "CUSTOM": "{{count}} aangepaste periodes van {{length}} dagen × {{price}}",
         "days": "{{count}} dagen × {{price}}",
-        "pending": "Voer geldige data en prijzen in om de prijsopbouw te zien"
+        "pending": "Voer geldige data en prijzen in om de prijsopbouw te zien",
+        "roundedUpMonth": "+1 extra volledige maand × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "Aangepaste periode",
           "description": "Bepaal hoeveel factureerbare dagen één maandelijkse factureringseenheid vormen."
         }
+      },
+      "partialMonthPolicy": {
+        "title": "Facturering van gedeeltelijke maand",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "Naar rato per dag berekenen",
+            "description": "Volledige maanden worden tegen de maandprijs berekend; resterende dagen worden tegen het dagtarief berekend."
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "Begonnen maand als volledige maand berekenen",
+            "description": "Elke begonnen extra maand wordt als een volledige maand gefactureerd — een apart dagtarief is niet nodig."
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "Contract genereren",
       "prepareHandover": "Overdrachtsprotocol voorbereiden"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "Naar rato per dag berekenen",
+      "ROUND_UP_TO_FULL_MONTH": "Begonnen maand als volledige maand berekenen"
     }
   },
   "quote": {

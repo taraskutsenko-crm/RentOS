@@ -173,7 +173,16 @@
     "DE": "독일",
     "UA": "우크라이나",
     "ES": "스페인",
-    "GB": "영국"
+    "GB": "영국",
+    "FR": "프랑스",
+    "IT": "이탈리아",
+    "NL": "네덜란드",
+    "CZ": "체코",
+    "BR": "브라질",
+    "RU": "러시아",
+    "JP": "일본",
+    "KR": "대한민국",
+    "CN": "중국"
   },
   "customer": {
     "title": "고객",
@@ -453,7 +462,8 @@
       "total": "합계",
       "internalNotes": "내부 메모",
       "returnedAt": "반납일",
-      "sourceQuote": "원본 견적서"
+      "sourceQuote": "원본 견적서",
+      "partialMonthPolicy": "잔여 월 청구 방식"
     },
     "sections": {
       "details": "세부 정보",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "고정 30일 {{count}}회 × {{price}}",
         "CUSTOM": "사용자 지정 {{length}}일 {{count}}회 × {{price}}",
         "days": "{{count}}일 × {{price}}",
-        "pending": "요금 명세를 보려면 유효한 날짜와 요금을 입력하세요"
+        "pending": "요금 명세를 보려면 유효한 날짜와 요금을 입력하세요",
+        "roundedUpMonth": "+1개월 추가 전체 청구 × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "사용자 지정 기간",
           "description": "하나의 월간 청구 단위를 구성하는 청구 가능 일수를 정의하세요."
         }
+      },
+      "partialMonthPolicy": {
+        "title": "잔여 월 청구 방식",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "일할 계산으로 청구",
+            "description": "전체 월은 월 요금으로 청구되며, 남은 일수는 일일 요금으로 청구됩니다."
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "시작된 월을 전체 월로 청구",
+            "description": "시작된 추가 월은 모두 전체 월로 청구됩니다. 별도의 일일 요금은 필요하지 않습니다."
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "계약서 생성",
       "prepareHandover": "인도 기록서 준비"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "일할 계산으로 청구",
+      "ROUND_UP_TO_FULL_MONTH": "시작된 월을 전체 월로 청구"
     }
   },
   "quote": {

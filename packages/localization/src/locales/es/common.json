@@ -173,7 +173,16 @@
     "DE": "Alemania",
     "UA": "Ucrania",
     "ES": "España",
-    "GB": "Reino Unido"
+    "GB": "Reino Unido",
+    "FR": "Francia",
+    "IT": "Italia",
+    "NL": "Países Bajos",
+    "CZ": "Chequia",
+    "BR": "Brasil",
+    "RU": "Rusia",
+    "JP": "Japón",
+    "KR": "Corea del Sur",
+    "CN": "China"
   },
   "customer": {
     "title": "Clientes",
@@ -453,7 +462,8 @@
       "total": "Total",
       "internalNotes": "Notas internas",
       "returnedAt": "Devuelto el",
-      "sourceQuote": "Presupuesto de origen"
+      "sourceQuote": "Presupuesto de origen",
+      "partialMonthPolicy": "Facturación de mes parcial"
     },
     "sections": {
       "details": "Detalles",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "{{count}} períodos fijos de 30 días × {{price}}",
         "CUSTOM": "{{count}} períodos personalizados de {{length}} días × {{price}}",
         "days": "{{count}} días × {{price}}",
-        "pending": "Introduce fechas y precios válidos para ver el desglose de precios"
+        "pending": "Introduce fechas y precios válidos para ver el desglose de precios",
+        "roundedUpMonth": "+1 mes completo adicional × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "Período personalizado",
           "description": "Define cuántos días facturables componen una unidad de facturación mensual."
         }
+      },
+      "partialMonthPolicy": {
+        "title": "Facturación de mes parcial",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "Cobrar proporcionalmente por día",
+            "description": "Los meses completos se cobran al precio mensual; los días restantes se cobran a la tarifa diaria."
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "Cobrar el mes iniciado como mes completo",
+            "description": "Cualquier mes adicional iniciado se factura como un mes completo; no se necesita una tarifa diaria independiente."
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "Generar contrato",
       "prepareHandover": "Preparar acta de entrega"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "Cobrar proporcionalmente por día",
+      "ROUND_UP_TO_FULL_MONTH": "Cobrar el mes iniciado como mes completo"
     }
   },
   "quote": {

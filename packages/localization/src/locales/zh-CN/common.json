@@ -173,7 +173,16 @@
     "DE": "德国",
     "UA": "乌克兰",
     "ES": "西班牙",
-    "GB": "英国"
+    "GB": "英国",
+    "FR": "法国",
+    "IT": "意大利",
+    "NL": "荷兰",
+    "CZ": "捷克",
+    "BR": "巴西",
+    "RU": "俄罗斯",
+    "JP": "日本",
+    "KR": "韩国",
+    "CN": "中国"
   },
   "customer": {
     "title": "客户",
@@ -453,7 +462,8 @@
       "total": "总计",
       "internalNotes": "内部备注",
       "returnedAt": "归还时间",
-      "sourceQuote": "来源报价单"
+      "sourceQuote": "来源报价单",
+      "partialMonthPolicy": "不满整月的计费方式"
     },
     "sections": {
       "details": "详情",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "{{count}} 个固定 30 天周期 × {{price}}",
         "CUSTOM": "{{count}} 个自定义 {{length}} 天周期 × {{price}}",
         "days": "{{count}} 天 × {{price}}",
-        "pending": "请输入有效的日期和价格以查看价格明细"
+        "pending": "请输入有效的日期和价格以查看价格明细",
+        "roundedUpMonth": "+1 个额外整月 × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "自定义周期",
           "description": "定义多少个可计费天数构成一个月度计费单位。"
         }
+      },
+      "partialMonthPolicy": {
+        "title": "不满整月的计费方式",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "按天比例收费",
+            "description": "整月按月费率收费；剩余天数按日费率收费。"
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "已开始的月份按整月收费",
+            "description": "任何已开始的额外月份都按整月收费，无需单独的日费率。"
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "生成合同",
       "prepareHandover": "准备交接记录"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "按天比例收费",
+      "ROUND_UP_TO_FULL_MONTH": "已开始的月份按整月收费"
     }
   },
   "quote": {

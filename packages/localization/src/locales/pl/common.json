@@ -173,7 +173,16 @@
     "DE": "Niemcy",
     "UA": "Ukraina",
     "ES": "Hiszpania",
-    "GB": "Wielka Brytania"
+    "GB": "Wielka Brytania",
+    "FR": "Francja",
+    "IT": "Włochy",
+    "NL": "Holandia",
+    "CZ": "Czechy",
+    "BR": "Brazylia",
+    "RU": "Rosja",
+    "JP": "Japonia",
+    "KR": "Korea Południowa",
+    "CN": "Chiny"
   },
   "customer": {
     "title": "Klienci",
@@ -453,7 +462,8 @@
       "total": "Razem",
       "internalNotes": "Notatki wewnętrzne",
       "returnedAt": "Zwrócono",
-      "sourceQuote": "Oferta źródłowa"
+      "sourceQuote": "Oferta źródłowa",
+      "partialMonthPolicy": "Rozliczanie niepełnego miesiąca"
     },
     "sections": {
       "details": "Szczegóły",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "{{count}} okresów 30-dniowych × {{price}}",
         "CUSTOM": "{{count}} okresów {{length}}-dniowych × {{price}}",
         "days": "{{count}} dni × {{price}}",
-        "pending": "Wprowadź prawidłowe daty i ceny, aby zobaczyć podział cen"
+        "pending": "Wprowadź prawidłowe daty i ceny, aby zobaczyć podział cen",
+        "roundedUpMonth": "+1 dodatkowy pełny miesiąc × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "Okres niestandardowy",
           "description": "Określ, ile rozliczanych dni składa się na jedną jednostkę rozliczeniową miesiąca."
         }
+      },
+      "partialMonthPolicy": {
+        "title": "Rozliczanie niepełnego miesiąca",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "Naliczaj proporcjonalnie za dzień",
+            "description": "Pełne miesiące są rozliczane wg ceny miesięcznej; pozostałe dni są rozliczane wg stawki dziennej."
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "Naliczaj rozpoczęty miesiąc jako pełny",
+            "description": "Każdy rozpoczęty dodatkowy miesiąc jest rozliczany jako pełny miesiąc — oddzielna stawka dzienna nie jest wymagana."
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "Wygeneruj umowę",
       "prepareHandover": "Przygotuj protokół przekazania"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "Naliczaj proporcjonalnie za dzień",
+      "ROUND_UP_TO_FULL_MONTH": "Naliczaj rozpoczęty miesiąc jako pełny"
     }
   },
   "quote": {

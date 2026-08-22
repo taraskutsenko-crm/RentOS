@@ -173,7 +173,16 @@
     "DE": "Deutschland",
     "UA": "Ukraine",
     "ES": "Spanien",
-    "GB": "Vereinigtes Königreich"
+    "GB": "Vereinigtes Königreich",
+    "FR": "Frankreich",
+    "IT": "Italien",
+    "NL": "Niederlande",
+    "CZ": "Tschechien",
+    "BR": "Brasilien",
+    "RU": "Russland",
+    "JP": "Japan",
+    "KR": "Südkorea",
+    "CN": "China"
   },
   "customer": {
     "title": "Kunden",
@@ -453,7 +462,8 @@
       "total": "Gesamt",
       "internalNotes": "Interne Notizen",
       "returnedAt": "Zurückgegeben am",
-      "sourceQuote": "Ursprüngliches Angebot"
+      "sourceQuote": "Ursprüngliches Angebot",
+      "partialMonthPolicy": "Abrechnung angebrochener Monate"
     },
     "sections": {
       "details": "Details",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "{{count}} feste 30-Tage-Zeiträume × {{price}}",
         "CUSTOM": "{{count}} individuelle {{length}}-Tage-Zeiträume × {{price}}",
         "days": "{{count}} Tage × {{price}}",
-        "pending": "Geben Sie gültige Termine und Preise ein, um die Preisaufschlüsselung zu sehen"
+        "pending": "Geben Sie gültige Termine und Preise ein, um die Preisaufschlüsselung zu sehen",
+        "roundedUpMonth": "+1 zusätzlicher voller Monat × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "Individueller Zeitraum",
           "description": "Legen Sie fest, wie viele abrechenbare Tage eine monatliche Abrechnungseinheit ergeben."
         }
+      },
+      "partialMonthPolicy": {
+        "title": "Abrechnung angebrochener Monate",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "Anteilig nach Tagen berechnen",
+            "description": "Volle Monate werden zum Monatspreis berechnet; verbleibende Tage werden zum Tagessatz berechnet."
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "Angebrochenen Monat als vollen Monat berechnen",
+            "description": "Jeder begonnene zusätzliche Monat wird als vollständiger Monat berechnet — ein separater Tagessatz ist nicht erforderlich."
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "Vertrag erstellen",
       "prepareHandover": "Übergabeprotokoll vorbereiten"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "Anteilig nach Tagen berechnen",
+      "ROUND_UP_TO_FULL_MONTH": "Angebrochenen Monat als vollen Monat berechnen"
     }
   },
   "quote": {

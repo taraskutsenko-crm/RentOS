@@ -173,7 +173,16 @@
     "DE": "Germania",
     "UA": "Ucraina",
     "ES": "Spagna",
-    "GB": "Regno Unito"
+    "GB": "Regno Unito",
+    "FR": "Francia",
+    "IT": "Italia",
+    "NL": "Paesi Bassi",
+    "CZ": "Cechia",
+    "BR": "Brasile",
+    "RU": "Russia",
+    "JP": "Giappone",
+    "KR": "Corea del Sud",
+    "CN": "Cina"
   },
   "customer": {
     "title": "Clienti",
@@ -453,7 +462,8 @@
       "total": "Totale",
       "internalNotes": "Note interne",
       "returnedAt": "Restituito il",
-      "sourceQuote": "Preventivo di origine"
+      "sourceQuote": "Preventivo di origine",
+      "partialMonthPolicy": "Fatturazione del mese parziale"
     },
     "sections": {
       "details": "Dettagli",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "{{count}} periodi fissi di 30 giorni × {{price}}",
         "CUSTOM": "{{count}} periodi personalizzati di {{length}} giorni × {{price}}",
         "days": "{{count}} giorni × {{price}}",
-        "pending": "Inserisci date e prezzi validi per vedere il dettaglio delle tariffe"
+        "pending": "Inserisci date e prezzi validi per vedere il dettaglio delle tariffe",
+        "roundedUpMonth": "+1 mese completo aggiuntivo × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "Periodo personalizzato",
           "description": "Definisci quanti giorni fatturabili compongono un'unità di fatturazione mensile."
         }
+      },
+      "partialMonthPolicy": {
+        "title": "Fatturazione del mese parziale",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "Addebita proporzionalmente al giorno",
+            "description": "I mesi completi vengono addebitati al prezzo mensile; i giorni rimanenti vengono addebitati alla tariffa giornaliera."
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "Addebita il mese iniziato come mese completo",
+            "description": "Ogni mese aggiuntivo iniziato viene addebitato come un mese completo — non è necessaria una tariffa giornaliera separata."
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "Genera contratto",
       "prepareHandover": "Prepara verbale di consegna"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "Addebita proporzionalmente al giorno",
+      "ROUND_UP_TO_FULL_MONTH": "Addebita il mese iniziato come mese completo"
     }
   },
   "quote": {

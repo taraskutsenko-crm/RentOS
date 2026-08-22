@@ -173,7 +173,16 @@
     "DE": "Allemagne",
     "UA": "Ukraine",
     "ES": "Espagne",
-    "GB": "Royaume-Uni"
+    "GB": "Royaume-Uni",
+    "FR": "France",
+    "IT": "Italie",
+    "NL": "Pays-Bas",
+    "CZ": "Tchéquie",
+    "BR": "Brésil",
+    "RU": "Russie",
+    "JP": "Japon",
+    "KR": "Corée du Sud",
+    "CN": "Chine"
   },
   "customer": {
     "title": "Clients",
@@ -453,7 +462,8 @@
       "total": "Total",
       "internalNotes": "Notes internes",
       "returnedAt": "Retourné le",
-      "sourceQuote": "Devis d'origine"
+      "sourceQuote": "Devis d'origine",
+      "partialMonthPolicy": "Facturation du mois partiel"
     },
     "sections": {
       "details": "Détails",
@@ -540,7 +550,8 @@
         "FIXED_30_DAYS": "{{count}} périodes fixes de 30 jours × {{price}}",
         "CUSTOM": "{{count}} périodes personnalisées de {{length}} jours × {{price}}",
         "days": "{{count}} jours × {{price}}",
-        "pending": "Saisissez des dates et des prix valides pour voir le détail de la tarification"
+        "pending": "Saisissez des dates et des prix valides pour voir le détail de la tarification",
+        "roundedUpMonth": "+1 mois complet supplémentaire × {{price}}"
       }
     },
     "availabilityCalendar": {
@@ -574,11 +585,28 @@
           "label": "Période personnalisée",
           "description": "Définissez combien de jours facturables composent une unité de facturation mensuelle."
         }
+      },
+      "partialMonthPolicy": {
+        "title": "Facturation du mois partiel",
+        "options": {
+          "PRORATE_BY_DAY": {
+            "label": "Facturer au prorata par jour",
+            "description": "Les mois complets sont facturés au prix mensuel ; les jours restants sont facturés au tarif journalier."
+          },
+          "ROUND_UP_TO_FULL_MONTH": {
+            "label": "Facturer le mois entamé comme un mois complet",
+            "description": "Tout mois supplémentaire entamé est facturé comme un mois complet — aucun tarif journalier distinct n'est nécessaire."
+          }
+        }
       }
     },
     "nextAction": {
       "generateContract": "Générer le contrat",
       "prepareHandover": "Préparer le procès-verbal de remise"
+    },
+    "partialMonthPolicyOptions": {
+      "PRORATE_BY_DAY": "Facturer au prorata par jour",
+      "ROUND_UP_TO_FULL_MONTH": "Facturer le mois entamé comme un mois complet"
     }
   },
   "quote": {

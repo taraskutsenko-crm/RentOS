@@ -36,10 +36,11 @@ export class CreateRentalDto {
   @Min(0)
   discountMinor?: number;
 
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  taxMinor?: number;
+  // Deliberately no `taxMinor` here — tax is entered as a rate on each
+  // RentalItem (`taxRateBp`), never a pre-calculated flat amount the
+  // client would have to compute itself; the server always derives and
+  // stores the authoritative `Rental.taxMinor` aggregate (see
+  // docs/DECISIONS.md, rental tax percentage model).
 
   @EmptyToNull()
   @IsOptional()

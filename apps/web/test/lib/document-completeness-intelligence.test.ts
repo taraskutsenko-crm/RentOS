@@ -137,8 +137,8 @@ describe("getRentalDocumentChecklist", () => {
   });
 
   describe("handoverProtocol", () => {
-    it.each<RentalStatus>(["DRAFT", "QUOTE", "RESERVED"])(
-      "is notRequiredYet before the asset has been handed over and no document exists (status=%s)",
+    it.each<RentalStatus>(["DRAFT", "QUOTE"])(
+      "is notRequiredYet before the rental is even reserved and no document exists (status=%s)",
       (status) => {
         const checklist = getRentalDocumentChecklist({ status, sourceQuote: null, documents: [] });
         expect(checklist.find((item) => item.key === "handoverProtocol")).toEqual({
@@ -149,8 +149,12 @@ describe("getRentalDocumentChecklist", () => {
       },
     );
 
-    it.each<RentalStatus>(["ACTIVE", "RETURNED", "COMPLETED"])(
-      "is readyToGenerate once the rental has started with no protocol on file (status=%s)",
+    // A Handover Protocol may be prepared as soon as the rental is a real
+    // commitment (RESERVED), not only once the asset has actually been
+    // handed over (ACTIVE) — see DECISIONS.md, document checklist
+    // actionability fix.
+    it.each<RentalStatus>(["RESERVED", "ACTIVE", "RETURNED", "COMPLETED"])(
+      "is readyToGenerate once the rental is reserved or later, with no protocol on file (status=%s)",
       (status) => {
         const checklist = getRentalDocumentChecklist({ status, sourceQuote: null, documents: [] });
         expect(checklist.find((item) => item.key === "handoverProtocol")).toEqual({
@@ -194,8 +198,8 @@ describe("getRentalDocumentChecklist", () => {
   });
 
   describe("returnProtocol", () => {
-    it.each<RentalStatus>(["DRAFT", "QUOTE", "RESERVED", "ACTIVE"])(
-      "is notRequiredYet before the asset has actually come back and no document exists (status=%s)",
+    it.each<RentalStatus>(["DRAFT", "QUOTE", "RESERVED"])(
+      "is notRequiredYet before the asset has actually been handed over and no document exists (status=%s)",
       (status) => {
         const checklist = getRentalDocumentChecklist({ status, sourceQuote: null, documents: [] });
         expect(checklist.find((item) => item.key === "returnProtocol")).toEqual({
@@ -206,18 +210,20 @@ describe("getRentalDocumentChecklist", () => {
       },
     );
 
-    it("is readyToGenerate once the rental is RETURNED with no protocol on file", () => {
-      const checklist = getRentalDocumentChecklist({
-        status: "RETURNED",
-        sourceQuote: null,
-        documents: [],
-      });
-      expect(checklist.find((item) => item.key === "returnProtocol")).toEqual({
-        key: "returnProtocol",
-        state: "readyToGenerate",
-        document: null,
-      });
-    });
+    // A Return Protocol may be prepared as soon as the asset is actually
+    // out (ACTIVE), not only once it has already come back (RETURNED) —
+    // see DECISIONS.md, document checklist actionability fix.
+    it.each<RentalStatus>(["ACTIVE", "RETURNED", "COMPLETED"])(
+      "is readyToGenerate once the rental is active or later, with no protocol on file (status=%s)",
+      (status) => {
+        const checklist = getRentalDocumentChecklist({ status, sourceQuote: null, documents: [] });
+        expect(checklist.find((item) => item.key === "returnProtocol")).toEqual({
+          key: "returnProtocol",
+          state: "readyToGenerate",
+          document: null,
+        });
+      },
+    );
 
     it("is generated once a RETURN_PROTOCOL document exists for a returned rental", () => {
       const returnDoc = doc({ id: "doc-3", documentType: "RETURN_PROTOCOL" });

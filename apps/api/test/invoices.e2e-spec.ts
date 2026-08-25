@@ -88,8 +88,7 @@ describe("Invoices E2E", () => {
         currency: "PLN",
         plannedStart: dateOffset(0),
         plannedEnd: dateOffset(1),
-        taxMinor: 18_400, // 23% of an 80000-minor-unit (800.00 PLN) DAILY subtotal
-        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 80_000 }],
+        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 80_000, taxRateBp: 2300 }], // 23% of 80000 minor units (800.00 PLN) = 18_400
         ...overrides,
       })
       .expect(201);
@@ -231,7 +230,6 @@ describe("Invoices E2E", () => {
 
   it("recording a partial then final payment derives PARTIALLY_PAID then PAID with exact remaining amounts", async () => {
     const rental = await createRental({
-      taxMinor: 0,
       items: [{ assetId, billingMode: "CUSTOM", customPriceMinor: 100_000 }],
     });
     const created = await request(app.getHttpServer())
@@ -339,7 +337,6 @@ describe("Invoices E2E", () => {
 
   it("cannot cancel a PAID invoice, but can cancel an ISSUED one", async () => {
     const rental = await createRental({
-      taxMinor: 0,
       items: [{ assetId, billingMode: "CUSTOM", customPriceMinor: 10_000 }],
     });
     const created = await request(app.getHttpServer())
@@ -365,7 +362,6 @@ describe("Invoices E2E", () => {
       .expect(409);
 
     const secondRental = await createRental({
-      taxMinor: 0,
       items: [{ assetId, billingMode: "CUSTOM", customPriceMinor: 10_000 }],
     });
     const secondInvoice = await request(app.getHttpServer())

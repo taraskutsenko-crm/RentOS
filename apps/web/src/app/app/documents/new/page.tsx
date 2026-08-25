@@ -42,6 +42,20 @@ export default function NewDocumentPage() {
   const documentTypeParam = searchParams.get("documentType");
 
   async function handleSubmit(values: DocumentFormValues): Promise<void> {
+    const isConditionType =
+      values.documentType === "HANDOVER_PROTOCOL" || values.documentType === "RETURN_PROTOCOL";
+    const businessData: Record<string, unknown> = {};
+    if (values.notes) businessData.notes = values.notes;
+    if (isConditionType && (values.assetConditionNotes || values.damageDescription || values.missingItems)) {
+      businessData.conditionNotes = {
+        ...(values.assetConditionNotes ? { assetCondition: values.assetConditionNotes } : {}),
+        ...(values.damageDescription ? { damageDescription: values.damageDescription } : {}),
+        ...(values.documentType === "RETURN_PROTOCOL" && values.missingItems
+          ? { missingItems: values.missingItems }
+          : {}),
+      };
+    }
+
     const created = await createDocument.mutateAsync({
       documentType: values.documentType,
       customTypeName: values.customTypeName || undefined,
@@ -51,6 +65,7 @@ export default function NewDocumentPage() {
       rentalId: values.rentalId || undefined,
       quoteId: quoteIdParam ?? undefined,
       templateLanguage: values.templateLanguage || undefined,
+      businessData: Object.keys(businessData).length > 0 ? businessData : undefined,
     });
     router.push(`/app/documents/${created.id}`);
   }

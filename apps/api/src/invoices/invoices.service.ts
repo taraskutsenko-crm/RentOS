@@ -710,16 +710,15 @@ export class InvoicesService {
    * Invoice from Rental Workspace" flow (see docs/DECISIONS.md). Asset
    * lines reuse `computeItemLineTotalMinor` (the same centralized pricing
    * primitive Rentals themselves are priced with) rather than
-   * reinventing the arithmetic. Rentals carry only one flat
-   * `taxMinor` amount (no per-item tax rate — see RentalItem), so the
-   * effective tax rate the tenant already entered for the whole Rental is
-   * derived once (`taxMinor / subtotalMinor`) and applied per line as a
-   * sensible, editable default — never a fabricated/invented rate. When
-   * the Rental was converted from a Quote, that Quote's non-asset lines
-   * (delivery, installation, cleaning, fees, ...) are prefilled too, so
-   * delivery/services are invoiceable exactly like asset lines. The
-   * caller always still receives an editable DRAFT before anything is
-   * issued.
+   * reinventing the arithmetic. Each RentalItem now carries its own real
+   * `taxRateBp` (see the rental tax percentage model, docs/DECISIONS.md),
+   * so each invoice line is prefilled with that same item's own rate —
+   * never a blended/derived average across items, and never a
+   * fabricated/invented rate. When the Rental was converted from a Quote,
+   * that Quote's non-asset lines (delivery, installation, cleaning,
+   * fees, ...) are prefilled too, so delivery/services are invoiceable
+   * exactly like asset lines. The caller always still receives an
+   * editable DRAFT before anything is issued.
    */
   private async prefillFromRental(tenantId: string, rentalId: string): Promise<PrefillResult> {
     const rental = await this.prisma.rental.findFirst({
@@ -732,9 +731,6 @@ export class InvoicesService {
     if (!rental) {
       throw new NotFoundException("Rental not found");
     }
-
-    const effectiveTaxRateBp =
-      rental.subtotalMinor > 0 ? Math.round((rental.taxMinor / rental.subtotalMinor) * 10_000) : 0;
 
     const assetItems: InvoiceItemDto[] = rental.items.map((item) => {
       const pricedInput: PricedRentalItemInput = {
@@ -758,7 +754,7 @@ export class InvoicesService {
         description: item.asset.name,
         quantity: 1,
         unitNetPriceMinor: netTotalMinor,
-        taxRateBp: effectiveTaxRateBp,
+        taxRateBp: item.taxRateBp,
         sourceRentalItemId: item.id,
       };
     });

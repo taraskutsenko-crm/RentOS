@@ -128,6 +128,7 @@ function InvoiceEditor({ invoice, tenantId }: { invoice: Invoice; tenantId: stri
   const [dueDate, setDueDate] = useState(invoice.dueDate?.slice(0, 10) ?? "");
   const [notes, setNotes] = useState(invoice.notes ?? "");
   const [error, setError] = useState<string | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10));
@@ -163,6 +164,7 @@ function InvoiceEditor({ invoice, tenantId }: { invoice: Invoice; tenantId: stri
 
   async function handleSaveDraft(): Promise<void> {
     setError(null);
+    setJustSaved(false);
     try {
       await updateInvoice.mutateAsync({
         id: invoice.id,
@@ -176,6 +178,7 @@ function InvoiceEditor({ invoice, tenantId }: { invoice: Invoice; tenantId: stri
           items: toInvoiceItemInputs(items),
         },
       });
+      setJustSaved(true);
     } catch (err) {
       setError(apiErrorMessage(err, t("common.error")));
     }
@@ -289,6 +292,9 @@ function InvoiceEditor({ invoice, tenantId }: { invoice: Invoice; tenantId: stri
       />
 
       {error && <p className="text-destructive text-sm">{error}</p>}
+      {justSaved && !updateInvoice.isPending && !error && (
+        <p className="text-success text-sm">{t("invoice.saved")}</p>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">

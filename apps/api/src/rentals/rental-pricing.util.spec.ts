@@ -644,31 +644,170 @@ describe("computeItemLineTotalMinor: MONTHLY partial-month policy regression mat
 });
 
 describe("computeRentalTotals", () => {
-  it("sums item line totals into subtotal, then applies rental-level discount and tax", () => {
+  it("sums item line totals into subtotal, then applies rental-level discount and per-item tax", () => {
     const end = new Date("2026-08-04T00:00:00Z"); // 3 days
     const items: PricedRentalItemInput[] = [
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 1000, discountMinor: 0 },
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 500, discountMinor: 0 },
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 1000, discountMinor: 0, taxRateBp: 1000 },
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 500, discountMinor: 0, taxRateBp: 1000 },
     ];
-    // subtotal = (1000*3) + (500*3) = 4500
-    const result = computeRentalTotals(items, start, end, 500, 200);
+    // subtotal = (1000*3) + (500*3) = 4500; tax = 3000*10% + 1500*10% = 300 + 150 = 450
+    const result = computeRentalTotals(items, start, end, 500);
     expect(result.subtotalMinor).toBe(4500);
-    expect(result.totalMinor).toBe(4500 - 500 + 200);
+    expect(result.taxMinor).toBe(450);
+    expect(result.totalMinor).toBe(4500 - 500 + 450);
   });
 
   it("floors the grand total at 0", () => {
     const end = new Date("2026-08-02T00:00:00Z");
     const items: PricedRentalItemInput[] = [
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 100, discountMinor: 0 },
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 100, discountMinor: 0, taxRateBp: 0 },
     ];
-    const result = computeRentalTotals(items, start, end, 10_000, 0);
+    const result = computeRentalTotals(items, start, end, 10_000);
     expect(result.totalMinor).toBe(0);
   });
 
   it("returns a 0 subtotal for an empty item list", () => {
     const end = new Date("2026-08-02T00:00:00Z");
-    const result = computeRentalTotals([], start, end, 0, 0);
+    const result = computeRentalTotals([], start, end, 0);
     expect(result.subtotalMinor).toBe(0);
+    expect(result.taxMinor).toBe(0);
     expect(result.totalMinor).toBe(0);
+  });
+
+  it("0% tax rate (or omitted) contributes no tax", () => {
+    const end = new Date("2026-08-05T00:00:00Z"); // 4 days
+    const items: PricedRentalItemInput[] = [
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 5000, discountMinor: 0, taxRateBp: 0 },
+    ];
+    const result = computeRentalTotals(items, start, end, 0);
+    expect(result.subtotalMinor).toBe(20_000);
+    expect(result.taxMinor).toBe(0);
+    expect(result.totalMinor).toBe(20_000);
+  });
+
+  it("the canonical acceptance example: 50 PLN/day x 4 days x qty 1 x 23% VAT = 200.00 net / 46.00 VAT / 246.00 gross", () => {
+    const end = new Date("2026-08-05T00:00:00Z"); // 4 days
+    const items: PricedRentalItemInput[] = [
+      {
+        billingMode: "DAILY",
+        quantity: 1,
+        dailyPriceMinor: 5000, // 50.00 PLN
+        discountMinor: 0,
+        taxRateBp: 2300, // 23%
+      },
+    ];
+    const result = computeRentalTotals(items, start, end, 0);
+    expect(result.subtotalMinor).toBe(20_000); // 200.00
+    expect(result.taxMinor).toBe(4600); // 46.00
+    expect(result.totalMinor).toBe(24_600); // 246.00
+  });
+
+  it("8% tax rate", () => {
+    const end = new Date("2026-08-05T00:00:00Z"); // 4 days
+    const items: PricedRentalItemInput[] = [
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 5000, discountMinor: 0, taxRateBp: 800 },
+    ];
+    const result = computeRentalTotals(items, start, end, 0);
+    expect(result.taxMinor).toBe(1600); // 200.00 * 8% = 16.00
+    expect(result.totalMinor).toBe(21_600);
+  });
+
+  it("quantity > 1 multiplies the taxable base before applying the rate", () => {
+    const end = new Date("2026-08-05T00:00:00Z"); // 4 days
+    const items: PricedRentalItemInput[] = [
+      {
+        billingMode: "DAILY",
+        quantity: 3,
+        dailyPriceMinor: 5000,
+        discountMinor: 0,
+        taxRateBp: 2300,
+      },
+    ];
+    const result = computeRentalTotals(items, start, end, 0);
+    expect(result.subtotalMinor).toBe(60_000); // 200.00 * 3
+    expect(result.taxMinor).toBe(13_800); // 600.00 * 23%
+    expect(result.totalMinor).toBe(73_800);
+  });
+
+  it("weekly billing mode applies tax to the weekly-priced taxable base", () => {
+    const end = new Date("2026-08-15T00:00:00Z"); // 14 days -> 2 weekly units
+    const items: PricedRentalItemInput[] = [
+      { billingMode: "WEEKLY", quantity: 1, weeklyPriceMinor: 10_000, discountMinor: 0, taxRateBp: 2300 },
+    ];
+    const result = computeRentalTotals(items, start, end, 0);
+    expect(result.subtotalMinor).toBe(20_000);
+    expect(result.taxMinor).toBe(4600);
+  });
+
+  it("monthly billing mode (with a partial-month remainder) applies tax to the full taxable base", () => {
+    const monthlyStart = new Date("2026-08-18T00:00:00Z");
+    const end = new Date("2026-09-29T00:00:00Z"); // 1 month + 11 days
+    const items: PricedRentalItemInput[] = [
+      {
+        billingMode: "MONTHLY",
+        quantity: 1,
+        monthlyPriceMinor: 100_000,
+        dailyPriceMinor: 2000,
+        discountMinor: 0,
+        taxRateBp: 2300,
+        monthlyBillingStrategy: "CALENDAR_MONTH",
+        partialMonthPolicy: "PRORATE_BY_DAY",
+      },
+    ];
+    const result = computeRentalTotals(items, monthlyStart, end, 0);
+    const expectedSubtotal = 100_000 + 2000 * 11;
+    expect(result.subtotalMinor).toBe(expectedSubtotal);
+    expect(result.taxMinor).toBe(Math.round((expectedSubtotal * 2300) / 10_000));
+  });
+
+  it("per-item discount reduces the taxable base before tax is applied", () => {
+    const end = new Date("2026-08-05T00:00:00Z"); // 4 days
+    const items: PricedRentalItemInput[] = [
+      {
+        billingMode: "DAILY",
+        quantity: 1,
+        dailyPriceMinor: 5000,
+        discountMinor: 5000, // 50.00 off the 200.00 gross -> 150.00 taxable
+        taxRateBp: 2300,
+      },
+    ];
+    const result = computeRentalTotals(items, start, end, 0);
+    expect(result.subtotalMinor).toBe(15_000);
+    expect(result.taxMinor).toBe(3450); // 150.00 * 23%
+    expect(result.totalMinor).toBe(18_450);
+  });
+
+  it("rental-level discount is applied AFTER tax, never reducing the taxable base itself", () => {
+    const end = new Date("2026-08-05T00:00:00Z"); // 4 days
+    const items: PricedRentalItemInput[] = [
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 5000, discountMinor: 0, taxRateBp: 2300 },
+    ];
+    const result = computeRentalTotals(items, start, end, 10_000); // 100.00 rental-level discount
+    expect(result.taxMinor).toBe(4600); // still 23% of the full 200.00 taxable base
+    expect(result.totalMinor).toBe(20_000 - 10_000 + 4600);
+  });
+
+  it("multiple items sum their individually-rounded tax, each at its own rate", () => {
+    const end = new Date("2026-08-05T00:00:00Z"); // 4 days
+    const items: PricedRentalItemInput[] = [
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 3333, discountMinor: 0, taxRateBp: 2300 },
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 777, discountMinor: 0, taxRateBp: 800 },
+    ];
+    const result = computeRentalTotals(items, start, end, 0);
+    const firstBase = 3333 * 4;
+    const secondBase = 777 * 4;
+    const expectedTax =
+      Math.round((firstBase * 2300) / 10_000) + Math.round((secondBase * 800) / 10_000);
+    expect(result.taxMinor).toBe(expectedTax);
+  });
+
+  it("rounds fractional minor units deterministically (single Math.round per item)", () => {
+    const end = new Date("2026-08-02T00:00:00Z"); // 1 day
+    const items: PricedRentalItemInput[] = [
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 101, discountMinor: 0, taxRateBp: 2300 },
+    ];
+    const result = computeRentalTotals(items, start, end, 0);
+    // 101 * 23% = 23.23 -> rounds to 23
+    expect(result.taxMinor).toBe(23);
   });
 });

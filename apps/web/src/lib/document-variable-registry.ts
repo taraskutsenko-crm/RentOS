@@ -36,6 +36,12 @@ export interface DocumentVariableMeta {
 export const DOCUMENT_VARIABLES: DocumentVariableMeta[] = [
   { path: "company.name", group: "company", labelKey: "documentVariable.company.name" },
   { path: "company.logo", group: "company", labelKey: "documentVariable.company.logo" },
+  {
+    path: "company.logoHtml",
+    group: "company",
+    labelKey: "documentVariable.company.logoHtml",
+    isRawHtml: true,
+  },
   { path: "company.email", group: "company", labelKey: "documentVariable.company.email" },
   {
     path: "company.registrationNumber",
@@ -127,8 +133,12 @@ export const DOCUMENT_VARIABLES: DocumentVariableMeta[] = [
     group: "rental",
     labelKey: "documentVariable.rental.endDateTime",
   },
+  { path: "rental.subtotal", group: "rental", labelKey: "documentVariable.rental.subtotal" },
+  { path: "rental.discount", group: "rental", labelKey: "documentVariable.rental.discount" },
+  { path: "rental.tax", group: "rental", labelKey: "documentVariable.rental.tax" },
   { path: "rental.total", group: "rental", labelKey: "documentVariable.rental.total" },
   { path: "rental.deposit", group: "rental", labelKey: "documentVariable.rental.deposit" },
+  { path: "rental.amountDue", group: "rental", labelKey: "documentVariable.rental.amountDue" },
   {
     path: "rental.assetsTableHtml",
     group: "rental",
@@ -137,7 +147,10 @@ export const DOCUMENT_VARIABLES: DocumentVariableMeta[] = [
   },
 
   { path: "quote.number", group: "quote", labelKey: "documentVariable.quote.number" },
+  { path: "quote.issueDate", group: "quote", labelKey: "documentVariable.quote.issueDate" },
+  { path: "quote.validUntil", group: "quote", labelKey: "documentVariable.quote.validUntil" },
   { path: "quote.total", group: "quote", labelKey: "documentVariable.quote.total" },
+  { path: "quote.terms", group: "quote", labelKey: "documentVariable.quote.terms" },
   {
     path: "quote.servicesTableHtml",
     group: "quote",

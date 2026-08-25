@@ -461,7 +461,7 @@
       "actualStart": "実際の開始日",
       "actualEnd": "実際の終了日",
       "billingMode": "請求方式",
-      "quantity": "数量",
+      "quantity": "数量（個数）",
       "dailyPrice": "日額料金",
       "dailyPriceForRemainder": "日額料金（残り日数分）",
       "weeklyPrice": "週額料金",
@@ -471,13 +471,13 @@
       "itemDiscount": "品目割引",
       "discount": "割引",
       "tax": "税金",
-      "taxAmount": "税額",
       "subtotal": "小計",
       "total": "合計",
       "internalNotes": "内部メモ",
       "returnedAt": "返却日",
       "sourceQuote": "元の見積書",
-      "partialMonthPolicy": "端数月の請求方法"
+      "partialMonthPolicy": "端数月の請求方法",
+      "amountDue": "開始時のお支払い金額"
     },
     "sections": {
       "details": "詳細",
@@ -711,7 +711,7 @@
       "unit": "単位",
       "unitPlaceholder": "例：日、時間、個",
       "billingMode": "請求方式",
-      "quantity": "数量",
+      "quantity": "数量（個数）",
       "unitPrice": "単価",
       "dailyPrice": "日額料金",
       "weeklyPrice": "週額料金",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "以下で承諾すると、この見積書への承諾が記録されます。これは適格電子署名ではありません。",
       "rejectReasonPlaceholder": "理由をお聞かせください（任意）",
       "confirmReject": "却下を確定"
+    },
+    "pdf": {
+      "title": "御見積書",
+      "quoteNumber": "見積書番号",
+      "status": "ステータス",
+      "customer": "顧客",
+      "issueDate": "発行日",
+      "validUntil": "有効期限",
+      "plannedPeriod": "予定レンタル期間",
+      "columns": {
+        "name": "内容",
+        "quantity": "数量",
+        "unitPrice": "単価",
+        "discount": "割引",
+        "tax": "税金",
+        "lineTotal": "小計"
+      },
+      "subtotal": "小計",
+      "discountTotal": "割引",
+      "taxTotal": "税金（内税）",
+      "depositTotal": "必要保証金",
+      "total": "合計",
+      "customerNotes": "備考",
+      "termsAndConditions": "利用規約",
+      "acceptanceTitle": "見積承諾",
+      "acceptedBy": "承諾者",
+      "acceptedAt": "承諾日",
+      "generatedAt": "作成日",
+      "page": "ページ",
+      "of": "/",
+      "amountDue": "開始時のお支払い金額"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "templateLanguage": "書類の言語",
       "templateLanguageHint": "このドキュメントタイプには、言語ごとに有効なテンプレートが複数あります。使用するテンプレートを選択してください。",
       "templateLanguageDefault": "テナントの既定値",
-      "rentalHint": "レンタルをリンクすると、その番号、日付、料金、資産がドキュメントテンプレートで利用できるようになります。"
+      "rentalHint": "レンタルをリンクすると、その番号、日付、料金、資産がドキュメントテンプレートで利用できるようになります。",
+      "notes": "備考",
+      "assetConditionNotes": "資産の状態",
+      "damageDescription": "損傷の説明",
+      "missingItems": "不足品・付属品"
     },
     "summary": {
       "total": "ドキュメント総数",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "保留中",
         "SENT": "送信済み",
-        "FAILED": "失敗"
+        "FAILED": "失敗",
+        "NOT_CONFIGURED": "未設定"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "このカスタムドキュメント種類の名前を入力してください"
-    }
+    },
+    "print": "印刷"
   },
   "documentTemplate": {
     "title": "ドキュメントテンプレート",
@@ -1270,13 +1307,20 @@
       "endTime": "レンタル終了時刻",
       "startDateTime": "レンタル開始日時",
       "endDateTime": "レンタル終了日時",
+      "subtotal": "小計",
+      "discount": "割引",
+      "tax": "税金",
       "total": "レンタル合計金額",
       "deposit": "保証金",
+      "amountDue": "開始時のお支払い金額",
       "assetsTableHtml": "レンタル資産一覧表"
     },
     "quote": {
       "number": "見積番号",
+      "issueDate": "発行日",
+      "validUntil": "有効期限",
       "total": "見積合計金額",
+      "terms": "利用規約",
       "servicesTableHtml": "追加サービス一覧表"
     },
     "other": {
@@ -1370,7 +1414,8 @@
       "paid": "入金済み",
       "remaining": "残額",
       "notes": "備考"
-    }
+    },
+    "saved": "請求書を保存しました"
   },
   "bankAccount": {
     "add": "銀行口座を追加",

@@ -33,6 +33,7 @@ import {
   usePortalRentalTimeline,
 } from "../../../../../hooks/use-portal-rentals";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
+import { getAssetDisplayLabel } from "../../../../../lib/asset-display-label";
 import { formatDate, formatDateTime } from "../../../../../lib/date-format";
 import { formatMoney } from "../../../../../lib/money";
 
@@ -165,7 +166,7 @@ export default function PortalRentalDetailPage() {
                           href={`/portal/assets/${item.assetId}`}
                           className="text-primary underline-offset-4 hover:underline"
                         >
-                          {item.asset.name}
+                          {getAssetDisplayLabel(item.asset)}
                         </Link>
                       </td>
                       <td className="p-3">{item.quantity}</td>

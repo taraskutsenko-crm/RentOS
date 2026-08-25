@@ -27,6 +27,7 @@ import {
   useStartRental,
 } from "../../../../hooks/use-rentals";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
+import { getAssetDisplayLabel } from "../../../../lib/asset-display-label";
 import { getAssetStatusLabel } from "../../../../lib/asset-status-label";
 import {
   formatBusinessDate,
@@ -110,6 +111,14 @@ export default function RentalDetailPage() {
   if (isError || !rental) {
     return <p className="text-destructive text-sm">{t("common.error")}</p>;
   }
+
+  // A display-only sum of already-stored per-item deposits -- mirrors the
+  // resolver's identical resolveRentalDeposit aggregate used in generated
+  // documents (variable-resolver.service.ts) -- never a pricing
+  // recalculation. Kept strictly separate from rental.totalMinor: the
+  // refundable security deposit is not taxable rental revenue (see
+  // DECISIONS.md D-097).
+  const depositTotalMinor = rental.items.reduce((sum, item) => sum + item.depositMinor, 0);
 
   async function runAction(action: () => Promise<unknown>): Promise<void> {
     setActionError(null);
@@ -250,10 +259,7 @@ export default function RentalDetailPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-semibold">
-              {formatMoney(
-                rental.items.reduce((sum, item) => sum + item.depositMinor, 0),
-                rental.currency,
-              )}
+              {formatMoney(depositTotalMinor, rental.currency)}
             </p>
             <p className="text-muted-foreground text-xs">{t("rental.summary.totalDeposit")}</p>
           </CardContent>
@@ -356,7 +362,7 @@ export default function RentalDetailPage() {
                             href={`/app/assets/${item.asset.id}`}
                             className="text-primary hover:underline"
                           >
-                            {item.asset.name}
+                            {getAssetDisplayLabel(item.asset)}
                           </Link>
                         </td>
                         <td className="p-3">
@@ -630,6 +636,16 @@ export default function RentalDetailPage() {
                 label={t("rental.fields.total")}
                 value={formatMoney(rental.totalMinor, rental.currency)}
               />
+              {depositTotalMinor > 0 && (
+                // Explicit "amount due at start" = rental total + refundable
+                // deposit -- kept visually distinct from Total, which stays
+                // the taxable rental value only (see DECISIONS.md D-097: a
+                // refundable deposit is never rental revenue).
+                <InfoRow
+                  label={t("rental.fields.amountDue")}
+                  value={formatMoney(rental.totalMinor + depositTotalMinor, rental.currency)}
+                />
+              )}
             </CardContent>
           </Card>
         </div>

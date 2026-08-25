@@ -86,14 +86,9 @@ export class VariableResolverService {
 
     const businessData = (version.businessDataSnapshot as Record<string, unknown>) ?? {};
 
-    const rentalDeposit = document.rental
-      ? await this.resolveRentalDeposit(
-          tenantId,
-          document.rental.id,
-          document.rental.currency,
-          language,
-        )
-      : "";
+    const rentalDepositMinor = document.rental
+      ? await this.resolveRentalDepositMinor(tenantId, document.rental.id)
+      : 0;
     const assetsTableHtml = document.rental
       ? await this.buildAssetsTableHtml(
           tenantId,
@@ -117,6 +112,12 @@ export class VariableResolverService {
         // No tenant branding/logo field exists yet — resolves empty until
         // one is added; the template syntax itself needs no change then.
         logo: "",
+        // Pre-built raw HTML (see RAW_HTML_VARIABLES below) — renders a
+        // real <img> only when a logo URL actually exists, so a tenant
+        // with no logo never emits a broken-image icon in a generated
+        // document. Templates should use this instead of hand-wrapping
+        // {{company.logo}} in their own <img> tag.
+        logoHtml: buildLogoHtml("", tenant.name),
         email: "",
         registrationNumber: tenant.registrationNumber ?? "",
         taxNumber: tenant.taxNumber ?? "",
@@ -181,23 +182,54 @@ export class VariableResolverService {
             endTime: formatTime(document.rental.plannedEnd, language, "UTC"),
             startDateTime: formatDateTime(document.rental.plannedStart, language, "UTC"),
             endDateTime: formatDateTime(document.rental.plannedEnd, language, "UTC"),
+            subtotal: formatMoney(
+              document.rental.subtotalMinor,
+              document.rental.currency ?? CURRENCY_FALLBACK,
+              language,
+            ),
+            discount: formatMoney(
+              document.rental.discountMinor,
+              document.rental.currency ?? CURRENCY_FALLBACK,
+              language,
+            ),
+            tax: formatMoney(
+              document.rental.taxMinor,
+              document.rental.currency ?? CURRENCY_FALLBACK,
+              language,
+            ),
             total: formatMoney(
               document.rental.totalMinor,
               document.rental.currency ?? CURRENCY_FALLBACK,
               language,
             ),
-            deposit: rentalDeposit,
+            deposit: formatMoney(
+              rentalDepositMinor,
+              document.rental.currency ?? CURRENCY_FALLBACK,
+              language,
+            ),
+            // Explicit "amount due at start" = rental total + refundable
+            // deposit -- a refundable deposit is never rental revenue (see
+            // DECISIONS.md D-097/D-098), so this is kept as its own
+            // variable rather than redefining rental.total.
+            amountDue: formatMoney(
+              document.rental.totalMinor + rentalDepositMinor,
+              document.rental.currency ?? CURRENCY_FALLBACK,
+              language,
+            ),
             assetsTableHtml,
           }
         : {},
       quote: document.quote
         ? {
             number: document.quote.quoteNumber,
+            issueDate: formatDate(document.quote.issueDate, language, "UTC"),
+            validUntil: formatDate(document.quote.validUntil, language, "UTC"),
             total: formatMoney(
               document.quote.totalMinor,
               document.quote.currency ?? CURRENCY_FALLBACK,
               language,
             ),
+            terms: document.quote.termsAndConditions ?? "",
             servicesTableHtml,
           }
         : {},
@@ -263,6 +295,7 @@ export class VariableResolverService {
       company: {
         name: tenant.name,
         logo: "",
+        logoHtml: buildLogoHtml("", tenant.name),
         email: "",
         registrationNumber: tenant.registrationNumber ?? "",
         taxNumber: tenant.taxNumber ?? "",
@@ -321,8 +354,12 @@ export class VariableResolverService {
         endTime: formatTime(later, language, timezone),
         startDateTime: formatDateTime(now, language, timezone),
         endDateTime: formatDateTime(later, language, timezone),
+        subtotal: formatMoney(46000, currency, language),
+        discount: formatMoney(0, currency, language),
+        tax: formatMoney(4000, currency, language),
         total: formatMoney(50000, currency, language),
         deposit: formatMoney(10000, currency, language),
+        amountDue: formatMoney(60000, currency, language),
         assetsTableHtml: sampleTableHtml(labels.asset, labels.quantity, labels.unitPrice, [
           ["Sample Asset A", "1", `${formatMoney(15000, currency, language)} / ${labels.day}`],
           ["Sample Asset B", "2", `${formatMoney(5000, currency, language)} / ${labels.day}`],
@@ -330,7 +367,10 @@ export class VariableResolverService {
       },
       quote: {
         number: "Q-000001",
+        issueDate: formatDate(now, language, timezone),
+        validUntil: formatDate(later, language, timezone),
         total: formatMoney(50000, currency, language),
+        terms: "Sample terms and conditions for preview purposes.",
         servicesTableHtml: sampleTableHtml(labels.service, labels.quantity, labels.total, [
           ["Sample Delivery Service", "1", formatMoney(5000, currency, language)],
         ]),
@@ -366,18 +406,13 @@ export class VariableResolverService {
     return result;
   }
 
-  /** A display-only sum of already-stored per-item deposits — never a pricing recalculation. */
-  private async resolveRentalDeposit(
-    tenantId: string,
-    rentalId: string,
-    currency: string,
-    language: string,
-  ): Promise<string> {
+  /** A display-only sum of already-stored per-item deposits, in minor units — never a pricing recalculation. */
+  private async resolveRentalDepositMinor(tenantId: string, rentalId: string): Promise<number> {
     const result = await this.prisma.rentalItem.aggregate({
       where: { tenantId, rentalId },
       _sum: { depositMinor: true },
     });
-    return formatMoney(result._sum.depositMinor ?? 0, currency ?? CURRENCY_FALLBACK, language);
+    return result._sum.depositMinor ?? 0;
   }
 
   /**
@@ -741,6 +776,19 @@ function formatMoney(minor: number, currency: string, language: string): string 
 }
 
 /**
+ * Renders the header logo `<img>` only when a real logo URL exists —
+ * otherwise returns "" so no element is emitted at all, never a
+ * `src=""` broken-image icon (see docs/DECISIONS.md, logo fallback fix).
+ * Every value is individually escaped before assembly, matching the
+ * per-cell-escaping convention buildAssetsTableHtml/buildServicesTableHtml
+ * already use for their own RAW_HTML_VARIABLES entries.
+ */
+function buildLogoHtml(logoUrl: string, companyName: string): string {
+  if (!logoUrl) return "";
+  return `<img class="doc-header__logo" src="${escapeHtml(logoUrl)}" alt="${escapeHtml(companyName)}" />`;
+}
+
+/**
  * Variables whose resolved value is pre-built HTML with every cell already
  * escaped individually by the resolver (see buildAssetsTableHtml/
  * buildServicesTableHtml) and so must be substituted verbatim. A small,
@@ -749,7 +797,11 @@ function formatMoney(minor: number, currency: string, language: string): string 
  * variables, which would reopen the XSS surface the default escaping below
  * exists to close.
  */
-const RAW_HTML_VARIABLES = new Set(["rental.assetsTableHtml", "quote.servicesTableHtml"]);
+const RAW_HTML_VARIABLES = new Set([
+  "rental.assetsTableHtml",
+  "quote.servicesTableHtml",
+  "company.logoHtml",
+]);
 
 /**
  * Substitutes every `{{dot.path}}` placeholder in `template` by walking

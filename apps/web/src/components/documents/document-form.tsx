@@ -12,6 +12,7 @@ import { useCustomers } from "../../hooks/use-customers";
 import { useCurrentTenantId } from "../../hooks/use-current-tenant";
 import { useActiveDocumentTemplateLanguages } from "../../hooks/use-document-templates";
 import { useRentals } from "../../hooks/use-rentals";
+import { getAssetDisplayLabel } from "../../lib/asset-display-label";
 import { documentSchema, type DocumentFormValues } from "../../lib/validation";
 import type { DocumentType } from "../../types/document";
 
@@ -71,6 +72,10 @@ export function DocumentForm({
       assetId: "",
       rentalId: "",
       templateLanguage: "",
+      notes: "",
+      assetConditionNotes: "",
+      damageDescription: "",
+      missingItems: "",
       ...initialValues,
     },
   });
@@ -236,11 +241,55 @@ export function DocumentForm({
           <option value="">{t("document.fields.none")}</option>
           {assets?.items.map((asset) => (
             <option key={asset.id} value={asset.id}>
-              {asset.name}
+              {getAssetDisplayLabel(asset)}
             </option>
           ))}
         </select>
       </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="notes">{t("document.fields.notes")}</Label>
+        <textarea
+          id="notes"
+          rows={2}
+          className="border-input flex w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs"
+          {...register("notes")}
+        />
+      </div>
+
+      {(documentType === "HANDOVER_PROTOCOL" || documentType === "RETURN_PROTOCOL") && (
+        <>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="assetConditionNotes">{t("document.fields.assetConditionNotes")}</Label>
+            <textarea
+              id="assetConditionNotes"
+              rows={2}
+              className="border-input flex w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs"
+              {...register("assetConditionNotes")}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="damageDescription">{t("document.fields.damageDescription")}</Label>
+            <textarea
+              id="damageDescription"
+              rows={2}
+              className="border-input flex w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs"
+              {...register("damageDescription")}
+            />
+          </div>
+          {documentType === "RETURN_PROTOCOL" && (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="missingItems">{t("document.fields.missingItems")}</Label>
+              <textarea
+                id="missingItems"
+                rows={2}
+                className="border-input flex w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs"
+                {...register("missingItems")}
+              />
+            </div>
+          )}
+        </>
+      )}
 
       <Button type="submit" disabled={isPending || isSubmitting}>
         {isPending || isSubmitting ? submittingLabel : submitLabel}

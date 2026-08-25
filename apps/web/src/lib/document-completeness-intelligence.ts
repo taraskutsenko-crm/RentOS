@@ -49,11 +49,22 @@ export interface DocumentChecklistItem {
   document: RentalDocument | null;
 }
 
-/** Rental states in which the asset has actually been handed over. */
-const HANDED_OVER_STATUSES: RentalStatus[] = ["ACTIVE", "RETURNED", "COMPLETED"];
+/**
+ * Rental states in which a Handover Protocol may be prepared — from
+ * RESERVED onward, not only once the asset has actually been handed over
+ * (ACTIVE). Staff routinely prepare handover paperwork ahead of the actual
+ * physical handover; gating "readyToGenerate" on ACTIVE alone incorrectly
+ * showed "Not required yet" for a real, already-committed reservation (see
+ * DECISIONS.md, document checklist actionability fix).
+ */
+const HANDOVER_PREPARABLE_STATUSES: RentalStatus[] = ["RESERVED", "ACTIVE", "RETURNED", "COMPLETED"];
 
-/** Rental states in which the asset has actually come back. */
-const RETURNED_STATUSES: RentalStatus[] = ["RETURNED", "COMPLETED"];
+/**
+ * Rental states in which a Return Protocol may be prepared — from ACTIVE
+ * onward (the asset is actually out), not only once it has already come
+ * back (RETURNED). Same rationale as HANDOVER_PREPARABLE_STATUSES above.
+ */
+const RETURN_PREPARABLE_STATUSES: RentalStatus[] = ["ACTIVE", "RETURNED", "COMPLETED"];
 
 const SIGNED_STATUSES: RentalDocumentStatus[] = ["SIGNED", "PARTIALLY_SIGNED"];
 const SENT_STATUSES: RentalDocumentStatus[] = ["SENT", "VIEWED"];
@@ -119,7 +130,7 @@ export function getRentalDocumentChecklist(rental: {
       }
     : {
         key: "handoverProtocol",
-        state: HANDED_OVER_STATUSES.includes(status) ? "readyToGenerate" : "notRequiredYet",
+        state: HANDOVER_PREPARABLE_STATUSES.includes(status) ? "readyToGenerate" : "notRequiredYet",
         document: null,
       };
 
@@ -128,7 +139,7 @@ export function getRentalDocumentChecklist(rental: {
     ? { key: "returnProtocol", state: returnDocument.state, document: returnDocument.document }
     : {
         key: "returnProtocol",
-        state: RETURNED_STATUSES.includes(status) ? "readyToGenerate" : "notRequiredYet",
+        state: RETURN_PREPARABLE_STATUSES.includes(status) ? "readyToGenerate" : "notRequiredYet",
         document: null,
       };
 

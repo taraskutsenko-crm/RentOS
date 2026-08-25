@@ -38,10 +38,7 @@ export class UpdateRentalDto {
   @Min(0)
   discountMinor?: number;
 
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  taxMinor?: number;
+  // Deliberately no `taxMinor` — see CreateRentalDto's identical note.
 
   @EmptyToNull()
   @IsOptional()

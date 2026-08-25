@@ -19,4 +19,12 @@ describe("LoggingEmailProvider", () => {
       { success: true },
     );
   });
+
+  // Callers that need to show a truthful "Sent" vs "Not configured" status
+  // (see DocumentEmailService) must check isConfigured() rather than
+  // trusting send()'s always-successful result — see DECISIONS.md.
+  it("reports itself as not configured, even though send() always succeeds", () => {
+    const provider = new LoggingEmailProvider();
+    expect(provider.isConfigured()).toBe(false);
+  });
 });

@@ -461,7 +461,7 @@
       "actualStart": "Actual start",
       "actualEnd": "Actual end",
       "billingMode": "Billing mode",
-      "quantity": "Quantity",
+      "quantity": "Quantity (units)",
       "dailyPrice": "Daily price",
       "dailyPriceForRemainder": "Daily price (for remaining days)",
       "weeklyPrice": "Weekly price",
@@ -471,13 +471,13 @@
       "itemDiscount": "Item discount",
       "discount": "Discount",
       "tax": "Tax",
-      "taxAmount": "Tax amount",
       "subtotal": "Subtotal",
       "total": "Total",
       "internalNotes": "Internal notes",
       "returnedAt": "Returned at",
       "sourceQuote": "Source quote",
-      "partialMonthPolicy": "Partial month billing"
+      "partialMonthPolicy": "Partial month billing",
+      "amountDue": "Amount due at start"
     },
     "sections": {
       "details": "Details",
@@ -711,7 +711,7 @@
       "unit": "Unit",
       "unitPlaceholder": "e.g. day, hour, piece",
       "billingMode": "Billing mode",
-      "quantity": "Quantity",
+      "quantity": "Quantity (units)",
       "unitPrice": "Unit price",
       "dailyPrice": "Daily price",
       "weeklyPrice": "Weekly price",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "Accepting below records your acceptance of this quote. This is not a qualified electronic signature.",
       "rejectReasonPlaceholder": "Let us know why (optional)",
       "confirmReject": "Confirm rejection"
+    },
+    "pdf": {
+      "title": "Commercial Quote",
+      "quoteNumber": "Quote number",
+      "status": "Status",
+      "customer": "Customer",
+      "issueDate": "Issue date",
+      "validUntil": "Valid until",
+      "plannedPeriod": "Planned rental period",
+      "columns": {
+        "name": "Description",
+        "quantity": "Qty",
+        "unitPrice": "Unit price",
+        "discount": "Discount",
+        "tax": "Tax",
+        "lineTotal": "Line total"
+      },
+      "subtotal": "Subtotal",
+      "discountTotal": "Discount",
+      "taxTotal": "Tax (included)",
+      "depositTotal": "Deposit required",
+      "total": "Total",
+      "customerNotes": "Notes",
+      "termsAndConditions": "Terms and conditions",
+      "acceptanceTitle": "Quote acceptance",
+      "acceptedBy": "Accepted by",
+      "acceptedAt": "Accepted at",
+      "generatedAt": "Generated",
+      "page": "Page",
+      "of": "of",
+      "amountDue": "Amount due at start"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "asset": "Asset",
       "templateLanguage": "Document language",
       "templateLanguageHint": "This document type has more than one active language-specific template — choose which one to use.",
-      "templateLanguageDefault": "Tenant default"
+      "templateLanguageDefault": "Tenant default",
+      "notes": "Notes",
+      "assetConditionNotes": "Asset condition",
+      "damageDescription": "Damage description",
+      "missingItems": "Missing items / accessories"
     },
     "summary": {
       "total": "Total documents",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "Pending",
         "SENT": "Sent",
-        "FAILED": "Failed"
+        "FAILED": "Failed",
+        "NOT_CONFIGURED": "Not configured"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "Enter a name for this custom document type"
-    }
+    },
+    "print": "Print"
   },
   "documentTemplate": {
     "title": "Document templates",
@@ -1051,13 +1088,20 @@
       "endTime": "Rental end time",
       "startDateTime": "Rental start date & time",
       "endDateTime": "Rental end date & time",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "tax": "Tax",
       "total": "Rental total",
       "deposit": "Security deposit",
+      "amountDue": "Amount due at start",
       "assetsTableHtml": "Rented assets table"
     },
     "quote": {
       "number": "Quote number",
+      "issueDate": "Issue date",
+      "validUntil": "Valid until",
       "total": "Quote total",
+      "terms": "Terms and conditions",
       "servicesTableHtml": "Additional services table"
     },
     "other": {
@@ -1362,7 +1406,8 @@
       "paid": "Paid",
       "remaining": "Remaining",
       "notes": "Notes"
-    }
+    },
+    "saved": "Invoice saved"
   },
   "bankAccount": {
     "add": "Add bank account",

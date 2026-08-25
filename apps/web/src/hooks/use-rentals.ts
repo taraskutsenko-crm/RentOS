@@ -34,6 +34,8 @@ export interface RentalItemInput {
   customPriceMinor?: number;
   depositMinor?: number;
   discountMinor?: number;
+  /** Integer basis points (2300 = 23.00%) — see DECISIONS.md D-090. */
+  taxRateBp?: number;
   notes?: string | null;
   /** Only meaningful for MONTHLY — see DECISIONS.md D-072. */
   partialMonthPolicy?: PartialMonthPolicy;
@@ -45,7 +47,6 @@ export interface RentalInput {
   plannedEnd: string;
   currency?: string;
   discountMinor?: number;
-  taxMinor?: number;
   notes?: string | null;
   internalNotes?: string | null;
   items?: RentalItemInput[];

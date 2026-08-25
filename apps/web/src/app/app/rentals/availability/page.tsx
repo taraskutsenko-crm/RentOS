@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useAssets } from "../../../../hooks/use-assets";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { useAvailability } from "../../../../hooks/use-rentals";
+import { getAssetDisplayLabel } from "../../../../lib/asset-display-label";
 
 function startOfMonth(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
@@ -95,7 +96,7 @@ export default function AvailabilityCalendarPage() {
                   checked={selectedAssetIds.includes(asset.id)}
                   onChange={() => toggleAsset(asset.id)}
                 />
-                {asset.name}
+                {getAssetDisplayLabel(asset)}
               </label>
             ))}
           </div>

@@ -1,4 +1,5 @@
 import { applyPartialMonthPolicy, estimateMonthlyBreakdown } from "./rental-pricing";
+import { resolveTaxMinor } from "./tax-estimate";
 import type { MonthlyBillingStrategy, PartialMonthPolicy } from "../types/rental";
 import type { QuoteBillingMode, QuoteDiscountType } from "../types/quote";
 
@@ -57,13 +58,6 @@ function resolveDiscountMinor(
       ? discountValue
       : Math.round((baseMinor * discountValue) / BASIS_POINTS_DENOMINATOR);
   return Math.min(baseMinor, Math.max(0, raw));
-}
-
-function resolveTaxMinor(baseMinor: number, taxRateBp: number): number {
-  if (taxRateBp <= 0 || baseMinor <= 0) {
-    return 0;
-  }
-  return Math.max(0, Math.round((baseMinor * taxRateBp) / BASIS_POINTS_DENOMINATOR));
 }
 
 export interface EstimatedQuoteItemPricing {

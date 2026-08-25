@@ -20,6 +20,18 @@
  * avoids that failure mode entirely, no build-step changes needed.
  */
 export const BASE_DOCUMENT_CSS = `
+/* True A4 page size and print-safe margins for the browser's native print
+   dialog (the "Direct Print" action — printing the preview iframe directly,
+   see documents/[id]/page.tsx). Puppeteer's own PDF render
+   (pdf-renderer.service.ts) passes an explicit JS-level margin of 0 and
+   does not set preferCSSPageSize, so that render path always overrides
+   this rule and is completely unaffected by it — this @page rule only
+   ever applies to a real browser print. */
+@page {
+  size: A4;
+  margin: 18mm 16mm;
+}
+
 :root {
   --doc-ink: #17181c;
   --doc-ink-muted: #5b5f6b;
@@ -225,5 +237,18 @@ table.doc-table tr:last-child td {
 .doc-section,
 table.doc-table tr {
   page-break-inside: avoid;
+}
+
+/* Puppeteer's PDF render (margin: 0 at the JS level, see the @page comment
+   above) relies entirely on .doc-page's own padding for its margin, so
+   that padding must stay full-size there. A real browser print instead
+   gets its margin from @page above -- stacking .doc-page's padding on top
+   of that would double it, so shrink it down to a small visual gutter
+   for print only. */
+@media print {
+  .doc-page {
+    max-width: none;
+    padding: 8px 0 24px;
+  }
 }
 `;

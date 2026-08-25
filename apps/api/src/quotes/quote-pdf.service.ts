@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import type { QuoteDocument } from "@prisma/client";
 import PDFDocument from "pdfkit";
 
+import { resolveDefaultDocumentLanguage } from "../documents/rendering/document-language-resolver.util";
 import { PrismaService } from "../prisma/prisma.service";
 import { StorageService } from "../storage/storage.service";
 import { pdfLabel } from "./pdf-labels.util";
@@ -50,18 +51,21 @@ export class QuotePdfService {
   ): Promise<GeneratedQuotePdf> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { name: true, defaultLanguage: true, timezone: true },
+      select: { name: true, countryCode: true, defaultLanguage: true, timezone: true },
     });
     if (!tenant) {
       throw new NotFoundException("Tenant not found");
     }
 
-    const buffer = await this.renderPdf(
-      quote,
-      tenant.name,
-      tenant.defaultLanguage,
-      tenant.timezone,
-    );
+    // The document language (company country first, never the tenant's
+    // registration-time UI default alone) — same canonical resolver every
+    // other document type uses, so a Polish company gets a Polish
+    // Commercial Offer PDF regardless of what language its account
+    // happened to be created under (see DECISIONS.md, Commercial Quote PDF
+    // localization fix).
+    const language = resolveDefaultDocumentLanguage(tenant);
+
+    const buffer = await this.renderPdf(quote, tenant.name, language, tenant.timezone);
     const fileName = `${quote.quoteNumber}.pdf`;
     const storageKey = this.buildKey(tenantId, quote.id, fileName);
 
@@ -347,6 +351,17 @@ export class QuotePdfService {
           ][])
         : []),
       [t("quote.pdf.total", "Total"), money(quote.totalMinor)],
+      // Explicit "amount due at start" -- kept visually distinct from Total,
+      // which stays the taxable value only; a refundable deposit is never
+      // revenue (see DECISIONS.md D-097/D-098).
+      ...(quote.depositTotalMinor > 0
+        ? ([
+            [
+              t("quote.pdf.amountDue", "Amount due at start"),
+              money(quote.totalMinor + quote.depositTotalMinor),
+            ],
+          ] as [string, string][])
+        : []),
     ];
 
     const labelWidth = 350;

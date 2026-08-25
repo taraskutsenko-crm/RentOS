@@ -461,7 +461,7 @@
       "actualStart": "Skutečný začátek",
       "actualEnd": "Skutečný konec",
       "billingMode": "Způsob fakturace",
-      "quantity": "Množství",
+      "quantity": "Počet (kusů)",
       "dailyPrice": "Denní cena",
       "dailyPriceForRemainder": "Denní cena (za zbývající dny)",
       "weeklyPrice": "Týdenní cena",
@@ -471,13 +471,13 @@
       "itemDiscount": "Sleva na položku",
       "discount": "Sleva",
       "tax": "Daň",
-      "taxAmount": "Částka daně",
       "subtotal": "Mezisoučet",
       "total": "Celkem",
       "internalNotes": "Interní poznámky",
       "returnedAt": "Vráceno dne",
       "sourceQuote": "Zdrojová nabídka",
-      "partialMonthPolicy": "Účtování neúplného měsíce"
+      "partialMonthPolicy": "Účtování neúplného měsíce",
+      "amountDue": "Splatná částka na začátku"
     },
     "sections": {
       "details": "Podrobnosti",
@@ -711,7 +711,7 @@
       "unit": "Jednotka",
       "unitPlaceholder": "např. den, hodina, kus",
       "billingMode": "Způsob fakturace",
-      "quantity": "Množství",
+      "quantity": "Počet (kusů)",
       "unitPrice": "Jednotková cena",
       "dailyPrice": "Denní cena",
       "weeklyPrice": "Týdenní cena",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "Přijetím níže zaznamenáváte souhlas s touto nabídkou. Nejedná se o kvalifikovaný elektronický podpis.",
       "rejectReasonPlaceholder": "Sdělte nám důvod (volitelné)",
       "confirmReject": "Potvrdit zamítnutí"
+    },
+    "pdf": {
+      "title": "Obchodní nabídka",
+      "quoteNumber": "Číslo nabídky",
+      "status": "Stav",
+      "customer": "Zákazník",
+      "issueDate": "Datum vystavení",
+      "validUntil": "Platnost do",
+      "plannedPeriod": "Plánované období pronájmu",
+      "columns": {
+        "name": "Popis",
+        "quantity": "Množství",
+        "unitPrice": "Jednotková cena",
+        "discount": "Sleva",
+        "tax": "Daň",
+        "lineTotal": "Celkem za položku"
+      },
+      "subtotal": "Mezisoučet",
+      "discountTotal": "Sleva",
+      "taxTotal": "Daň (zahrnuta)",
+      "depositTotal": "Požadovaná kauce",
+      "total": "Celkem",
+      "customerNotes": "Poznámky",
+      "termsAndConditions": "Obchodní podmínky",
+      "acceptanceTitle": "Přijetí nabídky",
+      "acceptedBy": "Přijal(a)",
+      "acceptedAt": "Přijato dne",
+      "generatedAt": "Vygenerováno",
+      "page": "Strana",
+      "of": "z",
+      "amountDue": "Splatná částka na začátku"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "templateLanguage": "Jazyk dokumentu",
       "templateLanguageHint": "Tento typ dokumentu má aktivních více jazykově specifických šablon — vyberte, kterou použít.",
       "templateLanguageDefault": "Výchozí nastavení nájemce",
-      "rentalHint": "Propojení pronájmu zpřístupní jeho číslo, data, cenu a vybavení šabloně dokumentu."
+      "rentalHint": "Propojení pronájmu zpřístupní jeho číslo, data, cenu a vybavení šabloně dokumentu.",
+      "notes": "Poznámky",
+      "assetConditionNotes": "Stav vybavení",
+      "damageDescription": "Popis poškození",
+      "missingItems": "Chybějící položky / příslušenství"
     },
     "summary": {
       "total": "Celkem dokumentů",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "Čeká se",
         "SENT": "Odesláno",
-        "FAILED": "Selhalo"
+        "FAILED": "Selhalo",
+        "NOT_CONFIGURED": "Nenakonfigurováno"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "Zadejte název tohoto vlastního typu dokumentu"
-    }
+    },
+    "print": "Tisk"
   },
   "documentTemplate": {
     "title": "Šablony dokumentů",
@@ -1270,13 +1307,20 @@
       "endTime": "Čas ukončení pronájmu",
       "startDateTime": "Datum a čas zahájení pronájmu",
       "endDateTime": "Datum a čas ukončení pronájmu",
+      "subtotal": "Mezisoučet",
+      "discount": "Sleva",
+      "tax": "Daň",
       "total": "Celková částka pronájmu",
       "deposit": "Jistota",
+      "amountDue": "Splatná částka na začátku",
       "assetsTableHtml": "Tabulka pronajatého vybavení"
     },
     "quote": {
       "number": "Číslo nabídky",
+      "issueDate": "Datum vystavení",
+      "validUntil": "Platnost do",
       "total": "Celková částka nabídky",
+      "terms": "Obchodní podmínky",
       "servicesTableHtml": "Tabulka doplňkových služeb"
     },
     "other": {
@@ -1370,7 +1414,8 @@
       "paid": "Uhrazeno",
       "remaining": "Zbývá uhradit",
       "notes": "Poznámky"
-    }
+    },
+    "saved": "Faktura byla uložena"
   },
   "bankAccount": {
     "add": "Přidat bankovní účet",

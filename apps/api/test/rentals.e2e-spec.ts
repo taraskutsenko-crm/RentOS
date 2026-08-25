@@ -127,16 +127,24 @@ describe("Rentals E2E", () => {
     expect(response.body.subtotalMinor).toBe(10000);
   });
 
-  // 3. Pricing test: CUSTOM ignores quantity/duration, plus rental-level discount/tax
-  it("computes CUSTOM pricing as a flat price and applies rental-level discount/tax", async () => {
+  // 3. Pricing test: CUSTOM ignores quantity/duration, plus rental-level discount and per-item tax rate
+  it("computes CUSTOM pricing as a flat price and applies rental-level discount plus per-item tax rate", async () => {
     const response = await createRental({
-      items: [{ assetId: assetAId, billingMode: "CUSTOM", customPriceMinor: 50000, quantity: 3 }],
+      items: [
+        {
+          assetId: assetAId,
+          billingMode: "CUSTOM",
+          customPriceMinor: 50000,
+          quantity: 3,
+          taxRateBp: 2000, // 20%
+        },
+      ],
       discountMinor: 5000,
-      taxMinor: 1000,
     }).expect(201);
 
     expect(response.body.subtotalMinor).toBe(50000);
-    expect(response.body.totalMinor).toBe(50000 - 5000 + 1000);
+    expect(response.body.taxMinor).toBe(10000); // 50000 * 20%
+    expect(response.body.totalMinor).toBe(50000 - 5000 + 10000);
   });
 
   function isoDaysAfter(base: string, days: number): string {
@@ -1111,5 +1119,73 @@ describe("Rentals E2E", () => {
       .expect(200);
     expect(filtered.body.items).toHaveLength(1);
     expect(filtered.body.items[0].id).toBe(reserved.body.id);
+  });
+
+  // 33. Dashboard "Active rentals" canonical definition (DECISIONS.md D-090):
+  // ACTIVE means the persisted RentalStatus.ACTIVE value only, reached
+  // exclusively via an explicit reserve() then start() action — never
+  // inferred from whether plannedStart/plannedEnd happen to overlap "now".
+  // A DRAFT rental whose planned dates overlap today must NOT be counted,
+  // even though it looks superficially "active" by date alone.
+  it("the ?status=ACTIVE filter (which the Dashboard's Active Rentals metric uses) counts only a truly-started rental, never a DRAFT one whose dates merely overlap today", async () => {
+    // DRAFT, dates overlapping "now" — must NOT count as active.
+    await createRental({ plannedStart: dateOffset(-1), plannedEnd: dateOffset(1) }).expect(201);
+
+    // RESERVED, in the future — must NOT count as active yet.
+    const future = await createRental({
+      plannedStart: dateOffset(10),
+      plannedEnd: dateOffset(12),
+    }).expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${future.body.id}/reserve`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    // Genuinely ACTIVE — reserve() then start() — must count.
+    const active = await createRental({
+      plannedStart: dateOffset(-1),
+      plannedEnd: dateOffset(1),
+    }).expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${active.body.id}/reserve`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${active.body.id}/start`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    // RETURNED — was active, now finished — must NOT count.
+    const returned = await createRental({
+      plannedStart: dateOffset(-3),
+      plannedEnd: dateOffset(-1),
+      items: [{ assetId: assetBId, billingMode: "DAILY", dailyPriceMinor: 1000 }],
+    }).expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${returned.body.id}/reserve`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${returned.body.id}/start`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${returned.body.id}/return`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const activeOnly = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/rentals`)
+      .query({ status: "ACTIVE", pageSize: 1 })
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(activeOnly.body.total).toBe(1);
+    expect(activeOnly.body.items[0].id).toBe(active.body.id);
   });
 });

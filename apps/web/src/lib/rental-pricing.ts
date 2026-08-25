@@ -1,3 +1,4 @@
+import { resolveTaxMinor } from "./tax-estimate";
 import type {
   MonthlyBillingStrategy,
   PartialMonthPolicy,
@@ -20,6 +21,8 @@ export interface EstimatedItemInput {
   monthlyPriceMinor?: number | undefined;
   customPriceMinor?: number | undefined;
   discountMinor: number;
+  /** Integer basis points (2300 = 23.00%) — never a float rate. Applied to this item's own already-discounted line total. */
+  taxRateBp?: number | undefined;
 }
 
 /**
@@ -295,16 +298,27 @@ export function getMissingRentalItemPriceFields(
   );
 }
 
+/**
+ * Mirrors apps/api/src/rentals/rental-pricing.util.ts's `computeRentalTotals`
+ * exactly: subtotal = sum of item line totals (each already net of its own
+ * discount); taxMinor = sum of each item's own tax, computed from its
+ * taxRateBp applied to that item's own (already-discounted) line total —
+ * never a manually-entered flat amount (see docs/DECISIONS.md D-090). total
+ * = subtotal - rental-level discount + tax, floored at 0.
+ */
 export function estimateRentalTotals(
   items: (EstimatedItemInput | EstimatedMonthlyItemInput)[],
   plannedStart: string,
   plannedEnd: string,
   discountMinor: number,
-  taxMinor: number,
-): { subtotalMinor: number; totalMinor: number } {
-  const subtotalMinor = items.reduce(
-    (sum, item) => sum + estimateItemLineTotalMinor(item, plannedStart, plannedEnd),
+): { subtotalMinor: number; taxMinor: number; totalMinor: number } {
+  const itemNetTotals = items.map((item) =>
+    estimateItemLineTotalMinor(item, plannedStart, plannedEnd),
+  );
+  const subtotalMinor = itemNetTotals.reduce((sum, value) => sum + value, 0);
+  const taxMinor = items.reduce(
+    (sum, item, index) => sum + resolveTaxMinor(itemNetTotals[index]!, item.taxRateBp ?? 0),
     0,
   );
-  return { subtotalMinor, totalMinor: Math.max(0, subtotalMinor - discountMinor + taxMinor) };
+  return { subtotalMinor, taxMinor, totalMinor: Math.max(0, subtotalMinor - discountMinor + taxMinor) };
 }

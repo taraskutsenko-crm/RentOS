@@ -99,6 +99,32 @@ export class DocumentEmailService {
     delivery: DocumentEmailDelivery,
     actorUserId: string,
   ): Promise<DocumentEmailDelivery> {
+    // No real email transport exists in this environment (see
+    // LoggingEmailProvider) — never claim "Sent" for a message that was
+    // never actually attempted. Skips PDF generation too, since there is
+    // nothing to attach it to (see DECISIONS.md, email truthfulness fix).
+    if (!this.emailService.isConfigured()) {
+      const notConfigured = await this.prisma.documentEmailDelivery.update({
+        where: { id: delivery.id },
+        data: {
+          status: "NOT_CONFIGURED",
+          errorMessage: "No real email provider is configured in this environment.",
+          sentAt: null,
+        },
+      });
+
+      await this.auditService.log({
+        tenantId,
+        userId: actorUserId,
+        action: "document.email_not_configured",
+        entityType: "Document",
+        entityId: document.id,
+        metadata: { emailDeliveryId: delivery.id, recipientEmail: delivery.recipientEmail },
+      });
+
+      return notConfigured;
+    }
+
     const { buffer } = await this.pdfService.getOrGenerate(tenantId, document, version);
 
     const result = await this.emailService.send({

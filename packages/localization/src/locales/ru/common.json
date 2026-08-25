@@ -461,7 +461,7 @@
       "actualStart": "Фактическое начало",
       "actualEnd": "Фактическое окончание",
       "billingMode": "Режим тарификации",
-      "quantity": "Количество",
+      "quantity": "Количество единиц",
       "dailyPrice": "Цена за день",
       "dailyPriceForRemainder": "Цена за день (для остатка)",
       "weeklyPrice": "Цена за неделю",
@@ -471,13 +471,13 @@
       "itemDiscount": "Скидка на позицию",
       "discount": "Скидка",
       "tax": "Налог",
-      "taxAmount": "Сумма налога",
       "subtotal": "Промежуточный итог",
       "total": "Итого",
       "internalNotes": "Внутренние заметки",
       "returnedAt": "Возвращено",
       "sourceQuote": "Исходная смета",
-      "partialMonthPolicy": "Оплата неполного месяца"
+      "partialMonthPolicy": "Оплата неполного месяца",
+      "amountDue": "Сумма к оплате в начале"
     },
     "sections": {
       "details": "Детали",
@@ -711,7 +711,7 @@
       "unit": "Единица",
       "unitPlaceholder": "напр. день, час, штука",
       "billingMode": "Режим тарификации",
-      "quantity": "Количество",
+      "quantity": "Количество единиц",
       "unitPrice": "Цена за единицу",
       "dailyPrice": "Цена за день",
       "weeklyPrice": "Цена за неделю",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "Принятие ниже фиксирует ваше согласие с этой сметой. Это не является квалифицированной электронной подписью.",
       "rejectReasonPlaceholder": "Сообщите нам причину (необязательно)",
       "confirmReject": "Подтвердить отклонение"
+    },
+    "pdf": {
+      "title": "Коммерческое предложение",
+      "quoteNumber": "Номер сметы",
+      "status": "Статус",
+      "customer": "Клиент",
+      "issueDate": "Дата выдачи",
+      "validUntil": "Действительна до",
+      "plannedPeriod": "Планируемый период аренды",
+      "columns": {
+        "name": "Описание",
+        "quantity": "Кол-во",
+        "unitPrice": "Цена за единицу",
+        "discount": "Скидка",
+        "tax": "Налог",
+        "lineTotal": "Сумма по позиции"
+      },
+      "subtotal": "Промежуточный итог",
+      "discountTotal": "Скидка",
+      "taxTotal": "Налог (включён)",
+      "depositTotal": "Требуемый залог",
+      "total": "Итого",
+      "customerNotes": "Примечания",
+      "termsAndConditions": "Условия",
+      "acceptanceTitle": "Принятие сметы",
+      "acceptedBy": "Принято",
+      "acceptedAt": "Дата принятия",
+      "generatedAt": "Сформировано",
+      "page": "Страница",
+      "of": "из",
+      "amountDue": "Сумма к оплате в начале"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "rentalHint": "Привязка аренды делает её номер, даты, цену и активы доступными в шаблоне документа.",
       "templateLanguage": "Язык документа",
       "templateLanguageHint": "Для этого типа документа активно несколько языковых шаблонов — выберите, какой использовать.",
-      "templateLanguageDefault": "Значение арендатора по умолчанию"
+      "templateLanguageDefault": "Значение арендатора по умолчанию",
+      "notes": "Примечания",
+      "assetConditionNotes": "Состояние оборудования",
+      "damageDescription": "Описание повреждения",
+      "missingItems": "Недостающие предметы / аксессуары"
     },
     "summary": {
       "total": "Всего документов",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "Ожидание",
         "SENT": "Отправлено",
-        "FAILED": "Ошибка"
+        "FAILED": "Ошибка",
+        "NOT_CONFIGURED": "Не настроено"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "Введите название для этого произвольного типа документа"
-    }
+    },
+    "print": "Печать"
   },
   "documentTemplate": {
     "title": "Шаблоны документов",
@@ -1270,13 +1307,20 @@
       "endTime": "Время окончания аренды",
       "startDateTime": "Дата и время начала аренды",
       "endDateTime": "Дата и время окончания аренды",
+      "subtotal": "Промежуточный итог",
+      "discount": "Скидка",
+      "tax": "Налог",
       "total": "Итоговая сумма аренды",
       "deposit": "Залог",
+      "amountDue": "Сумма к оплате в начале",
       "assetsTableHtml": "Таблица арендованного оборудования"
     },
     "quote": {
       "number": "Номер предложения",
+      "issueDate": "Дата выдачи",
+      "validUntil": "Действительна до",
       "total": "Итоговая сумма предложения",
+      "terms": "Условия",
       "servicesTableHtml": "Таблица дополнительных услуг"
     },
     "other": {
@@ -1370,7 +1414,8 @@
       "paid": "Оплачено",
       "remaining": "Остаток к оплате",
       "notes": "Примечания"
-    }
+    },
+    "saved": "Счёт сохранён"
   },
   "bankAccount": {
     "add": "Добавить банковский счёт",

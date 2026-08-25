@@ -461,7 +461,7 @@
       "actualStart": "Rzeczywisty początek",
       "actualEnd": "Rzeczywisty koniec",
       "billingMode": "Tryb rozliczenia",
-      "quantity": "Ilość",
+      "quantity": "Ilość sztuk",
       "dailyPrice": "Cena dzienna",
       "dailyPriceForRemainder": "Cena dzienna (za pozostałe dni)",
       "weeklyPrice": "Cena tygodniowa",
@@ -471,13 +471,13 @@
       "itemDiscount": "Rabat na pozycję",
       "discount": "Rabat",
       "tax": "Podatek",
-      "taxAmount": "Kwota podatku",
       "subtotal": "Suma częściowa",
       "total": "Razem",
       "internalNotes": "Notatki wewnętrzne",
       "returnedAt": "Zwrócono",
       "sourceQuote": "Oferta źródłowa",
-      "partialMonthPolicy": "Rozliczanie niepełnego miesiąca"
+      "partialMonthPolicy": "Rozliczanie niepełnego miesiąca",
+      "amountDue": "Kwota do zapłaty na start"
     },
     "sections": {
       "details": "Szczegóły",
@@ -711,7 +711,7 @@
       "unit": "Jednostka",
       "unitPlaceholder": "np. dzień, godzina, sztuka",
       "billingMode": "Tryb rozliczenia",
-      "quantity": "Ilość",
+      "quantity": "Ilość sztuk",
       "unitPrice": "Cena jednostkowa",
       "dailyPrice": "Cena dzienna",
       "weeklyPrice": "Cena tygodniowa",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "Akceptacja poniżej rejestruje Twoją zgodę na tę ofertę. Nie jest to kwalifikowany podpis elektroniczny.",
       "rejectReasonPlaceholder": "Daj nam znać dlaczego (opcjonalnie)",
       "confirmReject": "Potwierdź odrzucenie"
+    },
+    "pdf": {
+      "title": "Oferta handlowa",
+      "quoteNumber": "Numer oferty",
+      "status": "Status",
+      "customer": "Klient",
+      "issueDate": "Data wystawienia",
+      "validUntil": "Ważna do",
+      "plannedPeriod": "Planowany okres najmu",
+      "columns": {
+        "name": "Opis",
+        "quantity": "Ilość",
+        "unitPrice": "Cena jednostkowa",
+        "discount": "Rabat",
+        "tax": "Podatek",
+        "lineTotal": "Wartość pozycji"
+      },
+      "subtotal": "Suma częściowa",
+      "discountTotal": "Rabat",
+      "taxTotal": "Podatek (wliczony)",
+      "depositTotal": "Wymagana kaucja",
+      "total": "Razem",
+      "customerNotes": "Uwagi",
+      "termsAndConditions": "Warunki",
+      "acceptanceTitle": "Akceptacja oferty",
+      "acceptedBy": "Zaakceptowano przez",
+      "acceptedAt": "Zaakceptowano dnia",
+      "generatedAt": "Wygenerowano",
+      "page": "Strona",
+      "of": "z",
+      "amountDue": "Kwota do zapłaty na start"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "templateLanguage": "Język dokumentu",
       "templateLanguageHint": "Ten typ dokumentu ma więcej niż jeden aktywny szablon dla danego języka — wybierz, którego użyć.",
       "templateLanguageDefault": "Domyślny dla najemcy",
-      "rentalHint": "Powiązanie wynajmu udostępnia jego numer, daty, cenę i zasoby w szablonie dokumentu."
+      "rentalHint": "Powiązanie wynajmu udostępnia jego numer, daty, cenę i zasoby w szablonie dokumentu.",
+      "notes": "Uwagi",
+      "assetConditionNotes": "Stan sprzętu",
+      "damageDescription": "Opis uszkodzenia",
+      "missingItems": "Brakujące elementy / akcesoria"
     },
     "summary": {
       "total": "Wszystkie dokumenty",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "Oczekujący",
         "SENT": "Wysłany",
-        "FAILED": "Nieudany"
+        "FAILED": "Nieudany",
+        "NOT_CONFIGURED": "Nieskonfigurowane"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "Podaj nazwę tego niestandardowego typu dokumentu"
-    }
+    },
+    "print": "Drukuj"
   },
   "documentTemplate": {
     "title": "Szablony dokumentów",
@@ -1270,13 +1307,20 @@
       "endTime": "Godzina zakończenia wynajmu",
       "startDateTime": "Data i godzina rozpoczęcia wynajmu",
       "endDateTime": "Data i godzina zakończenia wynajmu",
+      "subtotal": "Suma częściowa",
+      "discount": "Rabat",
+      "tax": "Podatek",
       "total": "Kwota wynajmu razem",
       "deposit": "Kaucja",
+      "amountDue": "Kwota do zapłaty na start",
       "assetsTableHtml": "Tabela wynajętego sprzętu"
     },
     "quote": {
       "number": "Numer oferty",
+      "issueDate": "Data wystawienia",
+      "validUntil": "Ważna do",
       "total": "Kwota oferty razem",
+      "terms": "Warunki",
       "servicesTableHtml": "Tabela usług dodatkowych"
     },
     "other": {
@@ -1370,7 +1414,8 @@
       "paid": "Zapłacono",
       "remaining": "Do zapłaty",
       "notes": "Uwagi"
-    }
+    },
+    "saved": "Faktura zapisana"
   },
   "bankAccount": {
     "add": "Dodaj rachunek bankowy",

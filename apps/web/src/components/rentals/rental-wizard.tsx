@@ -20,6 +20,7 @@ import { useCustomers } from "../../hooks/use-customers";
 import { useRentalBillingSettings } from "../../hooks/use-rental-billing-settings";
 import type { RentalItemInput } from "../../hooks/use-rentals";
 import { useAvailability } from "../../hooks/use-rentals";
+import { getAssetDisplayLabel } from "../../lib/asset-display-label";
 import { formatMoney } from "../../lib/money";
 import {
   estimateMonthlyBreakdown,
@@ -73,7 +74,6 @@ export interface RentalWizardProps {
     plannedEnd: string;
     currency: string;
     discountMinor: number;
-    taxMinor: number;
     notes: string | null;
     internalNotes: string | null;
     items: RentalItemInput[];
@@ -101,6 +101,7 @@ function emptyItemForm(
     customPriceDisplay: "",
     depositDisplay: "",
     discountDisplay: "",
+    taxRateDisplay: "",
     notes: "",
     partialMonthPolicy,
   };
@@ -137,7 +138,6 @@ export function RentalWizard({
       plannedEnd: "",
       currency: defaultCurrency ?? "",
       discountDisplay: "",
-      taxDisplay: "",
       notes: "",
       internalNotes: "",
       ...initialValues,
@@ -179,6 +179,7 @@ export function RentalWizard({
       monthlyPriceMinor: toMinor(item.monthlyPriceDisplay),
       customPriceMinor: toMinor(item.customPriceDisplay),
       discountMinor: toMinor(item.discountDisplay),
+      taxRateBp: toMinor(item.taxRateDisplay),
       ...(item.billingMode === "MONTHLY"
         ? {
             monthlyBillingStrategy: monthlyStrategy,
@@ -194,7 +195,6 @@ export function RentalWizard({
     values.plannedStart,
     values.plannedEnd,
     toMinor(values.discountDisplay),
-    toMinor(values.taxDisplay),
   );
 
   const monthlyBreakdown = estimateMonthlyBreakdown(
@@ -258,7 +258,6 @@ export function RentalWizard({
       plannedEnd: values.plannedEnd,
       currency: values.currency,
       discountMinor: toMinor(values.discountDisplay),
-      taxMinor: toMinor(values.taxDisplay),
       notes: values.notes || null,
       internalNotes: values.internalNotes || null,
       items: items.map((item) => ({
@@ -273,6 +272,7 @@ export function RentalWizard({
         ...(item.customPriceDisplay ? { customPriceMinor: toMinor(item.customPriceDisplay) } : {}),
         depositMinor: toMinor(item.depositDisplay),
         discountMinor: toMinor(item.discountDisplay),
+        taxRateBp: toMinor(item.taxRateDisplay),
         notes: item.notes || null,
         ...(item.billingMode === "MONTHLY" ? { partialMonthPolicy: item.partialMonthPolicy } : {}),
       })),
@@ -345,7 +345,7 @@ export function RentalWizard({
                   className="flex items-center justify-between rounded-md border p-2 text-sm"
                 >
                   <span>
-                    {asset.name} ({asset.internalNumber})
+                    {getAssetDisplayLabel(asset)}
                   </span>
                   <input
                     type="checkbox"
@@ -640,6 +640,29 @@ export function RentalWizard({
                         }
                       />
                     </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label>{t("quote.fields.taxRatePercent")}</Label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          className="pr-7"
+                          aria-label={t("quote.fields.taxRatePercent")}
+                          value={item.taxRateDisplay}
+                          onChange={(event) =>
+                            updateItem(item.assetId, { taxRateDisplay: event.target.value })
+                          }
+                        />
+                        <span
+                          className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm"
+                          aria-hidden="true"
+                        >
+                          %
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
@@ -659,33 +682,16 @@ export function RentalWizard({
                   {...register("discountDisplay")}
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="taxDisplay">{t("rental.fields.taxAmount")}</Label>
-                <div className="relative">
-                  <Input
-                    id="taxDisplay"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="pr-14"
-                    {...register("taxDisplay")}
-                  />
-                  {values.currency && (
-                    <span
-                      className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm"
-                      aria-hidden="true"
-                    >
-                      {values.currency}
-                    </span>
-                  )}
-                </div>
-              </div>
             </div>
 
             <div className="rounded-md border p-3 text-sm">
               <p>
                 {t("rental.fields.subtotal")}:{" "}
                 {formatMoney(estimatedTotals.subtotalMinor, values.currency)}
+              </p>
+              <p>
+                {t("quote.fields.taxTotal")}:{" "}
+                {formatMoney(estimatedTotals.taxMinor, values.currency)}
               </p>
               <p className="font-semibold">
                 {t("rental.fields.total")}:{" "}

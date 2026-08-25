@@ -17,9 +17,10 @@ import { useTranslation } from "react-i18next";
 
 import { useAssets } from "../../hooks/use-assets";
 import { useCustomers } from "../../hooks/use-customers";
+import type { QuoteInput, QuoteItemInput } from "../../hooks/use-quotes";
 import { useRentalBillingSettings } from "../../hooks/use-rental-billing-settings";
 import { useAvailability } from "../../hooks/use-rentals";
-import type { QuoteInput, QuoteItemInput } from "../../hooks/use-quotes";
+import { getAssetDisplayLabel } from "../../lib/asset-display-label";
 import { formatMoney } from "../../lib/money";
 import { estimateQuoteTotals, getMissingQuoteItemPriceFields } from "../../lib/quote-pricing";
 import { quoteSchema, type QuoteFormValues, type QuoteItemFormValues } from "../../lib/validation";
@@ -420,7 +421,7 @@ export function QuoteWizard({
                   className="flex items-center justify-between rounded-md border p-2 text-sm"
                 >
                   <span>
-                    {asset.name} ({asset.internalNumber})
+                    {getAssetDisplayLabel(asset)}
                   </span>
                   <input
                     type="checkbox"

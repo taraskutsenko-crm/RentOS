@@ -129,6 +129,44 @@ describe("DocumentForm document-language picker (D-068)", () => {
   });
 });
 
+describe("Handover/Return condition notes (D-094 regression)", () => {
+  beforeEach(() => {
+    useCurrentTenantIdMock.mockReturnValue(["tenant-1", vi.fn()]);
+    useCustomersMock.mockReturnValue({ data: { items: [] } });
+    useAssetsMock.mockReturnValue({ data: { items: [] } });
+    useRentalsMock.mockReturnValue({ data: { items: [] } });
+    useActiveDocumentTemplateLanguagesMock.mockReturnValue({ data: { languages: [] } });
+  });
+
+  it("shows only the general Notes field for a CONTRACT — no condition/damage fields", () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(renderForm(queryClient, { documentType: "CONTRACT" }));
+
+    expect(screen.getByLabelText("Notes")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Asset condition")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Damage description")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Missing items / accessories")).not.toBeInTheDocument();
+  });
+
+  it("shows asset condition and damage fields, but not missing items, for a Handover Protocol", () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(renderForm(queryClient, { documentType: "HANDOVER_PROTOCOL" }));
+
+    expect(screen.getByLabelText("Asset condition")).toBeInTheDocument();
+    expect(screen.getByLabelText("Damage description")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Missing items / accessories")).not.toBeInTheDocument();
+  });
+
+  it("shows asset condition, damage, and missing items fields for a Return Protocol", () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(renderForm(queryClient, { documentType: "RETURN_PROTOCOL" }));
+
+    expect(screen.getByLabelText("Asset condition")).toBeInTheDocument();
+    expect(screen.getByLabelText("Damage description")).toBeInTheDocument();
+    expect(screen.getByLabelText("Missing items / accessories")).toBeInTheDocument();
+  });
+});
+
 describe("Document language stays independent of UI language (D-069 regression)", () => {
   beforeEach(() => {
     useCurrentTenantIdMock.mockReturnValue(["tenant-1", vi.fn()]);

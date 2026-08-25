@@ -461,7 +461,7 @@
       "actualStart": "实际开始时间",
       "actualEnd": "实际结束时间",
       "billingMode": "计费方式",
-      "quantity": "数量",
+      "quantity": "数量（件数）",
       "dailyPrice": "日租价格",
       "dailyPriceForRemainder": "日租价格（剩余天数）",
       "weeklyPrice": "周租价格",
@@ -471,13 +471,13 @@
       "itemDiscount": "单项折扣",
       "discount": "折扣",
       "tax": "税费",
-      "taxAmount": "税额",
       "subtotal": "小计",
       "total": "总计",
       "internalNotes": "内部备注",
       "returnedAt": "归还时间",
       "sourceQuote": "来源报价单",
-      "partialMonthPolicy": "不满整月的计费方式"
+      "partialMonthPolicy": "不满整月的计费方式",
+      "amountDue": "起租时应付金额"
     },
     "sections": {
       "details": "详情",
@@ -711,7 +711,7 @@
       "unit": "单位",
       "unitPlaceholder": "例如：天、小时、件",
       "billingMode": "计费方式",
-      "quantity": "数量",
+      "quantity": "数量（件数）",
       "unitPrice": "单价",
       "dailyPrice": "日租价格",
       "weeklyPrice": "周租价格",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "在下方确认接受即表示您已记录对本报价单的接受。这并非合格的电子签名。",
       "rejectReasonPlaceholder": "请告诉我们原因（可选）",
       "confirmReject": "确认拒绝"
+    },
+    "pdf": {
+      "title": "商业报价单",
+      "quoteNumber": "报价单编号",
+      "status": "状态",
+      "customer": "客户",
+      "issueDate": "开具日期",
+      "validUntil": "有效期至",
+      "plannedPeriod": "计划租赁期间",
+      "columns": {
+        "name": "说明",
+        "quantity": "数量",
+        "unitPrice": "单价",
+        "discount": "折扣",
+        "tax": "税费",
+        "lineTotal": "行总计"
+      },
+      "subtotal": "小计",
+      "discountTotal": "折扣",
+      "taxTotal": "税费（已含）",
+      "depositTotal": "所需押金",
+      "total": "总计",
+      "customerNotes": "备注",
+      "termsAndConditions": "条款与条件",
+      "acceptanceTitle": "报价确认",
+      "acceptedBy": "确认人",
+      "acceptedAt": "确认日期",
+      "generatedAt": "生成时间",
+      "page": "第",
+      "of": "页，共",
+      "amountDue": "起租时应付金额"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "templateLanguage": "文档语言",
       "templateLanguageHint": "此文档类型有多个语言专属的启用模板 — 请选择要使用的模板。",
       "templateLanguageDefault": "租户默认",
-      "rentalHint": "关联租赁后，其编号、日期、价格和资产将可用于文档模板。"
+      "rentalHint": "关联租赁后，其编号、日期、价格和资产将可用于文档模板。",
+      "notes": "备注",
+      "assetConditionNotes": "资产状况",
+      "damageDescription": "损坏描述",
+      "missingItems": "缺失物品/配件"
     },
     "summary": {
       "total": "文档总数",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "待处理",
         "SENT": "已发送",
-        "FAILED": "发送失败"
+        "FAILED": "发送失败",
+        "NOT_CONFIGURED": "未配置"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "请输入该自定义文档类型的名称"
-    }
+    },
+    "print": "打印"
   },
   "documentTemplate": {
     "title": "文档模板",
@@ -1270,13 +1307,20 @@
       "endTime": "租赁结束时间",
       "startDateTime": "租赁开始日期和时间",
       "endDateTime": "租赁结束日期和时间",
+      "subtotal": "小计",
+      "discount": "折扣",
+      "tax": "税费",
       "total": "租赁总额",
       "deposit": "押金",
+      "amountDue": "起租时应付金额",
       "assetsTableHtml": "租赁资产表"
     },
     "quote": {
       "number": "报价编号",
+      "issueDate": "开具日期",
+      "validUntil": "有效期至",
       "total": "报价总额",
+      "terms": "条款与条件",
       "servicesTableHtml": "附加服务表"
     },
     "other": {
@@ -1370,7 +1414,8 @@
       "paid": "已付",
       "remaining": "尚欠金额",
       "notes": "备注"
-    }
+    },
+    "saved": "发票已保存"
   },
   "bankAccount": {
     "add": "添加银行账户",

@@ -30,4 +30,15 @@ export interface EmailSendResult {
  */
 export interface EmailProvider {
   send(message: EmailMessage): Promise<EmailSendResult>;
+  /**
+   * Whether this provider can actually deliver mail — `false` for
+   * LoggingEmailProvider (no real transport wired up), `true` for a real
+   * SMTP/SES/SendGrid provider once one exists. Callers that need to show a
+   * truthful "Sent" vs "Not configured" status (see DocumentEmailService)
+   * must check this before calling `send`, rather than trusting `send`'s
+   * result alone — LoggingEmailProvider's `send` always resolves
+   * `{success: true}` for local dev-log visibility, which is not the same
+   * claim as "this was actually delivered".
+   */
+  isConfigured(): boolean;
 }

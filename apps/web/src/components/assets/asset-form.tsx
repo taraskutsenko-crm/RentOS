@@ -6,9 +6,10 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { useAssetCategories } from "../../hooks/use-asset-categories";
+import { useAssetCategoryTree } from "../../hooks/use-asset-categories";
 import { useAssetCustomFieldsForCategory } from "../../hooks/use-asset-custom-fields";
 import { useAssetStatuses } from "../../hooks/use-asset-statuses";
+import { categoryIndent, flattenCategoryTree } from "../../lib/asset-category-tree";
 import { getAssetStatusLabel } from "../../lib/asset-status-label";
 import { toMinorUnits } from "../../lib/money";
 import { assetSchema, type AssetFormValues } from "../../lib/validation";
@@ -39,7 +40,8 @@ export function AssetForm({
   submittingLabel,
 }: AssetFormProps) {
   const { t } = useTranslation();
-  const { data: categoriesData } = useAssetCategories(tenantId);
+  const { data: categoryTree } = useAssetCategoryTree(tenantId);
+  const categoryOptions = flattenCategoryTree(categoryTree ?? []);
   const { data: statuses } = useAssetStatuses(tenantId);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>(
     initialCustomFields ?? {},
@@ -213,9 +215,11 @@ export function AssetForm({
             {...register("categoryId")}
           >
             <option value="">{t("asset.fields.selectPlaceholder")}</option>
-            {categoriesData?.items.map((category) => (
+            {categoryOptions.map((category) => (
               <option key={category.id} value={category.id}>
+                {categoryIndent(category.depth)}
                 {category.name}
+                {!category.isActive ? ` (${t("asset.categorySettings.inactiveSuffix")})` : ""}
               </option>
             ))}
           </select>

@@ -31,6 +31,8 @@ export interface RentalItem {
   partialMonthPolicy: PartialMonthPolicy | null;
   depositMinor: number;
   discountMinor: number;
+  /** Integer basis points (2300 = 23.00%) — the tax rate applied to this line's own (already-discounted) total. See DECISIONS.md D-090. */
+  taxRateBp: number;
   notes: string | null;
   returnedAt: string | null;
   createdAt: string;

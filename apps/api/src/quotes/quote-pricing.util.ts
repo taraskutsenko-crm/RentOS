@@ -6,6 +6,7 @@ import type {
   QuoteDiscountType,
 } from "@prisma/client";
 
+import { resolveTaxMinor } from "../common/tax.util";
 import {
   applyPartialMonthPolicy,
   computeMonthlyBreakdown,
@@ -13,6 +14,8 @@ import {
   durationInDays,
   monthsInRange,
 } from "../rentals/rental-pricing.util";
+
+export { resolveTaxMinor } from "../common/tax.util";
 
 const BASIS_POINTS_DENOMINATOR = 10_000;
 
@@ -87,13 +90,6 @@ export function resolveDiscountMinor(
   return Math.min(baseMinor, Math.max(0, raw));
 }
 
-/** Resolves a tax amount from integer basis points, one rounding step, never negative. */
-export function resolveTaxMinor(baseMinor: number, taxRateBp: number): number {
-  if (taxRateBp <= 0 || baseMinor <= 0) {
-    return 0;
-  }
-  return Math.max(0, Math.round((baseMinor * taxRateBp) / BASIS_POINTS_DENOMINATOR));
-}
 
 /**
  * Validates that the price field(s) matching `billingMode` are present

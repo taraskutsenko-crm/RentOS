@@ -174,11 +174,17 @@ function buildQuote(overrides: Partial<QuoteDetailView> = {}): QuoteDetailView {
   } as any;
 }
 
-function buildService(tenantOverrides: { defaultLanguage?: string; timezone?: string } = {}) {
+function buildService(
+  tenantOverrides: { countryCode?: string; defaultLanguage?: string; timezone?: string } = {},
+) {
   const prisma = {
     tenant: {
       findUnique: vi.fn().mockResolvedValue({
         name: "Acme Rentals",
+        // No countryCode override by default -- an unrecognized code makes
+        // resolveDefaultDocumentLanguage fall through to defaultLanguage
+        // below, unchanged from every test's pre-existing expectations.
+        countryCode: tenantOverrides.countryCode ?? "ZZ",
         defaultLanguage: tenantOverrides.defaultLanguage ?? "en",
         timezone: tenantOverrides.timezone ?? "UTC",
       }),
@@ -229,6 +235,23 @@ describe("QuotePdfService.generateAndStore", () => {
     // as substitute characters, not the original text).
     expect(text).toContain("Доставка / Delivery / Dostawa");
     expect(text).toContain("Тестове кириличне поле");
+  });
+
+  // Regression: the PDF previously always used tenant.defaultLanguage
+  // directly (the registration-time UI language), never the canonical
+  // company-country-first document-language resolver every other document
+  // type uses — a Polish company whose account happened to be registered
+  // in English got an English Commercial Quote PDF. See DECISIONS.md,
+  // Commercial Quote PDF localization fix.
+  it("renders in the company's country default language, not the tenant's registration-time defaultLanguage", async () => {
+    const { service } = buildService({ countryCode: "PL", defaultLanguage: "en" });
+    const quote = buildQuote();
+
+    const result = await service.generateAndStore("tenant-1", quote, "user-1");
+    const text = await extractText(result.buffer);
+
+    expect(text).toContain("Oferta handlowa"); // "Commercial Quote" (quote.pdf.title, pl)
+    expect(text).not.toContain("Commercial Quote");
   });
 
   it("produces exactly as many PDF pages as the footer claims, for a long item list", async () => {

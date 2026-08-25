@@ -51,6 +51,18 @@ export class RentalItemDto {
   @Min(0)
   discountMinor?: number;
 
+  /**
+   * Integer basis points (2300 = 23.00%) — the tax rate applied to this
+   * line's own (already-discounted) total. Replaces the old Rental-header
+   * flat `taxMinor` amount: the user enters a rate, never a pre-calculated
+   * currency amount (see docs/DECISIONS.md, rental tax percentage model).
+   */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(10_000)
+  taxRateBp?: number;
+
   @EmptyToNull()
   @IsOptional()
   @IsString()

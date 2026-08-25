@@ -3,7 +3,7 @@
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PageHeader } from "../../../../components/shell/page-header";
@@ -60,6 +60,7 @@ export default function DocumentDetailPage() {
   const [tenantId] = useCurrentTenantId();
   const [actionError, setActionError] = useState<string | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<number | null>(null);
+  const previewFrameRef = useRef<HTMLIFrameElement>(null);
   const [sharePassword, setSharePassword] = useState("");
   const [emailForm, setEmailForm] = useState<{
     recipientType: DocumentEmailRecipientType;
@@ -133,6 +134,20 @@ export default function DocumentDetailPage() {
     } catch (error) {
       setActionError(apiErrorMessage(error, t("common.error")));
     }
+  }
+
+  /**
+   * Prints the already-rendered preview iframe directly -- no manual
+   * "Generate PDF, download, open, print" round-trip. The iframe holds a
+   * complete, isolated HTML document (its own <html>/<head>/<style>, see
+   * DocumentRendererService), so printing it never includes any of this
+   * page's own sidebar/nav/buttons: there is nothing else in that
+   * document to print. Uses the exact same @page A4 print CSS and
+   * localized rendering as the generated PDF (see DECISIONS.md, direct
+   * print fix).
+   */
+  function handlePrint(): void {
+    previewFrameRef.current?.contentWindow?.print();
   }
 
   async function handleDelete(): Promise<void> {
@@ -377,23 +392,31 @@ export default function DocumentDetailPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t("document.sections.preview")}</CardTitle>
-              {document.versions.length > 1 && (
-                <select
-                  className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
-                  value={selectedVersion ?? document.currentVersionNumber}
-                  onChange={(event) => setSelectedVersion(Number(event.target.value))}
-                >
-                  {document.versions.map((version) => (
-                    <option key={version.id} value={version.versionNumber}>
-                      {t("document.fields.version")} {version.versionNumber}
-                    </option>
-                  ))}
-                </select>
-              )}
+              <div className="flex items-center gap-2">
+                {document.versions.length > 1 && (
+                  <select
+                    className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+                    value={selectedVersion ?? document.currentVersionNumber}
+                    onChange={(event) => setSelectedVersion(Number(event.target.value))}
+                  >
+                    {document.versions.map((version) => (
+                      <option key={version.id} value={version.versionNumber}>
+                        {t("document.fields.version")} {version.versionNumber}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {preview && (
+                  <Button variant="outline" size="sm" onClick={handlePrint}>
+                    {t("document.print")}
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {preview ? (
                 <iframe
+                  ref={previewFrameRef}
                   title={t("document.sections.preview")}
                   srcDoc={preview.html}
                   className="h-[600px] w-full rounded-md border bg-white"
@@ -553,7 +576,7 @@ export default function DocumentDetailPage() {
                         {t(`document.email.statuses.${delivery.status}`)}
                         {delivery.errorMessage ? ` · ${delivery.errorMessage}` : ""}
                       </span>
-                      {delivery.status === "FAILED" && (
+                      {(delivery.status === "FAILED" || delivery.status === "NOT_CONFIGURED") && (
                         <Button
                           variant="outline"
                           size="sm"

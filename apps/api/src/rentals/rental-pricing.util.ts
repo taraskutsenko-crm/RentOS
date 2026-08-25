@@ -1,6 +1,8 @@
 import { BadRequestException } from "@nestjs/common";
 import type { MonthlyBillingStrategy, PartialMonthPolicy, RentalBillingMode } from "@prisma/client";
 
+import { resolveTaxMinor } from "../common/tax.util";
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export const MIN_CUSTOM_MONTH_LENGTH_DAYS = 1;
@@ -17,6 +19,8 @@ export interface PricedRentalItemInput {
   monthlyPriceMinor?: number | null;
   customPriceMinor?: number | null;
   discountMinor: number;
+  /** Integer basis points (2300 = 23.00%) — never a float rate. Applied to this item's own already-discounted line total; see resolveTaxMinor. */
+  taxRateBp?: number | null;
   /** Required (together with dailyPriceMinor, when partialMonthPolicy is PRORATE_BY_DAY) only when billingMode is MONTHLY — see computeMonthlyBreakdown. */
   monthlyBillingStrategy?: MonthlyBillingStrategy | null;
   /** Required only when monthlyBillingStrategy is CUSTOM; ignored otherwise. */
@@ -296,21 +300,33 @@ export function computeItemLineTotalMinor(
 
 export interface RentalTotals {
   subtotalMinor: number;
+  taxMinor: number;
   totalMinor: number;
 }
 
-/** subtotal = sum of item line totals; total = subtotal - rental-level discount + tax, floored at 0. */
+/**
+ * subtotal = sum of item line totals (each already net of its own
+ * discount); taxMinor = sum of each item's own tax, computed from its
+ * `taxRateBp` applied to that item's own (already-discounted) line total
+ * — never a manually-entered flat amount (see docs/DECISIONS.md, rental
+ * tax percentage model; ARCHITECTURE_LOCK §1.5 historical financial
+ * immutability). total = subtotal - rental-level discount + tax, floored
+ * at 0 — the rental-level discount is applied on top of already-taxed
+ * line totals, matching Quote's identical "loyalty discount on the whole
+ * order" ordering (see quote-pricing.util.ts's computeQuoteTotals).
+ */
 export function computeRentalTotals(
   items: PricedRentalItemInput[],
   plannedStart: Date,
   plannedEnd: Date,
   rentalDiscountMinor: number,
-  rentalTaxMinor: number,
 ): RentalTotals {
-  const subtotalMinor = items.reduce(
-    (sum, item) => sum + computeItemLineTotalMinor(item, plannedStart, plannedEnd),
+  const itemNetTotals = items.map((item) => computeItemLineTotalMinor(item, plannedStart, plannedEnd));
+  const subtotalMinor = itemNetTotals.reduce((sum, value) => sum + value, 0);
+  const taxMinor = items.reduce(
+    (sum, item, index) => sum + resolveTaxMinor(itemNetTotals[index]!, item.taxRateBp ?? 0),
     0,
   );
-  const totalMinor = Math.max(0, subtotalMinor - rentalDiscountMinor + rentalTaxMinor);
-  return { subtotalMinor, totalMinor };
+  const totalMinor = Math.max(0, subtotalMinor - rentalDiscountMinor + taxMinor);
+  return { subtotalMinor, taxMinor, totalMinor };
 }

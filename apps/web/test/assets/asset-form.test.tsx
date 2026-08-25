@@ -6,9 +6,9 @@ import { AssetForm } from "../../src/components/assets/asset-form";
 import type { AssetInput } from "../../src/hooks/use-assets";
 import { renderWithProviders } from "../test-utils";
 
-const useAssetCategoriesMock = vi.fn();
+const useAssetCategoryTreeMock = vi.fn();
 vi.mock("../../src/hooks/use-asset-categories", () => ({
-  useAssetCategories: (...args: unknown[]) => useAssetCategoriesMock(...args),
+  useAssetCategoryTree: (...args: unknown[]) => useAssetCategoryTreeMock(...args),
 }));
 
 const useAssetStatusesMock = vi.fn();
@@ -23,8 +23,8 @@ vi.mock("../../src/hooks/use-asset-custom-fields", () => ({
 }));
 
 function setup(customFields: unknown[] = []) {
-  useAssetCategoriesMock.mockReturnValue({
-    data: { items: [{ id: "cat-1", name: "Vehicles" }] },
+  useAssetCategoryTreeMock.mockReturnValue({
+    data: [{ id: "cat-1", name: "Vehicles", isActive: true, children: [] }],
   });
   useAssetStatusesMock.mockReturnValue({
     data: [{ id: "status-1", name: "Available", code: "AVAILABLE" }],

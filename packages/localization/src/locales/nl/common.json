@@ -461,7 +461,7 @@
       "actualStart": "Werkelijke start",
       "actualEnd": "Werkelijk einde",
       "billingMode": "Factureringswijze",
-      "quantity": "Aantal",
+      "quantity": "Aantal (stuks)",
       "dailyPrice": "Dagprijs",
       "dailyPriceForRemainder": "Dagprijs (resterende dagen)",
       "weeklyPrice": "Weekprijs",
@@ -471,13 +471,13 @@
       "itemDiscount": "Korting op item",
       "discount": "Korting",
       "tax": "Belasting",
-      "taxAmount": "Belastingbedrag",
       "subtotal": "Subtotaal",
       "total": "Totaal",
       "internalNotes": "Interne notities",
       "returnedAt": "Geretourneerd op",
       "sourceQuote": "Bron-offerte",
-      "partialMonthPolicy": "Facturering van gedeeltelijke maand"
+      "partialMonthPolicy": "Facturering van gedeeltelijke maand",
+      "amountDue": "Verschuldigd bedrag bij start"
     },
     "sections": {
       "details": "Details",
@@ -711,7 +711,7 @@
       "unit": "Eenheid",
       "unitPlaceholder": "bijv. dag, uur, stuk",
       "billingMode": "Factureringswijze",
-      "quantity": "Aantal",
+      "quantity": "Aantal (stuks)",
       "unitPrice": "Eenheidsprijs",
       "dailyPrice": "Dagprijs",
       "weeklyPrice": "Weekprijs",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "Door hieronder te accepteren, registreer je je acceptatie van deze offerte. Dit is geen gekwalificeerde elektronische handtekening.",
       "rejectReasonPlaceholder": "Laat ons weten waarom (optioneel)",
       "confirmReject": "Afwijzing bevestigen"
+    },
+    "pdf": {
+      "title": "Offerte",
+      "quoteNumber": "Offertenummer",
+      "status": "Status",
+      "customer": "Klant",
+      "issueDate": "Uitgiftedatum",
+      "validUntil": "Geldig tot",
+      "plannedPeriod": "Geplande huurperiode",
+      "columns": {
+        "name": "Omschrijving",
+        "quantity": "Aantal",
+        "unitPrice": "Stukprijs",
+        "discount": "Korting",
+        "tax": "Belasting",
+        "lineTotal": "Regeltotaal"
+      },
+      "subtotal": "Subtotaal",
+      "discountTotal": "Korting",
+      "taxTotal": "Belasting (inbegrepen)",
+      "depositTotal": "Vereiste borg",
+      "total": "Totaal",
+      "customerNotes": "Notities",
+      "termsAndConditions": "Algemene voorwaarden",
+      "acceptanceTitle": "Aanvaarding van de offerte",
+      "acceptedBy": "Aanvaard door",
+      "acceptedAt": "Aanvaard op",
+      "generatedAt": "Gegenereerd",
+      "page": "Pagina",
+      "of": "van",
+      "amountDue": "Verschuldigd bedrag bij start"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "templateLanguage": "Documenttaal",
       "templateLanguageHint": "Dit documenttype heeft meerdere actieve taalspecifieke sjablonen — kies welke u wilt gebruiken.",
       "templateLanguageDefault": "Standaard van tenant",
-      "rentalHint": "Door een verhuur te koppelen, worden het nummer, de data, de prijs en de activa beschikbaar in de documentsjabloon."
+      "rentalHint": "Door een verhuur te koppelen, worden het nummer, de data, de prijs en de activa beschikbaar in de documentsjabloon.",
+      "notes": "Notities",
+      "assetConditionNotes": "Staat van materiaal",
+      "damageDescription": "Beschrijving van de schade",
+      "missingItems": "Ontbrekende items / accessoires"
     },
     "summary": {
       "total": "Totaal aantal documenten",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "In behandeling",
         "SENT": "Verzonden",
-        "FAILED": "Mislukt"
+        "FAILED": "Mislukt",
+        "NOT_CONFIGURED": "Niet geconfigureerd"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "Voer een naam in voor dit aangepaste documenttype"
-    }
+    },
+    "print": "Afdrukken"
   },
   "documentTemplate": {
     "title": "Documentsjablonen",
@@ -1270,13 +1307,20 @@
       "endTime": "Eindtijd verhuur",
       "startDateTime": "Startdatum en -tijd verhuur",
       "endDateTime": "Einddatum en -tijd verhuur",
+      "subtotal": "Subtotaal",
+      "discount": "Korting",
+      "tax": "Belasting",
       "total": "Totaalbedrag verhuur",
       "deposit": "Borg",
+      "amountDue": "Verschuldigd bedrag bij start",
       "assetsTableHtml": "Tabel gehuurd materiaal"
     },
     "quote": {
       "number": "Offertenummer",
+      "issueDate": "Uitgiftedatum",
+      "validUntil": "Geldig tot",
       "total": "Totaalbedrag offerte",
+      "terms": "Algemene voorwaarden",
       "servicesTableHtml": "Tabel aanvullende diensten"
     },
     "other": {
@@ -1370,7 +1414,8 @@
       "paid": "Betaald",
       "remaining": "Openstaand",
       "notes": "Notities"
-    }
+    },
+    "saved": "Factuur opgeslagen"
   },
   "bankAccount": {
     "add": "Bankrekening toevoegen",

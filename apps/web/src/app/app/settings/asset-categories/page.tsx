@@ -13,6 +13,7 @@ import {
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
+import { categoryIndent, flattenCategoryTree } from "../../../../lib/asset-category-tree";
 import type { AssetCategoryTreeNode } from "../../../../types/asset";
 
 export default function AssetCategoriesSettingsPage() {
@@ -85,16 +86,6 @@ export default function AssetCategoriesSettingsPage() {
     );
   }
 
-  function flattenForParentSelect(
-    nodes: AssetCategoryTreeNode[],
-    depth = 0,
-  ): { id: string; label: string }[] {
-    return nodes.flatMap((node) => [
-      { id: node.id, label: `${"— ".repeat(depth)}${node.name}` },
-      ...flattenForParentSelect(node.children, depth + 1),
-    ]);
-  }
-
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -120,9 +111,10 @@ export default function AssetCategoriesSettingsPage() {
               >
                 <option value="">{t("asset.categorySettings.noParent")}</option>
                 {tree &&
-                  flattenForParentSelect(tree).map((option) => (
+                  flattenCategoryTree(tree).map((option) => (
                     <option key={option.id} value={option.id}>
-                      {option.label}
+                      {categoryIndent(option.depth)}
+                      {option.name}
                     </option>
                   ))}
               </select>

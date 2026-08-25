@@ -154,6 +154,7 @@ describe("RentalDetailPage", () => {
             asset: {
               id: "asset-1",
               name: "Generator A",
+              internalNumber: "GEN-0001",
               currentStatus: { name: "Available", isAvailableForRental: true },
             },
           },
@@ -172,6 +173,54 @@ describe("RentalDetailPage", () => {
 
     const assetsCard = screen.getByText("Asset count").closest("div");
     expect(assetsCard).toHaveTextContent("1");
+  });
+
+  // Regression: the Financial summary must show an explicit "amount due at
+  // start" (rental total + refundable deposit), kept visually distinct from
+  // Total -- a refundable deposit is never rental revenue (see
+  // DECISIONS.md D-097). Uses the task's own acceptance figures: 200 net +
+  // 46 VAT = 246 rental total, 700 refundable deposit, 946 amount due.
+  it("shows an explicit amount-due-at-start figure separate from the taxable rental total", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({
+      data: {
+        ...baseRental("DRAFT"),
+        subtotalMinor: 20000,
+        taxMinor: 4600,
+        totalMinor: 24600,
+        items: [
+          {
+            id: "item-1",
+            billingMode: "DAILY",
+            quantity: 1,
+            dailyPriceMinor: 5000,
+            weeklyPriceMinor: null,
+            monthlyPriceMinor: null,
+            customPriceMinor: null,
+            monthlyBillingStrategy: null,
+            customMonthLengthDays: null,
+            discountMinor: 0,
+            depositMinor: 70000,
+            returnedAt: null,
+            asset: {
+              id: "asset-1",
+              name: "Skoda Fabia",
+              internalNumber: "SK977UG",
+              currentStatus: { name: "Available", isAvailableForRental: true },
+            },
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    const financialCard = screen.getByText("Financial summary").closest("div")
+      ?.parentElement as HTMLElement;
+    const financial = within(financialCard);
+    expect(financial.getByText(moneyPattern(24600, "USD"))).toBeInTheDocument(); // rental total
+    expect(financial.getByText(moneyPattern(94600, "USD"))).toBeInTheDocument(); // amount due
   });
 
   // Chapter 7: the Assets card links each item to its asset and shows the asset's own status
@@ -197,6 +246,7 @@ describe("RentalDetailPage", () => {
             asset: {
               id: "asset-1",
               name: "Generator A",
+              internalNumber: "GEN-0001",
               currentStatus: { name: "Rented out", isAvailableForRental: false },
             },
           },
@@ -207,7 +257,7 @@ describe("RentalDetailPage", () => {
 
     renderWithProviders(<RentalDetailPage />);
 
-    const assetLink = screen.getByRole("link", { name: "Generator A" });
+    const assetLink = screen.getByRole("link", { name: "Generator A — GEN-0001" });
     expect(assetLink).toHaveAttribute("href", "/app/assets/asset-1");
     expect(screen.getByText("Rented out")).toBeInTheDocument();
   });
@@ -297,9 +347,11 @@ describe("RentalDetailPage", () => {
     // Rental contract: a real signed CONTRACT document -- links straight to it.
     const contractLink = checklist.getByRole("link", { name: "CON-000001" });
     expect(contractLink).toHaveAttribute("href", "/app/documents/doc-1");
-    // Handover protocol: ACTIVE with no document yet, but no create permission
-    // -- plain "ready to generate" text, not a Generate link.
-    expect(checklist.getByText("Ready to generate")).toBeInTheDocument();
+    // Handover protocol AND Return protocol: ACTIVE with no document yet
+    // (a Return Protocol may now be prepared as soon as the rental is
+    // ACTIVE, not only once already RETURNED -- see DECISIONS.md), but no
+    // create permission -- plain "ready to generate" text, not a Generate link.
+    expect(checklist.getAllByText("Ready to generate")).toHaveLength(2);
   });
 
   it("omits the document checklist card for a CANCELLED rental", () => {

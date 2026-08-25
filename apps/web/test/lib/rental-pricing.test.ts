@@ -197,20 +197,26 @@ describe("estimateItemLineTotalMinor (MONTHLY)", () => {
 });
 
 describe("estimateRentalTotals", () => {
-  it("sums items then applies rental-level discount and tax", () => {
+  it("sums items then applies rental-level discount and per-item tax", () => {
     const items: EstimatedItemInput[] = [
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 1000, discountMinor: 0 },
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 500, discountMinor: 0 },
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 1000, discountMinor: 0, taxRateBp: 1000 },
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 500, discountMinor: 0, taxRateBp: 1000 },
     ];
-    const result = estimateRentalTotals(
-      items,
-      "2026-08-01T00:00:00Z",
-      "2026-08-04T00:00:00Z",
-      200,
-      100,
-    );
+    const result = estimateRentalTotals(items, "2026-08-01T00:00:00Z", "2026-08-04T00:00:00Z", 200);
+    // subtotal = (1000*3) + (500*3) = 4500; tax = 3000*10% + 1500*10% = 450
     expect(result.subtotalMinor).toBe(4500);
-    expect(result.totalMinor).toBe(4500 - 200 + 100);
+    expect(result.taxMinor).toBe(450);
+    expect(result.totalMinor).toBe(4500 - 200 + 450);
+  });
+
+  it("the canonical acceptance example: 50/day x 4 days x qty 1 x 23% VAT = 200.00 net / 46.00 VAT / 246.00 gross", () => {
+    const items: EstimatedItemInput[] = [
+      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 5000, discountMinor: 0, taxRateBp: 2300 },
+    ];
+    const result = estimateRentalTotals(items, "2026-08-01T00:00:00Z", "2026-08-05T00:00:00Z", 0);
+    expect(result.subtotalMinor).toBe(20_000);
+    expect(result.taxMinor).toBe(4600);
+    expect(result.totalMinor).toBe(24_600);
   });
 });
 

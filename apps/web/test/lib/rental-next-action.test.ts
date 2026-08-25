@@ -45,9 +45,14 @@ describe("getRentalNextAction", () => {
     });
   });
 
-  it("returns NONE once the contract exists but the rental isn't ACTIVE yet", () => {
+  // A Handover Protocol may be prepared as soon as the rental is RESERVED,
+  // not only once the asset has actually been handed over (ACTIVE) — see
+  // DECISIONS.md, document checklist actionability fix.
+  it("returns PREPARE_HANDOVER once RESERVED with a contract but no handover protocol", () => {
     const documents = [document("CONTRACT")];
-    expect(getRentalNextAction(rental("RESERVED", documents))).toEqual({ kind: "NONE" });
+    expect(getRentalNextAction(rental("RESERVED", documents))).toEqual({
+      kind: "PREPARE_HANDOVER",
+    });
   });
 
   it("returns PREPARE_HANDOVER once ACTIVE with a contract but no handover protocol", () => {

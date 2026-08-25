@@ -169,6 +169,7 @@ export const rentalItemFormSchema = z.object({
   customPriceDisplay: z.string(),
   depositDisplay: z.string(),
   discountDisplay: z.string(),
+  taxRateDisplay: z.string(),
   notes: z.string().max(2000),
   /** Only meaningful for MONTHLY — see DECISIONS.md D-072. */
   partialMonthPolicy: z.enum(["PRORATE_BY_DAY", "ROUND_UP_TO_FULL_MONTH"]),
@@ -213,7 +214,6 @@ export const rentalSchema = z
     plannedEnd: z.string().min(1, "rental.errors.datesRequired"),
     currency: z.string().min(1, "auth.errors.required"),
     discountDisplay: z.string(),
-    taxDisplay: z.string(),
     notes: z.string().max(2000),
     internalNotes: z.string().max(2000),
   })
@@ -298,6 +298,12 @@ export const documentSchema = z
     assetId: z.string(),
     rentalId: z.string(),
     templateLanguage: z.string(),
+    notes: z.string().max(2000),
+    /** Only meaningful (and only ever shown) for HANDOVER_PROTOCOL/RETURN_PROTOCOL — see DECISIONS.md, condition notes fix. */
+    assetConditionNotes: z.string().max(2000),
+    damageDescription: z.string().max(2000),
+    /** Only meaningful for RETURN_PROTOCOL. */
+    missingItems: z.string().max(2000),
   })
   .refine((data) => data.documentType !== "CUSTOM" || data.customTypeName.trim().length > 0, {
     path: ["customTypeName"],

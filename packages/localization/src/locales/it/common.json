@@ -461,7 +461,7 @@
       "actualStart": "Inizio effettivo",
       "actualEnd": "Fine effettiva",
       "billingMode": "Modalità di fatturazione",
-      "quantity": "Quantità",
+      "quantity": "Quantità (unità)",
       "dailyPrice": "Prezzo giornaliero",
       "dailyPriceForRemainder": "Prezzo giornaliero (giorni rimanenti)",
       "weeklyPrice": "Prezzo settimanale",
@@ -471,13 +471,13 @@
       "itemDiscount": "Sconto articolo",
       "discount": "Sconto",
       "tax": "Imposta",
-      "taxAmount": "Importo imposta",
       "subtotal": "Subtotale",
       "total": "Totale",
       "internalNotes": "Note interne",
       "returnedAt": "Restituito il",
       "sourceQuote": "Preventivo di origine",
-      "partialMonthPolicy": "Fatturazione del mese parziale"
+      "partialMonthPolicy": "Fatturazione del mese parziale",
+      "amountDue": "Importo dovuto all'inizio"
     },
     "sections": {
       "details": "Dettagli",
@@ -711,7 +711,7 @@
       "unit": "Unità",
       "unitPlaceholder": "es. giorno, ora, pezzo",
       "billingMode": "Modalità di fatturazione",
-      "quantity": "Quantità",
+      "quantity": "Quantità (unità)",
       "unitPrice": "Prezzo unitario",
       "dailyPrice": "Prezzo giornaliero",
       "weeklyPrice": "Prezzo settimanale",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "Accettando qui sotto registri la tua accettazione di questo preventivo. Non si tratta di una firma elettronica qualificata.",
       "rejectReasonPlaceholder": "Facci sapere il motivo (facoltativo)",
       "confirmReject": "Conferma rifiuto"
+    },
+    "pdf": {
+      "title": "Preventivo commerciale",
+      "quoteNumber": "Numero preventivo",
+      "status": "Stato",
+      "customer": "Cliente",
+      "issueDate": "Data di emissione",
+      "validUntil": "Valido fino al",
+      "plannedPeriod": "Periodo di noleggio previsto",
+      "columns": {
+        "name": "Descrizione",
+        "quantity": "Qtà",
+        "unitPrice": "Prezzo unitario",
+        "discount": "Sconto",
+        "tax": "Imposta",
+        "lineTotal": "Totale riga"
+      },
+      "subtotal": "Subtotale",
+      "discountTotal": "Sconto",
+      "taxTotal": "Imposta (inclusa)",
+      "depositTotal": "Deposito richiesto",
+      "total": "Totale",
+      "customerNotes": "Note",
+      "termsAndConditions": "Termini e condizioni",
+      "acceptanceTitle": "Accettazione del preventivo",
+      "acceptedBy": "Accettato da",
+      "acceptedAt": "Accettato il",
+      "generatedAt": "Generato",
+      "page": "Pagina",
+      "of": "di",
+      "amountDue": "Importo dovuto all'inizio"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "templateLanguage": "Lingua del documento",
       "templateLanguageHint": "Questo tipo di documento ha più di un modello attivo specifico per lingua: scegli quale utilizzare.",
       "templateLanguageDefault": "Predefinito del tenant",
-      "rentalHint": "Collegare un noleggio rende il suo numero, le date, il prezzo e i beni disponibili nel modello di documento."
+      "rentalHint": "Collegare un noleggio rende il suo numero, le date, il prezzo e i beni disponibili nel modello di documento.",
+      "notes": "Note",
+      "assetConditionNotes": "Condizione dell'attrezzatura",
+      "damageDescription": "Descrizione del danno",
+      "missingItems": "Elementi / accessori mancanti"
     },
     "summary": {
       "total": "Documenti totali",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "In attesa",
         "SENT": "Inviato",
-        "FAILED": "Non riuscito"
+        "FAILED": "Non riuscito",
+        "NOT_CONFIGURED": "Non configurato"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "Inserisci un nome per questo tipo di documento personalizzato"
-    }
+    },
+    "print": "Stampa"
   },
   "documentTemplate": {
     "title": "Modelli di documento",
@@ -1270,13 +1307,20 @@
       "endTime": "Ora di fine noleggio",
       "startDateTime": "Data e ora di inizio noleggio",
       "endDateTime": "Data e ora di fine noleggio",
+      "subtotal": "Subtotale",
+      "discount": "Sconto",
+      "tax": "Imposta",
       "total": "Totale noleggio",
       "deposit": "Deposito cauzionale",
+      "amountDue": "Importo dovuto all'inizio",
       "assetsTableHtml": "Tabella dell'attrezzatura noleggiata"
     },
     "quote": {
       "number": "Numero preventivo",
+      "issueDate": "Data di emissione",
+      "validUntil": "Valido fino al",
       "total": "Totale preventivo",
+      "terms": "Termini e condizioni",
       "servicesTableHtml": "Tabella dei servizi aggiuntivi"
     },
     "other": {
@@ -1370,7 +1414,8 @@
       "paid": "Pagato",
       "remaining": "Residuo",
       "notes": "Note"
-    }
+    },
+    "saved": "Fattura salvata"
   },
   "bankAccount": {
     "add": "Aggiungi conto bancario",

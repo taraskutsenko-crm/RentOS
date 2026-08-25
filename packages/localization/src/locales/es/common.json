@@ -461,7 +461,7 @@
       "actualStart": "Inicio real",
       "actualEnd": "Fin real",
       "billingMode": "Modo de facturación",
-      "quantity": "Cantidad",
+      "quantity": "Cantidad (unidades)",
       "dailyPrice": "Precio diario",
       "dailyPriceForRemainder": "Precio diario (para los días restantes)",
       "weeklyPrice": "Precio semanal",
@@ -471,13 +471,13 @@
       "itemDiscount": "Descuento de la línea",
       "discount": "Descuento",
       "tax": "Impuesto",
-      "taxAmount": "Importe del impuesto",
       "subtotal": "Subtotal",
       "total": "Total",
       "internalNotes": "Notas internas",
       "returnedAt": "Devuelto el",
       "sourceQuote": "Presupuesto de origen",
-      "partialMonthPolicy": "Facturación de mes parcial"
+      "partialMonthPolicy": "Facturación de mes parcial",
+      "amountDue": "Importe a pagar al inicio"
     },
     "sections": {
       "details": "Detalles",
@@ -711,7 +711,7 @@
       "unit": "Unidad",
       "unitPlaceholder": "p. ej. día, hora, unidad",
       "billingMode": "Modo de facturación",
-      "quantity": "Cantidad",
+      "quantity": "Cantidad (unidades)",
       "unitPrice": "Precio unitario",
       "dailyPrice": "Precio diario",
       "weeklyPrice": "Precio semanal",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "Al aceptar a continuación se registra tu aceptación de este presupuesto. Esto no es una firma electrónica cualificada.",
       "rejectReasonPlaceholder": "Cuéntanos por qué (opcional)",
       "confirmReject": "Confirmar rechazo"
+    },
+    "pdf": {
+      "title": "Presupuesto comercial",
+      "quoteNumber": "Número de presupuesto",
+      "status": "Estado",
+      "customer": "Cliente",
+      "issueDate": "Fecha de emisión",
+      "validUntil": "Válido hasta",
+      "plannedPeriod": "Período de alquiler previsto",
+      "columns": {
+        "name": "Descripción",
+        "quantity": "Cant.",
+        "unitPrice": "Precio unitario",
+        "discount": "Descuento",
+        "tax": "Impuesto",
+        "lineTotal": "Total de línea"
+      },
+      "subtotal": "Subtotal",
+      "discountTotal": "Descuento",
+      "taxTotal": "Impuesto (incluido)",
+      "depositTotal": "Depósito requerido",
+      "total": "Total",
+      "customerNotes": "Notas",
+      "termsAndConditions": "Términos y condiciones",
+      "acceptanceTitle": "Aceptación del presupuesto",
+      "acceptedBy": "Aceptado por",
+      "acceptedAt": "Aceptado el",
+      "generatedAt": "Generado",
+      "page": "Página",
+      "of": "de",
+      "amountDue": "Importe a pagar al inicio"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "templateLanguage": "Idioma del documento",
       "templateLanguageHint": "Este tipo de documento tiene más de una plantilla activa específica de idioma: elige cuál usar.",
       "templateLanguageDefault": "Predeterminado del inquilino",
-      "rentalHint": "Vincular un alquiler pone su número, fechas, precio y activos a disposición de la plantilla del documento."
+      "rentalHint": "Vincular un alquiler pone su número, fechas, precio y activos a disposición de la plantilla del documento.",
+      "notes": "Notas",
+      "assetConditionNotes": "Estado del equipo",
+      "damageDescription": "Descripción del daño",
+      "missingItems": "Elementos / accesorios faltantes"
     },
     "summary": {
       "total": "Documentos totales",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "Pendiente",
         "SENT": "Enviado",
-        "FAILED": "Fallido"
+        "FAILED": "Fallido",
+        "NOT_CONFIGURED": "No configurado"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "Introduce un nombre para este tipo de documento personalizado"
-    }
+    },
+    "print": "Imprimir"
   },
   "documentTemplate": {
     "title": "Plantillas de documentos",
@@ -1270,13 +1307,20 @@
       "endTime": "Hora de fin del alquiler",
       "startDateTime": "Fecha y hora de inicio del alquiler",
       "endDateTime": "Fecha y hora de fin del alquiler",
+      "subtotal": "Subtotal",
+      "discount": "Descuento",
+      "tax": "Impuesto",
       "total": "Total del alquiler",
       "deposit": "Depósito de seguridad",
+      "amountDue": "Importe a pagar al inicio",
       "assetsTableHtml": "Tabla de equipos alquilados"
     },
     "quote": {
       "number": "Número de presupuesto",
+      "issueDate": "Fecha de emisión",
+      "validUntil": "Válido hasta",
       "total": "Total del presupuesto",
+      "terms": "Términos y condiciones",
       "servicesTableHtml": "Tabla de servicios adicionales"
     },
     "other": {
@@ -1370,7 +1414,8 @@
       "paid": "Pagado",
       "remaining": "Pendiente",
       "notes": "Notas"
-    }
+    },
+    "saved": "Factura guardada"
   },
   "bankAccount": {
     "add": "Añadir cuenta bancaria",

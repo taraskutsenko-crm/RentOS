@@ -461,7 +461,7 @@
       "actualStart": "실제 시작일",
       "actualEnd": "실제 종료일",
       "billingMode": "청구 방식",
-      "quantity": "수량",
+      "quantity": "수량(개수)",
       "dailyPrice": "일일 요금",
       "dailyPriceForRemainder": "일일 요금（남은 일수）",
       "weeklyPrice": "주간 요금",
@@ -471,13 +471,13 @@
       "itemDiscount": "품목 할인",
       "discount": "할인",
       "tax": "세금",
-      "taxAmount": "세금 금액",
       "subtotal": "소계",
       "total": "합계",
       "internalNotes": "내부 메모",
       "returnedAt": "반납일",
       "sourceQuote": "원본 견적서",
-      "partialMonthPolicy": "잔여 월 청구 방식"
+      "partialMonthPolicy": "잔여 월 청구 방식",
+      "amountDue": "시작 시 지급 금액"
     },
     "sections": {
       "details": "세부 정보",
@@ -711,7 +711,7 @@
       "unit": "단위",
       "unitPlaceholder": "예: 일, 시간, 개",
       "billingMode": "청구 방식",
-      "quantity": "수량",
+      "quantity": "수량(개수)",
       "unitPrice": "단가",
       "dailyPrice": "일일 요금",
       "weeklyPrice": "주간 요금",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "아래에서 수락하면 이 견적서에 대한 수락이 기록됩니다. 이는 적격 전자 서명이 아닙니다.",
       "rejectReasonPlaceholder": "이유를 알려주세요（선택 사항）",
       "confirmReject": "거절 확정"
+    },
+    "pdf": {
+      "title": "견적서",
+      "quoteNumber": "견적서 번호",
+      "status": "상태",
+      "customer": "고객",
+      "issueDate": "발행일",
+      "validUntil": "유효 기한",
+      "plannedPeriod": "예정 대여 기간",
+      "columns": {
+        "name": "설명",
+        "quantity": "수량",
+        "unitPrice": "단가",
+        "discount": "할인",
+        "tax": "세금",
+        "lineTotal": "항목 합계"
+      },
+      "subtotal": "소계",
+      "discountTotal": "할인",
+      "taxTotal": "세금(포함)",
+      "depositTotal": "필요 보증금",
+      "total": "합계",
+      "customerNotes": "메모",
+      "termsAndConditions": "이용 약관",
+      "acceptanceTitle": "견적 승인",
+      "acceptedBy": "승인자",
+      "acceptedAt": "승인일",
+      "generatedAt": "생성일",
+      "page": "페이지",
+      "of": "/",
+      "amountDue": "시작 시 지급 금액"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "templateLanguage": "문서 언어",
       "templateLanguageHint": "이 문서 유형에는 언어별 활성 템플릿이 두 개 이상 있습니다. 사용할 템플릿을 선택하세요.",
       "templateLanguageDefault": "테넌트 기본값",
-      "rentalHint": "렌탈을 연결하면 번호, 날짜, 가격 및 자산이 문서 템플릿에서 사용 가능해집니다."
+      "rentalHint": "렌탈을 연결하면 번호, 날짜, 가격 및 자산이 문서 템플릿에서 사용 가능해집니다.",
+      "notes": "메모",
+      "assetConditionNotes": "자산 상태",
+      "damageDescription": "손상 설명",
+      "missingItems": "누락된 항목 / 부속품"
     },
     "summary": {
       "total": "총 문서 수",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "대기 중",
         "SENT": "발송됨",
-        "FAILED": "실패"
+        "FAILED": "실패",
+        "NOT_CONFIGURED": "설정되지 않음"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "이 사용자 지정 문서 유형의 이름을 입력하세요"
-    }
+    },
+    "print": "인쇄"
   },
   "documentTemplate": {
     "title": "문서 템플릿",
@@ -1270,13 +1307,20 @@
       "endTime": "렌탈 종료 시간",
       "startDateTime": "렌탈 시작 일시",
       "endDateTime": "렌탈 종료 일시",
+      "subtotal": "소계",
+      "discount": "할인",
+      "tax": "세금",
       "total": "렌탈 총액",
       "deposit": "보증금",
+      "amountDue": "시작 시 지급 금액",
       "assetsTableHtml": "렌탈 자산 표"
     },
     "quote": {
       "number": "견적 번호",
+      "issueDate": "발행일",
+      "validUntil": "유효 기한",
       "total": "견적 총액",
+      "terms": "이용 약관",
       "servicesTableHtml": "추가 서비스 표"
     },
     "other": {
@@ -1370,7 +1414,8 @@
       "paid": "결제됨",
       "remaining": "미결제 잔액",
       "notes": "메모"
-    }
+    },
+    "saved": "청구서가 저장되었습니다"
   },
   "bankAccount": {
     "add": "계좌 추가",

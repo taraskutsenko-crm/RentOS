@@ -94,12 +94,11 @@ export class RentalsService {
     const billingSettings = await this.resolveBillingSettingsIfNeeded(tenantId, items);
     const pricedItems = withMonthlyBillingSettings(items, billingSettings);
 
-    const { subtotalMinor, totalMinor } = computeRentalTotals(
+    const { subtotalMinor, taxMinor, totalMinor } = computeRentalTotals(
       pricedItems.map(toPricedItemInput),
       plannedStart,
       plannedEnd,
       dto.discountMinor ?? 0,
-      dto.taxMinor ?? 0,
     );
 
     const created = await this.prisma.$transaction(async (tx) => {
@@ -115,7 +114,7 @@ export class RentalsService {
           plannedEnd,
           currency,
           discountMinor: dto.discountMinor ?? 0,
-          taxMinor: dto.taxMinor ?? 0,
+          taxMinor,
           subtotalMinor,
           totalMinor,
           notes: dto.notes ?? null,
@@ -284,14 +283,21 @@ export class RentalsService {
       dto.items !== undefined ? withMonthlyBillingSettings(dto.items, billingSettings) : items;
 
     const effectiveDiscountMinor = dto.discountMinor ?? current.discountMinor;
-    const effectiveTaxMinor = dto.taxMinor ?? current.taxMinor;
-    const { subtotalMinor, totalMinor } = computeRentalTotals(
+    const computedTotals = computeRentalTotals(
       pricedItems.map(toPricedItemInput),
       plannedStart,
       plannedEnd,
       effectiveDiscountMinor,
-      effectiveTaxMinor,
     );
+    const { subtotalMinor } = computedTotals;
+    // Tax is only re-derived from items on an explicit full item
+    // resubmission. An update that leaves items untouched (notes, discount,
+    // dates) must not silently recompute tax from each item's taxRateBp —
+    // a rental created before this field existed has taxRateBp=0 on every
+    // item, and re-deriving would zero out its real historical tax amount,
+    // violating the frozen-at-write-time invariant (ARCHITECTURE_LOCK §1.5).
+    const taxMinor = dto.items !== undefined ? computedTotals.taxMinor : current.taxMinor;
+    const totalMinor = Math.max(0, subtotalMinor - effectiveDiscountMinor + taxMinor);
 
     await this.prisma.$transaction(async (tx) => {
       const result = await tx.rental.updateMany({
@@ -302,7 +308,7 @@ export class RentalsService {
           ...(dto.plannedEnd ? { plannedEnd } : {}),
           ...(dto.currency ? { currency: dto.currency } : {}),
           discountMinor: effectiveDiscountMinor,
-          taxMinor: effectiveTaxMinor,
+          taxMinor,
           subtotalMinor,
           totalMinor,
           ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
@@ -372,12 +378,11 @@ export class RentalsService {
     );
 
     const items = current.items.map(fromExistingItem);
-    const { subtotalMinor, totalMinor } = computeRentalTotals(
+    const { subtotalMinor, taxMinor, totalMinor } = computeRentalTotals(
       items.map(toPricedItemInput),
       current.plannedStart,
       newPlannedEnd,
       current.discountMinor,
-      current.taxMinor,
     );
 
     await this.prisma.$transaction(async (tx) => {
@@ -386,6 +391,7 @@ export class RentalsService {
         data: {
           plannedEnd: newPlannedEnd,
           subtotalMinor,
+          taxMinor,
           totalMinor,
           updatedByUserId: actorUserId,
         },
@@ -892,6 +898,7 @@ function toPricedItemInput(item: RentalItemSource): PricedRentalItemInput {
     monthlyPriceMinor: item.monthlyPriceMinor ?? null,
     customPriceMinor: item.customPriceMinor ?? null,
     discountMinor: item.discountMinor ?? 0,
+    taxRateBp: item.taxRateBp ?? 0,
     monthlyBillingStrategy: item.monthlyBillingStrategy ?? null,
     customMonthLengthDays: item.customMonthLengthDays ?? null,
     partialMonthPolicy: item.partialMonthPolicy ?? null,
@@ -909,6 +916,7 @@ function fromExistingItem(item: RentalItem): RentalItemSource {
     ...(item.customPriceMinor !== null ? { customPriceMinor: item.customPriceMinor } : {}),
     depositMinor: item.depositMinor,
     discountMinor: item.discountMinor,
+    taxRateBp: item.taxRateBp,
     notes: item.notes,
     monthlyBillingStrategy: item.monthlyBillingStrategy,
     customMonthLengthDays: item.customMonthLengthDays,
@@ -933,6 +941,7 @@ function toRentalItemCreateData(
     customPriceMinor: item.customPriceMinor ?? null,
     depositMinor: item.depositMinor ?? 0,
     discountMinor: item.discountMinor ?? 0,
+    taxRateBp: item.taxRateBp ?? 0,
     notes: item.notes ?? null,
     monthlyBillingStrategy:
       item.billingMode === "MONTHLY" ? (item.monthlyBillingStrategy ?? null) : null,

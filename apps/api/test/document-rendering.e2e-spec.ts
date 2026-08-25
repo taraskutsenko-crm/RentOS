@@ -385,7 +385,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     // company.logo/company.email are permanently hardcoded to "" in the
     // resolver (no tenant branding/company-email field exists yet) — same
     // documented exception as the real-render coverage test below.
-    const permanentlyEmpty = new Set(["company.logo", "company.email"]);
+    const permanentlyEmpty = new Set(["company.logo", "company.logoHtml", "company.email"]);
     for (const varPath of DOCUMENT_VARIABLE_PATHS) {
       const match = new RegExp(`${varPath.replace(/\./g, "\\.")}::(.*?)::end`, "s").exec(
         response.body.html,
@@ -470,6 +470,124 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       expect(preview.body.html).toContain(section);
     }
     expect(preview.body.html).toContain("doc-signature-block");
+  });
+
+  // A direct Rental->Commercial Offer document (no source Quote at all) must
+  // never render empty — see docs/DECISIONS.md (Commercial Offer from
+  // Rental fix). Proves the built-in QUOTE template pulls real customer/
+  // asset/period/price data straight from rental.* when there is no
+  // backing Quote object to supply quote.*.
+  it("built-in default QUOTE (Commercial Offer) template is fully populated when generated directly from a Rental with no source Quote", async () => {
+    const categoryId = await createAssetCategory();
+    const assetId = await createAsset(categoryId, "Skoda Fabia", "SK977UG");
+
+    const rental = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId,
+        plannedStart: "2027-01-10T00:00:00.000Z",
+        plannedEnd: "2027-01-14T00:00:00.000Z",
+        discountMinor: 500,
+        items: [
+          {
+            assetId,
+            billingMode: "DAILY",
+            dailyPriceMinor: 5000,
+            depositMinor: 70000,
+            taxRateBp: 2300,
+          },
+        ],
+      })
+      .expect(201);
+    expect(rental.body.sourceQuoteId).toBeNull();
+
+    const document = await createDocument({
+      documentType: "QUOTE",
+      customerId,
+      rentalId: rental.body.id,
+    }).expect(201);
+    expect(document.body.quoteId).toBeNull();
+
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${document.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(preview.body.html).toContain("Jane Doe");
+    expect(preview.body.html).toContain("Skoda Fabia");
+    // subtotal 200.00 (4 days x 50.00), tax 46.00 (23% of the 200.00 taxable
+    // base), rental-level discount 5.00 applied after tax: 200 - 5 + 46 = 241.00
+    expect(preview.body.html).toContain("$241.00");
+    expect(preview.body.html).toContain("$46.00"); // tax
+    expect(preview.body.html).toContain("$5.00"); // discount
+    expect(preview.body.html).toContain("$700.00"); // deposit
+  });
+
+  // Regression: Handover/Return Protocols previously had no UI path that
+  // ever populated condition/damage notes at all — businessData.notes and
+  // businessData.conditionNotes are real, tenant-scoped, persisted domain
+  // data (DocumentVersion.businessDataSnapshot), retrievable after reload
+  // and rendered into the document — see DECISIONS.md, condition notes fix.
+  it("built-in HANDOVER_PROTOCOL and RETURN_PROTOCOL templates render persisted condition/damage notes", async () => {
+    const categoryId = await createAssetCategory();
+    const assetId = await createAsset(categoryId, "Generator A", "GEN-0001");
+
+    const handover = await createDocument({
+      documentType: "HANDOVER_PROTOCOL",
+      assetId,
+      businessData: {
+        notes: "General handover notes",
+        conditionNotes: {
+          assetCondition: "Fully functional, minor scratches on the casing",
+          damageDescription: "Pre-existing dent on the left side panel",
+        },
+      },
+    }).expect(201);
+    const handoverPreview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${handover.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(handoverPreview.body.html).toContain("General handover notes");
+    expect(handoverPreview.body.html).toContain(
+      "Fully functional, minor scratches on the casing",
+    );
+    expect(handoverPreview.body.html).toContain("Pre-existing dent on the left side panel");
+
+    const returnDoc = await createDocument({
+      documentType: "RETURN_PROTOCOL",
+      assetId,
+      businessData: {
+        notes: "General return notes",
+        conditionNotes: {
+          assetCondition: "Returned in working order",
+          damageDescription: "New crack on the rear housing",
+          missingItems: "Power cable not returned",
+        },
+      },
+    }).expect(201);
+    const returnPreview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${returnDoc.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(returnPreview.body.html).toContain("General return notes");
+    expect(returnPreview.body.html).toContain("Returned in working order");
+    expect(returnPreview.body.html).toContain("New crack on the rear housing");
+    expect(returnPreview.body.html).toContain("Power cable not returned");
+
+    // The persisted data survives a reload — reading the document back
+    // directly must return the exact same structured business data, not
+    // only whatever happened to be baked into the last rendered HTML.
+    const reloaded = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${returnDoc.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    const currentVersion = reloaded.body.versions.find(
+      (v: { versionNumber: number }) => v.versionNumber === reloaded.body.currentVersionNumber,
+    );
+    expect(currentVersion.businessDataSnapshot.conditionNotes.missingItems).toBe(
+      "Power cable not returned",
+    );
   });
 
   it("renders the tenant's ACTIVE template instead of the built-in default once one is activated", async () => {
@@ -791,7 +909,11 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
   // Email delivery (Part 5)
   // ---------------------------------------------------------------------
 
-  it("sends a document by email to the customer and records the delivery as SENT", async () => {
+  // No real email transport is configured in this test environment (see
+  // LoggingEmailProvider) — the delivery must truthfully report
+  // NOT_CONFIGURED, never a fabricated SENT (see DECISIONS.md, email
+  // truthfulness fix).
+  it("records a delivery as NOT_CONFIGURED — never fakes SENT — when no real email provider is configured", async () => {
     const created = await createDocument().expect(201);
     const response = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/documents/${created.body.id}/email`)
@@ -799,8 +921,10 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .send({ recipientType: "CUSTOMER", subject: "Your contract" })
       .expect(201);
 
-    expect(response.body.status).toBe("SENT");
+    expect(response.body.status).toBe("NOT_CONFIGURED");
     expect(response.body.recipientEmail).toBe("jane@example.com");
+    expect(response.body.sentAt).toBeNull();
+    expect(response.body.errorMessage).toBeTruthy();
   }, 30000);
 
   it("rejects sending to CUSTOMER when the customer has no email on file", async () => {
@@ -973,7 +1097,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     });
     const actions = logs.map((log) => log.action);
     expect(actions).toContain("document.shared");
-    expect(actions).toContain("document.email_sent");
+    expect(actions).toContain("document.email_not_configured");
     expect(actions).toContain("document.signature_requested");
   }, 30000);
 
@@ -1473,6 +1597,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
         validUntil: "2027-02-01T00:00:00.000Z",
         plannedStart: "2027-01-10T09:30:00.000Z",
         plannedEnd: "2027-01-12T17:00:00.000Z",
+        termsAndConditions: "Standard rental terms apply.",
         items: [
           {
             itemType: "ASSET",
@@ -1537,7 +1662,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     // tenant branding/company-email field exists yet, see hardcoded ""
     // values in variable-resolver.service.ts) — every other path must
     // resolve to real, non-empty content given this fully-populated document.
-    const permanentlyEmpty = new Set(["company.logo", "company.email"]);
+    const permanentlyEmpty = new Set(["company.logo", "company.logoHtml", "company.email"]);
     for (const varPath of DOCUMENT_VARIABLE_PATHS) {
       const match = new RegExp(`${varPath.replace(/\./g, "\\.")}::(.*?)::end`, "s").exec(
         preview.body.html,

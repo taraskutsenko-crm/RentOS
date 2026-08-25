@@ -493,6 +493,19 @@ export default function QuoteDetailPage() {
                 label={t("rental.fields.total")}
                 value={formatMoney(quote.totalMinor, quote.currency)}
               />
+              {quote.depositTotalMinor > 0 && (
+                // Explicit "amount due at start" = quote total + refundable
+                // deposit -- kept visually distinct from Total, which stays
+                // the taxable value only (see DECISIONS.md D-097/D-098: a
+                // refundable deposit is never revenue).
+                <InfoRow
+                  label={t("rental.fields.amountDue")}
+                  value={formatMoney(
+                    quote.totalMinor + quote.depositTotalMinor,
+                    quote.currency,
+                  )}
+                />
+              )}
             </CardContent>
           </Card>
         </div>

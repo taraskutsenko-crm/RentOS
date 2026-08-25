@@ -201,6 +201,40 @@ describe("DocumentDetailPage", () => {
     expect(screen.queryByText("Related records")).not.toBeInTheDocument();
   });
 
+  // Regression: direct print, without a manual Generate -> Download -> Print
+  // round-trip -- see DECISIONS.md, direct print fix.
+  it("hides the Print button until a preview has loaded", () => {
+    usePermissionMock.mockReturnValue(false);
+    useDocumentMock.mockReturnValue({ data: baseDocument("DRAFT"), isLoading: false });
+    useDocumentPreviewMock.mockReturnValue({ data: undefined });
+
+    renderWithProviders(<DocumentDetailPage />);
+
+    expect(screen.queryByRole("button", { name: "Print" })).not.toBeInTheDocument();
+  });
+
+  it("prints the preview iframe's own content directly when Print is clicked", async () => {
+    usePermissionMock.mockReturnValue(false);
+    useDocumentMock.mockReturnValue({ data: baseDocument("DRAFT"), isLoading: false });
+    useDocumentPreviewMock.mockReturnValue({
+      data: { html: "<html><body>Rendered document</body></html>", templateSource: "built_in_default" },
+    });
+    const user = userEvent.setup();
+
+    renderWithProviders(<DocumentDetailPage />);
+
+    const frame = screen.getByTitle("Preview") as HTMLIFrameElement;
+    const printSpy = vi.fn();
+    // jsdom gives every iframe a real contentWindow, but doesn't implement
+    // window.print() -- stub it to verify the button calls the frame's own
+    // print, not the outer app window's.
+    Object.defineProperty(frame.contentWindow!, "print", { value: printSpy, writable: true });
+
+    await user.click(screen.getByRole("button", { name: "Print" }));
+
+    expect(printSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("shows the error message when a lifecycle action fails", async () => {
     usePermissionMock.mockImplementation((permission: string) => permission === "documents.update");
     useDocumentMock.mockReturnValue({ data: baseDocument("DRAFT"), isLoading: false });

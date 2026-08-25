@@ -38,6 +38,7 @@ export default function EditRentalPage() {
     customPriceDisplay: fromMinorUnits(item.customPriceMinor),
     depositDisplay: fromMinorUnits(item.depositMinor),
     discountDisplay: fromMinorUnits(item.discountMinor),
+    taxRateDisplay: item.taxRateBp ? String(item.taxRateBp / 100) : "",
     notes: item.notes ?? "",
     partialMonthPolicy: item.partialMonthPolicy ?? "PRORATE_BY_DAY",
   }));
@@ -59,7 +60,6 @@ export default function EditRentalPage() {
               plannedEnd: rental.plannedEnd.slice(0, 16),
               currency: rental.currency,
               discountDisplay: fromMinorUnits(rental.discountMinor),
-              taxDisplay: fromMinorUnits(rental.taxMinor),
               notes: rental.notes ?? "",
               internalNotes: rental.internalNotes ?? "",
             }}

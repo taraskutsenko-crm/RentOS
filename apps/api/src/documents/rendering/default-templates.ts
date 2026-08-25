@@ -47,6 +47,12 @@ interface DocumentStrings {
   quoteTitle: string;
   quoteOfferSection: string;
   quoteTotal: string;
+  subtotal: string;
+  discount: string;
+  tax: string;
+  issueDateLabel: string;
+  validUntilLabel: string;
+  termsTitle: string;
   contractTitle: string;
   contractSubject: string;
   rentalPeriod: string;
@@ -55,12 +61,16 @@ interface DocumentStrings {
   price: string;
   rentalTotal: string;
   securityDeposit: string;
+  amountDue: string;
   handoverTitle: string;
   handoverSubtitle: string;
   returnTitle: string;
   returnSubtitle: string;
   damageReportTitle: string;
   damageDescription: string;
+  assetConditionLabel: string;
+  newDamageLabel: string;
+  missingItemsLabel: string;
   contractAmendmentTitle: string;
   amendmentTo: string;
   contractSections: { title: string; body: string }[];
@@ -76,7 +86,7 @@ function documentShell(
 <div class="doc-page">
   <div class="doc-header">
     <div class="doc-header__brand">
-      <img class="doc-header__logo" src="{{company.logo}}" alt="{{company.name}}" />
+      {{company.logoHtml}}
       <div class="doc-header__company">{{company.name}}</div>
     </div>
     <div class="doc-header__meta">
@@ -189,6 +199,7 @@ function rentalContractBody(strings: DocumentStrings): string {
       <div class="doc-grid">
         <div class="doc-field"><div class="doc-field__label">${strings.rentalTotal}</div><div class="doc-field__value">{{rental.total}}</div></div>
         <div class="doc-field"><div class="doc-field__label">${strings.securityDeposit}</div><div class="doc-field__value">{{rental.deposit}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.amountDue}</div><div class="doc-field__value">{{rental.amountDue}}</div></div>
       </div>
     </div>
   </div>
@@ -206,11 +217,42 @@ function buildTemplates(strings: DocumentStrings): Record<DocumentType, DefaultT
         `${partiesSection(strings)}
   <div class="doc-section">
     <div class="doc-section__title">${strings.quoteOfferSection}</div>
+    {{rental.assetsTableHtml}}
+    {{quote.servicesTableHtml}}
     <div class="doc-card">
-      <div class="doc-field"><div class="doc-field__label">${strings.quoteTotal}</div><div class="doc-field__value">{{quote.total}}</div></div>
+      <div class="doc-grid">
+        <div class="doc-field"><div class="doc-field__label">${strings.issueDateLabel}</div><div class="doc-field__value">{{quote.issueDate}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.validUntilLabel}</div><div class="doc-field__value">{{quote.validUntil}}</div></div>
+      </div>
     </div>
   </div>
-  ${notesSection(strings)}`,
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.rentalPeriod}</div>
+    <div class="doc-card">
+      <div class="doc-grid">
+        <div class="doc-field"><div class="doc-field__label">${strings.periodStart}</div><div class="doc-field__value">{{rental.startDateTime}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.periodEnd}</div><div class="doc-field__value">{{rental.endDateTime}}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.price}</div>
+    <div class="doc-card">
+      <div class="doc-grid">
+        <div class="doc-field"><div class="doc-field__label">${strings.subtotal}</div><div class="doc-field__value">{{rental.subtotal}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.discount}</div><div class="doc-field__value">{{rental.discount}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.tax}</div><div class="doc-field__value">{{rental.tax}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.quoteTotal}</div><div class="doc-field__value">{{rental.total}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.securityDeposit}</div><div class="doc-field__value">{{rental.deposit}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.amountDue}</div><div class="doc-field__value">{{rental.amountDue}}</div></div>
+      </div>
+    </div>
+  </div>
+  ${notesSection(strings)}
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.termsTitle}</div>
+    <p class="doc-notes">{{quote.terms}}</p>
+  </div>`,
       ),
     },
     CONTRACT: {
@@ -228,7 +270,15 @@ function buildTemplates(strings: DocumentStrings): Record<DocumentType, DefaultT
         strings,
         strings.handoverTitle,
         strings.handoverSubtitle,
-        `${partiesSection(strings)}${assetSection(strings)}${notesSection(strings)}`,
+        `${partiesSection(strings)}${assetSection(strings)}${notesSection(strings)}
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.assetConditionLabel}</div>
+    <p class="doc-notes">{{data.conditionNotes.assetCondition}}</p>
+  </div>
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.damageDescription}</div>
+    <p class="doc-notes">{{data.conditionNotes.damageDescription}}</p>
+  </div>`,
       ),
     },
     RETURN_PROTOCOL: {
@@ -237,7 +287,19 @@ function buildTemplates(strings: DocumentStrings): Record<DocumentType, DefaultT
         strings,
         strings.returnTitle,
         strings.returnSubtitle,
-        `${partiesSection(strings)}${assetSection(strings)}${notesSection(strings)}`,
+        `${partiesSection(strings)}${assetSection(strings)}${notesSection(strings)}
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.assetConditionLabel}</div>
+    <p class="doc-notes">{{data.conditionNotes.assetCondition}}</p>
+  </div>
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.newDamageLabel}</div>
+    <p class="doc-notes">{{data.conditionNotes.damageDescription}}</p>
+  </div>
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.missingItemsLabel}</div>
+    <p class="doc-notes">{{data.conditionNotes.missingItems}}</p>
+  </div>`,
       ),
     },
     DAMAGE_REPORT: {
@@ -291,6 +353,12 @@ const EN_STRINGS: DocumentStrings = {
   quoteTitle: "Commercial Offer",
   quoteOfferSection: "Offer",
   quoteTotal: "Total",
+  subtotal: "Subtotal",
+  discount: "Discount",
+  tax: "Tax",
+  issueDateLabel: "Issue date",
+  validUntilLabel: "Valid until",
+  termsTitle: "Terms and conditions",
   contractTitle: "Rental Contract",
   contractSubject: "Subject of the Contract — Rented Assets",
   rentalPeriod: "Rental Period",
@@ -299,12 +367,16 @@ const EN_STRINGS: DocumentStrings = {
   price: "Price",
   rentalTotal: "Rental total",
   securityDeposit: "Security deposit",
+  amountDue: "Amount due at start",
   handoverTitle: "Handover Protocol",
   handoverSubtitle: "Condition recorded at handover",
   returnTitle: "Return Protocol",
   returnSubtitle: "Condition recorded at return",
   damageReportTitle: "Damage Report",
   damageDescription: "Damage description",
+  assetConditionLabel: "Asset condition",
+  newDamageLabel: "New damage",
+  missingItemsLabel: "Missing items / accessories",
   contractAmendmentTitle: "Contract Amendment",
   amendmentTo: "Amendment to",
   contractSections: [
@@ -382,6 +454,12 @@ const PL_STRINGS: DocumentStrings = {
   quoteTitle: "Oferta handlowa",
   quoteOfferSection: "Oferta",
   quoteTotal: "Razem",
+  subtotal: "Suma częściowa",
+  discount: "Rabat",
+  tax: "Podatek",
+  issueDateLabel: "Data wystawienia",
+  validUntilLabel: "Ważna do",
+  termsTitle: "Warunki",
   contractTitle: "Umowa najmu",
   contractSubject: "Przedmiot umowy — wynajmowany sprzęt",
   rentalPeriod: "Okres najmu",
@@ -390,12 +468,16 @@ const PL_STRINGS: DocumentStrings = {
   price: "Cena",
   rentalTotal: "Wartość najmu",
   securityDeposit: "Kaucja zabezpieczająca",
+  amountDue: "Kwota do zapłaty na start",
   handoverTitle: "Protokół wydania",
   handoverSubtitle: "Stan sprzętu odnotowany przy wydaniu",
   returnTitle: "Protokół zwrotu",
   returnSubtitle: "Stan sprzętu odnotowany przy zwrocie",
   damageReportTitle: "Zgłoszenie szkody",
   damageDescription: "Opis uszkodzenia",
+  assetConditionLabel: "Stan sprzętu",
+  newDamageLabel: "Nowe uszkodzenia",
+  missingItemsLabel: "Brakujące elementy / akcesoria",
   contractAmendmentTitle: "Aneks do umowy",
   amendmentTo: "Aneks do umowy",
   contractSections: [

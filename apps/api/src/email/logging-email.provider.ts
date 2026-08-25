@@ -23,4 +23,8 @@ export class LoggingEmailProvider implements EmailProvider {
     );
     return Promise.resolve({ success: true });
   }
+
+  isConfigured(): boolean {
+    return false;
+  }
 }

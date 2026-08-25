@@ -773,3 +773,74 @@ and generated-document footer now reads "Havelio" instead of "RentOS" —
 `app.name`, and the document footer template. Package names, internal
 module/class names, and cookie names are deliberately untouched (see ADR
 0012 decision 10).
+
+## E-invoicing: provider architecture and international scope
+
+`EInvoiceProvider` (`apps/api/src/einvoice/einvoice-provider.interface.ts`)
+is the one country-neutral boundary every e-invoice compliance system
+integrates through — `InvoicesService` and every other Invoice-domain
+caller only ever call this interface, never a provider-specific class.
+`EInvoiceConnection` stores which provider a tenant has configured
+(`provider: EInvoiceProvider` enum, currently only `KSEF`), its
+environment (test/production), and its credentials encrypted at rest via
+`EncryptionService` (AES-256-GCM). `Invoice.eInvoiceReferenceNumber` always
+stores the external system's identifier separately from Havelio's own
+`invoiceNumber`.
+
+**What is actually built today:** `KsefProvider`
+(`apps/api/src/einvoice/providers/ksef-provider.service.ts`) — Poland's
+KSeF (Krajowy System e-Faktur). Its `testConnection` always returns an
+honest `{connected: false, ...}` result and `submitInvoice`/
+`checkSubmissionStatus` both throw `NotImplementedException`. No real KSeF
+HTTP call, authentication-token exchange, XAdES signing, or invoice XML
+generation exists anywhere in the codebase — this is a deliberate,
+documented placeholder (see DECISIONS.md D-086), not a stub pretending to
+work. The frontend Integrations settings page reflects this truthfully
+(a `NOT_CONNECTED`/`ERROR`/`CONNECTED` status badge driven entirely by the
+real `EInvoiceConnection.status` column, never a hardcoded "connected").
+
+**International landscape (documented for architecture planning only — no
+adapters beyond KSeF are implemented, and none of the below should be
+treated as legally authoritative; verify current requirements and
+timelines against each country's official source before building
+anything against them, since EU e-invoicing mandates have repeatedly
+shifted their effective dates through the legislative process).** The
+`EInvoiceProvider` interface's three-method shape (test connection, submit,
+check status) was deliberately kept minimal and generic enough to plausibly
+fit any of these models as a future `XxxProvider implements EInvoiceProvider`
+class — no naming, method, or credential-shape assumption in the interface
+is Poland-specific:
+
+- **Mandatory government clearance systems** — the invoice is submitted to
+  and validated/cleared by a national tax authority platform before or as
+  part of being considered legally issued. KSeF (Poland) is this model.
+  Italy's Sistema di Interscambio (SdI) is a longer-established example of
+  the same pattern (mandatory B2B/B2G e-invoicing since 2019). Romania's
+  e-Factura (via ANAF) is a more recent example. A conceptual
+  `SdiProvider`/`EFacturaProvider` would follow the exact same
+  `EInvoiceProvider` shape as `KsefProvider`.
+- **PEPPOL-network exchange** — invoices are exchanged peer-to-peer over
+  the international PEPPOL network via Access Points, typically without a
+  central government clearance step; several EU countries mandate PEPPOL
+  for B2G procurement and some (e.g. Belgium) are moving toward mandating
+  it for B2B too. A conceptual `PeppolProvider` would likely need an
+  Access Point relationship rather than a direct government API, still
+  expressible through the same interface shape.
+- **Decentralized/direct-exchange mandates with a reporting obligation** —
+  e.g. Germany's phased B2B e-invoicing mandate (structured
+  EN 16931-format invoices exchanged directly between parties, without a
+  mandatory central clearance platform as of this writing). A conceptual
+  `provider` here might mostly validate format/schema rather than "submit"
+  anywhere external.
+- **Mixed/transitional models** — e.g. France's shift toward a
+  Partner Dematerialization Platform (PDP) model routed through a public
+  invoicing portal, and Spain's existing Facturae (B2G) alongside pending
+  B2B rules — both illustrate that a single country can combine more than
+  one of the patterns above, and that implementation details are still
+  actively legislated in several of these markets.
+
+None of the above are implemented; this section exists so a future
+`XxxProvider` is written against a deliberately-chosen pattern (clearance
+vs. PEPPOL vs. direct-exchange) rather than guessed from scratch, and so
+`Invoice`/`InvoiceItem`'s core schema is never accidentally shaped around
+Poland-specific assumptions (see PRODUCT_BIBLE §28, "Global by Design").

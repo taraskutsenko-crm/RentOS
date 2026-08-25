@@ -20,4 +20,8 @@ export class EmailService {
   send(message: EmailMessage): Promise<EmailSendResult> {
     return this.provider.send(message);
   }
+
+  isConfigured(): boolean {
+    return this.provider.isConfigured();
+  }
 }

@@ -461,7 +461,7 @@
       "actualStart": "Début réel",
       "actualEnd": "Fin réelle",
       "billingMode": "Mode de facturation",
-      "quantity": "Quantité",
+      "quantity": "Quantité (unités)",
       "dailyPrice": "Prix journalier",
       "dailyPriceForRemainder": "Prix journalier (jours restants)",
       "weeklyPrice": "Prix hebdomadaire",
@@ -471,13 +471,13 @@
       "itemDiscount": "Remise sur l'article",
       "discount": "Remise",
       "tax": "Taxe",
-      "taxAmount": "Montant de la taxe",
       "subtotal": "Sous-total",
       "total": "Total",
       "internalNotes": "Notes internes",
       "returnedAt": "Retourné le",
       "sourceQuote": "Devis d'origine",
-      "partialMonthPolicy": "Facturation du mois partiel"
+      "partialMonthPolicy": "Facturation du mois partiel",
+      "amountDue": "Montant dû au départ"
     },
     "sections": {
       "details": "Détails",
@@ -711,7 +711,7 @@
       "unit": "Unité",
       "unitPlaceholder": "ex. jour, heure, pièce",
       "billingMode": "Mode de facturation",
-      "quantity": "Quantité",
+      "quantity": "Quantité (unités)",
       "unitPrice": "Prix unitaire",
       "dailyPrice": "Prix journalier",
       "weeklyPrice": "Prix hebdomadaire",
@@ -788,6 +788,37 @@
       "acceptanceDisclaimer": "En acceptant ci-dessous, vous enregistrez votre acceptation de ce devis. Il ne s'agit pas d'une signature électronique qualifiée.",
       "rejectReasonPlaceholder": "Indiquez la raison (facultatif)",
       "confirmReject": "Confirmer le refus"
+    },
+    "pdf": {
+      "title": "Devis commercial",
+      "quoteNumber": "Numéro de devis",
+      "status": "Statut",
+      "customer": "Client",
+      "issueDate": "Date d'émission",
+      "validUntil": "Valide jusqu'au",
+      "plannedPeriod": "Période de location prévue",
+      "columns": {
+        "name": "Description",
+        "quantity": "Qté",
+        "unitPrice": "Prix unitaire",
+        "discount": "Remise",
+        "tax": "Taxe",
+        "lineTotal": "Total ligne"
+      },
+      "subtotal": "Sous-total",
+      "discountTotal": "Remise",
+      "taxTotal": "Taxe (incluse)",
+      "depositTotal": "Caution requise",
+      "total": "Total",
+      "customerNotes": "Notes",
+      "termsAndConditions": "Conditions générales",
+      "acceptanceTitle": "Acceptation du devis",
+      "acceptedBy": "Accepté par",
+      "acceptedAt": "Accepté le",
+      "generatedAt": "Généré",
+      "page": "Page",
+      "of": "sur",
+      "amountDue": "Montant dû au départ"
     }
   },
   "document": {
@@ -838,7 +869,11 @@
       "templateLanguage": "Langue du document",
       "templateLanguageHint": "Ce type de document dispose de plusieurs modèles actifs propres à une langue — choisissez lequel utiliser.",
       "templateLanguageDefault": "Valeur par défaut du locataire",
-      "rentalHint": "Lier une location rend son numéro, ses dates, son prix et ses actifs disponibles dans le modèle de document."
+      "rentalHint": "Lier une location rend son numéro, ses dates, son prix et ses actifs disponibles dans le modèle de document.",
+      "notes": "Notes",
+      "assetConditionNotes": "État de l'équipement",
+      "damageDescription": "Description des dommages",
+      "missingItems": "Éléments / accessoires manquants"
     },
     "summary": {
       "total": "Total des documents",
@@ -883,7 +918,8 @@
       "statuses": {
         "PENDING": "En attente",
         "SENT": "Envoyé",
-        "FAILED": "Échoué"
+        "FAILED": "Échoué",
+        "NOT_CONFIGURED": "Non configuré"
       }
     },
     "signature": {
@@ -933,7 +969,8 @@
     },
     "errors": {
       "customTypeNameRequired": "Saisissez un nom pour ce type de document personnalisé"
-    }
+    },
+    "print": "Imprimer"
   },
   "documentTemplate": {
     "title": "Modèles de documents",
@@ -1270,13 +1307,20 @@
       "endTime": "Heure de fin de location",
       "startDateTime": "Date et heure de début de location",
       "endDateTime": "Date et heure de fin de location",
+      "subtotal": "Sous-total",
+      "discount": "Remise",
+      "tax": "Taxe",
       "total": "Total de la location",
       "deposit": "Caution",
+      "amountDue": "Montant dû au départ",
       "assetsTableHtml": "Tableau du matériel loué"
     },
     "quote": {
       "number": "Numéro de devis",
+      "issueDate": "Date d'émission",
+      "validUntil": "Valide jusqu'au",
       "total": "Total du devis",
+      "terms": "Conditions générales",
       "servicesTableHtml": "Tableau des services additionnels"
     },
     "other": {
@@ -1370,7 +1414,8 @@
       "paid": "Payé",
       "remaining": "Restant dû",
       "notes": "Notes"
-    }
+    },
+    "saved": "Facture enregistrée"
   },
   "bankAccount": {
     "add": "Ajouter un compte bancaire",

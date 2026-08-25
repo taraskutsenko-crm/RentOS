@@ -218,7 +218,7 @@ export interface PublicDocumentView {
 // ---------------------------------------------------------------------
 
 export type DocumentEmailRecipientType = "CUSTOMER" | "EMPLOYEE" | "CUSTOM";
-export type DocumentEmailStatus = "PENDING" | "SENT" | "FAILED";
+export type DocumentEmailStatus = "PENDING" | "SENT" | "FAILED" | "NOT_CONFIGURED";
 
 export interface DocumentEmailDelivery {
   id: string;

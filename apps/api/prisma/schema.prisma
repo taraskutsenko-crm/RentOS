@@ -250,6 +250,10 @@ enum DocumentEmailStatus {
   PENDING
   SENT
   FAILED
+  /// No real email transport is configured in this environment (see
+  /// LoggingEmailProvider) — the message was never actually attempted, so
+  /// the UI must never claim "Sent". See DECISIONS.md, email truthfulness fix.
+  NOT_CONFIGURED
 }
 
 // ===========================================================================
@@ -1176,6 +1180,13 @@ model Rental {
   currency        String       @db.VarChar(3)
   subtotalMinor   Int          @default(0)
   discountMinor   Int          @default(0)
+  /// A computed aggregate (sum of each RentalItem's own taxRateBp applied
+  /// to its own line total) — never a directly user-entered amount, same
+  /// "server always recomputes, client input is only ever a rate" status
+  /// as subtotalMinor/totalMinor. Rows written before the percentage-based
+  /// tax model (see RentalItem.taxRateBp) keep whatever flat amount was
+  /// manually entered back then, untouched (historical financial
+  /// immutability).
   taxMinor        Int          @default(0)
   totalMinor      Int          @default(0)
   notes           String?
@@ -1246,6 +1257,17 @@ model RentalItem {
   /// as PRORATE_BY_DAY, the calculation those rows were actually priced
   /// under.
   partialMonthPolicy     PartialMonthPolicy?
+  /// Integer basis points (2300 = 23.00%) — mirrors QuoteItem.taxRateBp's
+  /// exact convention (see quote-pricing.util.ts). Replaces the old
+  /// Rental-header flat `taxMinor` manual-amount input: tax is now always
+  /// a rate applied per line, computed server-side, never a number the
+  /// user must calculate themselves (see docs/DECISIONS.md, rental tax
+  /// percentage model). Defaults to 0 so every pre-migration row (which
+  /// had no rate at all) keeps computing to zero additional tax — their
+  /// already-stored `Rental.taxMinor` amount is left untouched by this
+  /// migration (historical financial immutability, ARCHITECTURE_LOCK
+  /// §1.5); only a future explicit item resubmission recomputes it.
+  taxRateBp              Int                     @default(0)
   depositMinor           Int                     @default(0)
   discountMinor          Int                     @default(0)
   notes                  String?

@@ -500,10 +500,7 @@ export default function QuoteDetailPage() {
                 // refundable deposit is never revenue).
                 <InfoRow
                   label={t("rental.fields.amountDue")}
-                  value={formatMoney(
-                    quote.totalMinor + quote.depositTotalMinor,
-                    quote.currency,
-                  )}
+                  value={formatMoney(quote.totalMinor + quote.depositTotalMinor, quote.currency)}
                 />
               )}
             </CardContent>

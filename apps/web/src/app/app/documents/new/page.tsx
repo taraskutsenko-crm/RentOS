@@ -46,7 +46,10 @@ export default function NewDocumentPage() {
       values.documentType === "HANDOVER_PROTOCOL" || values.documentType === "RETURN_PROTOCOL";
     const businessData: Record<string, unknown> = {};
     if (values.notes) businessData.notes = values.notes;
-    if (isConditionType && (values.assetConditionNotes || values.damageDescription || values.missingItems)) {
+    if (
+      isConditionType &&
+      (values.assetConditionNotes || values.damageDescription || values.missingItems)
+    ) {
       businessData.conditionNotes = {
         ...(values.assetConditionNotes ? { assetCondition: values.assetConditionNotes } : {}),
         ...(values.damageDescription ? { damageDescription: values.damageDescription } : {}),

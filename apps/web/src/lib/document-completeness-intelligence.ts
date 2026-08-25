@@ -57,7 +57,12 @@ export interface DocumentChecklistItem {
  * showed "Not required yet" for a real, already-committed reservation (see
  * DECISIONS.md, document checklist actionability fix).
  */
-const HANDOVER_PREPARABLE_STATUSES: RentalStatus[] = ["RESERVED", "ACTIVE", "RETURNED", "COMPLETED"];
+const HANDOVER_PREPARABLE_STATUSES: RentalStatus[] = [
+  "RESERVED",
+  "ACTIVE",
+  "RETURNED",
+  "COMPLETED",
+];
 
 /**
  * Rental states in which a Return Protocol may be prepared — from ACTIVE

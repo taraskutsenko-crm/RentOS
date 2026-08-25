@@ -320,5 +320,9 @@ export function estimateRentalTotals(
     (sum, item, index) => sum + resolveTaxMinor(itemNetTotals[index]!, item.taxRateBp ?? 0),
     0,
   );
-  return { subtotalMinor, taxMinor, totalMinor: Math.max(0, subtotalMinor - discountMinor + taxMinor) };
+  return {
+    subtotalMinor,
+    taxMinor,
+    totalMinor: Math.max(0, subtotalMinor - discountMinor + taxMinor),
+  };
 }

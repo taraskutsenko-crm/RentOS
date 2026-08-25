@@ -11,7 +11,7 @@ import {
   Input,
   Label,
 } from "@rentos/ui";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -144,6 +144,22 @@ export function QuoteWizard({
       ...initialValues,
     },
   });
+
+  // See rental-wizard.tsx's identical fix for why this is needed: a
+  // still-loading `defaultCurrency` at mount time would otherwise leave the
+  // currency field permanently blank, silently breaking the live pricing
+  // estimate.
+  const appliedDefaultCurrency = useRef(false);
+  useEffect(() => {
+    if (appliedDefaultCurrency.current) return;
+    if (!defaultCurrency) return;
+    if (initialValues?.currency) {
+      appliedDefaultCurrency.current = true;
+      return;
+    }
+    setValue("currency", defaultCurrency);
+    appliedDefaultCurrency.current = true;
+  }, [defaultCurrency, initialValues, setValue]);
 
   const values = watch();
   const { data: customersData } = useCustomers(tenantId, {
@@ -420,9 +436,7 @@ export function QuoteWizard({
                   key={asset.id}
                   className="flex items-center justify-between rounded-md border p-2 text-sm"
                 >
-                  <span>
-                    {getAssetDisplayLabel(asset)}
-                  </span>
+                  <span>{getAssetDisplayLabel(asset)}</span>
                   <input
                     type="checkbox"
                     checked={assetItems.some((item) => item.assetId === asset.id)}

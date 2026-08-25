@@ -647,8 +647,20 @@ describe("computeRentalTotals", () => {
   it("sums item line totals into subtotal, then applies rental-level discount and per-item tax", () => {
     const end = new Date("2026-08-04T00:00:00Z"); // 3 days
     const items: PricedRentalItemInput[] = [
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 1000, discountMinor: 0, taxRateBp: 1000 },
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 500, discountMinor: 0, taxRateBp: 1000 },
+      {
+        billingMode: "DAILY",
+        quantity: 1,
+        dailyPriceMinor: 1000,
+        discountMinor: 0,
+        taxRateBp: 1000,
+      },
+      {
+        billingMode: "DAILY",
+        quantity: 1,
+        dailyPriceMinor: 500,
+        discountMinor: 0,
+        taxRateBp: 1000,
+      },
     ];
     // subtotal = (1000*3) + (500*3) = 4500; tax = 3000*10% + 1500*10% = 300 + 150 = 450
     const result = computeRentalTotals(items, start, end, 500);
@@ -705,7 +717,13 @@ describe("computeRentalTotals", () => {
   it("8% tax rate", () => {
     const end = new Date("2026-08-05T00:00:00Z"); // 4 days
     const items: PricedRentalItemInput[] = [
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 5000, discountMinor: 0, taxRateBp: 800 },
+      {
+        billingMode: "DAILY",
+        quantity: 1,
+        dailyPriceMinor: 5000,
+        discountMinor: 0,
+        taxRateBp: 800,
+      },
     ];
     const result = computeRentalTotals(items, start, end, 0);
     expect(result.taxMinor).toBe(1600); // 200.00 * 8% = 16.00
@@ -732,7 +750,13 @@ describe("computeRentalTotals", () => {
   it("weekly billing mode applies tax to the weekly-priced taxable base", () => {
     const end = new Date("2026-08-15T00:00:00Z"); // 14 days -> 2 weekly units
     const items: PricedRentalItemInput[] = [
-      { billingMode: "WEEKLY", quantity: 1, weeklyPriceMinor: 10_000, discountMinor: 0, taxRateBp: 2300 },
+      {
+        billingMode: "WEEKLY",
+        quantity: 1,
+        weeklyPriceMinor: 10_000,
+        discountMinor: 0,
+        taxRateBp: 2300,
+      },
     ];
     const result = computeRentalTotals(items, start, end, 0);
     expect(result.subtotalMinor).toBe(20_000);
@@ -780,7 +804,13 @@ describe("computeRentalTotals", () => {
   it("rental-level discount is applied AFTER tax, never reducing the taxable base itself", () => {
     const end = new Date("2026-08-05T00:00:00Z"); // 4 days
     const items: PricedRentalItemInput[] = [
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 5000, discountMinor: 0, taxRateBp: 2300 },
+      {
+        billingMode: "DAILY",
+        quantity: 1,
+        dailyPriceMinor: 5000,
+        discountMinor: 0,
+        taxRateBp: 2300,
+      },
     ];
     const result = computeRentalTotals(items, start, end, 10_000); // 100.00 rental-level discount
     expect(result.taxMinor).toBe(4600); // still 23% of the full 200.00 taxable base
@@ -790,7 +820,13 @@ describe("computeRentalTotals", () => {
   it("multiple items sum their individually-rounded tax, each at its own rate", () => {
     const end = new Date("2026-08-05T00:00:00Z"); // 4 days
     const items: PricedRentalItemInput[] = [
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 3333, discountMinor: 0, taxRateBp: 2300 },
+      {
+        billingMode: "DAILY",
+        quantity: 1,
+        dailyPriceMinor: 3333,
+        discountMinor: 0,
+        taxRateBp: 2300,
+      },
       { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 777, discountMinor: 0, taxRateBp: 800 },
     ];
     const result = computeRentalTotals(items, start, end, 0);
@@ -804,7 +840,13 @@ describe("computeRentalTotals", () => {
   it("rounds fractional minor units deterministically (single Math.round per item)", () => {
     const end = new Date("2026-08-02T00:00:00Z"); // 1 day
     const items: PricedRentalItemInput[] = [
-      { billingMode: "DAILY", quantity: 1, dailyPriceMinor: 101, discountMinor: 0, taxRateBp: 2300 },
+      {
+        billingMode: "DAILY",
+        quantity: 1,
+        dailyPriceMinor: 101,
+        discountMinor: 0,
+        taxRateBp: 2300,
+      },
     ];
     const result = computeRentalTotals(items, start, end, 0);
     // 101 * 23% = 23.23 -> rounds to 23

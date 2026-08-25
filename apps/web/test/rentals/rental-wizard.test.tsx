@@ -139,6 +139,85 @@ describe("RentalWizard", () => {
     expect(await screen.findByText(/2 calendar months × .*5 days ×/i)).toBeInTheDocument();
   });
 
+  // Regression: found via manual browser QA -- the tenant's default
+  // currency (fetched async) often isn't loaded yet at the moment this
+  // wizard first mounts. Since react-hook-form only reads `defaultValues`
+  // once, at initialization, a still-`undefined` defaultCurrency at that
+  // instant used to leave the currency field permanently blank for the
+  // rest of the form's life, silently breaking the entire live pricing
+  // estimate (money can't be formatted with an empty currency code).
+  it("fills in the currency once defaultCurrency arrives after the initial render", async () => {
+    setup();
+    const user = userEvent.setup();
+    const { rerender } = renderWithProviders(
+      <RentalWizard
+        tenantId="tenant-1"
+        defaultCurrency={undefined}
+        initialValues={{
+          customerId: "cust-1",
+          plannedStart: "2026-08-25T00:00",
+          plannedEnd: "2026-08-29T00:00",
+        }}
+        initialItems={[
+          {
+            assetId: "asset-1",
+            billingMode: "DAILY",
+            quantity: 1,
+            dailyPriceDisplay: "50.00",
+            weeklyPriceDisplay: "",
+            monthlyPriceDisplay: "",
+            customPriceDisplay: "",
+            depositDisplay: "",
+            discountDisplay: "",
+            taxRateDisplay: "",
+            notes: "",
+            partialMonthPolicy: "PRORATE_BY_DAY",
+          },
+        ]}
+        onSubmit={vi.fn()}
+        isPending={false}
+      />,
+    );
+
+    // The tenant role query resolves after mount, now supplying a real currency.
+    rerender(
+      <RentalWizard
+        tenantId="tenant-1"
+        defaultCurrency="PLN"
+        initialValues={{
+          customerId: "cust-1",
+          plannedStart: "2026-08-25T00:00",
+          plannedEnd: "2026-08-29T00:00",
+        }}
+        initialItems={[
+          {
+            assetId: "asset-1",
+            billingMode: "DAILY",
+            quantity: 1,
+            dailyPriceDisplay: "50.00",
+            weeklyPriceDisplay: "",
+            monthlyPriceDisplay: "",
+            customPriceDisplay: "",
+            depositDisplay: "",
+            discountDisplay: "",
+            taxRateDisplay: "",
+            notes: "",
+            partialMonthPolicy: "PRORATE_BY_DAY",
+          },
+        ]}
+        onSubmit={vi.fn()}
+        isPending={false}
+      />,
+    );
+
+    // customer -> assets -> dates -> pricing
+    await user.click(screen.getByRole("button", { name: /next/i }));
+    await user.click(screen.getByRole("button", { name: /next/i }));
+    await user.click(screen.getByRole("button", { name: /next/i }));
+
+    expect(await screen.findByDisplayValue("PLN")).toBeInTheDocument();
+  });
+
   it("pre-fills from initialValues and initialItems for edit mode", () => {
     setup();
     renderWithProviders(

@@ -11,7 +11,7 @@ import {
   Input,
   Label,
 } from "@rentos/ui";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -143,6 +143,27 @@ export function RentalWizard({
       ...initialValues,
     },
   });
+
+  // `defaultCurrency` (the tenant's own default currency) often isn't loaded
+  // yet at the moment this form first mounts -- react-hook-form's
+  // `defaultValues` is only ever read once, at initialization, so a
+  // still-`undefined` defaultCurrency at that instant would otherwise leave
+  // the currency field permanently blank for the rest of the form's life,
+  // silently breaking the entire live pricing estimate (formatMoney can't
+  // format an empty currency code). Re-applies once the real value arrives,
+  // but only for a fresh create (never overriding an explicit initialValues
+  // currency in edit mode) and only if the user hasn't already typed one.
+  const appliedDefaultCurrency = useRef(false);
+  useEffect(() => {
+    if (appliedDefaultCurrency.current) return;
+    if (!defaultCurrency) return;
+    if (initialValues?.currency) {
+      appliedDefaultCurrency.current = true;
+      return;
+    }
+    setValue("currency", defaultCurrency);
+    appliedDefaultCurrency.current = true;
+  }, [defaultCurrency, initialValues, setValue]);
 
   const values = watch();
   const { data: customersData } = useCustomers(tenantId, {
@@ -344,9 +365,7 @@ export function RentalWizard({
                   key={asset.id}
                   className="flex items-center justify-between rounded-md border p-2 text-sm"
                 >
-                  <span>
-                    {getAssetDisplayLabel(asset)}
-                  </span>
+                  <span>{getAssetDisplayLabel(asset)}</span>
                   <input
                     type="checkbox"
                     checked={items.some((item) => item.assetId === asset.id)}

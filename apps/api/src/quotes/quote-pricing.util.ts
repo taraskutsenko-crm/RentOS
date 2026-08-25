@@ -90,7 +90,6 @@ export function resolveDiscountMinor(
   return Math.min(baseMinor, Math.max(0, raw));
 }
 
-
 /**
  * Validates that the price field(s) matching `billingMode` are present
  * (mirrors rental-pricing.util's assertBillingModePriceProvided, extended

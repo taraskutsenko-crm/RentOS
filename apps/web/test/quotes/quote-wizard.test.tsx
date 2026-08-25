@@ -141,6 +141,49 @@ describe("QuoteWizard", () => {
     expect(await screen.findByText(/2 calendar months × .*5 days ×/i)).toBeInTheDocument();
   });
 
+  // Regression: found via manual browser QA on rental-wizard.tsx's
+  // identical pattern -- the tenant's default currency (fetched async)
+  // often isn't loaded yet at the moment this wizard first mounts. Since
+  // react-hook-form only reads `defaultValues` once, at initialization, a
+  // still-`undefined` defaultCurrency at that instant used to leave the
+  // currency field permanently blank for the rest of the form's life.
+  it("fills in the currency once defaultCurrency arrives after the initial render", async () => {
+    setup();
+    const user = userEvent.setup();
+    const initialValues = {
+      plannedStart: "2031-01-15T00:00",
+      plannedEnd: "2031-03-20T00:00",
+      validUntil: "2031-04-01T00:00",
+    };
+    const { rerender } = renderWithProviders(
+      <QuoteWizard
+        tenantId="tenant-1"
+        defaultCurrency={undefined}
+        onSubmit={vi.fn()}
+        isPending={false}
+        initialValues={initialValues}
+      />,
+    );
+
+    // The tenant role query resolves after mount, now supplying a real currency.
+    rerender(
+      <QuoteWizard
+        tenantId="tenant-1"
+        defaultCurrency="PLN"
+        onSubmit={vi.fn()}
+        isPending={false}
+        initialValues={initialValues}
+      />,
+    );
+
+    await user.click(screen.getByLabelText("Jane Doe"));
+    await goToStep(user, 2); // -> dates -> assets
+    await user.click(await screen.findByRole("checkbox"));
+    await goToStep(user, 2); // -> services -> pricing
+
+    expect(await screen.findByDisplayValue("PLN")).toBeInTheDocument();
+  });
+
   describe("MONTHLY pricing validation before Review (manual-testing bug fix)", () => {
     async function reachMonthlyPricingStep(
       user: ReturnType<typeof userEvent.setup>,

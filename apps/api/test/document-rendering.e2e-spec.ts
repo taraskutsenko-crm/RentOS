@@ -549,9 +549,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .expect(200);
     expect(handoverPreview.body.html).toContain("General handover notes");
-    expect(handoverPreview.body.html).toContain(
-      "Fully functional, minor scratches on the casing",
-    );
+    expect(handoverPreview.body.html).toContain("Fully functional, minor scratches on the casing");
     expect(handoverPreview.body.html).toContain("Pre-existing dent on the left side panel");
 
     const returnDoc = await createDocument({

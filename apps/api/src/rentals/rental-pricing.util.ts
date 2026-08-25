@@ -321,7 +321,9 @@ export function computeRentalTotals(
   plannedEnd: Date,
   rentalDiscountMinor: number,
 ): RentalTotals {
-  const itemNetTotals = items.map((item) => computeItemLineTotalMinor(item, plannedStart, plannedEnd));
+  const itemNetTotals = items.map((item) =>
+    computeItemLineTotalMinor(item, plannedStart, plannedEnd),
+  );
   const subtotalMinor = itemNetTotals.reduce((sum, value) => sum + value, 0);
   const taxMinor = items.reduce(
     (sum, item, index) => sum + resolveTaxMinor(itemNetTotals[index]!, item.taxRateBp ?? 0),

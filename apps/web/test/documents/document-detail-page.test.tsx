@@ -217,7 +217,10 @@ describe("DocumentDetailPage", () => {
     usePermissionMock.mockReturnValue(false);
     useDocumentMock.mockReturnValue({ data: baseDocument("DRAFT"), isLoading: false });
     useDocumentPreviewMock.mockReturnValue({
-      data: { html: "<html><body>Rendered document</body></html>", templateSource: "built_in_default" },
+      data: {
+        html: "<html><body>Rendered document</body></html>",
+        templateSource: "built_in_default",
+      },
     });
     const user = userEvent.setup();
 

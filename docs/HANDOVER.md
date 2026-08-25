@@ -19,10 +19,84 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `fd09d91` (i18n: localize invoicing, bank
-  accounts & integrations UI) — PRE-CHAPTER-10 Invoicing, Bank Details &
-  E-Invoice Architecture is complete. Chapter 10 itself was **not**
-  started, per this arc's explicit hard-stop instruction.
+- **Latest verified commit:** `2cf66f8` (fix: currency race condition in
+  Rental/Quote wizards, prettier formatting) — the POST-CHAPTER-9 MANUAL
+  QA FIX PASS is complete. This was explicitly a bug-fix pass over
+  real-browser-tested issues, **not** a new product chapter; the next
+  product chapter was **not** started, per this arc's explicit hard-stop
+  instruction. See D-090 through D-100 in
+  [DECISIONS.md](DECISIONS.md) for full rationale on each fix.
+- **What shipped (POST-CHAPTER-9 QA fix pass, D-090–D-100):** Rental tax
+  is now a per-item **rate** (`RentalItem.taxRateBp`), mirroring
+  `QuoteItem` exactly, replacing the old manual flat-amount entry
+  (D-090). Investigated and documented — no code defect — the reported
+  "Dashboard shows 0 active rentals" symptom: the canonical Active
+  Rental definition is, and remains, the persisted `RentalStatus.ACTIVE`
+  value only, reached via explicit `reserve()`/`start()` actions, never
+  inferred from dates (D-091). Fixed the real, HIGH PRIORITY bug where a
+  Commercial Offer generated directly from a Rental (no source Quote)
+  rendered almost empty — enriched the `QUOTE` document template +
+  resolver with `rental.subtotal/discount/tax` and
+  `quote.issueDate/validUntil/terms` (D-092). Asset selectors/tables now
+  show a disambiguating identifier (`name — internalNumber`) everywhere
+  an asset is picked or listed. `DocumentEmailDelivery` gained a real
+  `NOT_CONFIGURED` status instead of always claiming `SENT` when no real
+  email provider exists (D-093). Handover/Return Protocol
+  condition/damage notes are now collectible in the UI and persisted as
+  real `businessData`, rendered into the generated document (D-094); the
+  document checklist no longer hides Handover/Return as "not required
+  yet" before they are legally preparable — Handover from `RESERVED`
+  onward, Return from `ACTIVE` onward (D-095). Fixed Commercial Quote
+  PDF localization — two compounding bugs: the wrong language source
+  (`tenant.defaultLanguage` instead of the canonical company-country-
+  first resolver) and `quote.pdf.*` i18n keys that had **never existed**
+  in any locale file, so labels always fell back to English regardless
+  of language (D-096). Added an explicit "Amount due at start" figure
+  (total + refundable deposit) everywhere Total/Deposit were shown
+  separately but never summed, and researched — but deliberately did not
+  implement — a full refundable-deposit accounting/ledger model
+  (D-097/D-098). Added a direct "Print" action on the Document preview
+  iframe plus real `@page` A4 print CSS (D-099). Found and fixed one
+  more real bug live during the required manual acceptance walkthrough
+  (not from the written report): the Rental/Quote wizard's currency
+  field could silently stay permanently blank when the tenant's default
+  currency query resolved after the wizard's first render (D-100).
+- **Verification:** full backend suite (35 files / 607 tests) and full
+  frontend suite (79 files / 529 tests) green; every quality gate
+  (`format`, `lint`, `typecheck`, `check:governance`,
+  `test:governance-checks`) green; two new additive Prisma migrations
+  (`RentalItem.taxRateBp`, `DocumentEmailStatus.NOT_CONFIGURED`) applied
+  cleanly to both the dev and test databases. Docker images rebuilt from
+  committed HEAD and the full acceptance scenario walked through live in
+  a real browser against the rebuilt containers: created a Polish
+  tenant/PLN company, a `Transport → Passenger cars / Delivery vehicles`
+  category hierarchy, an asset "Skoda Fabia — SK977UG", a Rental at 50
+  PLN/day × 4 days × 23% VAT (confirmed exactly 200.00 net / 46.00 VAT /
+  246.00 total / 700.00 refundable deposit / 946.00 amount due at every
+  surface — Rental detail, Contract, Commercial Offer, and the issued
+  Invoice); generated a Rental Contract and a Commercial Offer directly
+  from the Rental (confirmed fully populated, not empty); generated a
+  Handover Protocol and a Return Protocol with condition/damage notes
+  (confirmed all fields persisted and rendered, with Return's distinct
+  "new damage"/"missing items" labels); confirmed the Dashboard's Active
+  Rentals count go 0 → 1 exactly when the rental was explicitly started
+  (never merely for overlapping dates); saved and issued an Invoice
+  (confirmed the "Invoice saved" confirmation appears, the real
+  `INV-YYYY-MM-NNNNNN` number is assigned only at issue, and the VAT
+  rate is derived from the Rental item's own real rate); attempted an
+  email send and a signature request (confirmed both honestly report
+  "Not configured"/"Pending", never a fabricated success); confirmed
+  KSeF still honestly reports "Not connected"; used the direct Print
+  action (confirmed it opens the browser's native print dialog scoped
+  to only the document content); and switched the UI language to
+  Russian without touching the Polish company (confirmed the app chrome
+  translated while every already-generated and newly-generated business
+  document — Contract, Commercial Offer — stayed fully in Polish, zero
+  English/Russian leakage). One real bug was found and fixed live during
+  this walkthrough that was not caught by the automated suites (D-100,
+  above) — the currency field race condition, only reproducible with a
+  genuinely fresh tenant whose default-currency query hadn't resolved
+  yet at first render.
 - **What shipped:** Invoice is a standalone first-class business object
   (`Invoice`/`InvoiceItem`/`InvoiceSequence`/`Payment`/
   `InvoiceStatusHistory`), never a generic `Document` row — its own

@@ -517,7 +517,8 @@
         "commercialOffer": "Offerta commerciale",
         "contract": "Contratto di noleggio",
         "handoverProtocol": "Verbale di consegna",
-        "returnProtocol": "Verbale di restituzione"
+        "returnProtocol": "Verbale di restituzione",
+        "depositReceipt": "Ricevuta del deposito"
       },
       "states": {
         "notApplicable": "Non applicabile",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "Nessuna fattura per questo noleggio finora",
       "create": "Crea fattura"
+    },
+    "deposit": {
+      "title": "Deposito cauzionale",
+      "required": "Importo richiesto",
+      "received": "Ricevuto",
+      "returned": "Restituito",
+      "retained": "Trattenuto",
+      "recordReceipt": "Registra ricezione deposito",
+      "recordReturn": "Registra restituzione deposito",
+      "receivedAt": "Ricevuto il",
+      "returnedAt": "Restituito il",
+      "amountPlaceholder": "Importo ricevuto",
+      "referencePlaceholder": "Riferimento di pagamento (facoltativo)",
+      "returnedAmountPlaceholder": "Importo restituito",
+      "retainedAmountPlaceholder": "Importo trattenuto (0 se nessuno)",
+      "retentionReasonPlaceholder": "Motivo della trattenuta"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Verbale di restituzione",
       "DAMAGE_REPORT": "Segnalazione di danno",
       "CONTRACT_AMENDMENT": "Modifica contrattuale",
-      "CUSTOM": "Personalizzato"
+      "CUSTOM": "Personalizzato",
+      "DEPOSIT_RECEIPT": "Ricevuta del deposito"
     },
     "statuses": {
       "DRAFT": "Bozza",

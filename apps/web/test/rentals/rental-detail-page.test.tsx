@@ -40,6 +40,9 @@ const useReserveRentalMock = vi.fn();
 const useStartRentalMock = vi.fn();
 const useReturnRentalMock = vi.fn();
 const useCancelRentalMock = vi.fn();
+const useRentalDepositMock = vi.fn();
+const useRecordDepositReceiptMock = vi.fn();
+const useRecordDepositReturnMock = vi.fn();
 vi.mock("../../src/hooks/use-rentals", () => ({
   useRental: (...args: unknown[]) => useRentalMock(...args),
   useRentalTimeline: (...args: unknown[]) => useRentalTimelineMock(...args),
@@ -48,6 +51,9 @@ vi.mock("../../src/hooks/use-rentals", () => ({
   useStartRental: () => useStartRentalMock(),
   useReturnRental: () => useReturnRentalMock(),
   useCancelRental: () => useCancelRentalMock(),
+  useRentalDeposit: (...args: unknown[]) => useRentalDepositMock(...args),
+  useRecordDepositReceipt: () => useRecordDepositReceiptMock(),
+  useRecordDepositReturn: () => useRecordDepositReturnMock(),
 }));
 
 function baseRental(status: string) {
@@ -90,6 +96,9 @@ describe("RentalDetailPage", () => {
     useStartRentalMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useReturnRentalMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useCancelRentalMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useRentalDepositMock.mockReturnValue({ data: null });
+    useRecordDepositReceiptMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useRecordDepositReturnMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
   });
 
   it("renders the rental header with number, customer, and status", () => {

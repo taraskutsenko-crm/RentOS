@@ -517,7 +517,8 @@
         "commercialOffer": "Commercieel aanbod",
         "contract": "Huurcontract",
         "handoverProtocol": "Overdrachtsprotocol",
-        "returnProtocol": "Retourprotocol"
+        "returnProtocol": "Retourprotocol",
+        "depositReceipt": "Borgbewijs"
       },
       "states": {
         "notApplicable": "Niet van toepassing",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "Nog geen facturen voor deze verhuur",
       "create": "Factuur aanmaken"
+    },
+    "deposit": {
+      "title": "Borg",
+      "required": "Vereist bedrag",
+      "received": "Ontvangen",
+      "returned": "Terugbetaald",
+      "retained": "Ingehouden",
+      "recordReceipt": "Ontvangst van borg registreren",
+      "recordReturn": "Teruggave van borg registreren",
+      "receivedAt": "Ontvangen op",
+      "returnedAt": "Teruggegeven op",
+      "amountPlaceholder": "Ontvangen bedrag",
+      "referencePlaceholder": "Betalingsreferentie (optioneel)",
+      "returnedAmountPlaceholder": "Terugbetaald bedrag",
+      "retainedAmountPlaceholder": "Ingehouden bedrag (0 indien geen)",
+      "retentionReasonPlaceholder": "Reden voor inhouding"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Retourprotocol",
       "DAMAGE_REPORT": "Schademelding",
       "CONTRACT_AMENDMENT": "Contractwijziging",
-      "CUSTOM": "Aangepast"
+      "CUSTOM": "Aangepast",
+      "DEPOSIT_RECEIPT": "Borgontvangstbewijs"
     },
     "statuses": {
       "DRAFT": "Concept",

@@ -517,7 +517,8 @@
         "commercialOffer": "Proposta comercial",
         "contract": "Contrato de locação",
         "handoverProtocol": "Protocolo de entrega",
-        "returnProtocol": "Protocolo de devolução"
+        "returnProtocol": "Protocolo de devolução",
+        "depositReceipt": "Recibo de caução"
       },
       "states": {
         "notApplicable": "Não aplicável",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "Ainda não há faturas para esta locação",
       "create": "Criar fatura"
+    },
+    "deposit": {
+      "title": "Caução",
+      "required": "Valor exigido",
+      "received": "Recebido",
+      "returned": "Devolvido",
+      "retained": "Retido",
+      "recordReceipt": "Registrar recebimento da caução",
+      "recordReturn": "Registrar devolução da caução",
+      "receivedAt": "Recebido em",
+      "returnedAt": "Devolvido em",
+      "amountPlaceholder": "Valor recebido",
+      "referencePlaceholder": "Referência de pagamento (opcional)",
+      "returnedAmountPlaceholder": "Valor devolvido",
+      "retainedAmountPlaceholder": "Valor retido (0 se nenhum)",
+      "retentionReasonPlaceholder": "Motivo da retenção"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Protocolo de devolução",
       "DAMAGE_REPORT": "Relato de danos",
       "CONTRACT_AMENDMENT": "Aditivo contratual",
-      "CUSTOM": "Personalizado"
+      "CUSTOM": "Personalizado",
+      "DEPOSIT_RECEIPT": "Recibo de caução"
     },
     "statuses": {
       "DRAFT": "Rascunho",

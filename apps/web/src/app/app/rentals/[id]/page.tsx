@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import { DashboardGrid, DashboardMetric } from "../../../../components/dashboard";
 import { InvoiceStatusBadge } from "../../../../components/invoices/invoice-status-badge";
+import { RentalDepositSection } from "../../../../components/rentals/rental-deposit-section";
 import { RentalStatusBadge } from "../../../../components/rentals/rental-status-badge";
 import { usePageBreadcrumbs } from "../../../../components/shell/breadcrumb-context";
 import { PageHeader } from "../../../../components/shell/page-header";
@@ -92,6 +93,7 @@ export default function RentalDetailPage() {
   const canCancel = usePermission("rentals.cancel");
   const canCreateDocument = usePermission("documents.create");
   const canCreateInvoice = usePermission("invoices.create");
+  const canManageDeposit = usePermission("rentals.manage_deposit");
   const timeZone = useTenantTimezone();
 
   usePageBreadcrumbs(
@@ -490,6 +492,14 @@ export default function RentalDetailPage() {
               </CardContent>
             </Card>
           )}
+
+          <RentalDepositSection
+            tenantId={tenantId}
+            rentalId={rental.id}
+            requiredAmountMinor={depositTotalMinor}
+            currency={rental.currency}
+            canManage={canManageDeposit}
+          />
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">

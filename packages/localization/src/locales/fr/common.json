@@ -517,7 +517,8 @@
         "commercialOffer": "Offre commerciale",
         "contract": "Contrat de location",
         "handoverProtocol": "Protocole de remise",
-        "returnProtocol": "Protocole de retour"
+        "returnProtocol": "Protocole de retour",
+        "depositReceipt": "Reçu de caution"
       },
       "states": {
         "notApplicable": "Non applicable",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "Aucune facture pour cette location pour le moment",
       "create": "Créer une facture"
+    },
+    "deposit": {
+      "title": "Caution",
+      "required": "Montant requis",
+      "received": "Reçu",
+      "returned": "Restitué",
+      "retained": "Retenu",
+      "recordReceipt": "Enregistrer la réception de la caution",
+      "recordReturn": "Enregistrer la restitution de la caution",
+      "receivedAt": "Reçu le",
+      "returnedAt": "Restitué le",
+      "amountPlaceholder": "Montant reçu",
+      "referencePlaceholder": "Référence de paiement (facultatif)",
+      "returnedAmountPlaceholder": "Montant restitué",
+      "retainedAmountPlaceholder": "Montant retenu (0 si aucun)",
+      "retentionReasonPlaceholder": "Motif de la retenue"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Protocole de retour",
       "DAMAGE_REPORT": "Rapport de dommages",
       "CONTRACT_AMENDMENT": "Avenant au contrat",
-      "CUSTOM": "Personnalisé"
+      "CUSTOM": "Personnalisé",
+      "DEPOSIT_RECEIPT": "Reçu de caution"
     },
     "statuses": {
       "DRAFT": "Brouillon",

@@ -6,7 +6,11 @@ import type {
 } from "../types/rental";
 
 export type DocumentChecklistItemKey =
-  "commercialOffer" | "contract" | "handoverProtocol" | "returnProtocol";
+  | "commercialOffer"
+  | "contract"
+  | "handoverProtocol"
+  | "returnProtocol"
+  | "depositReceipt";
 
 /**
  * Which real Document.documentType each checklist row corresponds to — used
@@ -23,6 +27,7 @@ export const CHECKLIST_ITEM_DOCUMENT_TYPE: Record<
   contract: "CONTRACT",
   handoverProtocol: "HANDOVER_PROTOCOL",
   returnProtocol: "RETURN_PROTOCOL",
+  depositReceipt: "DEPOSIT_RECEIPT",
 };
 
 /**
@@ -71,6 +76,19 @@ const HANDOVER_PREPARABLE_STATUSES: RentalStatus[] = [
  */
 const RETURN_PREPARABLE_STATUSES: RentalStatus[] = ["ACTIVE", "RETURNED", "COMPLETED"];
 
+/**
+ * A deposit receipt only makes sense once the rental is actually committed
+ * (RESERVED onward) — same reasoning as HANDOVER_PREPARABLE_STATUSES: staff
+ * routinely collect the deposit ahead of physical handover, not only once
+ * ACTIVE.
+ */
+const DEPOSIT_PREPARABLE_STATUSES: RentalStatus[] = [
+  "RESERVED",
+  "ACTIVE",
+  "RETURNED",
+  "COMPLETED",
+];
+
 const SIGNED_STATUSES: RentalDocumentStatus[] = ["SIGNED", "PARTIALLY_SIGNED"];
 const SENT_STATUSES: RentalDocumentStatus[] = ["SENT", "VIEWED"];
 
@@ -104,8 +122,11 @@ export function getRentalDocumentChecklist(rental: {
   status: RentalStatus;
   sourceQuote: RentalSourceQuote | null;
   documents: RentalDocument[];
+  /** Optional — omit when the caller doesn't need the depositReceipt row (e.g. rental-next-action.ts's status-only derivation). */
+  items?: { depositMinor: number }[];
 }): DocumentChecklistItem[] {
-  const { status, sourceQuote, documents } = rental;
+  const { status, sourceQuote, documents, items = [] } = rental;
+  const depositRequired = items.some((item) => item.depositMinor > 0);
 
   const offerDocument = mostAdvancedDocument(documents, "QUOTE");
   const commercialOffer: DocumentChecklistItem = offerDocument
@@ -148,5 +169,18 @@ export function getRentalDocumentChecklist(rental: {
         document: null,
       };
 
-  return [commercialOffer, contract, handoverProtocol, returnProtocol];
+  const depositDocument = mostAdvancedDocument(documents, "DEPOSIT_RECEIPT");
+  const depositReceipt: DocumentChecklistItem = depositDocument
+    ? { key: "depositReceipt", state: depositDocument.state, document: depositDocument.document }
+    : {
+        key: "depositReceipt",
+        state: !depositRequired
+          ? "notApplicable"
+          : DEPOSIT_PREPARABLE_STATUSES.includes(status)
+            ? "readyToGenerate"
+            : "notRequiredYet",
+        document: null,
+      };
+
+  return [commercialOffer, contract, handoverProtocol, returnProtocol, depositReceipt];
 }

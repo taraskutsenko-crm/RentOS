@@ -517,7 +517,8 @@
         "commercialOffer": "Комерційна пропозиція",
         "contract": "Договір оренди",
         "handoverProtocol": "Акт приймання-передачі",
-        "returnProtocol": "Акт повернення"
+        "returnProtocol": "Акт повернення",
+        "depositReceipt": "Квитанція про заставу"
       },
       "states": {
         "notApplicable": "Не застосовується",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "Для цієї оренди поки що немає рахунків",
       "create": "Створити рахунок"
+    },
+    "deposit": {
+      "title": "Застава",
+      "required": "Необхідна сума",
+      "received": "Отримано",
+      "returned": "Повернено",
+      "retained": "Утримано",
+      "recordReceipt": "Зафіксувати отримання застави",
+      "recordReturn": "Зафіксувати повернення застави",
+      "receivedAt": "Дата отримання",
+      "returnedAt": "Дата повернення",
+      "amountPlaceholder": "Отримана сума",
+      "referencePlaceholder": "Референс платежу (необов'язково)",
+      "returnedAmountPlaceholder": "Повернена сума",
+      "retainedAmountPlaceholder": "Утримана сума (0, якщо немає)",
+      "retentionReasonPlaceholder": "Причина утримання"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Акт повернення",
       "DAMAGE_REPORT": "Акт про пошкодження",
       "CONTRACT_AMENDMENT": "Додаткова угода",
-      "CUSTOM": "Довільний"
+      "CUSTOM": "Довільний",
+      "DEPOSIT_RECEIPT": "Квитанція про отримання застави"
     },
     "statuses": {
       "DRAFT": "Чернетка",

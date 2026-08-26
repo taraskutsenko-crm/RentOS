@@ -517,7 +517,8 @@
         "commercialOffer": "Коммерческое предложение",
         "contract": "Договор аренды",
         "handoverProtocol": "Акт передачи",
-        "returnProtocol": "Акт возврата"
+        "returnProtocol": "Акт возврата",
+        "depositReceipt": "Квитанция о залоге"
       },
       "states": {
         "notApplicable": "Не применимо",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "Для этой аренды пока нет счетов",
       "create": "Создать счёт"
+    },
+    "deposit": {
+      "title": "Залог",
+      "required": "Требуемая сумма",
+      "received": "Получено",
+      "returned": "Возвращено",
+      "retained": "Удержано",
+      "recordReceipt": "Зафиксировать получение залога",
+      "recordReturn": "Зафиксировать возврат залога",
+      "receivedAt": "Дата получения",
+      "returnedAt": "Дата возврата",
+      "amountPlaceholder": "Полученная сумма",
+      "referencePlaceholder": "Референс платежа (необязательно)",
+      "returnedAmountPlaceholder": "Возвращённая сумма",
+      "retainedAmountPlaceholder": "Удержанная сумма (0, если нет)",
+      "retentionReasonPlaceholder": "Причина удержания"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Акт возврата",
       "DAMAGE_REPORT": "Акт о повреждениях",
       "CONTRACT_AMENDMENT": "Дополнительное соглашение",
-      "CUSTOM": "Произвольный"
+      "CUSTOM": "Произвольный",
+      "DEPOSIT_RECEIPT": "Квитанция о получении залога"
     },
     "statuses": {
       "DRAFT": "Черновик",

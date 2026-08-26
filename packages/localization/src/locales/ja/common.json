@@ -517,7 +517,8 @@
         "commercialOffer": "商業オファー",
         "contract": "レンタル契約書",
         "handoverProtocol": "引渡書",
-        "returnProtocol": "返却書"
+        "returnProtocol": "返却書",
+        "depositReceipt": "保証金受領書"
       },
       "states": {
         "notApplicable": "該当なし",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "このレンタルにはまだ請求書がありません",
       "create": "請求書を作成"
+    },
+    "deposit": {
+      "title": "保証金",
+      "required": "必要金額",
+      "received": "受領済み",
+      "returned": "返還済み",
+      "retained": "保留",
+      "recordReceipt": "保証金受領を記録",
+      "recordReturn": "保証金返還を記録",
+      "receivedAt": "受領日",
+      "returnedAt": "返還日",
+      "amountPlaceholder": "受領金額",
+      "referencePlaceholder": "支払い参照番号（任意）",
+      "returnedAmountPlaceholder": "返還金額",
+      "retainedAmountPlaceholder": "保留金額（なければ0）",
+      "retentionReasonPlaceholder": "保留の理由"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "返却書",
       "DAMAGE_REPORT": "損傷報告書",
       "CONTRACT_AMENDMENT": "契約変更書",
-      "CUSTOM": "カスタム"
+      "CUSTOM": "カスタム",
+      "DEPOSIT_RECEIPT": "保証金受領書"
     },
     "statuses": {
       "DRAFT": "下書き",

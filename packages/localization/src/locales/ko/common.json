@@ -517,7 +517,8 @@
         "commercialOffer": "상업 제안서",
         "contract": "대여 계약서",
         "handoverProtocol": "인도 확인서",
-        "returnProtocol": "반납 확인서"
+        "returnProtocol": "반납 확인서",
+        "depositReceipt": "보증금 영수증"
       },
       "states": {
         "notApplicable": "해당 없음",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "이 대여 건에 대한 청구서가 아직 없습니다",
       "create": "청구서 생성"
+    },
+    "deposit": {
+      "title": "보증금",
+      "required": "필요 금액",
+      "received": "수령됨",
+      "returned": "반환됨",
+      "retained": "보류됨",
+      "recordReceipt": "보증금 수령 기록",
+      "recordReturn": "보증금 반환 기록",
+      "receivedAt": "수령일",
+      "returnedAt": "반환일",
+      "amountPlaceholder": "수령 금액",
+      "referencePlaceholder": "결제 참조번호(선택 사항)",
+      "returnedAmountPlaceholder": "반환 금액",
+      "retainedAmountPlaceholder": "보류 금액(없으면 0)",
+      "retentionReasonPlaceholder": "보류 사유"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "반납 확인서",
       "DAMAGE_REPORT": "파손 신고서",
       "CONTRACT_AMENDMENT": "계약 수정서",
-      "CUSTOM": "사용자 지정"
+      "CUSTOM": "사용자 지정",
+      "DEPOSIT_RECEIPT": "보증금 영수증"
     },
     "statuses": {
       "DRAFT": "임시 저장",

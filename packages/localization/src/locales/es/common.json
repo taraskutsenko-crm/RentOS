@@ -517,7 +517,8 @@
         "commercialOffer": "Oferta comercial",
         "contract": "Contrato de alquiler",
         "handoverProtocol": "Acta de entrega",
-        "returnProtocol": "Acta de devolución"
+        "returnProtocol": "Acta de devolución",
+        "depositReceipt": "Recibo de depósito"
       },
       "states": {
         "notApplicable": "No aplicable",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "Aún no hay facturas para este alquiler",
       "create": "Crear factura"
+    },
+    "deposit": {
+      "title": "Depósito",
+      "required": "Importe requerido",
+      "received": "Recibido",
+      "returned": "Devuelto",
+      "retained": "Retenido",
+      "recordReceipt": "Registrar recepción del depósito",
+      "recordReturn": "Registrar devolución del depósito",
+      "receivedAt": "Recibido el",
+      "returnedAt": "Devuelto el",
+      "amountPlaceholder": "Importe recibido",
+      "referencePlaceholder": "Referencia de pago (opcional)",
+      "returnedAmountPlaceholder": "Importe devuelto",
+      "retainedAmountPlaceholder": "Importe retenido (0 si no hay)",
+      "retentionReasonPlaceholder": "Motivo de la retención"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Protocolo de devolución",
       "DAMAGE_REPORT": "Informe de daños",
       "CONTRACT_AMENDMENT": "Modificación del contrato",
-      "CUSTOM": "Personalizado"
+      "CUSTOM": "Personalizado",
+      "DEPOSIT_RECEIPT": "Recibo de depósito"
     },
     "statuses": {
       "DRAFT": "Borrador",

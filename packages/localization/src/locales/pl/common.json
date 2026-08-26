@@ -517,7 +517,8 @@
         "commercialOffer": "Oferta handlowa",
         "contract": "Umowa najmu",
         "handoverProtocol": "Protokół wydania",
-        "returnProtocol": "Protokół zwrotu"
+        "returnProtocol": "Protokół zwrotu",
+        "depositReceipt": "Potwierdzenie kaucji"
       },
       "states": {
         "notApplicable": "Nie dotyczy",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "Brak faktur dla tego wynajmu",
       "create": "Utwórz fakturę"
+    },
+    "deposit": {
+      "title": "Kaucja",
+      "required": "Wymagana kwota",
+      "received": "Przyjęto",
+      "returned": "Zwrócono",
+      "retained": "Zatrzymano",
+      "recordReceipt": "Zarejestruj przyjęcie kaucji",
+      "recordReturn": "Zarejestruj zwrot kaucji",
+      "receivedAt": "Data przyjęcia",
+      "returnedAt": "Data zwrotu",
+      "amountPlaceholder": "Otrzymana kwota",
+      "referencePlaceholder": "Numer referencyjny (opcjonalnie)",
+      "returnedAmountPlaceholder": "Zwrócona kwota",
+      "retainedAmountPlaceholder": "Zatrzymana kwota (0, jeśli brak)",
+      "retentionReasonPlaceholder": "Powód zatrzymania"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Protokół zwrotu",
       "DAMAGE_REPORT": "Raport szkody",
       "CONTRACT_AMENDMENT": "Aneks do umowy",
-      "CUSTOM": "Niestandardowy"
+      "CUSTOM": "Niestandardowy",
+      "DEPOSIT_RECEIPT": "Potwierdzenie przyjęcia kaucji"
     },
     "statuses": {
       "DRAFT": "Szkic",

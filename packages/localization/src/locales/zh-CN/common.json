@@ -517,7 +517,8 @@
         "commercialOffer": "商业报价",
         "contract": "租赁合同",
         "handoverProtocol": "交接单",
-        "returnProtocol": "归还单"
+        "returnProtocol": "归还单",
+        "depositReceipt": "押金收据"
       },
       "states": {
         "notApplicable": "不适用",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "此租赁暂无发票",
       "create": "创建发票"
+    },
+    "deposit": {
+      "title": "押金",
+      "required": "所需金额",
+      "received": "已收",
+      "returned": "已退还",
+      "retained": "已扣留",
+      "recordReceipt": "记录押金收取",
+      "recordReturn": "记录押金退还",
+      "receivedAt": "收取日期",
+      "returnedAt": "退还日期",
+      "amountPlaceholder": "收取金额",
+      "referencePlaceholder": "支付参考号（可选）",
+      "returnedAmountPlaceholder": "退还金额",
+      "retainedAmountPlaceholder": "扣留金额（无则填0）",
+      "retentionReasonPlaceholder": "扣留原因"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "归还单",
       "DAMAGE_REPORT": "损坏报告",
       "CONTRACT_AMENDMENT": "合同修订",
-      "CUSTOM": "自定义"
+      "CUSTOM": "自定义",
+      "DEPOSIT_RECEIPT": "押金收据"
     },
     "statuses": {
       "DRAFT": "草稿",

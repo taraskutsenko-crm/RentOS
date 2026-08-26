@@ -269,7 +269,7 @@ describe("getRentalDocumentChecklist", () => {
     });
   });
 
-  it("returns exactly the four expected checklist items, in order", () => {
+  it("returns exactly the five expected checklist items, in order", () => {
     const checklist = getRentalDocumentChecklist({
       status: "DRAFT",
       sourceQuote: null,
@@ -280,6 +280,68 @@ describe("getRentalDocumentChecklist", () => {
       "contract",
       "handoverProtocol",
       "returnProtocol",
+      "depositReceipt",
     ]);
+  });
+
+  describe("depositReceipt row", () => {
+    it("is notApplicable when no item on the rental requires a deposit", () => {
+      const checklist = getRentalDocumentChecklist({
+        status: "ACTIVE",
+        sourceQuote: null,
+        documents: [],
+        items: [{ depositMinor: 0 }],
+      });
+      expect(checklist.find((item) => item.key === "depositReceipt")).toMatchObject({
+        state: "notApplicable",
+      });
+    });
+
+    it("is notRequiredYet while DRAFT/QUOTE even when a deposit is required", () => {
+      const checklist = getRentalDocumentChecklist({
+        status: "DRAFT",
+        sourceQuote: null,
+        documents: [],
+        items: [{ depositMinor: 10000 }],
+      });
+      expect(checklist.find((item) => item.key === "depositReceipt")).toMatchObject({
+        state: "notRequiredYet",
+      });
+    });
+
+    it("is readyToGenerate once RESERVED with a required deposit and no document yet", () => {
+      const checklist = getRentalDocumentChecklist({
+        status: "RESERVED",
+        sourceQuote: null,
+        documents: [],
+        items: [{ depositMinor: 10000 }],
+      });
+      expect(checklist.find((item) => item.key === "depositReceipt")).toMatchObject({
+        state: "readyToGenerate",
+      });
+    });
+
+    it("reflects an already-generated deposit receipt document regardless of status", () => {
+      const generatedDoc = {
+        id: "doc-1",
+        documentType: "DEPOSIT_RECEIPT" as const,
+        customTypeName: null,
+        documentNumber: "DEP-000001",
+        status: "DRAFT" as const,
+        title: null,
+        createdAt: "2026-01-01T00:00:00Z",
+      };
+      const checklist = getRentalDocumentChecklist({
+        status: "DRAFT",
+        sourceQuote: null,
+        documents: [generatedDoc],
+        items: [{ depositMinor: 10000 }],
+      });
+      expect(checklist.find((item) => item.key === "depositReceipt")).toEqual({
+        key: "depositReceipt",
+        state: "generated",
+        document: generatedDoc,
+      });
+    });
   });
 });

@@ -517,7 +517,8 @@
         "commercialOffer": "Obchodní nabídka",
         "contract": "Smlouva o pronájmu",
         "handoverProtocol": "Předávací protokol",
-        "returnProtocol": "Protokol o vrácení"
+        "returnProtocol": "Protokol o vrácení",
+        "depositReceipt": "Potvrzení o kauci"
       },
       "states": {
         "notApplicable": "Netýká se",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "Pro tento pronájem zatím nejsou žádné faktury",
       "create": "Vytvořit fakturu"
+    },
+    "deposit": {
+      "title": "Kauce",
+      "required": "Požadovaná částka",
+      "received": "Přijato",
+      "returned": "Vráceno",
+      "retained": "Zadrženo",
+      "recordReceipt": "Zaznamenat přijetí kauce",
+      "recordReturn": "Zaznamenat vrácení kauce",
+      "receivedAt": "Datum přijetí",
+      "returnedAt": "Datum vrácení",
+      "amountPlaceholder": "Přijatá částka",
+      "referencePlaceholder": "Číslo reference (nepovinné)",
+      "returnedAmountPlaceholder": "Vrácená částka",
+      "retainedAmountPlaceholder": "Zadržená částka (0, pokud žádná)",
+      "retentionReasonPlaceholder": "Důvod zadržení"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Protokol o vrácení",
       "DAMAGE_REPORT": "Hlášení škody",
       "CONTRACT_AMENDMENT": "Dodatek smlouvy",
-      "CUSTOM": "Vlastní"
+      "CUSTOM": "Vlastní",
+      "DEPOSIT_RECEIPT": "Potvrzení o přijetí kauce"
     },
     "statuses": {
       "DRAFT": "Koncept",

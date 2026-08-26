@@ -517,7 +517,8 @@
         "commercialOffer": "Angebot",
         "contract": "Mietvertrag",
         "handoverProtocol": "Übergabeprotokoll",
-        "returnProtocol": "Rückgabeprotokoll"
+        "returnProtocol": "Rückgabeprotokoll",
+        "depositReceipt": "Kautionsbestätigung"
       },
       "states": {
         "notApplicable": "Nicht zutreffend",
@@ -651,6 +652,22 @@
     "invoices": {
       "empty": "Noch keine Rechnungen für diesen Mietvorgang",
       "create": "Rechnung erstellen"
+    },
+    "deposit": {
+      "title": "Kaution",
+      "required": "Erforderlicher Betrag",
+      "received": "Erhalten",
+      "returned": "Zurückerstattet",
+      "retained": "Einbehalten",
+      "recordReceipt": "Kautionseingang erfassen",
+      "recordReturn": "Kautionsrückgabe erfassen",
+      "receivedAt": "Eingangsdatum",
+      "returnedAt": "Rückgabedatum",
+      "amountPlaceholder": "Erhaltener Betrag",
+      "referencePlaceholder": "Referenznummer (optional)",
+      "returnedAmountPlaceholder": "Zurückerstatteter Betrag",
+      "retainedAmountPlaceholder": "Einbehaltener Betrag (0, falls keiner)",
+      "retentionReasonPlaceholder": "Grund für den Einbehalt"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Rückgabeprotokoll",
       "DAMAGE_REPORT": "Schadensbericht",
       "CONTRACT_AMENDMENT": "Vertragsänderung",
-      "CUSTOM": "Benutzerdefiniert"
+      "CUSTOM": "Benutzerdefiniert",
+      "DEPOSIT_RECEIPT": "Kautionsempfangsbestätigung"
     },
     "statuses": {
       "DRAFT": "Entwurf",

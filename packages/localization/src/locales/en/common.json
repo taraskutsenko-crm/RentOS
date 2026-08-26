@@ -522,7 +522,8 @@
         "commercialOffer": "Commercial offer",
         "contract": "Rental contract",
         "handoverProtocol": "Handover protocol",
-        "returnProtocol": "Return protocol"
+        "returnProtocol": "Return protocol",
+        "depositReceipt": "Deposit receipt"
       },
       "states": {
         "notApplicable": "Not applicable",
@@ -651,6 +652,22 @@
     "partialMonthPolicyOptions": {
       "PRORATE_BY_DAY": "Charge proportionally by day",
       "ROUND_UP_TO_FULL_MONTH": "Charge started month as full month"
+    },
+    "deposit": {
+      "title": "Deposit",
+      "required": "Required amount",
+      "received": "Received",
+      "returned": "Returned",
+      "retained": "Retained",
+      "recordReceipt": "Record deposit receipt",
+      "recordReturn": "Record deposit return",
+      "receivedAt": "Received on",
+      "returnedAt": "Returned on",
+      "amountPlaceholder": "Amount received",
+      "referencePlaceholder": "Payment reference (optional)",
+      "returnedAmountPlaceholder": "Amount returned",
+      "retainedAmountPlaceholder": "Amount retained (0 if none)",
+      "retentionReasonPlaceholder": "Reason for retention"
     }
   },
   "quote": {
@@ -860,7 +877,8 @@
       "RETURN_PROTOCOL": "Return protocol",
       "DAMAGE_REPORT": "Damage report",
       "CONTRACT_AMENDMENT": "Contract amendment",
-      "CUSTOM": "Custom"
+      "CUSTOM": "Custom",
+      "DEPOSIT_RECEIPT": "Deposit receipt"
     },
     "statuses": {
       "DRAFT": "Draft",

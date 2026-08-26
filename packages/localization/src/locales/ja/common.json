@@ -325,7 +325,8 @@
       "documents": "ドキュメント",
       "timeline": "タイムライン",
       "filesManagement": "画像とドキュメント",
-      "platformDocuments": "ドキュメント"
+      "platformDocuments": "ドキュメント",
+      "availability": "空き状況／スケジュール"
     },
     "actions": {
       "changeStatus": "ステータスを変更",
@@ -426,6 +427,25 @@
       "REPAIR": "修理中",
       "LOST": "紛失",
       "RETIRED": "廃棄"
+    },
+    "availability": {
+      "rentalConflict": "予約済み／レンタル中",
+      "maintenance": "メンテナンス",
+      "repair": "修理",
+      "inspection": "点検",
+      "relocation": "移送",
+      "manualBlock": "手動ブロック",
+      "lost": "紛失",
+      "retired": "廃棄済み",
+      "noBlocks": "予定されたブロックはありません",
+      "scheduleBlock": "ブロックを予定する",
+      "cancelBlock": "ブロックを取り消す",
+      "cancelReasonPrompt": "取り消しの理由（任意）",
+      "cancelledBlocks": "取り消し済みブロック（{{count}}件）",
+      "startAt": "開始",
+      "endAt": "終了",
+      "notesPlaceholder": "備考（任意）",
+      "createError": "この資産には、この期間の一部と重複するブロックが既に予定されています。"
     }
   },
   "rental": {

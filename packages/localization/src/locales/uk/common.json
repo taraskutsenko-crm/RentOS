@@ -325,7 +325,8 @@
       "documents": "Документи",
       "timeline": "Історія",
       "filesManagement": "Зображення та документи",
-      "platformDocuments": "Документи"
+      "platformDocuments": "Документи",
+      "availability": "Доступність/графік"
     },
     "actions": {
       "changeStatus": "Змінити статус",
@@ -426,6 +427,25 @@
       "REPAIR": "Ремонт",
       "LOST": "Втрачений",
       "RETIRED": "Списаний"
+    },
+    "availability": {
+      "rentalConflict": "Заброньовано/в оренді",
+      "maintenance": "Обслуговування",
+      "repair": "Ремонт",
+      "inspection": "Інспекція",
+      "relocation": "Переміщення",
+      "manualBlock": "Ручне блокування",
+      "lost": "Втрачено",
+      "retired": "Списано",
+      "noBlocks": "Немає запланованих блокувань",
+      "scheduleBlock": "Запланувати блокування",
+      "cancelBlock": "Скасувати блокування",
+      "cancelReasonPrompt": "Причина скасування (необов'язково)",
+      "cancelledBlocks": "Скасовані блокування ({{count}})",
+      "startAt": "Початок",
+      "endAt": "Кінець",
+      "notesPlaceholder": "Примітки (необов'язково)",
+      "createError": "Для цього активу вже заплановано блокування, що перетинається з частиною цього періоду."
     }
   },
   "rental": {

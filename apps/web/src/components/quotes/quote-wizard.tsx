@@ -15,11 +15,13 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { AvailabilityBadge } from "../assets/availability-badge";
 import { useAssets } from "../../hooks/use-assets";
 import { useCustomers } from "../../hooks/use-customers";
 import type { QuoteInput, QuoteItemInput } from "../../hooks/use-quotes";
 import { useRentalBillingSettings } from "../../hooks/use-rental-billing-settings";
 import { useAvailability } from "../../hooks/use-rentals";
+import { pickAvailabilityBadge } from "../../lib/asset-availability-badge";
 import { getAssetDisplayLabel } from "../../lib/asset-display-label";
 import { formatMoney } from "../../lib/money";
 import { estimateQuoteTotals, getMissingQuoteItemPriceFields } from "../../lib/quote-pricing";
@@ -175,13 +177,17 @@ export function QuoteWizard({
 
   const assetItems = items.filter((item) => item.itemType === "ASSET");
   const serviceItems = items.filter((item) => item.itemType !== "ASSET");
-  const selectedAssetIds = assetItems.map((item) => item.assetId).filter(Boolean);
 
-  const { data: availability } = useAvailability(
+  // The assets step comes after the dates step here, so the real requested
+  // window is already known — check every browsable candidate (not just
+  // already-selected items) so the picker shows each asset's reason
+  // directly, never hiding a reserved/blocked one.
+  const candidateAssetIds = assetsData?.items.map((asset) => asset.id) ?? [];
+  const { data: candidateAvailability } = useAvailability(
     tenantId,
-    values.plannedStart && values.plannedEnd && selectedAssetIds.length > 0
+    values.plannedStart && values.plannedEnd && candidateAssetIds.length > 0
       ? {
-          assetIds: selectedAssetIds,
+          assetIds: candidateAssetIds,
           plannedStart: values.plannedStart,
           plannedEnd: values.plannedEnd,
         }
@@ -431,41 +437,31 @@ export function QuoteWizard({
               onChange={(event) => setAssetSearch(event.target.value)}
             />
             <div className="flex max-h-72 flex-col gap-2 overflow-y-auto">
-              {assetsData?.items.map((asset) => (
-                <label
-                  key={asset.id}
-                  className="flex items-center justify-between rounded-md border p-2 text-sm"
-                >
-                  <span>{getAssetDisplayLabel(asset)}</span>
-                  <input
-                    type="checkbox"
-                    checked={assetItems.some((item) => item.assetId === asset.id)}
-                    onChange={() => toggleAsset(asset.id, asset.name)}
-                  />
-                </label>
-              ))}
+              {assetsData?.items.map((asset) => {
+                const badge = pickAvailabilityBadge(
+                  candidateAvailability?.results.find((result) => result.assetId === asset.id),
+                );
+                return (
+                  <label
+                    key={asset.id}
+                    className="flex items-center justify-between gap-3 rounded-md border p-2 text-sm"
+                  >
+                    <span className="flex flex-col gap-1">
+                      <span>{getAssetDisplayLabel(asset)}</span>
+                      {badge && <AvailabilityBadge badge={badge} locale={i18n.language} />}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={assetItems.some((item) => item.assetId === asset.id)}
+                      onChange={() => toggleAsset(asset.id, asset.name)}
+                    />
+                  </label>
+                );
+              })}
               {assetsData?.items.length === 0 && (
                 <p className="text-muted-foreground text-sm">{t("asset.noAssets")}</p>
               )}
             </div>
-            {availability && (
-              <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium">{t("rental.wizard.availabilityCheck")}</span>
-                {availability.results.map((result) => (
-                  <p
-                    key={result.assetId}
-                    className={result.isAvailable ? "text-sm" : "text-destructive text-sm"}
-                  >
-                    {assetsData?.items.find((asset) => asset.id === result.assetId)?.name ??
-                      result.assetId}
-                    :{" "}
-                    {result.isAvailable
-                      ? t("rental.wizard.available")
-                      : t("rental.wizard.unavailable")}
-                  </p>
-                ))}
-              </div>
-            )}
           </CardContent>
         </Card>
       )}

@@ -15,11 +15,13 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { AvailabilityBadge } from "../assets/availability-badge";
 import { useAssets } from "../../hooks/use-assets";
 import { useCustomers } from "../../hooks/use-customers";
 import { useRentalBillingSettings } from "../../hooks/use-rental-billing-settings";
 import type { RentalItemInput } from "../../hooks/use-rentals";
 import { useAvailability } from "../../hooks/use-rentals";
+import { pickAvailabilityBadge } from "../../lib/asset-availability-badge";
 import { getAssetDisplayLabel } from "../../lib/asset-display-label";
 import { formatMoney } from "../../lib/money";
 import {
@@ -184,6 +186,27 @@ export function RentalWizard({
           assetIds: selectedAssetIds,
           plannedStart: values.plannedStart,
           plannedEnd: values.plannedEnd,
+        }
+      : null,
+  );
+  // The asset picker (step 2) comes before the dates step, so the exact
+  // requested window isn't known yet — fall back to "today .. +30 days" for
+  // this preview-only check so every browsable asset still shows its
+  // nearest upcoming conflict (reservation/maintenance/etc.) with a reason,
+  // per the requirement that unavailable assets never disappear from a
+  // selector silently. Once real dates are picked, `availability` above
+  // takes over with the precise window for the actually-selected assets.
+  const candidateAssetIds = assetsData?.items.map((asset) => asset.id) ?? [];
+  const previewWindowStart = values.plannedStart || new Date().toISOString();
+  const previewWindowEnd =
+    values.plannedEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: candidateAvailability } = useAvailability(
+    tenantId,
+    candidateAssetIds.length > 0
+      ? {
+          assetIds: candidateAssetIds,
+          plannedStart: previewWindowStart,
+          plannedEnd: previewWindowEnd,
         }
       : null,
   );
@@ -360,19 +383,27 @@ export function RentalWizard({
               onChange={(event) => setAssetSearch(event.target.value)}
             />
             <div className="flex max-h-72 flex-col gap-2 overflow-y-auto">
-              {assetsData?.items.map((asset) => (
-                <label
-                  key={asset.id}
-                  className="flex items-center justify-between rounded-md border p-2 text-sm"
-                >
-                  <span>{getAssetDisplayLabel(asset)}</span>
-                  <input
-                    type="checkbox"
-                    checked={items.some((item) => item.assetId === asset.id)}
-                    onChange={() => toggleAsset(asset.id)}
-                  />
-                </label>
-              ))}
+              {assetsData?.items.map((asset) => {
+                const badge = pickAvailabilityBadge(
+                  candidateAvailability?.results.find((result) => result.assetId === asset.id),
+                );
+                return (
+                  <label
+                    key={asset.id}
+                    className="flex items-center justify-between gap-3 rounded-md border p-2 text-sm"
+                  >
+                    <span className="flex flex-col gap-1">
+                      <span>{getAssetDisplayLabel(asset)}</span>
+                      {badge && <AvailabilityBadge badge={badge} locale={i18n.language} />}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={items.some((item) => item.assetId === asset.id)}
+                      onChange={() => toggleAsset(asset.id)}
+                    />
+                  </label>
+                );
+              })}
               {assetsData?.items.length === 0 && (
                 <p className="text-muted-foreground text-sm">{t("asset.noAssets")}</p>
               )}

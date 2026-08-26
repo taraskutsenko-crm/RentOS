@@ -1,12 +1,15 @@
 "use client";
 
 import { Button, Card, CardContent, Input } from "@rentos/ui";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useAssets } from "../../../../hooks/use-assets";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { useAvailability } from "../../../../hooks/use-rentals";
+import { AVAILABILITY_BADGE_ICONS } from "../../../../components/assets/availability-badge";
+import { pickAvailabilityBadgeForDay } from "../../../../lib/asset-availability-badge";
 import { getAssetDisplayLabel } from "../../../../lib/asset-display-label";
 
 function startOfMonth(date: Date): Date {
@@ -60,14 +63,9 @@ export default function AvailabilityCalendarPage() {
     );
   }
 
-  function isDayBooked(assetId: string, day: Date): boolean {
+  function dayBadge(assetId: string, day: Date) {
     const result = availability?.results.find((entry) => entry.assetId === assetId);
-    if (!result) return false;
-    return result.conflicts.some((conflict) => {
-      const start = new Date(conflict.plannedStart);
-      const end = new Date(conflict.plannedEnd);
-      return day >= start && day < end;
-    });
+    return pickAvailabilityBadgeForDay(result, day);
   }
 
   return (
@@ -142,18 +140,39 @@ export default function AvailabilityCalendarPage() {
                 <p className="mb-2 font-medium">{asset?.name ?? assetId}</p>
                 <div className="grid grid-cols-7 gap-1">
                   {days.map((day) => {
-                    const booked = isDayBooked(assetId, day);
-                    return (
-                      <div
+                    const badge = dayBadge(assetId, day);
+                    const dateRange =
+                      badge?.startAt && badge.endAt
+                        ? `${new Date(badge.startAt).toLocaleDateString(i18n.language)} – ${new Date(badge.endAt).toLocaleDateString(i18n.language)}`
+                        : null;
+                    const title = badge
+                      ? [t(badge.labelKey), dateRange, badge.reference].filter(Boolean).join(" · ")
+                      : t("rental.availabilityCalendar.free");
+                    const href = badge?.rentalId
+                      ? `/app/rentals/${badge.rentalId}`
+                      : badge
+                        ? `/app/assets/${assetId}`
+                        : null;
+                    const cellClassName = `flex h-10 flex-col items-center justify-center gap-0.5 rounded text-xs ${badge ? "bg-warning/15 text-warning-foreground" : "bg-primary/10"}`;
+                    const Icon = badge ? AVAILABILITY_BADGE_ICONS[badge.kind] : null;
+                    const content = (
+                      <>
+                        <span>{day.getUTCDate()}</span>
+                        {Icon && <Icon className="size-3" aria-hidden="true" />}
+                      </>
+                    );
+                    return href ? (
+                      <Link
                         key={day.toISOString()}
-                        className={`flex h-10 items-center justify-center rounded text-xs ${booked ? "bg-destructive/20 text-destructive" : "bg-primary/10"}`}
-                        title={
-                          booked
-                            ? t("rental.availabilityCalendar.booked")
-                            : t("rental.availabilityCalendar.free")
-                        }
+                        href={href}
+                        title={title}
+                        className={`${cellClassName} hover:opacity-80`}
                       >
-                        {day.getUTCDate()}
+                        {content}
+                      </Link>
+                    ) : (
+                      <div key={day.toISOString()} title={title} className={cellClassName}>
+                        {content}
                       </div>
                     );
                   })}

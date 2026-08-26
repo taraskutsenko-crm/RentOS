@@ -325,7 +325,8 @@
       "documents": "Dokumente",
       "timeline": "Verlauf",
       "filesManagement": "Bilder & Dokumente",
-      "platformDocuments": "Dokumente"
+      "platformDocuments": "Dokumente",
+      "availability": "Verfügbarkeit/Zeitplan"
     },
     "actions": {
       "changeStatus": "Status ändern",
@@ -426,6 +427,25 @@
       "REPAIR": "Reparatur",
       "LOST": "Verloren",
       "RETIRED": "Ausgemustert"
+    },
+    "availability": {
+      "rentalConflict": "Reserviert/vermietet",
+      "maintenance": "Wartung",
+      "repair": "Reparatur",
+      "inspection": "Inspektion",
+      "relocation": "Standortwechsel",
+      "manualBlock": "Manuelle Sperre",
+      "lost": "Verloren",
+      "retired": "Ausgemustert",
+      "noBlocks": "Keine geplanten Sperren",
+      "scheduleBlock": "Sperre planen",
+      "cancelBlock": "Sperre stornieren",
+      "cancelReasonPrompt": "Grund für die Stornierung (optional)",
+      "cancelledBlocks": "Stornierte Sperren ({{count}})",
+      "startAt": "Beginn",
+      "endAt": "Ende",
+      "notesPlaceholder": "Notizen (optional)",
+      "createError": "Für dieses Gerät ist für einen Teil dieses Zeitraums bereits eine Sperre geplant."
     }
   },
   "rental": {

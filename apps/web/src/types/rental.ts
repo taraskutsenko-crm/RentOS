@@ -62,6 +62,7 @@ export type RentalDocumentType =
   | "RETURN_PROTOCOL"
   | "DAMAGE_REPORT"
   | "CONTRACT_AMENDMENT"
+  | "DEPOSIT_RECEIPT"
   | "CUSTOM";
 
 export type RentalDocumentStatus =
@@ -136,8 +137,66 @@ export interface AvailabilityConflict {
   plannedEnd: string;
 }
 
+export type AssetAvailabilityBlockType =
+  | "MAINTENANCE"
+  | "REPAIR"
+  | "INSPECTION"
+  | "RELOCATION"
+  | "MANUAL_BLOCK";
+
+export interface AvailabilityBlockConflict {
+  blockId: string;
+  type: AssetAvailabilityBlockType;
+  startAt: string;
+  endAt: string;
+  notes: string | null;
+  relatedRentalId: string | null;
+}
+
+/** LOST/RETIRED — unavailable for every date, not just the requested range. */
+export type AssetPermanentUnavailabilityReason = "LOST" | "RETIRED";
+
 export interface AssetAvailabilityResult {
   assetId: string;
   isAvailable: boolean;
   conflicts: AvailabilityConflict[];
+  blocks: AvailabilityBlockConflict[];
+  permanentReason: AssetPermanentUnavailabilityReason | null;
+}
+
+export interface AssetAvailabilityBlock {
+  id: string;
+  tenantId: string;
+  assetId: string;
+  type: AssetAvailabilityBlockType;
+  startAt: string;
+  endAt: string;
+  notes: string | null;
+  relatedRentalId: string | null;
+  createdByUserId: string;
+  createdAt: string;
+  cancelledAt: string | null;
+  cancelledByUserId: string | null;
+  cancelReason: string | null;
+}
+
+export type DepositPaymentMethod = "BANK_TRANSFER" | "CASH" | "CARD" | "OTHER";
+
+export interface RentalDeposit {
+  id: string;
+  tenantId: string;
+  rentalId: string;
+  requiredAmountMinor: number;
+  currency: string;
+  receivedAt: string | null;
+  receivedAmountMinor: number | null;
+  receivedMethod: DepositPaymentMethod | null;
+  receivedReference: string | null;
+  returnedAt: string | null;
+  returnedAmountMinor: number | null;
+  retainedAmountMinor: number | null;
+  retentionReason: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

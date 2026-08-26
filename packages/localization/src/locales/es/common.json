@@ -325,7 +325,8 @@
       "documents": "Documentos",
       "timeline": "Historial",
       "filesManagement": "Imágenes y documentos",
-      "platformDocuments": "Documentos"
+      "platformDocuments": "Documentos",
+      "availability": "Disponibilidad/calendario"
     },
     "actions": {
       "changeStatus": "Cambiar estado",
@@ -426,6 +427,25 @@
       "REPAIR": "Reparación",
       "LOST": "Perdido",
       "RETIRED": "Retirado"
+    },
+    "availability": {
+      "rentalConflict": "Reservado/alquilado",
+      "maintenance": "Mantenimiento",
+      "repair": "Reparación",
+      "inspection": "Inspección",
+      "relocation": "Reubicación",
+      "manualBlock": "Bloqueo manual",
+      "lost": "Perdido",
+      "retired": "Retirado",
+      "noBlocks": "Sin bloqueos programados",
+      "scheduleBlock": "Programar bloqueo",
+      "cancelBlock": "Cancelar bloqueo",
+      "cancelReasonPrompt": "Motivo de la cancelación (opcional)",
+      "cancelledBlocks": "Bloqueos cancelados ({{count}})",
+      "startAt": "Inicio",
+      "endAt": "Fin",
+      "notesPlaceholder": "Notas (opcional)",
+      "createError": "Este activo ya tiene un bloqueo superpuesto programado para parte de este período."
     }
   },
   "rental": {

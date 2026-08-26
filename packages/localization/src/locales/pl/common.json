@@ -325,7 +325,8 @@
       "documents": "Dokumenty",
       "timeline": "Historia",
       "filesManagement": "Zdjęcia i dokumenty",
-      "platformDocuments": "Dokumenty"
+      "platformDocuments": "Dokumenty",
+      "availability": "Dostępność / harmonogram"
     },
     "actions": {
       "changeStatus": "Zmień status",
@@ -426,6 +427,25 @@
       "REPAIR": "Naprawa",
       "LOST": "Zgubiony",
       "RETIRED": "Wycofany"
+    },
+    "availability": {
+      "rentalConflict": "Zarezerwowany/wynajęty",
+      "maintenance": "Serwis",
+      "repair": "Naprawa",
+      "inspection": "Przegląd",
+      "relocation": "Przemieszczenie",
+      "manualBlock": "Blokada ręczna",
+      "lost": "Zagubiony",
+      "retired": "Wycofany",
+      "noBlocks": "Brak zaplanowanych blokad",
+      "scheduleBlock": "Zaplanuj blokadę",
+      "cancelBlock": "Anuluj blokadę",
+      "cancelReasonPrompt": "Powód anulowania (opcjonalnie)",
+      "cancelledBlocks": "Anulowane blokady ({{count}})",
+      "startAt": "Początek",
+      "endAt": "Koniec",
+      "notesPlaceholder": "Uwagi (opcjonalnie)",
+      "createError": "Ten zasób ma już zaplanowaną nakładającą się blokadę w części tego okresu."
     }
   },
   "rental": {

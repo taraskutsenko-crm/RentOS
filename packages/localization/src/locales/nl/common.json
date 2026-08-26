@@ -325,7 +325,8 @@
       "documents": "Documenten",
       "timeline": "Tijdlijn",
       "filesManagement": "Afbeeldingen en documenten",
-      "platformDocuments": "Documenten"
+      "platformDocuments": "Documenten",
+      "availability": "Beschikbaarheid/planning"
     },
     "actions": {
       "changeStatus": "Status wijzigen",
@@ -426,6 +427,25 @@
       "REPAIR": "Reparatie",
       "LOST": "Verloren",
       "RETIRED": "Uit dienst"
+    },
+    "availability": {
+      "rentalConflict": "Gereserveerd/verhuurd",
+      "maintenance": "Onderhoud",
+      "repair": "Reparatie",
+      "inspection": "Inspectie",
+      "relocation": "Verplaatsing",
+      "manualBlock": "Handmatige blokkering",
+      "lost": "Verloren",
+      "retired": "Uit gebruik genomen",
+      "noBlocks": "Geen geplande blokkeringen",
+      "scheduleBlock": "Blokkering plannen",
+      "cancelBlock": "Blokkering annuleren",
+      "cancelReasonPrompt": "Reden voor annulering (optioneel)",
+      "cancelledBlocks": "Geannuleerde blokkeringen ({{count}})",
+      "startAt": "Start",
+      "endAt": "Einde",
+      "notesPlaceholder": "Notities (optioneel)",
+      "createError": "Voor dit object is al een overlappende blokkering gepland voor een deel van deze periode."
     }
   },
   "rental": {

@@ -325,7 +325,8 @@
       "documents": "文档",
       "timeline": "时间线",
       "filesManagement": "图片与文档",
-      "platformDocuments": "文档"
+      "platformDocuments": "文档",
+      "availability": "可用性/日程"
     },
     "actions": {
       "changeStatus": "更改状态",
@@ -426,6 +427,25 @@
       "REPAIR": "维修中",
       "LOST": "丢失",
       "RETIRED": "已报废"
+    },
+    "availability": {
+      "rentalConflict": "已预订/已租出",
+      "maintenance": "维护",
+      "repair": "维修",
+      "inspection": "检查",
+      "relocation": "调配",
+      "manualBlock": "手动锁定",
+      "lost": "遗失",
+      "retired": "已报废",
+      "noBlocks": "没有计划中的锁定",
+      "scheduleBlock": "安排锁定",
+      "cancelBlock": "取消锁定",
+      "cancelReasonPrompt": "取消原因（可选）",
+      "cancelledBlocks": "已取消的锁定（{{count}}）",
+      "startAt": "开始",
+      "endAt": "结束",
+      "notesPlaceholder": "备注（可选）",
+      "createError": "该资产在此期间的部分时间已有重叠的锁定计划。"
     }
   },
   "rental": {

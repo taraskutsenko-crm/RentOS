@@ -325,7 +325,8 @@
       "documents": "Documents",
       "timeline": "Chronologie",
       "filesManagement": "Images et documents",
-      "platformDocuments": "Documents"
+      "platformDocuments": "Documents",
+      "availability": "Disponibilité/planning"
     },
     "actions": {
       "changeStatus": "Changer le statut",
@@ -426,6 +427,25 @@
       "REPAIR": "Réparation",
       "LOST": "Perdu",
       "RETIRED": "Retiré"
+    },
+    "availability": {
+      "rentalConflict": "Réservé/loué",
+      "maintenance": "Maintenance",
+      "repair": "Réparation",
+      "inspection": "Inspection",
+      "relocation": "Déplacement",
+      "manualBlock": "Blocage manuel",
+      "lost": "Perdu",
+      "retired": "Retiré du service",
+      "noBlocks": "Aucun blocage planifié",
+      "scheduleBlock": "Planifier un blocage",
+      "cancelBlock": "Annuler le blocage",
+      "cancelReasonPrompt": "Motif de l'annulation (facultatif)",
+      "cancelledBlocks": "Blocages annulés ({{count}})",
+      "startAt": "Début",
+      "endAt": "Fin",
+      "notesPlaceholder": "Notes (facultatif)",
+      "createError": "Cet équipement a déjà un blocage qui chevauche une partie de cette période."
     }
   },
   "rental": {

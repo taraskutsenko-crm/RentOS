@@ -325,7 +325,8 @@
       "documents": "Documenti",
       "timeline": "Cronologia",
       "filesManagement": "Immagini e documenti",
-      "platformDocuments": "Documenti"
+      "platformDocuments": "Documenti",
+      "availability": "Disponibilità/pianificazione"
     },
     "actions": {
       "changeStatus": "Cambia stato",
@@ -426,6 +427,25 @@
       "REPAIR": "Riparazione",
       "LOST": "Smarrito",
       "RETIRED": "Ritirato"
+    },
+    "availability": {
+      "rentalConflict": "Prenotato/noleggiato",
+      "maintenance": "Manutenzione",
+      "repair": "Riparazione",
+      "inspection": "Ispezione",
+      "relocation": "Trasferimento",
+      "manualBlock": "Blocco manuale",
+      "lost": "Smarrito",
+      "retired": "Dismesso",
+      "noBlocks": "Nessun blocco pianificato",
+      "scheduleBlock": "Pianifica blocco",
+      "cancelBlock": "Annulla blocco",
+      "cancelReasonPrompt": "Motivo dell'annullamento (facoltativo)",
+      "cancelledBlocks": "Blocchi annullati ({{count}})",
+      "startAt": "Inizio",
+      "endAt": "Fine",
+      "notesPlaceholder": "Note (facoltative)",
+      "createError": "Questo bene ha già un blocco sovrapposto pianificato per parte di questo periodo."
     }
   },
   "rental": {

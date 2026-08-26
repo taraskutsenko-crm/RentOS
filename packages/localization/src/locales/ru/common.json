@@ -325,7 +325,8 @@
       "documents": "Документы",
       "timeline": "История",
       "filesManagement": "Изображения и документы",
-      "platformDocuments": "Документы"
+      "platformDocuments": "Документы",
+      "availability": "Доступность/график"
     },
     "actions": {
       "changeStatus": "Изменить статус",
@@ -426,6 +427,25 @@
       "REPAIR": "Ремонт",
       "LOST": "Утерян",
       "RETIRED": "Списан"
+    },
+    "availability": {
+      "rentalConflict": "Забронировано/в аренде",
+      "maintenance": "Обслуживание",
+      "repair": "Ремонт",
+      "inspection": "Инспекция",
+      "relocation": "Перемещение",
+      "manualBlock": "Ручная блокировка",
+      "lost": "Утеряно",
+      "retired": "Списано",
+      "noBlocks": "Нет запланированных блокировок",
+      "scheduleBlock": "Запланировать блокировку",
+      "cancelBlock": "Отменить блокировку",
+      "cancelReasonPrompt": "Причина отмены (необязательно)",
+      "cancelledBlocks": "Отменённые блокировки ({{count}})",
+      "startAt": "Начало",
+      "endAt": "Окончание",
+      "notesPlaceholder": "Примечания (необязательно)",
+      "createError": "Для этого актива уже запланирована пересекающаяся блокировка на часть этого периода."
     }
   },
   "rental": {

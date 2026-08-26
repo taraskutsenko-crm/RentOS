@@ -5,10 +5,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/api-client";
 import type {
   AssetAvailabilityResult,
+  DepositPaymentMethod,
   PaginatedRentals,
   PartialMonthPolicy,
   Rental,
   RentalBillingMode,
+  RentalDeposit,
   RentalStatus,
   RentalTimelineEvent,
 } from "../types/rental";
@@ -177,6 +179,62 @@ export function useReturnRental(tenantId: string | null) {
       void queryClient.invalidateQueries({
         queryKey: [BASE_KEY, tenantId, "timeline", variables.id],
       });
+    },
+  });
+}
+
+export function useRentalDeposit(tenantId: string | null, rentalId: string | null) {
+  return useQuery({
+    queryKey: [BASE_KEY, tenantId, "deposit", rentalId],
+    queryFn: () =>
+      apiClient.get<RentalDeposit | Record<string, never>>(
+        `/tenants/${tenantId}/rentals/${rentalId}/deposit`,
+      ),
+    enabled: !!tenantId && !!rentalId,
+    select: (data) => (data && "id" in data ? (data as RentalDeposit) : null),
+  });
+}
+
+export interface RecordDepositReceiptInput {
+  receivedAt: string;
+  receivedAmountMinor: number;
+  receivedMethod: DepositPaymentMethod;
+  receivedReference?: string | null;
+  notes?: string | null;
+}
+
+export function useRecordDepositReceipt(tenantId: string | null, rentalId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: RecordDepositReceiptInput) =>
+      apiClient.post<RentalDeposit>(
+        `/tenants/${tenantId}/rentals/${rentalId}/deposit/receive`,
+        input,
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId, "deposit", rentalId] });
+    },
+  });
+}
+
+export interface RecordDepositReturnInput {
+  returnedAt: string;
+  returnedAmountMinor: number;
+  retainedAmountMinor: number;
+  retentionReason?: string | null;
+  notes?: string | null;
+}
+
+export function useRecordDepositReturn(tenantId: string | null, rentalId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: RecordDepositReturnInput) =>
+      apiClient.post<RentalDeposit>(
+        `/tenants/${tenantId}/rentals/${rentalId}/deposit/return`,
+        input,
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId, "deposit", rentalId] });
     },
   });
 }

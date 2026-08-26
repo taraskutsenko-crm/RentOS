@@ -325,7 +325,8 @@
       "documents": "Dokumenty",
       "timeline": "Časová osa",
       "filesManagement": "Obrázky a dokumenty",
-      "platformDocuments": "Dokumenty"
+      "platformDocuments": "Dokumenty",
+      "availability": "Dostupnost / plán"
     },
     "actions": {
       "changeStatus": "Změnit stav",
@@ -426,6 +427,25 @@
       "REPAIR": "Oprava",
       "LOST": "Ztracený",
       "RETIRED": "Vyřazený"
+    },
+    "availability": {
+      "rentalConflict": "Rezervováno / pronajato",
+      "maintenance": "Údržba",
+      "repair": "Oprava",
+      "inspection": "Kontrola",
+      "relocation": "Přesun",
+      "manualBlock": "Ruční blokace",
+      "lost": "Ztraceno",
+      "retired": "Vyřazeno",
+      "noBlocks": "Žádné plánované blokace",
+      "scheduleBlock": "Naplánovat blokaci",
+      "cancelBlock": "Zrušit blokaci",
+      "cancelReasonPrompt": "Důvod zrušení (nepovinné)",
+      "cancelledBlocks": "Zrušené blokace ({{count}})",
+      "startAt": "Začátek",
+      "endAt": "Konec",
+      "notesPlaceholder": "Poznámky (nepovinné)",
+      "createError": "Toto aktivum má již pro část tohoto období naplánovanou blokaci."
     }
   },
   "rental": {

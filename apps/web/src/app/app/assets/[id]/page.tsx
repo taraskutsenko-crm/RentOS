@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { AssetAvailabilitySection } from "../../../../components/assets/asset-availability-section";
 import { AssetFilesManager } from "../../../../components/assets/asset-files-manager";
 import { PinButton } from "../../../../components/shell/pin-button";
 import { DashboardGrid, DashboardMetric } from "../../../../components/dashboard";
@@ -58,6 +59,7 @@ export default function AssetDetailPage() {
   const canChangeStatus = usePermission("assets.change_status");
   const canManageImages = usePermission("assets.manage_images");
   const canManageDocuments = usePermission("assets.manage_documents");
+  const canManageAvailability = usePermission("assets.manage_availability");
 
   const [statusFormOpen, setStatusFormOpen] = useState(false);
   const [selectedStatusId, setSelectedStatusId] = useState("");
@@ -292,6 +294,12 @@ export default function AssetDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          <AssetAvailabilitySection
+            tenantId={tenantId}
+            assetId={asset.id}
+            canManage={canManageAvailability}
+          />
 
           <Card>
             <CardHeader>

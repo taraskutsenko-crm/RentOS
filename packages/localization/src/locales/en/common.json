@@ -325,7 +325,8 @@
       "documents": "Documents",
       "timeline": "Timeline",
       "filesManagement": "Images & documents",
-      "platformDocuments": "Documents"
+      "platformDocuments": "Documents",
+      "availability": "Availability / schedule"
     },
     "actions": {
       "changeStatus": "Change status",
@@ -426,6 +427,25 @@
       "REPAIR": "Repair",
       "LOST": "Lost",
       "RETIRED": "Retired"
+    },
+    "availability": {
+      "rentalConflict": "Booked (rental)",
+      "maintenance": "Maintenance",
+      "repair": "Repair",
+      "inspection": "Inspection",
+      "relocation": "Relocation",
+      "manualBlock": "Manual block",
+      "lost": "Lost",
+      "retired": "Retired",
+      "noBlocks": "No scheduled blocks",
+      "scheduleBlock": "Schedule block",
+      "cancelBlock": "Cancel block",
+      "cancelReasonPrompt": "Reason for cancelling (optional)",
+      "cancelledBlocks": "Cancelled blocks ({{count}})",
+      "startAt": "Start",
+      "endAt": "End",
+      "notesPlaceholder": "Notes (optional)",
+      "createError": "This asset already has an overlapping block scheduled for part of this period."
     }
   },
   "rental": {

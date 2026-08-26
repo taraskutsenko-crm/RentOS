@@ -325,7 +325,8 @@
       "documents": "문서",
       "timeline": "타임라인",
       "filesManagement": "이미지 및 문서",
-      "platformDocuments": "문서"
+      "platformDocuments": "문서",
+      "availability": "가용성/일정"
     },
     "actions": {
       "changeStatus": "상태 변경",
@@ -426,6 +427,25 @@
       "REPAIR": "수리 중",
       "LOST": "분실",
       "RETIRED": "폐기"
+    },
+    "availability": {
+      "rentalConflict": "예약됨/렌탈 중",
+      "maintenance": "정비",
+      "repair": "수리",
+      "inspection": "점검",
+      "relocation": "이동",
+      "manualBlock": "수동 차단",
+      "lost": "분실",
+      "retired": "폐기됨",
+      "noBlocks": "예정된 차단이 없습니다",
+      "scheduleBlock": "차단 예약",
+      "cancelBlock": "차단 취소",
+      "cancelReasonPrompt": "취소 사유(선택 사항)",
+      "cancelledBlocks": "취소된 차단 ({{count}}개)",
+      "startAt": "시작",
+      "endAt": "종료",
+      "notesPlaceholder": "메모(선택 사항)",
+      "createError": "이 자산에는 이미 이 기간 일부와 겹치는 차단이 예약되어 있습니다."
     }
   },
   "rental": {

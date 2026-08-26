@@ -846,9 +846,7 @@ const PAYMENT_METHOD_LABELS: Record<string, Record<string, string>> = {
 };
 
 function paymentMethodLabel(method: string, language: string): string {
-  return (
-    PAYMENT_METHOD_LABELS[language]?.[method] ?? PAYMENT_METHOD_LABELS.en?.[method] ?? method
-  );
+  return PAYMENT_METHOD_LABELS[language]?.[method] ?? PAYMENT_METHOD_LABELS.en?.[method] ?? method;
 }
 
 /** Same `.doc-table` markup shape as buildAssetsTableHtml/buildServicesTableHtml, built from literal sample rows (see buildPreviewContext). */

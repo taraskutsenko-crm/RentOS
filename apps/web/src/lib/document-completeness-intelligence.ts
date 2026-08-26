@@ -6,11 +6,7 @@ import type {
 } from "../types/rental";
 
 export type DocumentChecklistItemKey =
-  | "commercialOffer"
-  | "contract"
-  | "handoverProtocol"
-  | "returnProtocol"
-  | "depositReceipt";
+  "commercialOffer" | "contract" | "handoverProtocol" | "returnProtocol" | "depositReceipt";
 
 /**
  * Which real Document.documentType each checklist row corresponds to — used
@@ -82,12 +78,7 @@ const RETURN_PREPARABLE_STATUSES: RentalStatus[] = ["ACTIVE", "RETURNED", "COMPL
  * routinely collect the deposit ahead of physical handover, not only once
  * ACTIVE.
  */
-const DEPOSIT_PREPARABLE_STATUSES: RentalStatus[] = [
-  "RESERVED",
-  "ACTIVE",
-  "RETURNED",
-  "COMPLETED",
-];
+const DEPOSIT_PREPARABLE_STATUSES: RentalStatus[] = ["RESERVED", "ACTIVE", "RETURNED", "COMPLETED"];
 
 const SIGNED_STATUSES: RentalDocumentStatus[] = ["SIGNED", "PARTIALLY_SIGNED"];
 const SENT_STATUSES: RentalDocumentStatus[] = ["SENT", "VIEWED"];

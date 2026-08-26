@@ -138,11 +138,7 @@ export interface AvailabilityConflict {
 }
 
 export type AssetAvailabilityBlockType =
-  | "MAINTENANCE"
-  | "REPAIR"
-  | "INSPECTION"
-  | "RELOCATION"
-  | "MANUAL_BLOCK";
+  "MAINTENANCE" | "REPAIR" | "INSPECTION" | "RELOCATION" | "MANUAL_BLOCK";
 
 export interface AvailabilityBlockConflict {
   blockId: string;

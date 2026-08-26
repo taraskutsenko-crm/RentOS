@@ -192,7 +192,13 @@ regenerates a signed version.
 - Half-open interval overlap checks are used for availability (a
   same-day back-to-back booking is allowed) — do not silently change
   this inclusive/exclusive semantics without an ADR, since it changes
-  what counts as a double-booking.
+  what counts as a double-booking. `AssetAvailabilityBlock`
+  (maintenance/repair/inspection/relocation/manual-block) reuses this
+  exact same convention rather than defining its own — `AvailabilityService`
+  is the single place both `RentalItem` and `AssetAvailabilityBlock`
+  conflicts are resolved; do not add a second overlap implementation
+  anywhere else (Quote/Rental wizard, Asset page, Calendar, Dashboard all
+  call through it).
 - Any new duration- or calendar-boundary-sensitive logic requires
   leap-year, end-of-month, year-boundary, and timezone-safety tests,
   matching every existing pricing/numbering change's test suite

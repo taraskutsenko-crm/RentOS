@@ -11,10 +11,7 @@ import type { AssetAvailabilityBlockType, AssetAvailabilityResult } from "../typ
  * this is meant for a compact inline badge, not a full report.
  */
 export type AvailabilityBadgeKind =
-  | "RENTAL_CONFLICT"
-  | AssetAvailabilityBlockType
-  | "LOST"
-  | "RETIRED";
+  "RENTAL_CONFLICT" | AssetAvailabilityBlockType | "LOST" | "RETIRED";
 
 export interface AvailabilityBadgeInfo {
   kind: AvailabilityBadgeKind;

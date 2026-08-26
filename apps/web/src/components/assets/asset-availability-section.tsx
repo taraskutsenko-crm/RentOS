@@ -97,7 +97,9 @@ export function AssetAvailabilitySection({
             className="flex items-center justify-between gap-3 rounded-md border p-2"
           >
             <div className="flex flex-col">
-              <span className="font-medium">{t(`asset.availability.${block.type.toLowerCase()}`)}</span>
+              <span className="font-medium">
+                {t(`asset.availability.${block.type.toLowerCase()}`)}
+              </span>
               <span className="text-muted-foreground text-xs">
                 {formatDateTime(block.startAt, i18n.language)} –{" "}
                 {formatDateTime(block.endAt, i18n.language)}

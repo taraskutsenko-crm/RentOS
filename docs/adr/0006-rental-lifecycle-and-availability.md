@@ -196,6 +196,44 @@ availability engine's early-return handling above — immediately frees
 those specific assets for new bookings, while the rest of the order
 continues as normal.
 
+### Extension (2026-08-26): non-rental availability blocks
+
+The original availability engine above only ever considered `RentalItem`
+conflicts. A later pass added `AssetAvailabilityBlock` — a
+tenant+asset-scoped record with a `[startAt, endAt)` window and a `type`
+(`MAINTENANCE`/`REPAIR`/`INSPECTION`/`RELOCATION`/`MANUAL_BLOCK`), plus an
+optional `relatedRentalId` (e.g. a repair scheduled directly from a Return
+Protocol). `AvailabilityService.checkAvailability` now returns, per asset:
+
+```
+{ assetId, isAvailable, conflicts: RentalItem[], blocks: AssetAvailabilityBlock[], permanentReason: "LOST" | "RETIRED" | null }
+```
+
+`isAvailable` is `false` if any of the three is non-empty/non-null. Blocks
+use the exact same half-open interval convention as the original rental
+overlap check (locked, see ARCHITECTURE_LOCK §3) — a `MAINTENANCE` block
+ending exactly when a rental would start does not conflict, same-day
+turnover rules apply identically. `permanentReason` is the one deliberate
+exception to "never trust a status field for date-range availability": a
+`LOST`/`RETIRED` **system** asset status (not a tenant-custom status of the
+same name) makes the asset unavailable for _every_ requested range, since a
+lost or retired asset can never be booked for any future date either — this
+does not contradict the original design principle, it's the one case where
+the global status genuinely does answer the date-range question for all
+dates at once. A future-dated block (e.g. maintenance scheduled next month)
+never affects a request for today or any other non-overlapping range — the
+same window-scoping the original engine always had.
+
+Every existing caller — `RentalsService.reserve`/`extendPlannedEnd`,
+`QuotesService`'s hard-block and warning paths, the
+`GET .../rentals/availability` endpoint (and therefore both wizards and the
+Availability Calendar) — inherited the richer conflict set with no code
+change, confirming `AvailabilityService` really was the only place this
+logic lived. See `docs/DECISIONS.md` D-101 through D-104 for the full
+rationale, RBAC (`assets.manage_availability`), and frontend UX
+(availability badges, the Asset detail "Availability / schedule" section,
+the Return→Repair follow-up).
+
 ## Consequences
 
 - `RentalItem.quantity` has no effect on availability capacity (see

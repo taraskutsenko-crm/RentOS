@@ -67,9 +67,7 @@ describe("Rental Deposits E2E", () => {
         customerId: customerResponse.body.id,
         plannedStart: dateOffset(1),
         plannedEnd: dateOffset(4),
-        items: [
-          { assetId, billingMode: "DAILY", dailyPriceMinor: 1000, depositMinor: 70000 },
-        ],
+        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 1000, depositMinor: 70000 }],
       })
       .expect(201);
     rentalId = rentalResponse.body.id;

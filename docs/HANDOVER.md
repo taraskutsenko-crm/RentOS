@@ -19,9 +19,95 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `2cf66f8` (fix: currency race condition in
+- **Latest verified commit:** `347b742` (docs: record D-101 through D-105
+  for the availability engine and deposit workflow) — the Asset
+  Availability Engine + Rental Deposit workflow + Reservation-UX pass is
+  complete. This was explicitly QA/fixes + a specific new-feature scope
+  (Reservation workflow, Asset Availability architecture, Deposit workflow
+  foundation, document/invoice corrections), **not** a new product
+  chapter; per this pass's explicit scope-boundary instruction, no
+  unrelated roadmap work was started. See D-101 through D-105 in
+  [DECISIONS.md](DECISIONS.md) for full rationale on each change.
+- **What shipped (Asset Availability Engine + Deposit workflow, D-101–D-105):**
+  a new `AssetAvailabilityBlock` model (`MAINTENANCE`/`REPAIR`/
+  `INSPECTION`/`RELOCATION`/`MANUAL_BLOCK`, half-open `[startAt, endAt)`
+  window, optional `relatedRentalId`) is now unioned into
+  `AvailabilityService.checkAvailability` alongside the pre-existing
+  RESERVED/ACTIVE `RentalItem` conflicts and a new `permanentReason`
+  (`LOST`/`RETIRED` **system** asset status only) — one canonical result
+  shape (`{isAvailable, conflicts, blocks, permanentReason}`) every caller
+  (Rental/Quote reserve checks, the availability endpoint, both wizards,
+  the Availability Calendar) already goes through, so none needed a code
+  change to inherit the richer conflict set (D-101). New
+  `assets.manage_availability` permission (MANAGER/TECHNICIAN) gates
+  scheduling/cancelling blocks via a new Asset detail "Availability /
+  schedule" section (D-102). A new `RentalDeposit` accounting model
+  (received/returned/retained amounts, method, reference, retention
+  reason) implements the workflow D-097 had researched-but-deferred —
+  separate from the pre-existing `RentalItem.depositMinor` _required_
+  amount — with a new `rentals.manage_deposit` permission
+  (MANAGER/ACCOUNTANT), a Rental Workspace deposit-ledger UI, a new
+  `DEPOSIT_RECEIPT` document type + EN/PL template + `deposit.*` resolver
+  variables (payment method rendered through a localized label, not the
+  raw enum value), and a fifth "Deposit receipt" row on the document
+  checklist (D-103). The Rental/Quote wizard asset selectors, the Asset
+  detail Availability section, and the Availability Calendar all now show
+  each asset's nearest conflict/block/permanent-reason as an icon+text+
+  dates badge — never hidden, never color-only — sourced from one shared
+  `lib/asset-availability-badge.ts`; the Calendar's day cells link to the
+  conflicting rental or the asset's Availability section; a returned
+  Rental item gained a "Send to repair" link that pre-opens the Asset
+  detail block form to `REPAIR` with `relatedRentalId` set, never
+  auto-inventing a repair period (D-104). Two real bugs were found and
+  fixed only by the required real-Docker browser walkthrough, neither
+  caught by the automated suites: a request-storm/429 race in the Rental
+  wizard's availability preview (unstable query key recomputed every
+  render), and `DEPOSIT_RECEIPT` missing from four separate frontend
+  hardcoded `DocumentType` allowlists, silently falling back to `CONTRACT`
+  when generating a deposit receipt from the Rental checklist (D-105).
+  **Not implemented, explicitly documented as a gap:** automatic invoice
+  creation for a retained deposit amount (staff add it as a manual
+  invoice line today); Handover/Return Protocol's additional
+  meter/fuel-level/comparison-to-handover/additional-charges fields
+  (existing `businessData.conditionNotes` structure — asset
+  condition/damage description/missing items — was left as-is, not
+  extended, this pass); connecting existing photo/attachment
+  infrastructure to Handover/Return; a richer
+  NOT_SENT/SENT/DELIVERED/OPENED/SIGNED/FAILED signature-status set
+  (`LocalMockSignatureProvider` still only ever reports `PENDING`,
+  honestly, which was judged not worth expanding for a mock with no real
+  capability behind it).
+- **Verification:** full backend suite (37 files / 628 tests, +21 new)
+  and full frontend suite (79 files / 533 tests, +4 new) green; every
+  quality gate (`format`, `lint` — 0 errors, `typecheck` — 9 packages,
+  `build` — 6 packages, `check:governance`, `test:governance-checks` —
+  16/16) green; one new additive Prisma migration
+  (`AssetAvailabilityBlock`, `AssetAvailabilityBlockType`,
+  `RentalDeposit`, `DocumentType.DEPOSIT_RECEIPT`) applied cleanly to
+  both the dev and test databases. Docker images rebuilt from committed
+  HEAD (twice, after each bug fix) and walked through live in a real
+  browser against the rebuilt containers with a Russian-UI/Polish-company
+  tenant: created an asset, scheduled a `MAINTENANCE` block (20–22 Sept),
+  confirmed it did **not** appear as a conflict for a near-term booking
+  but did for an overlapping one, confirmed `Reserve` hard-blocked
+  against the overlapping window with a clear conflict error and
+  succeeded once the dates moved past the block (half-open boundary
+  confirmed: the block's own end day was free); recorded a real deposit
+  receipt (700.00 PLN, bank transfer, reference) and generated a
+  `DEPOSIT_RECEIPT` document — confirmed fully Polish content
+  ("Potwierdzenie przyjęcia kaucji", "Sposób płatności: Przelew
+  bankowy") despite the Russian staff UI, with a working Print action;
+  started and returned the rental, used the new "Send to repair" link to
+  schedule a real `REPAIR` block linked back to the rental (both blocks
+  then visible together on the asset); confirmed the Availability
+  Calendar showed both blocked days with a wrench icon (not color alone)
+  and linked correctly to the asset page. Two bugs found live during this
+  walkthrough (D-105 above) were fixed and the fix re-verified live
+  after rebuilding both images again.
+- **Previous state (POST-CHAPTER-9 MANUAL QA FIX PASS, D-090–D-100):**
+  Latest verified commit: `2cf66f8` (fix: currency race condition in
   Rental/Quote wizards, prettier formatting) — the POST-CHAPTER-9 MANUAL
-  QA FIX PASS is complete. This was explicitly a bug-fix pass over
+  QA FIX PASS was complete. This was explicitly a bug-fix pass over
   real-browser-tested issues, **not** a new product chapter; the next
   product chapter was **not** started, per this arc's explicit hard-stop
   instruction. See D-090 through D-100 in

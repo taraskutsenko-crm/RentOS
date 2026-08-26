@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "Повернена сума",
       "retainedAmountPlaceholder": "Утримана сума (0, якщо немає)",
       "retentionReasonPlaceholder": "Причина утримання"
-    }
+    },
+    "sendToRepair": "Відправити в ремонт"
   },
   "quote": {
     "title": "Кошториси",

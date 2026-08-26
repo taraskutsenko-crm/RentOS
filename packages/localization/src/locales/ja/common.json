@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "返還金額",
       "retainedAmountPlaceholder": "保留金額（なければ0）",
       "retentionReasonPlaceholder": "保留の理由"
-    }
+    },
+    "sendToRepair": "修理に出す"
   },
   "quote": {
     "title": "見積書",

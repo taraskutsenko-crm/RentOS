@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "Zwrócona kwota",
       "retainedAmountPlaceholder": "Zatrzymana kwota (0, jeśli brak)",
       "retentionReasonPlaceholder": "Powód zatrzymania"
-    }
+    },
+    "sendToRepair": "Wyślij do naprawy"
   },
   "quote": {
     "title": "Oferty",

@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "Terugbetaald bedrag",
       "retainedAmountPlaceholder": "Ingehouden bedrag (0 indien geen)",
       "retentionReasonPlaceholder": "Reden voor inhouding"
-    }
+    },
+    "sendToRepair": "Naar reparatie sturen"
   },
   "quote": {
     "title": "Offertes",

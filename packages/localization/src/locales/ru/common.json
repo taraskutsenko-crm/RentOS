@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "Возвращённая сумма",
       "retainedAmountPlaceholder": "Удержанная сумма (0, если нет)",
       "retentionReasonPlaceholder": "Причина удержания"
-    }
+    },
+    "sendToRepair": "Отправить в ремонт"
   },
   "quote": {
     "title": "Сметы",

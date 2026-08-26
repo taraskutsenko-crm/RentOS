@@ -8,6 +8,7 @@ import { renderWithProviders } from "../test-utils";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   useParams: () => ({ id: "asset-1" }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 const useCurrentTenantIdMock = vi.fn();

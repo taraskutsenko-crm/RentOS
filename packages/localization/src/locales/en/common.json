@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "Amount returned",
       "retainedAmountPlaceholder": "Amount retained (0 if none)",
       "retentionReasonPlaceholder": "Reason for retention"
-    }
+    },
+    "sendToRepair": "Send to repair"
   },
   "quote": {
     "title": "Quotes",

@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "Vrácená částka",
       "retainedAmountPlaceholder": "Zadržená částka (0, pokud žádná)",
       "retentionReasonPlaceholder": "Důvod zadržení"
-    }
+    },
+    "sendToRepair": "Odeslat do opravy"
   },
   "quote": {
     "title": "Nabídky",

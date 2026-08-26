@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "Montant restitué",
       "retainedAmountPlaceholder": "Montant retenu (0 si aucun)",
       "retentionReasonPlaceholder": "Motif de la retenue"
-    }
+    },
+    "sendToRepair": "Envoyer en réparation"
   },
   "quote": {
     "title": "Devis",

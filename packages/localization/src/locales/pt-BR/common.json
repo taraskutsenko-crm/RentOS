@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "Valor devolvido",
       "retainedAmountPlaceholder": "Valor retido (0 se nenhum)",
       "retentionReasonPlaceholder": "Motivo da retenção"
-    }
+    },
+    "sendToRepair": "Enviar para reparo"
   },
   "quote": {
     "title": "Orçamentos",

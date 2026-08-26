@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "退还金额",
       "retainedAmountPlaceholder": "扣留金额（无则填0）",
       "retentionReasonPlaceholder": "扣留原因"
-    }
+    },
+    "sendToRepair": "送修"
   },
   "quote": {
     "title": "报价单",

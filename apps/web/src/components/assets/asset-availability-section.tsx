@@ -32,18 +32,23 @@ export function AssetAvailabilitySection({
   tenantId,
   assetId,
   canManage,
+  initialType,
+  initialRelatedRentalId,
 }: {
   tenantId: string | null;
   assetId: string;
   canManage: boolean;
+  /** Pre-opens the form with this type/rental link — used by the Return Protocol's "Send to repair" follow-up. */
+  initialType?: AssetAvailabilityBlockType;
+  initialRelatedRentalId?: string;
 }) {
   const { t, i18n } = useTranslation();
   const { data: blocks } = useAssetAvailabilityBlocks(tenantId, assetId);
   const createBlock = useCreateAvailabilityBlock(tenantId, assetId);
   const cancelBlock = useCancelAvailabilityBlock(tenantId, assetId);
 
-  const [formOpen, setFormOpen] = useState(false);
-  const [type, setType] = useState<AssetAvailabilityBlockType>("MAINTENANCE");
+  const [formOpen, setFormOpen] = useState(!!initialType);
+  const [type, setType] = useState<AssetAvailabilityBlockType>(initialType ?? "MAINTENANCE");
   const [startAt, setStartAt] = useState("");
   const [endAt, setEndAt] = useState("");
   const [notes, setNotes] = useState("");
@@ -53,7 +58,13 @@ export function AssetAvailabilitySection({
     setError(null);
     if (!startAt || !endAt) return;
     try {
-      await createBlock.mutateAsync({ type, startAt, endAt, notes: notes || null });
+      await createBlock.mutateAsync({
+        type,
+        startAt,
+        endAt,
+        notes: notes || null,
+        ...(initialRelatedRentalId ? { relatedRentalId: initialRelatedRentalId } : {}),
+      });
       setFormOpen(false);
       setStartAt("");
       setEndAt("");

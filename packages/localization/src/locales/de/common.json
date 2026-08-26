@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "Zurückerstatteter Betrag",
       "retainedAmountPlaceholder": "Einbehaltener Betrag (0, falls keiner)",
       "retentionReasonPlaceholder": "Grund für den Einbehalt"
-    }
+    },
+    "sendToRepair": "Zur Reparatur schicken"
   },
   "quote": {
     "title": "Angebote",

@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "Importe devuelto",
       "retainedAmountPlaceholder": "Importe retenido (0 si no hay)",
       "retentionReasonPlaceholder": "Motivo de la retención"
-    }
+    },
+    "sendToRepair": "Enviar a reparación"
   },
   "quote": {
     "title": "Presupuestos",

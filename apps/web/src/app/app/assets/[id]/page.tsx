@@ -2,7 +2,7 @@
 
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -26,11 +26,21 @@ import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import { getAssetStatusLabel } from "../../../../lib/asset-status-label";
 import { formatMoney } from "../../../../lib/money";
 import { ASSET_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
+import type { AssetAvailabilityBlockType } from "../../../../types/rental";
+
+const ASSET_AVAILABILITY_BLOCK_TYPES: AssetAvailabilityBlockType[] = [
+  "MAINTENANCE",
+  "REPAIR",
+  "INSPECTION",
+  "RELOCATION",
+  "MANUAL_BLOCK",
+];
 
 export default function AssetDetailPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const [tenantId] = useCurrentTenantId();
 
   const { data: asset, isLoading } = useAsset(tenantId, params.id);
@@ -60,6 +70,13 @@ export default function AssetDetailPage() {
   const canManageImages = usePermission("assets.manage_images");
   const canManageDocuments = usePermission("assets.manage_documents");
   const canManageAvailability = usePermission("assets.manage_availability");
+  const scheduleBlockParam = searchParams.get("scheduleBlock");
+  const initialBlockType = ASSET_AVAILABILITY_BLOCK_TYPES.includes(
+    scheduleBlockParam as AssetAvailabilityBlockType,
+  )
+    ? (scheduleBlockParam as AssetAvailabilityBlockType)
+    : undefined;
+  const initialRelatedRentalId = searchParams.get("relatedRentalId") ?? undefined;
 
   const [statusFormOpen, setStatusFormOpen] = useState(false);
   const [selectedStatusId, setSelectedStatusId] = useState("");
@@ -299,6 +316,8 @@ export default function AssetDetailPage() {
             tenantId={tenantId}
             assetId={asset.id}
             canManage={canManageAvailability}
+            {...(initialBlockType ? { initialType: initialBlockType } : {})}
+            {...(initialRelatedRentalId ? { initialRelatedRentalId } : {})}
           />
 
           <Card>

@@ -94,6 +94,7 @@ export default function RentalDetailPage() {
   const canCreateDocument = usePermission("documents.create");
   const canCreateInvoice = usePermission("invoices.create");
   const canManageDeposit = usePermission("rentals.manage_deposit");
+  const canManageAvailability = usePermission("assets.manage_availability");
   const timeZone = useTenantTimezone();
 
   usePageBreadcrumbs(
@@ -317,6 +318,7 @@ export default function RentalDetailPage() {
                     <th className="p-3 font-medium">{t("rental.fields.quantity")}</th>
                     <th className="p-3 font-medium">{t("rental.fields.total")}</th>
                     <th className="p-3 font-medium">{t("rental.fields.returnedAt")}</th>
+                    {canManageAvailability && <th className="p-3 font-medium"></th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -413,6 +415,18 @@ export default function RentalDetailPage() {
                             ? formatDateTime(item.returnedAt, i18n.language, timeZone)
                             : "—"}
                         </td>
+                        {canManageAvailability && (
+                          <td className="p-3">
+                            {item.returnedAt && (
+                              <Link
+                                href={`/app/assets/${item.asset.id}?scheduleBlock=REPAIR&relatedRentalId=${rental.id}`}
+                                className="text-primary text-sm hover:underline"
+                              >
+                                {t("rental.sendToRepair")}
+                              </Link>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     );
                   })}

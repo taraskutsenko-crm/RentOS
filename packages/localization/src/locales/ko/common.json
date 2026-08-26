@@ -668,7 +668,8 @@
       "returnedAmountPlaceholder": "반환 금액",
       "retainedAmountPlaceholder": "보류 금액(없으면 0)",
       "retentionReasonPlaceholder": "보류 사유"
-    }
+    },
+    "sendToRepair": "수리 보내기"
   },
   "quote": {
     "title": "견적서",

@@ -530,7 +530,8 @@
         "signed": "署名済み"
       },
       "generate": "生成",
-      "open": "開く"
+      "open": "開く",
+      "generateQuote": "見積もりを作成"
     },
     "timeIntelligence": {
       "starts_today": "本日開始",
@@ -765,7 +766,8 @@
       "depositTotal": "保証金",
       "customerNotes": "顧客向けメモ",
       "termsAndConditions": "利用規約",
-      "convertedRental": "変換されたレンタル"
+      "convertedRental": "変換されたレンタル",
+      "sourceRental": "レンタルから生成"
     },
     "actions": {
       "send": "見積書を送付",

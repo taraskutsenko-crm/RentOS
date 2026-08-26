@@ -132,6 +132,8 @@ export class QuotesService {
     tenantId: string,
     actorUserId: string,
     dto: CreateQuoteDto,
+    /** Only ever set internally by createFromRental — never accepted from a client DTO. */
+    sourceRentalId?: string,
   ): Promise<QuoteDetailResponse> {
     const issueDate = dto.issueDate ? new Date(dto.issueDate) : new Date();
     const validUntil = new Date(dto.validUntil);
@@ -181,6 +183,7 @@ export class QuotesService {
           customerNotes: dto.customerNotes ?? null,
           internalNotes: dto.internalNotes ?? null,
           termsAndConditions: dto.termsAndConditions ?? null,
+          sourceRentalId: sourceRentalId ?? null,
           createdByUserId: actorUserId,
         },
       });
@@ -198,7 +201,7 @@ export class QuotesService {
           action: "quote.created",
           entityType: "Quote",
           entityId: quote.id,
-          metadata: { quoteNumber: quote.quoteNumber, itemCount: items.length },
+          metadata: { quoteNumber: quote.quoteNumber, itemCount: items.length, sourceRentalId },
         },
         tx,
       );
@@ -207,6 +210,88 @@ export class QuotesService {
     });
 
     return this.findOne(tenantId, created.id);
+  }
+
+  /**
+   * "Rental -> Generate Commercial Quote": builds a real, canonical Quote
+   * (not merely a generic Document(type=QUOTE)) from an existing Rental's
+   * current items/pricing, reusing `create()` wholesale for the actual
+   * persistence + pricing computation — no second pricing formula, no
+   * second quote-creation code path. Idempotent via
+   * `Quote.sourceRentalId @unique`: a repeat call returns the
+   * already-generated Quote rather than creating a duplicate, mirroring
+   * `convertToRental`'s own idempotency check for the opposite direction.
+   * Only ASSET-bearing rentals make sense to quote — an empty rental has
+   * nothing to offer.
+   */
+  async createFromRental(
+    tenantId: string,
+    rentalId: string,
+    actorUserId: string,
+  ): Promise<QuoteDetailResponse> {
+    const existing = await this.prisma.quote.findFirst({
+      where: { sourceRentalId: rentalId, tenantId, deletedAt: null },
+    });
+    if (existing) {
+      return this.findOne(tenantId, existing.id);
+    }
+
+    const rental = await this.prisma.rental.findFirst({
+      where: { id: rentalId, tenantId, deletedAt: null },
+      include: { items: { include: { asset: true }, orderBy: { createdAt: "asc" } } },
+    });
+    if (!rental) {
+      throw new NotFoundException("Rental not found");
+    }
+    if (rental.items.length === 0) {
+      throw new BadRequestException("Cannot generate a quote from a rental with no items");
+    }
+
+    const issueDate = new Date();
+    const validUntil = new Date(issueDate.getTime() + 14 * 24 * 60 * 60 * 1000);
+
+    const items: QuoteItemDto[] = rental.items.map((item) => ({
+      itemType: "ASSET",
+      assetId: item.assetId,
+      name: item.asset.name,
+      quantity: item.quantity,
+      billingMode: item.billingMode,
+      ...(item.dailyPriceMinor !== null ? { dailyPriceMinor: item.dailyPriceMinor } : {}),
+      ...(item.weeklyPriceMinor !== null ? { weeklyPriceMinor: item.weeklyPriceMinor } : {}),
+      ...(item.monthlyPriceMinor !== null ? { monthlyPriceMinor: item.monthlyPriceMinor } : {}),
+      ...(item.customPriceMinor !== null ? { customPriceMinor: item.customPriceMinor } : {}),
+      ...(item.billingMode === "MONTHLY" && item.partialMonthPolicy
+        ? { partialMonthPolicy: item.partialMonthPolicy }
+        : {}),
+      // RentalItem's discount is a flat minor-unit amount; QuoteItem only
+      // accepts a discountType+discountValue pair — FIXED reproduces the
+      // exact same amount without inventing a percentage.
+      ...(item.discountMinor > 0
+        ? { discountType: "FIXED" as const, discountValue: item.discountMinor }
+        : {}),
+      taxRateBp: item.taxRateBp,
+      depositMinor: item.depositMinor,
+      notes: item.notes ?? null,
+    }));
+
+    const dto: CreateQuoteDto = {
+      customerId: rental.customerId,
+      issueDate: issueDate.toISOString(),
+      validUntil: validUntil.toISOString(),
+      plannedStart: rental.plannedStart.toISOString(),
+      plannedEnd: rental.plannedEnd.toISOString(),
+      currency: rental.currency,
+      ...(rental.discountMinor > 0
+        ? { discountType: "FIXED" as const, discountValue: rental.discountMinor }
+        : {}),
+      customerNotes: rental.notes ?? null,
+      internalNotes: `Generated from Rental ${rental.rentalNumber}.${
+        rental.internalNotes ? ` ${rental.internalNotes}` : ""
+      }`,
+      items,
+    };
+
+    return this.create(tenantId, actorUserId, dto, rentalId);
   }
 
   async findMany(

@@ -530,7 +530,8 @@
         "signed": "Ondertekend"
       },
       "generate": "Genereren",
-      "open": "Openen"
+      "open": "Openen",
+      "generateQuote": "Offerte genereren"
     },
     "timeIntelligence": {
       "starts_today": "Start vandaag",
@@ -765,7 +766,8 @@
       "depositTotal": "Borg",
       "customerNotes": "Klantnotities",
       "termsAndConditions": "Algemene voorwaarden",
-      "convertedRental": "Omgezette verhuur"
+      "convertedRental": "Omgezette verhuur",
+      "sourceRental": "Gegenereerd vanuit verhuur"
     },
     "actions": {
       "send": "Offerte verzenden",

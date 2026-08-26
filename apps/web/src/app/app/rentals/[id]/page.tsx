@@ -17,6 +17,7 @@ import { Timeline } from "../../../../components/timeline/timeline";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission, useTenantTimezone } from "../../../../hooks/use-current-tenant-role";
 import { useInvoices } from "../../../../hooks/use-invoices";
+import { useGenerateQuoteFromRental } from "../../../../hooks/use-quotes";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
   useCancelRental,
@@ -84,6 +85,7 @@ export default function RentalDetailPage() {
   const startRental = useStartRental(tenantId);
   const returnRental = useReturnRental(tenantId);
   const cancelRental = useCancelRental(tenantId);
+  const generateQuoteFromRental = useGenerateQuoteFromRental(tenantId);
 
   const canUpdate = usePermission("rentals.update");
   const canDelete = usePermission("rentals.delete");
@@ -92,6 +94,7 @@ export default function RentalDetailPage() {
   const canReturnAction = usePermission("rentals.return");
   const canCancel = usePermission("rentals.cancel");
   const canCreateDocument = usePermission("documents.create");
+  const canCreateQuote = usePermission("quotes.create");
   const canCreateInvoice = usePermission("invoices.create");
   const canManageDeposit = usePermission("rentals.manage_deposit");
   const canManageAvailability = usePermission("assets.manage_availability");
@@ -137,6 +140,13 @@ export default function RentalDetailPage() {
     await runAction(async () => {
       await deleteRental.mutateAsync(rental!.id);
       router.push("/app/rentals");
+    });
+  }
+
+  async function handleGenerateQuote(): Promise<void> {
+    await runAction(async () => {
+      const quote = await generateQuoteFromRental.mutateAsync(rental!.id);
+      router.push(`/app/quotes/${quote.id}`);
     });
   }
 
@@ -442,24 +452,30 @@ export default function RentalDetailPage() {
               </CardHeader>
               <CardContent>
                 <ul className="flex flex-col gap-2 text-sm">
-                  {getRentalDocumentChecklist(rental).map((item) => {
+                  {getRentalDocumentChecklist({
+                    ...rental,
+                    generatedQuote: rental.generatedQuote,
+                  }).map((item) => {
                     const generateDocumentType = CHECKLIST_ITEM_DOCUMENT_TYPE[item.key];
                     const isGeneratedState =
                       item.state === "generated" ||
                       item.state === "sent" ||
                       item.state === "signed";
+                    // A real Quote may be linked either direction — this
+                    // Rental was converted from one (sourceQuote), or a
+                    // canonical Quote was generated FROM it via "Generate
+                    // Commercial Quote" (generatedQuote, see DECISIONS.md
+                    // D-106) — both link straight to the Quotes workspace,
+                    // never to a generic Document, until an actual QUOTE
+                    // Document has also been generated.
+                    const linkedQuote = rental.sourceQuote ?? rental.generatedQuote ?? null;
 
-                    // Commercial Offer is never generated from this page — a
-                    // QUOTE document belongs to the Quote workspace (see
-                    // CHECKLIST_ITEM_DOCUMENT_TYPE's doc comment) — it can
-                    // only ever be opened (the source Quote, or a real
-                    // generated offer document), never generated here.
                     const openHref =
                       item.key === "commercialOffer"
                         ? isGeneratedState
                           ? `/app/documents/${item.document!.id}`
-                          : item.state === "sourceQuoteOnly"
-                            ? `/app/quotes/${rental.sourceQuote!.id}`
+                          : linkedQuote
+                            ? `/app/quotes/${linkedQuote.id}`
                             : null
                         : isGeneratedState
                           ? `/app/documents/${item.document!.id}`
@@ -473,9 +489,20 @@ export default function RentalDetailPage() {
                             {isGeneratedState
                               ? (item.document?.documentNumber ??
                                 t("rental.documentChecklist.open"))
-                              : (rental.sourceQuote?.quoteNumber ??
-                                t("rental.documentChecklist.open"))}
+                              : (linkedQuote?.quoteNumber ?? t("rental.documentChecklist.open"))}
                           </Link>
+                        ) : item.key === "commercialOffer" &&
+                          item.state === "readyToGenerate" &&
+                          canCreateQuote ? (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-sm"
+                            onClick={() => void handleGenerateQuote()}
+                            disabled={generateQuoteFromRental.isPending}
+                          >
+                            {t("rental.documentChecklist.generateQuote")}
+                          </Button>
                         ) : item.state === "readyToGenerate" &&
                           item.key !== "commercialOffer" &&
                           generateDocumentType &&

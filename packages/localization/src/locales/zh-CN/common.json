@@ -530,7 +530,8 @@
         "signed": "已签署"
       },
       "generate": "生成",
-      "open": "打开"
+      "open": "打开",
+      "generateQuote": "生成报价单"
     },
     "timeIntelligence": {
       "starts_today": "今天开始",
@@ -765,7 +766,8 @@
       "depositTotal": "押金",
       "customerNotes": "客户备注",
       "termsAndConditions": "条款与条件",
-      "convertedRental": "已转换的租赁"
+      "convertedRental": "已转换的租赁",
+      "sourceRental": "由租赁生成"
     },
     "actions": {
       "send": "发送报价单",

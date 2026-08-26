@@ -530,7 +530,8 @@
         "signed": "Подписан"
       },
       "generate": "Создать",
-      "open": "Открыть"
+      "open": "Открыть",
+      "generateQuote": "Сформировать смету"
     },
     "timeIntelligence": {
       "starts_today": "Начинается сегодня",
@@ -765,7 +766,8 @@
       "depositTotal": "Залог",
       "customerNotes": "Заметки для клиента",
       "termsAndConditions": "Условия",
-      "convertedRental": "Аренда после преобразования"
+      "convertedRental": "Аренда после преобразования",
+      "sourceRental": "Создано на основе аренды"
     },
     "actions": {
       "send": "Отправить смету",

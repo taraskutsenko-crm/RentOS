@@ -430,10 +430,25 @@ export default function QuoteDetailPage() {
               )}
             </CardHeader>
             <CardContent>
-              {!quote.convertedRental && quote.platformDocuments.length === 0 ? (
+              {!quote.convertedRental &&
+              !quote.sourceRental &&
+              quote.platformDocuments.length === 0 ? (
                 <p className="text-muted-foreground text-sm">{t("quote.documents.empty")}</p>
               ) : (
                 <ul className="flex flex-col gap-2 text-sm">
+                  {quote.sourceRental && (
+                    <li className="flex items-center justify-between">
+                      <span className="text-muted-foreground">
+                        {t("quote.fields.sourceRental")}
+                      </span>
+                      <Link
+                        href={`/app/rentals/${quote.sourceRental.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {quote.sourceRental.rentalNumber}
+                      </Link>
+                    </li>
+                  )}
                   {quote.convertedRental && (
                     <li className="flex items-center justify-between">
                       <span className="text-muted-foreground">

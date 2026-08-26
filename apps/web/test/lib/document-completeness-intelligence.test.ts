@@ -31,6 +31,35 @@ describe("getRentalDocumentChecklist", () => {
       });
     });
 
+    it("is readyToGenerate when the rental has items but no source/generated quote and no QUOTE document", () => {
+      const checklist = getRentalDocumentChecklist({
+        status: "DRAFT",
+        sourceQuote: null,
+        documents: [],
+        items: [{ depositMinor: 0 }],
+      });
+      expect(checklist.find((item) => item.key === "commercialOffer")).toEqual({
+        key: "commercialOffer",
+        state: "readyToGenerate",
+        document: null,
+      });
+    });
+
+    it("is sourceQuoteOnly (linked, not readyToGenerate) when a canonical Quote was generated FROM this rental", () => {
+      const checklist = getRentalDocumentChecklist({
+        status: "DRAFT",
+        sourceQuote: null,
+        generatedQuote: { id: "quote-2", quoteNumber: "Q-2026-000002" },
+        documents: [],
+        items: [{ depositMinor: 0 }],
+      });
+      expect(checklist.find((item) => item.key === "commercialOffer")).toEqual({
+        key: "commercialOffer",
+        state: "sourceQuoteOnly",
+        document: null,
+      });
+    });
+
     it("is sourceQuoteOnly when a source quote exists but no QUOTE document was ever generated (business object != document)", () => {
       const checklist = getRentalDocumentChecklist({
         status: "DRAFT",

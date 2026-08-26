@@ -112,19 +112,30 @@ function mostAdvancedDocument(
 export function getRentalDocumentChecklist(rental: {
   status: RentalStatus;
   sourceQuote: RentalSourceQuote | null;
+  /** A canonical Quote generated FROM this Rental — the opposite direction from sourceQuote (see DECISIONS.md D-106). */
+  generatedQuote?: RentalSourceQuote | null;
   documents: RentalDocument[];
   /** Optional — omit when the caller doesn't need the depositReceipt row (e.g. rental-next-action.ts's status-only derivation). */
   items?: { depositMinor: number }[];
 }): DocumentChecklistItem[] {
-  const { status, sourceQuote, documents, items = [] } = rental;
+  const { status, sourceQuote, generatedQuote, documents, items = [] } = rental;
   const depositRequired = items.some((item) => item.depositMinor > 0);
 
+  const linkedQuote = sourceQuote ?? generatedQuote ?? null;
   const offerDocument = mostAdvancedDocument(documents, "QUOTE");
   const commercialOffer: DocumentChecklistItem = offerDocument
     ? { key: "commercialOffer", state: offerDocument.state, document: offerDocument.document }
     : {
         key: "commercialOffer",
-        state: sourceQuote ? "sourceQuoteOnly" : "notApplicable",
+        // A real Quote linked either direction (this Rental was converted
+        // from one, or a canonical Quote was generated FROM it via
+        // "Generate Commercial Quote") always outranks "readyToGenerate" —
+        // the caller (rentals/[id]/page.tsx) resolves which one to link to.
+        state: linkedQuote
+          ? "sourceQuoteOnly"
+          : items.length > 0
+            ? "readyToGenerate"
+            : "notApplicable",
         document: null,
       };
 

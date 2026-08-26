@@ -530,7 +530,8 @@
         "signed": "서명됨"
       },
       "generate": "생성",
-      "open": "열기"
+      "open": "열기",
+      "generateQuote": "견적서 생성"
     },
     "timeIntelligence": {
       "starts_today": "오늘 시작",
@@ -765,7 +766,8 @@
       "depositTotal": "보증금",
       "customerNotes": "고객 메모",
       "termsAndConditions": "이용 약관",
-      "convertedRental": "전환된 대여"
+      "convertedRental": "전환된 대여",
+      "sourceRental": "대여로부터 생성됨"
     },
     "actions": {
       "send": "견적서 발송",

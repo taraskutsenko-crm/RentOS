@@ -211,4 +211,39 @@ describe("Asset Availability Blocks E2E", () => {
       .send({ type: "MAINTENANCE", startAt: dateOffset(10), endAt: dateOffset(12) })
       .expect(404);
   });
+
+  // RBAC: assets.manage_availability is required to create/cancel a block —
+  // VIEWER has neither (see permission.ts), mirrors the exact
+  // register-a-second-membership-row pattern assets.e2e-spec.ts already
+  // uses for its own "blocks a VIEWER-role member" regression test.
+  it("blocks a VIEWER-role member from creating or cancelling a block but allows reading", async () => {
+    const viewerRegister = await request(app.getHttpServer())
+      .post("/auth/register")
+      .send({ ...validRegisterPayload, email: "viewer@example.com", companyName: "Viewer Co" })
+      .expect(201);
+    const viewerBody = viewerRegister.body as RegisterResponseBody;
+    const viewerCookie = extractCookie(viewerRegister.headers, "rentos_access_token");
+
+    await prisma.tenantMembership.create({
+      data: { tenantId, userId: viewerBody.user.id, role: "VIEWER", status: "ACTIVE" },
+    });
+
+    await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/assets/${assetId}/availability-blocks`)
+      .set("Cookie", viewerCookie)
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/assets/${assetId}/availability-blocks`)
+      .set("Cookie", viewerCookie)
+      .send({ type: "MAINTENANCE", startAt: dateOffset(10), endAt: dateOffset(12) })
+      .expect(403);
+
+    const created = await createBlock().expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/assets/${assetId}/availability-blocks/${created.body.id}/cancel`)
+      .set("Cookie", viewerCookie)
+      .send({})
+      .expect(403);
+  });
 });

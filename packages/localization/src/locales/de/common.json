@@ -530,7 +530,8 @@
         "signed": "Unterschrieben"
       },
       "generate": "Generieren",
-      "open": "Öffnen"
+      "open": "Öffnen",
+      "generateQuote": "Angebot erstellen"
     },
     "timeIntelligence": {
       "starts_today": "Beginnt heute",
@@ -765,7 +766,8 @@
       "depositTotal": "Kaution",
       "customerNotes": "Notizen für den Kunden",
       "termsAndConditions": "Allgemeine Geschäftsbedingungen",
-      "convertedRental": "Umgewandelte Vermietung"
+      "convertedRental": "Umgewandelte Vermietung",
+      "sourceRental": "Erstellt aus Vermietung"
     },
     "actions": {
       "send": "Angebot senden",

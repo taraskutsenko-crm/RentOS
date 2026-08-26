@@ -530,7 +530,8 @@
         "signed": "Podepsáno"
       },
       "generate": "Vygenerovat",
-      "open": "Otevřít"
+      "open": "Otevřít",
+      "generateQuote": "Vygenerovat smetu"
     },
     "timeIntelligence": {
       "starts_today": "Začíná dnes",
@@ -765,7 +766,8 @@
       "depositTotal": "Kauce",
       "customerNotes": "Poznámky zákazníka",
       "termsAndConditions": "Obchodní podmínky",
-      "convertedRental": "Převedený pronájem"
+      "convertedRental": "Převedený pronájem",
+      "sourceRental": "Vytvořeno z pronájmu"
     },
     "actions": {
       "send": "Odeslat nabídku",

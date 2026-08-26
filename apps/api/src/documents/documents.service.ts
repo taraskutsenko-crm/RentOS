@@ -159,15 +159,25 @@ export class DocumentsService {
     // what actually fixes the reported blank rental.number/total/start/end
     // bug: those placeholders were only ever blank because nothing in the
     // UI set rentalId at all, not because of a resolver/template defect.
-    let rental: { customerId: string; sourceQuoteId: string | null } | null = null;
+    // `generatedQuote` is the opposite-direction link (a canonical Quote
+    // generated FROM this Rental via QuotesService.createFromRental, see
+    // DECISIONS.md D-106) — checked as a second fallback so a QUOTE-type
+    // Document created from this Rental resolves against that real Quote's
+    // own fields (number/issueDate/validUntil/terms) instead of rendering
+    // with only rental.*-sourced content.
+    let rental: {
+      customerId: string;
+      sourceQuoteId: string | null;
+      generatedQuote: { id: string } | null;
+    } | null = null;
     if (dto.rentalId) {
       rental = await this.prisma.rental.findFirst({
         where: { id: dto.rentalId, tenantId, deletedAt: null },
-        select: { customerId: true, sourceQuoteId: true },
+        select: { customerId: true, sourceQuoteId: true, generatedQuote: { select: { id: true } } },
       });
       if (!rental) throw new NotFoundException("Rental not found");
     }
-    const quoteId = dto.quoteId ?? rental?.sourceQuoteId ?? undefined;
+    const quoteId = dto.quoteId ?? rental?.sourceQuoteId ?? rental?.generatedQuote?.id ?? undefined;
     if (quoteId) await this.assertQuoteBelongsToTenant(tenantId, quoteId);
     if (dto.assetId) await this.assertAssetBelongsToTenant(tenantId, dto.assetId);
     if (dto.employeeUserId) await this.assertUserIsTenantMember(tenantId, dto.employeeUserId);

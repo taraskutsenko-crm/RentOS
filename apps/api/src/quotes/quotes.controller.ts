@@ -53,6 +53,22 @@ export class QuotesController {
     return this.quotesService.create(tenant.id, user.id, dto);
   }
 
+  /**
+   * "Rental -> Generate Commercial Quote" — builds/reuses a real canonical
+   * Quote from an existing Rental's current items/pricing (see
+   * QuotesService.createFromRental). A static path segment, not `:id`, so
+   * it can't collide with the `:id/...` routes below.
+   */
+  @RequirePermissions("quotes.create")
+  @Post("from-rental/:rentalId")
+  createFromRental(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @CurrentUser() user: PublicUser,
+    @Param("rentalId") rentalId: string,
+  ) {
+    return this.quotesService.createFromRental(tenant.id, rentalId, user.id);
+  }
+
   @RequirePermissions("quotes.view")
   @Get()
   findMany(@CurrentTenant() { tenant }: CurrentTenantContext, @Query() query: QueryQuotesDto) {

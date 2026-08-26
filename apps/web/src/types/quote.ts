@@ -107,13 +107,15 @@ export interface Quote {
   customer: Customer;
   items: QuoteItem[];
   convertedRental: { id: string; rentalNumber: string } | null;
+  /** Set when this Quote was generated FROM a Rental via "Generate Commercial Quote" — see DECISIONS.md D-106. */
+  sourceRental: { id: string; rentalNumber: string } | null;
   platformDocuments: QuotePlatformDocument[];
   availabilityWarnings: QuoteAvailabilityWarning[];
 }
 
 export interface QuoteListItem extends Omit<
   Quote,
-  "items" | "convertedRental" | "platformDocuments" | "availabilityWarnings"
+  "items" | "convertedRental" | "sourceRental" | "platformDocuments" | "availabilityWarnings"
 > {
   itemCount: number;
 }

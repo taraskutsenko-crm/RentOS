@@ -1285,6 +1285,11 @@ model Rental {
   damageReports      RentalDamageReport[]
   availabilityBlocks AssetAvailabilityBlock[]
   deposit            RentalDeposit?
+  /// The canonical Quote generated FROM this Rental via "Generate
+  /// Commercial Quote" (QuotesService.createFromRental) — the inverse side
+  /// of Quote.sourceRentalId. Distinct from sourceQuote above (that's the
+  /// Quote this Rental itself was converted from, the opposite direction).
+  generatedQuote     Quote?                   @relation("RentalGeneratedQuote")
 
   @@unique([tenantId, rentalNumber])
   @@index([tenantId, status])
@@ -1512,6 +1517,16 @@ model Quote {
   /// Lineage pointer set by QuotesService.duplicate — deliberately just a
   /// single self-relation, not a full revision chain (see ADR 0007).
   duplicatedFromQuoteId String?
+  /// Set when this Quote was generated FROM an existing Rental (staff
+  /// clicked "Generate Commercial Quote" on the Rental Workspace) — the
+  /// mirror-image relation of Rental.sourceQuoteId (Quote -> Rental via
+  /// acceptance/conversion). @unique makes quote-generation idempotent:
+  /// QuotesService.createFromRental reuses the existing Quote instead of
+  /// creating a duplicate on a repeat click. Null for every Quote created
+  /// directly (the normal case) or reached via QuotesService.convertToRental
+  /// (that direction is recorded on Rental.sourceQuoteId instead — a Quote
+  /// is never both a Rental's source AND generated from that same Rental).
+  sourceRentalId        String?            @unique
   createdByUserId       String
   updatedByUserId       String?
   createdAt             DateTime           @default(now())
@@ -1527,6 +1542,7 @@ model Quote {
   /// Populated once this quote has been converted — the created Rental
   /// holds the FK (Rental.sourceQuoteId); this is the derived inverse side.
   convertedRental     Rental?  @relation("QuoteConvertedToRental")
+  sourceRental        Rental?  @relation("RentalGeneratedQuote", fields: [sourceRentalId], references: [id])
 
   items             QuoteItem[]
   statusHistory     QuoteStatusHistory[]

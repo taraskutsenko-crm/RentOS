@@ -530,7 +530,8 @@
         "signed": "Assinado"
       },
       "generate": "Gerar",
-      "open": "Abrir"
+      "open": "Abrir",
+      "generateQuote": "Gerar orçamento"
     },
     "timeIntelligence": {
       "starts_today": "Começa hoje",
@@ -765,7 +766,8 @@
       "depositTotal": "Caução",
       "customerNotes": "Notas do cliente",
       "termsAndConditions": "Termos e condições",
-      "convertedRental": "Locação convertida"
+      "convertedRental": "Locação convertida",
+      "sourceRental": "Gerado a partir da locação"
     },
     "actions": {
       "send": "Enviar orçamento",

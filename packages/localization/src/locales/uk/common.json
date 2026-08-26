@@ -530,7 +530,8 @@
         "signed": "Підписано"
       },
       "generate": "Створити",
-      "open": "Відкрити"
+      "open": "Відкрити",
+      "generateQuote": "Сформувати кошторис"
     },
     "timeIntelligence": {
       "starts_today": "Починається сьогодні",
@@ -765,7 +766,8 @@
       "depositTotal": "Застава",
       "customerNotes": "Нотатки для клієнта",
       "termsAndConditions": "Умови",
-      "convertedRental": "Оренда після перетворення"
+      "convertedRental": "Оренда після перетворення",
+      "sourceRental": "Створено на основі оренди"
     },
     "actions": {
       "send": "Надіслати кошторис",

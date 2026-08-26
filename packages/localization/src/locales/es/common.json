@@ -530,7 +530,8 @@
         "signed": "Firmado"
       },
       "generate": "Generar",
-      "open": "Abrir"
+      "open": "Abrir",
+      "generateQuote": "Generar presupuesto"
     },
     "timeIntelligence": {
       "starts_today": "Comienza hoy",
@@ -765,7 +766,8 @@
       "depositTotal": "Depósito",
       "customerNotes": "Notas para el cliente",
       "termsAndConditions": "Términos y condiciones",
-      "convertedRental": "Alquiler convertido"
+      "convertedRental": "Alquiler convertido",
+      "sourceRental": "Generado a partir del alquiler"
     },
     "actions": {
       "send": "Enviar presupuesto",

@@ -205,4 +205,43 @@ describe("Rental Deposits E2E", () => {
       .send({ returnedAt: dateOffset(5), returnedAmountMinor: 0, retainedAmountMinor: 0 })
       .expect(404);
   });
+
+  // RBAC: rentals.manage_deposit is required to record a receipt/return —
+  // VIEWER has neither (see permission.ts), same register-a-second-
+  // membership-row pattern used throughout the e2e suite (assets.e2e-spec.ts).
+  it("blocks a VIEWER-role member from recording a deposit receipt or return but allows reading", async () => {
+    const viewerRegister = await request(app.getHttpServer())
+      .post("/auth/register")
+      .send({ ...validRegisterPayload, email: "viewer@example.com", companyName: "Viewer Co" })
+      .expect(201);
+    const viewerBody = viewerRegister.body as RegisterResponseBody;
+    const viewerCookie = extractCookie(viewerRegister.headers, "rentos_access_token");
+
+    await prisma.tenantMembership.create({
+      data: { tenantId, userId: viewerBody.user.id, role: "VIEWER", status: "ACTIVE" },
+    });
+
+    await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/rentals/${rentalId}/deposit`)
+      .set("Cookie", viewerCookie)
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${rentalId}/deposit/receive`)
+      .set("Cookie", viewerCookie)
+      .send({ receivedAt: dateOffset(1), receivedAmountMinor: 70000, receivedMethod: "CASH" })
+      .expect(403);
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${rentalId}/deposit/receive`)
+      .set("Cookie", accessCookie)
+      .send({ receivedAt: dateOffset(1), receivedAmountMinor: 70000, receivedMethod: "CASH" })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${rentalId}/deposit/return`)
+      .set("Cookie", viewerCookie)
+      .send({ returnedAt: dateOffset(5), returnedAmountMinor: 70000, retainedAmountMinor: 0 })
+      .expect(403);
+  });
 });

@@ -530,7 +530,8 @@
         "signed": "Signé"
       },
       "generate": "Générer",
-      "open": "Ouvrir"
+      "open": "Ouvrir",
+      "generateQuote": "Générer un devis"
     },
     "timeIntelligence": {
       "starts_today": "Débute aujourd'hui",
@@ -765,7 +766,8 @@
       "depositTotal": "Caution",
       "customerNotes": "Notes client",
       "termsAndConditions": "Conditions générales",
-      "convertedRental": "Location convertie"
+      "convertedRental": "Location convertie",
+      "sourceRental": "Généré depuis la location"
     },
     "actions": {
       "send": "Envoyer le devis",

@@ -169,6 +169,23 @@ export function useConvertQuoteToRental(tenantId: string | null) {
   return useQuoteLifecycleAction<ConvertQuoteResult>(tenantId, "convert-to-rental");
 }
 
+/**
+ * "Rental -> Generate Commercial Quote" — builds/reuses the real canonical
+ * Quote for a Rental (QuotesService.createFromRental). Idempotent
+ * server-side: calling this again for the same rental returns the
+ * already-generated Quote rather than creating a duplicate.
+ */
+export function useGenerateQuoteFromRental(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (rentalId: string) =>
+      apiClient.post<Quote>(`/tenants/${tenantId}/quotes/from-rental/${rentalId}`, {}),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
+    },
+  });
+}
+
 export function useSendQuote(tenantId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({

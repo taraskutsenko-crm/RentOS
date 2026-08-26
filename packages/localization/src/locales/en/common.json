@@ -534,7 +534,8 @@
         "sent": "Sent",
         "signed": "Signed"
       },
-      "open": "Open"
+      "open": "Open",
+      "generateQuote": "Generate Quote"
     },
     "timeIntelligence": {
       "starts_today": "Starts today",
@@ -765,7 +766,8 @@
       "depositTotal": "Deposit",
       "customerNotes": "Customer notes",
       "termsAndConditions": "Terms and conditions",
-      "convertedRental": "Converted rental"
+      "convertedRental": "Converted rental",
+      "sourceRental": "Generated from rental"
     },
     "actions": {
       "send": "Send quote",

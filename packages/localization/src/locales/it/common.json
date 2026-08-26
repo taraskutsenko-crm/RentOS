@@ -530,7 +530,8 @@
         "signed": "Firmato"
       },
       "generate": "Genera",
-      "open": "Apri"
+      "open": "Apri",
+      "generateQuote": "Genera preventivo"
     },
     "timeIntelligence": {
       "starts_today": "Inizia oggi",
@@ -765,7 +766,8 @@
       "depositTotal": "Cauzione",
       "customerNotes": "Note cliente",
       "termsAndConditions": "Termini e condizioni",
-      "convertedRental": "Noleggio convertito"
+      "convertedRental": "Noleggio convertito",
+      "sourceRental": "Generato dal noleggio"
     },
     "actions": {
       "send": "Invia preventivo",

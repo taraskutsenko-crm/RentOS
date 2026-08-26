@@ -236,6 +236,40 @@ describe("Documents E2E (TASK-0008 Part 1 — Document Management Platform)", ()
     expect(response.body.quoteId).toBe(otherQuote.body.id);
   });
 
+  it("auto-populates quoteId from the Rental's generatedQuote (canonical Quote generated FROM this Rental)", async () => {
+    // The opposite direction from sourceQuoteId above: this Rental was
+    // never converted from a quote, but staff used "Generate Commercial
+    // Quote" to create a real canonical Quote FROM it (see
+    // QuotesService.createFromRental, DECISIONS.md D-106). Needs a rental
+    // with at least one item — the shared `rentalId` from beforeEach has
+    // none, so build a dedicated one here.
+    const itemRental = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals`)
+      .set("Cookie", accessCookie)
+      .send({
+        customerId,
+        plannedStart: dateOffset(1),
+        plannedEnd: dateOffset(4),
+        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 1000 }],
+      })
+      .expect(201);
+    const itemRentalId = itemRental.body.id as string;
+
+    const generated = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/quotes/from-rental/${itemRentalId}`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    const generatedQuoteId = generated.body.id as string;
+
+    const response = await createDocument({
+      customerId: undefined,
+      rentalId: itemRentalId,
+    }).expect(201);
+    expect(response.body.rentalId).toBe(itemRentalId);
+    expect(response.body.quoteId).toBe(generatedQuoteId);
+  });
+
   it("defaults employeeUserId to the creating staff user when omitted", async () => {
     const me = await request(app.getHttpServer())
       .get("/auth/me")

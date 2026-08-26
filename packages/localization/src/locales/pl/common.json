@@ -530,7 +530,8 @@
         "signed": "Podpisany"
       },
       "generate": "Generuj",
-      "open": "Otwórz"
+      "open": "Otwórz",
+      "generateQuote": "Wygeneruj ofertę"
     },
     "timeIntelligence": {
       "starts_today": "Rozpoczyna się dzisiaj",
@@ -765,7 +766,8 @@
       "depositTotal": "Kaucja",
       "customerNotes": "Notatki dla klienta",
       "termsAndConditions": "Warunki",
-      "convertedRental": "Wynajem po przekształceniu"
+      "convertedRental": "Wynajem po przekształceniu",
+      "sourceRental": "Wygenerowano z wynajmu"
     },
     "actions": {
       "send": "Wyślij ofertę",

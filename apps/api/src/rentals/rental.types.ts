@@ -27,6 +27,10 @@ export const RENTAL_DETAIL_INCLUDE = {
   customer: true,
   items: { include: RENTAL_ITEM_INCLUDE },
   sourceQuote: { select: RENTAL_SOURCE_QUOTE_SELECT },
+  /// The canonical Quote generated FROM this Rental (see
+  /// QuotesService.createFromRental, DECISIONS.md D-106) — the opposite
+  /// direction from sourceQuote above.
+  generatedQuote: { select: RENTAL_SOURCE_QUOTE_SELECT },
   documents: {
     where: { deletedAt: null },
     select: RENTAL_DOCUMENT_SELECT,
@@ -45,6 +49,7 @@ export interface RentalDetailView extends Rental {
   customer: Customer;
   items: RentalItemWithAsset[];
   sourceQuote: RentalSourceQuoteView | null;
+  generatedQuote: RentalSourceQuoteView | null;
   documents: RentalDocumentView[];
 }
 

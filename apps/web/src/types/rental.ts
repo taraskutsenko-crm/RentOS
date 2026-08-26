@@ -112,10 +112,15 @@ export interface Rental {
   customer: Customer;
   items: RentalItem[];
   sourceQuote: RentalSourceQuote | null;
+  /** The canonical Quote generated FROM this Rental — the opposite direction from sourceQuote (see DECISIONS.md D-106). */
+  generatedQuote: RentalSourceQuote | null;
   documents: RentalDocument[];
 }
 
-export interface RentalListItem extends Omit<Rental, "items" | "sourceQuote" | "documents"> {
+export interface RentalListItem extends Omit<
+  Rental,
+  "items" | "sourceQuote" | "generatedQuote" | "documents"
+> {
   itemCount: number;
 }
 

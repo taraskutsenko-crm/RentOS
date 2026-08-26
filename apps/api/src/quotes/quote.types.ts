@@ -26,16 +26,24 @@ export const QUOTE_PLATFORM_DOCUMENT_SELECT = {
   createdAt: true,
 } satisfies Prisma.DocumentSelect;
 
+export const QUOTE_SOURCE_RENTAL_SELECT = {
+  id: true,
+  rentalNumber: true,
+} satisfies Prisma.RentalSelect;
+
 export const QUOTE_DETAIL_INCLUDE = {
   customer: true,
   items: { include: QUOTE_ITEM_INCLUDE, orderBy: { sortOrder: "asc" } },
   convertedRental: true,
+  sourceRental: { select: QUOTE_SOURCE_RENTAL_SELECT },
   platformDocuments: {
     where: { deletedAt: null },
     select: QUOTE_PLATFORM_DOCUMENT_SELECT,
     orderBy: { createdAt: "desc" },
   },
 } satisfies Prisma.QuoteInclude;
+
+export type QuoteSourceRentalView = Pick<Rental, "id" | "rentalNumber">;
 
 export type QuotePlatformDocumentView = Pick<
   Document,
@@ -46,6 +54,7 @@ export interface QuoteDetailView extends Quote {
   customer: Customer;
   items: QuoteItemWithAsset[];
   convertedRental: Rental | null;
+  sourceRental: QuoteSourceRentalView | null;
   platformDocuments: QuotePlatformDocumentView[];
 }
 

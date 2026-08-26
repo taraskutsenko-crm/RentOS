@@ -30,6 +30,7 @@ const DOCUMENT_TYPES: DocumentType[] = [
   "RETURN_PROTOCOL",
   "DAMAGE_REPORT",
   "CONTRACT_AMENDMENT",
+  "DEPOSIT_RECEIPT",
   "CUSTOM",
 ];
 const STATUSES: DocumentTemplateStatus[] = ["DRAFT", "ACTIVE", "ARCHIVED"];

@@ -9,6 +9,7 @@ export type DocumentType =
   | "RETURN_PROTOCOL"
   | "DAMAGE_REPORT"
   | "CONTRACT_AMENDMENT"
+  | "DEPOSIT_RECEIPT"
   | "CUSTOM";
 
 export type DocumentStatus =

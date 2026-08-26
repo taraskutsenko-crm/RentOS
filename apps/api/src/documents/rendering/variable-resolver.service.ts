@@ -259,7 +259,9 @@ export class VariableResolverService {
                     language,
                   )
                 : "",
-            receivedMethod: rentalDepositRecord.receivedMethod ?? "",
+            receivedMethod: rentalDepositRecord.receivedMethod
+              ? paymentMethodLabel(rentalDepositRecord.receivedMethod, language)
+              : "",
             receivedReference: rentalDepositRecord.receivedReference ?? "",
             returnedAt: rentalDepositRecord.returnedAt
               ? formatDate(rentalDepositRecord.returnedAt, language, "UTC")
@@ -434,7 +436,7 @@ export class VariableResolverService {
         requiredAmount: formatMoney(10000, currency, language),
         receivedAt: formatDate(now, language, timezone),
         receivedAmount: formatMoney(10000, currency, language),
-        receivedMethod: "BANK_TRANSFER",
+        receivedMethod: paymentMethodLabel("BANK_TRANSFER", language),
         receivedReference: "SAMPLE-REF-001",
         returnedAt: formatDate(later, language, timezone),
         returnedAmount: formatMoney(8000, currency, language),
@@ -803,6 +805,50 @@ const TABLE_LABELS: Record<string, TableLabels> = {
 
 function tableLabels(language: string): TableLabels {
   return TABLE_LABELS[language] ?? TABLE_LABELS.en!;
+}
+
+/**
+ * Labels for RentalDeposit.receivedMethod in the deposit.receivedMethod
+ * variable — same small-local-dictionary convention as TABLE_LABELS, so a
+ * generated Deposit Receipt document never shows a raw enum value like
+ * "BANK_TRANSFER" to a customer.
+ */
+const PAYMENT_METHOD_LABELS: Record<string, Record<string, string>> = {
+  en: { BANK_TRANSFER: "Bank transfer", CASH: "Cash", CARD: "Card", OTHER: "Other" },
+  cs: { BANK_TRANSFER: "Bankovní převod", CASH: "Hotovost", CARD: "Karta", OTHER: "Jiné" },
+  de: { BANK_TRANSFER: "Überweisung", CASH: "Bar", CARD: "Karte", OTHER: "Sonstige" },
+  es: {
+    BANK_TRANSFER: "Transferencia bancaria",
+    CASH: "Efectivo",
+    CARD: "Tarjeta",
+    OTHER: "Otro",
+  },
+  fr: { BANK_TRANSFER: "Virement bancaire", CASH: "Espèces", CARD: "Carte", OTHER: "Autre" },
+  it: { BANK_TRANSFER: "Bonifico bancario", CASH: "Contanti", CARD: "Carta", OTHER: "Altro" },
+  ja: { BANK_TRANSFER: "銀行振込", CASH: "現金", CARD: "カード", OTHER: "その他" },
+  ko: { BANK_TRANSFER: "계좌이체", CASH: "현금", CARD: "카드", OTHER: "기타" },
+  nl: { BANK_TRANSFER: "Bankoverschrijving", CASH: "Contant", CARD: "Kaart", OTHER: "Anders" },
+  pl: { BANK_TRANSFER: "Przelew bankowy", CASH: "Gotówka", CARD: "Karta", OTHER: "Inne" },
+  "pt-BR": {
+    BANK_TRANSFER: "Transferência bancária",
+    CASH: "Dinheiro",
+    CARD: "Cartão",
+    OTHER: "Outro",
+  },
+  ru: { BANK_TRANSFER: "Банковский перевод", CASH: "Наличные", CARD: "Карта", OTHER: "Другое" },
+  uk: {
+    BANK_TRANSFER: "Банківський переказ",
+    CASH: "Готівка",
+    CARD: "Картка",
+    OTHER: "Інше",
+  },
+  "zh-CN": { BANK_TRANSFER: "银行转账", CASH: "现金", CARD: "银行卡", OTHER: "其他" },
+};
+
+function paymentMethodLabel(method: string, language: string): string {
+  return (
+    PAYMENT_METHOD_LABELS[language]?.[method] ?? PAYMENT_METHOD_LABELS.en?.[method] ?? method
+  );
 }
 
 /** Same `.doc-table` markup shape as buildAssetsTableHtml/buildServicesTableHtml, built from literal sample rows (see buildPreviewContext). */

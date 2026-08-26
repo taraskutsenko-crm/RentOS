@@ -125,6 +125,10 @@ export function RentalWizard({
   const [assetSearch, setAssetSearch] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
   const [pricingValidationAttempted, setPricingValidationAttempted] = useState(false);
+  const todayStartIso = useRef(new Date().toISOString().slice(0, 10) + "T00:00:00.000Z");
+  const previewWindowEnd30Days = useRef(
+    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10) + "T00:00:00.000Z",
+  );
 
   const {
     register,
@@ -196,10 +200,13 @@ export function RentalWizard({
   // per the requirement that unavailable assets never disappear from a
   // selector silently. Once real dates are picked, `availability` above
   // takes over with the precise window for the actually-selected assets.
+  // Rounded to the start of today (not `new Date()` computed fresh every
+  // render) so the query key stays stable across re-renders — an
+  // ever-changing plannedStart/plannedEnd previously caused React Query to
+  // treat every render as a new query, hammering the API into 429s.
   const candidateAssetIds = assetsData?.items.map((asset) => asset.id) ?? [];
-  const previewWindowStart = values.plannedStart || new Date().toISOString();
-  const previewWindowEnd =
-    values.plannedEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  const previewWindowStart = values.plannedStart || todayStartIso.current;
+  const previewWindowEnd = values.plannedEnd || previewWindowEnd30Days.current;
   const { data: candidateAvailability } = useAvailability(
     tenantId,
     candidateAssetIds.length > 0

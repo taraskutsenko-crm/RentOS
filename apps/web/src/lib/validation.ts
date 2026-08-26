@@ -290,6 +290,7 @@ export const documentSchema = z
       "RETURN_PROTOCOL",
       "DAMAGE_REPORT",
       "CONTRACT_AMENDMENT",
+      "DEPOSIT_RECEIPT",
       "CUSTOM",
     ]),
     customTypeName: z.string().max(100),

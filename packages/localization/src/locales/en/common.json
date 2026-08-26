@@ -1038,7 +1038,8 @@
       "quote": "Quote",
       "document": "Document",
       "signature": "Signature",
-      "other": "Other"
+      "other": "Other",
+      "deposit": "Deposit"
     },
     "company": {
       "name": "Company name",
@@ -1117,6 +1118,18 @@
       "title": "Document title",
       "type": "Document type",
       "status": "Document status"
+    },
+    "deposit": {
+      "requiredAmount": "Required deposit amount",
+      "receivedAt": "Deposit received date",
+      "receivedAmount": "Deposit received amount",
+      "receivedMethod": "Deposit payment method",
+      "receivedReference": "Deposit payment reference",
+      "returnedAt": "Deposit returned date",
+      "returnedAmount": "Deposit returned amount",
+      "retainedAmount": "Deposit retained amount",
+      "retentionReason": "Deposit retention reason",
+      "notes": "Deposit notes"
     }
   },
   "contractSection": {

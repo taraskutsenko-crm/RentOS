@@ -28,7 +28,7 @@ describe("ROLE_PERMISSIONS", () => {
     }
   });
 
-  it("restricts ACCOUNTANT to read-only everywhere except invoicing/payments (its real operational job)", () => {
+  it("restricts ACCOUNTANT to read-only everywhere except invoicing/payments/deposits (its real operational job)", () => {
     const invoicingException = [
       "invoices.create",
       "invoices.update",
@@ -36,6 +36,7 @@ describe("ROLE_PERMISSIONS", () => {
       "invoices.send",
       "invoices.cancel",
       "payments.record",
+      "rentals.manage_deposit",
     ];
     for (const permission of ROLE_PERMISSIONS.ACCOUNTANT) {
       const isReadOnly =

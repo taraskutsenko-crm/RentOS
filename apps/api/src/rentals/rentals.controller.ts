@@ -25,9 +25,12 @@ import { AvailabilityService } from "./availability.service";
 import { CreateRentalDto } from "./dto/create-rental.dto";
 import { QueryAvailabilityDto } from "./dto/query-availability.dto";
 import { QueryRentalsDto } from "./dto/query-rentals.dto";
+import { RecordDepositReceiptDto } from "./dto/record-deposit-receipt.dto";
+import { RecordDepositReturnDto } from "./dto/record-deposit-return.dto";
 import { ReturnRentalDto } from "./dto/return-rental.dto";
 import { StatusActionDto } from "./dto/status-action.dto";
 import { UpdateRentalDto } from "./dto/update-rental.dto";
+import { RentalDepositsService } from "./rental-deposits.service";
 import { RentalsService } from "./rentals.service";
 
 /**
@@ -43,6 +46,7 @@ export class RentalsController {
   constructor(
     private readonly rentalsService: RentalsService,
     private readonly availabilityService: AvailabilityService,
+    private readonly rentalDepositsService: RentalDepositsService,
   ) {}
 
   @RequirePermissions("rentals.create")
@@ -153,5 +157,33 @@ export class RentalsController {
   @Get(":id/timeline")
   timeline(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("id") id: string) {
     return this.rentalsService.timeline(tenant.id, id);
+  }
+
+  @RequirePermissions("rentals.view")
+  @Get(":id/deposit")
+  findDeposit(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("id") id: string) {
+    return this.rentalDepositsService.findForRental(tenant.id, id);
+  }
+
+  @RequirePermissions("rentals.manage_deposit")
+  @Post(":id/deposit/receive")
+  recordDepositReceipt(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @CurrentUser() user: PublicUser,
+    @Param("id") id: string,
+    @Body() dto: RecordDepositReceiptDto,
+  ) {
+    return this.rentalDepositsService.recordReceipt(tenant.id, id, user.id, dto);
+  }
+
+  @RequirePermissions("rentals.manage_deposit")
+  @Post(":id/deposit/return")
+  recordDepositReturn(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @CurrentUser() user: PublicUser,
+    @Param("id") id: string,
+    @Body() dto: RecordDepositReturnDto,
+  ) {
+    return this.rentalDepositsService.recordReturn(tenant.id, id, user.id, dto);
   }
 }

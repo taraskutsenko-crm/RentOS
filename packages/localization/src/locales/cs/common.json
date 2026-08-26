@@ -1257,7 +1257,8 @@
       "quote": "Nabídka",
       "document": "Dokument",
       "signature": "Podpis",
-      "other": "Ostatní"
+      "other": "Ostatní",
+      "deposit": "Kauce"
     },
     "company": {
       "name": "Název společnosti",
@@ -1336,6 +1337,18 @@
       "title": "Název dokumentu",
       "type": "Typ dokumentu",
       "status": "Stav dokumentu"
+    },
+    "deposit": {
+      "requiredAmount": "Požadovaná výše kauce",
+      "receivedAt": "Datum přijetí kauce",
+      "receivedAmount": "Přijatá výše kauce",
+      "receivedMethod": "Způsob platby kauce",
+      "receivedReference": "Reference platby kauce",
+      "returnedAt": "Datum vrácení kauce",
+      "returnedAmount": "Vrácená výše kauce",
+      "retainedAmount": "Zadržená výše kauce",
+      "retentionReason": "Důvod zadržení kauce",
+      "notes": "Poznámky ke kauci"
     }
   },
   "contractSection": {

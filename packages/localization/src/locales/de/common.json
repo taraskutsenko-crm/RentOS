@@ -1257,7 +1257,8 @@
       "quote": "Angebot",
       "document": "Dokument",
       "signature": "Unterschrift",
-      "other": "Sonstiges"
+      "other": "Sonstiges",
+      "deposit": "Kaution"
     },
     "company": {
       "name": "Firmenname",
@@ -1336,6 +1337,18 @@
       "title": "Dokumenttitel",
       "type": "Dokumenttyp",
       "status": "Dokumentstatus"
+    },
+    "deposit": {
+      "requiredAmount": "Erforderlicher Kautionsbetrag",
+      "receivedAt": "Datum des Kautionseingangs",
+      "receivedAmount": "Erhaltener Kautionsbetrag",
+      "receivedMethod": "Zahlungsmethode der Kaution",
+      "receivedReference": "Zahlungsreferenz der Kaution",
+      "returnedAt": "Datum der Kautionsrückgabe",
+      "returnedAmount": "Zurückgezahlter Kautionsbetrag",
+      "retainedAmount": "Einbehaltener Kautionsbetrag",
+      "retentionReason": "Grund für Einbehalt der Kaution",
+      "notes": "Anmerkungen zur Kaution"
     }
   },
   "contractSection": {

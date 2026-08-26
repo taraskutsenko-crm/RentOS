@@ -1257,7 +1257,8 @@
       "quote": "Orçamento",
       "document": "Documento",
       "signature": "Assinatura",
-      "other": "Outros"
+      "other": "Outros",
+      "deposit": "Caução"
     },
     "company": {
       "name": "Nome da empresa",
@@ -1336,6 +1337,18 @@
       "title": "Título do documento",
       "type": "Tipo de documento",
       "status": "Status do documento"
+    },
+    "deposit": {
+      "requiredAmount": "Valor de caução exigido",
+      "receivedAt": "Data de recebimento da caução",
+      "receivedAmount": "Valor de caução recebido",
+      "receivedMethod": "Forma de pagamento da caução",
+      "receivedReference": "Referência de pagamento da caução",
+      "returnedAt": "Data de devolução da caução",
+      "returnedAmount": "Valor de caução devolvido",
+      "retainedAmount": "Valor de caução retido",
+      "retentionReason": "Motivo da retenção da caução",
+      "notes": "Observações sobre a caução"
     }
   },
   "contractSection": {

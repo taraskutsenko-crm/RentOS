@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 import { apiEnvSchema } from "@rentos/shared";
 
+import { AssetAvailabilityModule } from "./asset-availability/asset-availability.module";
 import { AssetCategoriesModule } from "./asset-categories/asset-categories.module";
 import { AssetCustomFieldsModule } from "./asset-custom-fields/asset-custom-fields.module";
 import { AssetFilesModule } from "./asset-files/asset-files.module";
@@ -49,6 +50,7 @@ import { TenantsModule } from "./tenants/tenants.module";
     AssetsModule,
     AssetFilesModule,
     RentalsModule,
+    AssetAvailabilityModule,
     RentalBillingSettingsModule,
     QuotesModule,
     DocumentsModule,

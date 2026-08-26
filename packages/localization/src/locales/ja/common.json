@@ -1257,7 +1257,8 @@
       "quote": "見積もり",
       "document": "ドキュメント",
       "signature": "署名",
-      "other": "その他"
+      "other": "その他",
+      "deposit": "保証金"
     },
     "company": {
       "name": "会社名",
@@ -1336,6 +1337,18 @@
       "title": "書類タイトル",
       "type": "書類種別",
       "status": "書類ステータス"
+    },
+    "deposit": {
+      "requiredAmount": "必要保証金額",
+      "receivedAt": "保証金受領日",
+      "receivedAmount": "受領した保証金額",
+      "receivedMethod": "保証金の支払い方法",
+      "receivedReference": "保証金の支払い参照番号",
+      "returnedAt": "保証金返還日",
+      "returnedAmount": "返還した保証金額",
+      "retainedAmount": "保留した保証金額",
+      "retentionReason": "保証金保留の理由",
+      "notes": "保証金に関する備考"
     }
   },
   "contractSection": {

@@ -4,6 +4,14 @@ import type { MembershipRole } from "@prisma/client";
  * Granular, resource-scoped permissions for the Assets module. Controllers
  * must authorize against these, not against `MembershipRole` names
  * directly — see PermissionsGuard.
+ *
+ * `assets.manage_availability` is deliberately separate from
+ * `assets.change_status`: changing Asset.currentStatusId is a single
+ * "right now" global-status edit, while managing availability blocks
+ * creates/cancels a date-ranged AssetAvailabilityBlock (maintenance/repair/
+ * inspection/relocation/manual-block) — a different, temporal concept (see
+ * AvailabilityService). Reading blocks only requires `assets.read`; this
+ * permission gates writes.
  */
 export const ASSET_PERMISSIONS = [
   "assets.read",
@@ -13,6 +21,7 @@ export const ASSET_PERMISSIONS = [
   "assets.change_status",
   "assets.manage_images",
   "assets.manage_documents",
+  "assets.manage_availability",
   "asset_categories.read",
   "asset_categories.manage",
   "asset_fields.read",
@@ -31,6 +40,12 @@ export const ASSET_PERMISSIONS = [
  * `rentals.update`, since changing how MONTHLY is priced tenant-wide is a
  * financial policy decision, not a per-rental operational one (same
  * reasoning as `asset_categories.manage` being distinct from `assets.update`).
+ *
+ * `rentals.manage_deposit` gates recording/returning a RentalDeposit — kept
+ * separate from `rentals.update` because deposit receipt/return legitimately
+ * happens on a RESERVED/ACTIVE/RETURNED rental whose items/dates are already
+ * locked (see EDITABLE_STATUSES), so it must not be constrained by whatever
+ * status gating `rentals.update` itself is subject to.
  */
 export const RENTAL_PERMISSIONS = [
   "rentals.view",
@@ -41,6 +56,7 @@ export const RENTAL_PERMISSIONS = [
   "rentals.start",
   "rentals.return",
   "rentals.cancel",
+  "rentals.manage_deposit",
   "rental_settings.view",
   "rental_settings.manage",
 ] as const;
@@ -271,6 +287,13 @@ const BANK_ACCOUNT_READ_ONLY: Permission[] = ["bankAccounts.view"];
  * permissions. VIEWER is read-only (`invoices.view/download`,
  * `payments.view`, `bankAccounts.view`).
  *
+ * Availability blocks + deposits: MANAGER and TECHNICIAN both get
+ * `assets.manage_availability` (scheduling maintenance/repair/inspection/
+ * relocation/manual blocks is physical-equipment work both roles do).
+ * MANAGER and ACCOUNTANT get `rentals.manage_deposit` (recording deposit
+ * receipt/return is commercial/financial, matching their existing
+ * invoice/payment grants); TECHNICIAN does not.
+ *
  * Known limitation: the permission model is resource-level, not field- or
  * value-level (e.g. TECHNICIAN's asset `update` isn't restricted to only
  * condition/location fields). See ADR references in each module's
@@ -286,6 +309,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "assets.change_status",
     "assets.manage_images",
     "assets.manage_documents",
+    "assets.manage_availability",
     "asset_categories.read",
     "asset_fields.read",
     "asset_statuses.read",
@@ -296,6 +320,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "rentals.start",
     "rentals.return",
     "rentals.cancel",
+    "rentals.manage_deposit",
     "rental_settings.view",
     "quotes.view",
     "quotes.create",
@@ -335,6 +360,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "assets.change_status",
     "assets.manage_images",
     "assets.manage_documents",
+    "assets.manage_availability",
     "asset_categories.read",
     "asset_fields.read",
     "asset_statuses.read",
@@ -362,6 +388,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "payments.view",
     "payments.record",
     "bankAccounts.view",
+    "rentals.manage_deposit",
   ],
   VIEWER: [
     ...ASSET_READ_ONLY,

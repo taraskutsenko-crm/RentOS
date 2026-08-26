@@ -1257,7 +1257,8 @@
       "quote": "Devis",
       "document": "Document",
       "signature": "Signature",
-      "other": "Autre"
+      "other": "Autre",
+      "deposit": "Caution"
     },
     "company": {
       "name": "Nom de l'entreprise",
@@ -1336,6 +1337,18 @@
       "title": "Titre du document",
       "type": "Type de document",
       "status": "Statut du document"
+    },
+    "deposit": {
+      "requiredAmount": "Montant de caution requis",
+      "receivedAt": "Date de réception de la caution",
+      "receivedAmount": "Montant de caution reçu",
+      "receivedMethod": "Mode de paiement de la caution",
+      "receivedReference": "Référence de paiement de la caution",
+      "returnedAt": "Date de restitution de la caution",
+      "returnedAmount": "Montant de caution restitué",
+      "retainedAmount": "Montant de caution retenu",
+      "retentionReason": "Motif de retenue de la caution",
+      "notes": "Notes sur la caution"
     }
   },
   "contractSection": {

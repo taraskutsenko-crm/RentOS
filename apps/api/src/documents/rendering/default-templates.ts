@@ -74,6 +74,13 @@ interface DocumentStrings {
   contractAmendmentTitle: string;
   amendmentTo: string;
   contractSections: { title: string; body: string }[];
+  depositReceiptTitle: string;
+  depositReceiptSubtitle: string;
+  depositRequiredLabel: string;
+  depositReceivedAtLabel: string;
+  depositReceivedAmountLabel: string;
+  depositReceivedMethodLabel: string;
+  depositReceivedReferenceLabel: string;
 }
 
 function documentShell(
@@ -324,6 +331,28 @@ function buildTemplates(strings: DocumentStrings): Record<DocumentType, DefaultT
         `${partiesSection(strings)}${notesSection(strings)}`,
       ),
     },
+    DEPOSIT_RECEIPT: {
+      title: strings.depositReceiptTitle,
+      htmlContent: documentShell(
+        strings,
+        strings.depositReceiptTitle,
+        strings.depositReceiptSubtitle,
+        `${partiesSection(strings)}
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.depositReceiptTitle}</div>
+    <div class="doc-card">
+      <div class="doc-grid">
+        <div class="doc-field"><div class="doc-field__label">${strings.depositRequiredLabel}</div><div class="doc-field__value">{{deposit.requiredAmount}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.depositReceivedAtLabel}</div><div class="doc-field__value">{{deposit.receivedAt}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.depositReceivedAmountLabel}</div><div class="doc-field__value">{{deposit.receivedAmount}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.depositReceivedMethodLabel}</div><div class="doc-field__value">{{deposit.receivedMethod}}</div></div>
+        <div class="doc-field"><div class="doc-field__label">${strings.depositReceivedReferenceLabel}</div><div class="doc-field__value">{{deposit.receivedReference}}</div></div>
+      </div>
+    </div>
+  </div>
+  ${notesSection(strings)}`,
+      ),
+    },
     CUSTOM: {
       title: "Document",
       htmlContent: documentShell(
@@ -379,6 +408,13 @@ const EN_STRINGS: DocumentStrings = {
   missingItemsLabel: "Missing items / accessories",
   contractAmendmentTitle: "Contract Amendment",
   amendmentTo: "Amendment to",
+  depositReceiptTitle: "Deposit Receipt Confirmation",
+  depositReceiptSubtitle: "Confirms receipt of the security deposit stated below",
+  depositRequiredLabel: "Required deposit amount",
+  depositReceivedAtLabel: "Received on",
+  depositReceivedAmountLabel: "Amount received",
+  depositReceivedMethodLabel: "Payment method",
+  depositReceivedReferenceLabel: "Payment reference",
   contractSections: [
     {
       title: "Payment Terms",
@@ -480,6 +516,13 @@ const PL_STRINGS: DocumentStrings = {
   missingItemsLabel: "Brakujące elementy / akcesoria",
   contractAmendmentTitle: "Aneks do umowy",
   amendmentTo: "Aneks do umowy",
+  depositReceiptTitle: "Potwierdzenie przyjęcia kaucji",
+  depositReceiptSubtitle: "Potwierdza przyjęcie kaucji zabezpieczającej wskazanej poniżej",
+  depositRequiredLabel: "Wymagana kwota kaucji",
+  depositReceivedAtLabel: "Data przyjęcia",
+  depositReceivedAmountLabel: "Przyjęta kwota",
+  depositReceivedMethodLabel: "Sposób płatności",
+  depositReceivedReferenceLabel: "Numer referencyjny płatności",
   contractSections: [
     {
       title: "Warunki płatności",

@@ -7,6 +7,7 @@ import { PermissionsModule } from "../permissions/permissions.module";
 import { RentalBillingSettingsModule } from "../rental-billing-settings/rental-billing-settings.module";
 import { TenantsModule } from "../tenants/tenants.module";
 import { AvailabilityService } from "./availability.service";
+import { RentalDepositsService } from "./rental-deposits.service";
 import { RentalsController } from "./rentals.controller";
 import { RentalsService } from "./rentals.service";
 
@@ -20,7 +21,7 @@ import { RentalsService } from "./rentals.service";
     RentalBillingSettingsModule,
   ],
   controllers: [RentalsController],
-  providers: [RentalsService, AvailabilityService],
-  exports: [RentalsService, AvailabilityService],
+  providers: [RentalsService, AvailabilityService, RentalDepositsService],
+  exports: [RentalsService, AvailabilityService, RentalDepositsService],
 })
 export class RentalsModule {}

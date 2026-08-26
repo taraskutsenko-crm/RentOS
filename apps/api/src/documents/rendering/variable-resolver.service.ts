@@ -89,6 +89,9 @@ export class VariableResolverService {
     const rentalDepositMinor = document.rental
       ? await this.resolveRentalDepositMinor(tenantId, document.rental.id)
       : 0;
+    const rentalDepositRecord = document.rental
+      ? await this.prisma.rentalDeposit.findUnique({ where: { rentalId: document.rental.id } })
+      : null;
     const assetsTableHtml = document.rental
       ? await this.buildAssetsTableHtml(
           tenantId,
@@ -233,6 +236,54 @@ export class VariableResolverService {
             servicesTableHtml,
           }
         : {},
+      // The RentalDeposit accounting ledger — distinct from rental.deposit
+      // above (the flat *required* amount quoted from RentalItem.depositMinor).
+      // This namespace reflects what actually happened to the money: only
+      // populated once staff records receipt (see RentalDepositsService).
+      // Backs the DEPOSIT_RECEIPT document type.
+      deposit: rentalDepositRecord
+        ? {
+            requiredAmount: formatMoney(
+              rentalDepositRecord.requiredAmountMinor,
+              rentalDepositRecord.currency,
+              language,
+            ),
+            receivedAt: rentalDepositRecord.receivedAt
+              ? formatDate(rentalDepositRecord.receivedAt, language, "UTC")
+              : "",
+            receivedAmount:
+              rentalDepositRecord.receivedAmountMinor !== null
+                ? formatMoney(
+                    rentalDepositRecord.receivedAmountMinor,
+                    rentalDepositRecord.currency,
+                    language,
+                  )
+                : "",
+            receivedMethod: rentalDepositRecord.receivedMethod ?? "",
+            receivedReference: rentalDepositRecord.receivedReference ?? "",
+            returnedAt: rentalDepositRecord.returnedAt
+              ? formatDate(rentalDepositRecord.returnedAt, language, "UTC")
+              : "",
+            returnedAmount:
+              rentalDepositRecord.returnedAmountMinor !== null
+                ? formatMoney(
+                    rentalDepositRecord.returnedAmountMinor,
+                    rentalDepositRecord.currency,
+                    language,
+                  )
+                : "",
+            retainedAmount:
+              rentalDepositRecord.retainedAmountMinor !== null
+                ? formatMoney(
+                    rentalDepositRecord.retainedAmountMinor,
+                    rentalDepositRecord.currency,
+                    language,
+                  )
+                : "",
+            retentionReason: rentalDepositRecord.retentionReason ?? "",
+            notes: rentalDepositRecord.notes ?? "",
+          }
+        : {},
       today: formatDate(new Date(), language, timezone),
       signature: {
         company: tenant.name,
@@ -374,6 +425,22 @@ export class VariableResolverService {
         servicesTableHtml: sampleTableHtml(labels.service, labels.quantity, labels.total, [
           ["Sample Delivery Service", "1", formatMoney(5000, currency, language)],
         ]),
+      },
+      // Sample data covers the full receive-then-return lifecycle so every
+      // deposit.* path resolves to something in a template preview, even
+      // though a real document's deposit only has return fields populated
+      // once staff actually records a return (see buildContext above).
+      deposit: {
+        requiredAmount: formatMoney(10000, currency, language),
+        receivedAt: formatDate(now, language, timezone),
+        receivedAmount: formatMoney(10000, currency, language),
+        receivedMethod: "BANK_TRANSFER",
+        receivedReference: "SAMPLE-REF-001",
+        returnedAt: formatDate(later, language, timezone),
+        returnedAmount: formatMoney(8000, currency, language),
+        retainedAmount: formatMoney(2000, currency, language),
+        retentionReason: "Sample retention reason for preview purposes.",
+        notes: "Sample deposit notes for preview purposes.",
       },
       today: formatDate(now, language, timezone),
       signature: {

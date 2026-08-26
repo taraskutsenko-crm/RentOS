@@ -28,6 +28,8 @@ async function deleteAllRows(prisma: PrismaClient): Promise<void> {
   await prisma.quoteStatusHistory.deleteMany();
   await prisma.quoteDocument.deleteMany();
   await prisma.quoteItem.deleteMany();
+  await prisma.assetAvailabilityBlock.deleteMany();
+  await prisma.rentalDeposit.deleteMany();
   await prisma.rentalStatusHistory.deleteMany();
   await prisma.rentalItem.deleteMany();
   await prisma.rental.deleteMany();

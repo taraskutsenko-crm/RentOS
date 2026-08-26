@@ -1257,7 +1257,8 @@
       "quote": "Offerte",
       "document": "Document",
       "signature": "Handtekening",
-      "other": "Overig"
+      "other": "Overig",
+      "deposit": "Borg"
     },
     "company": {
       "name": "Bedrijfsnaam",
@@ -1336,6 +1337,18 @@
       "title": "Documenttitel",
       "type": "Documenttype",
       "status": "Documentstatus"
+    },
+    "deposit": {
+      "requiredAmount": "Vereist borgbedrag",
+      "receivedAt": "Datum ontvangst borg",
+      "receivedAmount": "Ontvangen borgbedrag",
+      "receivedMethod": "Betaalmethode borg",
+      "receivedReference": "Betalingsreferentie borg",
+      "returnedAt": "Datum teruggave borg",
+      "returnedAmount": "Terugbetaald borgbedrag",
+      "retainedAmount": "Ingehouden borgbedrag",
+      "retentionReason": "Reden voor inhouding borg",
+      "notes": "Opmerkingen bij borg"
     }
   },
   "contractSection": {

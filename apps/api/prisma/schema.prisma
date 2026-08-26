@@ -52,6 +52,21 @@ enum AssetDocumentType {
   OTHER
 }
 
+/// A reason an asset is blocked out of availability for a date range, distinct
+/// from a Rental's own RESERVED/ACTIVE claim (see AssetAvailabilityBlock).
+/// INSPECTION/RELOCATION are included because they can legitimately take an
+/// asset out of service for a period even though they aren't a rental — same
+/// "three-industry test" as every other asset concept (PRODUCT_BIBLE §3):
+/// maintenance/repair/inspection/relocation/manual-block apply equally to a
+/// vehicle, a generator, or a folding table.
+enum AssetAvailabilityBlockType {
+  MAINTENANCE
+  REPAIR
+  INSPECTION
+  RELOCATION
+  MANUAL_BLOCK
+}
+
 /// Rental lifecycle: DRAFT -> QUOTE -> RESERVED -> ACTIVE -> RETURNED -> COMPLETED,
 /// with CANCELLED reachable from every non-terminal state. See
 /// docs/adr/0006-rental-lifecycle-and-availability.md.
@@ -171,6 +186,11 @@ enum DocumentType {
   RETURN_PROTOCOL
   DAMAGE_REPORT
   CONTRACT_AMENDMENT
+  /// A deposit-receipt/confirmation document ("Potwierdzenie przyjęcia
+  /// kaucji") generated from a RentalDeposit's received state — same
+  /// universal Document/DocumentType platform as every other document type,
+  /// no type-specific columns (see ARCHITECTURE_LOCK §2).
+  DEPOSIT_RECEIPT
   CUSTOM
 }
 
@@ -635,12 +655,16 @@ model User {
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
 
-  createdAssets          Asset[]                @relation("AssetCreatedBy")
-  updatedAssets          Asset[]                @relation("AssetUpdatedBy")
-  assetStatusChanges     AssetStatusHistory[]   @relation("AssetStatusHistoryChangedBy")
-  assetLocationChanges   AssetLocationHistory[] @relation("AssetLocationHistoryChangedBy")
-  uploadedAssetImages    AssetImage[]           @relation("AssetImageUploadedBy")
-  uploadedAssetDocuments AssetDocument[]        @relation("AssetDocumentUploadedBy")
+  createdAssets               Asset[]                  @relation("AssetCreatedBy")
+  updatedAssets               Asset[]                  @relation("AssetUpdatedBy")
+  assetStatusChanges          AssetStatusHistory[]     @relation("AssetStatusHistoryChangedBy")
+  assetLocationChanges        AssetLocationHistory[]   @relation("AssetLocationHistoryChangedBy")
+  uploadedAssetImages         AssetImage[]             @relation("AssetImageUploadedBy")
+  uploadedAssetDocuments      AssetDocument[]          @relation("AssetDocumentUploadedBy")
+  createdAvailabilityBlocks   AssetAvailabilityBlock[] @relation("AssetAvailabilityBlockCreatedBy")
+  cancelledAvailabilityBlocks AssetAvailabilityBlock[] @relation("AssetAvailabilityBlockCancelledBy")
+  createdRentalDeposits       RentalDeposit[]          @relation("RentalDepositCreatedBy")
+  updatedRentalDeposits       RentalDeposit[]          @relation("RentalDepositUpdatedBy")
 
   createdRentals      Rental[]              @relation("RentalCreatedBy")
   updatedRentals      Rental[]              @relation("RentalUpdatedBy")
@@ -714,12 +738,14 @@ model Tenant {
   assetCustomFieldValues      AssetCustomFieldValue[]
   assetImages                 AssetImage[]
   assetDocuments              AssetDocument[]
+  assetAvailabilityBlocks     AssetAvailabilityBlock[]
 
   rentals               Rental[]
   rentalItems           RentalItem[]
   rentalStatusHistory   RentalStatusHistory[]
   rentalBillingSettings RentalBillingSettings?
   rentalSequence        RentalSequence?
+  rentalDeposits        RentalDeposit[]
 
   quotes             Quote[]
   quoteItems         QuoteItem[]
@@ -980,6 +1006,7 @@ model Asset {
   customFieldValues     AssetCustomFieldValue[]
   statusHistory         AssetStatusHistory[]
   locationHistory       AssetLocationHistory[]
+  availabilityBlocks    AssetAvailabilityBlock[]
   images                AssetImage[]
   documents             AssetDocument[]
   rentalItems           RentalItem[]
@@ -1049,6 +1076,45 @@ model AssetLocationHistory {
 
   @@index([tenantId, assetId, createdAt])
   @@map("asset_location_history")
+}
+
+/// A time-bounded reason an asset is unavailable, independent of any Rental.
+/// This is deliberately separate from Asset.currentStatusId: the current
+/// status is a single global "right now" value with no date range, while a
+/// block always has a concrete [startAt, endAt) window — a MAINTENANCE block
+/// scheduled for next month must never make the asset look unavailable
+/// today. AvailabilityService is the only place that reads this model; it
+/// unions block conflicts with the existing RESERVED/ACTIVE RentalItem
+/// conflicts to answer "is this asset free for this range" from one place.
+/// relatedRentalId optionally links a REPAIR block created from a Return
+/// Protocol back to the rental that surfaced the damage — informational
+/// only, never required. Cancelling a block (cancelledAt set) is a soft
+/// delete: the row is kept for audit/history, and AvailabilityService simply
+/// excludes cancelled blocks from conflict queries.
+model AssetAvailabilityBlock {
+  id                String                     @id @default(uuid())
+  tenantId          String
+  assetId           String
+  type              AssetAvailabilityBlockType
+  startAt           DateTime
+  endAt             DateTime
+  notes             String?
+  relatedRentalId   String?
+  createdByUserId   String
+  createdAt         DateTime                   @default(now())
+  cancelledAt       DateTime?
+  cancelledByUserId String?
+  cancelReason      String?
+
+  tenant          Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  asset           Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  relatedRental   Rental? @relation(fields: [relatedRentalId], references: [id], onDelete: SetNull)
+  createdByUser   User    @relation("AssetAvailabilityBlockCreatedBy", fields: [createdByUserId], references: [id])
+  cancelledByUser User?   @relation("AssetAvailabilityBlockCancelledBy", fields: [cancelledByUserId], references: [id])
+
+  @@index([tenantId, assetId, cancelledAt])
+  @@index([tenantId, startAt, endAt])
+  @@map("asset_availability_blocks")
 }
 
 /// A tenant-defined custom attribute, optionally scoped to one AssetCategory
@@ -1214,9 +1280,11 @@ model Rental {
   documents     Document[]
   invoices      Invoice[]
 
-  portalMessages    CustomerPortalMessage[]
-  extensionRequests RentalExtensionRequest[]
-  damageReports     RentalDamageReport[]
+  portalMessages     CustomerPortalMessage[]
+  extensionRequests  RentalExtensionRequest[]
+  damageReports      RentalDamageReport[]
+  availabilityBlocks AssetAvailabilityBlock[]
+  deposit            RentalDeposit?
 
   @@unique([tenantId, rentalNumber])
   @@index([tenantId, status])
@@ -1356,6 +1424,51 @@ model RentalStatusHistory {
 
   @@index([tenantId, rentalId, createdAt])
   @@map("rental_status_history")
+}
+
+/// The accounting record for a Rental's security deposit — deliberately
+/// separate from RentalItem.depositMinor (which stays exactly as-is: the
+/// *required* amount quoted/priced per item, shown as "Amount due at start"
+/// alongside the taxable rental total, see docs/DECISIONS.md). This model
+/// tracks what actually happened to that money: whether it was received, by
+/// what method, and — at return — how much was given back vs. retained and
+/// why. A refundable deposit is a balance-sheet liability while held, not
+/// taxable rental revenue (see docs/DECISIONS.md D-097); only a retained
+/// amount becomes a real charge, and that is invoiced through the normal
+/// Invoice pipeline as its own line, never silently reclassified here. One
+/// row per Rental (nullable 1:1 — most rentals have no deposit recorded
+/// until staff explicitly records receipt).
+model RentalDeposit {
+  id                  String         @id @default(uuid())
+  tenantId            String
+  rentalId            String         @unique
+  /// Snapshot of the required amount at the moment receipt was recorded
+  /// (normally the sum of RentalItem.depositMinor at that time) — frozen
+  /// for the same historical-immutability reason every other financial
+  /// snapshot in this schema is frozen.
+  requiredAmountMinor Int
+  currency            String         @db.VarChar(3)
+  receivedAt          DateTime?
+  receivedAmountMinor Int?
+  receivedMethod      PaymentMethod?
+  receivedReference   String?
+  returnedAt          DateTime?
+  returnedAmountMinor Int?
+  retainedAmountMinor Int?
+  retentionReason     String?
+  notes               String?
+  createdByUserId     String
+  updatedByUserId     String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rental        Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  createdByUser User   @relation("RentalDepositCreatedBy", fields: [createdByUserId], references: [id])
+  updatedByUser User?  @relation("RentalDepositUpdatedBy", fields: [updatedByUserId], references: [id])
+
+  @@index([tenantId, rentalId])
+  @@map("rental_deposits")
 }
 
 /// A tenant's commercial offer to a Customer — assets, generic products or

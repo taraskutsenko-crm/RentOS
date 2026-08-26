@@ -1257,7 +1257,8 @@
       "quote": "Preventivo",
       "document": "Documento",
       "signature": "Firma",
-      "other": "Altro"
+      "other": "Altro",
+      "deposit": "Deposito cauzionale"
     },
     "company": {
       "name": "Nome dell'azienda",
@@ -1336,6 +1337,18 @@
       "title": "Titolo del documento",
       "type": "Tipo di documento",
       "status": "Stato del documento"
+    },
+    "deposit": {
+      "requiredAmount": "Importo del deposito richiesto",
+      "receivedAt": "Data di ricezione del deposito",
+      "receivedAmount": "Importo del deposito ricevuto",
+      "receivedMethod": "Metodo di pagamento del deposito",
+      "receivedReference": "Riferimento di pagamento del deposito",
+      "returnedAt": "Data di restituzione del deposito",
+      "returnedAmount": "Importo del deposito restituito",
+      "retainedAmount": "Importo del deposito trattenuto",
+      "retentionReason": "Motivo della trattenuta del deposito",
+      "notes": "Note sul deposito"
     }
   },
   "contractSection": {

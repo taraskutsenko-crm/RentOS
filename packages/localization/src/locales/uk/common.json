@@ -1257,7 +1257,8 @@
       "quote": "Комерційна пропозиція",
       "document": "Документ",
       "signature": "Підпис",
-      "other": "Інше"
+      "other": "Інше",
+      "deposit": "Застава"
     },
     "company": {
       "name": "Назва компанії",
@@ -1336,6 +1337,18 @@
       "title": "Назва документа",
       "type": "Тип документа",
       "status": "Статус документа"
+    },
+    "deposit": {
+      "requiredAmount": "Необхідна сума застави",
+      "receivedAt": "Дата отримання застави",
+      "receivedAmount": "Отримана сума застави",
+      "receivedMethod": "Спосіб оплати застави",
+      "receivedReference": "Референс платежу застави",
+      "returnedAt": "Дата повернення застави",
+      "returnedAmount": "Повернена сума застави",
+      "retainedAmount": "Утримана сума застави",
+      "retentionReason": "Причина утримання застави",
+      "notes": "Примітки щодо застави"
     }
   },
   "contractSection": {

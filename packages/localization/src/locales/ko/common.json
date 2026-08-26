@@ -1257,7 +1257,8 @@
       "quote": "견적",
       "document": "문서",
       "signature": "서명",
-      "other": "기타"
+      "other": "기타",
+      "deposit": "보증금"
     },
     "company": {
       "name": "회사명",
@@ -1336,6 +1337,18 @@
       "title": "문서 제목",
       "type": "문서 유형",
       "status": "문서 상태"
+    },
+    "deposit": {
+      "requiredAmount": "필요 보증금 금액",
+      "receivedAt": "보증금 수령일",
+      "receivedAmount": "수령한 보증금 금액",
+      "receivedMethod": "보증금 결제 방법",
+      "receivedReference": "보증금 결제 참조번호",
+      "returnedAt": "보증금 반환일",
+      "returnedAmount": "반환된 보증금 금액",
+      "retainedAmount": "보류된 보증금 금액",
+      "retentionReason": "보증금 보류 사유",
+      "notes": "보증금 관련 메모"
     }
   },
   "contractSection": {

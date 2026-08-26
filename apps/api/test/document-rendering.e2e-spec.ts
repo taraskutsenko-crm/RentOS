@@ -1587,6 +1587,28 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .expect(201);
     const rentalId = rental.body.id as string;
 
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${rentalId}/deposit/receive`)
+      .set("Cookie", accessCookie)
+      .send({
+        receivedAt: "2027-01-10T09:00:00.000Z",
+        receivedAmountMinor: 10000,
+        receivedMethod: "BANK_TRANSFER",
+        receivedReference: "TRX-VAR-001",
+        notes: "Deposit received in cash-equivalent bank transfer at handover.",
+      })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${rentalId}/deposit/return`)
+      .set("Cookie", accessCookie)
+      .send({
+        returnedAt: "2027-01-12T18:00:00.000Z",
+        returnedAmountMinor: 8000,
+        retainedAmountMinor: 2000,
+        retentionReason: "Minor cosmetic damage",
+      })
+      .expect(201);
+
     const quote = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/quotes`)
       .set("Cookie", accessCookie)

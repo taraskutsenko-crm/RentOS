@@ -1257,7 +1257,8 @@
       "quote": "报价",
       "document": "文档",
       "signature": "签署",
-      "other": "其他"
+      "other": "其他",
+      "deposit": "押金"
     },
     "company": {
       "name": "公司名称",
@@ -1336,6 +1337,18 @@
       "title": "文档标题",
       "type": "文档类型",
       "status": "文档状态"
+    },
+    "deposit": {
+      "requiredAmount": "所需押金金额",
+      "receivedAt": "押金收取日期",
+      "receivedAmount": "已收押金金额",
+      "receivedMethod": "押金支付方式",
+      "receivedReference": "押金支付参考号",
+      "returnedAt": "押金退还日期",
+      "returnedAmount": "已退还押金金额",
+      "retainedAmount": "已扣留押金金额",
+      "retentionReason": "押金扣留原因",
+      "notes": "押金备注"
     }
   },
   "contractSection": {

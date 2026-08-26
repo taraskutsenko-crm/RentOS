@@ -19,6 +19,7 @@ export type DocumentVariableGroup =
   | "asset"
   | "rental"
   | "quote"
+  | "deposit"
   | "document"
   | "signature"
   | "other";
@@ -158,6 +159,53 @@ export const DOCUMENT_VARIABLES: DocumentVariableMeta[] = [
     isRawHtml: true,
   },
 
+  {
+    path: "deposit.requiredAmount",
+    group: "deposit",
+    labelKey: "documentVariable.deposit.requiredAmount",
+  },
+  {
+    path: "deposit.receivedAt",
+    group: "deposit",
+    labelKey: "documentVariable.deposit.receivedAt",
+  },
+  {
+    path: "deposit.receivedAmount",
+    group: "deposit",
+    labelKey: "documentVariable.deposit.receivedAmount",
+  },
+  {
+    path: "deposit.receivedMethod",
+    group: "deposit",
+    labelKey: "documentVariable.deposit.receivedMethod",
+  },
+  {
+    path: "deposit.receivedReference",
+    group: "deposit",
+    labelKey: "documentVariable.deposit.receivedReference",
+  },
+  {
+    path: "deposit.returnedAt",
+    group: "deposit",
+    labelKey: "documentVariable.deposit.returnedAt",
+  },
+  {
+    path: "deposit.returnedAmount",
+    group: "deposit",
+    labelKey: "documentVariable.deposit.returnedAmount",
+  },
+  {
+    path: "deposit.retainedAmount",
+    group: "deposit",
+    labelKey: "documentVariable.deposit.retainedAmount",
+  },
+  {
+    path: "deposit.retentionReason",
+    group: "deposit",
+    labelKey: "documentVariable.deposit.retentionReason",
+  },
+  { path: "deposit.notes", group: "deposit", labelKey: "documentVariable.deposit.notes" },
+
   { path: "today", group: "other", labelKey: "documentVariable.other.today" },
   { path: "signature.company", group: "signature", labelKey: "documentVariable.signature.company" },
   {
@@ -182,6 +230,7 @@ export const DOCUMENT_VARIABLE_GROUP_LABEL_KEYS: Record<DocumentVariableGroup, s
   asset: "documentVariable.group.asset",
   rental: "documentVariable.group.rental",
   quote: "documentVariable.group.quote",
+  deposit: "documentVariable.group.deposit",
   document: "documentVariable.group.document",
   signature: "documentVariable.group.signature",
   other: "documentVariable.group.other",
@@ -198,6 +247,7 @@ export function groupDocumentVariables(): Array<{
     "asset",
     "rental",
     "quote",
+    "deposit",
     "document",
     "signature",
     "other",

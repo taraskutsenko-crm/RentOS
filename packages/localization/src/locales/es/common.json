@@ -1257,7 +1257,8 @@
       "quote": "Presupuesto",
       "document": "Documento",
       "signature": "Firma",
-      "other": "Otros"
+      "other": "Otros",
+      "deposit": "Depósito"
     },
     "company": {
       "name": "Nombre de la empresa",
@@ -1336,6 +1337,18 @@
       "title": "Título del documento",
       "type": "Tipo de documento",
       "status": "Estado del documento"
+    },
+    "deposit": {
+      "requiredAmount": "Importe de depósito requerido",
+      "receivedAt": "Fecha de recepción del depósito",
+      "receivedAmount": "Importe de depósito recibido",
+      "receivedMethod": "Método de pago del depósito",
+      "receivedReference": "Referencia de pago del depósito",
+      "returnedAt": "Fecha de devolución del depósito",
+      "returnedAmount": "Importe de depósito devuelto",
+      "retainedAmount": "Importe de depósito retenido",
+      "retentionReason": "Motivo de retención del depósito",
+      "notes": "Notas del depósito"
     }
   },
   "contractSection": {

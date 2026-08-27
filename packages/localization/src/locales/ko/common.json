@@ -868,6 +868,9 @@
       "page": "페이지",
       "of": "/",
       "amountDue": "시작 시 지급 금액"
+    },
+    "email": {
+      "deliveryHistory": "이메일 전송 기록"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "이 사용자 지정 문서 유형의 이름을 입력하세요"
     },
-    "print": "인쇄"
+    "print": "인쇄",
+    "attachments": {
+      "title": "첨부 파일",
+      "empty": "아직 첨부 파일이 없습니다.",
+      "upload": "업로드",
+      "delete": "삭제",
+      "captionPlaceholder": "캡션(선택 사항)",
+      "category": {
+        "HANDOVER_CONDITION": "인계 시 상태",
+        "RETURN_CONDITION": "반납 시 상태",
+        "DAMAGE": "손상",
+        "OTHER": "기타"
+      }
+    }
   },
   "documentTemplate": {
     "title": "문서 템플릿",
@@ -1483,7 +1499,13 @@
       "remaining": "미결제 잔액",
       "notes": "메모"
     },
-    "saved": "청구서가 저장되었습니다"
+    "saved": "청구서가 저장되었습니다",
+    "email": {
+      "title": "송장 이메일",
+      "send": "이메일 보내기",
+      "deliveryHistory": "이메일 전송 기록",
+      "noRecipient": "이 고객에게 등록된 이메일이 없습니다."
+    }
   },
   "bankAccount": {
     "add": "계좌 추가",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "KSeF 인증 토큰을 붙여넣으세요",
       "connect": "연결",
       "disconnect": "연결 해제"
+    },
+    "email": {
+      "title": "이메일",
+      "status": "상태",
+      "hint": "이메일 제공업체는 환경 수준(SMTP_* 변수)에서 구성됩니다. 이 단계에서는 테넌트별 자격 증명 관리를 지원하지 않습니다.",
+      "statuses": {
+        "NOT_CONFIGURED": "구성되지 않음",
+        "CONFIGURED": "구성됨",
+        "CONNECTION_TEST_FAILED": "연결 테스트 실패",
+        "READY": "준비됨"
+      }
     }
   }
 }

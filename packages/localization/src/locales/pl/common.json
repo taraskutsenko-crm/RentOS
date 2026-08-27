@@ -868,6 +868,9 @@
       "page": "Strona",
       "of": "z",
       "amountDue": "Kwota do zapłaty na start"
+    },
+    "email": {
+      "deliveryHistory": "Historia wysyłki e-maili"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "Podaj nazwę tego niestandardowego typu dokumentu"
     },
-    "print": "Drukuj"
+    "print": "Drukuj",
+    "attachments": {
+      "title": "Załączniki",
+      "empty": "Brak załączników.",
+      "upload": "Prześlij",
+      "delete": "Usuń",
+      "captionPlaceholder": "Podpis (opcjonalnie)",
+      "category": {
+        "HANDOVER_CONDITION": "Stan przy przekazaniu",
+        "RETURN_CONDITION": "Stan przy zwrocie",
+        "DAMAGE": "Uszkodzenie",
+        "OTHER": "Inne"
+      }
+    }
   },
   "documentTemplate": {
     "title": "Szablony dokumentów",
@@ -1483,7 +1499,13 @@
       "remaining": "Do zapłaty",
       "notes": "Uwagi"
     },
-    "saved": "Faktura zapisana"
+    "saved": "Faktura zapisana",
+    "email": {
+      "title": "E-mail faktury",
+      "send": "Wyślij e-mailem",
+      "deliveryHistory": "Historia wysyłki e-maili",
+      "noRecipient": "Ten klient nie ma zapisanego adresu e-mail."
+    }
   },
   "bankAccount": {
     "add": "Dodaj rachunek bankowy",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "Wklej token autoryzacyjny KSeF",
       "connect": "Połącz",
       "disconnect": "Rozłącz"
+    },
+    "email": {
+      "title": "E-mail",
+      "status": "Status",
+      "hint": "Dostawca poczty e-mail jest konfigurowany na poziomie środowiska (zmienne SMTP_*). Zarządzanie danymi uwierzytelniającymi na poziomie najemcy nie jest jeszcze obsługiwane.",
+      "statuses": {
+        "NOT_CONFIGURED": "Nieskonfigurowane",
+        "CONFIGURED": "Skonfigurowane",
+        "CONNECTION_TEST_FAILED": "Test połączenia nie powiódł się",
+        "READY": "Gotowe"
+      }
     }
   }
 }

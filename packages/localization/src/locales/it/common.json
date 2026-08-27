@@ -868,6 +868,9 @@
       "page": "Pagina",
       "of": "di",
       "amountDue": "Importo dovuto all'inizio"
+    },
+    "email": {
+      "deliveryHistory": "Cronologia invio email"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "Inserisci un nome per questo tipo di documento personalizzato"
     },
-    "print": "Stampa"
+    "print": "Stampa",
+    "attachments": {
+      "title": "Allegati",
+      "empty": "Nessun allegato ancora.",
+      "upload": "Carica",
+      "delete": "Rimuovi",
+      "captionPlaceholder": "Didascalia (opzionale)",
+      "category": {
+        "HANDOVER_CONDITION": "Condizione alla consegna",
+        "RETURN_CONDITION": "Condizione alla restituzione",
+        "DAMAGE": "Danno",
+        "OTHER": "Altro"
+      }
+    }
   },
   "documentTemplate": {
     "title": "Modelli di documento",
@@ -1483,7 +1499,13 @@
       "remaining": "Residuo",
       "notes": "Note"
     },
-    "saved": "Fattura salvata"
+    "saved": "Fattura salvata",
+    "email": {
+      "title": "Email della fattura",
+      "send": "Invia email",
+      "deliveryHistory": "Cronologia invio email",
+      "noRecipient": "Questo cliente non ha un'email registrata."
+    }
   },
   "bankAccount": {
     "add": "Aggiungi conto bancario",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "Incolla il tuo token di autorizzazione KSeF",
       "connect": "Connetti",
       "disconnect": "Disconnetti"
+    },
+    "email": {
+      "title": "Email",
+      "status": "Stato",
+      "hint": "Il provider email è configurato a livello di ambiente (variabili SMTP_*). Le credenziali gestite dal tenant non sono supportate in questa fase.",
+      "statuses": {
+        "NOT_CONFIGURED": "Non configurato",
+        "CONFIGURED": "Configurato",
+        "CONNECTION_TEST_FAILED": "Test di connessione non riuscito",
+        "READY": "Pronto"
+      }
     }
   }
 }

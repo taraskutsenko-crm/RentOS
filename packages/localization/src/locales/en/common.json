@@ -868,6 +868,9 @@
       "page": "Page",
       "of": "of",
       "amountDue": "Amount due at start"
+    },
+    "email": {
+      "deliveryHistory": "Email delivery history"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "Enter a name for this custom document type"
     },
-    "print": "Print"
+    "print": "Print",
+    "attachments": {
+      "title": "Attachments",
+      "empty": "No attachments yet.",
+      "upload": "Upload",
+      "delete": "Remove",
+      "captionPlaceholder": "Caption (optional)",
+      "category": {
+        "HANDOVER_CONDITION": "Handover condition",
+        "RETURN_CONDITION": "Return condition",
+        "DAMAGE": "Damage",
+        "OTHER": "Other"
+      }
+    }
   },
   "documentTemplate": {
     "title": "Document templates",
@@ -1475,7 +1491,13 @@
       "remaining": "Remaining",
       "notes": "Notes"
     },
-    "saved": "Invoice saved"
+    "saved": "Invoice saved",
+    "email": {
+      "title": "Invoice email",
+      "send": "Send email",
+      "deliveryHistory": "Email delivery history",
+      "noRecipient": "This customer has no email on file."
+    }
   },
   "bankAccount": {
     "add": "Add bank account",
@@ -1544,6 +1566,17 @@
       "credentialsPlaceholder": "Paste your KSeF authorization token",
       "connect": "Connect",
       "disconnect": "Disconnect"
+    },
+    "email": {
+      "title": "Email",
+      "status": "Status",
+      "hint": "The email provider is configured at the environment level (SMTP_* variables). Tenant-managed credentials aren't supported in this phase.",
+      "statuses": {
+        "NOT_CONFIGURED": "Not configured",
+        "CONFIGURED": "Configured",
+        "CONNECTION_TEST_FAILED": "Connection test failed",
+        "READY": "Ready"
+      }
     }
   },
   "timeline": {

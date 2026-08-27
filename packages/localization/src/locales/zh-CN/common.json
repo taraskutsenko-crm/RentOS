@@ -868,6 +868,9 @@
       "page": "第",
       "of": "页，共",
       "amountDue": "起租时应付金额"
+    },
+    "email": {
+      "deliveryHistory": "邮件发送历史"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "请输入该自定义文档类型的名称"
     },
-    "print": "打印"
+    "print": "打印",
+    "attachments": {
+      "title": "附件",
+      "empty": "暂无附件。",
+      "upload": "上传",
+      "delete": "移除",
+      "captionPlaceholder": "说明（可选）",
+      "category": {
+        "HANDOVER_CONDITION": "交接时状况",
+        "RETURN_CONDITION": "归还时状况",
+        "DAMAGE": "损坏",
+        "OTHER": "其他"
+      }
+    }
   },
   "documentTemplate": {
     "title": "文档模板",
@@ -1483,7 +1499,13 @@
       "remaining": "尚欠金额",
       "notes": "备注"
     },
-    "saved": "发票已保存"
+    "saved": "发票已保存",
+    "email": {
+      "title": "发票邮件",
+      "send": "发送邮件",
+      "deliveryHistory": "邮件发送历史",
+      "noRecipient": "该客户没有登记邮箱。"
+    }
   },
   "bankAccount": {
     "add": "添加银行账户",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "粘贴您的 KSeF 授权令牌",
       "connect": "连接",
       "disconnect": "断开连接"
+    },
+    "email": {
+      "title": "电子邮件",
+      "status": "状态",
+      "hint": "邮件服务提供商在环境级别配置（SMTP_* 变量）。此阶段尚不支持按租户管理凭据。",
+      "statuses": {
+        "NOT_CONFIGURED": "未配置",
+        "CONFIGURED": "已配置",
+        "CONNECTION_TEST_FAILED": "连接测试失败",
+        "READY": "已就绪"
+      }
     }
   }
 }

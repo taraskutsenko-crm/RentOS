@@ -868,6 +868,9 @@
       "page": "Page",
       "of": "sur",
       "amountDue": "Montant dû au départ"
+    },
+    "email": {
+      "deliveryHistory": "Historique d'envoi des e-mails"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "Saisissez un nom pour ce type de document personnalisé"
     },
-    "print": "Imprimer"
+    "print": "Imprimer",
+    "attachments": {
+      "title": "Pièces jointes",
+      "empty": "Aucune pièce jointe pour le moment.",
+      "upload": "Téléverser",
+      "delete": "Supprimer",
+      "captionPlaceholder": "Légende (facultatif)",
+      "category": {
+        "HANDOVER_CONDITION": "État à la remise",
+        "RETURN_CONDITION": "État au retour",
+        "DAMAGE": "Dommage",
+        "OTHER": "Autre"
+      }
+    }
   },
   "documentTemplate": {
     "title": "Modèles de documents",
@@ -1483,7 +1499,13 @@
       "remaining": "Restant dû",
       "notes": "Notes"
     },
-    "saved": "Facture enregistrée"
+    "saved": "Facture enregistrée",
+    "email": {
+      "title": "E-mail de la facture",
+      "send": "Envoyer par e-mail",
+      "deliveryHistory": "Historique d'envoi des e-mails",
+      "noRecipient": "Ce client n'a pas d'e-mail enregistré."
+    }
   },
   "bankAccount": {
     "add": "Ajouter un compte bancaire",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "Collez votre jeton d'autorisation KSeF",
       "connect": "Connecter",
       "disconnect": "Déconnecter"
+    },
+    "email": {
+      "title": "E-mail",
+      "status": "État",
+      "hint": "Le fournisseur d'e-mail est configuré au niveau de l'environnement (variables SMTP_*). Les identifiants gérés par le locataire ne sont pas pris en charge à ce stade.",
+      "statuses": {
+        "NOT_CONFIGURED": "Non configuré",
+        "CONFIGURED": "Configuré",
+        "CONNECTION_TEST_FAILED": "Échec du test de connexion",
+        "READY": "Prêt"
+      }
     }
   }
 }

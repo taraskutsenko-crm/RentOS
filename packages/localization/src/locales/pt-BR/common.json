@@ -868,6 +868,9 @@
       "page": "Página",
       "of": "de",
       "amountDue": "Valor devido no início"
+    },
+    "email": {
+      "deliveryHistory": "Histórico de envio de e-mail"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "Digite um nome para este tipo de documento personalizado"
     },
-    "print": "Imprimir"
+    "print": "Imprimir",
+    "attachments": {
+      "title": "Anexos",
+      "empty": "Ainda sem anexos.",
+      "upload": "Enviar",
+      "delete": "Remover",
+      "captionPlaceholder": "Legenda (opcional)",
+      "category": {
+        "HANDOVER_CONDITION": "Condição na entrega",
+        "RETURN_CONDITION": "Condição na devolução",
+        "DAMAGE": "Dano",
+        "OTHER": "Outro"
+      }
+    }
   },
   "documentTemplate": {
     "title": "Modelos de documento",
@@ -1483,7 +1499,13 @@
       "remaining": "Saldo devedor",
       "notes": "Observações"
     },
-    "saved": "Fatura salva"
+    "saved": "Fatura salva",
+    "email": {
+      "title": "E-mail da fatura",
+      "send": "Enviar e-mail",
+      "deliveryHistory": "Histórico de envio de e-mail",
+      "noRecipient": "Este cliente não tem e-mail cadastrado."
+    }
   },
   "bankAccount": {
     "add": "Adicionar conta bancária",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "Cole seu token de autorização do KSeF",
       "connect": "Conectar",
       "disconnect": "Desconectar"
+    },
+    "email": {
+      "title": "E-mail",
+      "status": "Status",
+      "hint": "O provedor de e-mail é configurado no nível do ambiente (variáveis SMTP_*). Credenciais gerenciadas por locatário não são suportadas nesta fase.",
+      "statuses": {
+        "NOT_CONFIGURED": "Não configurado",
+        "CONFIGURED": "Configurado",
+        "CONNECTION_TEST_FAILED": "Falha no teste de conexão",
+        "READY": "Pronto"
+      }
     }
   }
 }

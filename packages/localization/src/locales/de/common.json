@@ -868,6 +868,9 @@
       "page": "Seite",
       "of": "von",
       "amountDue": "Fälliger Betrag zu Beginn"
+    },
+    "email": {
+      "deliveryHistory": "E-Mail-Zustellverlauf"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "Geben Sie einen Namen für diesen benutzerdefinierten Dokumenttyp ein"
     },
-    "print": "Drucken"
+    "print": "Drucken",
+    "attachments": {
+      "title": "Anhänge",
+      "empty": "Noch keine Anhänge.",
+      "upload": "Hochladen",
+      "delete": "Entfernen",
+      "captionPlaceholder": "Beschriftung (optional)",
+      "category": {
+        "HANDOVER_CONDITION": "Zustand bei Übergabe",
+        "RETURN_CONDITION": "Zustand bei Rückgabe",
+        "DAMAGE": "Schaden",
+        "OTHER": "Sonstiges"
+      }
+    }
   },
   "documentTemplate": {
     "title": "Dokumentvorlagen",
@@ -1483,7 +1499,13 @@
       "remaining": "Offener Betrag",
       "notes": "Notizen"
     },
-    "saved": "Rechnung gespeichert"
+    "saved": "Rechnung gespeichert",
+    "email": {
+      "title": "Rechnungs-E-Mail",
+      "send": "Per E-Mail senden",
+      "deliveryHistory": "E-Mail-Zustellverlauf",
+      "noRecipient": "Für den Kunden ist keine E-Mail-Adresse hinterlegt."
+    }
   },
   "bankAccount": {
     "add": "Bankkonto hinzufügen",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "KSeF-Autorisierungstoken einfügen",
       "connect": "Verbinden",
       "disconnect": "Trennen"
+    },
+    "email": {
+      "title": "E-Mail",
+      "status": "Status",
+      "hint": "Der E-Mail-Provider wird auf Umgebungsebene konfiguriert (SMTP_*-Variablen). Mandantenspezifische Zugangsdaten werden in dieser Phase nicht unterstützt.",
+      "statuses": {
+        "NOT_CONFIGURED": "Nicht konfiguriert",
+        "CONFIGURED": "Konfiguriert",
+        "CONNECTION_TEST_FAILED": "Verbindungstest fehlgeschlagen",
+        "READY": "Bereit"
+      }
     }
   }
 }

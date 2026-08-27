@@ -868,6 +868,9 @@
       "page": "ページ",
       "of": "/",
       "amountDue": "開始時のお支払い金額"
+    },
+    "email": {
+      "deliveryHistory": "メール送信履歴"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "このカスタムドキュメント種類の名前を入力してください"
     },
-    "print": "印刷"
+    "print": "印刷",
+    "attachments": {
+      "title": "添付ファイル",
+      "empty": "添付ファイルはまだありません。",
+      "upload": "アップロード",
+      "delete": "削除",
+      "captionPlaceholder": "キャプション（任意）",
+      "category": {
+        "HANDOVER_CONDITION": "引き渡し時の状態",
+        "RETURN_CONDITION": "返却時の状態",
+        "DAMAGE": "損傷",
+        "OTHER": "その他"
+      }
+    }
   },
   "documentTemplate": {
     "title": "ドキュメントテンプレート",
@@ -1483,7 +1499,13 @@
       "remaining": "残額",
       "notes": "備考"
     },
-    "saved": "請求書を保存しました"
+    "saved": "請求書を保存しました",
+    "email": {
+      "title": "請求書メール",
+      "send": "メールを送信",
+      "deliveryHistory": "メール送信履歴",
+      "noRecipient": "この顧客にはメールアドレスが登録されていません。"
+    }
   },
   "bankAccount": {
     "add": "銀行口座を追加",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "KSeFの認証トークンを貼り付けてください",
       "connect": "接続",
       "disconnect": "切断"
+    },
+    "email": {
+      "title": "メール",
+      "status": "状態",
+      "hint": "メールプロバイダーは環境レベル（SMTP_*変数）で設定されます。この段階ではテナントごとの認証情報管理はサポートされていません。",
+      "statuses": {
+        "NOT_CONFIGURED": "未設定",
+        "CONFIGURED": "設定済み",
+        "CONNECTION_TEST_FAILED": "接続テストに失敗しました",
+        "READY": "準備完了"
+      }
     }
   }
 }

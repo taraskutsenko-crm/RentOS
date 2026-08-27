@@ -868,6 +868,9 @@
       "page": "Strana",
       "of": "z",
       "amountDue": "Splatná částka na začátku"
+    },
+    "email": {
+      "deliveryHistory": "Historie odeslání e-mailu"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "Zadejte název tohoto vlastního typu dokumentu"
     },
-    "print": "Tisk"
+    "print": "Tisk",
+    "attachments": {
+      "title": "Přílohy",
+      "empty": "Zatím žádné přílohy.",
+      "upload": "Nahrát",
+      "delete": "Odstranit",
+      "captionPlaceholder": "Popisek (nepovinné)",
+      "category": {
+        "HANDOVER_CONDITION": "Stav při předání",
+        "RETURN_CONDITION": "Stav při vrácení",
+        "DAMAGE": "Poškození",
+        "OTHER": "Jiné"
+      }
+    }
   },
   "documentTemplate": {
     "title": "Šablony dokumentů",
@@ -1483,7 +1499,13 @@
       "remaining": "Zbývá uhradit",
       "notes": "Poznámky"
     },
-    "saved": "Faktura byla uložena"
+    "saved": "Faktura byla uložena",
+    "email": {
+      "title": "E-mail faktury",
+      "send": "Odeslat e-mailem",
+      "deliveryHistory": "Historie odeslání e-mailu",
+      "noRecipient": "Zákazník nemá uvedený e-mail."
+    }
   },
   "bankAccount": {
     "add": "Přidat bankovní účet",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "Vložte svůj autorizační token KSeF",
       "connect": "Připojit",
       "disconnect": "Odpojit"
+    },
+    "email": {
+      "title": "E-mail",
+      "status": "Stav",
+      "hint": "Poštovní server se konfiguruje na úrovni prostředí (proměnné SMTP_*). V této fázi nelze přihlašovací údaje spravovat na úrovni tenantu.",
+      "statuses": {
+        "NOT_CONFIGURED": "Nenakonfigurováno",
+        "CONFIGURED": "Nakonfigurováno",
+        "CONNECTION_TEST_FAILED": "Test připojení selhal",
+        "READY": "Připraveno"
+      }
     }
   }
 }

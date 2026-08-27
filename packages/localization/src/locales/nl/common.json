@@ -868,6 +868,9 @@
       "page": "Pagina",
       "of": "van",
       "amountDue": "Verschuldigd bedrag bij start"
+    },
+    "email": {
+      "deliveryHistory": "E-mailbezorggeschiedenis"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "Voer een naam in voor dit aangepaste documenttype"
     },
-    "print": "Afdrukken"
+    "print": "Afdrukken",
+    "attachments": {
+      "title": "Bijlagen",
+      "empty": "Nog geen bijlagen.",
+      "upload": "Uploaden",
+      "delete": "Verwijderen",
+      "captionPlaceholder": "Bijschrift (optioneel)",
+      "category": {
+        "HANDOVER_CONDITION": "Staat bij overdracht",
+        "RETURN_CONDITION": "Staat bij teruggave",
+        "DAMAGE": "Schade",
+        "OTHER": "Overig"
+      }
+    }
   },
   "documentTemplate": {
     "title": "Documentsjablonen",
@@ -1483,7 +1499,13 @@
       "remaining": "Openstaand",
       "notes": "Notities"
     },
-    "saved": "Factuur opgeslagen"
+    "saved": "Factuur opgeslagen",
+    "email": {
+      "title": "Factuur-e-mail",
+      "send": "E-mail verzenden",
+      "deliveryHistory": "E-mailbezorggeschiedenis",
+      "noRecipient": "Voor deze klant is geen e-mailadres bekend."
+    }
   },
   "bankAccount": {
     "add": "Bankrekening toevoegen",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "Plak uw KSeF-autorisatietoken",
       "connect": "Verbinden",
       "disconnect": "Verbinding verbreken"
+    },
+    "email": {
+      "title": "E-mail",
+      "status": "Status",
+      "hint": "De e-mailprovider wordt op omgevingsniveau geconfigureerd (SMTP_*-variabelen). Tenant-beheerde inloggegevens worden in deze fase niet ondersteund.",
+      "statuses": {
+        "NOT_CONFIGURED": "Niet geconfigureerd",
+        "CONFIGURED": "Geconfigureerd",
+        "CONNECTION_TEST_FAILED": "Verbindingstest mislukt",
+        "READY": "Gereed"
+      }
     }
   }
 }

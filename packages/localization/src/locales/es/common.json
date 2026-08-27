@@ -868,6 +868,9 @@
       "page": "Página",
       "of": "de",
       "amountDue": "Importe a pagar al inicio"
+    },
+    "email": {
+      "deliveryHistory": "Historial de envío de correo"
     }
   },
   "document": {
@@ -1025,7 +1028,20 @@
     "errors": {
       "customTypeNameRequired": "Introduce un nombre para este tipo de documento personalizado"
     },
-    "print": "Imprimir"
+    "print": "Imprimir",
+    "attachments": {
+      "title": "Archivos adjuntos",
+      "empty": "Aún no hay archivos adjuntos.",
+      "upload": "Subir",
+      "delete": "Eliminar",
+      "captionPlaceholder": "Descripción (opcional)",
+      "category": {
+        "HANDOVER_CONDITION": "Estado en la entrega",
+        "RETURN_CONDITION": "Estado en la devolución",
+        "DAMAGE": "Daño",
+        "OTHER": "Otro"
+      }
+    }
   },
   "documentTemplate": {
     "title": "Plantillas de documentos",
@@ -1483,7 +1499,13 @@
       "remaining": "Pendiente",
       "notes": "Notas"
     },
-    "saved": "Factura guardada"
+    "saved": "Factura guardada",
+    "email": {
+      "title": "Correo de la factura",
+      "send": "Enviar por correo",
+      "deliveryHistory": "Historial de envío de correo",
+      "noRecipient": "Este cliente no tiene correo registrado."
+    }
   },
   "bankAccount": {
     "add": "Añadir cuenta bancaria",
@@ -1552,6 +1574,17 @@
       "credentialsPlaceholder": "Pega tu token de autorización de KSeF",
       "connect": "Conectar",
       "disconnect": "Desconectar"
+    },
+    "email": {
+      "title": "Correo electrónico",
+      "status": "Estado",
+      "hint": "El proveedor de correo se configura a nivel de entorno (variables SMTP_*). En esta fase no se admiten credenciales gestionadas por el inquilino.",
+      "statuses": {
+        "NOT_CONFIGURED": "No configurado",
+        "CONFIGURED": "Configurado",
+        "CONNECTION_TEST_FAILED": "Falló la prueba de conexión",
+        "READY": "Listo"
+      }
     }
   }
 }

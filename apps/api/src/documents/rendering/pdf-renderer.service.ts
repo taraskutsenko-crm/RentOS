@@ -1,6 +1,20 @@
 import { Injectable, type OnModuleDestroy } from "@nestjs/common";
 import puppeteer, { type Browser } from "puppeteer";
 
+// Puppeteer replaces `class="title"` with the rendered page's own
+// `document.title` (each renderer sets this to the document/invoice
+// number — see document-renderer.service.ts's wrapDocumentHtml and
+// invoice-renderer.service.ts) and `pageNumber`/`totalPages` with the
+// live page count, so this one static template covers every document
+// type without per-type wiring (D-107).
+const HEADER_TEMPLATE = `<div style="width:100%;font-size:9px;color:#8b8f99;padding:0 16mm;font-family:Arial,Helvetica,sans-serif;">
+  <span class="title"></span>
+</div>`;
+
+const FOOTER_TEMPLATE = `<div style="width:100%;font-size:9px;color:#8b8f99;padding:0 16mm;text-align:right;font-family:Arial,Helvetica,sans-serif;">
+  <span class="pageNumber"></span> / <span class="totalPages"></span>
+</div>`;
+
 /**
  * Converts a fully-resolved HTML document (see DocumentRendererService)
  * into a PDF buffer via a headless Chromium instance (Puppeteer) — the
@@ -30,10 +44,18 @@ export class PdfRendererService implements OnModuleDestroy {
       // every render is a self-contained HTML string with inline CSS and no
       // external resources (see resolveVariables' no-raw-HTML-injection note).
       await page.setContent(html, { waitUntil: "load" });
+      // Reserves slim top/bottom margins for a repeated running header
+      // (the document's own <title> — its number) and a page-number
+      // footer on every page of a multi-page render (D-107). Left/right
+      // stay 0: unchanged from before, since .doc-page's own CSS padding
+      // (see base-document-css.ts) already supplies the horizontal margin.
       const pdf = await page.pdf({
         format: "a4",
         printBackground: true,
-        margin: { top: "0", right: "0", bottom: "0", left: "0" },
+        margin: { top: "36px", right: "0", bottom: "32px", left: "0" },
+        displayHeaderFooter: true,
+        headerTemplate: HEADER_TEMPLATE,
+        footerTemplate: FOOTER_TEMPLATE,
       });
       return Buffer.from(pdf);
     } finally {

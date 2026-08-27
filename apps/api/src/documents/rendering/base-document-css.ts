@@ -232,11 +232,27 @@ table.doc-table tr:last-child td {
   margin: 0;
 }
 
-/* Keeps a clause/table row from being split across a PDF page boundary
-   (TASK-0008 Part 2 follow-up: the 18-section contract template). */
+/* Keeps a clause/table row/signature block from being split across a PDF
+   page boundary (TASK-0008 Part 2 follow-up: the 18-section contract
+   template; signature-row addition per DECISIONS.md D-107 multi-page pass). */
 .doc-section,
+.doc-signature-row,
 table.doc-table tr {
   page-break-inside: avoid;
+}
+
+/* Never leave a section heading stranded alone at the bottom of a page,
+   separated from the content it introduces (D-107). */
+.doc-section__title {
+  page-break-after: avoid;
+}
+
+/* Keeps at least a few lines of a paragraph together on either side of a
+   page break instead of stranding a single orphan/widow line (D-107). */
+.doc-clause,
+.doc-notes {
+  orphans: 3;
+  widows: 3;
 }
 
 /* Puppeteer's PDF render (margin: 0 at the JS level, see the @page comment

@@ -28,9 +28,22 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      # Genuinely reachable for GET /health's real TCP connectivity check
+      # (see health.controller.ts / DECISIONS.md D-109) — no application
+      # code connects to Redis for anything else yet.
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     env:
       DATABASE_URL: postgresql://rentos:rentos@localhost:5432/rentos_test?schema=public
+      REDIS_URL: redis://localhost:6379
 
     steps:
       - name: Checkout

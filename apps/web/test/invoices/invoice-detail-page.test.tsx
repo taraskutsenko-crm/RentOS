@@ -5,9 +5,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import InvoiceDetailPage from "../../src/app/app/invoices/[id]/page";
 import { renderWithProviders } from "../test-utils";
 
+const searchParamsMock = vi.fn(() => new URLSearchParams());
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   useParams: () => ({ id: "invoice-1" }),
+  useSearchParams: () => searchParamsMock(),
 }));
 
 const useCurrentTenantIdMock = vi.fn();
@@ -42,12 +44,14 @@ const useUpdateInvoiceMock = vi.fn();
 const useIssueInvoiceMock = vi.fn();
 const useSendInvoiceMock = vi.fn();
 const useCancelInvoiceMock = vi.fn();
+const useInvoicePreviewMock = vi.fn();
 vi.mock("../../src/hooks/use-invoices", () => ({
   useInvoice: (...args: unknown[]) => useInvoiceMock(...args),
   useUpdateInvoice: () => useUpdateInvoiceMock(),
   useIssueInvoice: () => useIssueInvoiceMock(),
   useSendInvoice: () => useSendInvoiceMock(),
   useCancelInvoice: () => useCancelInvoiceMock(),
+  useInvoicePreview: (...args: unknown[]) => useInvoicePreviewMock(...args),
   invoicePdfUrl: () => "https://example.com/invoice.pdf",
 }));
 
@@ -113,6 +117,7 @@ function baseInvoice(status: string) {
 
 describe("InvoiceDetailPage", () => {
   beforeEach(() => {
+    searchParamsMock.mockReturnValue(new URLSearchParams());
     useCurrentTenantIdMock.mockReturnValue(["tenant-1", vi.fn()]);
     usePermissionMock.mockReturnValue(true);
     useCustomersMock.mockReturnValue({ data: { items: [] } });
@@ -122,6 +127,7 @@ describe("InvoiceDetailPage", () => {
     useIssueInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useSendInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useCancelInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useInvoicePreviewMock.mockReturnValue({ data: { html: "<html><body>Invoice</body></html>" } });
   });
 
   // Regression: "Invoice Save button does nothing" — the mutation always
@@ -153,6 +159,56 @@ describe("InvoiceDetailPage", () => {
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
     expect(screen.queryByText("Invoice saved")).not.toBeInTheDocument();
+  });
+
+  // "Create additional charge" from Return findings (see DECISIONS.md
+  // D-107) — a rentals/[id]/page.tsx link pre-fills exactly one extra blank
+  // line's description via ?addChargeDescription=..., leaving amount/tax
+  // for staff to enter explicitly, never invented.
+  it("pre-fills one extra line with the addChargeDescription query param on a DRAFT invoice", () => {
+    searchParamsMock.mockReturnValue(new URLSearchParams("addChargeDescription=Damage%20fee"));
+    useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useInvoiceMock.mockReturnValue({ data: baseInvoice("DRAFT"), isLoading: false });
+
+    renderWithProviders(<InvoiceDetailPage />);
+
+    expect(screen.getByDisplayValue("Damage fee")).toBeInTheDocument();
+    // The pre-existing rental line item is untouched, not replaced.
+    expect(screen.getByDisplayValue("Generator A")).toBeInTheDocument();
+  });
+
+  it("ignores addChargeDescription once the invoice is no longer DRAFT", () => {
+    searchParamsMock.mockReturnValue(new URLSearchParams("addChargeDescription=Damage%20fee"));
+    useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useInvoiceMock.mockReturnValue({ data: baseInvoice("ISSUED"), isLoading: false });
+
+    renderWithProviders(<InvoiceDetailPage />);
+
+    expect(screen.queryByDisplayValue("Damage fee")).not.toBeInTheDocument();
+  });
+
+  // Direct-print action (see DECISIONS.md D-107) mirrors the generic
+  // Document detail page: a Print button plus an iframe rendering the same
+  // HTML the PDF is built from, so no manual PDF download is required.
+  it("shows a Print button and preview iframe once the preview HTML has loaded", () => {
+    useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useInvoiceMock.mockReturnValue({ data: baseInvoice("ISSUED"), isLoading: false });
+
+    renderWithProviders(<InvoiceDetailPage />);
+
+    expect(screen.getByRole("button", { name: "Print" })).toBeInTheDocument();
+    const iframe = document.querySelector("iframe");
+    expect(iframe).toHaveAttribute("srcdoc", "<html><body>Invoice</body></html>");
+  });
+
+  it("omits the Print button while the preview is still loading", () => {
+    useInvoicePreviewMock.mockReturnValue({ data: undefined });
+    useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useInvoiceMock.mockReturnValue({ data: baseInvoice("ISSUED"), isLoading: false });
+
+    renderWithProviders(<InvoiceDetailPage />);
+
+    expect(screen.queryByRole("button", { name: "Print" })).not.toBeInTheDocument();
   });
 
   // Regression: DRAFT vs ISSUED must be visibly distinguishable and the

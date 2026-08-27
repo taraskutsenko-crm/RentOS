@@ -16,8 +16,8 @@ import {
   Select,
 } from "@rentos/ui";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { InvoiceStatusBadge } from "../../../../components/invoices/invoice-status-badge";
@@ -30,6 +30,7 @@ import {
   invoicePdfUrl,
   useCancelInvoice,
   useInvoice,
+  useInvoicePreview,
   useIssueInvoice,
   useSendInvoice,
   useUpdateInvoice,
@@ -88,6 +89,7 @@ function toInvoiceItemInputs(items: EditableItem[]): InvoiceItemInput[] {
 export default function InvoiceDetailPage() {
   const { t } = useTranslation();
   const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const [tenantId] = useCurrentTenantId();
   const { data: invoice, isLoading } = useInvoice(tenantId, params.id);
 
@@ -99,10 +101,25 @@ export default function InvoiceDetailPage() {
   // change after issuing) remounts this editor with fresh initial state
   // read directly from `invoice` — no effect needed to sync loaded data
   // into local state (see react-hooks/set-state-in-effect).
-  return <InvoiceEditor key={invoice.id} invoice={invoice} tenantId={tenantId} />;
+  return (
+    <InvoiceEditor
+      key={invoice.id}
+      invoice={invoice}
+      tenantId={tenantId}
+      prefillChargeDescription={searchParams.get("addChargeDescription")}
+    />
+  );
 }
 
-function InvoiceEditor({ invoice, tenantId }: { invoice: Invoice; tenantId: string }) {
+function InvoiceEditor({
+  invoice,
+  tenantId,
+  prefillChargeDescription,
+}: {
+  invoice: Invoice;
+  tenantId: string;
+  prefillChargeDescription?: string | null;
+}) {
   const { t, i18n } = useTranslation();
   const updateInvoice = useUpdateInvoice(tenantId);
   const issueInvoice = useIssueInvoice(tenantId);
@@ -112,6 +129,8 @@ function InvoiceEditor({ invoice, tenantId }: { invoice: Invoice; tenantId: stri
   const { data: bankAccounts } = useBankAccounts(tenantId);
   const { data: payments } = usePayments(tenantId, invoice.id);
   const recordPayment = useRecordPayment(tenantId);
+  const { data: preview } = useInvoicePreview(tenantId, invoice.id);
+  const previewFrameRef = useRef<HTMLIFrameElement>(null);
 
   const canUpdate = usePermission("invoices.update");
   const canIssue = usePermission("invoices.issue");
@@ -120,7 +139,28 @@ function InvoiceEditor({ invoice, tenantId }: { invoice: Invoice; tenantId: stri
   const canDownload = usePermission("invoices.download");
   const canRecordPayment = usePermission("payments.record");
 
-  const [items, setItems] = useState<EditableItem[]>(() => toEditableItems(invoice.items));
+  // A "Create additional charge" link from the Return Protocol/Rental
+  // Workspace (see rentals/[id]/page.tsx) pre-fills exactly one extra blank
+  // line's description — amount and tax are always left for staff to enter
+  // explicitly, never invented (see DECISIONS.md D-107). Only meaningful on
+  // a still-editable DRAFT invoice; a non-DRAFT invoice ignores the param.
+  const [items, setItems] = useState<EditableItem[]>(() => {
+    const base = toEditableItems(invoice.items);
+    if (invoice.status === "DRAFT" && prefillChargeDescription) {
+      return [
+        ...base,
+        {
+          description: prefillChargeDescription,
+          quantity: "1",
+          unit: "",
+          unitNetPrice: "0.00",
+          discount: "0.00",
+          taxRatePercent: "0",
+        },
+      ];
+    }
+    return base;
+  });
   const [customerId, setCustomerId] = useState(invoice.customerId);
   const [bankAccountId, setBankAccountId] = useState(invoice.bankAccountId ?? "");
   const [issueDate, setIssueDate] = useState(invoice.issueDate.slice(0, 10));
@@ -212,6 +252,16 @@ function InvoiceEditor({ invoice, tenantId }: { invoice: Invoice; tenantId: stri
     }
   }
 
+  /**
+   * The preview iframe renders the exact same HTML the PDF is built from
+   * (see InvoiceRendererService), so printing its own content window gives
+   * a direct-print action with no manual PDF download round trip — same
+   * pattern as the generic Document detail page (see DECISIONS.md D-107).
+   */
+  function handlePrint(): void {
+    previewFrameRef.current?.contentWindow?.print();
+  }
+
   async function handleRecordPayment(): Promise<void> {
     setPaymentError(null);
     const amountMinor = toMinorUnits(paymentAmount);
@@ -259,6 +309,11 @@ function InvoiceEditor({ invoice, tenantId }: { invoice: Invoice; tenantId: stri
                 <Link href={`/app/rentals/${invoice.rental.id}`}>
                   {invoice.rental.rentalNumber}
                 </Link>
+              </Button>
+            )}
+            {preview && (
+              <Button variant="outline" onClick={handlePrint}>
+                {t("document.print")}
               </Button>
             )}
             {!isDraft && canDownload && (
@@ -558,6 +613,22 @@ function InvoiceEditor({ invoice, tenantId }: { invoice: Invoice; tenantId: stri
               </div>
             </CardContent>
           </Card>
+
+          {preview && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("document.sections.preview")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <iframe
+                  ref={previewFrameRef}
+                  title={t("document.sections.preview")}
+                  srcDoc={preview.html}
+                  className="h-[600px] w-full rounded-md border bg-white"
+                />
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 

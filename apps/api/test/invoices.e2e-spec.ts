@@ -162,6 +162,29 @@ describe("Invoices E2E", () => {
   });
 
   // -----------------------------------------------------------------------
+  // Direct-print preview — backs the invoice detail page's Print button
+  // (see DECISIONS.md D-107); same HTML the PDF is rendered from, without
+  // invoking Puppeteer.
+  // -----------------------------------------------------------------------
+
+  it("returns the same renderable HTML the PDF is built from via GET /:id/preview", async () => {
+    const rental = await createRental();
+    const created = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/invoices`)
+      .set("Cookie", accessCookie)
+      .send({ rentalId: rental.body.id })
+      .expect(201);
+
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/invoices/${created.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(preview.body.html).toContain("Generator A");
+    expect(preview.body.html).toContain(created.body.invoiceNumber);
+  });
+
+  // -----------------------------------------------------------------------
   // Issue — numbering + snapshot freeze + immutability
   // -----------------------------------------------------------------------
 

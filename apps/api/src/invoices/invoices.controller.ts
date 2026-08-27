@@ -27,6 +27,7 @@ import { QueryInvoicesDto } from "./dto/query-invoices.dto";
 import { UpdateInvoiceDto } from "./dto/update-invoice.dto";
 import { InvoicesService } from "./invoices.service";
 import { InvoicePdfService } from "./rendering/invoice-pdf.service";
+import { InvoiceRendererService } from "./rendering/invoice-renderer.service";
 
 @UseGuards(TenantGuard, PermissionsGuard)
 @Controller("tenants/:tenantId/invoices")
@@ -34,6 +35,7 @@ export class InvoicesController {
   constructor(
     private readonly invoicesService: InvoicesService,
     private readonly invoicePdfService: InvoicePdfService,
+    private readonly invoiceRenderer: InvoiceRendererService,
   ) {}
 
   @RequirePermissions("invoices.view")
@@ -101,6 +103,26 @@ export class InvoicesController {
     @Body() dto: CancelInvoiceDto,
   ) {
     return this.invoicesService.cancel(tenant.id, id, user.id, dto.reason ?? null);
+  }
+
+  /**
+   * The same HTML `InvoicePdfService`/Puppeteer renders to PDF, returned
+   * directly for an in-page iframe preview + native browser print — the
+   * exact same "print the iframe's own content window" pattern the generic
+   * Document detail page already uses (see DECISIONS.md D-107), so Invoice
+   * gets a direct-print action without a manual PDF download/open round
+   * trip. Gated by `invoices.view`, same as opening the invoice at all —
+   * viewing a rendering of data you can already see is not a stronger
+   * permission than viewing the data itself.
+   */
+  @RequirePermissions("invoices.view")
+  @Get(":id/preview")
+  async getPreview(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    const invoice = await this.invoicesService.findOne(tenant.id, id);
+    return this.invoiceRenderer.render(invoice);
   }
 
   @RequirePermissions("invoices.download")

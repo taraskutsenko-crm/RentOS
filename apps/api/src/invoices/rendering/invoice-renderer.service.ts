@@ -48,6 +48,7 @@ export class InvoiceRendererService {
 <html lang="${escapeHtml(invoice.documentLanguage)}">
 <head>
 <meta charset="utf-8" />
+<title>${escapeHtml(invoice.invoiceNumber)}</title>
 <style>${BASE_DOCUMENT_CSS}</style>
 </head>
 <body>

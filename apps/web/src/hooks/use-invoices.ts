@@ -77,6 +77,15 @@ export function useInvoice(tenantId: string | null, id: string | null) {
   });
 }
 
+/** The same HTML InvoicePdfService renders to PDF — backs the direct-print iframe (mirrors useDocumentPreview). */
+export function useInvoicePreview(tenantId: string | null, id: string | null) {
+  return useQuery({
+    queryKey: [BASE_KEY, tenantId, "preview", id],
+    queryFn: () => apiClient.get<{ html: string }>(`/tenants/${tenantId}/invoices/${id}/preview`),
+    enabled: !!tenantId && !!id,
+  });
+}
+
 export function useCreateInvoice(tenantId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({

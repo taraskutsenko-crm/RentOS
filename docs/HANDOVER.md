@@ -19,8 +19,93 @@ prior conversations.
 ## Latest verified state
 
 - **Branch:** `main`
-- **Latest verified commit:** `347b742` (docs: record D-101 through D-105
-  for the availability engine and deposit workflow) — the Asset
+- **Latest verified commit:** see `git log -1` at the time this pass
+  concluded (docs: record the POST-PRE-CHAPTER-10 production-infrastructure
+  pass, D-109) — the production-infrastructure pass is complete. Scope:
+  make the two remaining honest-placeholder provider seams
+  (`StorageAdapter`, `EmailProvider`) real, add Handover/Return photo
+  attachments, and audit/harden for production deployment — explicitly
+  **not** Chapter 10. See D-109 and ADR 0013 for full rationale.
+- **What shipped (production-infrastructure pass, D-109 / ADR 0013):**
+  `S3StorageAdapter` (`@aws-sdk/client-s3`) is a second `StorageAdapter`
+  implementation — works against AWS S3, Cloudflare R2, Backblaze B2,
+  MinIO, or any other S3-compatible endpoint — selected via
+  `STORAGE_DRIVER=s3` (default `local`) with zero caller changes.
+  `SmtpEmailProvider` (`nodemailer`) is a second `EmailProvider`
+  implementation — provider-neutral SMTP (SES/SendGrid/Mailgun/Postmark/
+  self-hosted) — selected via `EMAIL_DRIVER=smtp` (default `logging`),
+  also zero caller changes; a new honest `GET .../integrations/email/status`
+  (NOT_CONFIGURED/CONFIGURED/CONNECTION_TEST_FAILED/READY, backed by
+  SMTP's own `verify()` handshake, never claims READY without a real
+  check) is shown on Settings → Integrations. Handover/Return Protocol
+  photo/file evidence: the upload/download/delete backend
+  (`DocumentFilesService`/`DocumentFilesController`) turned out to
+  **already exist** from an earlier chapter — this pass added the missing
+  frontend (`DocumentAttachments` component: thumbnail grid, caption,
+  upload, delete), two additive `DocumentFile` fields
+  (`category`/`caption`), a real correctness fix (upload/remove now reject
+  once the parent document leaves DRAFT — previously unchecked, so
+  finalized evidence could silently be added to or deleted), and Return
+  Protocol's existing Handover-condition-text comparison block now also
+  shows Handover's photos read-only. Email delivery truthfulness (D-093's
+  isConfigured()-before-send pattern, previously Document-only) is now
+  also applied to Quote (`QuoteEmailDelivery`, new durable/retryable
+  table — `Quote.status`'s SENT transition timing is untouched) and
+  Invoice (`InvoiceEmailDelivery` + new `InvoiceEmailService`/
+  `POST .../invoices/:id/email` — Invoice previously had **no** email
+  action at all, only `markSent`'s manual status flip with nothing
+  dispatched; that stays untouched too). `GET /health` now genuinely
+  round-trips Postgres + the bound `StorageAdapter` + Redis (a bare TCP
+  connect — no Redis client library exists elsewhere in the codebase, so
+  none was added just for a health ping); new dependency-free
+  `GET /health/live`. New `GET .../storage/usage` aggregates
+  already-persisted size/count metadata (never scans the bucket) — a
+  foundation for a future billing/quota feature, not one itself. **A real
+  bug was caught and fixed before shipping:** the new `docker-compose.yml`
+  `S3_*`/`SMTP_*` passthroughs use `${VAR:-}` interpolation, which passes
+  an *empty string* when unset, not an unset key — this would have broken
+  numeric/boolean env coercion at boot for any deployment that didn't set
+  every one of them; `packages/shared/src/env.ts` now has purpose-built
+  `optionalPositiveInt()`/`booleanFlag()` helpers with a dedicated
+  regression test. **Deliberately not built, all honestly reported (never
+  faked):** presigned/signed download URLs (the authenticated streaming
+  endpoint remains the enforced path); tenant-managed SMTP credentials in
+  Settings (no secure per-tenant secret-storage primitive exists beyond
+  the single-purpose `EInvoiceConnection.encryptedCredentials`; email
+  config stays environment-level only, as the task explicitly allowed);
+  malware/content scanning (MIME allow-list + size limit + private storage
+  remain the enforced boundary, unchanged); KSeF and e-signature
+  connectivity (both untouched — still honestly not-connected/mock, no
+  endpoints guessed, no fake success states).
+- **Verification (production-infrastructure pass):** full backend suite
+  (43 files / 662 tests, +24 new) and full frontend suite (79 files / 549
+  tests, +7 new) green; every quality gate (`format`, `lint` — 0 errors,
+  `typecheck` — 9 packages, `build` — 6 packages, `check:governance`)
+  green; one new additive Prisma migration
+  (`production_infra_attachments_email` — `DocumentAttachmentCategory`
+  enum, `DocumentFile.category`/`.caption`, `QuoteEmailDelivery`,
+  `InvoiceEmailDelivery`, `DocumentEmailDelivery.failedAt`/
+  `.providerMessageId`) applied cleanly to both the dev and test
+  databases. `S3StorageAdapter`/`SmtpEmailProvider` were exercised via
+  mocked unit tests (not a real external cloud account or real external
+  SMTP send — no credentials exist in this environment; `docker-compose.yml`
+  gained opt-in `minio`/`mailhog` services, behind `--profile s3`/`--profile
+  smtp`, for local S3-compatible/SMTP integration testing, not started
+  here this pass). Docker images rebuilt from committed HEAD and walked
+  through live in a real browser — see the final report for the exact
+  scenario results.
+- **Previous state (PRE-CHAPTER-10 remaining acceptance gaps closure
+  pass, D-106–D-108):** commit `fb4960a` — Rental→Quote now generates a
+  real canonical Quote entity (D-106); Handover/Return universal condition
+  fields (meter/fuel/battery/accessories), Return-vs-Handover text
+  comparison, additional-charge-from-Return workflow, Invoice direct
+  print, multi-page PDF/print-quality CSS, and RBAC negative tests for
+  `assets.manage_availability`/`rentals.manage_deposit` (D-107);
+  Handover/Return photo/attachment support investigated and found
+  deferred-not-blocked (D-108, closed by D-109 above). Full details in
+  DECISIONS.md.
+- **Before that (Asset Availability Engine + Deposit workflow, D-101–D-105):**
+  commit `347b742` — the Asset
   Availability Engine + Rental Deposit workflow + Reservation-UX pass is
   complete. This was explicitly QA/fixes + a specific new-feature scope
   (Reservation workflow, Asset Availability architecture, Deposit workflow
@@ -1097,7 +1182,27 @@ partial-success state to rely on.
   additive UI work, not a data gap. See
   [ADR 0009](adr/0009-shared-monthly-pricing-and-atomic-rental-numbering.md).
 - Public quote page doesn't show the tenant's company name (PDF does).
-- No production email provider is wired in (`LoggingEmailProvider` only).
+- Email and object storage now have a real, production-capable provider
+  each (`SmtpEmailProvider`/`S3StorageAdapter`, selected via
+  `EMAIL_DRIVER`/`STORAGE_DRIVER` — see D-109/ADR 0013), but neither has
+  been live-verified against a real external SMTP account or a real
+  external cloud storage account in this environment — no credentials
+  exist here. `LoggingEmailProvider`/`LocalFilesystemStorageAdapter`
+  remain the default for dev/test.
+- No production email provider is *configured by default* — a real
+  deployment must set `EMAIL_DRIVER=smtp` and real SMTP credentials, or
+  every email attempt stays honestly `NOT_CONFIGURED`.
+- No secure per-tenant SMTP credential storage exists — email
+  configuration is environment-level only (see D-109); a tenant-managed
+  "connect your own SMTP" Settings flow would need a new secret-storage
+  primitive first.
+- No malware/content scanning on uploaded files (asset images/documents,
+  Handover/Return attachments) — MIME allow-list + size limit + private
+  storage are the enforced boundary today (see ADR 0005, D-109).
+- No presigned/signed temporary download URLs — every file read goes
+  through the authenticated streaming API endpoint, by design (see D-109);
+  this is a deliberate choice, not a gap, but worth knowing before
+  assuming a CDN-fronted read path exists.
 - No localization-key-parity lint check (verified manually per task).
 - Document Management Platform (TASK-0008, both parts now complete) has
   no real e-signature provider integration — only the swappable seam and

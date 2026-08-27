@@ -305,12 +305,14 @@ behavior explicitly — not leave it implicit.
 Business services depend on a swappable interface, never a concrete
 vendor implementation, for every external-provider concern:
 
-- `StorageService` / `StorageAdapter` (ADR 0005) — local disk today,
-  swappable to S3-compatible storage later without touching any
-  caller.
-- `EmailService` / `EmailProvider` (ADR 0007) — `LoggingEmailProvider`
-  today, swappable to a real SMTP/SES/SendGrid provider via a
-  different `useClass` binding, with zero caller changes.
+- `StorageService` / `StorageAdapter` (ADR 0005, ADR 0013) —
+  `LocalFilesystemStorageAdapter` (dev/test) or `S3StorageAdapter`
+  (any S3-compatible provider — AWS S3, R2, B2, MinIO), selected by
+  `STORAGE_DRIVER` with zero caller changes either way.
+- `EmailService` / `EmailProvider` (ADR 0013) — `LoggingEmailProvider`
+  (dev/test, never actually sends) or `SmtpEmailProvider` (any
+  transactional-SMTP provider), selected by `EMAIL_DRIVER` with zero
+  caller changes either way.
 - `DocumentSignatureProvider` (ADR 0011) — `LocalMockSignatureProvider`
   today, the seam for DocuSign/Adobe Sign/Autenti/eIDAS later.
 

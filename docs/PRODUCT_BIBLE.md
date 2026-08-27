@@ -1090,3 +1090,32 @@ second, document-only "quote" that only looks like a quote but is not
 one — a commercial offer a customer receives is always backed by a
 real Quote record a staff member can reopen, price-check, and trace
 back to its source Rental.
+
+**Photo and file evidence.** Staff can attach photos and supporting
+files to a Handover or Return Protocol — condition photos at pickup,
+new damage at return, a scanned supporting document — while the
+protocol is still editable. Every attachment is private and
+tenant-scoped: it is never reachable by anyone outside the tenant it
+belongs to, and viewing or downloading it always goes through the same
+permission checks as the protocol itself. Once a Handover or Return
+Protocol is finalized, its recorded evidence — including photos — is
+permanent: nothing can be added to or removed from it afterward, the
+same way the rest of a finalized document's content is locked. A
+Return Protocol's own comparison view shows the original Handover's
+photos alongside its recorded condition, so staff can visually compare
+what changed without having to leave the screen.
+
+**Email behavior.** Whether a Quote, Contract, Handover Protocol,
+Return Protocol, Invoice, or Deposit Receipt was actually emailed is
+never assumed — Havelio only ever reports a document as sent once a
+real email provider has genuinely accepted it, and honestly reports
+"not configured" rather than a false success when no real provider is
+connected. Sending an email is never treated as the same event as a
+document being signed — those remain two separate, independently
+tracked facts; signing genuinely requires a signer's own confirmed
+action, not just a message reaching their inbox. Generated
+documents and uploaded evidence are stored so that they remain
+available after the application restarts or is scaled across multiple
+instances, once a production storage provider is configured — this is
+an infrastructure property tenants can rely on, not an implementation
+detail.

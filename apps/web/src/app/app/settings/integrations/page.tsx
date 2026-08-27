@@ -11,6 +11,7 @@ import {
   useDisconnectEInvoiceProvider,
   useEInvoiceConnection,
 } from "../../../../hooks/use-einvoice-connections";
+import { useEmailStatus } from "../../../../hooks/use-email-status";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 
 /**
@@ -33,6 +34,7 @@ export default function IntegrationsSettingsPage() {
   const { data: connection } = useEInvoiceConnection(tenantId, "KSEF");
   const connectProvider = useConnectEInvoiceProvider(tenantId);
   const disconnectProvider = useDisconnectEInvoiceProvider(tenantId);
+  const { data: emailStatus } = useEmailStatus(tenantId);
 
   const [credentials, setCredentials] = useState("");
   const [environment, setEnvironment] = useState("test");
@@ -59,15 +61,31 @@ export default function IntegrationsSettingsPage() {
         <p className="text-muted-foreground text-sm">{t("integration.settings.subtitle")}</p>
       </div>
 
-      {!showKsef && (
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-muted-foreground text-sm">
-              {t("integration.settings.noneAvailable")}
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      <Card className="max-w-xl">
+        <CardHeader>
+          <CardTitle>{t("integration.email.title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">{t("integration.email.status")}:</span>
+            <span
+              className={
+                emailStatus?.status === "READY"
+                  ? "text-success"
+                  : emailStatus?.status === "CONNECTION_TEST_FAILED"
+                    ? "text-destructive"
+                    : "text-muted-foreground"
+              }
+            >
+              {t(`integration.email.statuses.${emailStatus?.status ?? "NOT_CONFIGURED"}`)}
+            </span>
+          </div>
+          {emailStatus?.error && (
+            <p className="text-muted-foreground text-sm">{emailStatus.error}</p>
+          )}
+          <p className="text-muted-foreground text-xs">{t("integration.email.hint")}</p>
+        </CardContent>
+      </Card>
 
       {showKsef && (
         <Card className="max-w-xl">

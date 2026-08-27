@@ -24,4 +24,9 @@ export class EmailService {
   isConfigured(): boolean {
     return this.provider.isConfigured();
   }
+
+  /** Real connectivity check when the bound provider offers one (see EmailProvider.testConnection) — null when it doesn't (e.g. LoggingEmailProvider, nothing to verify). */
+  testConnection(): Promise<{ ok: boolean; error?: string }> | null {
+    return this.provider.testConnection?.() ?? null;
+  }
 }

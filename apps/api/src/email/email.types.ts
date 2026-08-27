@@ -19,6 +19,14 @@ export interface EmailSendResult {
   success: boolean;
   /** Present only when success is false. */
   error?: string;
+  /**
+   * The transport-level id a real provider returns on acceptance (e.g.
+   * SMTP's Message-ID) — present only when a real (non-logging) provider
+   * actually accepted the message. Never fabricated; callers persist this
+   * verbatim (see DocumentEmailDelivery/QuoteEmailDelivery/
+   * InvoiceEmailDelivery.providerMessageId) as truthful proof of send.
+   */
+  messageId?: string;
 }
 
 /**
@@ -41,4 +49,12 @@ export interface EmailProvider {
    * claim as "this was actually delivered".
    */
   isConfigured(): boolean;
+  /**
+   * Optional real connectivity check (e.g. SMTP's own `verify()` — an
+   * actual handshake with the transport, not just "the env vars are set").
+   * Absent on LoggingEmailProvider (nothing to verify). Used only to power
+   * an honest status display (see EmailStatusController) — never called
+   * before every send, to avoid a network round trip per email.
+   */
+  testConnection?(): Promise<{ ok: boolean; error?: string }>;
 }

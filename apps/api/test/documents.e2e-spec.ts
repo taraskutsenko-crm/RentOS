@@ -640,6 +640,13 @@ describe("Documents E2E (TASK-0008 Part 1 — Document Management Platform)", ()
       .set("Cookie", accessCookie)
       .expect(200);
     expect(Buffer.from(downloadResponse.body as Buffer).toString()).toContain("fake pdf content");
+    // Web and API are always different origins in this deployment (see
+    // main.ts) -- helmet's default Cross-Origin-Resource-Policy:same-origin
+    // would silently block every <img src="...file"> load from the web
+    // app (a real bug found live via Docker browser verification: uploads
+    // succeeded, thumbnails rendered broken). Must never regress to
+    // same-origin/same-site.
+    expect(downloadResponse.headers["cross-origin-resource-policy"]).toBe("cross-origin");
 
     const history = await request(app.getHttpServer())
       .get(`/tenants/${tenantId}/documents/${id}/history`)

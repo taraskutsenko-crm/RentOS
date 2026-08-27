@@ -259,6 +259,19 @@ enum DocumentSignatureStatus {
   CANCELLED
 }
 
+/// Groups a staff-uploaded DocumentFile (ATTACHMENT/PHOTO) by what it shows
+/// — Handover/Return Protocol photo evidence today, kept generic (not
+/// "VEHICLE_DAMAGE" or similar) so it stays meaningful for any asset
+/// vertical. Null on every system-generated rendering (PDF/HTML/etc.) and
+/// optional even for staff uploads — a category is a helpful filter, never
+/// a required classification.
+enum DocumentAttachmentCategory {
+  HANDOVER_CONDITION
+  RETURN_CONDITION
+  DAMAGE
+  OTHER
+}
+
 /// Who a DocumentEmailDelivery was addressed to.
 enum DocumentEmailRecipientType {
   CUSTOMER
@@ -505,9 +518,10 @@ model Invoice {
   createdByUser User                @relation("InvoiceCreatedBy", fields: [createdByUserId], references: [id])
   updatedByUser User?               @relation("InvoiceUpdatedBy", fields: [updatedByUserId], references: [id])
 
-  items         InvoiceItem[]
-  payments      Payment[]
-  statusHistory InvoiceStatusHistory[]
+  items           InvoiceItem[]
+  payments        Payment[]
+  statusHistory   InvoiceStatusHistory[]
+  emailDeliveries InvoiceEmailDelivery[]
 
   @@unique([tenantId, invoiceNumber])
   @@index([tenantId, status])
@@ -670,10 +684,11 @@ model User {
   updatedRentals      Rental[]              @relation("RentalUpdatedBy")
   rentalStatusChanges RentalStatusHistory[] @relation("RentalStatusHistoryChangedBy")
 
-  createdQuotes           Quote[]              @relation("QuoteCreatedBy")
-  updatedQuotes           Quote[]              @relation("QuoteUpdatedBy")
-  quoteStatusChanges      QuoteStatusHistory[] @relation("QuoteStatusHistoryChangedBy")
-  generatedQuoteDocuments QuoteDocument[]      @relation("QuoteDocumentGeneratedBy")
+  createdQuotes            Quote[]              @relation("QuoteCreatedBy")
+  updatedQuotes            Quote[]              @relation("QuoteUpdatedBy")
+  quoteStatusChanges       QuoteStatusHistory[] @relation("QuoteStatusHistoryChangedBy")
+  generatedQuoteDocuments  QuoteDocument[]      @relation("QuoteDocumentGeneratedBy")
+  sentQuoteEmailDeliveries QuoteEmailDelivery[] @relation("QuoteEmailDeliverySentBy")
 
   createdDocuments                Document[]                 @relation("DocumentCreatedBy")
   updatedDocuments                Document[]                 @relation("DocumentUpdatedBy")
@@ -691,10 +706,11 @@ model User {
   respondedExtensionRequests RentalExtensionRequest[] @relation("RentalExtensionRequestRespondedBy")
   reviewedDamageReports      RentalDamageReport[]     @relation("RentalDamageReportReviewedBy")
 
-  createdInvoices      Invoice[]              @relation("InvoiceCreatedBy")
-  updatedInvoices      Invoice[]              @relation("InvoiceUpdatedBy")
-  invoiceStatusChanges InvoiceStatusHistory[] @relation("InvoiceStatusHistoryChangedBy")
-  recordedPayments     Payment[]              @relation("PaymentRecordedBy")
+  createdInvoices            Invoice[]              @relation("InvoiceCreatedBy")
+  updatedInvoices            Invoice[]              @relation("InvoiceUpdatedBy")
+  invoiceStatusChanges       InvoiceStatusHistory[] @relation("InvoiceStatusHistoryChangedBy")
+  recordedPayments           Payment[]              @relation("PaymentRecordedBy")
+  sentInvoiceEmailDeliveries InvoiceEmailDelivery[] @relation("InvoiceEmailDeliverySentBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -764,6 +780,8 @@ model Tenant {
   documentShareLinks        DocumentShareLink[]
   documentEmailDeliveries   DocumentEmailDelivery[]
   documentSignatureRequests DocumentSignatureRequest[]
+  quoteEmailDeliveries      QuoteEmailDelivery[]
+  invoiceEmailDeliveries    InvoiceEmailDelivery[]
 
   customerPortalRefreshTokens CustomerRefreshToken[]
   customerPortalMessages      CustomerPortalMessage[]
@@ -1552,6 +1570,7 @@ model Quote {
   /// this quote's own generated PDF).
   platformDocuments Document[]
   invoices          Invoice[]
+  emailDeliveries   QuoteEmailDelivery[]
 
   @@unique([tenantId, quoteNumber])
   @@index([tenantId, status])
@@ -1862,7 +1881,7 @@ model DocumentVersion {
 /// a staff-uploaded supporting file (ATTACHMENT/PHOTO); uploadedByUserId is
 /// null for system-generated renderings and set for staff uploads.
 model DocumentFile {
-  id                String             @id @default(uuid())
+  id                String                      @id @default(uuid())
   tenantId          String
   documentVersionId String
   format            DocumentFileFormat
@@ -1870,8 +1889,14 @@ model DocumentFile {
   originalFileName  String
   mimeType          String
   sizeBytes         Int
+  /// Staff-uploaded ATTACHMENT/PHOTO only — see DocumentAttachmentCategory.
+  /// Always null for system-generated renderings.
+  category          DocumentAttachmentCategory?
+  /// Optional staff-entered caption ("Front bumper, minor scratch") — never
+  /// required, never system-generated.
+  caption           String?
   uploadedByUserId  String?
-  createdAt         DateTime           @default(now())
+  createdAt         DateTime                    @default(now())
   deletedAt         DateTime?
 
   tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -2115,9 +2140,17 @@ model DocumentEmailDelivery {
   message           String?
   status            DocumentEmailStatus        @default(PENDING)
   errorMessage      String?
+  /// Present only once a real (non-logging) provider actually accepts the
+  /// message — the transport-level id (e.g. SMTP's returned Message-ID),
+  /// never fabricated. Null for NOT_CONFIGURED/FAILED and for every send
+  /// made before this field existed.
+  providerMessageId String?
   sentByUserId      String
   createdAt         DateTime                   @default(now())
   sentAt            DateTime?
+  /// Set only when status transitions to FAILED — distinct from `sentAt` so
+  /// "when did we last try" is always answerable even on failure.
+  failedAt          DateTime?
 
   tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   document        Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
@@ -2126,6 +2159,66 @@ model DocumentEmailDelivery {
 
   @@index([tenantId, documentId, createdAt])
   @@map("document_email_deliveries")
+}
+
+/// Same truthful-delivery-tracking shape as DocumentEmailDelivery
+/// (PRE-CHAPTER-10 production-infrastructure pass), for Quote — which is
+/// deliberately NOT a Document row (see D-081) so it needed its own table
+/// rather than widening DocumentEmailDelivery's FK. QuotesService.send()
+/// already flips Quote.status to SENT independently of email delivery
+/// (unchanged, existing behavior) — this table exists purely so a failed or
+/// unconfigured email attempt is persisted/retryable/visible, not silently
+/// dropped to only an audit-log line as it was before this pass.
+model QuoteEmailDelivery {
+  id                String              @id @default(uuid())
+  tenantId          String
+  quoteId           String
+  recipientEmail    String
+  subject           String
+  message           String?
+  status            DocumentEmailStatus @default(PENDING)
+  errorMessage      String?
+  providerMessageId String?
+  sentByUserId      String
+  createdAt         DateTime            @default(now())
+  sentAt            DateTime?
+  failedAt          DateTime?
+
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  quote      Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  sentByUser User   @relation("QuoteEmailDeliverySentBy", fields: [sentByUserId], references: [id])
+
+  @@index([tenantId, quoteId, createdAt])
+  @@map("quote_email_deliveries")
+}
+
+/// Same truthful-delivery-tracking shape as DocumentEmailDelivery, for
+/// Invoice — also deliberately standalone (D-081). Invoice previously had
+/// no real email-sending action at all (only `markSent`, a manual status
+/// flip with no email dispatched); this is the first version that actually
+/// sends anything. `markSent`/Invoice.status stay untouched — email
+/// delivery is tracked independently, same separation as Quote/Document.
+model InvoiceEmailDelivery {
+  id                String              @id @default(uuid())
+  tenantId          String
+  invoiceId         String
+  recipientEmail    String
+  subject           String
+  message           String?
+  status            DocumentEmailStatus @default(PENDING)
+  errorMessage      String?
+  providerMessageId String?
+  sentByUserId      String
+  createdAt         DateTime            @default(now())
+  sentAt            DateTime?
+  failedAt          DateTime?
+
+  tenant     Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoice    Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  sentByUser User    @relation("InvoiceEmailDeliverySentBy", fields: [sentByUserId], references: [id])
+
+  @@index([tenantId, invoiceId, createdAt])
+  @@map("invoice_email_deliveries")
 }
 
 /// Tracks one e-signature request for a specific DocumentVersion, decoupled

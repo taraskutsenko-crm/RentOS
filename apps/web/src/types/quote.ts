@@ -147,6 +147,21 @@ export interface SendQuoteResult {
   emailError?: string;
 }
 
+/** PENDING/SENT/FAILED/NOT_CONFIGURED — same truthful shape as Document email delivery (see DECISIONS.md production-infrastructure pass). */
+export interface QuoteEmailDelivery {
+  id: string;
+  quoteId: string;
+  recipientEmail: string;
+  subject: string;
+  message: string | null;
+  status: "PENDING" | "SENT" | "FAILED" | "NOT_CONFIGURED";
+  errorMessage: string | null;
+  providerMessageId: string | null;
+  createdAt: string;
+  sentAt: string | null;
+  failedAt: string | null;
+}
+
 export interface ConvertQuoteResult {
   rental: {
     id: string;

@@ -185,6 +185,72 @@ describe("Invoices E2E", () => {
   });
 
   // -----------------------------------------------------------------------
+  // Email — production-infrastructure pass. Invoice previously had no
+  // email-sending action at all (only `markSent`, a manual status flip
+  // that dispatches nothing) — this is the first version that actually
+  // attempts to send anything, honestly, via InvoiceEmailService.
+  // -----------------------------------------------------------------------
+
+  it("honestly reports NOT_CONFIGURED and never claims sent when no email provider is configured", async () => {
+    const rental = await createRental();
+    const created = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/invoices`)
+      .set("Cookie", accessCookie)
+      .send({ rentalId: rental.body.id })
+      .expect(201);
+
+    const sendResponse = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/invoices/${created.body.id}/email`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    expect(sendResponse.body).toMatchObject({
+      sent: false,
+      error: "No email provider is configured",
+    });
+
+    // markSent/Invoice.status/sentAt are untouched by this — email delivery
+    // is tracked independently (see InvoiceEmailDelivery).
+    const invoiceAfter = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/invoices/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(invoiceAfter.body.status).toBe("DRAFT");
+    expect(invoiceAfter.body.sentAt).toBeNull();
+
+    const deliveries = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/invoices/${created.body.id}/email-deliveries`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(deliveries.body).toHaveLength(1);
+    expect(deliveries.body[0]).toMatchObject({
+      status: "NOT_CONFIGURED",
+      recipientEmail: "jane@example.com",
+    });
+  });
+
+  it("rejects sending an invoice email when the customer has no email and none is provided explicitly", async () => {
+    const noEmailCustomer = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/customers`)
+      .set("Cookie", accessCookie)
+      .send({ firstName: "No", lastName: "Email" })
+      .expect(201);
+    const rental = await createRental({ customerId: noEmailCustomer.body.id });
+    const created = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/invoices`)
+      .set("Cookie", accessCookie)
+      .send({ rentalId: rental.body.id })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/invoices/${created.body.id}/email`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(400);
+  });
+
+  // -----------------------------------------------------------------------
   // Issue — numbering + snapshot freeze + immutability
   // -----------------------------------------------------------------------
 

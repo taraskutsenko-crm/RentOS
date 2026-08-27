@@ -97,6 +97,21 @@ export interface PaginatedInvoices {
   totalPages: number;
 }
 
+/** PENDING/SENT/FAILED/NOT_CONFIGURED — same truthful shape as Document/Quote email delivery (see DECISIONS.md production-infrastructure pass). */
+export interface InvoiceEmailDelivery {
+  id: string;
+  invoiceId: string;
+  recipientEmail: string;
+  subject: string;
+  message: string | null;
+  status: "PENDING" | "SENT" | "FAILED" | "NOT_CONFIGURED";
+  errorMessage: string | null;
+  providerMessageId: string | null;
+  createdAt: string;
+  sentAt: string | null;
+  failedAt: string | null;
+}
+
 export interface Payment {
   id: string;
   tenantId: string;

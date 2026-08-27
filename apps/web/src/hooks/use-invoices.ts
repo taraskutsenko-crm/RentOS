@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/api-client";
 import type {
   Invoice,
+  InvoiceEmailDelivery,
   InvoiceStatus,
   InvoiceType,
   PaginatedInvoices,
@@ -140,4 +141,43 @@ export function useCancelInvoice(tenantId: string | null) {
 
 export function invoicePdfUrl(tenantId: string | null, id: string): string {
   return `${process.env.NEXT_PUBLIC_API_URL}/tenants/${tenantId}/invoices/${id}/pdf`;
+}
+
+/**
+ * Actually emails the invoice (PDF attached) via whichever EmailProvider is
+ * configured — distinct from useSendInvoice above, which only flips
+ * Invoice.status/sentAt with nothing dispatched. See InvoiceEmailService /
+ * DECISIONS.md production-infrastructure pass.
+ */
+export function useSendInvoiceEmail(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      recipientEmail,
+      message,
+    }: {
+      id: string;
+      recipientEmail?: string | undefined;
+      message?: string | undefined;
+    }) =>
+      apiClient.post<{ sent: boolean; error?: string }>(
+        `/tenants/${tenantId}/invoices/${id}/email`,
+        { recipientEmail, message },
+      ),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: [BASE_KEY, tenantId, "email-deliveries", variables.id],
+      });
+    },
+  });
+}
+
+export function useInvoiceEmailDeliveries(tenantId: string | null, id: string | null) {
+  return useQuery({
+    queryKey: [BASE_KEY, tenantId, "email-deliveries", id],
+    queryFn: () =>
+      apiClient.get<InvoiceEmailDelivery[]>(`/tenants/${tenantId}/invoices/${id}/email-deliveries`),
+    enabled: !!tenantId && !!id,
+  });
 }

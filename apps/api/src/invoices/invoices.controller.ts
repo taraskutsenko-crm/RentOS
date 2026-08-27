@@ -24,7 +24,9 @@ import type { PublicUser } from "../users/user.mapper";
 import { CancelInvoiceDto } from "./dto/cancel-invoice.dto";
 import { CreateInvoiceDto } from "./dto/create-invoice.dto";
 import { QueryInvoicesDto } from "./dto/query-invoices.dto";
+import { SendInvoiceEmailDto } from "./dto/send-invoice-email.dto";
 import { UpdateInvoiceDto } from "./dto/update-invoice.dto";
+import { InvoiceEmailService } from "./invoice-email.service";
 import { InvoicesService } from "./invoices.service";
 import { InvoicePdfService } from "./rendering/invoice-pdf.service";
 import { InvoiceRendererService } from "./rendering/invoice-renderer.service";
@@ -36,6 +38,7 @@ export class InvoicesController {
     private readonly invoicesService: InvoicesService,
     private readonly invoicePdfService: InvoicePdfService,
     private readonly invoiceRenderer: InvoiceRendererService,
+    private readonly invoiceEmailService: InvoiceEmailService,
   ) {}
 
   @RequirePermissions("invoices.view")
@@ -92,6 +95,34 @@ export class InvoicesController {
     @CurrentUser() user: PublicUser,
   ) {
     return this.invoicesService.markSent(tenant.id, id, user.id);
+  }
+
+  /**
+   * Actually emails the invoice (PDF attached) via whichever EmailProvider
+   * is configured — see InvoiceEmailService. Deliberately separate from
+   * `markSent` above: that flips Invoice.status/sentAt manually and never
+   * dispatches anything; this attempts a real send and truthfully persists
+   * the outcome (see InvoiceEmailDelivery), same PENDING/SENT/FAILED/
+   * NOT_CONFIGURED shape Document/Quote email use.
+   */
+  @RequirePermissions("invoices.send")
+  @Post(":id/email")
+  sendEmail(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @Param("id", ParseUUIDPipe) id: string,
+    @CurrentUser() user: PublicUser,
+    @Body() dto: SendInvoiceEmailDto,
+  ) {
+    return this.invoiceEmailService.send(tenant.id, id, user.id, dto);
+  }
+
+  @RequirePermissions("invoices.view")
+  @Get(":id/email-deliveries")
+  findEmailDeliveries(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    return this.invoiceEmailService.findDeliveries(tenant.id, id);
   }
 
   @RequirePermissions("invoices.cancel")

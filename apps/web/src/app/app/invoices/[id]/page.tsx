@@ -30,9 +30,11 @@ import {
   invoicePdfUrl,
   useCancelInvoice,
   useInvoice,
+  useInvoiceEmailDeliveries,
   useInvoicePreview,
   useIssueInvoice,
   useSendInvoice,
+  useSendInvoiceEmail,
   useUpdateInvoice,
   type InvoiceItemInput,
 } from "../../../../hooks/use-invoices";
@@ -131,6 +133,8 @@ function InvoiceEditor({
   const recordPayment = useRecordPayment(tenantId);
   const { data: preview } = useInvoicePreview(tenantId, invoice.id);
   const previewFrameRef = useRef<HTMLIFrameElement>(null);
+  const sendInvoiceEmail = useSendInvoiceEmail(tenantId);
+  const { data: emailDeliveries } = useInvoiceEmailDeliveries(tenantId, invoice.id);
 
   const canUpdate = usePermission("invoices.update");
   const canIssue = usePermission("invoices.issue");
@@ -237,6 +241,15 @@ function InvoiceEditor({
     setError(null);
     try {
       await sendInvoice.mutateAsync(invoice.id);
+    } catch (err) {
+      setError(apiErrorMessage(err, t("common.error")));
+    }
+  }
+
+  async function handleSendEmail(): Promise<void> {
+    setError(null);
+    try {
+      await sendInvoiceEmail.mutateAsync({ id: invoice.id });
     } catch (err) {
       setError(apiErrorMessage(err, t("common.error")));
     }
@@ -627,6 +640,38 @@ function InvoiceEditor({
                   className="h-[600px] w-full rounded-md border bg-white"
                 />
               </CardContent>
+            </Card>
+          )}
+
+          {!isDraft && canSend && (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>{t("invoice.email.title")}</CardTitle>
+                <Button
+                  size="sm"
+                  onClick={() => void handleSendEmail()}
+                  disabled={sendInvoiceEmail.isPending}
+                >
+                  {t("invoice.email.send")}
+                </Button>
+              </CardHeader>
+              {emailDeliveries && emailDeliveries.length > 0 && (
+                <CardContent>
+                  <ul className="flex flex-col gap-2 text-sm">
+                    {emailDeliveries.map((delivery) => (
+                      <li
+                        key={delivery.id}
+                        className="flex items-center justify-between border-b pb-2 last:border-0"
+                      >
+                        <span>
+                          {delivery.recipientEmail} · {t(`document.email.statuses.${delivery.status}`)}
+                          {delivery.errorMessage ? ` · ${delivery.errorMessage}` : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              )}
             </Card>
           )}
         </div>

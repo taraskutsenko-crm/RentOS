@@ -114,6 +114,16 @@ export class QuotesController {
     return this.quotesService.send(tenant.id, id, user.id, dto);
   }
 
+  /** Every email-send attempt for this quote, newest first — the truthful PENDING/SENT/FAILED/NOT_CONFIGURED record `send()` persists (see QuoteEmailDelivery). */
+  @RequirePermissions("quotes.view")
+  @Get(":id/email-deliveries")
+  findEmailDeliveries(
+    @CurrentTenant() { tenant }: CurrentTenantContext,
+    @Param("id") id: string,
+  ) {
+    return this.quotesService.findEmailDeliveries(tenant.id, id);
+  }
+
   /** Staff-recorded acceptance (e.g. the customer approved verbally or by email). */
   @RequirePermissions("quotes.accept")
   @Post(":id/accept")

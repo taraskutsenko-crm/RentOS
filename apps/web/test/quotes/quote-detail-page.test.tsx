@@ -31,6 +31,7 @@ const useCancelQuoteMock = vi.fn();
 const useDuplicateQuoteMock = vi.fn();
 const useConvertQuoteToRentalMock = vi.fn();
 const useRegenerateQuotePdfMock = vi.fn();
+const useQuoteEmailDeliveriesMock = vi.fn();
 vi.mock("../../src/hooks/use-quotes", () => ({
   useQuote: (...args: unknown[]) => useQuoteMock(...args),
   useQuoteTimeline: (...args: unknown[]) => useQuoteTimelineMock(...args),
@@ -42,6 +43,7 @@ vi.mock("../../src/hooks/use-quotes", () => ({
   useDuplicateQuote: () => useDuplicateQuoteMock(),
   useConvertQuoteToRental: () => useConvertQuoteToRentalMock(),
   useRegenerateQuotePdf: () => useRegenerateQuotePdfMock(),
+  useQuoteEmailDeliveries: (...args: unknown[]) => useQuoteEmailDeliveriesMock(...args),
   quotePdfUrl: (tenantId: string | null, id: string) =>
     `http://api.test/tenants/${tenantId}/quotes/${id}/pdf`,
 }));
@@ -91,6 +93,7 @@ describe("QuoteDetailPage", () => {
     useDuplicateQuoteMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useConvertQuoteToRentalMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useRegenerateQuotePdfMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useQuoteEmailDeliveriesMock.mockReturnValue({ data: [] });
   });
 
   it("renders the quote header with number, customer, and status", () => {
@@ -325,5 +328,28 @@ describe("QuoteDetailPage", () => {
       "href",
       "/app/rentals/rental-1",
     );
+  });
+
+  // Email delivery truthfulness (production-infrastructure pass) — a
+  // persisted, retryable record of each send attempt, not just an
+  // audit-log line on failure.
+  it("shows the truthful email delivery history for this quote", () => {
+    usePermissionMock.mockReturnValue(false);
+    useQuoteMock.mockReturnValue({ data: baseQuote("SENT"), isLoading: false });
+    useQuoteEmailDeliveriesMock.mockReturnValue({
+      data: [
+        {
+          id: "delivery-1",
+          recipientEmail: "jane@example.com",
+          status: "NOT_CONFIGURED",
+          errorMessage: "No email provider is configured",
+        },
+      ],
+    });
+
+    renderWithProviders(<QuoteDetailPage />);
+
+    expect(screen.getByText(/jane@example.com/)).toBeInTheDocument();
+    expect(screen.getByText(/Not configured/)).toBeInTheDocument();
   });
 });

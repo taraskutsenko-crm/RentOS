@@ -25,6 +25,7 @@ import {
   useQuoteTimeline,
   useRegenerateQuotePdf,
   useRejectQuote,
+  useQuoteEmailDeliveries,
   useSendQuote,
 } from "../../../../hooks/use-quotes";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
@@ -53,6 +54,7 @@ export default function QuoteDetailPage() {
 
   const { data: quote, isLoading, isError } = useQuote(tenantId, params.id);
   const { data: timeline } = useQuoteTimeline(tenantId, params.id);
+  const { data: emailDeliveries } = useQuoteEmailDeliveries(tenantId, params.id);
   const trackRecentItem = useTrackRecentItem();
 
   useEffect(() => {
@@ -482,6 +484,26 @@ export default function QuoteDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          {emailDeliveries && emailDeliveries.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("quote.email.deliveryHistory")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="flex flex-col gap-2 text-sm">
+                  {emailDeliveries.map((delivery) => (
+                    <li key={delivery.id} className="flex items-center justify-between border-b pb-2 last:border-0">
+                      <span>
+                        {delivery.recipientEmail} · {t(`document.email.statuses.${delivery.status}`)}
+                        {delivery.errorMessage ? ` · ${delivery.errorMessage}` : ""}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

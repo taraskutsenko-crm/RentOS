@@ -892,7 +892,14 @@ describe("Quotes E2E", () => {
   // Send, history, PDF
   // ---------------------------------------------------------------------
 
-  it("sends a quote, transitioning DRAFT -> SENT, and reports the (logging-provider) email as sent", async () => {
+  // Quote.status flips to SENT regardless of email outcome (the offer is
+  // now dispatched/active for the customer's public link — a broader
+  // business state than raw email delivery, same separation Document/
+  // Invoice keep). The email itself is honestly reported as NOT sent here
+  // because no real EmailProvider is configured in tests (LoggingEmailProvider
+  // — see EmailProvider.isConfigured() / DECISIONS.md truthfulness fix);
+  // it is never fabricated as sent just because a provider was invoked.
+  it("sends a quote, transitioning DRAFT -> SENT, and honestly reports the email as not sent (no provider configured)", async () => {
     const created = await createQuote().expect(201);
 
     const sendResponse = await request(app.getHttpServer())
@@ -901,8 +908,16 @@ describe("Quotes E2E", () => {
       .send({})
       .expect(201);
 
-    expect(sendResponse.body.emailSent).toBe(true);
+    expect(sendResponse.body.emailSent).toBe(false);
+    expect(sendResponse.body.emailError).toBe("No email provider is configured");
     expect(sendResponse.body.quote.status).toBe("SENT");
+
+    const deliveries = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/quotes/${created.body.id}/email-deliveries`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    expect(deliveries.body).toHaveLength(1);
+    expect(deliveries.body[0]).toMatchObject({ status: "NOT_CONFIGURED" });
   });
 
   it("rejects sending a quote with no items", async () => {

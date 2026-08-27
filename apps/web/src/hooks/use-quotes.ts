@@ -9,6 +9,7 @@ import type {
   Quote,
   QuoteBillingMode,
   QuoteDiscountType,
+  QuoteEmailDelivery,
   QuoteItemType,
   QuoteStatus,
   QuoteTimelineEvent,
@@ -207,7 +208,20 @@ export function useSendQuote(tenantId: string | null) {
       void queryClient.invalidateQueries({
         queryKey: [BASE_KEY, tenantId, "history", variables.id],
       });
+      void queryClient.invalidateQueries({
+        queryKey: [BASE_KEY, tenantId, "email-deliveries", variables.id],
+      });
     },
+  });
+}
+
+/** Every email-send attempt for this quote, newest first — see quotes.controller.ts. */
+export function useQuoteEmailDeliveries(tenantId: string | null, quoteId: string | null) {
+  return useQuery({
+    queryKey: [BASE_KEY, tenantId, "email-deliveries", quoteId],
+    queryFn: () =>
+      apiClient.get<QuoteEmailDelivery[]>(`/tenants/${tenantId}/quotes/${quoteId}/email-deliveries`),
+    enabled: !!tenantId && !!quoteId,
   });
 }
 

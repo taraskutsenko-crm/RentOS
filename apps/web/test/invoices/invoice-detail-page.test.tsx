@@ -45,6 +45,8 @@ const useIssueInvoiceMock = vi.fn();
 const useSendInvoiceMock = vi.fn();
 const useCancelInvoiceMock = vi.fn();
 const useInvoicePreviewMock = vi.fn();
+const useSendInvoiceEmailMock = vi.fn();
+const useInvoiceEmailDeliveriesMock = vi.fn();
 vi.mock("../../src/hooks/use-invoices", () => ({
   useInvoice: (...args: unknown[]) => useInvoiceMock(...args),
   useUpdateInvoice: () => useUpdateInvoiceMock(),
@@ -52,6 +54,8 @@ vi.mock("../../src/hooks/use-invoices", () => ({
   useSendInvoice: () => useSendInvoiceMock(),
   useCancelInvoice: () => useCancelInvoiceMock(),
   useInvoicePreview: (...args: unknown[]) => useInvoicePreviewMock(...args),
+  useSendInvoiceEmail: () => useSendInvoiceEmailMock(),
+  useInvoiceEmailDeliveries: (...args: unknown[]) => useInvoiceEmailDeliveriesMock(...args),
   invoicePdfUrl: () => "https://example.com/invoice.pdf",
 }));
 
@@ -128,6 +132,8 @@ describe("InvoiceDetailPage", () => {
     useSendInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useCancelInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useInvoicePreviewMock.mockReturnValue({ data: { html: "<html><body>Invoice</body></html>" } });
+    useSendInvoiceEmailMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useInvoiceEmailDeliveriesMock.mockReturnValue({ data: [] });
   });
 
   // Regression: "Invoice Save button does nothing" — the mutation always
@@ -199,6 +205,39 @@ describe("InvoiceDetailPage", () => {
     expect(screen.getByRole("button", { name: "Print" })).toBeInTheDocument();
     const iframe = document.querySelector("iframe");
     expect(iframe).toHaveAttribute("srcdoc", "<html><body>Invoice</body></html>");
+  });
+
+  // Invoice email — production-infrastructure pass. Distinct from the
+  // existing "Mark as sent" status-flip action.
+  it("offers a Send email action on an ISSUED invoice but not on a DRAFT one", () => {
+    useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useInvoiceMock.mockReturnValue({ data: baseInvoice("ISSUED"), isLoading: false });
+    const { rerender } = renderWithProviders(<InvoiceDetailPage />);
+    expect(screen.getByRole("button", { name: "Send email" })).toBeInTheDocument();
+
+    useInvoiceMock.mockReturnValue({ data: baseInvoice("DRAFT"), isLoading: false });
+    rerender(<InvoiceDetailPage />);
+    expect(screen.queryByRole("button", { name: "Send email" })).not.toBeInTheDocument();
+  });
+
+  it("shows the truthful email delivery history (never claims Sent when not configured)", () => {
+    useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useInvoiceMock.mockReturnValue({ data: baseInvoice("ISSUED"), isLoading: false });
+    useInvoiceEmailDeliveriesMock.mockReturnValue({
+      data: [
+        {
+          id: "delivery-1",
+          recipientEmail: "jane@example.com",
+          status: "NOT_CONFIGURED",
+          errorMessage: "No email provider is configured",
+        },
+      ],
+    });
+
+    renderWithProviders(<InvoiceDetailPage />);
+
+    expect(screen.getByText(/jane@example.com/)).toBeInTheDocument();
+    expect(screen.getByText(/Not configured/)).toBeInTheDocument();
   });
 
   it("omits the Print button while the preview is still loading", () => {

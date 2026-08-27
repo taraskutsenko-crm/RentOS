@@ -625,18 +625,59 @@ export class QuotesService {
 
     const tenant = await this.resolveTenant(tenantId);
     const publicUrl = `${this.configService.get("WEB_ORIGIN", { infer: true })}/quote/${token}`;
-    const emailResult = await this.emailService.send({
-      to: recipientEmail,
-      subject: `Quote ${updated.quoteNumber} from ${tenant.name}`,
-      html: buildSendEmailHtml(updated, tenant.name, publicUrl, dto.message),
-      attachments: [
-        {
-          filename: pdf.document.originalFileName,
-          content: pdf.buffer,
-          contentType: "application/pdf",
+    const subject = `Quote ${updated.quoteNumber} from ${tenant.name}`;
+
+    // Quote.status already flipped to SENT above (unchanged, existing
+    // behavior — "sent" is the offer being dispatched/made active, a
+    // broader business state than raw email delivery, same as
+    // Document/Invoice keep their own status separate from email). This
+    // block only tracks the truthful outcome of the *email* attempt itself
+    // — a durable, retryable row, not just an audit-log line on failure
+    // (see QuoteEmailDelivery / DECISIONS.md production-infrastructure pass).
+    let emailResult: { success: boolean; error?: string; messageId?: string };
+    if (!this.emailService.isConfigured()) {
+      emailResult = { success: false, error: "No email provider is configured" };
+      await this.prisma.quoteEmailDelivery.create({
+        data: {
+          tenantId,
+          quoteId: id,
+          recipientEmail,
+          subject,
+          message: dto.message ?? null,
+          status: "NOT_CONFIGURED",
+          errorMessage: emailResult.error ?? null,
+          sentByUserId: actorUserId,
         },
-      ],
-    });
+      });
+    } else {
+      emailResult = await this.emailService.send({
+        to: recipientEmail,
+        subject,
+        html: buildSendEmailHtml(updated, tenant.name, publicUrl, dto.message),
+        attachments: [
+          {
+            filename: pdf.document.originalFileName,
+            content: pdf.buffer,
+            contentType: "application/pdf",
+          },
+        ],
+      });
+      await this.prisma.quoteEmailDelivery.create({
+        data: {
+          tenantId,
+          quoteId: id,
+          recipientEmail,
+          subject,
+          message: dto.message ?? null,
+          status: emailResult.success ? "SENT" : "FAILED",
+          errorMessage: emailResult.error ?? null,
+          providerMessageId: emailResult.messageId ?? null,
+          sentByUserId: actorUserId,
+          sentAt: emailResult.success ? new Date() : null,
+          failedAt: emailResult.success ? null : new Date(),
+        },
+      });
+    }
 
     if (!emailResult.success) {
       await this.auditService.log({
@@ -655,6 +696,15 @@ export class QuotesService {
       emailSent: emailResult.success,
       ...(emailResult.error ? { emailError: emailResult.error } : {}),
     };
+  }
+
+  /** Every email-send attempt for this quote, newest first. */
+  async findEmailDeliveries(tenantId: string, quoteId: string) {
+    await this.findOneRaw(tenantId, quoteId); // 404s if the quote isn't this tenant's
+    return this.prisma.quoteEmailDelivery.findMany({
+      where: { tenantId, quoteId },
+      orderBy: { createdAt: "desc" },
+    });
   }
 
   /** Staff-recorded acceptance (e.g. the customer approved verbally or by email). Idempotent. */

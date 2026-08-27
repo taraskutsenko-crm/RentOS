@@ -68,6 +68,10 @@ most abstract question (why Havelio exists) to the most concrete one
 
 28. [Global By Design](#28-global-by-design)
 
+**Part F — Core Workflow Behavior**
+
+29. [Rental, Availability, Deposit & Document Behavior](#29-rental-availability-deposit--document-behavior)
+
 ---
 
 # Part A — Vision & Identity
@@ -1016,3 +1020,73 @@ validate yet, a currency Havelio doesn't format correctly) is
 documented as a known limitation, never silently ignored and never
 faked with a hardcoded assumption that happens to work for one
 country.
+
+---
+
+# Part F — Core Workflow Behavior
+
+## 29. Rental, Availability, Deposit & Document Behavior
+
+Sections 1–28 state the durable principles Havelio is built on. This
+section states the product-level behavior those principles produced
+for the core rental workflow — what a user should be able to rely on,
+not how it is implemented. Deeper technical detail (schema shape,
+service boundaries, exact migrations) lives in `DECISIONS.md` and the
+ADRs; this section only records the behavior a product decision, a
+support answer, or a new feature should stay consistent with.
+
+**Rental lifecycle.** A Rental moves through `DRAFT → RESERVED →
+ACTIVE → RETURNED/COMPLETED`, with an explicit cancellation path
+available from the pre-active states. Each stage change is a
+deliberate staff action, never an inferred side effect of an unrelated
+one — issuing an invoice does not silently move a Rental forward, and
+generating a document does not silently move it backward. Whether a
+Rental's dates/items are still editable is a direct function of its
+current status, the same rule everywhere the Rental is shown, never a
+per-screen judgment call.
+
+**Availability behavior.** An asset's date-range availability is
+resolved by one shared engine, consulted identically everywhere an
+asset can be selected or scheduled (a rental wizard, a quote wizard,
+the asset page, the availability calendar, the dashboard). Booking a
+future maintenance, repair, inspection, or relocation window only
+blocks that asset for that specific date range — it does not make the
+asset globally unbookable, and it never silently hides the asset from
+a selector for an unrelated date. An asset that is unavailable for a
+requested window still appears in the selector, with the specific
+reason shown in text (never color alone). The two exceptions that make
+an asset unavailable for _every_ date, permanently, are its own
+`LOST` or `RETIRED` global status — those assets remain visible (never
+hidden, never deleted) but can never be reserved or rented again for
+any date.
+
+**Deposit behavior.** A rental deposit is tracked separately from
+taxable revenue: receiving it is not a sale, and it is not invoiced as
+one. A deposit has its own receive → return lifecycle (amount
+required, amount received, method/reference, then amount returned and
+any amount retained with a stated reason), independent of the
+Rental's own priced items. If part of a deposit is retained to cover
+damage or another cost, that retained amount stays a distinct,
+auditable deposit-ledger fact — turning it into taxable invoice
+revenue is always a separate, explicit staff action, never an
+automatic conversion.
+
+**Document behavior.** The language a document is generated in and
+the language the staff member is currently working in are two
+independent settings — a document is never limited to, or assumed to
+be in, the UI's current language (Section 28 states the general
+principle; this is its concrete expression for documents
+specifically). A generated Contract, Handover Protocol, Return
+Protocol, or Invoice reflects the real data behind it — the linked
+rental's number/dates/total/customer/assets — never blank placeholders
+from a disconnected template.
+
+**Quote behavior.** Whether a Quote led to a Rental (Quote → Rental)
+or a Rental generated a Quote after the fact (Rental → Quote), the
+result is always the same first-class, canonical Quote entity, visible
+and editable in the Quotes workspace like any other quote, carrying
+its own real quote number and pricing. Havelio never produces a
+second, document-only "quote" that only looks like a quote but is not
+one — a commercial offer a customer receives is always backed by a
+real Quote record a staff member can reopen, price-check, and trace
+back to its source Rental.

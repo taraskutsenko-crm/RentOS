@@ -89,7 +89,7 @@ const SENT_STATUSES: RentalDocumentStatus[] = ["SENT", "VIEWED"];
  * checklist row reflects the furthest real progress made, regardless of how
  * many draft/superseded documents of the same type also exist.
  */
-function mostAdvancedDocument(
+export function mostAdvancedDocument(
   documents: RentalDocument[],
   type: RentalDocument["documentType"],
 ): { state: "generated" | "sent" | "signed"; document: RentalDocument } | null {

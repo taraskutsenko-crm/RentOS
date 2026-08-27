@@ -596,14 +596,55 @@ export default function RentalDetailPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t("rental.sections.invoices")}</CardTitle>
-              {canCreateInvoice && (
-                <Link
-                  href={`/app/invoices/new?rentalId=${rental.id}`}
-                  className="text-primary text-sm hover:underline"
-                >
-                  {t("rental.invoices.create")}
-                </Link>
-              )}
+              <div className="flex items-center gap-3">
+                {canCreateInvoice && (
+                  <select
+                    className="border-input h-8 rounded-md border bg-transparent px-2 text-xs shadow-xs"
+                    value=""
+                    onChange={(event) => {
+                      const description = event.target.value;
+                      if (!description) return;
+                      const draftInvoice = rentalInvoices?.data.find(
+                        (invoice) => invoice.status === "DRAFT",
+                      );
+                      const suffix = `addChargeDescription=${encodeURIComponent(description)}`;
+                      router.push(
+                        draftInvoice
+                          ? `/app/invoices/${draftInvoice.id}?${suffix}`
+                          : `/app/invoices/new?rentalId=${rental.id}&${suffix}`,
+                      );
+                    }}
+                  >
+                    <option value="">{t("rental.invoices.addCharge")}</option>
+                    <option value={t("rental.invoices.chargeTypes.damage")}>
+                      {t("rental.invoices.chargeTypes.damage")}
+                    </option>
+                    <option value={t("rental.invoices.chargeTypes.missingItem")}>
+                      {t("rental.invoices.chargeTypes.missingItem")}
+                    </option>
+                    <option value={t("rental.invoices.chargeTypes.cleaning")}>
+                      {t("rental.invoices.chargeTypes.cleaning")}
+                    </option>
+                    <option value={t("rental.invoices.chargeTypes.fuel")}>
+                      {t("rental.invoices.chargeTypes.fuel")}
+                    </option>
+                    <option value={t("rental.invoices.chargeTypes.lateReturn")}>
+                      {t("rental.invoices.chargeTypes.lateReturn")}
+                    </option>
+                    <option value={t("rental.invoices.chargeTypes.other")}>
+                      {t("rental.invoices.chargeTypes.other")}
+                    </option>
+                  </select>
+                )}
+                {canCreateInvoice && (
+                  <Link
+                    href={`/app/invoices/new?rentalId=${rental.id}`}
+                    className="text-primary text-sm hover:underline"
+                  >
+                    {t("rental.invoices.create")}
+                  </Link>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {!rentalInvoices || rentalInvoices.data.length === 0 ? (

@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "このレンタルにはまだ請求書がありません",
-      "create": "請求書を作成"
+      "create": "請求書を作成",
+      "addCharge": "料金を追加…",
+      "chargeTypes": {
+        "damage": "損傷料金",
+        "missingItem": "紛失品料金",
+        "cleaning": "清掃料金",
+        "fuel": "燃料補給料金",
+        "lateReturn": "延滞返却料金",
+        "other": "その他の料金"
+      }
     },
     "deposit": {
       "title": "保証金",
@@ -914,7 +923,12 @@
       "notes": "備考",
       "assetConditionNotes": "資産の状態",
       "damageDescription": "損傷の説明",
-      "missingItems": "不足品・付属品"
+      "missingItems": "不足品・付属品",
+      "meterReading": "メーター／走行距離／稼働時間",
+      "fuelLevel": "燃料残量",
+      "batteryLevel": "バッテリー残量",
+      "accessoriesChecklist": "付属品／備品チェックリスト",
+      "handoverReferenceTitle": "引き渡し時の状態（比較用）"
     },
     "summary": {
       "total": "ドキュメント総数",

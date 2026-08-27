@@ -17,6 +17,7 @@ export default function NewInvoicePage() {
   const searchParams = useSearchParams();
   const [tenantId] = useCurrentTenantId();
   const rentalId = searchParams.get("rentalId") ?? undefined;
+  const addChargeDescription = searchParams.get("addChargeDescription");
 
   const createInvoice = useCreateInvoice(tenantId);
   const { data: customers } = useCustomers(tenantId, { pageSize: 100 });
@@ -30,7 +31,10 @@ export default function NewInvoicePage() {
       createInvoice
         .mutateAsync({ rentalId })
         .then((invoice) => {
-          router.replace(`/app/invoices/${invoice.id}`);
+          const suffix = addChargeDescription
+            ? `?addChargeDescription=${encodeURIComponent(addChargeDescription)}`
+            : "";
+          router.replace(`/app/invoices/${invoice.id}${suffix}`);
         })
         .catch((err: unknown) => {
           setError(apiErrorMessage(err, t("common.error")));

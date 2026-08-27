@@ -305,6 +305,16 @@ export const documentSchema = z
     damageDescription: z.string().max(2000),
     /** Only meaningful for RETURN_PROTOCOL. */
     missingItems: z.string().max(2000),
+    /**
+     * Universal, optional operational condition fields — free-text so they
+     * work for any asset type (a container, a generator, a camera, a car, a
+     * bicycle), never a vehicle-only mandatory field (see DECISIONS.md
+     * D-107, PRODUCT_BIBLE §3's three-industry test).
+     */
+    meterReading: z.string().max(200),
+    fuelLevel: z.string().max(100),
+    batteryLevel: z.string().max(100),
+    accessoriesChecklist: z.string().max(2000),
   })
   .refine((data) => data.documentType !== "CUSTOM" || data.customTypeName.trim().length > 0, {
     path: ["customTypeName"],

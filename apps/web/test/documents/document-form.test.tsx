@@ -24,8 +24,21 @@ vi.mock("../../src/hooks/use-assets", () => ({
 }));
 
 const useRentalsMock = vi.fn();
+// Default to `{ data: undefined }` so the many existing tests below (which
+// never exercise the RETURN_PROTOCOL Handover-comparison path) don't have
+// to each mock this out individually — useRental/useDocument are still
+// called unconditionally (React's rules of hooks), just with a null id.
+const useRentalMock = vi.fn();
+useRentalMock.mockReturnValue({ data: undefined });
 vi.mock("../../src/hooks/use-rentals", () => ({
   useRentals: (...args: unknown[]) => useRentalsMock(...args),
+  useRental: (...args: unknown[]) => useRentalMock(...args),
+}));
+
+const useDocumentMock = vi.fn();
+useDocumentMock.mockReturnValue({ data: undefined });
+vi.mock("../../src/hooks/use-documents", () => ({
+  useDocument: (...args: unknown[]) => useDocumentMock(...args),
 }));
 
 const useActiveDocumentTemplateLanguagesMock = vi.fn();
@@ -164,6 +177,82 @@ describe("Handover/Return condition notes (D-094 regression)", () => {
     expect(screen.getByLabelText("Asset condition")).toBeInTheDocument();
     expect(screen.getByLabelText("Damage description")).toBeInTheDocument();
     expect(screen.getByLabelText("Missing items / accessories")).toBeInTheDocument();
+  });
+
+  it("shows the universal optional condition fields (meter/fuel/battery/accessories) for both Handover and Return", () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(renderForm(queryClient, { documentType: "HANDOVER_PROTOCOL" }));
+
+    expect(screen.getByLabelText("Meter / odometer / operating hours")).toBeInTheDocument();
+    expect(screen.getByLabelText("Fuel level")).toBeInTheDocument();
+    expect(screen.getByLabelText("Battery / charge level")).toBeInTheDocument();
+    expect(screen.getByLabelText("Accessories / equipment checklist")).toBeInTheDocument();
+  });
+});
+
+describe("Return Protocol compares against the linked Handover Protocol (D-107)", () => {
+  beforeEach(() => {
+    useCurrentTenantIdMock.mockReturnValue(["tenant-1", vi.fn()]);
+    useCustomersMock.mockReturnValue({ data: { items: [] } });
+    useAssetsMock.mockReturnValue({ data: { items: [] } });
+    useRentalsMock.mockReturnValue({
+      data: { items: [{ id: "rental-1", rentalNumber: "R-0001" }] },
+    });
+    useActiveDocumentTemplateLanguagesMock.mockReturnValue({ data: { languages: [] } });
+  });
+
+  it("shows no reference block when the rental has no linked Handover Protocol", () => {
+    useRentalMock.mockReturnValue({ data: { documents: [] } });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(renderForm(queryClient, { documentType: "RETURN_PROTOCOL", rentalId: "rental-1" }));
+
+    expect(screen.queryByText("Condition at handover (for comparison)")).not.toBeInTheDocument();
+  });
+
+  it("shows the linked Handover Protocol's recorded condition as a read-only reference", () => {
+    useRentalMock.mockReturnValue({
+      data: {
+        documents: [
+          {
+            id: "doc-handover",
+            documentType: "HANDOVER_PROTOCOL",
+            status: "SIGNED",
+            customTypeName: null,
+            documentNumber: "HD-000001",
+            title: null,
+            createdAt: "2026-01-01T00:00:00Z",
+          },
+        ],
+      },
+    });
+    useDocumentMock.mockReturnValue({
+      data: {
+        currentVersionNumber: 1,
+        versions: [
+          {
+            versionNumber: 1,
+            businessDataSnapshot: {
+              conditionNotes: {
+                assetCondition: "Good, minor scratches",
+                meterReading: "12345 km",
+                fuelLevel: "Full",
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(renderForm(queryClient, { documentType: "RETURN_PROTOCOL", rentalId: "rental-1" }));
+
+    expect(screen.getByText("Condition at handover (for comparison)")).toBeInTheDocument();
+    // The value sits as a sibling text node after a <span> label inside the
+    // same <p> (see the reference block's JSX) — match against the whole
+    // paragraph's text content rather than an exact standalone node.
+    expect(screen.getByText(/Good, minor scratches/)).toBeInTheDocument();
+    expect(screen.getByText(/12345 km/)).toBeInTheDocument();
+    expect(screen.getByText(/Full/)).toBeInTheDocument();
   });
 });
 

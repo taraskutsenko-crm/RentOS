@@ -49,13 +49,28 @@ export default function NewDocumentPage() {
     if (values.notes) businessData.notes = values.notes;
     if (
       isConditionType &&
-      (values.assetConditionNotes || values.damageDescription || values.missingItems)
+      (values.assetConditionNotes ||
+        values.damageDescription ||
+        values.missingItems ||
+        values.meterReading ||
+        values.fuelLevel ||
+        values.batteryLevel ||
+        values.accessoriesChecklist)
     ) {
       businessData.conditionNotes = {
         ...(values.assetConditionNotes ? { assetCondition: values.assetConditionNotes } : {}),
         ...(values.damageDescription ? { damageDescription: values.damageDescription } : {}),
         ...(values.documentType === "RETURN_PROTOCOL" && values.missingItems
           ? { missingItems: values.missingItems }
+          : {}),
+        // Universal, optional operational condition fields — meaningful for
+        // any asset type, never vehicle-only mandatory (see DECISIONS.md
+        // D-107).
+        ...(values.meterReading ? { meterReading: values.meterReading } : {}),
+        ...(values.fuelLevel ? { fuelLevel: values.fuelLevel } : {}),
+        ...(values.batteryLevel ? { batteryLevel: values.batteryLevel } : {}),
+        ...(values.accessoriesChecklist
+          ? { accessoriesChecklist: values.accessoriesChecklist }
           : {}),
       };
     }

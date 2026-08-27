@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "이 대여 건에 대한 청구서가 아직 없습니다",
-      "create": "청구서 생성"
+      "create": "청구서 생성",
+      "addCharge": "요금 추가…",
+      "chargeTypes": {
+        "damage": "손상 요금",
+        "missingItem": "분실 물품 요금",
+        "cleaning": "청소 요금",
+        "fuel": "연료 충전 요금",
+        "lateReturn": "연체 반납 요금",
+        "other": "기타 요금"
+      }
     },
     "deposit": {
       "title": "보증금",
@@ -914,7 +923,12 @@
       "notes": "메모",
       "assetConditionNotes": "자산 상태",
       "damageDescription": "손상 설명",
-      "missingItems": "누락된 항목 / 부속품"
+      "missingItems": "누락된 항목 / 부속품",
+      "meterReading": "계기/주행거리/가동 시간",
+      "fuelLevel": "연료 잔량",
+      "batteryLevel": "배터리/충전 잔량",
+      "accessoriesChecklist": "부속품/장비 체크리스트",
+      "handoverReferenceTitle": "인도 시 상태(비교용)"
     },
     "summary": {
       "total": "총 문서 수",

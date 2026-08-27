@@ -71,6 +71,10 @@ interface DocumentStrings {
   assetConditionLabel: string;
   newDamageLabel: string;
   missingItemsLabel: string;
+  meterReadingLabel: string;
+  fuelLevelLabel: string;
+  batteryLevelLabel: string;
+  accessoriesChecklistLabel: string;
   contractAmendmentTitle: string;
   amendmentTo: string;
   contractSections: { title: string; body: string }[];
@@ -285,6 +289,17 @@ function buildTemplates(strings: DocumentStrings): Record<DocumentType, DefaultT
   <div class="doc-section">
     <div class="doc-section__title">${strings.damageDescription}</div>
     <p class="doc-notes">{{data.conditionNotes.damageDescription}}</p>
+  </div>
+  <div class="doc-section">
+    <div class="doc-grid">
+      <div class="doc-field"><div class="doc-field__label">${strings.meterReadingLabel}</div><div class="doc-field__value">{{data.conditionNotes.meterReading}}</div></div>
+      <div class="doc-field"><div class="doc-field__label">${strings.fuelLevelLabel}</div><div class="doc-field__value">{{data.conditionNotes.fuelLevel}}</div></div>
+      <div class="doc-field"><div class="doc-field__label">${strings.batteryLevelLabel}</div><div class="doc-field__value">{{data.conditionNotes.batteryLevel}}</div></div>
+    </div>
+  </div>
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.accessoriesChecklistLabel}</div>
+    <p class="doc-notes">{{data.conditionNotes.accessoriesChecklist}}</p>
   </div>`,
       ),
     },
@@ -306,6 +321,17 @@ function buildTemplates(strings: DocumentStrings): Record<DocumentType, DefaultT
   <div class="doc-section">
     <div class="doc-section__title">${strings.missingItemsLabel}</div>
     <p class="doc-notes">{{data.conditionNotes.missingItems}}</p>
+  </div>
+  <div class="doc-section">
+    <div class="doc-grid">
+      <div class="doc-field"><div class="doc-field__label">${strings.meterReadingLabel}</div><div class="doc-field__value">{{data.conditionNotes.meterReading}}</div></div>
+      <div class="doc-field"><div class="doc-field__label">${strings.fuelLevelLabel}</div><div class="doc-field__value">{{data.conditionNotes.fuelLevel}}</div></div>
+      <div class="doc-field"><div class="doc-field__label">${strings.batteryLevelLabel}</div><div class="doc-field__value">{{data.conditionNotes.batteryLevel}}</div></div>
+    </div>
+  </div>
+  <div class="doc-section">
+    <div class="doc-section__title">${strings.accessoriesChecklistLabel}</div>
+    <p class="doc-notes">{{data.conditionNotes.accessoriesChecklist}}</p>
   </div>`,
       ),
     },
@@ -406,6 +432,10 @@ const EN_STRINGS: DocumentStrings = {
   assetConditionLabel: "Asset condition",
   newDamageLabel: "New damage",
   missingItemsLabel: "Missing items / accessories",
+  meterReadingLabel: "Meter / odometer / operating hours",
+  fuelLevelLabel: "Fuel level",
+  batteryLevelLabel: "Battery / charge level",
+  accessoriesChecklistLabel: "Accessories / equipment checklist",
   contractAmendmentTitle: "Contract Amendment",
   amendmentTo: "Amendment to",
   depositReceiptTitle: "Deposit Receipt Confirmation",
@@ -514,6 +544,10 @@ const PL_STRINGS: DocumentStrings = {
   assetConditionLabel: "Stan sprzętu",
   newDamageLabel: "Nowe uszkodzenia",
   missingItemsLabel: "Brakujące elementy / akcesoria",
+  meterReadingLabel: "Stan licznika / przebieg / motogodziny",
+  fuelLevelLabel: "Poziom paliwa",
+  batteryLevelLabel: "Poziom naładowania baterii",
+  accessoriesChecklistLabel: "Wyposażenie / lista akcesoriów",
   contractAmendmentTitle: "Aneks do umowy",
   amendmentTo: "Aneks do umowy",
   depositReceiptTitle: "Potwierdzenie przyjęcia kaucji",

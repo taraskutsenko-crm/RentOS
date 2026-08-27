@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "Noch keine Rechnungen für diesen Mietvorgang",
-      "create": "Rechnung erstellen"
+      "create": "Rechnung erstellen",
+      "addCharge": "Gebühr hinzufügen…",
+      "chargeTypes": {
+        "damage": "Schadensgebühr",
+        "missingItem": "Gebühr für fehlenden Artikel",
+        "cleaning": "Reinigungsgebühr",
+        "fuel": "Kraftstoffgebühr",
+        "lateReturn": "Gebühr für verspätete Rückgabe",
+        "other": "Sonstige Gebühr"
+      }
     },
     "deposit": {
       "title": "Kaution",
@@ -914,7 +923,12 @@
       "notes": "Notizen",
       "assetConditionNotes": "Zustand des Geräts",
       "damageDescription": "Schadensbeschreibung",
-      "missingItems": "Fehlende Teile / Zubehör"
+      "missingItems": "Fehlende Teile / Zubehör",
+      "meterReading": "Zählerstand / Kilometerstand / Betriebsstunden",
+      "fuelLevel": "Kraftstoffstand",
+      "batteryLevel": "Akkustand",
+      "accessoriesChecklist": "Zubehör / Ausrüstungscheckliste",
+      "handoverReferenceTitle": "Zustand bei Übergabe (zum Vergleich)"
     },
     "summary": {
       "total": "Dokumente gesamt",

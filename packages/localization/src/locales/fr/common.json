@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "Aucune facture pour cette location pour le moment",
-      "create": "Créer une facture"
+      "create": "Créer une facture",
+      "addCharge": "Ajouter des frais…",
+      "chargeTypes": {
+        "damage": "Frais de dommage",
+        "missingItem": "Frais d'article manquant",
+        "cleaning": "Frais de nettoyage",
+        "fuel": "Frais de carburant",
+        "lateReturn": "Frais de retard de retour",
+        "other": "Autres frais"
+      }
     },
     "deposit": {
       "title": "Caution",
@@ -914,7 +923,12 @@
       "notes": "Notes",
       "assetConditionNotes": "État de l'équipement",
       "damageDescription": "Description des dommages",
-      "missingItems": "Éléments / accessoires manquants"
+      "missingItems": "Éléments / accessoires manquants",
+      "meterReading": "Compteur / kilométrage / heures de fonctionnement",
+      "fuelLevel": "Niveau de carburant",
+      "batteryLevel": "Niveau de batterie / charge",
+      "accessoriesChecklist": "Accessoires / liste du matériel",
+      "handoverReferenceTitle": "État à la remise (pour comparaison)"
     },
     "summary": {
       "total": "Total des documents",

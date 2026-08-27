@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "Brak faktur dla tego wynajmu",
-      "create": "Utwórz fakturę"
+      "create": "Utwórz fakturę",
+      "addCharge": "Dodaj opłatę…",
+      "chargeTypes": {
+        "damage": "Opłata za uszkodzenie",
+        "missingItem": "Opłata za brakujący element",
+        "cleaning": "Opłata za sprzątanie",
+        "fuel": "Opłata za paliwo",
+        "lateReturn": "Opłata za opóźniony zwrot",
+        "other": "Inna opłata"
+      }
     },
     "deposit": {
       "title": "Kaucja",
@@ -914,7 +923,12 @@
       "notes": "Uwagi",
       "assetConditionNotes": "Stan sprzętu",
       "damageDescription": "Opis uszkodzenia",
-      "missingItems": "Brakujące elementy / akcesoria"
+      "missingItems": "Brakujące elementy / akcesoria",
+      "meterReading": "Stan licznika / przebieg / motogodziny",
+      "fuelLevel": "Poziom paliwa",
+      "batteryLevel": "Poziom naładowania baterii",
+      "accessoriesChecklist": "Wyposażenie / lista akcesoriów",
+      "handoverReferenceTitle": "Stan przy wydaniu (do porównania)"
     },
     "summary": {
       "total": "Wszystkie dokumenty",

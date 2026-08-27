@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "Pro tento pronájem zatím nejsou žádné faktury",
-      "create": "Vytvořit fakturu"
+      "create": "Vytvořit fakturu",
+      "addCharge": "Přidat poplatek…",
+      "chargeTypes": {
+        "damage": "Poplatek za poškození",
+        "missingItem": "Poplatek za chybějící položku",
+        "cleaning": "Poplatek za úklid",
+        "fuel": "Poplatek za palivo",
+        "lateReturn": "Poplatek za pozdní vrácení",
+        "other": "Jiný poplatek"
+      }
     },
     "deposit": {
       "title": "Kauce",
@@ -914,7 +923,12 @@
       "notes": "Poznámky",
       "assetConditionNotes": "Stav vybavení",
       "damageDescription": "Popis poškození",
-      "missingItems": "Chybějící položky / příslušenství"
+      "missingItems": "Chybějící položky / příslušenství",
+      "meterReading": "Stav počítadla / tachometru / motohodin",
+      "fuelLevel": "Stav paliva",
+      "batteryLevel": "Stav baterie",
+      "accessoriesChecklist": "Příslušenství / kontrolní seznam vybavení",
+      "handoverReferenceTitle": "Stav při předání (pro srovnání)"
     },
     "summary": {
       "total": "Celkem dokumentů",

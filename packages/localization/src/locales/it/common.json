@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "Nessuna fattura per questo noleggio finora",
-      "create": "Crea fattura"
+      "create": "Crea fattura",
+      "addCharge": "Aggiungi addebito…",
+      "chargeTypes": {
+        "damage": "Addebito per danni",
+        "missingItem": "Addebito per articolo mancante",
+        "cleaning": "Addebito per pulizia",
+        "fuel": "Addebito per carburante",
+        "lateReturn": "Addebito per restituzione tardiva",
+        "other": "Altro addebito"
+      }
     },
     "deposit": {
       "title": "Deposito cauzionale",
@@ -914,7 +923,12 @@
       "notes": "Note",
       "assetConditionNotes": "Condizione dell'attrezzatura",
       "damageDescription": "Descrizione del danno",
-      "missingItems": "Elementi / accessori mancanti"
+      "missingItems": "Elementi / accessori mancanti",
+      "meterReading": "Contatore / contachilometri / ore di funzionamento",
+      "fuelLevel": "Livello carburante",
+      "batteryLevel": "Livello batteria / carica",
+      "accessoriesChecklist": "Accessori / lista attrezzatura",
+      "handoverReferenceTitle": "Condizione alla consegna (per confronto)"
     },
     "summary": {
       "total": "Documenti totali",

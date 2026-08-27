@@ -11,10 +11,22 @@ import { useAssets } from "../../hooks/use-assets";
 import { useCustomers } from "../../hooks/use-customers";
 import { useCurrentTenantId } from "../../hooks/use-current-tenant";
 import { useActiveDocumentTemplateLanguages } from "../../hooks/use-document-templates";
-import { useRentals } from "../../hooks/use-rentals";
+import { useDocument } from "../../hooks/use-documents";
+import { useRental, useRentals } from "../../hooks/use-rentals";
 import { getAssetDisplayLabel } from "../../lib/asset-display-label";
+import { mostAdvancedDocument } from "../../lib/document-completeness-intelligence";
 import { documentSchema, type DocumentFormValues } from "../../lib/validation";
 import type { DocumentType } from "../../types/document";
+
+/** The subset of Handover Protocol condition-notes fields worth showing back to staff filling in a Return Protocol. */
+interface HandoverConditionReference {
+  assetCondition?: string;
+  damageDescription?: string;
+  meterReading?: string;
+  fuelLevel?: string;
+  batteryLevel?: string;
+  accessoriesChecklist?: string;
+}
 
 const DOCUMENT_TYPES: DocumentType[] = [
   "QUOTE",
@@ -77,6 +89,10 @@ export function DocumentForm({
       assetConditionNotes: "",
       damageDescription: "",
       missingItems: "",
+      meterReading: "",
+      fuelLevel: "",
+      batteryLevel: "",
+      accessoriesChecklist: "",
       ...initialValues,
     },
   });
@@ -100,6 +116,30 @@ export function DocumentForm({
   }, [customers, assets, rentals, initialValues, setValue]);
 
   const documentType = watch("documentType");
+  const selectedRentalId = watch("rentalId");
+
+  // Return Protocol: surface the linked Handover Protocol's condition data
+  // as a read-only reference so staff can compare "at handover" vs "at
+  // return" without re-entering or duplicating the original values (see
+  // DECISIONS.md D-107). Only fetched for RETURN_PROTOCOL with a rental
+  // selected — the two extra requests never fire for any other document type.
+  const isReturnProtocol = documentType === "RETURN_PROTOCOL";
+  const { data: rentalForComparison } = useRental(
+    tenantId,
+    isReturnProtocol ? selectedRentalId || null : null,
+  );
+  const linkedHandover = rentalForComparison
+    ? mostAdvancedDocument(rentalForComparison.documents, "HANDOVER_PROTOCOL")
+    : null;
+  const { data: handoverDocument } = useDocument(
+    tenantId,
+    linkedHandover ? linkedHandover.document.id : null,
+  );
+  const handoverLatestVersion = handoverDocument?.versions.find(
+    (version) => version.versionNumber === handoverDocument.currentVersionNumber,
+  );
+  const handoverConditionReference = (handoverLatestVersion?.businessDataSnapshot?.conditionNotes ??
+    null) as HandoverConditionReference | null;
 
   // Only meaningful (and only ever shown) when 2+ ACTIVE templates exist for
   // this documentType across different languages — see
@@ -258,6 +298,54 @@ export function DocumentForm({
         />
       </div>
 
+      {isReturnProtocol && handoverConditionReference && (
+        <div className="bg-muted/40 flex flex-col gap-1 rounded-md border p-3 text-sm">
+          <p className="font-medium">{t("document.fields.handoverReferenceTitle")}</p>
+          {handoverConditionReference.assetCondition && (
+            <p>
+              <span className="text-muted-foreground">
+                {t("document.fields.assetConditionNotes")}:{" "}
+              </span>
+              {handoverConditionReference.assetCondition}
+            </p>
+          )}
+          {handoverConditionReference.damageDescription && (
+            <p>
+              <span className="text-muted-foreground">
+                {t("document.fields.damageDescription")}:{" "}
+              </span>
+              {handoverConditionReference.damageDescription}
+            </p>
+          )}
+          {handoverConditionReference.meterReading && (
+            <p>
+              <span className="text-muted-foreground">{t("document.fields.meterReading")}: </span>
+              {handoverConditionReference.meterReading}
+            </p>
+          )}
+          {handoverConditionReference.fuelLevel && (
+            <p>
+              <span className="text-muted-foreground">{t("document.fields.fuelLevel")}: </span>
+              {handoverConditionReference.fuelLevel}
+            </p>
+          )}
+          {handoverConditionReference.batteryLevel && (
+            <p>
+              <span className="text-muted-foreground">{t("document.fields.batteryLevel")}: </span>
+              {handoverConditionReference.batteryLevel}
+            </p>
+          )}
+          {handoverConditionReference.accessoriesChecklist && (
+            <p>
+              <span className="text-muted-foreground">
+                {t("document.fields.accessoriesChecklist")}:{" "}
+              </span>
+              {handoverConditionReference.accessoriesChecklist}
+            </p>
+          )}
+        </div>
+      )}
+
       {(documentType === "HANDOVER_PROTOCOL" || documentType === "RETURN_PROTOCOL") && (
         <>
           <div className="flex flex-col gap-1.5">
@@ -289,6 +377,31 @@ export function DocumentForm({
               />
             </div>
           )}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="meterReading">{t("document.fields.meterReading")}</Label>
+              <Input id="meterReading" {...register("meterReading")} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="fuelLevel">{t("document.fields.fuelLevel")}</Label>
+              <Input id="fuelLevel" {...register("fuelLevel")} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="batteryLevel">{t("document.fields.batteryLevel")}</Label>
+              <Input id="batteryLevel" {...register("batteryLevel")} />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="accessoriesChecklist">
+              {t("document.fields.accessoriesChecklist")}
+            </Label>
+            <textarea
+              id="accessoriesChecklist"
+              rows={2}
+              className="border-input flex w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs"
+              {...register("accessoriesChecklist")}
+            />
+          </div>
         </>
       )}
 

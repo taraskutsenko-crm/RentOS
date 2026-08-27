@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "Ainda não há faturas para esta locação",
-      "create": "Criar fatura"
+      "create": "Criar fatura",
+      "addCharge": "Adicionar cobrança…",
+      "chargeTypes": {
+        "damage": "Taxa de dano",
+        "missingItem": "Taxa de item ausente",
+        "cleaning": "Taxa de limpeza",
+        "fuel": "Taxa de combustível",
+        "lateReturn": "Taxa de devolução tardia",
+        "other": "Outra cobrança"
+      }
     },
     "deposit": {
       "title": "Caução",
@@ -914,7 +923,12 @@
       "notes": "Observações",
       "assetConditionNotes": "Condição do equipamento",
       "damageDescription": "Descrição do dano",
-      "missingItems": "Itens / acessórios ausentes"
+      "missingItems": "Itens / acessórios ausentes",
+      "meterReading": "Medidor / odômetro / horas de operação",
+      "fuelLevel": "Nível de combustível",
+      "batteryLevel": "Nível de bateria / carga",
+      "accessoriesChecklist": "Acessórios / lista de equipamentos",
+      "handoverReferenceTitle": "Condição na entrega (para comparação)"
     },
     "summary": {
       "total": "Total de documentos",

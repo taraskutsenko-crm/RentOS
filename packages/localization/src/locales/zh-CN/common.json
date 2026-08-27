@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "此租赁暂无发票",
-      "create": "创建发票"
+      "create": "创建发票",
+      "addCharge": "添加费用…",
+      "chargeTypes": {
+        "damage": "损坏费",
+        "missingItem": "缺失物品费",
+        "cleaning": "清洁费",
+        "fuel": "燃油费",
+        "lateReturn": "逾期归还费",
+        "other": "其他费用"
+      }
     },
     "deposit": {
       "title": "押金",
@@ -914,7 +923,12 @@
       "notes": "备注",
       "assetConditionNotes": "资产状况",
       "damageDescription": "损坏描述",
-      "missingItems": "缺失物品/配件"
+      "missingItems": "缺失物品/配件",
+      "meterReading": "计量表／里程表／运行小时数",
+      "fuelLevel": "燃油量",
+      "batteryLevel": "电池／电量水平",
+      "accessoriesChecklist": "配件／设备清单",
+      "handoverReferenceTitle": "交接时状态（用于比较）"
     },
     "summary": {
       "total": "文档总数",

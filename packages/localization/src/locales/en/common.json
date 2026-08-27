@@ -513,7 +513,16 @@
     },
     "invoices": {
       "empty": "No invoices for this rental yet",
-      "create": "Create invoice"
+      "create": "Create invoice",
+      "addCharge": "Add charge…",
+      "chargeTypes": {
+        "damage": "Damage fee",
+        "missingItem": "Missing item fee",
+        "cleaning": "Cleaning fee",
+        "fuel": "Fuel / refill fee",
+        "lateReturn": "Late return fee",
+        "other": "Other charge"
+      }
     },
     "documentChecklist": {
       "title": "Document checklist",
@@ -914,7 +923,12 @@
       "notes": "Notes",
       "assetConditionNotes": "Asset condition",
       "damageDescription": "Damage description",
-      "missingItems": "Missing items / accessories"
+      "missingItems": "Missing items / accessories",
+      "meterReading": "Meter / odometer / operating hours",
+      "fuelLevel": "Fuel level",
+      "batteryLevel": "Battery / charge level",
+      "accessoriesChecklist": "Accessories / equipment checklist",
+      "handoverReferenceTitle": "Condition at handover (for comparison)"
     },
     "summary": {
       "total": "Total documents",

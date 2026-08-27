@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "Aún no hay facturas para este alquiler",
-      "create": "Crear factura"
+      "create": "Crear factura",
+      "addCharge": "Añadir cargo…",
+      "chargeTypes": {
+        "damage": "Cargo por daños",
+        "missingItem": "Cargo por artículo faltante",
+        "cleaning": "Cargo de limpieza",
+        "fuel": "Cargo por combustible",
+        "lateReturn": "Cargo por devolución tardía",
+        "other": "Otro cargo"
+      }
     },
     "deposit": {
       "title": "Depósito",
@@ -914,7 +923,12 @@
       "notes": "Notas",
       "assetConditionNotes": "Estado del equipo",
       "damageDescription": "Descripción del daño",
-      "missingItems": "Elementos / accesorios faltantes"
+      "missingItems": "Elementos / accesorios faltantes",
+      "meterReading": "Contador / odómetro / horas de funcionamiento",
+      "fuelLevel": "Nivel de combustible",
+      "batteryLevel": "Nivel de batería / carga",
+      "accessoriesChecklist": "Accesorios / lista de equipo",
+      "handoverReferenceTitle": "Estado en la entrega (para comparar)"
     },
     "summary": {
       "total": "Documentos totales",

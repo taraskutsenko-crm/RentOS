@@ -652,7 +652,16 @@
     },
     "invoices": {
       "empty": "Nog geen facturen voor deze verhuur",
-      "create": "Factuur aanmaken"
+      "create": "Factuur aanmaken",
+      "addCharge": "Kosten toevoegen…",
+      "chargeTypes": {
+        "damage": "Schadevergoeding",
+        "missingItem": "Vergoeding ontbrekend item",
+        "cleaning": "Schoonmaakkosten",
+        "fuel": "Brandstofkosten",
+        "lateReturn": "Vergoeding late teruggave",
+        "other": "Overige kosten"
+      }
     },
     "deposit": {
       "title": "Borg",
@@ -914,7 +923,12 @@
       "notes": "Notities",
       "assetConditionNotes": "Staat van materiaal",
       "damageDescription": "Beschrijving van de schade",
-      "missingItems": "Ontbrekende items / accessoires"
+      "missingItems": "Ontbrekende items / accessoires",
+      "meterReading": "Teller/kilometerstand/bedrijfsuren",
+      "fuelLevel": "Brandstofniveau",
+      "batteryLevel": "Batterij-/laadniveau",
+      "accessoriesChecklist": "Accessoires/uitrustingschecklist",
+      "handoverReferenceTitle": "Staat bij overdracht (ter vergelijking)"
     },
     "summary": {
       "total": "Totaal aantal documenten",

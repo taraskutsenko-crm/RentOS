@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import type { DocumentFile } from "@prisma/client";
 
 import { AuditService } from "../audit/audit.service";
@@ -41,6 +41,17 @@ export class DocumentFilesService {
     if (!document) {
       throw new NotFoundException("Document not found");
     }
+    // Mirrors DocumentsService.update's exact guard (see documents.service.ts)
+    // — a version is only ever mutable while its Document is DRAFT. Once
+    // finalized, staff-uploaded evidence (Handover/Return photos included)
+    // must be exactly as immutable as the rest of the version, or a
+    // "finalized document" would stop meaning what ARCHITECTURE_LOCK §1.6
+    // says it means.
+    if (document.status !== "DRAFT") {
+      throw new ConflictException(
+        "Files can only be added while the document is DRAFT — its current version is finalized and immutable",
+      );
+    }
 
     const version = await this.prisma.documentVersion.findFirst({
       where: { documentId, tenantId, versionNumber: document.currentVersionNumber },
@@ -63,6 +74,8 @@ export class DocumentFilesService {
         originalFileName: file.originalname,
         mimeType: file.mimetype,
         sizeBytes: file.size,
+        category: dto.category ?? null,
+        caption: dto.caption ?? null,
         uploadedByUserId: actorUserId,
       },
     });
@@ -95,6 +108,18 @@ export class DocumentFilesService {
     fileId: string,
     actorUserId: string,
   ): Promise<void> {
+    const document = await this.prisma.document.findFirst({
+      where: { id: documentId, tenantId, deletedAt: null },
+    });
+    if (!document) {
+      throw new NotFoundException("Document not found");
+    }
+    if (document.status !== "DRAFT") {
+      throw new ConflictException(
+        "Files can only be removed while the document is DRAFT — evidence on a finalized document is immutable",
+      );
+    }
+
     const file = await this.findFileOrThrow(tenantId, documentId, fileId);
 
     await this.prisma.documentFile.update({

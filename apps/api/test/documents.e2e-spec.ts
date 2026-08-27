@@ -651,6 +651,122 @@ describe("Documents E2E (TASK-0008 Part 1 — Document Management Platform)", ()
     expect(history.body.some((event: { type: string }) => event.type === "downloaded")).toBe(true);
   });
 
+  it("accepts an optional category and caption and returns them verbatim", async () => {
+    const created = await createDocument().expect(201);
+    const id = created.body.id as string;
+
+    const uploadResponse = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents/${id}/files`)
+      .set("Cookie", accessCookie)
+      .field("format", "PHOTO")
+      .field("category", "HANDOVER_CONDITION")
+      .field("caption", "Front bumper, minor scratch")
+      .attach("file", Buffer.from("fake image bytes"), {
+        filename: "handover-1.jpg",
+        contentType: "image/jpeg",
+      })
+      .expect(201);
+    expect(uploadResponse.body.category).toBe("HANDOVER_CONDITION");
+    expect(uploadResponse.body.caption).toBe("Front bumper, minor scratch");
+  });
+
+  // Production-infrastructure pass (D-1xx): staff-uploaded evidence must be
+  // exactly as immutable as the rest of a finalized document's content.
+  it("rejects uploading or removing a file once the document has been finalized (left DRAFT)", async () => {
+    const created = await createDocument().expect(201);
+    const id = created.body.id as string;
+
+    const uploadResponse = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents/${id}/files`)
+      .set("Cookie", accessCookie)
+      .field("format", "ATTACHMENT")
+      .attach("file", Buffer.from("draft-era file"), {
+        filename: "draft.pdf",
+        contentType: "application/pdf",
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents/${id}/ready`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents/${id}/files`)
+      .set("Cookie", accessCookie)
+      .field("format", "ATTACHMENT")
+      .attach("file", Buffer.from("post-finalize file"), {
+        filename: "late.pdf",
+        contentType: "application/pdf",
+      })
+      .expect(409);
+
+    await request(app.getHttpServer())
+      .delete(`/tenants/${tenantId}/documents/${id}/files/${uploadResponse.body.id}`)
+      .set("Cookie", accessCookie)
+      .expect(409);
+  });
+
+  it("denies a different tenant from uploading, downloading, or deleting another tenant's document files", async () => {
+    const created = await createDocument().expect(201);
+    const id = created.body.id as string;
+    const uploadResponse = await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents/${id}/files`)
+      .set("Cookie", accessCookie)
+      .field("format", "ATTACHMENT")
+      .attach("file", Buffer.from("tenant A file"), {
+        filename: "a.pdf",
+        contentType: "application/pdf",
+      })
+      .expect(201);
+
+    const otherTenant = await request(app.getHttpServer())
+      .post("/auth/register")
+      .send({ ...validRegisterPayload, email: "other-tenant-files@example.com" })
+      .expect(201);
+    const otherTenantId = (otherTenant.body as RegisterResponseBody).tenant.id;
+    const otherCookie = extractCookie(otherTenant.headers, "rentos_access_token");
+
+    // Tenant B has no membership in tenant A's tenantId at all — TenantGuard
+    // itself denies before any document is looked up (see ARCHITECTURE_LOCK
+    // §1.2 / tenant.guard.ts).
+    await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${id}/files/${uploadResponse.body.id}/file`)
+      .set("Cookie", otherCookie)
+      .expect(403);
+
+    // Tenant B using their OWN (real) tenantId but referencing tenant A's
+    // document/file id — passes TenantGuard, then DocumentFilesService's
+    // own tenant-scoped Prisma lookup finds nothing: existence is never
+    // leaked across tenants, so this is 404, not 403 (§1.2).
+    await request(app.getHttpServer())
+      .get(`/tenants/${otherTenantId}/documents/${id}/files/${uploadResponse.body.id}/file`)
+      .set("Cookie", otherCookie)
+      .expect(404);
+
+    await request(app.getHttpServer())
+      .post(`/tenants/${otherTenantId}/documents/${id}/files`)
+      .set("Cookie", otherCookie)
+      .field("format", "ATTACHMENT")
+      .attach("file", Buffer.from("tenant B file"), {
+        filename: "b.pdf",
+        contentType: "application/pdf",
+      })
+      .expect(404);
+
+    await request(app.getHttpServer())
+      .delete(`/tenants/${otherTenantId}/documents/${id}/files/${uploadResponse.body.id}`)
+      .set("Cookie", otherCookie)
+      .expect(404);
+
+    // Tenant A's own file must remain completely intact after all of the above.
+    await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${id}/files/${uploadResponse.body.id}/file`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+  });
+
   it("soft-deletes a file, after which download returns 404", async () => {
     const created = await createDocument().expect(201);
     const id = created.body.id as string;

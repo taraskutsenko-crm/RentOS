@@ -26,6 +26,9 @@ export type DocumentStatus =
 export type DocumentFileFormat =
   "PDF" | "HTML" | "JSON_SNAPSHOT" | "DOCX" | "XML" | "ATTACHMENT" | "PHOTO";
 
+export type DocumentAttachmentCategory =
+  "HANDOVER_CONDITION" | "RETURN_CONDITION" | "DAMAGE" | "OTHER";
+
 export interface DocumentFile {
   id: string;
   documentVersionId: string;
@@ -34,6 +37,8 @@ export interface DocumentFile {
   originalFileName: string;
   mimeType: string;
   sizeBytes: number;
+  category: DocumentAttachmentCategory | null;
+  caption: string | null;
   uploadedByUserId: string | null;
   createdAt: string;
   deletedAt: string | null;

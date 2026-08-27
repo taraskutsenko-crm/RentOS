@@ -39,6 +39,8 @@ const useDocumentMock = vi.fn();
 useDocumentMock.mockReturnValue({ data: undefined });
 vi.mock("../../src/hooks/use-documents", () => ({
   useDocument: (...args: unknown[]) => useDocumentMock(...args),
+  documentFileUrl: (tenantId: string | null, documentId: string, fileId: string) =>
+    `http://api.test/tenants/${tenantId}/documents/${documentId}/files/${fileId}/file`,
 }));
 
 const useActiveDocumentTemplateLanguagesMock = vi.fn();
@@ -253,6 +255,51 @@ describe("Return Protocol compares against the linked Handover Protocol (D-107)"
     expect(screen.getByText(/Good, minor scratches/)).toBeInTheDocument();
     expect(screen.getByText(/12345 km/)).toBeInTheDocument();
     expect(screen.getByText(/Full/)).toBeInTheDocument();
+  });
+
+  it("shows the linked Handover Protocol's photos as read-only thumbnails alongside the text reference", () => {
+    useRentalMock.mockReturnValue({
+      data: {
+        documents: [
+          {
+            id: "doc-handover",
+            documentType: "HANDOVER_PROTOCOL",
+            status: "SIGNED",
+            customTypeName: null,
+            documentNumber: "HD-000001",
+            title: null,
+            createdAt: "2026-01-01T00:00:00Z",
+          },
+        ],
+      },
+    });
+    useDocumentMock.mockReturnValue({
+      data: {
+        currentVersionNumber: 1,
+        versions: [
+          {
+            versionNumber: 1,
+            businessDataSnapshot: { conditionNotes: { assetCondition: "Good" } },
+            files: [
+              { id: "file-1", format: "PHOTO", originalFileName: "front.jpg", caption: "Front view" },
+              { id: "file-2", format: "ATTACHMENT", originalFileName: "manual.pdf", caption: null },
+            ],
+          },
+        ],
+      },
+    });
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(renderForm(queryClient, { documentType: "RETURN_PROTOCOL", rentalId: "rental-1" }));
+
+    // Only the PHOTO file renders as a thumbnail — the ATTACHMENT (a PDF)
+    // is not a comparable "photo" and is deliberately not shown here.
+    const thumbnail = screen.getByAltText("Front view");
+    expect(thumbnail).toHaveAttribute(
+      "src",
+      "http://api.test/tenants/tenant-1/documents/doc-handover/files/file-1/file",
+    );
+    expect(screen.queryByAltText("manual.pdf")).not.toBeInTheDocument();
   });
 });
 

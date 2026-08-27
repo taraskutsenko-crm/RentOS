@@ -43,6 +43,8 @@ const useRetryDocumentEmailMock = vi.fn();
 const useRequestDocumentSignatureMock = vi.fn();
 const useRefreshDocumentSignatureMock = vi.fn();
 const useCancelDocumentSignatureMock = vi.fn();
+const useUploadDocumentFileMock = vi.fn();
+const useDeleteDocumentFileMock = vi.fn();
 
 vi.mock("../../src/hooks/use-documents", () => ({
   useDocument: (...args: unknown[]) => useDocumentMock(...args),
@@ -68,8 +70,12 @@ vi.mock("../../src/hooks/use-documents", () => ({
   useRequestDocumentSignature: () => useRequestDocumentSignatureMock(),
   useRefreshDocumentSignature: () => useRefreshDocumentSignatureMock(),
   useCancelDocumentSignature: () => useCancelDocumentSignatureMock(),
+  useUploadDocumentFile: () => useUploadDocumentFileMock(),
+  useDeleteDocumentFile: () => useDeleteDocumentFileMock(),
   documentPdfUrl: (tenantId: string | null, id: string) =>
     `http://api.test/tenants/${tenantId}/documents/${id}/pdf`,
+  documentFileUrl: (tenantId: string | null, documentId: string, fileId: string) =>
+    `http://api.test/tenants/${tenantId}/documents/${documentId}/files/${fileId}/file`,
 }));
 
 function baseDocument(status: string) {
@@ -109,6 +115,8 @@ describe("DocumentDetailPage", () => {
     useRequestDocumentSignatureMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useRefreshDocumentSignatureMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useCancelDocumentSignatureMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useUploadDocumentFileMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useDeleteDocumentFileMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
   });
 
   it("renders the document header with number, type, and status", () => {
@@ -251,5 +259,62 @@ describe("DocumentDetailPage", () => {
     await user.click(screen.getByRole("button", { name: /mark ready/i }));
 
     expect(await screen.findByText(/something went wrong/i)).toBeInTheDocument();
+  });
+
+  // Attachments (production-infrastructure pass) — staff-uploaded
+  // ATTACHMENT/PHOTO evidence, e.g. Handover/Return condition photos.
+  describe("attachments", () => {
+    function documentWithFiles(status: string, files: Record<string, unknown>[]) {
+      const doc = baseDocument(status);
+      return { ...doc, versions: [{ ...doc.versions[0], files }] };
+    }
+
+    it("shows an upload control on a DRAFT document when the user can update it", () => {
+      usePermissionMock.mockImplementation((permission: string) => permission === "documents.update");
+      useDocumentMock.mockReturnValue({ data: documentWithFiles("DRAFT", []), isLoading: false });
+
+      renderWithProviders(<DocumentDetailPage />);
+
+      expect(screen.getByText(/no attachments yet/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /upload/i })).toBeInTheDocument();
+    });
+
+    it("hides the upload control once the document is no longer DRAFT (finalized/immutable)", () => {
+      usePermissionMock.mockImplementation((permission: string) => permission === "documents.update");
+      useDocumentMock.mockReturnValue({ data: documentWithFiles("READY", []), isLoading: false });
+
+      renderWithProviders(<DocumentDetailPage />);
+
+      expect(screen.queryByRole("button", { name: /upload/i })).not.toBeInTheDocument();
+    });
+
+    it("renders an uploaded photo as a thumbnail and an uploaded document as a download link", () => {
+      usePermissionMock.mockReturnValue(false);
+      useDocumentMock.mockReturnValue({
+        data: documentWithFiles("DRAFT", [
+          {
+            id: "file-photo",
+            format: "PHOTO",
+            originalFileName: "damage.jpg",
+            caption: "Front bumper scratch",
+          },
+          {
+            id: "file-doc",
+            format: "ATTACHMENT",
+            originalFileName: "inspection.pdf",
+            caption: null,
+          },
+        ]),
+        isLoading: false,
+      });
+
+      renderWithProviders(<DocumentDetailPage />);
+
+      expect(screen.getByAltText("Front bumper scratch")).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "inspection.pdf" })).toHaveAttribute(
+        "href",
+        "http://api.test/tenants/tenant-1/documents/doc-1/files/file-doc/file",
+      );
+    });
   });
 });

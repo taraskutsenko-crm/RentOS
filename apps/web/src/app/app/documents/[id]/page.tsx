@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { PageHeader } from "../../../../components/shell/page-header";
 import { PinButton } from "../../../../components/shell/pin-button";
 import { Timeline } from "../../../../components/timeline/timeline";
+import { DocumentAttachments } from "../../../../components/documents/document-attachments";
 import { DocumentStatusBadge } from "../../../../components/documents/document-status-badge";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
@@ -431,6 +432,22 @@ export default function DocumentDetailPage() {
                   {currentVersion.reason ? ` · ${currentVersion.reason}` : ""}
                 </p>
               )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("document.attachments.title")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DocumentAttachments
+                tenantId={tenantId}
+                documentId={document.id}
+                documentType={document.documentType}
+                files={currentVersion?.files ?? []}
+                isDraft={document.status === "DRAFT"}
+                canManage={canUpdate}
+              />
             </CardContent>
           </Card>
 

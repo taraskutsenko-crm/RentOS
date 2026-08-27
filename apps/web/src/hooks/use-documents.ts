@@ -5,8 +5,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/api-client";
 import type {
   CreatedDocumentShareLink,
+  DocumentAttachmentCategory,
   DocumentEmailDelivery,
   DocumentEmailRecipientType,
+  DocumentFile,
   DocumentPreview,
   DocumentShareLink,
   DocumentSignatureRequest,
@@ -261,6 +263,62 @@ export function useRegenerateDocumentPdf(tenantId: string | null) {
 
 export function documentPdfUrl(tenantId: string | null, id: string): string {
   return `${process.env.NEXT_PUBLIC_API_URL}/tenants/${tenantId}/documents/${id}/pdf`;
+}
+
+// ---------------------------------------------------------------------
+// Files (staff-uploaded ATTACHMENT/PHOTO evidence — Handover/Return
+// condition photos, production-infrastructure pass)
+// ---------------------------------------------------------------------
+
+export function useUploadDocumentFile(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      documentId,
+      file,
+      format,
+      category,
+      caption,
+    }: {
+      documentId: string;
+      file: File;
+      format: "ATTACHMENT" | "PHOTO";
+      category?: DocumentAttachmentCategory | undefined;
+      caption?: string | undefined;
+    }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("format", format);
+      if (category) formData.append("category", category);
+      if (caption) formData.append("caption", caption);
+      return apiClient.postForm<DocumentFile>(
+        `/tenants/${tenantId}/documents/${documentId}/files`,
+        formData,
+      );
+    },
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: [BASE_KEY, tenantId, "detail", variables.documentId],
+      });
+    },
+  });
+}
+
+export function useDeleteDocumentFile(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ documentId, fileId }: { documentId: string; fileId: string }) =>
+      apiClient.delete<void>(`/tenants/${tenantId}/documents/${documentId}/files/${fileId}`),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: [BASE_KEY, tenantId, "detail", variables.documentId],
+      });
+    },
+  });
+}
+
+export function documentFileUrl(tenantId: string | null, documentId: string, fileId: string): string {
+  return `${process.env.NEXT_PUBLIC_API_URL}/tenants/${tenantId}/documents/${documentId}/files/${fileId}/file`;
 }
 
 // ---------------------------------------------------------------------

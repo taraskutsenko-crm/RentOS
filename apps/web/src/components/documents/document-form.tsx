@@ -11,7 +11,7 @@ import { useAssets } from "../../hooks/use-assets";
 import { useCustomers } from "../../hooks/use-customers";
 import { useCurrentTenantId } from "../../hooks/use-current-tenant";
 import { useActiveDocumentTemplateLanguages } from "../../hooks/use-document-templates";
-import { useDocument } from "../../hooks/use-documents";
+import { documentFileUrl, useDocument } from "../../hooks/use-documents";
 import { useRental, useRentals } from "../../hooks/use-rentals";
 import { getAssetDisplayLabel } from "../../lib/asset-display-label";
 import { mostAdvancedDocument } from "../../lib/document-completeness-intelligence";
@@ -140,6 +140,11 @@ export function DocumentForm({
   );
   const handoverConditionReference = (handoverLatestVersion?.businessDataSnapshot?.conditionNotes ??
     null) as HandoverConditionReference | null;
+  // Read-only — Return staff compare against, never edit, the Handover's
+  // own photos (historical evidence stays immutable, see DECISIONS.md).
+  const handoverPhotos = (handoverLatestVersion?.files ?? []).filter(
+    (file) => file.format === "PHOTO",
+  );
 
   // Only meaningful (and only ever shown) when 2+ ACTIVE templates exist for
   // this documentType across different languages — see
@@ -342,6 +347,24 @@ export function DocumentForm({
               </span>
               {handoverConditionReference.accessoriesChecklist}
             </p>
+          )}
+          {handoverPhotos.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {handoverPhotos.map((photo) => (
+                <a
+                  key={photo.id}
+                  href={documentFileUrl(tenantId, linkedHandover!.document.id, photo.id)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <img
+                    src={documentFileUrl(tenantId, linkedHandover!.document.id, photo.id)}
+                    alt={photo.caption ?? photo.originalFileName}
+                    className="h-16 w-16 rounded-md border object-cover"
+                  />
+                </a>
+              ))}
+            </div>
           )}
         </div>
       )}

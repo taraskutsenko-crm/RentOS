@@ -317,7 +317,11 @@ export function useDeleteDocumentFile(tenantId: string | null) {
   });
 }
 
-export function documentFileUrl(tenantId: string | null, documentId: string, fileId: string): string {
+export function documentFileUrl(
+  tenantId: string | null,
+  documentId: string,
+  fileId: string,
+): string {
   return `${process.env.NEXT_PUBLIC_API_URL}/tenants/${tenantId}/documents/${documentId}/files/${fileId}/file`;
 }
 

@@ -61,7 +61,9 @@ describe("SmtpEmailProvider", () => {
       to: "customer@example.com",
       subject: "Your quote",
       html: "<p>hi</p>",
-      attachments: [{ filename: "quote.pdf", content: Buffer.from("pdf"), contentType: "application/pdf" }],
+      attachments: [
+        { filename: "quote.pdf", content: Buffer.from("pdf"), contentType: "application/pdf" },
+      ],
     });
 
     expect(result).toEqual({ success: true, messageId: "<abc123@smtp.example.com>" });
@@ -80,7 +82,9 @@ describe("SmtpEmailProvider", () => {
   // Never surface the raw transport error (which can include the SMTP
   // username/host) back to callers/UI — only a short generic message.
   it("returns a generic error and never leaks the raw SMTP error on failure", async () => {
-    sendMail.mockRejectedValue(new Error("535 Authentication failed for user apikey@smtp.example.com"));
+    sendMail.mockRejectedValue(
+      new Error("535 Authentication failed for user apikey@smtp.example.com"),
+    );
     const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
 
     const result = await provider.send({ to: "a@b.com", subject: "s", html: "<p>x</p>" });
@@ -104,7 +108,9 @@ describe("SmtpEmailProvider", () => {
   });
 
   it("testConnection() reports failure without leaking the raw SMTP error", async () => {
-    verify.mockRejectedValue(new Error("535 Authentication failed for user apikey@smtp.example.com"));
+    verify.mockRejectedValue(
+      new Error("535 Authentication failed for user apikey@smtp.example.com"),
+    );
     const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
     const result = await provider.testConnection();
     expect(result.ok).toBe(false);

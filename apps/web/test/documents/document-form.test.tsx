@@ -281,7 +281,12 @@ describe("Return Protocol compares against the linked Handover Protocol (D-107)"
             versionNumber: 1,
             businessDataSnapshot: { conditionNotes: { assetCondition: "Good" } },
             files: [
-              { id: "file-1", format: "PHOTO", originalFileName: "front.jpg", caption: "Front view" },
+              {
+                id: "file-1",
+                format: "PHOTO",
+                originalFileName: "front.jpg",
+                caption: "Front view",
+              },
               { id: "file-2", format: "ATTACHMENT", originalFileName: "manual.pdf", caption: null },
             ],
           },

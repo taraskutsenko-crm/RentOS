@@ -53,7 +53,9 @@ export class InvoiceEmailService {
       );
     }
 
-    const subject = dto.subject || `Invoice ${invoice.invoiceNumber} from ${String(invoice.sellerSnapshot.name ?? "")}`;
+    const subject =
+      dto.subject ||
+      `Invoice ${invoice.invoiceNumber} from ${String(invoice.sellerSnapshot.name ?? "")}`;
 
     if (!this.emailService.isConfigured()) {
       await this.prisma.invoiceEmailDelivery.create({
@@ -132,9 +134,7 @@ export class InvoiceEmailService {
 }
 
 function buildInvoiceEmailHtml(invoiceNumber: string, message: string | undefined): string {
-  const escapedMessage = message
-    ? `<p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>`
-    : "";
+  const escapedMessage = message ? `<p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>` : "";
   return `<p>Please find invoice <strong>${escapeHtml(invoiceNumber)}</strong> attached.</p>${escapedMessage}`;
 }
 

@@ -63,7 +63,7 @@ prior conversations.
   foundation for a future billing/quota feature, not one itself. **A real
   bug was caught and fixed before shipping:** the new `docker-compose.yml`
   `S3_*`/`SMTP_*` passthroughs use `${VAR:-}` interpolation, which passes
-  an *empty string* when unset, not an unset key — this would have broken
+  an _empty string_ when unset, not an unset key — this would have broken
   numeric/boolean env coercion at boot for any deployment that didn't set
   every one of them; `packages/shared/src/env.ts` now has purpose-built
   `optionalPositiveInt()`/`booleanFlag()` helpers with a dedicated
@@ -90,7 +90,7 @@ prior conversations.
   mocked unit tests (not a real external cloud account or real external
   SMTP send — no credentials exist in this environment; `docker-compose.yml`
   gained opt-in `minio`/`mailhog` services, behind `--profile s3`/`--profile
-  smtp`, for local S3-compatible/SMTP integration testing, not started
+smtp`, for local S3-compatible/SMTP integration testing, not started
   here this pass). Docker images rebuilt from committed HEAD and walked
   through live in a real browser — see the final report for the exact
   scenario results.
@@ -1189,7 +1189,7 @@ partial-success state to rely on.
   external cloud storage account in this environment — no credentials
   exist here. `LoggingEmailProvider`/`LocalFilesystemStorageAdapter`
   remain the default for dev/test.
-- No production email provider is *configured by default* — a real
+- No production email provider is _configured by default_ — a real
   deployment must set `EMAIL_DRIVER=smtp` and real SMTP credentials, or
   every email attempt stays honestly `NOT_CONFIGURED`.
 - No secure per-tenant SMTP credential storage exists — email

@@ -270,7 +270,9 @@ describe("DocumentDetailPage", () => {
     }
 
     it("shows an upload control on a DRAFT document when the user can update it", () => {
-      usePermissionMock.mockImplementation((permission: string) => permission === "documents.update");
+      usePermissionMock.mockImplementation(
+        (permission: string) => permission === "documents.update",
+      );
       useDocumentMock.mockReturnValue({ data: documentWithFiles("DRAFT", []), isLoading: false });
 
       renderWithProviders(<DocumentDetailPage />);
@@ -280,7 +282,9 @@ describe("DocumentDetailPage", () => {
     });
 
     it("hides the upload control once the document is no longer DRAFT (finalized/immutable)", () => {
-      usePermissionMock.mockImplementation((permission: string) => permission === "documents.update");
+      usePermissionMock.mockImplementation(
+        (permission: string) => permission === "documents.update",
+      );
       useDocumentMock.mockReturnValue({ data: documentWithFiles("READY", []), isLoading: false });
 
       renderWithProviders(<DocumentDetailPage />);

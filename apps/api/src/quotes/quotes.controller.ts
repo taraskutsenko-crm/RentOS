@@ -117,10 +117,7 @@ export class QuotesController {
   /** Every email-send attempt for this quote, newest first — the truthful PENDING/SENT/FAILED/NOT_CONFIGURED record `send()` persists (see QuoteEmailDelivery). */
   @RequirePermissions("quotes.view")
   @Get(":id/email-deliveries")
-  findEmailDeliveries(
-    @CurrentTenant() { tenant }: CurrentTenantContext,
-    @Param("id") id: string,
-  ) {
+  findEmailDeliveries(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("id") id: string) {
     return this.quotesService.findEmailDeliveries(tenant.id, id);
   }
 

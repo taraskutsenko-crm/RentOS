@@ -493,9 +493,13 @@ export default function QuoteDetailPage() {
               <CardContent>
                 <ul className="flex flex-col gap-2 text-sm">
                   {emailDeliveries.map((delivery) => (
-                    <li key={delivery.id} className="flex items-center justify-between border-b pb-2 last:border-0">
+                    <li
+                      key={delivery.id}
+                      className="flex items-center justify-between border-b pb-2 last:border-0"
+                    >
                       <span>
-                        {delivery.recipientEmail} · {t(`document.email.statuses.${delivery.status}`)}
+                        {delivery.recipientEmail} ·{" "}
+                        {t(`document.email.statuses.${delivery.status}`)}
                         {delivery.errorMessage ? ` · ${delivery.errorMessage}` : ""}
                       </span>
                     </li>

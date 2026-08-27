@@ -1,6 +1,9 @@
 import { Controller, Get, UseGuards } from "@nestjs/common";
 
-import { CurrentTenant, type CurrentTenantContext } from "../auth/decorators/current-tenant.decorator";
+import {
+  CurrentTenant,
+  type CurrentTenantContext,
+} from "../auth/decorators/current-tenant.decorator";
 import { PermissionsGuard } from "../permissions/permissions.guard";
 import { RequirePermissions } from "../permissions/require-permissions.decorator";
 import { TenantGuard } from "../tenants/tenant.guard";
@@ -44,6 +47,9 @@ export class EmailStatusController {
     }
     return testResult.ok
       ? { status: "READY" }
-      : { status: "CONNECTION_TEST_FAILED", ...(testResult.error ? { error: testResult.error } : {}) };
+      : {
+          status: "CONNECTION_TEST_FAILED",
+          ...(testResult.error ? { error: testResult.error } : {}),
+        };
   }
 }

@@ -4,7 +4,11 @@ import { Button } from "@rentos/ui";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { documentFileUrl, useDeleteDocumentFile, useUploadDocumentFile } from "../../hooks/use-documents";
+import {
+  documentFileUrl,
+  useDeleteDocumentFile,
+  useUploadDocumentFile,
+} from "../../hooks/use-documents";
 import type { DocumentAttachmentCategory, DocumentFile, DocumentType } from "../../types/document";
 
 export interface DocumentAttachmentsProps {
@@ -78,7 +82,11 @@ export function DocumentAttachments({
       <div className="flex flex-wrap gap-3">
         {photos.map((photo) => (
           <div key={photo.id} className="relative">
-            <a href={documentFileUrl(tenantId, documentId, photo.id)} target="_blank" rel="noreferrer">
+            <a
+              href={documentFileUrl(tenantId, documentId, photo.id)}
+              target="_blank"
+              rel="noreferrer"
+            >
               <img
                 src={documentFileUrl(tenantId, documentId, photo.id)}
                 alt={photo.caption ?? photo.originalFileName}
@@ -157,8 +165,17 @@ export function DocumentAttachments({
             onChange={(event) => setCaption(event.target.value)}
             className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
           />
-          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" />
-          <Button type="button" size="sm" onClick={() => void handleUpload()} disabled={uploadFile.isPending}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,application/pdf"
+          />
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => void handleUpload()}
+            disabled={uploadFile.isPending}
+          >
             {uploadFile.isPending ? t("common.saving") : t("document.attachments.upload")}
           </Button>
         </div>

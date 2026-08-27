@@ -19,8 +19,7 @@ export interface EmailStatusView {
 export function useEmailStatus(tenantId: string | null) {
   return useQuery({
     queryKey: ["integrations", tenantId, "email-status"],
-    queryFn: () =>
-      apiClient.get<EmailStatusView>(`/tenants/${tenantId}/integrations/email/status`),
+    queryFn: () => apiClient.get<EmailStatusView>(`/tenants/${tenantId}/integrations/email/status`),
     enabled: !!tenantId,
   });
 }

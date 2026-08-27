@@ -220,7 +220,9 @@ export function useQuoteEmailDeliveries(tenantId: string | null, quoteId: string
   return useQuery({
     queryKey: [BASE_KEY, tenantId, "email-deliveries", quoteId],
     queryFn: () =>
-      apiClient.get<QuoteEmailDelivery[]>(`/tenants/${tenantId}/quotes/${quoteId}/email-deliveries`),
+      apiClient.get<QuoteEmailDelivery[]>(
+        `/tenants/${tenantId}/quotes/${quoteId}/email-deliveries`,
+      ),
     enabled: !!tenantId && !!quoteId,
   });
 }

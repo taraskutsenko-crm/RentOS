@@ -664,7 +664,8 @@ function InvoiceEditor({
                         className="flex items-center justify-between border-b pb-2 last:border-0"
                       >
                         <span>
-                          {delivery.recipientEmail} · {t(`document.email.statuses.${delivery.status}`)}
+                          {delivery.recipientEmail} ·{" "}
+                          {t(`document.email.statuses.${delivery.status}`)}
                           {delivery.errorMessage ? ` · ${delivery.errorMessage}` : ""}
                         </span>
                       </li>

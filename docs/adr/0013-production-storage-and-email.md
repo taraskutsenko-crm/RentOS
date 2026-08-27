@@ -101,8 +101,8 @@ once the document has left DRAFT, mirroring `DocumentsService.update`'s
 exact existing guard and making attachment immutability match
 `ARCHITECTURE_LOCK.md` §1.6's content-immutability guarantee. The frontend
 `DocumentAttachments` component and the Return-vs-Handover comparison
-block (which already showed Handover's condition *text*) now also shows
-Handover's *photos* read-only, alongside the existing text reference —
+block (which already showed Handover's condition _text_) now also shows
+Handover's _photos_ read-only, alongside the existing text reference —
 kept deliberately not routed through any new storage abstraction.
 
 ### 5. Tenant-object-key strategy and download authorization — unchanged, reused

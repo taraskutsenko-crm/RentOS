@@ -98,7 +98,10 @@ export class SmtpEmailProvider implements EmailProvider {
       // include the auth username or other transport detail. A short,
       // generic message is enough for staff to know it failed and retry.
       this.logger.error(`SMTP send failed: ${error instanceof Error ? error.message : error}`);
-      return { success: false, error: "The email provider rejected or failed to send this message" };
+      return {
+        success: false,
+        error: "The email provider rejected or failed to send this message",
+      };
     }
   }
 }

@@ -66,7 +66,9 @@ describe("S3StorageAdapter", () => {
   });
 
   it("throws a clear, actionable error when required S3 config is missing", () => {
-    expect(() => new S3StorageAdapter(configFrom({}))).toThrow(/S3_REGION.*S3_BUCKET.*S3_ACCESS_KEY_ID.*S3_SECRET_ACCESS_KEY/);
+    expect(() => new S3StorageAdapter(configFrom({}))).toThrow(
+      /S3_REGION.*S3_BUCKET.*S3_ACCESS_KEY_ID.*S3_SECRET_ACCESS_KEY/,
+    );
   });
 
   it("put() writes the object with its content type, never a public ACL", async () => {

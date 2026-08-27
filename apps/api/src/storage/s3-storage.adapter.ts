@@ -82,9 +82,7 @@ export class S3StorageAdapter implements StorageAdapter, OnModuleDestroy {
   }
 
   async read(key: string): Promise<Buffer> {
-    const result = await this.client.send(
-      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
-    );
+    const result = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
     if (!result.Body) {
       throw new Error(`Empty response body reading storage key: ${key}`);
     }

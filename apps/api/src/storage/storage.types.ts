@@ -11,6 +11,13 @@ export interface StorageAdapter {
   read(key: string): Promise<Buffer>;
   /** Deletes the object. A no-op (not an error) if the key does not exist. */
   delete(key: string): Promise<void>;
+  /**
+   * Optional existence check (cheaper than a full `read` when only presence
+   * matters) — optional because it's an additive capability, not every past
+   * caller needs it and `LocalFilesystemStorageAdapter` didn't have one
+   * before this pass.
+   */
+  exists?(key: string): Promise<boolean>;
 }
 
 export const STORAGE_ADAPTER = Symbol("STORAGE_ADAPTER");

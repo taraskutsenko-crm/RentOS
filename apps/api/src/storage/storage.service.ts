@@ -62,6 +62,17 @@ export class StorageService {
     return this.adapter.delete(key);
   }
 
+  /** Falls back to a real `read` attempt for an adapter that never implemented the optional `exists` method. */
+  async exists(key: string): Promise<boolean> {
+    if (this.adapter.exists) return this.adapter.exists(key);
+    try {
+      await this.adapter.read(key);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   private validate(
     file: UploadedFileLike,
     allowedMimeTypes: readonly string[],

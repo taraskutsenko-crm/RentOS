@@ -167,8 +167,36 @@ export interface Asset {
   customFields: Record<string, unknown>;
 }
 
+/**
+ * Why an asset is not available right now — computed by the backend from
+ * the canonical availability engine (see AssetsService.findMany /
+ * asset-current-availability.util.ts), never re-derived on the frontend.
+ */
+export type AssetUnavailableReason =
+  | "NOT_RENTABLE"
+  | "RENTED"
+  | "MAINTENANCE"
+  | "REPAIR"
+  | "INSPECTION"
+  | "RELOCATION"
+  | "MANUAL_BLOCK"
+  | "LOST"
+  | "RETIRED";
+
 export interface AssetListItem extends Asset {
   primaryImage: AssetImage | null;
+  /**
+   * "Is this asset actually available right now" — server-computed from the
+   * same canonical rental/block overlap engine every other availability
+   * decision uses, evaluated at the moment of the list request. Distinct
+   * from `isRentable` (the owner's own enable/disable configuration, which
+   * this already factors in) and from `currentStatus` (a coarser,
+   * best-effort persisted label — see Asset.currentStatusId's own doc
+   * comment). Never reconstruct this on the frontend.
+   */
+  isAvailableNow: boolean;
+  /** Set only when `isAvailableNow` is false. */
+  unavailableReason: AssetUnavailableReason | null;
 }
 
 export interface AssetDetail extends Asset {

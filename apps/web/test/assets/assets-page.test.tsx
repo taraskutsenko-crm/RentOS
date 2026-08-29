@@ -72,6 +72,106 @@ describe("AssetsPage", () => {
     expect(screen.getAllByText("Vehicles").length).toBeGreaterThan(0);
   });
 
+  // Regression test for the exact reported bug: an asset whose persisted
+  // Status is "Rented" must never simultaneously show "Available now: Yes" —
+  // the column is driven purely by the server-computed isAvailableNow field,
+  // never by isRentable or currentStatus on their own.
+  it("shows 'No' for an asset that is currently rented, never 'Yes', even though isRentable is true", () => {
+    usePermissionMock.mockReturnValue(false);
+    useAssetsMock.mockReturnValue({
+      data: {
+        items: [
+          {
+            id: "a1",
+            internalNumber: "AST-0001",
+            name: "Skoda Fabia",
+            category: { name: "Vehicles" },
+            currentStatus: { name: "Rented" },
+            isRentable: true,
+            isAvailableNow: false,
+            unavailableReason: "RENTED",
+            primaryImage: null,
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithProviders(<AssetsPage />);
+
+    expect(screen.getByText("Available now")).toBeInTheDocument();
+    expect(screen.getAllByText("Rented").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("No").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Yes")).not.toBeInTheDocument();
+  });
+
+  it("shows 'Yes' for a rentable asset with no current conflicts, and the reason tooltip is only present when unavailable", () => {
+    usePermissionMock.mockReturnValue(false);
+    useAssetsMock.mockReturnValue({
+      data: {
+        items: [
+          {
+            id: "a2",
+            internalNumber: "AST-0002",
+            name: "Container",
+            category: { name: "Containers" },
+            currentStatus: { name: "Available" },
+            isRentable: true,
+            isAvailableNow: true,
+            unavailableReason: null,
+            primaryImage: null,
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithProviders(<AssetsPage />);
+
+    const yesCell = screen.getByText("Yes");
+    expect(yesCell).toBeInTheDocument();
+    expect(yesCell).not.toHaveAttribute("title");
+  });
+
+  it("shows a reason tooltip on the 'No' cell for a blocked (e.g. maintenance) asset", () => {
+    usePermissionMock.mockReturnValue(false);
+    useAssetsMock.mockReturnValue({
+      data: {
+        items: [
+          {
+            id: "a3",
+            internalNumber: "AST-0003",
+            name: "Generator",
+            category: { name: "Equipment" },
+            currentStatus: { name: "Available" },
+            isRentable: true,
+            isAvailableNow: false,
+            unavailableReason: "MAINTENANCE",
+            primaryImage: null,
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithProviders(<AssetsPage />);
+
+    const noCell = screen.getByText("No");
+    expect(noCell).toHaveAttribute("title", "Maintenance");
+  });
+
   it("renders the empty state when there are no assets", () => {
     usePermissionMock.mockReturnValue(false);
     useAssetsMock.mockReturnValue({

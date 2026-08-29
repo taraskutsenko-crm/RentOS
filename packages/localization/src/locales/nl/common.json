@@ -307,6 +307,7 @@
       "replacementValue": "Vervangingswaarde",
       "conditionNotes": "Notities over de staat",
       "isRentable": "Verhuurbaar",
+      "availableNow": "Nu beschikbaar",
       "isActive": "Actief",
       "currentLocation": "Huidige locatie",
       "locationChangeHint": "De locatie wordt gewijzigd vanaf de detailpagina van het bezit, zodat elke verplaatsing in de tijdlijn wordt vastgelegd.",
@@ -314,6 +315,17 @@
       "primaryImage": "Primair",
       "documentTitle": "Documenttitel",
       "booleanYes": "Ja"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "Verhuur uitgeschakeld",
+      "RENTED": "Verhuurd",
+      "MAINTENANCE": "Onderhoud",
+      "REPAIR": "Reparatie",
+      "INSPECTION": "Inspectie",
+      "RELOCATION": "Verplaatsing",
+      "MANUAL_BLOCK": "Geblokkeerd",
+      "LOST": "Vermist",
+      "RETIRED": "Buiten dienst"
     },
     "sections": {
       "basicInfo": "Basisinformatie",

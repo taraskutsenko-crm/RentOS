@@ -227,3 +227,100 @@ describe("AvailabilityService", () => {
     expect(results[0]?.permanentReason).toBeNull();
   });
 });
+
+describe("AvailabilityService.checkAvailableNow", () => {
+  it("queries the engine with a zero-width [now, now) window — the same half-open math, at a single instant", async () => {
+    const { service, prisma } = buildService();
+    const now = new Date("2026-08-29T12:00:00Z");
+
+    await service.checkAvailableNow("t1", ["asset-1"], now);
+
+    expect(prisma.rentalItem.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          rental: expect.objectContaining({ plannedStart: { lt: now } }),
+        }),
+      }),
+    );
+    expect(prisma.assetAvailabilityBlock.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ startAt: { lt: now }, endAt: { gt: now } }),
+      }),
+    );
+  });
+
+  it("defaults to the real current instant when `now` is omitted", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-29T12:00:00Z"));
+    try {
+      const { service, prisma } = buildService();
+
+      await service.checkAvailableNow("t1", ["asset-1"]);
+
+      expect(prisma.rentalItem.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            rental: expect.objectContaining({
+              plannedStart: { lt: new Date("2026-08-29T12:00:00Z") },
+            }),
+          }),
+        }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("a rental in progress right now (started before, not yet ended) reports unavailable", async () => {
+    const { service, prisma } = buildService();
+    const now = new Date("2026-08-05T00:00:00Z");
+    prisma.rentalItem.findMany.mockResolvedValue([
+      rentalItem({
+        rental: {
+          id: "rental-1",
+          rentalNumber: "RNT-000001",
+          plannedStart: new Date("2026-08-01T00:00:00Z"), // started 4 days ago
+          plannedEnd: new Date("2026-08-10T00:00:00Z"), // ends in 5 days
+        },
+      }),
+    ]);
+
+    const results = await service.checkAvailableNow("t1", ["asset-1"], now);
+
+    expect(results[0]?.isAvailable).toBe(false);
+  });
+
+  it("a rental that hasn't started yet (future) does not report unavailable today", async () => {
+    const { service, prisma } = buildService();
+    const now = new Date("2026-08-05T00:00:00Z");
+    // The DB-side filter (rental.plannedStart < now) already excludes a
+    // future rental from candidateItems entirely in real Postgres — the
+    // real end-to-end proof of this is the e2e test, this unit test
+    // documents that an empty candidate set (what the future-rental case
+    // resolves to) correctly reports available.
+    prisma.rentalItem.findMany.mockResolvedValue([]);
+
+    const results = await service.checkAvailableNow("t1", ["asset-1"], now);
+
+    expect(results[0]?.isAvailable).toBe(true);
+  });
+
+  it("a rental that already ended does not report unavailable today", async () => {
+    const { service, prisma } = buildService();
+    const now = new Date("2026-08-05T00:00:00Z");
+    prisma.rentalItem.findMany.mockResolvedValue([
+      rentalItem({
+        rental: {
+          id: "rental-1",
+          rentalNumber: "RNT-000001",
+          plannedStart: new Date("2026-07-01T00:00:00Z"),
+          plannedEnd: new Date("2026-07-05T00:00:00Z"), // ended a month ago
+        },
+      }),
+    ]);
+
+    const results = await service.checkAvailableNow("t1", ["asset-1"], now);
+
+    expect(results[0]?.isAvailable).toBe(true);
+  });
+});

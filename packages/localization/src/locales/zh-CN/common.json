@@ -307,6 +307,7 @@
       "replacementValue": "重置价值",
       "conditionNotes": "状况说明",
       "isRentable": "可租赁",
+      "availableNow": "当前可租",
       "isActive": "启用",
       "currentLocation": "当前位置",
       "locationChangeHint": "位置信息需从资产详情页修改，以便每次移动都记录在时间线中。",
@@ -314,6 +315,17 @@
       "primaryImage": "主图",
       "documentTitle": "文档标题",
       "booleanYes": "是"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "未启用租赁",
+      "RENTED": "已租出",
+      "MAINTENANCE": "维护中",
+      "REPAIR": "维修中",
+      "INSPECTION": "检查中",
+      "RELOCATION": "调配中",
+      "MANUAL_BLOCK": "已锁定",
+      "LOST": "已丢失",
+      "RETIRED": "已报废"
     },
     "sections": {
       "basicInfo": "基本信息",

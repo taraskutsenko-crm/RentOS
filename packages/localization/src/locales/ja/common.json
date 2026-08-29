@@ -307,6 +307,7 @@
       "replacementValue": "再調達価値",
       "conditionNotes": "状態に関するメモ",
       "isRentable": "レンタル可能",
+      "availableNow": "現在利用可能",
       "isActive": "有効",
       "currentLocation": "現在の所在地",
       "locationChangeHint": "所在地の変更は資産の詳細ページから行うため、移動があるたびにタイムラインに記録されます。",
@@ -314,6 +315,17 @@
       "primaryImage": "メイン",
       "documentTitle": "ドキュメントのタイトル",
       "booleanYes": "はい"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "レンタル無効",
+      "RENTED": "レンタル中",
+      "MAINTENANCE": "メンテナンス中",
+      "REPAIR": "修理中",
+      "INSPECTION": "点検中",
+      "RELOCATION": "移動中",
+      "MANUAL_BLOCK": "ブロック中",
+      "LOST": "紛失",
+      "RETIRED": "廃棄"
     },
     "sections": {
       "basicInfo": "基本情報",

@@ -111,9 +111,23 @@ export default function AssetsPage() {
       mobileRole: "secondary",
     },
     {
-      id: "rentable",
-      header: t("asset.fields.isRentable"),
-      cell: (asset) => (asset.isRentable ? t("asset.rentableYes") : t("asset.rentableNo")),
+      id: "available-now",
+      header: t("asset.fields.availableNow"),
+      // Server-computed via the canonical availability engine at request
+      // time (see AssetsService.findMany) — never re-derived here from
+      // isRentable/currentStatus alone, so this can never show "Yes" for an
+      // asset that's actually rented/blocked/lost/retired right now.
+      cell: (asset) => (
+        <span
+          title={
+            asset.isAvailableNow || !asset.unavailableReason
+              ? undefined
+              : t(`asset.unavailableReasons.${asset.unavailableReason}`)
+          }
+        >
+          {asset.isAvailableNow ? t("asset.rentableYes") : t("asset.rentableNo")}
+        </span>
+      ),
       align: "center",
     },
   ];

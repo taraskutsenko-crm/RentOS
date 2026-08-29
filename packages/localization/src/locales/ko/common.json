@@ -307,6 +307,7 @@
       "replacementValue": "교체 가치",
       "conditionNotes": "상태 메모",
       "isRentable": "대여 가능",
+      "availableNow": "현재 이용 가능",
       "isActive": "활성",
       "currentLocation": "현재 위치",
       "locationChangeHint": "위치는 자산 상세 페이지에서 변경되며, 이동할 때마다 타임라인에 기록됩니다.",
@@ -314,6 +315,17 @@
       "primaryImage": "대표",
       "documentTitle": "문서 제목",
       "booleanYes": "예"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "대여 비활성화됨",
+      "RENTED": "대여 중",
+      "MAINTENANCE": "정비 중",
+      "REPAIR": "수리 중",
+      "INSPECTION": "점검 중",
+      "RELOCATION": "이동 중",
+      "MANUAL_BLOCK": "차단됨",
+      "LOST": "분실됨",
+      "RETIRED": "폐기됨"
     },
     "sections": {
       "basicInfo": "기본 정보",

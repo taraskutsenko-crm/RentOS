@@ -307,6 +307,7 @@
       "replacementValue": "Восстановительная стоимость",
       "conditionNotes": "Заметки о состоянии",
       "isRentable": "Доступен для аренды",
+      "availableNow": "Доступен сейчас",
       "isActive": "Активен",
       "currentLocation": "Текущее местоположение",
       "locationChangeHint": "Местоположение меняется на странице актива — каждое перемещение фиксируется в истории.",
@@ -314,6 +315,17 @@
       "primaryImage": "Основное",
       "documentTitle": "Название документа",
       "booleanYes": "Да"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "Аренда отключена",
+      "RENTED": "В аренде",
+      "MAINTENANCE": "Техобслуживание",
+      "REPAIR": "Ремонт",
+      "INSPECTION": "Осмотр",
+      "RELOCATION": "Перемещение",
+      "MANUAL_BLOCK": "Заблокирован",
+      "LOST": "Утерян",
+      "RETIRED": "Списан"
     },
     "sections": {
       "basicInfo": "Основная информация",

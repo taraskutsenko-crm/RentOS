@@ -307,6 +307,7 @@
       "replacementValue": "Wartość odtworzeniowa",
       "conditionNotes": "Uwagi o stanie",
       "isRentable": "Dostępne do wynajmu",
+      "availableNow": "Dostępny teraz",
       "isActive": "Aktywne",
       "currentLocation": "Aktualna lokalizacja",
       "locationChangeHint": "Lokalizację zmienia się na stronie szczegółów aktywa, dzięki czemu każdy ruch jest zapisywany w historii.",
@@ -314,6 +315,17 @@
       "primaryImage": "Główne",
       "documentTitle": "Tytuł dokumentu",
       "booleanYes": "Tak"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "Wynajem wyłączony",
+      "RENTED": "Wynajęty",
+      "MAINTENANCE": "Konserwacja",
+      "REPAIR": "Naprawa",
+      "INSPECTION": "Przegląd",
+      "RELOCATION": "Przemieszczenie",
+      "MANUAL_BLOCK": "Zablokowany",
+      "LOST": "Zagubiony",
+      "RETIRED": "Wycofany"
     },
     "sections": {
       "basicInfo": "Podstawowe informacje",

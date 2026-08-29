@@ -307,6 +307,7 @@
       "replacementValue": "Pořizovací hodnota",
       "conditionNotes": "Poznámky ke stavu",
       "isRentable": "Pronajímatelný",
+      "availableNow": "Nyní dostupný",
       "isActive": "Aktivní",
       "currentLocation": "Aktuální umístění",
       "locationChangeHint": "Umístění se mění na stránce detailu majetku, takže je každý přesun zaznamenán na časové ose.",
@@ -314,6 +315,17 @@
       "primaryImage": "Hlavní",
       "documentTitle": "Název dokumentu",
       "booleanYes": "Ano"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "Pronájem vypnutý",
+      "RENTED": "Pronajato",
+      "MAINTENANCE": "Údržba",
+      "REPAIR": "Oprava",
+      "INSPECTION": "Kontrola",
+      "RELOCATION": "Přemístění",
+      "MANUAL_BLOCK": "Zablokováno",
+      "LOST": "Ztraceno",
+      "RETIRED": "Vyřazeno"
     },
     "sections": {
       "basicInfo": "Základní informace",

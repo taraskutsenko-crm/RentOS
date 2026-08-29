@@ -17,7 +17,12 @@ import { AssetStatusesService } from "../asset-statuses/asset-statuses.service";
 import { AuditService } from "../audit/audit.service";
 import type { PaginatedResult } from "../customers/customers.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { AvailabilityService } from "../rentals/availability.service";
 import { computeItemLineTotalMinor } from "../rentals/rental-pricing.util";
+import {
+  deriveAssetCurrentAvailability,
+  type AssetCurrentAvailability,
+} from "./asset-current-availability.util";
 import { AssetFieldValuesService, type AssetWithCustomFields } from "./asset-field-values.service";
 import { buildAssetWhere, parseCustomFieldsFilter } from "./asset-query.util";
 import type { ChangeAssetLocationDto } from "./dto/change-asset-location.dto";
@@ -53,7 +58,8 @@ export type AssetPlatformDocumentView = Pick<
 
 type AssetWithRelations = Prisma.AssetGetPayload<{ include: typeof ASSET_INCLUDE }>;
 
-export interface AssetListItemView extends AssetWithCustomFields<AssetWithRelations> {
+export interface AssetListItemView
+  extends AssetWithCustomFields<AssetWithRelations>, AssetCurrentAvailability {
   primaryImage: AssetImage | null;
 }
 
@@ -70,6 +76,7 @@ export class AssetsService {
     private readonly auditService: AuditService,
     private readonly assetStatusesService: AssetStatusesService,
     private readonly fieldValuesService: AssetFieldValuesService,
+    private readonly availabilityService: AvailabilityService,
   ) {}
 
   async create(
@@ -183,12 +190,30 @@ export class AssetsService {
       : [];
     const primaryImageByAssetId = new Map(primaryImages.map((image) => [image.assetId, image]));
 
+    // "Available right now" is always computed here (never persisted, never
+    // read from Asset.currentStatusId) via the same canonical engine every
+    // other availability decision in the app uses — see
+    // AvailabilityService.checkAvailableNow and
+    // asset-current-availability.util.ts's doc comment. One batched call
+    // for the whole page, not one query per row.
+    const availabilityByAssetId = items.length
+      ? new Map(
+          (
+            await this.availabilityService.checkAvailableNow(
+              tenantId,
+              items.map((item) => item.id),
+            )
+          ).map((result) => [result.assetId, result]),
+        )
+      : new Map();
+
     const itemsWithFields = await Promise.all(
       items.map(async (item) => {
         const valuesByKey = await this.fieldValuesService.getExistingValuesByKey(item.id);
         return {
           ...this.fieldValuesService.attach(item, valuesByKey),
           primaryImage: primaryImageByAssetId.get(item.id) ?? null,
+          ...deriveAssetCurrentAvailability(item.isRentable, availabilityByAssetId.get(item.id)),
         };
       }),
     );

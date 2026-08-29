@@ -26,6 +26,7 @@ function buildService() {
     getExistingValuesByKey: vi.fn().mockResolvedValue({}),
     attach: vi.fn((asset: unknown) => asset),
   };
+  const availabilityService = { checkAvailableNow: vi.fn().mockResolvedValue([]) };
 
   const service = new AssetsService(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,6 +34,7 @@ function buildService() {
     auditService as never,
     assetStatusesService as never,
     fieldValuesService as never,
+    availabilityService as never,
   );
   return { service, prisma };
 }

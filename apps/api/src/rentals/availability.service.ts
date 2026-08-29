@@ -157,6 +157,28 @@ export class AvailabilityService {
     });
   }
 
+  /**
+   * "Is this asset free right now" — the same engine, called at a single
+   * instant instead of a date range. Passing `now` as both the start and
+   * end of a half-open `[now, now)` window resolves correctly under
+   * checkAvailability's own interval math: a RESERVED/ACTIVE rental item
+   * only conflicts when its own `plannedStart < now` (already started) and
+   * its effective end (`returnedAt ?? plannedEnd`) is `> now` (not yet
+   * ended/returned) — exactly "is this rental in progress at this instant."
+   * The same half-open logic applies to AssetAvailabilityBlock rows. No new
+   * blocking rules are introduced here — this is the one canonical
+   * engine (see docs/adr/0006-rental-lifecycle-and-availability.md), just a
+   * convenience entry point for "today," used by the Assets list's
+   * "available right now" column (see AssetsService).
+   */
+  async checkAvailableNow(
+    tenantId: string,
+    assetIds: string[],
+    now: Date = new Date(),
+  ): Promise<AssetAvailabilityResult[]> {
+    return this.checkAvailability(tenantId, assetIds, now, now);
+  }
+
   /** Throws ConflictException listing every unavailable asset, or resolves silently if all are free. */
   async assertAvailable(
     tenantId: string,

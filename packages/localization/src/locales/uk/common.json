@@ -307,6 +307,7 @@
       "replacementValue": "Відновна вартість",
       "conditionNotes": "Нотатки про стан",
       "isRentable": "Доступний для оренди",
+      "availableNow": "Доступний зараз",
       "isActive": "Активний",
       "currentLocation": "Поточне розташування",
       "locationChangeHint": "Розташування змінюється на сторінці активу — кожне переміщення фіксується в історії.",
@@ -314,6 +315,17 @@
       "primaryImage": "Основне",
       "documentTitle": "Назва документа",
       "booleanYes": "Так"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "Оренда вимкнена",
+      "RENTED": "В оренді",
+      "MAINTENANCE": "Технічне обслуговування",
+      "REPAIR": "Ремонт",
+      "INSPECTION": "Огляд",
+      "RELOCATION": "Переміщення",
+      "MANUAL_BLOCK": "Заблоковано",
+      "LOST": "Втрачено",
+      "RETIRED": "Списано"
     },
     "sections": {
       "basicInfo": "Основна інформація",

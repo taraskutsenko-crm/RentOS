@@ -307,6 +307,7 @@
       "replacementValue": "Valor de reposição",
       "conditionNotes": "Notas sobre o estado",
       "isRentable": "Locável",
+      "availableNow": "Disponível agora",
       "isActive": "Ativo",
       "currentLocation": "Localização atual",
       "locationChangeHint": "A localização é alterada na página de detalhes do ativo, para que cada movimentação seja registrada na linha do tempo.",
@@ -314,6 +315,17 @@
       "primaryImage": "Principal",
       "documentTitle": "Título do documento",
       "booleanYes": "Sim"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "Locação desativada",
+      "RENTED": "Alugado",
+      "MAINTENANCE": "Manutenção",
+      "REPAIR": "Reparo",
+      "INSPECTION": "Inspeção",
+      "RELOCATION": "Realocação",
+      "MANUAL_BLOCK": "Bloqueado",
+      "LOST": "Perdido",
+      "RETIRED": "Desativado"
     },
     "sections": {
       "basicInfo": "Informações básicas",

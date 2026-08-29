@@ -307,6 +307,7 @@
       "replacementValue": "Replacement value",
       "conditionNotes": "Condition notes",
       "isRentable": "Rentable",
+      "availableNow": "Available now",
       "isActive": "Active",
       "currentLocation": "Current location",
       "locationChangeHint": "Location is changed from the asset detail page so every move is recorded in the timeline.",
@@ -314,6 +315,17 @@
       "primaryImage": "Primary",
       "documentTitle": "Document title",
       "booleanYes": "Yes"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "Not enabled for rental",
+      "RENTED": "Rented",
+      "MAINTENANCE": "Maintenance",
+      "REPAIR": "Repair",
+      "INSPECTION": "Inspection",
+      "RELOCATION": "Relocation",
+      "MANUAL_BLOCK": "Blocked",
+      "LOST": "Lost",
+      "RETIRED": "Retired"
     },
     "sections": {
       "basicInfo": "Basic information",

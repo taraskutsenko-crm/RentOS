@@ -307,6 +307,7 @@
       "replacementValue": "Valeur de remplacement",
       "conditionNotes": "Notes sur l'état",
       "isRentable": "Louable",
+      "availableNow": "Disponible maintenant",
       "isActive": "Actif",
       "currentLocation": "Emplacement actuel",
       "locationChangeHint": "L'emplacement se modifie depuis la page de détail de l'actif, afin que chaque déplacement soit enregistré dans la chronologie.",
@@ -314,6 +315,17 @@
       "primaryImage": "Principale",
       "documentTitle": "Titre du document",
       "booleanYes": "Oui"
+    },
+    "unavailableReasons": {
+      "NOT_RENTABLE": "Location désactivée",
+      "RENTED": "Loué",
+      "MAINTENANCE": "Maintenance",
+      "REPAIR": "Réparation",
+      "INSPECTION": "Inspection",
+      "RELOCATION": "Relocalisation",
+      "MANUAL_BLOCK": "Bloqué",
+      "LOST": "Perdu",
+      "RETIRED": "Retiré"
     },
     "sections": {
       "basicInfo": "Informations de base",

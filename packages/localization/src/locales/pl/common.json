@@ -160,7 +160,8 @@
       "cardTitle": "Dane firmy",
       "save": "Zapisz",
       "saving": "Zapisywanie...",
-      "saved": "Profil firmy zapisany",
+      "saved": "Dane firmy zapisane",
+      "saveFailed": "Nie udało się zapisać danych firmy",
       "fields": {
         "name": "Nazwa firmy",
         "registrationNumber": "Numer rejestracyjny",

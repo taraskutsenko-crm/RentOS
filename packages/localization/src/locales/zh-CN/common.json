@@ -160,7 +160,8 @@
       "cardTitle": "公司详情",
       "save": "保存",
       "saving": "保存中...",
-      "saved": "公司资料已保存",
+      "saved": "公司信息已保存",
+      "saveFailed": "保存公司信息失败",
       "fields": {
         "name": "公司名称",
         "registrationNumber": "注册号",

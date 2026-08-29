@@ -160,7 +160,8 @@
       "cardTitle": "Company details",
       "save": "Save",
       "saving": "Saving...",
-      "saved": "Company profile saved",
+      "saved": "Company details saved",
+      "saveFailed": "Failed to save company details",
       "fields": {
         "name": "Company name",
         "registrationNumber": "Registration number",

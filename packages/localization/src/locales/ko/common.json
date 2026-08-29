@@ -160,7 +160,8 @@
       "cardTitle": "회사 세부정보",
       "save": "저장",
       "saving": "저장 중...",
-      "saved": "회사 프로필이 저장되었습니다",
+      "saved": "회사 정보가 저장되었습니다",
+      "saveFailed": "회사 정보 저장에 실패했습니다",
       "fields": {
         "name": "회사명",
         "registrationNumber": "등록 번호",

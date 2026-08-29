@@ -160,7 +160,8 @@
       "cardTitle": "Údaje o společnosti",
       "save": "Uložit",
       "saving": "Ukládání...",
-      "saved": "Profil společnosti byl uložen",
+      "saved": "Údaje o společnosti byly uloženy",
+      "saveFailed": "Uložení údajů o společnosti se nezdařilo",
       "fields": {
         "name": "Název společnosti",
         "registrationNumber": "Registrační číslo",

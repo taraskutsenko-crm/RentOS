@@ -160,7 +160,8 @@
       "cardTitle": "Bedrijfsgegevens",
       "save": "Opslaan",
       "saving": "Opslaan...",
-      "saved": "Bedrijfsprofiel opgeslagen",
+      "saved": "Bedrijfsgegevens opgeslagen",
+      "saveFailed": "Bedrijfsgegevens opslaan mislukt",
       "fields": {
         "name": "Bedrijfsnaam",
         "registrationNumber": "Registratienummer",

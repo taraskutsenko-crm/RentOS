@@ -160,7 +160,8 @@
       "cardTitle": "会社詳細",
       "save": "保存",
       "saving": "保存中...",
-      "saved": "会社プロフィールを保存しました",
+      "saved": "会社情報を保存しました",
+      "saveFailed": "会社情報の保存に失敗しました",
       "fields": {
         "name": "会社名",
         "registrationNumber": "登録番号",

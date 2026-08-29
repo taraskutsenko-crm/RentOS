@@ -56,7 +56,12 @@ describe("CustomerPortalPanel", () => {
       <CustomerPortalPanel tenantId="tenant-1" customerId="customer-1" />,
     );
 
-    expect(container).toBeEmptyDOMElement();
+    // renderWithProviders always mounts the app's (empty, invisible) toast
+    // viewport alongside whatever the component renders — "renders nothing"
+    // means nothing besides that, not a literally empty container.
+    expect(
+      container.querySelectorAll(':scope > :not([data-testid="toast-viewport"])'),
+    ).toHaveLength(0);
   });
 
   it("shows the invite action for a customer who has never been invited", () => {

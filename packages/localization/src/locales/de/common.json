@@ -160,7 +160,8 @@
       "cardTitle": "Unternehmensdaten",
       "save": "Speichern",
       "saving": "Speichern...",
-      "saved": "Unternehmensprofil gespeichert",
+      "saved": "Unternehmensdaten gespeichert",
+      "saveFailed": "Unternehmensdaten konnten nicht gespeichert werden",
       "fields": {
         "name": "Firmenname",
         "registrationNumber": "Handelsregisternummer",

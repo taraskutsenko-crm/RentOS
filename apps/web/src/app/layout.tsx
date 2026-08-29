@@ -1,4 +1,5 @@
 import { getLocaleMetadata } from "@rentos/localization";
+import { ToastProvider } from "@rentos/ui";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
@@ -46,7 +47,9 @@ export default async function RootLayout({
     <html lang={language} dir={direction} className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="font-sans antialiased">
         <I18nProvider initialLanguage={language}>
-          <QueryProvider>{children}</QueryProvider>
+          <ToastProvider>
+            <QueryProvider>{children}</QueryProvider>
+          </ToastProvider>
         </I18nProvider>
       </body>
     </html>

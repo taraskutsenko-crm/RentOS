@@ -34,6 +34,11 @@ describe("QuickActions", () => {
       />,
     );
 
-    expect(container).toBeEmptyDOMElement();
+    // renderWithProviders always mounts the app's (empty, invisible) toast
+    // viewport alongside whatever the component renders — "renders nothing"
+    // means nothing besides that, not a literally empty container.
+    expect(
+      container.querySelectorAll(':scope > :not([data-testid="toast-viewport"])'),
+    ).toHaveLength(0);
   });
 });

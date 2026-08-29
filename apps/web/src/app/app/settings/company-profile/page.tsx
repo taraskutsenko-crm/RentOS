@@ -2,8 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Alert,
-  AlertDescription,
   Button,
   Card,
   CardContent,
@@ -11,8 +9,9 @@ import {
   CardTitle,
   Input,
   Label,
+  useToast,
 } from "@rentos/ui";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -28,7 +27,7 @@ export default function CompanyProfileSettingsPage() {
   const canManage = usePermission("tenant.manage");
   const { data, isLoading } = useCurrentTenantRole();
   const updateProfile = useUpdateCompanyProfile(tenantId);
-  const [justSaved, setJustSaved] = useState(false);
+  const { toast } = useToast();
 
   const {
     register,
@@ -61,9 +60,26 @@ export default function CompanyProfileSettingsPage() {
   }, [data, reset]);
 
   async function onSubmit(values: CompanyProfileFormValues): Promise<void> {
-    setJustSaved(false);
-    await updateProfile.mutateAsync(values);
-    setJustSaved(true);
+    // Defensive double-submit guard on top of the disabled Save button below
+    // — a disabled button already stops a second click/Enter from firing
+    // this handler again, but this is a cheap extra line of defense against
+    // any race between the click and React committing that disabled state.
+    if (updateProfile.isPending) return;
+
+    try {
+      // Keep the just-saved values in the form (no reset()) — the user
+      // should see exactly what they saved, not a reverted/blank form.
+      await updateProfile.mutateAsync(values);
+      toast({ variant: "success", description: t("tenant.companyProfile.saved") });
+    } catch (error) {
+      // apiErrorMessage() already extracts a safe, user-readable backend
+      // validation message when the API provides one, falling back to a
+      // generic message otherwise — never the raw error/stack trace.
+      toast({
+        variant: "destructive",
+        description: apiErrorMessage(error, t("tenant.companyProfile.saveFailed")),
+      });
+    }
   }
 
   if (isLoading) {
@@ -87,19 +103,6 @@ export default function CompanyProfileSettingsPage() {
             className="flex flex-col gap-4"
             noValidate
           >
-            {updateProfile.isError && (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {apiErrorMessage(updateProfile.error, t("common.error"))}
-                </AlertDescription>
-              </Alert>
-            )}
-            {justSaved && !updateProfile.isPending && !updateProfile.isError && (
-              <Alert>
-                <AlertDescription>{t("tenant.companyProfile.saved")}</AlertDescription>
-              </Alert>
-            )}
-
             <fieldset className="flex flex-col gap-4" disabled={!canManage}>
               <legend className="sr-only">{t("tenant.companyProfile.cardTitle")}</legend>
 

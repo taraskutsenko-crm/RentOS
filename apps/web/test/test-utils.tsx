@@ -1,3 +1,4 @@
+import { ToastProvider } from "@rentos/ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, type RenderResult } from "@testing-library/react";
 import type { ReactElement } from "react";
@@ -15,7 +16,9 @@ export function renderWithProviders(ui: ReactElement): RenderResult {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <I18nextProvider i18n={i18n}>{ui}</I18nextProvider>
+      <I18nextProvider i18n={i18n}>
+        <ToastProvider>{ui}</ToastProvider>
+      </I18nextProvider>
     </QueryClientProvider>,
   );
 }

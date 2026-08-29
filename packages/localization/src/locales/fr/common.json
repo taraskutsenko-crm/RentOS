@@ -160,7 +160,8 @@
       "cardTitle": "Coordonnées de l'entreprise",
       "save": "Enregistrer",
       "saving": "Enregistrement...",
-      "saved": "Profil de l'entreprise enregistré",
+      "saved": "Coordonnées de l'entreprise enregistrées",
+      "saveFailed": "Échec de l'enregistrement des coordonnées de l'entreprise",
       "fields": {
         "name": "Nom de l'entreprise",
         "registrationNumber": "Numéro d'immatriculation",

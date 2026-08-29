@@ -37,4 +37,5 @@ export { Label } from "./components/label";
 export { Select } from "./components/select";
 export { Skeleton } from "./components/skeleton";
 export { TimePicker, type TimePickerProps } from "./components/time-picker";
+export { ToastProvider, useToast, type ToastInput, type ToastVariant } from "./components/toast";
 export { cn } from "./lib/utils";

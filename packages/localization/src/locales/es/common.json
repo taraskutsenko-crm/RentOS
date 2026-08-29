@@ -160,7 +160,8 @@
       "cardTitle": "Datos de la empresa",
       "save": "Guardar",
       "saving": "Guardando...",
-      "saved": "Perfil de la empresa guardado",
+      "saved": "Datos de la empresa guardados",
+      "saveFailed": "No se pudieron guardar los datos de la empresa",
       "fields": {
         "name": "Nombre de la empresa",
         "registrationNumber": "Número de registro",

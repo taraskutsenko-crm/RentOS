@@ -44,7 +44,20 @@ export class TenantsService {
     });
   }
 
-  /** Powers the Company Profile settings page. Empty strings on the optional identity fields are stored as null. */
+  /**
+   * Powers the Company Profile settings page. Empty strings on the optional
+   * identity fields are stored as null.
+   *
+   * `email` is handled one notch more carefully than the others: it's the
+   * one field on this DTO a client is allowed to omit entirely (see
+   * UpdateTenantDto's doc comment) — an older/other client that doesn't yet
+   * know about the company-email field must be able to keep saving the rest
+   * of the profile without silently wiping out an already-configured
+   * Reply-To address. So an *omitted* `email` (`undefined`) leaves the
+   * existing value untouched, while an *explicitly empty* value (`""` or
+   * `null` — both are ways a real client says "clear this") sets it to
+   * null, same as the other optional identity fields.
+   */
   async update(tenantId: string, actorUserId: string, dto: UpdateTenantDto): Promise<Tenant> {
     const previous = await this.prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } });
 
@@ -56,7 +69,7 @@ export class TenantsService {
         taxNumber: dto.taxNumber || null,
         address: dto.address || null,
         phone: dto.phone || null,
-        email: dto.email || null,
+        email: dto.email === undefined ? previous.email : dto.email || null,
       },
     });
 

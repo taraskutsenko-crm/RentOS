@@ -32,13 +32,19 @@ export class UpdateTenantDto {
 
   /**
    * The tenant's customer-facing company email — canonical Reply-To source
-   * for transactional email (see tenant-sender-identity.util.ts). Empty
-   * string clears it (same convention as the other optional identity
-   * fields); a non-empty value must be a syntactically valid email.
+   * for transactional email (see tenant-sender-identity.util.ts). Genuinely
+   * optional, unlike the other identity fields above: empty string, `null`,
+   * and an entirely omitted field are all treated as "no company email" and
+   * skip every validator below (`@ValidateIf` gates the whole property, not
+   * just the decorators declared after it) — a client that doesn't yet know
+   * about this field must never be blocked from saving the rest of the
+   * Company Profile. A non-empty value must still be a real, bounded email.
    */
+  @ValidateIf(
+    (dto: UpdateTenantDto) => dto.email !== undefined && dto.email !== null && dto.email !== "",
+  )
   @IsString()
   @MaxLength(320)
-  @ValidateIf((dto: UpdateTenantDto) => dto.email !== "")
   @IsEmail()
-  email!: string;
+  email?: string | null;
 }

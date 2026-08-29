@@ -140,6 +140,66 @@ describe("Tenants E2E — Company Profile (PATCH /tenants/:tenantId)", () => {
       .expect(400);
   });
 
+  it("accepts an explicit null company email and persists it as null", async () => {
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .send({ ...fullPayload, email: null })
+      .expect(200);
+
+    const response = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(response.body.tenant.email).toBeNull();
+  });
+
+  // Regression test for the exact reported bug: a client that doesn't send
+  // `email` at all (an older frontend build, a partial PATCH, any caller
+  // that predates this field) must still be able to save the rest of the
+  // Company Profile — and must never silently wipe an already-configured
+  // company email it never touched.
+  it("omitting email entirely still saves the rest of the profile, without erasing an existing email", async () => {
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .send(fullPayload)
+      .expect(200);
+
+    const { email: _omitted, ...payloadWithoutEmail } = fullPayload;
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .send({ ...payloadWithoutEmail, phone: "+49 30 9999999" })
+      .expect(200);
+
+    const response = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(response.body.tenant.email).toBe(fullPayload.email);
+    expect(response.body.tenant.phone).toBe("+49 30 9999999");
+  });
+
+  it("omitting email on a tenant with no email yet still saves the rest of the profile", async () => {
+    const { email: _omitted, ...payloadWithoutEmail } = fullPayload;
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .send(payloadWithoutEmail)
+      .expect(200);
+
+    const response = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    expect(response.body.tenant.email).toBeNull();
+    expect(response.body.tenant.name).toBe(fullPayload.name);
+  });
+
   it("rejects an empty name", async () => {
     await request(app.getHttpServer())
       .patch(`/tenants/${tenantId}`)

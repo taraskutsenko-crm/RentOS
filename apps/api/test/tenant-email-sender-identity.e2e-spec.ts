@@ -100,23 +100,24 @@ describe("Tenant email sender identity E2E", () => {
     tenantId: string,
     cookie: string,
     recipientEmail: string,
+    label = "0001",
   ): Promise<void> {
     const customer = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/customers`)
       .set("Cookie", cookie)
-      .send({ firstName: "John", lastName: "Customer", email: "customer@example.com" })
+      .send({ firstName: "John", lastName: "Customer", email: `customer-${label}@example.com` })
       .expect(201);
 
     const category = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/asset-categories`)
       .set("Cookie", cookie)
-      .send({ name: "Generators" })
+      .send({ name: `Generators ${label}` })
       .expect(201);
 
     const asset = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/assets`)
       .set("Cookie", cookie)
-      .send({ name: "Generator", internalNumber: "GEN-0001", categoryId: category.body.id })
+      .send({ name: "Generator", internalNumber: `GEN-${label}`, categoryId: category.body.id })
       .expect(201);
 
     const dateOffset = (days: number): string => {
@@ -202,6 +203,30 @@ describe("Tenant email sender identity E2E", () => {
 
     expect(sentMessages).toHaveLength(1);
     expect(sentMessages[0]!.replyTo).toBeUndefined();
+  });
+
+  // Requirement: User.email (the staff login) must never be substituted for
+  // Tenant.email (the company's own Reply-To address) — these are two
+  // unrelated concepts (see tenant-sender-identity.util.ts's doc comment).
+  it("never uses the logged-in staff user's own login email as Reply-To", async () => {
+    const ownerLoginEmail = "owner-loginemail@example.com";
+    const tenant = await registerTenant("Login Email Isolation Co", ownerLoginEmail);
+    // No company email configured — if User.email were ever used as a
+    // fallback, Reply-To would incorrectly become the owner's own login
+    // address here.
+    await createAndSendQuote(tenant.tenantId, tenant.cookie, "customer@example.com", "A");
+    expect(sentMessages[0]!.replyTo).toBeUndefined();
+    expect(sentMessages[0]!.replyTo).not.toBe(ownerLoginEmail);
+
+    sentMessages = [];
+    // Now configure a *different* company email than the owner's own login
+    // address — Reply-To must follow Tenant.email, never User.email, even
+    // though both are non-empty valid addresses at this point.
+    const companyEmail = "office@login-email-isolation.example";
+    await setCompanyEmail(tenant.tenantId, tenant.cookie, companyEmail);
+    await createAndSendQuote(tenant.tenantId, tenant.cookie, "customer@example.com", "B");
+    expect(sentMessages[0]!.replyTo).toBe(companyEmail);
+    expect(sentMessages[0]!.replyTo).not.toBe(ownerLoginEmail);
   });
 
   it("cross-tenant resource access remains denied for the company-profile endpoint used by this feature", async () => {

@@ -175,6 +175,7 @@ export interface Asset {
 export type AssetUnavailableReason =
   | "NOT_RENTABLE"
   | "RENTED"
+  | "OVERDUE_RETURN"
   | "MAINTENANCE"
   | "REPAIR"
   | "INSPECTION"
@@ -197,6 +198,15 @@ export interface AssetListItem extends Asset {
   isAvailableNow: boolean;
   /** Set only when `isAvailableNow` is false. */
   unavailableReason: AssetUnavailableReason | null;
+  /**
+   * True when the asset is currently blocked by a rental that started, has
+   * passed its planned end, and has not actually been returned yet — see
+   * rental-overdue.util.ts (backend). Distinct from plain `RENTED`:
+   * `unavailableReason` is `"OVERDUE_RETURN"` whenever this is true.
+   */
+  isOverdue: boolean;
+  /** Always the blocking rental's own planned end — set only when `isOverdue` is true. */
+  overdueSince: string | null;
 }
 
 export interface AssetDetail extends Asset {

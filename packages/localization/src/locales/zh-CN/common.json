@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "未启用租赁",
       "RENTED": "已租出",
+      "OVERDUE_RETURN": "逾期未还",
       "MAINTENANCE": "维护中",
       "REPAIR": "维修中",
       "INSPECTION": "检查中",
@@ -521,6 +522,10 @@
       "customer": "客户",
       "documents": "文档",
       "invoices": "发票"
+    },
+    "overdue": {
+      "bannerTitle": "归还已逾期",
+      "plannedReturn": "计划归还时间：{{date}}"
     },
     "documents": {
       "empty": "该租赁尚未关联任何文档",

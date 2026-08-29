@@ -28,6 +28,7 @@ import type { ReturnRentalDto } from "./dto/return-rental.dto";
 import type { StatusActionDto } from "./dto/status-action.dto";
 import type { UpdateRentalDto } from "./dto/update-rental.dto";
 import { generateRentalNumber } from "./rental-numbering.util";
+import { deriveOverdueStatus } from "./rental-overdue.util";
 import { computeRentalTotals, type PricedRentalItemInput } from "./rental-pricing.util";
 import {
   RENTAL_DETAIL_INCLUDE,
@@ -233,7 +234,12 @@ export class RentalsService {
       }
     }
 
-    return rental;
+    const overdue = deriveOverdueStatus(rental, rental.items);
+    return {
+      ...rental,
+      isOverdue: overdue.isOverdue,
+      overdueSince: overdue.overdueSince?.toISOString() ?? null,
+    };
   }
 
   async update(

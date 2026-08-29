@@ -51,6 +51,16 @@ export interface RentalDetailView extends Rental {
   sourceQuote: RentalSourceQuoteView | null;
   generatedQuote: RentalSourceQuoteView | null;
   documents: RentalDocumentView[];
+  /**
+   * Derived, never persisted — see rental-overdue.util.ts's
+   * deriveOverdueStatus (the single canonical definition, also used by
+   * AvailabilityService for the Assets list). True only while the rental
+   * is ACTIVE, its plannedEnd has passed, and at least one item has not
+   * actually been returned yet.
+   */
+  isOverdue: boolean;
+  /** Always this rental's own plannedEnd — set only when `isOverdue` is true. */
+  overdueSince: string | null;
 }
 
 export interface RentalListItemView extends Rental {

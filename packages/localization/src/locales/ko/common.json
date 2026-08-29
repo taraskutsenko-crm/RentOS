@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "대여 비활성화됨",
       "RENTED": "대여 중",
+      "OVERDUE_RETURN": "반납 연체",
       "MAINTENANCE": "정비 중",
       "REPAIR": "수리 중",
       "INSPECTION": "점검 중",
@@ -521,6 +522,10 @@
       "customer": "고객",
       "documents": "문서",
       "invoices": "청구서"
+    },
+    "overdue": {
+      "bannerTitle": "반납이 연체되었습니다",
+      "plannedReturn": "예정 반납일: {{date}}"
     },
     "documents": {
       "empty": "이 대여와 연결된 문서가 아직 없습니다",

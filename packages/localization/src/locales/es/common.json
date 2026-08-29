@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "Alquiler desactivado",
       "RENTED": "Alquilado",
+      "OVERDUE_RETURN": "Devolución vencida",
       "MAINTENANCE": "Mantenimiento",
       "REPAIR": "Reparación",
       "INSPECTION": "Inspección",
@@ -521,6 +522,10 @@
       "customer": "Cliente",
       "documents": "Documentos",
       "invoices": "Facturas"
+    },
+    "overdue": {
+      "bannerTitle": "Devolución vencida",
+      "plannedReturn": "Devolución prevista: {{date}}"
     },
     "documents": {
       "empty": "Todavía no hay documentos vinculados a este alquiler",

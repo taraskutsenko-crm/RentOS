@@ -18,6 +18,14 @@ const CONFLICT = {
   rentalNumber: "RNT-000001",
   plannedStart: "2026-08-01T00:00:00.000Z",
   plannedEnd: "2026-08-05T00:00:00.000Z",
+  isOverdue: false,
+  overdueSince: null,
+};
+
+const OVERDUE_CONFLICT = {
+  ...CONFLICT,
+  isOverdue: true,
+  overdueSince: "2026-08-05T00:00:00.000Z",
 };
 
 function block(type: "MAINTENANCE" | "REPAIR" | "INSPECTION" | "RELOCATION" | "MANUAL_BLOCK") {
@@ -32,8 +40,8 @@ function block(type: "MAINTENANCE" | "REPAIR" | "INSPECTION" | "RELOCATION" | "M
 }
 
 describe("deriveAssetCurrentAvailability", () => {
-  // A: an active rental right now.
-  it("is unavailable, reason RENTED, when the engine reports a current rental conflict", () => {
+  // A: an active rental right now (not overdue — still inside its planned window).
+  it("is unavailable, reason RENTED, when the engine reports a current, non-overdue rental conflict", () => {
     const result: AssetAvailabilityResult = {
       ...freeResult(),
       isAvailable: false,
@@ -42,6 +50,8 @@ describe("deriveAssetCurrentAvailability", () => {
     expect(deriveAssetCurrentAvailability(true, result)).toEqual({
       isAvailableNow: false,
       unavailableReason: "RENTED",
+      isOverdue: false,
+      overdueSince: null,
     });
   });
 
@@ -54,6 +64,23 @@ describe("deriveAssetCurrentAvailability", () => {
     expect(deriveAssetCurrentAvailability(true, freeResult())).toEqual({
       isAvailableNow: true,
       unavailableReason: null,
+      isOverdue: false,
+      overdueSince: null,
+    });
+  });
+
+  // Overdue return: plannedEnd already passed, rental never actually returned.
+  it("is unavailable, reason OVERDUE_RETURN, when the engine reports an overdue conflict — never plain RENTED", () => {
+    const result: AssetAvailabilityResult = {
+      ...freeResult(),
+      isAvailable: false,
+      conflicts: [OVERDUE_CONFLICT],
+    };
+    expect(deriveAssetCurrentAvailability(true, result)).toEqual({
+      isAvailableNow: false,
+      unavailableReason: "OVERDUE_RETURN",
+      isOverdue: true,
+      overdueSince: "2026-08-05T00:00:00.000Z",
     });
   });
 
@@ -67,6 +94,8 @@ describe("deriveAssetCurrentAvailability", () => {
     expect(deriveAssetCurrentAvailability(true, result)).toEqual({
       isAvailableNow: false,
       unavailableReason: "MAINTENANCE",
+      isOverdue: false,
+      overdueSince: null,
     });
   });
 
@@ -76,6 +105,8 @@ describe("deriveAssetCurrentAvailability", () => {
     expect(deriveAssetCurrentAvailability(true, freeResult())).toEqual({
       isAvailableNow: true,
       unavailableReason: null,
+      isOverdue: false,
+      overdueSince: null,
     });
   });
 
@@ -116,6 +147,8 @@ describe("deriveAssetCurrentAvailability", () => {
     expect(deriveAssetCurrentAvailability(true, result)).toEqual({
       isAvailableNow: false,
       unavailableReason: "MANUAL_BLOCK",
+      isOverdue: false,
+      overdueSince: null,
     });
   });
 
@@ -129,6 +162,8 @@ describe("deriveAssetCurrentAvailability", () => {
     expect(deriveAssetCurrentAvailability(true, result)).toEqual({
       isAvailableNow: false,
       unavailableReason: "LOST",
+      isOverdue: false,
+      overdueSince: null,
     });
   });
 
@@ -142,6 +177,8 @@ describe("deriveAssetCurrentAvailability", () => {
     expect(deriveAssetCurrentAvailability(true, result)).toEqual({
       isAvailableNow: false,
       unavailableReason: "RETIRED",
+      isOverdue: false,
+      overdueSince: null,
     });
   });
 
@@ -151,22 +188,28 @@ describe("deriveAssetCurrentAvailability", () => {
     expect(deriveAssetCurrentAvailability(false, freeResult())).toEqual({
       isAvailableNow: false,
       unavailableReason: "NOT_RENTABLE",
+      isOverdue: false,
+      overdueSince: null,
     });
   });
 
-  it("NOT_RENTABLE takes priority even when the engine also reports a conflict", () => {
+  it("NOT_RENTABLE takes priority even when the engine also reports an overdue conflict", () => {
     const result: AssetAvailabilityResult = {
       ...freeResult(),
       isAvailable: false,
-      conflicts: [CONFLICT],
+      conflicts: [OVERDUE_CONFLICT],
     };
-    expect(deriveAssetCurrentAvailability(false, result).unavailableReason).toBe("NOT_RENTABLE");
+    const derived = deriveAssetCurrentAvailability(false, result);
+    expect(derived.unavailableReason).toBe("NOT_RENTABLE");
+    expect(derived.isOverdue).toBe(false);
   });
 
   it("is unavailable, reason NOT_RENTABLE, when isRentable is false and no availability result exists yet", () => {
     expect(deriveAssetCurrentAvailability(false, undefined)).toEqual({
       isAvailableNow: false,
       unavailableReason: "NOT_RENTABLE",
+      isOverdue: false,
+      overdueSince: null,
     });
   });
 
@@ -175,6 +218,8 @@ describe("deriveAssetCurrentAvailability", () => {
     expect(deriveAssetCurrentAvailability(true, undefined)).toEqual({
       isAvailableNow: true,
       unavailableReason: null,
+      isOverdue: false,
+      overdueSince: null,
     });
   });
 });

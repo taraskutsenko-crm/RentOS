@@ -87,6 +87,8 @@ describe("Asset current availability (Assets list) E2E", () => {
   async function listRow(assetId: string): Promise<{
     isAvailableNow: boolean;
     unavailableReason: string | null;
+    isOverdue: boolean;
+    overdueSince: string | null;
     currentStatus: { code: string };
   }> {
     const response = await request(app.getHttpServer())
@@ -98,6 +100,8 @@ describe("Asset current availability (Assets list) E2E", () => {
         id: string;
         isAvailableNow: boolean;
         unavailableReason: string | null;
+        isOverdue: boolean;
+        overdueSince: string | null;
         currentStatus: { code: string };
       }[]
     ).find((item) => item.id === assetId);
@@ -143,6 +147,18 @@ describe("Asset current availability (Assets list) E2E", () => {
       .set("Cookie", accessCookie)
       .send({ type, startAt: startAt.toISOString(), endAt: endAt.toISOString() })
       .expect(201);
+  }
+
+  async function rentalDetail(rentalId: string): Promise<{
+    isOverdue: boolean;
+    overdueSince: string | null;
+    status: string;
+  }> {
+    const response = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+    return response.body;
   }
 
   const HOUR_MS = 60 * 60 * 1000;
@@ -315,5 +331,334 @@ describe("Asset current availability (Assets list) E2E", () => {
 
     const row = await listRow(assetId);
     expect(row.isAvailableNow).toBe(true);
+  });
+
+  describe("overdue returns (unreturned rentals stay blocked past their planned end)", () => {
+    // Regression coverage for the exact real case found in live data
+    // ("Agregat Honda"): an ACTIVE rental whose plannedEnd has already
+    // passed, never actually returned.
+
+    // A: still inside the planned period, not returned -> unavailable, not overdue.
+    it("rental currently inside its planned period, not returned -> unavailable now, not overdue", async () => {
+      const assetId = await createAsset("OD-A");
+      const now = new Date();
+      const rentalId = await createRental(
+        assetId,
+        new Date(now.getTime() - HOUR_MS),
+        new Date(now.getTime() + HOUR_MS),
+      );
+      await reserveAndStart(rentalId);
+
+      const row = await listRow(assetId);
+      expect(row.isAvailableNow).toBe(false);
+      expect(row.unavailableReason).toBe("RENTED");
+      expect(row.isOverdue).toBe(false);
+      expect(row.overdueSince).toBeNull();
+    });
+
+    // B: planned end passed, not returned -> unavailable, overdue = true.
+    it("planned end passed, not returned -> unavailable now, overdue = true, reason OVERDUE_RETURN", async () => {
+      const assetId = await createAsset("OD-B");
+      const now = new Date();
+      const plannedEnd = new Date(now.getTime() - 2 * HOUR_MS);
+      const rentalId = await createRental(
+        assetId,
+        new Date(now.getTime() - 5 * HOUR_MS),
+        plannedEnd,
+      );
+      await reserveAndStart(rentalId);
+
+      const row = await listRow(assetId);
+      expect(row.isAvailableNow).toBe(false);
+      expect(row.unavailableReason).toBe("OVERDUE_RETURN");
+      expect(row.isOverdue).toBe(true);
+      expect(row.overdueSince).toBe(plannedEnd.toISOString());
+      // The persisted Status label stays "Rented" (the best-effort field
+      // this task deliberately never overwrites); the derived display in
+      // the frontend layer overrides it — asserted at the API level here
+      // only via the raw currentStatus code.
+      expect(row.currentStatus.code).toBe("RENTED");
+    });
+
+    // C: planned end passed + actual return completed -> available again.
+    it("planned end passed, but actually returned -> available now, overdue = false", async () => {
+      const assetId = await createAsset("OD-C");
+      const now = new Date();
+      const rentalId = await createRental(
+        assetId,
+        new Date(now.getTime() - 5 * HOUR_MS),
+        new Date(now.getTime() - 2 * HOUR_MS), // already overdue before the return
+      );
+      await reserveAndStart(rentalId);
+
+      // Confirm it is genuinely overdue first — proves the return is what fixes it.
+      expect((await listRow(assetId)).isOverdue).toBe(true);
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/return`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      const row = await listRow(assetId);
+      expect(row.isAvailableNow).toBe(true);
+      expect(row.unavailableReason).toBeNull();
+      expect(row.isOverdue).toBe(false);
+      expect(row.overdueSince).toBeNull();
+      expect(row.currentStatus.code).toBe("AVAILABLE");
+    });
+
+    // D: a Return Protocol *document* was generated (drafted) but the real
+    // return() action was never called — must NOT release the asset.
+    it("a drafted Return Protocol document alone does not release an overdue asset", async () => {
+      const assetId = await createAsset("OD-D");
+      const now = new Date();
+      const rentalId = await createRental(
+        assetId,
+        new Date(now.getTime() - 5 * HOUR_MS),
+        new Date(now.getTime() - 2 * HOUR_MS),
+      );
+      await reserveAndStart(rentalId);
+
+      // Generate a Return Protocol document — paperwork only, see
+      // rental-overdue.util.ts's doc comment: this must never set
+      // RentalItem.returnedAt.
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/documents`)
+        .set("Cookie", accessCookie)
+        .send({ documentType: "RETURN_PROTOCOL", rentalId, customerId })
+        .expect(201);
+
+      const row = await listRow(assetId);
+      expect(row.isAvailableNow).toBe(false);
+      expect(row.isOverdue).toBe(true);
+      expect(row.unavailableReason).toBe("OVERDUE_RETURN");
+    });
+
+    // E: future rental only -> available today (unaffected, already covered
+    // by the top-level "future rental only" test above — re-asserted here
+    // for this describe block's own completeness).
+    it("future rental only -> available now today, never overdue", async () => {
+      const assetId = await createAsset("OD-E");
+      const now = new Date();
+      const rentalId = await createRental(
+        assetId,
+        new Date(now.getTime() + 7 * 24 * HOUR_MS),
+        new Date(now.getTime() + 12 * 24 * HOUR_MS),
+      );
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/reserve`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      const row = await listRow(assetId);
+      expect(row.isAvailableNow).toBe(true);
+      expect(row.isOverdue).toBe(false);
+    });
+
+    // F: a fully-returned past rental -> available, never overdue (already
+    // covered by the top-level "past rental only" test — re-confirmed here
+    // for isOverdue specifically).
+    it("a fully-returned past rental -> available now, isOverdue false", async () => {
+      const assetId = await createAsset("OD-F");
+      const now = new Date();
+      const rentalId = await createRental(
+        assetId,
+        new Date(now.getTime() - 5 * HOUR_MS),
+        new Date(now.getTime() - 2 * HOUR_MS),
+      );
+      await reserveAndStart(rentalId);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/return`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      const row = await listRow(assetId);
+      expect(row.isAvailableNow).toBe(true);
+      expect(row.isOverdue).toBe(false);
+    });
+
+    // G: overdue rental + an attempted future reservation on the same asset
+    // -> the future booking is rejected, proving overdue blocking has no end date.
+    it("overdue rental blocks a future reservation attempt on the same asset (overlap protection preserved)", async () => {
+      const assetId = await createAsset("OD-G");
+      const now = new Date();
+      const overdueRentalId = await createRental(
+        assetId,
+        new Date(now.getTime() - 5 * HOUR_MS),
+        new Date(now.getTime() - 2 * HOUR_MS),
+      );
+      await reserveAndStart(overdueRentalId);
+
+      // A different customer tries to book the same (still-overdue,
+      // never-returned) asset for next week.
+      const futureAttempt = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals`)
+        .set("Cookie", accessCookie)
+        .send({
+          customerId,
+          plannedStart: new Date(now.getTime() + 7 * 24 * HOUR_MS).toISOString(),
+          plannedEnd: new Date(now.getTime() + 8 * 24 * HOUR_MS).toISOString(),
+          items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 1000 }],
+        })
+        .expect(201); // creating a DRAFT rental itself is always allowed…
+
+      // …but reserving it must fail: the asset is still claimed by the
+      // overdue, unreturned rental, with no known end date.
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${futureAttempt.body.id}/reserve`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(409);
+    });
+
+    // H: overdue rental + a maintenance block -> still unavailable (both
+    // reasons exist; the rental conflict is reported first).
+    it("overdue rental plus a maintenance block -> still unavailable", async () => {
+      const assetId = await createAsset("OD-H");
+      const now = new Date();
+      const rentalId = await createRental(
+        assetId,
+        new Date(now.getTime() - 5 * HOUR_MS),
+        new Date(now.getTime() - 2 * HOUR_MS),
+      );
+      await reserveAndStart(rentalId);
+      await createBlock(
+        assetId,
+        "MAINTENANCE",
+        new Date(now.getTime() - HOUR_MS),
+        new Date(now.getTime() + HOUR_MS),
+      );
+
+      const row = await listRow(assetId);
+      expect(row.isAvailableNow).toBe(false);
+    });
+
+    // I: LOST/RETIRED semantics unchanged by this feature.
+    it("LOST still reports unavailable with reason LOST, unaffected by overdue logic", async () => {
+      const assetId = await createAsset("OD-I");
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/assets/${assetId}/status`)
+        .set("Cookie", accessCookie)
+        .send({ statusId: statusIdByCode.get("LOST") })
+        .expect(201);
+
+      const row = await listRow(assetId);
+      expect(row.isAvailableNow).toBe(false);
+      expect(row.unavailableReason).toBe("LOST");
+      expect(row.isOverdue).toBe(false);
+    });
+
+    // J: boundary — at the exact planned-end instant, not yet overdue (see
+    // rental-overdue.util.spec.ts and availability.service.spec.ts for the
+    // precise millisecond-level boundary proof; this confirms the same
+    // behavior survives the full HTTP + real-Postgres pipeline).
+    it("boundary: a rental exactly at its planned end (not past it) is not yet overdue", async () => {
+      const assetId = await createAsset("OD-J");
+      const now = new Date();
+      // plannedEnd a few seconds in the future — by the time the list
+      // request executes, well before it, so this proves "not overdue
+      // while still within or at the boundary of the planned window",
+      // without depending on hitting an exact millisecond in a live HTTP
+      // round trip.
+      const rentalId = await createRental(
+        assetId,
+        new Date(now.getTime() - HOUR_MS),
+        new Date(now.getTime() + 30_000),
+      );
+      await reserveAndStart(rentalId);
+
+      const row = await listRow(assetId);
+      expect(row.isAvailableNow).toBe(false); // still blocked — within its planned window
+      expect(row.isOverdue).toBe(false); // but not yet overdue
+    });
+
+    // K: cross-tenant isolation unchanged.
+    it("cross-tenant: another tenant's overdue rental never affects this tenant's asset of the same name", async () => {
+      const otherRegister = await request(app.getHttpServer())
+        .post("/auth/register")
+        .send({
+          ...validRegisterPayload,
+          email: "other-owner@example.com",
+          companyName: "Other Co",
+        })
+        .expect(201);
+      const otherTenantId = (otherRegister.body as RegisterResponseBody).tenant.id;
+      const otherCookie = extractCookie(otherRegister.headers, "rentos_access_token");
+
+      const otherCategory = await request(app.getHttpServer())
+        .post(`/tenants/${otherTenantId}/asset-categories`)
+        .set("Cookie", otherCookie)
+        .send({ name: "Generators" })
+        .expect(201);
+      const otherAsset = await request(app.getHttpServer())
+        .post(`/tenants/${otherTenantId}/assets`)
+        .set("Cookie", otherCookie)
+        .send({ name: "Shared Name", internalNumber: "OD-K", categoryId: otherCategory.body.id })
+        .expect(201);
+      const otherCustomer = await request(app.getHttpServer())
+        .post(`/tenants/${otherTenantId}/customers`)
+        .set("Cookie", otherCookie)
+        .send({ firstName: "Other", lastName: "Customer" })
+        .expect(201);
+      const now = new Date();
+      const otherRental = await request(app.getHttpServer())
+        .post(`/tenants/${otherTenantId}/rentals`)
+        .set("Cookie", otherCookie)
+        .send({
+          customerId: otherCustomer.body.id,
+          plannedStart: new Date(now.getTime() - 5 * HOUR_MS).toISOString(),
+          plannedEnd: new Date(now.getTime() - 2 * HOUR_MS).toISOString(),
+          items: [{ assetId: otherAsset.body.id, billingMode: "DAILY", dailyPriceMinor: 1000 }],
+        })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${otherTenantId}/rentals/${otherRental.body.id}/reserve`)
+        .set("Cookie", otherCookie)
+        .send({})
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${otherTenantId}/rentals/${otherRental.body.id}/start`)
+        .set("Cookie", otherCookie)
+        .send({})
+        .expect(201);
+
+      // This tenant's own, entirely separate asset with the same internal
+      // number pattern must be unaffected — never overdue, never blocked.
+      const myAssetId = await createAsset("OD-K");
+      const row = await listRow(myAssetId);
+      expect(row.isAvailableNow).toBe(true);
+      expect(row.isOverdue).toBe(false);
+    });
+
+    // L: rental detail page — isOverdue/overdueSince, and clears on return.
+    it("rental detail: isOverdue/overdueSince are exposed, and clear once the rental is actually returned", async () => {
+      const assetId = await createAsset("OD-L");
+      const now = new Date();
+      const plannedEnd = new Date(now.getTime() - 2 * HOUR_MS);
+      const rentalId = await createRental(
+        assetId,
+        new Date(now.getTime() - 5 * HOUR_MS),
+        plannedEnd,
+      );
+      await reserveAndStart(rentalId);
+
+      const overdueDetail = await rentalDetail(rentalId);
+      expect(overdueDetail.isOverdue).toBe(true);
+      expect(overdueDetail.overdueSince).toBe(plannedEnd.toISOString());
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/return`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      const returnedDetail = await rentalDetail(rentalId);
+      expect(returnedDetail.isOverdue).toBe(false);
+      expect(returnedDetail.overdueSince).toBeNull();
+      expect(returnedDetail.status).toBe("RETURNED");
+    });
   });
 });

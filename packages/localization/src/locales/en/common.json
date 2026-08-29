@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "Not enabled for rental",
       "RENTED": "Rented",
+      "OVERDUE_RETURN": "Overdue return",
       "MAINTENANCE": "Maintenance",
       "REPAIR": "Repair",
       "INSPECTION": "Inspection",
@@ -521,6 +522,10 @@
       "customer": "Customer",
       "documents": "Documents",
       "invoices": "Invoices"
+    },
+    "overdue": {
+      "bannerTitle": "Return overdue",
+      "plannedReturn": "Planned return: {{date}}"
     },
     "documents": {
       "empty": "No documents linked to this rental yet",

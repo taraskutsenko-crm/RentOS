@@ -1,6 +1,14 @@
 "use client";
 
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
@@ -257,6 +265,21 @@ export default function RentalDetailPage() {
           </>
         }
       />
+
+      {rental.isOverdue && (
+        <Alert variant="warning">
+          <AlertDescription>
+            <p className="font-medium">{t("rental.overdue.bannerTitle")}</p>
+            <p>
+              {t("rental.overdue.plannedReturn", {
+                date: formatDateTime(rental.plannedEnd, i18n.language, timeZone),
+              })}
+              {" — "}
+              {t("rental.timeIntelligence.overdue", { count: timeIntelligence.days })}
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {actionError && <p className="text-destructive text-sm">{actionError}</p>}
 

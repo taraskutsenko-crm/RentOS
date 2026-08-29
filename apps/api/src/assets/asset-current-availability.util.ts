@@ -8,15 +8,22 @@ import type { AssetAvailabilityResult } from "../rentals/availability.service";
  * plus the one purely-configuration reason it doesn't (`NOT_RENTABLE`,
  * from `Asset.isRentable`). Never a new blocking rule — a display-layer
  * label over facts the engine (or the asset's own configuration) already
- * computed.
+ * computed. `OVERDUE_RETURN` is a distinct reason from plain `RENTED`: the
+ * conflicting rental has started, its planned end has already passed, and
+ * it has not actually been returned yet — see rental-overdue.util.ts.
  */
 export type AssetUnavailableReason =
-  "NOT_RENTABLE" | "RENTED" | "LOST" | "RETIRED" | AssetAvailabilityBlockType;
+  "NOT_RENTABLE" | "RENTED" | "OVERDUE_RETURN" | "LOST" | "RETIRED" | AssetAvailabilityBlockType;
 
 export interface AssetCurrentAvailability {
   isAvailableNow: boolean;
   unavailableReason: AssetUnavailableReason | null;
+  isOverdue: boolean;
+  /** Always the blocking rental's own plannedEnd — set only when `isOverdue` is true. */
+  overdueSince: string | null;
 }
+
+const NOT_OVERDUE = { isOverdue: false, overdueSince: null } as const;
 
 /**
  * Combines the asset-level rental-enabled configuration flag
@@ -37,23 +44,40 @@ export function deriveAssetCurrentAvailability(
   availability: AssetAvailabilityResult | undefined,
 ): AssetCurrentAvailability {
   if (!isRentable) {
-    return { isAvailableNow: false, unavailableReason: "NOT_RENTABLE" };
+    return { isAvailableNow: false, unavailableReason: "NOT_RENTABLE", ...NOT_OVERDUE };
   }
   if (!availability || availability.isAvailable) {
-    return { isAvailableNow: true, unavailableReason: null };
+    return { isAvailableNow: true, unavailableReason: null, ...NOT_OVERDUE };
   }
   if (availability.permanentReason) {
-    return { isAvailableNow: false, unavailableReason: availability.permanentReason };
+    return {
+      isAvailableNow: false,
+      unavailableReason: availability.permanentReason,
+      ...NOT_OVERDUE,
+    };
   }
   if (availability.conflicts.length > 0) {
-    return { isAvailableNow: false, unavailableReason: "RENTED" };
+    const overdueConflict = availability.conflicts.find((conflict) => conflict.isOverdue);
+    if (overdueConflict) {
+      return {
+        isAvailableNow: false,
+        unavailableReason: "OVERDUE_RETURN",
+        isOverdue: true,
+        overdueSince: overdueConflict.overdueSince,
+      };
+    }
+    return { isAvailableNow: false, unavailableReason: "RENTED", ...NOT_OVERDUE };
   }
   if (availability.blocks.length > 0) {
-    return { isAvailableNow: false, unavailableReason: availability.blocks[0]!.type };
+    return {
+      isAvailableNow: false,
+      unavailableReason: availability.blocks[0]!.type,
+      ...NOT_OVERDUE,
+    };
   }
   // Defensive fallback — checkAvailability's isAvailable is always false
   // for one of the reasons above, so this should be unreachable. Stay
   // honest (unavailable, unexplained) rather than ever claiming available
   // when the engine said otherwise.
-  return { isAvailableNow: false, unavailableReason: null };
+  return { isAvailableNow: false, unavailableReason: null, ...NOT_OVERDUE };
 }

@@ -109,6 +109,46 @@ describe("AssetsPage", () => {
     expect(screen.queryByText("Yes")).not.toBeInTheDocument();
   });
 
+  // Overdue return: the persisted Status is still "Rented" (never
+  // overwritten — see Asset.currentStatusId's own doc comment), but the
+  // list must display the derived "Overdue return" status instead, plus
+  // "Available now: No" with a matching tooltip — this is the exact
+  // real-data case ("Agregat Honda").
+  it("shows the derived 'Overdue return' status (not the persisted 'Rented' label) and 'No' with a matching tooltip when isOverdue is true", () => {
+    usePermissionMock.mockReturnValue(false);
+    useAssetsMock.mockReturnValue({
+      data: {
+        items: [
+          {
+            id: "a1",
+            internalNumber: "01002",
+            name: "Agregat Honda",
+            category: { name: "Generators" },
+            currentStatus: { name: "Rented" },
+            isRentable: true,
+            isAvailableNow: false,
+            unavailableReason: "OVERDUE_RETURN",
+            isOverdue: true,
+            overdueSince: "2026-08-27T15:00:00.000Z",
+            primaryImage: null,
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithProviders(<AssetsPage />);
+
+    expect(screen.getByText("Overdue return")).toBeInTheDocument();
+    expect(screen.queryByText("Rented")).not.toBeInTheDocument();
+    const noCell = screen.getByText("No");
+    expect(noCell).toHaveAttribute("title", "Overdue return");
+  });
+
   it("shows 'Yes' for a rentable asset with no current conflicts, and the reason tooltip is only present when unavailable", () => {
     usePermissionMock.mockReturnValue(false);
     useAssetsMock.mockReturnValue({

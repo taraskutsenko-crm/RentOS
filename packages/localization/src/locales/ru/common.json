@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "Аренда отключена",
       "RENTED": "В аренде",
+      "OVERDUE_RETURN": "Просрочен возврат",
       "MAINTENANCE": "Техобслуживание",
       "REPAIR": "Ремонт",
       "INSPECTION": "Осмотр",
@@ -521,6 +522,10 @@
       "customer": "Клиент",
       "documents": "Документы",
       "invoices": "Счета"
+    },
+    "overdue": {
+      "bannerTitle": "Возврат просрочен",
+      "plannedReturn": "Плановый возврат: {{date}}"
     },
     "documents": {
       "empty": "К этой аренде пока не привязаны документы",

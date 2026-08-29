@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "レンタル無効",
       "RENTED": "レンタル中",
+      "OVERDUE_RETURN": "返却延滞",
       "MAINTENANCE": "メンテナンス中",
       "REPAIR": "修理中",
       "INSPECTION": "点検中",
@@ -521,6 +522,10 @@
       "customer": "顧客",
       "documents": "ドキュメント",
       "invoices": "請求書"
+    },
+    "overdue": {
+      "bannerTitle": "返却が延滞しています",
+      "plannedReturn": "予定返却日時: {{date}}"
     },
     "documents": {
       "empty": "このレンタルに関連付けられたドキュメントはまだありません",

@@ -107,7 +107,17 @@ export default function AssetsPage() {
     {
       id: "status",
       header: t("asset.fields.status"),
-      cell: (asset) => getAssetStatusLabel(t, asset.currentStatus),
+      // The persisted Status label (e.g. "Rented") is a best-effort,
+      // point-in-time snapshot — see Asset.currentStatusId's own doc
+      // comment — never overwritten by this page. When the asset is
+      // actually overdue (server-computed, see AssetsService.findMany),
+      // this display-only override shows that instead, so the list can
+      // never present "Rented" next to "Available now: Yes/No" in a way
+      // that hides a real overdue condition.
+      cell: (asset) =>
+        asset.isOverdue
+          ? t("asset.unavailableReasons.OVERDUE_RETURN")
+          : getAssetStatusLabel(t, asset.currentStatus),
       mobileRole: "secondary",
     },
     {

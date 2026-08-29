@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "Location désactivée",
       "RENTED": "Loué",
+      "OVERDUE_RETURN": "Retour en retard",
       "MAINTENANCE": "Maintenance",
       "REPAIR": "Réparation",
       "INSPECTION": "Inspection",
@@ -521,6 +522,10 @@
       "customer": "Client",
       "documents": "Documents",
       "invoices": "Factures"
+    },
+    "overdue": {
+      "bannerTitle": "Retour en retard",
+      "plannedReturn": "Retour prévu : {{date}}"
     },
     "documents": {
       "empty": "Aucun document lié à cette location pour l'instant",

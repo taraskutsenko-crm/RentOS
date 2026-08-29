@@ -84,6 +84,8 @@ function baseRental(status: string) {
     items: [],
     sourceQuote: null,
     documents: [],
+    isOverdue: false,
+    overdueSince: null,
   };
 }
 
@@ -110,6 +112,37 @@ describe("RentalDetailPage", () => {
     expect(screen.getByRole("heading", { name: "RNT-000001" })).toBeInTheDocument();
     expect(screen.getAllByText(/jane doe/i).length).toBeGreaterThan(0);
     expect(screen.getByText("Draft")).toBeInTheDocument();
+  });
+
+  // Regression coverage for the exact real case found in live data
+  // ("Agregat Honda"): the rental detail page must show a clear overdue
+  // warning banner whenever the backend reports isOverdue — never silently
+  // treat a past plannedEnd as "returned."
+  it("shows a 'Return overdue' warning banner when the rental is overdue, with the planned return date/time", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({
+      data: {
+        ...baseRental("ACTIVE"),
+        plannedEnd: "2026-08-27T15:00:00Z",
+        isOverdue: true,
+        overdueSince: "2026-08-27T15:00:00Z",
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    expect(screen.getByText("Return overdue")).toBeInTheDocument();
+    expect(screen.getByText(/planned return/i)).toBeInTheDocument();
+  });
+
+  it("does not show the overdue banner for a rental that is not overdue", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({ data: baseRental("ACTIVE"), isLoading: false });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    expect(screen.queryByText("Return overdue")).not.toBeInTheDocument();
   });
 
   // Chapter 7: Customer card links to the customer's own detail page

@@ -2,6 +2,7 @@ import { ConflictException, Injectable } from "@nestjs/common";
 import type { AssetAvailabilityBlockType, RentalStatus } from "@prisma/client";
 
 import { PrismaService } from "../prisma/prisma.service";
+import { deriveOverdueStatus } from "./rental-overdue.util";
 
 /** Rental statuses that represent a confirmed claim on an asset for its planned window. */
 const BLOCKING_STATUSES: RentalStatus[] = ["RESERVED", "ACTIVE"];
@@ -15,6 +16,10 @@ export interface AvailabilityConflict {
   rentalNumber: string;
   plannedStart: string;
   plannedEnd: string;
+  /** True when this rental has started, its planned end has already passed, and it has not actually been returned yet — see rental-overdue.util.ts. */
+  isOverdue: boolean;
+  /** Always the rental's own plannedEnd — set only when `isOverdue` is true. */
+  overdueSince: string | null;
 }
 
 /** A non-rental reason an asset is blocked out for a date range — see AssetAvailabilityBlock. */
@@ -64,6 +69,16 @@ export class AvailabilityService {
    * an asset immediately. AssetAvailabilityBlock rows use the same
    * half-open convention (`startAt <= x < endAt`); cancelled blocks
    * (`cancelledAt` set) are always excluded.
+   *
+   * An ACTIVE item that is genuinely overdue (its rental's plannedEnd has
+   * already passed and it still has not been actually returned — see
+   * rental-overdue.util.ts) is deliberately NOT bounded by that planned end
+   * for this computation: its effective end is treated as indefinite (no
+   * known end) until a real return happens, so it keeps blocking every
+   * requested window — including future ones — until then. This is the one
+   * exception to "plannedEnd bounds the block"; every other case (a
+   * still-on-track ACTIVE rental, a not-yet-started RESERVED rental)
+   * behaves exactly as before.
    */
   async checkAvailability(
     tenantId: string,
@@ -105,10 +120,24 @@ export class AvailabilityService {
       }),
     ]);
 
+    // Real wall-clock "now" for overdue determination — deliberately
+    // independent of the requested [plannedStart, plannedEnd) window, which
+    // may itself be a future date range (e.g. RentalsService.reserve()
+    // checking next month). "Overdue" always means overdue as of the
+    // actual current moment, never relative to whatever window is being
+    // queried. Computed once so every item in this call is judged
+    // consistently.
+    const now = new Date();
+
     const conflictsByAsset = new Map<string, AvailabilityConflict[]>();
     for (const item of candidateItems) {
-      const effectiveEnd = item.returnedAt ?? item.rental.plannedEnd;
-      if (effectiveEnd <= plannedStart) {
+      const overdue = deriveOverdueStatus(
+        { status: item.rental.status, plannedEnd: item.rental.plannedEnd },
+        [{ returnedAt: item.returnedAt }],
+        now,
+      );
+      const effectiveEnd = item.returnedAt ?? (overdue.isOverdue ? null : item.rental.plannedEnd);
+      if (effectiveEnd !== null && effectiveEnd <= plannedStart) {
         continue; // returned/ended before the requested window starts — no conflict
       }
       const list = conflictsByAsset.get(item.assetId) ?? [];
@@ -117,6 +146,8 @@ export class AvailabilityService {
         rentalNumber: item.rental.rentalNumber,
         plannedStart: item.rental.plannedStart.toISOString(),
         plannedEnd: item.rental.plannedEnd.toISOString(),
+        isOverdue: overdue.isOverdue,
+        overdueSince: overdue.overdueSince?.toISOString() ?? null,
       });
       conflictsByAsset.set(item.assetId, list);
     }

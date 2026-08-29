@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "Оренда вимкнена",
       "RENTED": "В оренді",
+      "OVERDUE_RETURN": "Прострочено повернення",
       "MAINTENANCE": "Технічне обслуговування",
       "REPAIR": "Ремонт",
       "INSPECTION": "Огляд",
@@ -521,6 +522,10 @@
       "customer": "Клієнт",
       "documents": "Документи",
       "invoices": "Рахунки"
+    },
+    "overdue": {
+      "bannerTitle": "Повернення прострочено",
+      "plannedReturn": "Плановий термін повернення: {{date}}"
     },
     "documents": {
       "empty": "До цієї оренди ще не прив'язано жодного документа",

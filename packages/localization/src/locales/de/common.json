@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "Vermietung deaktiviert",
       "RENTED": "Vermietet",
+      "OVERDUE_RETURN": "Rückgabe überfällig",
       "MAINTENANCE": "Wartung",
       "REPAIR": "Reparatur",
       "INSPECTION": "Inspektion",
@@ -521,6 +522,10 @@
       "customer": "Kunde",
       "documents": "Dokumente",
       "invoices": "Rechnungen"
+    },
+    "overdue": {
+      "bannerTitle": "Rückgabe überfällig",
+      "plannedReturn": "Geplante Rückgabe: {{date}}"
     },
     "documents": {
       "empty": "Dieser Vermietung sind noch keine Dokumente zugeordnet",

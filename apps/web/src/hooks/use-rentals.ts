@@ -8,9 +8,9 @@ import type {
   DepositPaymentMethod,
   PaginatedRentals,
   PartialMonthPolicy,
-  Rental,
   RentalBillingMode,
   RentalDeposit,
+  RentalDetail,
   RentalStatus,
   RentalTimelineEvent,
 } from "../types/rental";
@@ -67,7 +67,7 @@ export function useRentals(tenantId: string | null, params: RentalListParams = {
 export function useRental(tenantId: string | null, id: string | null) {
   return useQuery({
     queryKey: [BASE_KEY, tenantId, "detail", id],
-    queryFn: () => apiClient.get<Rental>(`/tenants/${tenantId}/rentals/${id}`),
+    queryFn: () => apiClient.get<RentalDetail>(`/tenants/${tenantId}/rentals/${id}`),
     enabled: !!tenantId && !!id,
   });
 }
@@ -115,7 +115,7 @@ export function useCreateRental(tenantId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: RentalInput) =>
-      apiClient.post<Rental>(`/tenants/${tenantId}/rentals`, input),
+      apiClient.post<RentalDetail>(`/tenants/${tenantId}/rentals`, input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
     },
@@ -126,7 +126,7 @@ export function useUpdateRental(tenantId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: Partial<RentalInput> }) =>
-      apiClient.patch<Rental>(`/tenants/${tenantId}/rentals/${id}`, input),
+      apiClient.patch<RentalDetail>(`/tenants/${tenantId}/rentals/${id}`, input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
     },
@@ -147,7 +147,7 @@ function useRentalLifecycleAction(tenantId: string | null, action: "reserve" | "
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
-      apiClient.post<Rental>(`/tenants/${tenantId}/rentals/${id}/${action}`, { reason }),
+      apiClient.post<RentalDetail>(`/tenants/${tenantId}/rentals/${id}/${action}`, { reason }),
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
       void queryClient.invalidateQueries({
@@ -173,7 +173,10 @@ export function useReturnRental(tenantId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, itemIds, reason }: { id: string; itemIds?: string[]; reason?: string }) =>
-      apiClient.post<Rental>(`/tenants/${tenantId}/rentals/${id}/return`, { itemIds, reason }),
+      apiClient.post<RentalDetail>(`/tenants/${tenantId}/rentals/${id}/return`, {
+        itemIds,
+        reason,
+      }),
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
       void queryClient.invalidateQueries({

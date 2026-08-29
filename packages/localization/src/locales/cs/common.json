@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "Pronájem vypnutý",
       "RENTED": "Pronajato",
+      "OVERDUE_RETURN": "Vrácení po termínu",
       "MAINTENANCE": "Údržba",
       "REPAIR": "Oprava",
       "INSPECTION": "Kontrola",
@@ -521,6 +522,10 @@
       "customer": "Zákazník",
       "documents": "Dokumenty",
       "invoices": "Faktury"
+    },
+    "overdue": {
+      "bannerTitle": "Vrácení je po termínu",
+      "plannedReturn": "Plánované vrácení: {{date}}"
     },
     "documents": {
       "empty": "K tomuto pronájmu zatím nejsou přiřazeny žádné dokumenty",

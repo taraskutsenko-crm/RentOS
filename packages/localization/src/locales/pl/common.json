@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "Wynajem wyłączony",
       "RENTED": "Wynajęty",
+      "OVERDUE_RETURN": "Zwrot przeterminowany",
       "MAINTENANCE": "Konserwacja",
       "REPAIR": "Naprawa",
       "INSPECTION": "Przegląd",
@@ -521,6 +522,10 @@
       "customer": "Klient",
       "documents": "Dokumenty",
       "invoices": "Faktury"
+    },
+    "overdue": {
+      "bannerTitle": "Zwrot jest przeterminowany",
+      "plannedReturn": "Planowany zwrot: {{date}}"
     },
     "documents": {
       "empty": "Do tego wynajmu nie przypisano jeszcze żadnych dokumentów",

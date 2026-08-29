@@ -21,6 +21,11 @@ function rentalItem(overrides: Record<string, unknown> = {}) {
     rental: {
       id: "rental-1",
       rentalNumber: "RNT-000001",
+      // No `status` by default — deriveOverdueStatus only ever treats
+      // status === "ACTIVE" as eligible for "overdue," so the many
+      // existing tests below (none of which set a status) are unaffected
+      // by the overdue logic regardless of how their fixture dates
+      // compare to the real wall-clock "now" used internally.
       plannedStart: new Date("2026-08-01T00:00:00Z"),
       plannedEnd: new Date("2026-08-05T00:00:00Z"),
     },
@@ -225,6 +230,178 @@ describe("AvailabilityService", () => {
 
     expect(results[0]?.isAvailable).toBe(true);
     expect(results[0]?.permanentReason).toBeNull();
+  });
+
+  describe("overdue returns", () => {
+    const NOW = new Date("2026-08-29T12:00:00Z");
+
+    function withFakeNow<T>(fn: () => Promise<T> | T): Promise<T> {
+      vi.useFakeTimers();
+      vi.setSystemTime(NOW);
+      return Promise.resolve(fn()).finally(() => vi.useRealTimers());
+    }
+
+    it("keeps blocking an ACTIVE, unreturned item past its planned end (does not silently release it)", () =>
+      withFakeNow(async () => {
+        const { service, prisma } = buildService();
+        prisma.rentalItem.findMany.mockResolvedValue([
+          rentalItem({
+            rental: {
+              id: "rental-1",
+              rentalNumber: "RNT-000001",
+              status: "ACTIVE",
+              plannedStart: new Date("2026-08-24T09:00:00Z"),
+              plannedEnd: new Date("2026-08-27T15:00:00Z"), // already passed
+            },
+          }),
+        ]);
+
+        // Checking availability "now" — the same query shape checkAvailableNow uses.
+        const results = await service.checkAvailability("t1", ["asset-1"], NOW, NOW);
+
+        expect(results[0]?.isAvailable).toBe(false);
+        expect(results[0]?.conflicts[0]).toMatchObject({
+          isOverdue: true,
+          overdueSince: "2026-08-27T15:00:00.000Z",
+        });
+      }));
+
+    it("keeps blocking a far-future requested window too — overdue never has a known end", () =>
+      withFakeNow(async () => {
+        const { service, prisma } = buildService();
+        prisma.rentalItem.findMany.mockResolvedValue([
+          rentalItem({
+            rental: {
+              id: "rental-1",
+              rentalNumber: "RNT-000001",
+              status: "ACTIVE",
+              plannedStart: new Date("2026-08-24T09:00:00Z"),
+              plannedEnd: new Date("2026-08-27T15:00:00Z"),
+            },
+          }),
+        ]);
+
+        const results = await service.checkAvailability(
+          "t1",
+          ["asset-1"],
+          new Date("2026-12-01T00:00:00Z"),
+          new Date("2026-12-05T00:00:00Z"),
+        );
+
+        expect(results[0]?.isAvailable).toBe(false);
+      }));
+
+    it("stops blocking once the overdue item is actually returned", () =>
+      withFakeNow(async () => {
+        const { service, prisma } = buildService();
+        prisma.rentalItem.findMany.mockResolvedValue([
+          rentalItem({
+            returnedAt: new Date("2026-08-29T10:00:00Z"), // returned this morning
+            rental: {
+              id: "rental-1",
+              rentalNumber: "RNT-000001",
+              status: "ACTIVE",
+              plannedStart: new Date("2026-08-24T09:00:00Z"),
+              plannedEnd: new Date("2026-08-27T15:00:00Z"),
+            },
+          }),
+        ]);
+
+        const results = await service.checkAvailability("t1", ["asset-1"], NOW, NOW);
+
+        expect(results[0]?.isAvailable).toBe(true);
+        expect(results[0]?.conflicts).toEqual([]);
+      }));
+
+    it("does not mark a conflict overdue merely because the rental is ACTIVE and still on track (plannedEnd in the future)", () =>
+      withFakeNow(async () => {
+        const { service, prisma } = buildService();
+        prisma.rentalItem.findMany.mockResolvedValue([
+          rentalItem({
+            rental: {
+              id: "rental-1",
+              rentalNumber: "RNT-000001",
+              status: "ACTIVE",
+              plannedStart: new Date("2026-08-28T00:00:00Z"),
+              plannedEnd: new Date("2026-09-01T00:00:00Z"), // still ahead
+            },
+          }),
+        ]);
+
+        const results = await service.checkAvailability("t1", ["asset-1"], NOW, NOW);
+
+        expect(results[0]?.isAvailable).toBe(false);
+        expect(results[0]?.conflicts[0]?.isOverdue).toBe(false);
+        expect(results[0]?.conflicts[0]?.overdueSince).toBeNull();
+      }));
+
+    it("does not mark a RESERVED (not yet started) item overdue, even with a past plannedEnd", () =>
+      withFakeNow(async () => {
+        const { service, prisma } = buildService();
+        prisma.rentalItem.findMany.mockResolvedValue([
+          rentalItem({
+            rental: {
+              id: "rental-1",
+              rentalNumber: "RNT-000001",
+              status: "RESERVED",
+              plannedStart: new Date("2026-08-01T00:00:00Z"),
+              plannedEnd: new Date("2026-08-05T00:00:00Z"), // in the past, but never started
+            },
+          }),
+        ]);
+
+        // RESERVED with a past plannedEnd behaves exactly as before this
+        // change: bounded by plannedEnd, so it does not block "now".
+        const results = await service.checkAvailability("t1", ["asset-1"], NOW, NOW);
+
+        expect(results[0]?.isAvailable).toBe(true);
+      }));
+
+    // Boundary: exactly at the planned-end instant. Same half-open
+    // convention as the rest of the engine ("allows back-to-back
+    // bookings" — an item ending exactly when a query starts does not
+    // conflict): not overdue, and the query window it's being checked
+    // against is released right at that instant, same as before this change.
+    it("boundary: is not overdue and is available at the exact planned-end instant (same half-open turnover rule as everywhere else)", () =>
+      withFakeNow(async () => {
+        const { service, prisma } = buildService();
+        prisma.rentalItem.findMany.mockResolvedValue([
+          rentalItem({
+            rental: {
+              id: "rental-1",
+              rentalNumber: "RNT-000001",
+              status: "ACTIVE",
+              plannedStart: new Date("2026-08-24T00:00:00Z"),
+              plannedEnd: NOW, // planned end is exactly "now"
+            },
+          }),
+        ]);
+
+        const results = await service.checkAvailability("t1", ["asset-1"], NOW, NOW);
+
+        expect(results[0]?.isAvailable).toBe(true);
+      }));
+
+    it("boundary: becomes overdue and stays blocked one millisecond after the planned-end instant, still unreturned", () =>
+      withFakeNow(async () => {
+        const { service, prisma } = buildService();
+        prisma.rentalItem.findMany.mockResolvedValue([
+          rentalItem({
+            rental: {
+              id: "rental-1",
+              rentalNumber: "RNT-000001",
+              status: "ACTIVE",
+              plannedStart: new Date("2026-08-24T00:00:00Z"),
+              plannedEnd: new Date(NOW.getTime() - 1), // one ms before "now"
+            },
+          }),
+        ]);
+
+        const results = await service.checkAvailability("t1", ["asset-1"], NOW, NOW);
+
+        expect(results[0]?.isAvailable).toBe(false);
+        expect(results[0]?.conflicts[0]?.isOverdue).toBe(true);
+      }));
   });
 });
 

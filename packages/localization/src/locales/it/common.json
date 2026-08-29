@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "Noleggio disattivato",
       "RENTED": "Noleggiato",
+      "OVERDUE_RETURN": "Restituzione in ritardo",
       "MAINTENANCE": "Manutenzione",
       "REPAIR": "Riparazione",
       "INSPECTION": "Ispezione",
@@ -521,6 +522,10 @@
       "customer": "Cliente",
       "documents": "Documenti",
       "invoices": "Fatture"
+    },
+    "overdue": {
+      "bannerTitle": "Restituzione in ritardo",
+      "plannedReturn": "Restituzione prevista: {{date}}"
     },
     "documents": {
       "empty": "Ancora nessun documento collegato a questo noleggio",

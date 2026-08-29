@@ -319,6 +319,7 @@
     "unavailableReasons": {
       "NOT_RENTABLE": "Verhuur uitgeschakeld",
       "RENTED": "Verhuurd",
+      "OVERDUE_RETURN": "Retour te laat",
       "MAINTENANCE": "Onderhoud",
       "REPAIR": "Reparatie",
       "INSPECTION": "Inspectie",
@@ -521,6 +522,10 @@
       "customer": "Klant",
       "documents": "Documenten",
       "invoices": "Facturen"
+    },
+    "overdue": {
+      "bannerTitle": "Retour te laat",
+      "plannedReturn": "Geplande retour: {{date}}"
     },
     "documents": {
       "empty": "Nog geen documenten gekoppeld aan deze verhuur",

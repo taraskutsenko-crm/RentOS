@@ -124,6 +124,19 @@ export interface RentalListItem extends Omit<
   itemCount: number;
 }
 
+/**
+ * The detail-view shape only — `isOverdue`/`overdueSince` are computed by
+ * RentalsService.findOne (see rental-overdue.util.ts) and are not present
+ * on list rows (RentalListItem). Mirrors the backend's own
+ * RentalDetailView vs RentalListItemView split.
+ */
+export interface RentalDetail extends Rental {
+  /** True only while ACTIVE, plannedEnd has passed, and at least one item has not actually been returned yet. */
+  isOverdue: boolean;
+  /** Always this rental's own plannedEnd — set only when `isOverdue` is true. */
+  overdueSince: string | null;
+}
+
 export interface PaginatedRentals {
   items: RentalListItem[];
   total: number;

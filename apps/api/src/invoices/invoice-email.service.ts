@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { AuditService } from "../audit/audit.service";
 import { EmailService } from "../email/email.service";
+import { buildTenantFromName, resolveTenantReplyTo } from "../email/tenant-sender-identity.util";
 import { PrismaService } from "../prisma/prisma.service";
 import type { SendInvoiceEmailDto } from "./dto/send-invoice-email.dto";
 import { InvoicesService } from "./invoices.service";
@@ -82,10 +83,17 @@ export class InvoiceEmailService {
     }
 
     const pdfBuffer = await this.invoicePdfService.render(invoice);
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { name: true, email: true },
+    });
+    const replyTo = resolveTenantReplyTo(tenant?.email);
     const result = await this.emailService.send({
       to: recipientEmail,
       subject,
-      html: buildInvoiceEmailHtml(invoice.invoiceNumber, dto.message),
+      html: buildInvoiceEmailHtml(invoice.invoiceNumber, dto.message, tenant?.name ?? null),
+      fromName: buildTenantFromName(tenant?.name),
+      ...(replyTo ? { replyTo } : {}),
       attachments: [
         {
           filename: `${invoice.invoiceNumber}.pdf`,
@@ -133,9 +141,14 @@ export class InvoiceEmailService {
   }
 }
 
-function buildInvoiceEmailHtml(invoiceNumber: string, message: string | undefined): string {
+function buildInvoiceEmailHtml(
+  invoiceNumber: string,
+  message: string | undefined,
+  tenantName: string | null,
+): string {
   const escapedMessage = message ? `<p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>` : "";
-  return `<p>Please find invoice <strong>${escapeHtml(invoiceNumber)}</strong> attached.</p>${escapedMessage}`;
+  const heading = tenantName ? `<h2>${escapeHtml(tenantName)}</h2>` : "";
+  return `${heading}<p>Please find invoice <strong>${escapeHtml(invoiceNumber)}</strong> attached.</p>${escapedMessage}<p style="color:#aaa; font-size: 11px; margin-top: 24px;">Sent via Havelio</p>`;
 }
 
 function escapeHtml(value: string): string {

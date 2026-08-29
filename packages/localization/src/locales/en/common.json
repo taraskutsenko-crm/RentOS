@@ -166,7 +166,9 @@
         "registrationNumber": "Registration number",
         "taxNumber": "Tax / VAT number",
         "address": "Address",
-        "phone": "Phone"
+        "phone": "Phone",
+        "email": "Company email",
+        "emailHelp": "Used as the reply address when documents are emailed to customers."
       }
     }
   },

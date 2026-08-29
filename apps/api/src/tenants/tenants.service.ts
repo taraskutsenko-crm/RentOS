@@ -56,6 +56,7 @@ export class TenantsService {
         taxNumber: dto.taxNumber || null,
         address: dto.address || null,
         phone: dto.phone || null,
+        email: dto.email || null,
       },
     });
 
@@ -72,6 +73,7 @@ export class TenantsService {
           taxNumber: previous.taxNumber,
           address: previous.address,
           phone: previous.phone,
+          email: previous.email,
         },
         to: {
           name: tenant.name,
@@ -79,6 +81,7 @@ export class TenantsService {
           taxNumber: tenant.taxNumber,
           address: tenant.address,
           phone: tenant.phone,
+          email: tenant.email,
         },
       },
     });

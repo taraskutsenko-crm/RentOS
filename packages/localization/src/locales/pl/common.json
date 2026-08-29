@@ -166,7 +166,9 @@
         "registrationNumber": "Numer rejestracyjny",
         "taxNumber": "NIP / numer VAT",
         "address": "Adres",
-        "phone": "Telefon"
+        "phone": "Telefon",
+        "email": "E-mail firmy",
+        "emailHelp": "Używany jako adres do odpowiedzi podczas wysyłania dokumentów do klientów e-mailem."
       }
     }
   },

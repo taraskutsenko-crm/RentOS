@@ -23,6 +23,7 @@ export interface Tenant {
   taxNumber: string | null;
   address: string | null;
   phone: string | null;
+  email: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

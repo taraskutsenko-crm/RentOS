@@ -370,6 +370,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
         taxNumber: "DE123456789",
         address: "Musterstrasse 1, Berlin",
         phone: "+49 30 1234567",
+        email: "office@acme-rentals.example",
       })
       .expect(200);
 
@@ -382,10 +383,11 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .send({ documentType: "CONTRACT", htmlContent: markers })
       .expect(201);
 
-    // company.logo/company.email are permanently hardcoded to "" in the
-    // resolver (no tenant branding/company-email field exists yet) — same
-    // documented exception as the real-render coverage test below.
-    const permanentlyEmpty = new Set(["company.logo", "company.logoHtml", "company.email"]);
+    // company.logo is permanently hardcoded to "" in the resolver (no
+    // tenant branding field exists yet) — same documented exception as the
+    // real-render coverage test below. company.email now resolves from
+    // Tenant.email (set above), so it is no longer in this set.
+    const permanentlyEmpty = new Set(["company.logo", "company.logoHtml"]);
     for (const varPath of DOCUMENT_VARIABLE_PATHS) {
       const match = new RegExp(`${varPath.replace(/\./g, "\\.")}::(.*?)::end`, "s").exec(
         response.body.html,
@@ -1140,6 +1142,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
         taxNumber: "DE123456789",
         address: "Musterstrasse 1, Berlin",
         phone: "+49 30 1234567",
+        email: "office@acme-rentals.example",
       })
       .expect(200);
 
@@ -1523,6 +1526,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
         taxNumber: "DE123456789",
         address: "Musterstrasse 1, Berlin",
         phone: "+49 30 1234567",
+        email: "office@acme-rentals.example",
       })
       .expect(200);
 
@@ -1678,11 +1682,11 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .expect(200);
 
-    // company.logo and company.email are permanently empty by design (no
-    // tenant branding/company-email field exists yet, see hardcoded ""
-    // values in variable-resolver.service.ts) — every other path must
-    // resolve to real, non-empty content given this fully-populated document.
-    const permanentlyEmpty = new Set(["company.logo", "company.logoHtml", "company.email"]);
+    // company.logo is permanently empty by design (no tenant branding field
+    // exists yet, see the hardcoded "" value in variable-resolver.service.ts)
+    // — every other path, including company.email (set above), must resolve
+    // to real, non-empty content given this fully-populated document.
+    const permanentlyEmpty = new Set(["company.logo", "company.logoHtml"]);
     for (const varPath of DOCUMENT_VARIABLE_PATHS) {
       const match = new RegExp(`${varPath.replace(/\./g, "\\.")}::(.*?)::end`, "s").exec(
         preview.body.html,

@@ -201,6 +201,7 @@ export const companyProfileSchema = z.object({
   taxNumber: z.string().max(100),
   address: z.string().max(500),
   phone: z.string().max(50),
+  email: z.union([z.literal(""), z.string().max(320).email("auth.errors.invalidEmail")]),
 });
 
 export type CompanyProfileFormValues = z.infer<typeof companyProfileSchema>;

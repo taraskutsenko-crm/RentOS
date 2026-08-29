@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MaxLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, MaxLength, ValidateIf } from "class-validator";
 
 /**
  * Backs `PATCH /tenants/:tenantId` (Company Profile settings). All fields
@@ -29,4 +29,16 @@ export class UpdateTenantDto {
   @IsString()
   @MaxLength(50)
   phone!: string;
+
+  /**
+   * The tenant's customer-facing company email — canonical Reply-To source
+   * for transactional email (see tenant-sender-identity.util.ts). Empty
+   * string clears it (same convention as the other optional identity
+   * fields); a non-empty value must be a syntactically valid email.
+   */
+  @IsString()
+  @MaxLength(320)
+  @ValidateIf((dto: UpdateTenantDto) => dto.email !== "")
+  @IsEmail()
+  email!: string;
 }

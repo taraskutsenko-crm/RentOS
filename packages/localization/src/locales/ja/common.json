@@ -166,7 +166,9 @@
         "registrationNumber": "登録番号",
         "taxNumber": "税番号／VAT番号",
         "address": "住所",
-        "phone": "電話番号"
+        "phone": "電話番号",
+        "email": "会社のメールアドレス",
+        "emailHelp": "ドキュメントを顧客にメールで送信する際の返信先として使用されます。"
       }
     }
   },

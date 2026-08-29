@@ -302,6 +302,7 @@ describe("Invoices E2E", () => {
         taxNumber: "",
         address: "",
         phone: "",
+        email: "",
       })
       .expect(200);
 

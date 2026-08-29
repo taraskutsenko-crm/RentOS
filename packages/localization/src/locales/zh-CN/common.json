@@ -166,7 +166,9 @@
         "registrationNumber": "注册号",
         "taxNumber": "税号/增值税号",
         "address": "地址",
-        "phone": "电话"
+        "phone": "电话",
+        "email": "公司邮箱",
+        "emailHelp": "向客户发送文件时用作回复地址。"
       }
     }
   },

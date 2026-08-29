@@ -19,6 +19,7 @@ export class LoggingEmailProvider implements EmailProvider {
   send(message: EmailMessage): Promise<EmailSendResult> {
     this.logger.log(
       `[LoggingEmailProvider] Would send email to=${message.to} subject="${message.subject}" ` +
+        `from="${message.fromName ?? "(default)"}" replyTo="${message.replyTo ?? "(none)"}" ` +
         `attachments=${message.attachments?.length ?? 0} (no real provider configured — see docs/architecture.md)`,
     );
     return Promise.resolve({ success: true });

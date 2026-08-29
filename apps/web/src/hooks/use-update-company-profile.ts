@@ -11,6 +11,7 @@ export interface CompanyProfileInput {
   taxNumber: string;
   address: string;
   phone: string;
+  email: string;
 }
 
 /** Powers the Company Profile settings page — PATCHes the same resource useCurrentTenantRole() reads. */

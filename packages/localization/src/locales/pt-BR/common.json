@@ -166,7 +166,9 @@
         "registrationNumber": "Número de registro",
         "taxNumber": "CNPJ / número de imposto",
         "address": "Endereço",
-        "phone": "Telefone"
+        "phone": "Telefone",
+        "email": "E-mail da empresa",
+        "emailHelp": "Usado como endereço de resposta ao enviar documentos por e-mail aos clientes."
       }
     }
   },

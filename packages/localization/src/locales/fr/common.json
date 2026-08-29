@@ -166,7 +166,9 @@
         "registrationNumber": "Numéro d'immatriculation",
         "taxNumber": "Numéro fiscal / TVA",
         "address": "Adresse",
-        "phone": "Téléphone"
+        "phone": "Téléphone",
+        "email": "E-mail de l'entreprise",
+        "emailHelp": "Utilisé comme adresse de réponse lors de l'envoi de documents par e-mail aux clients."
       }
     }
   },

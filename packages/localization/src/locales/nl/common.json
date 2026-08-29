@@ -166,7 +166,9 @@
         "registrationNumber": "Registratienummer",
         "taxNumber": "Btw-/belastingnummer",
         "address": "Adres",
-        "phone": "Telefoon"
+        "phone": "Telefoon",
+        "email": "Bedrijfs-e-mail",
+        "emailHelp": "Wordt gebruikt als antwoordadres wanneer documenten per e-mail naar klanten worden verstuurd."
       }
     }
   },

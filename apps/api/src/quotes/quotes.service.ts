@@ -32,6 +32,7 @@ import type { SendQuoteDto } from "./dto/send-quote.dto";
 import type { StatusActionDto } from "./dto/status-action.dto";
 import type { UpdateQuoteDto } from "./dto/update-quote.dto";
 import { EmailService } from "../email/email.service";
+import { buildTenantFromName, resolveTenantReplyTo } from "../email/tenant-sender-identity.util";
 import { generateQuoteNumber } from "./quote-numbering.util";
 import {
   computeQuoteTotals,
@@ -650,10 +651,13 @@ export class QuotesService {
         },
       });
     } else {
+      const replyTo = resolveTenantReplyTo(tenant.email);
       emailResult = await this.emailService.send({
         to: recipientEmail,
         subject,
         html: buildSendEmailHtml(updated, tenant.name, publicUrl, dto.message),
+        fromName: buildTenantFromName(tenant.name),
+        ...(replyTo ? { replyTo } : {}),
         attachments: [
           {
             filename: pdf.document.originalFileName,
@@ -1643,10 +1647,10 @@ export class QuotesService {
 
   private async resolveTenant(
     tenantId: string,
-  ): Promise<{ name: string; defaultCurrency: string }> {
+  ): Promise<{ name: string; defaultCurrency: string; email: string | null }> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { name: true, defaultCurrency: true },
+      select: { name: true, defaultCurrency: true, email: true },
     });
     if (!tenant) {
       throw new NotFoundException("Tenant not found");
@@ -1825,6 +1829,7 @@ function buildSendEmailHtml(
       ${escapedMessage}
       <p><a href="${publicUrl}">View and respond to this quote online</a></p>
       <p style="color:#888; font-size: 12px;">This link is valid until ${quote.validUntil.toISOString().slice(0, 10)}.</p>
+      <p style="color:#aaa; font-size: 11px; margin-top: 24px;">Sent via Havelio</p>
     </div>
   `.trim();
 }

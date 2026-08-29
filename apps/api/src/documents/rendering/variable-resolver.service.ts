@@ -47,6 +47,7 @@ export class VariableResolverService {
         taxNumber: true,
         address: true,
         phone: true,
+        email: true,
       },
     });
 
@@ -121,7 +122,7 @@ export class VariableResolverService {
         // document. Templates should use this instead of hand-wrapping
         // {{company.logo}} in their own <img> tag.
         logoHtml: buildLogoHtml("", tenant.name),
-        email: "",
+        email: tenant.email ?? "",
         registrationNumber: tenant.registrationNumber ?? "",
         taxNumber: tenant.taxNumber ?? "",
         address: tenant.address ?? "",
@@ -329,6 +330,7 @@ export class VariableResolverService {
         taxNumber: true,
         address: true,
         phone: true,
+        email: true,
       },
     });
 
@@ -349,7 +351,7 @@ export class VariableResolverService {
         name: tenant.name,
         logo: "",
         logoHtml: buildLogoHtml("", tenant.name),
-        email: "",
+        email: tenant.email ?? "",
         registrationNumber: tenant.registrationNumber ?? "",
         taxNumber: tenant.taxNumber ?? "",
         address: tenant.address ?? "",

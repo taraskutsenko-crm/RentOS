@@ -43,6 +43,7 @@ export default function CompanyProfileSettingsPage() {
       taxNumber: "",
       address: "",
       phone: "",
+      email: "",
     },
   });
 
@@ -54,6 +55,7 @@ export default function CompanyProfileSettingsPage() {
         taxNumber: data.tenant.taxNumber ?? "",
         address: data.tenant.address ?? "",
         phone: data.tenant.phone ?? "",
+        email: data.tenant.email ?? "",
       });
     }
   }, [data, reset]);
@@ -129,6 +131,22 @@ export default function CompanyProfileSettingsPage() {
               <div className="flex flex-col gap-1.5 sm:max-w-xs">
                 <Label htmlFor="phone">{t("tenant.companyProfile.fields.phone")}</Label>
                 <Input id="phone" type="tel" {...register("phone")} />
+              </div>
+
+              <div className="flex flex-col gap-1.5 sm:max-w-xs">
+                <Label htmlFor="email">{t("tenant.companyProfile.fields.email")}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  aria-invalid={!!errors.email}
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-destructive text-sm">{t(errors.email.message ?? "")}</p>
+                )}
+                <p className="text-muted-foreground text-xs">
+                  {t("tenant.companyProfile.fields.emailHelp")}
+                </p>
               </div>
             </fieldset>
 

@@ -13,6 +13,24 @@ export interface EmailMessage {
   html: string;
   text?: string;
   attachments?: EmailAttachment[];
+  /**
+   * Optional per-message From *display name* (e.g. "Closure Pass Rentals
+   * via Havelio" — see tenant-sender-identity.util.ts's buildTenantFromName).
+   * The authenticated From *address* is never overridable per-message; it
+   * always comes from trusted env configuration (SMTP_FROM_EMAIL). Falls
+   * back to the provider's own configured default display name
+   * (SMTP_FROM_NAME) when omitted.
+   */
+  fromName?: string;
+  /**
+   * Optional per-message Reply-To address (e.g. the tenant's company
+   * email — see tenant-sender-identity.util.ts's resolveTenantReplyTo).
+   * Takes precedence over the provider's global SMTP_REPLY_TO fallback when
+   * set and valid. Providers must independently validate/sanitize this
+   * before use — never trust a caller-supplied value blindly (see
+   * SmtpEmailProvider.resolveReplyTo).
+   */
+  replyTo?: string;
 }
 
 export interface EmailSendResult {

@@ -1,3 +1,4 @@
+import { Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { ApiEnv } from "@rentos/shared";
 import nodemailer from "nodemailer";
@@ -69,7 +70,7 @@ describe("SmtpEmailProvider", () => {
     expect(result).toEqual({ success: true, messageId: "<abc123@smtp.example.com>" });
     expect(sendMail).toHaveBeenCalledWith(
       expect.objectContaining({
-        from: '"Havelio" <no-reply@example.com>',
+        from: { name: "Havelio", address: "no-reply@example.com" },
         to: "customer@example.com",
         subject: "Your quote",
         attachments: [
@@ -77,6 +78,136 @@ describe("SmtpEmailProvider", () => {
         ],
       }),
     );
+  });
+
+  // Phase 7 #1/#2: a per-message fromName is used for the display name, but
+  // the authenticated From *address* always stays SMTP_FROM_EMAIL — nothing
+  // in EmailMessage can override it.
+  it("uses the per-message fromName for the display name while the From address stays SMTP_FROM_EMAIL", async () => {
+    sendMail.mockResolvedValue({ messageId: "<abc@x>" });
+    const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+
+    await provider.send({
+      to: "customer@example.com",
+      subject: "Your quote",
+      html: "<p>hi</p>",
+      fromName: "Closure Pass Rentals via Havelio",
+    });
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: { name: "Closure Pass Rentals via Havelio", address: "no-reply@example.com" },
+      }),
+    );
+  });
+
+  // Phase 7 #3: a valid per-message Reply-To is passed straight through to nodemailer.
+  it("passes a valid per-message Reply-To to nodemailer", async () => {
+    sendMail.mockResolvedValue({ messageId: "<abc@x>" });
+    const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+
+    await provider.send({
+      to: "customer@example.com",
+      subject: "s",
+      html: "<p>x</p>",
+      replyTo: "office@closurepassrentals.com",
+    });
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ replyTo: "office@closurepassrentals.com" }),
+    );
+  });
+
+  // Phase 7 #4: no per-message Reply-To and no global SMTP_REPLY_TO — omitted cleanly, no crash.
+  it("omits Reply-To entirely when neither a per-message nor a global Reply-To is set", async () => {
+    sendMail.mockResolvedValue({ messageId: "<abc@x>" });
+    const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+
+    await provider.send({ to: "customer@example.com", subject: "s", html: "<p>x</p>" });
+
+    const call = sendMail.mock.calls[0]![0] as Record<string, unknown>;
+    expect(call).not.toHaveProperty("replyTo");
+  });
+
+  // Phase 7 #5: an invalid/malformed Reply-To can never produce unsafe mail
+  // headers — it is silently dropped, never sent to nodemailer, never a send failure.
+  it("silently omits an invalid Reply-To instead of passing it through", async () => {
+    sendMail.mockResolvedValue({ messageId: "<abc@x>" });
+    const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+
+    await provider.send({
+      to: "customer@example.com",
+      subject: "s",
+      html: "<p>x</p>",
+      replyTo: "not-an-email",
+    });
+
+    const call = sendMail.mock.calls[0]![0] as Record<string, unknown>;
+    expect(call).not.toHaveProperty("replyTo");
+  });
+
+  it("strips CR/LF from a Reply-To attempting header injection instead of forwarding it", async () => {
+    sendMail.mockResolvedValue({ messageId: "<abc@x>" });
+    const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+
+    await provider.send({
+      to: "customer@example.com",
+      subject: "s",
+      html: "<p>x</p>",
+      replyTo: "office@company.com\r\nBcc: attacker@evil.com",
+    });
+
+    // The raw value contains CR/LF so it fails email validation even after
+    // stripping (stripping "office@company.comBcc: attacker@evil.com" is
+    // not a valid email either) — it must be omitted, never forwarded raw.
+    const call = sendMail.mock.calls[0]![0] as Record<string, unknown>;
+    expect(JSON.stringify(call)).not.toMatch(/[\r\n]/);
+  });
+
+  // Phase 4: a valid per-message Reply-To must win over the global SMTP_REPLY_TO fallback.
+  it("prefers a valid per-message Reply-To over the global SMTP_REPLY_TO", async () => {
+    sendMail.mockResolvedValue({ messageId: "<abc@x>" });
+    const provider = new SmtpEmailProvider(
+      configFrom({ ...FULL_CONFIG, SMTP_REPLY_TO: "global-fallback@example.com" }),
+    );
+
+    await provider.send({
+      to: "customer@example.com",
+      subject: "s",
+      html: "<p>x</p>",
+      replyTo: "office@closurepassrentals.com",
+    });
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ replyTo: "office@closurepassrentals.com" }),
+    );
+  });
+
+  it("falls back to the global SMTP_REPLY_TO when no per-message Reply-To is given", async () => {
+    sendMail.mockResolvedValue({ messageId: "<abc@x>" });
+    const provider = new SmtpEmailProvider(
+      configFrom({ ...FULL_CONFIG, SMTP_REPLY_TO: "global-fallback@example.com" }),
+    );
+
+    await provider.send({ to: "customer@example.com", subject: "s", html: "<p>x</p>" });
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ replyTo: "global-fallback@example.com" }),
+    );
+  });
+
+  // Phase 7 #7: SMTP credentials (the password specifically) are never
+  // logged, including on failure paths that log a message.
+  it("never logs SMTP_PASSWORD, even when send() fails", async () => {
+    sendMail.mockRejectedValue(new Error("boom"));
+    const logSpy = vi.spyOn(Logger.prototype, "error").mockImplementation(() => undefined);
+    const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+
+    await provider.send({ to: "a@b.com", subject: "s", html: "<p>x</p>" });
+
+    const loggedText = logSpy.mock.calls.map((call) => String(call[0])).join("\n");
+    expect(loggedText).not.toContain(FULL_CONFIG.SMTP_PASSWORD);
+    logSpy.mockRestore();
   });
 
   // Never surface the raw transport error (which can include the SMTP

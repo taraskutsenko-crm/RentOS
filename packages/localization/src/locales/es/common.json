@@ -166,7 +166,9 @@
         "registrationNumber": "Número de registro",
         "taxNumber": "NIF / número de IVA",
         "address": "Dirección",
-        "phone": "Teléfono"
+        "phone": "Teléfono",
+        "email": "Correo electrónico de la empresa",
+        "emailHelp": "Se usa como dirección de respuesta al enviar documentos por correo a los clientes."
       }
     }
   },

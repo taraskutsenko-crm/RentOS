@@ -735,6 +735,13 @@ model Tenant {
   taxNumber          String?
   address            String?
   phone              String?
+  /// The tenant's customer-facing company email — canonical source for the
+  /// Reply-To address on outbound transactional email (Quote/Document/
+  /// Invoice/Handover/Return/portal-invite sends). Deliberately separate
+  /// from any User.email (a staff login, not a company identity) and from
+  /// SMTP_REPLY_TO (a single global env fallback, never tenant-specific).
+  /// See tenant-sender-identity.util.ts / docs/adr/0013-production-storage-and-email.md.
+  email              String?
   isActive           Boolean   @default(true)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt

@@ -1,9 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { ApiEnv } from "@rentos/shared";
+import { isEmail } from "class-validator";
 import nodemailer, { type Transporter } from "nodemailer";
 
 import type { EmailMessage, EmailProvider, EmailSendResult } from "./email.types";
+import { stripControlChars } from "./tenant-sender-identity.util";
 
 /**
  * Provider-neutral SMTP transport — works with any transactional-SMTP
@@ -18,13 +20,27 @@ import type { EmailMessage, EmailProvider, EmailSendResult } from "./email.types
  * D-093) — it is `true` only when every field this provider actually needs
  * (host, user, password, from address) is present, never merely "an SMTP
  * driver was selected."
+ *
+ * Sender identity: the authenticated From *address* is always
+ * `SMTP_FROM_EMAIL` — never overridable per-message, by design (see
+ * tenant-sender-identity.util.ts). The From *display name* and Reply-To
+ * *can* vary per message (`EmailMessage.fromName`/`replyTo`, typically the
+ * tenant's own identity — see callers), but this provider is deliberately
+ * tenant-agnostic: it has no idea what a "Tenant" is, it only knows how to
+ * safely turn a display name / Reply-To string into mail headers. It
+ * re-sanitizes/re-validates both defensively regardless of what the caller
+ * already did — this is the last line of defense against header injection
+ * before anything reaches nodemailer.
  */
 @Injectable()
 export class SmtpEmailProvider implements EmailProvider {
   private readonly logger = new Logger(SmtpEmailProvider.name);
   private readonly transporter: Transporter | null;
-  private readonly fromAddress: string | null;
-  private readonly replyTo: string | undefined;
+  private readonly fromEmail: string | null;
+  /** Env-configured default display name (SMTP_FROM_NAME) — used only when a message doesn't supply its own `fromName`. */
+  private readonly defaultFromName: string | undefined;
+  /** Global fallback Reply-To (SMTP_REPLY_TO) — used only when a message doesn't supply its own valid per-message `replyTo` (see resolveReplyTo). */
+  private readonly globalReplyTo: string | undefined;
 
   constructor(configService: ConfigService<ApiEnv, true>) {
     const host = configService.get("SMTP_HOST", { infer: true });
@@ -33,8 +49,8 @@ export class SmtpEmailProvider implements EmailProvider {
     const user = configService.get("SMTP_USER", { infer: true });
     const password = configService.get("SMTP_PASSWORD", { infer: true });
     const fromEmail = configService.get("SMTP_FROM_EMAIL", { infer: true });
-    const fromName = configService.get("SMTP_FROM_NAME", { infer: true });
-    this.replyTo = configService.get("SMTP_REPLY_TO", { infer: true });
+    this.defaultFromName = configService.get("SMTP_FROM_NAME", { infer: true });
+    this.globalReplyTo = configService.get("SMTP_REPLY_TO", { infer: true });
 
     if (host && port && user && password && fromEmail) {
       this.transporter = nodemailer.createTransport({
@@ -43,14 +59,14 @@ export class SmtpEmailProvider implements EmailProvider {
         secure,
         auth: { user, pass: password },
       });
-      this.fromAddress = fromName ? `"${fromName}" <${fromEmail}>` : fromEmail;
+      this.fromEmail = fromEmail;
     } else {
       // Deliberately does not throw — EMAIL_DRIVER=smtp with incomplete
       // config degrades to "not configured" (isConfigured()===false), the
       // same honest-failure shape as LoggingEmailProvider, rather than
       // crashing the whole process at boot over an email misconfiguration.
       this.transporter = null;
-      this.fromAddress = null;
+      this.fromEmail = null;
       this.logger.warn(
         "EMAIL_DRIVER=smtp but SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASSWORD/SMTP_FROM_EMAIL are not all set — email sending will report NOT_CONFIGURED until they are.",
       );
@@ -75,17 +91,24 @@ export class SmtpEmailProvider implements EmailProvider {
   }
 
   async send(message: EmailMessage): Promise<EmailSendResult> {
-    if (!this.transporter || !this.fromAddress) {
+    if (!this.transporter || !this.fromEmail) {
       return { success: false, error: "SMTP provider is not configured" };
     }
+    const replyTo = this.resolveReplyTo(message.replyTo);
+    const fromName = this.resolveFromName(message.fromName);
     try {
       const info = await this.transporter.sendMail({
-        from: this.fromAddress,
+        // Object form (not a hand-built `"name" <addr>` string) so
+        // nodemailer's own address encoder handles RFC 2047/5322-correct
+        // quoting and encoding — including Unicode display names — rather
+        // than this code trying to reimplement that safely. Bare address
+        // string when there is no display name at all (never an empty name).
+        from: fromName ? { name: fromName, address: this.fromEmail } : this.fromEmail,
         to: message.to,
         subject: message.subject,
         html: message.html,
         text: message.text,
-        ...(this.replyTo ? { replyTo: this.replyTo } : {}),
+        ...(replyTo ? { replyTo } : {}),
         attachments: message.attachments?.map((attachment) => ({
           filename: attachment.filename,
           content: attachment.content,
@@ -103,5 +126,30 @@ export class SmtpEmailProvider implements EmailProvider {
         error: "The email provider rejected or failed to send this message",
       };
     }
+  }
+
+  /** Per-message display name wins; falls back to SMTP_FROM_NAME, then to no display name at all (bare address). Always re-sanitized here regardless of what the caller already did. */
+  private resolveFromName(perMessageFromName: string | undefined): string | undefined {
+    const candidate = perMessageFromName ?? this.defaultFromName;
+    if (!candidate) return undefined;
+    const cleaned = stripControlChars(candidate).trim();
+    return cleaned || undefined;
+  }
+
+  /**
+   * Per-message Reply-To wins over the global SMTP_REPLY_TO fallback (a
+   * valid tenant-specific Reply-To must never be silently overridden by the
+   * system-wide default — see docs/adr/0013). Re-validates as a
+   * syntactically valid email and strips control characters regardless of
+   * what the caller already did; an invalid/malformed value is silently
+   * omitted (Reply-To dropped, never a send failure, never an injected
+   * header).
+   */
+  private resolveReplyTo(perMessageReplyTo: string | undefined): string | undefined {
+    const candidate = perMessageReplyTo ?? this.globalReplyTo;
+    if (!candidate) return undefined;
+    const cleaned = stripControlChars(candidate).trim();
+    if (!cleaned || !isEmail(cleaned)) return undefined;
+    return cleaned;
   }
 }

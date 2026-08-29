@@ -166,7 +166,9 @@
         "registrationNumber": "Registrační číslo",
         "taxNumber": "DIČ / IČ DPH",
         "address": "Adresa",
-        "phone": "Telefon"
+        "phone": "Telefon",
+        "email": "Firemní e-mail",
+        "emailHelp": "Používá se jako adresa pro odpovědi při zasílání dokumentů zákazníkům e-mailem."
       }
     }
   },

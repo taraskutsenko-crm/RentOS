@@ -5,6 +5,7 @@ import type { ApiEnv } from "@rentos/shared";
 import { AuditService } from "../../audit/audit.service";
 import { CustomersService } from "../../customers/customers.service";
 import { EmailService } from "../../email/email.service";
+import { buildTenantFromName, resolveTenantReplyTo } from "../../email/tenant-sender-identity.util";
 import { PrismaService } from "../../prisma/prisma.service";
 import { generateCustomerInvitationToken } from "../common/customer-invitation-token.util";
 import type { InviteCustomerDto } from "../dto/invite-customer.dto";
@@ -83,6 +84,7 @@ export class CustomerPortalInvitationsService {
     const webOrigin = this.configService.get("WEB_ORIGIN", { infer: true });
     const inviteLink = `${webOrigin}/portal/invite/${token}`;
 
+    const replyTo = resolveTenantReplyTo(tenant.email);
     const emailResult = await this.emailService.send({
       to: email,
       subject: `You're invited to the ${tenant.name} customer portal`,
@@ -91,6 +93,8 @@ export class CustomerPortalInvitationsService {
 <p><a href="${inviteLink}">Activate your account</a></p>
 <p>This link expires in ${INVITATION_TTL_DAYS} days.</p>`,
       text: `Hello ${customer.firstName},\n\n${tenant.name} has invited you to their customer portal. Activate your account:\n${inviteLink}\n\nThis link expires in ${INVITATION_TTL_DAYS} days.`,
+      fromName: buildTenantFromName(tenant.name),
+      ...(replyTo ? { replyTo } : {}),
     });
 
     await this.auditService.log({

@@ -166,7 +166,9 @@
         "registrationNumber": "Handelsregisternummer",
         "taxNumber": "Steuer-/USt-IdNr.",
         "address": "Adresse",
-        "phone": "Telefon"
+        "phone": "Telefon",
+        "email": "Firmen-E-Mail",
+        "emailHelp": "Wird als Antwortadresse verwendet, wenn Dokumente per E-Mail an Kunden gesendet werden."
       }
     }
   },

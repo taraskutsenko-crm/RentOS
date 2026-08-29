@@ -3,6 +3,7 @@ import type { DocumentEmailDelivery } from "@prisma/client";
 
 import { AuditService } from "../../audit/audit.service";
 import { EmailService } from "../../email/email.service";
+import { buildTenantFromName, resolveTenantReplyTo } from "../../email/tenant-sender-identity.util";
 import { PrismaService } from "../../prisma/prisma.service";
 import { DocumentsService } from "../documents.service";
 import type { SendDocumentEmailDto } from "../dto/send-document-email.dto";
@@ -126,11 +127,18 @@ export class DocumentEmailService {
     }
 
     const { buffer } = await this.pdfService.getOrGenerate(tenantId, document, version);
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { name: true, email: true },
+    });
 
+    const replyTo = resolveTenantReplyTo(tenant?.email);
     const result = await this.emailService.send({
       to: delivery.recipientEmail,
       subject: delivery.subject,
-      html: buildEmailHtml(document.documentNumber, delivery.message),
+      html: buildEmailHtml(document.documentNumber, delivery.message, tenant?.name ?? null),
+      fromName: buildTenantFromName(tenant?.name),
+      ...(replyTo ? { replyTo } : {}),
       attachments: [
         {
           filename: `${document.documentNumber}.pdf`,
@@ -199,12 +207,19 @@ export class DocumentEmailService {
   }
 }
 
-function buildEmailHtml(documentNumber: string, message: string | null): string {
+function buildEmailHtml(
+  documentNumber: string,
+  message: string | null,
+  tenantName: string | null,
+): string {
   const escapedMessage = message ? `<p>${escapeHtml(message)}</p>` : "";
+  const heading = tenantName ? `<h2>${escapeHtml(tenantName)}</h2>` : "";
   return `
     <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto;">
+      ${heading}
       <p>Please find attached document <strong>${escapeHtml(documentNumber)}</strong>.</p>
       ${escapedMessage}
+      <p style="color:#aaa; font-size: 11px; margin-top: 24px;">Sent via Havelio</p>
     </div>
   `.trim();
 }

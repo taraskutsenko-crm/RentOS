@@ -18,6 +18,7 @@ const fullPayload = {
   taxNumber: "DE123456789",
   address: "Musterstrasse 1, 10115 Berlin",
   phone: "+49 30 1234567",
+  email: "office@acme-rentals.example",
 };
 
 describe("Tenants E2E — Company Profile (PATCH /tenants/:tenantId)", () => {
@@ -84,6 +85,7 @@ describe("Tenants E2E — Company Profile (PATCH /tenants/:tenantId)", () => {
       taxNumber: null,
       address: null,
       phone: null,
+      email: null,
     });
   });
 
@@ -106,7 +108,14 @@ describe("Tenants E2E — Company Profile (PATCH /tenants/:tenantId)", () => {
     await request(app.getHttpServer())
       .patch(`/tenants/${tenantId}`)
       .set("Cookie", accessCookie)
-      .send({ ...fullPayload, registrationNumber: "", taxNumber: "", address: "", phone: "" })
+      .send({
+        ...fullPayload,
+        registrationNumber: "",
+        taxNumber: "",
+        address: "",
+        phone: "",
+        email: "",
+      })
       .expect(200);
 
     const response = await request(app.getHttpServer())
@@ -119,7 +128,16 @@ describe("Tenants E2E — Company Profile (PATCH /tenants/:tenantId)", () => {
       taxNumber: null,
       address: null,
       phone: null,
+      email: null,
     });
+  });
+
+  it("rejects a malformed company email", async () => {
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}`)
+      .set("Cookie", accessCookie)
+      .send({ ...fullPayload, email: "not-an-email" })
+      .expect(400);
   });
 
   it("rejects an empty name", async () => {

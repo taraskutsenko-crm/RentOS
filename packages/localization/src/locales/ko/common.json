@@ -166,7 +166,9 @@
         "registrationNumber": "등록 번호",
         "taxNumber": "세금/부가세 번호",
         "address": "주소",
-        "phone": "전화번호"
+        "phone": "전화번호",
+        "email": "회사 이메일",
+        "emailHelp": "고객에게 문서를 이메일로 보낼 때 회신 주소로 사용됩니다."
       }
     }
   },

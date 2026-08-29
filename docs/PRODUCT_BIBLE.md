@@ -1091,6 +1091,47 @@ one — a commercial offer a customer receives is always backed by a
 real Quote record a staff member can reopen, price-check, and trace
 back to its source Rental.
 
+**Transactional email sender identity.** When a tenant emails a
+customer-facing document — Quote, Contract, Handover Protocol, Return
+Protocol, Invoice, deposit receipt, or a customer portal invitation —
+the customer must primarily recognize the _tenant's own company_, not
+Havelio, as the sender. Havelio's Basic Transactional Email
+Architecture achieves this without tenants managing any email
+infrastructure themselves:
+
+- **Authenticated sender (fixed, trusted):** every send is
+  authenticated as `SMTP_FROM_EMAIL` (e.g.
+  `documents@mail.havelio.net`) — this address is env-level
+  configuration only, never tenant-controlled, and never spoofs a
+  tenant's own domain.
+- **Visible sender identity (dynamic, per tenant):** the From display
+  name is `<Tenant Company Name> via Havelio` (e.g. "Closure Pass
+  Rentals via Havelio"), resolved from the tenant's own persisted
+  `Tenant.name` at send time — never from request input. A tenant
+  with no usable name falls back to plain "Havelio", never an ugly
+  `undefined via Havelio`.
+- **Reply-To (dynamic, per tenant):** replying addresses the tenant's
+  own company, not Havelio — Reply-To is the tenant's persisted
+  `Tenant.email` (the "Company email" field in Company Profile
+  settings) when it is a valid address, and is simply omitted
+  (sending still proceeds) when the tenant has none on file or it is
+  malformed. Reply-To is never another tenant's address, never a
+  customer's own email, and never taken from request input.
+- **What tenants do NOT need:** SMTP credentials, DNS records, or any
+  Resend/SES/SendGrid-specific configuration — this is the "basic"
+  sending mode available to every tenant today, distinct from a
+  **future, not-yet-built** Custom Sending Domain capability (an
+  eligible tenant sending from its own verified domain, with its own
+  DNS/DKIM/SPF) that would sit behind the same `EmailProvider` seam
+  (Section 16) without changing any caller.
+- See `tenant-sender-identity.util.ts`/`SmtpEmailProvider` and
+  `docs/adr/0013-production-storage-and-email.md` for the
+  implementation; header-injection safety (control-character
+  stripping, RFC-valid encoding via nodemailer's own address object
+  form) is a security property, not just a formatting detail — a
+  tenant's own company name is untrusted input the same as any other
+  user-supplied string.
+
 **Photo and file evidence.** Staff can attach photos and supporting
 files to a Handover or Return Protocol — condition photos at pickup,
 new damage at return, a scanned supporting document — while the

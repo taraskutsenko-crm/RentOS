@@ -166,7 +166,9 @@
         "registrationNumber": "Numero di registrazione",
         "taxNumber": "Codice fiscale / Partita IVA",
         "address": "Indirizzo",
-        "phone": "Telefono"
+        "phone": "Telefono",
+        "email": "E-mail aziendale",
+        "emailHelp": "Utilizzata come indirizzo di risposta quando i documenti vengono inviati via e-mail ai clienti."
       }
     }
   },

@@ -11,6 +11,7 @@ import {
   Input,
   Label,
 } from "@rentos/ui";
+import { tenantLocalToUtc, utcToTenantLocal } from "@rentos/shared";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -112,6 +113,7 @@ export default function PortalRentalDetailPage() {
         <ExtensionRequestForm
           rentalId={rental.id}
           currentEnd={rental.plannedEnd}
+          tenantTimezone={rental.tenantTimezone}
           onDone={() => setShowExtensionForm(false)}
         />
       )}
@@ -129,19 +131,27 @@ export default function PortalRentalDetailPage() {
             <CardContent className="grid grid-cols-2 gap-3 text-sm">
               <InfoRow
                 label={t("rental.fields.plannedStart")}
-                value={formatDateTime(rental.plannedStart, i18n.language)}
+                value={formatDateTime(rental.plannedStart, i18n.language, rental.tenantTimezone)}
               />
               <InfoRow
                 label={t("rental.fields.plannedEnd")}
-                value={formatDateTime(rental.plannedEnd, i18n.language)}
+                value={formatDateTime(rental.plannedEnd, i18n.language, rental.tenantTimezone)}
               />
               <InfoRow
                 label={t("rental.fields.actualStart")}
-                value={rental.actualStart ? formatDateTime(rental.actualStart, i18n.language) : "—"}
+                value={
+                  rental.actualStart
+                    ? formatDateTime(rental.actualStart, i18n.language, rental.tenantTimezone)
+                    : "—"
+                }
               />
               <InfoRow
                 label={t("rental.fields.actualEnd")}
-                value={rental.actualEnd ? formatDateTime(rental.actualEnd, i18n.language) : "—"}
+                value={
+                  rental.actualEnd
+                    ? formatDateTime(rental.actualEnd, i18n.language, rental.tenantTimezone)
+                    : "—"
+                }
               />
             </CardContent>
           </Card>
@@ -239,7 +249,7 @@ export default function PortalRentalDetailPage() {
                   <div key={request.id} className="border-l-2 pl-3">
                     <p className="font-medium">
                       {t(`portal.extensionRequests.statuses.${request.status}`)} —{" "}
-                      {formatDate(request.requestedEnd, i18n.language)}
+                      {formatDate(request.requestedEnd, i18n.language, rental.tenantTimezone)}
                     </p>
                     {request.responseMessage && (
                       <p className="text-muted-foreground text-xs">{request.responseMessage}</p>
@@ -279,7 +289,7 @@ export default function PortalRentalDetailPage() {
                 <li key={event.id} className="border-l-2 pl-3">
                   <p className="font-medium">{t(`rental.timeline.${event.type}`)}</p>
                   <p className="text-muted-foreground text-xs">
-                    {formatDateTime(event.occurredAt, i18n.language)}
+                    {formatDateTime(event.occurredAt, i18n.language, rental.tenantTimezone)}
                   </p>
                 </li>
               ))}
@@ -306,10 +316,12 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function ExtensionRequestForm({
   rentalId,
   currentEnd,
+  tenantTimezone,
   onDone,
 }: {
   rentalId: string;
   currentEnd: string;
+  tenantTimezone: string;
   onDone: () => void;
 }) {
   const { t, i18n } = useTranslation();
@@ -321,7 +333,21 @@ function ExtensionRequestForm({
   async function handleSubmit(): Promise<void> {
     setError(null);
     try {
-      await createRequest.mutateAsync({ rentalId, requestedEnd, message: message || undefined });
+      // The picker is date-only (no time-of-day control in this compact
+      // portal form) — the requested extension keeps the rental's existing
+      // time-of-day, just on the newly picked date, interpreted in the
+      // *company's* timezone (never the customer's own browser timezone —
+      // see docs/DECISIONS.md D-115 §11). `utcToTenantLocal` reads back
+      // `currentEnd`'s wall-clock time-of-day in that same timezone so the
+      // combined value stays consistent with it.
+      const currentEndLocal = utcToTenantLocal(currentEnd, tenantTimezone);
+      const timeOfDay = currentEndLocal.slice(11, 16);
+      const requestedEndInstant = tenantLocalToUtc(`${requestedEnd}T${timeOfDay}`, tenantTimezone);
+      await createRequest.mutateAsync({
+        rentalId,
+        requestedEnd: requestedEndInstant.toISOString(),
+        message: message || undefined,
+      });
       onDone();
     } catch (err) {
       setError(apiErrorMessage(err, t("common.error")));
@@ -344,7 +370,7 @@ function ExtensionRequestForm({
           <Input
             id="currentEnd"
             type="text"
-            value={formatDate(currentEnd, i18n.language)}
+            value={formatDate(currentEnd, i18n.language, tenantTimezone)}
             disabled
           />
         </div>

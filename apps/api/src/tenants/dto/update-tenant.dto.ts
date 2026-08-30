@@ -1,5 +1,7 @@
 import { IsEmail, IsNotEmpty, IsString, MaxLength, ValidateIf } from "class-validator";
 
+import { IsIanaTimezone } from "../../common/is-iana-timezone.decorator";
+
 /**
  * Backs `PATCH /tenants/:tenantId` (Company Profile settings). All fields
  * are required on every submit — same "always send the full form" shape as
@@ -13,6 +15,18 @@ export class UpdateTenantDto {
   @IsNotEmpty()
   @MaxLength(200)
   name!: string;
+
+  /**
+   * The tenant's canonical IANA timezone — the single source of truth for
+   * interpreting every tenant-local rental/quote/block wall-clock input and
+   * for displaying stored instants back (see docs/DECISIONS.md D-115).
+   * Previously set only once at registration with no way to correct it;
+   * required (not optional) on every submit, matching every other identity
+   * field on this DTO — a tenant always has exactly one configured
+   * timezone, never "cleared."
+   */
+  @IsIanaTimezone()
+  timezone!: string;
 
   @IsString()
   @MaxLength(100)

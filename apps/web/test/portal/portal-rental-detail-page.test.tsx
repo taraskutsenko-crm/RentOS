@@ -46,6 +46,7 @@ function baseRental(status: string) {
     status,
     plannedStart: "2026-08-01T00:00:00Z",
     plannedEnd: "2026-08-04T00:00:00Z",
+    tenantTimezone: "America/New_York",
     actualStart: null,
     actualEnd: null,
     currency: "USD",
@@ -113,9 +114,16 @@ describe("PortalRentalDetailPage", () => {
     await user.type(dateInput, "2026-08-20");
     await user.click(screen.getByRole("button", { name: /^submit request$/i }));
 
+    // The picker is date-only — the submitted instant keeps the rental's
+    // existing plannedEnd time-of-day (20:00 America/New_York, i.e.
+    // plannedEnd's 00:00 UTC) on the newly picked date, converted via the
+    // tenant's real timezone (see ExtensionRequestForm's handleSubmit).
     await waitFor(() =>
       expect(mutateAsync).toHaveBeenCalledWith(
-        expect.objectContaining({ rentalId: "rental-1", requestedEnd: "2026-08-20" }),
+        expect.objectContaining({
+          rentalId: "rental-1",
+          requestedEnd: "2026-08-21T00:00:00.000Z",
+        }),
       ),
     );
   });

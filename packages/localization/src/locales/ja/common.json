@@ -151,7 +151,8 @@
     "role": "役割",
     "errors": {
       "noAccess": "この会社のワークスペースへのアクセス権がなくなりました。別のワークスペースを選択してください。",
-      "nameRequired": "会社名は必須です"
+      "nameRequired": "会社名は必須です",
+      "timezoneRequired": "タイムゾーンを選択してください"
     },
     "companyProfile": {
       "navLabel": "会社プロフィール",
@@ -164,6 +165,8 @@
       "saveFailed": "会社情報の保存に失敗しました",
       "fields": {
         "name": "会社名",
+        "timezone": "タイムゾーン",
+        "timezoneHelp": "レンタル時間、空き状況、書類に使用されます。",
         "registrationNumber": "登録番号",
         "taxNumber": "税番号／VAT番号",
         "address": "住所",
@@ -595,7 +598,9 @@
       "assetRequired": "資産を選択してください",
       "selectAtLeastOneAsset": "少なくとも1つの資産を選択してください",
       "customMonthLengthRequired": "1〜365の範囲で日数を入力してください",
-      "priceFieldRequired": "{{field}}は必須です"
+      "priceFieldRequired": "{{field}}は必須です",
+      "timezoneNotLoaded": "会社のタイムゾーンを読み込み中です — しばらくしてからもう一度お試しください。",
+      "dstGap": "夏時間の切り替えにより、その時刻は存在しません。別の時刻を選択してください。"
     },
     "wizard": {
       "steps": {

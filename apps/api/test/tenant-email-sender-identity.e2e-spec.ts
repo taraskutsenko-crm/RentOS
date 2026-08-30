@@ -87,6 +87,7 @@ describe("Tenant email sender identity E2E", () => {
       .set("Cookie", cookie)
       .send({
         name: (await prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } })).name,
+        timezone: (await prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } })).timezone,
         registrationNumber: "",
         taxNumber: "",
         address: "",

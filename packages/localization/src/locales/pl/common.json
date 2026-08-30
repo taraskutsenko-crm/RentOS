@@ -151,7 +151,8 @@
     "role": "Rola",
     "errors": {
       "noAccess": "Nie masz już dostępu do tego obszaru roboczego firmy. Wybierz inny.",
-      "nameRequired": "Nazwa firmy jest wymagana"
+      "nameRequired": "Nazwa firmy jest wymagana",
+      "timezoneRequired": "Wybierz strefę czasową"
     },
     "companyProfile": {
       "navLabel": "Profil firmy",
@@ -164,6 +165,8 @@
       "saveFailed": "Nie udało się zapisać danych firmy",
       "fields": {
         "name": "Nazwa firmy",
+        "timezone": "Strefa czasowa",
+        "timezoneHelp": "Używana do godzin wynajmu, dostępności i dokumentów.",
         "registrationNumber": "Numer rejestracyjny",
         "taxNumber": "NIP / numer VAT",
         "address": "Adres",
@@ -595,7 +598,9 @@
       "assetRequired": "Wybierz aktywo",
       "selectAtLeastOneAsset": "Wybierz co najmniej jedno aktywo",
       "customMonthLengthRequired": "Wprowadź liczbę dni od 1 do 365",
-      "priceFieldRequired": "Pole {{field}} jest wymagane"
+      "priceFieldRequired": "Pole {{field}} jest wymagane",
+      "timezoneNotLoaded": "Strefa czasowa firmy wciąż się ładuje — poczekaj chwilę i spróbuj ponownie.",
+      "dstGap": "Ta godzina nie istnieje z powodu zmiany czasu letniego/zimowego. Wybierz inną godzinę."
     },
     "wizard": {
       "steps": {

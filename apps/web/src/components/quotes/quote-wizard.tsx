@@ -11,6 +11,7 @@ import {
   Input,
   Label,
 } from "@rentos/ui";
+import { tenantLocalToUtc } from "@rentos/shared";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -43,6 +44,8 @@ const NEW_SERVICE_TYPES: QuoteItemType[] = [
 
 export interface QuoteWizardProps {
   tenantId: string | null;
+  /** See RentalWizardProps.tenantTimezone's doc comment — identical role here. */
+  tenantTimezone?: string | undefined;
   defaultCurrency?: string | undefined;
   initialValues?: Partial<QuoteFormValues>;
   initialItems?: QuoteItemFormValues[];
@@ -109,6 +112,7 @@ function emptyServiceItemForm(partialMonthPolicy: PartialMonthPolicy): QuoteItem
 
 export function QuoteWizard({
   tenantId,
+  tenantTimezone,
   defaultCurrency,
   initialValues,
   initialItems,
@@ -123,6 +127,17 @@ export function QuoteWizard({
   const [assetSearch, setAssetSearch] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
   const [pricingValidationAttempted, setPricingValidationAttempted] = useState(false);
+  const [dateConversionError, setDateConversionError] = useState<string | null>(null);
+
+  /** See RentalWizard's identical helper — same tenant-local → UTC instant conversion. */
+  function toInstant(localDateTime: string): string | null {
+    if (!localDateTime || !tenantTimezone) return null;
+    try {
+      return tenantLocalToUtc(localDateTime, tenantTimezone).toISOString();
+    } catch {
+      return null;
+    }
+  }
 
   const {
     register,
@@ -183,13 +198,15 @@ export function QuoteWizard({
   // already-selected items) so the picker shows each asset's reason
   // directly, never hiding a reserved/blocked one.
   const candidateAssetIds = assetsData?.items.map((asset) => asset.id) ?? [];
+  const plannedStartInstant = toInstant(values.plannedStart);
+  const plannedEndInstant = toInstant(values.plannedEnd);
   const { data: candidateAvailability } = useAvailability(
     tenantId,
-    values.plannedStart && values.plannedEnd && candidateAssetIds.length > 0
+    plannedStartInstant && plannedEndInstant && candidateAssetIds.length > 0
       ? {
           assetIds: candidateAssetIds,
-          plannedStart: values.plannedStart,
-          plannedEnd: values.plannedEnd,
+          plannedStart: plannedStartInstant,
+          plannedEnd: plannedEndInstant,
         }
       : null,
   );
@@ -285,6 +302,24 @@ export function QuoteWizard({
       return;
     }
 
+    setDateConversionError(null);
+    if (!tenantTimezone) {
+      setDateConversionError(t("rental.errors.timezoneNotLoaded"));
+      return;
+    }
+    let plannedStart: string;
+    let plannedEnd: string;
+    let validUntil: string;
+    try {
+      plannedStart = tenantLocalToUtc(values.plannedStart, tenantTimezone).toISOString();
+      plannedEnd = tenantLocalToUtc(values.plannedEnd, tenantTimezone).toISOString();
+      validUntil = tenantLocalToUtc(values.validUntil, tenantTimezone).toISOString();
+    } catch {
+      setDateConversionError(t("rental.errors.dstGap"));
+      setStepIndex(STEPS.indexOf("dates"));
+      return;
+    }
+
     const itemInputs: QuoteItemInput[] = items.map((item, index) => ({
       itemType: item.itemType,
       ...(item.itemType === "ASSET" ? { assetId: item.assetId } : {}),
@@ -309,9 +344,9 @@ export function QuoteWizard({
 
     await onSubmit({
       customerId: values.customerId,
-      validUntil: values.validUntil,
-      plannedStart: values.plannedStart,
-      plannedEnd: values.plannedEnd,
+      validUntil,
+      plannedStart,
+      plannedEnd,
       currency: values.currency,
       ...(values.discountType ? { discountType: values.discountType } : {}),
       discountValue: toMinor(values.discountValueDisplay),
@@ -335,9 +370,9 @@ export function QuoteWizard({
         ))}
       </ol>
 
-      {errorMessage && (
+      {(errorMessage || dateConversionError) && (
         <Alert variant="destructive">
-          <AlertDescription>{errorMessage}</AlertDescription>
+          <AlertDescription>{dateConversionError || errorMessage}</AlertDescription>
         </Alert>
       )}
 
@@ -448,7 +483,13 @@ export function QuoteWizard({
                   >
                     <span className="flex flex-col gap-1">
                       <span>{getAssetDisplayLabel(asset)}</span>
-                      {badge && <AvailabilityBadge badge={badge} locale={i18n.language} />}
+                      {badge && (
+                        <AvailabilityBadge
+                          badge={badge}
+                          locale={i18n.language}
+                          timezone={tenantTimezone}
+                        />
+                      )}
                     </span>
                     <input
                       type="checkbox"

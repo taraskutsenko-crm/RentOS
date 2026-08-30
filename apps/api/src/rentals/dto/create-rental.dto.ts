@@ -2,7 +2,6 @@ import { Type } from "class-transformer";
 import {
   ArrayMaxSize,
   IsArray,
-  IsDateString,
   IsInt,
   IsOptional,
   IsString,
@@ -14,16 +13,18 @@ import {
 
 import { EmptyToNull } from "../../common/empty-to-null.transform";
 import { IsSupportedCurrency } from "../../common/is-supported-currency.decorator";
+import { IsUnambiguousInstant } from "../../common/is-unambiguous-instant.decorator";
 import { RentalItemDto } from "./rental-item.dto";
 
 export class CreateRentalDto {
   @IsUUID()
   customerId!: string;
 
-  @IsDateString()
+  /** A real instant — the frontend converts the tenant-local wall-clock reading via `tenantLocalToUtc` before sending (see docs/DECISIONS.md D-115). */
+  @IsUnambiguousInstant()
   plannedStart!: string;
 
-  @IsDateString()
+  @IsUnambiguousInstant()
   plannedEnd!: string;
 
   /** Defaults to the tenant's default currency when omitted. */

@@ -197,6 +197,7 @@ export type RentalBillingSettingsFormValues = z.infer<typeof rentalBillingSettin
 
 export const companyProfileSchema = z.object({
   name: z.string().min(1, "tenant.errors.nameRequired").max(200),
+  timezone: z.string().min(1, "tenant.errors.timezoneRequired"),
   registrationNumber: z.string().max(100),
   taxNumber: z.string().max(100),
   address: z.string().max(500),

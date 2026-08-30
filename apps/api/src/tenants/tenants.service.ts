@@ -65,6 +65,7 @@ export class TenantsService {
       where: { id: tenantId },
       data: {
         name: dto.name,
+        timezone: dto.timezone,
         registrationNumber: dto.registrationNumber || null,
         taxNumber: dto.taxNumber || null,
         address: dto.address || null,
@@ -82,6 +83,7 @@ export class TenantsService {
       metadata: {
         from: {
           name: previous.name,
+          timezone: previous.timezone,
           registrationNumber: previous.registrationNumber,
           taxNumber: previous.taxNumber,
           address: previous.address,
@@ -90,6 +92,7 @@ export class TenantsService {
         },
         to: {
           name: tenant.name,
+          timezone: tenant.timezone,
           registrationNumber: tenant.registrationNumber,
           taxNumber: tenant.taxNumber,
           address: tenant.address,

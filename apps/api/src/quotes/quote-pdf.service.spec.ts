@@ -328,36 +328,34 @@ describe("QuotePdfService.generateAndStore", () => {
     expect(text).toMatch(/Generated:/);
   });
 
-  it("prints issueDate/validUntil/plannedStart/plannedEnd as the literal entered digits, not shifted by the tenant's timezone (D-066)", async () => {
-    // issueDate/validUntil/plannedStart/plannedEnd are Prisma DateTime
-    // columns mapped to Postgres "timestamp without time zone" — a
-    // floating wall-clock value with no real-world instant attached (the
-    // digits typed into the picker pass straight through unchanged, since
-    // the API server runs with TZ=UTC). A tenant on a non-UTC IANA zone
-    // (here America/New_York, EDT = UTC-4) previously caused these four
-    // fields to be double-shifted: `new Date("2026-08-10T00:00:00Z")`
-    // formatted with `timeZone: "America/New_York"` renders as "08/09"
-    // (the previous day) instead of the literal "08/10" that was actually
-    // stored and intended.
+  it("prints issueDate/validUntil/plannedStart/plannedEnd converted into the tenant's real timezone (D-115, supersedes D-066)", async () => {
+    // issueDate/validUntil/plannedStart/plannedEnd are real UTC instants
+    // (see docs/DECISIONS.md D-115 — this supersedes D-066's "floating
+    // naive" model, which read these fields back as literal UTC digits
+    // regardless of the tenant's real timezone). A tenant on a non-UTC IANA
+    // zone (here America/New_York, EDT = UTC-4) must now see each instant
+    // correctly converted into its own local wall-clock reading — a real
+    // instant a few hours after UTC midnight can land on the *previous*
+    // calendar day once converted, and that's the correct behavior.
     const { service } = buildService({ timezone: "America/New_York" });
     const quote = buildQuote({
-      issueDate: new Date("2026-08-01T00:00:00Z"),
-      validUntil: new Date("2026-09-01T00:00:00Z"),
-      plannedStart: new Date("2026-08-10T00:00:00Z"),
-      plannedEnd: new Date("2026-08-17T00:00:00Z"),
+      issueDate: new Date("2026-08-01T02:00:00Z"), // 07/31 22:00 EDT
+      validUntil: new Date("2026-09-01T02:00:00Z"), // 08/31 22:00 EDT
+      plannedStart: new Date("2026-08-10T02:00:00Z"), // 08/09 22:00 EDT
+      plannedEnd: new Date("2026-08-17T02:00:00Z"), // 08/16 22:00 EDT
     });
 
     const result = await service.generateAndStore("tenant-1", quote, "user-1");
     const text = await extractText(result.buffer);
 
-    expect(text).toContain("08/01/2026");
-    expect(text).toContain("09/01/2026");
-    expect(text).toContain("08/10/2026");
-    expect(text).toContain("08/17/2026");
-    expect(text).not.toContain("07/31/2026");
-    expect(text).not.toContain("08/31/2026");
-    expect(text).not.toContain("08/09/2026");
-    expect(text).not.toContain("08/16/2026");
+    expect(text).toContain("07/31/2026");
+    expect(text).toContain("08/31/2026");
+    expect(text).toContain("08/09/2026");
+    expect(text).toContain("08/16/2026");
+    expect(text).not.toContain("08/01/2026");
+    expect(text).not.toContain("09/01/2026");
+    expect(text).not.toContain("08/10/2026");
+    expect(text).not.toContain("08/17/2026");
   });
 });
 

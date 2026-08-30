@@ -151,7 +151,8 @@
     "role": "Rolle",
     "errors": {
       "noAccess": "Sie haben keinen Zugriff mehr auf diesen Firmenbereich. Bitte wählen Sie einen anderen aus.",
-      "nameRequired": "Firmenname ist erforderlich"
+      "nameRequired": "Firmenname ist erforderlich",
+      "timezoneRequired": "Zeitzone auswählen"
     },
     "companyProfile": {
       "navLabel": "Unternehmensprofil",
@@ -164,6 +165,8 @@
       "saveFailed": "Unternehmensdaten konnten nicht gespeichert werden",
       "fields": {
         "name": "Firmenname",
+        "timezone": "Zeitzone",
+        "timezoneHelp": "Wird für Mietzeiten, Verfügbarkeit und Dokumente verwendet.",
         "registrationNumber": "Handelsregisternummer",
         "taxNumber": "Steuer-/USt-IdNr.",
         "address": "Adresse",
@@ -595,7 +598,9 @@
       "assetRequired": "Wählen Sie eine Anlage",
       "selectAtLeastOneAsset": "Wählen Sie mindestens eine Anlage",
       "customMonthLengthRequired": "Geben Sie eine Anzahl Tage zwischen 1 und 365 ein",
-      "priceFieldRequired": "{{field}} ist erforderlich"
+      "priceFieldRequired": "{{field}} ist erforderlich",
+      "timezoneNotLoaded": "Die Zeitzone des Unternehmens wird noch geladen — bitte warten Sie einen Moment und versuchen Sie es erneut.",
+      "dstGap": "Diese Uhrzeit existiert aufgrund einer Zeitumstellung nicht. Bitte wählen Sie eine andere Uhrzeit."
     },
     "wizard": {
       "steps": {

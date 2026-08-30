@@ -366,6 +366,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .send({
         name: validRegisterPayload.companyName,
+        timezone: "America/New_York",
         registrationNumber: "HRB 12345",
         taxNumber: "DE123456789",
         address: "Musterstrasse 1, Berlin",
@@ -1138,6 +1139,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .send({
         name: "Acme Rentals",
+        timezone: "America/New_York",
         registrationNumber: "HRB 12345",
         taxNumber: "DE123456789",
         address: "Musterstrasse 1, Berlin",
@@ -1194,17 +1196,17 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     expect(preview.body.html).toContain("Generator A");
   });
 
-  it("resolves rental.start/end/startTime/endTime/startDateTime/endDateTime to the literal entered digits, not shifted by the tenant's timezone (D-066)", async () => {
-    // Rental.plannedStart/plannedEnd are Prisma DateTime columns mapped to
-    // "timestamp without time zone" — a floating wall-clock value with no
-    // real-world instant attached. The test tenant (validRegisterPayload)
-    // is registered with timezone "America/New_York" (EST = UTC-5 in
-    // January): formatting a "02:00" UTC-labeled value with that real zone
-    // previously shifted it to "21:00 the PREVIOUS day" — every generated
-    // contract's rental period was silently wrong (both the date and the
-    // time) for any tenant not on UTC. Times are picked close to midnight
-    // UTC specifically so the bug's day-boundary shift is also caught, not
-    // just the hour shift.
+  it("resolves rental.start/end/startTime/endTime/startDateTime/endDateTime converted into the tenant's real timezone (D-115, supersedes D-066)", async () => {
+    // Rental.plannedStart/plannedEnd are real UTC instants (see
+    // docs/DECISIONS.md D-115 — supersedes D-066's "floating naive" model,
+    // which read these fields back as literal UTC digits regardless of the
+    // tenant's real timezone). The test tenant (validRegisterPayload) is
+    // registered with timezone "America/New_York" (EST = UTC-5 in
+    // January): a "02:00" UTC instant must now correctly convert to
+    // "21:00 the PREVIOUS day" in that zone — every generated contract's
+    // rental period must reflect the real instant, not the literal UTC
+    // digits. Times are picked close to midnight UTC specifically so the
+    // day-boundary conversion is also caught, not just the hour shift.
     const customer = await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/customers`)
       .set("Cookie", accessCookie)
@@ -1249,14 +1251,15 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .expect(200);
 
-    expect(preview.body.html).toContain("01/10/2027");
-    expect(preview.body.html).toContain("01/12/2027");
-    expect(preview.body.html).toContain("02:00 AM");
-    // The double-shifted (buggy) values this regresses against — the
-    // previous calendar day, at 9 PM (02:00 UTC minus the EST -5 offset).
-    expect(preview.body.html).not.toContain("01/09/2027");
-    expect(preview.body.html).not.toContain("01/11/2027");
-    expect(preview.body.html).not.toContain("09:00 PM");
+    // 02:00 UTC minus the EST -5 offset = 21:00 (9 PM) the previous
+    // calendar day — the correct tenant-local reading of this real instant.
+    expect(preview.body.html).toContain("01/09/2027");
+    expect(preview.body.html).toContain("01/11/2027");
+    expect(preview.body.html).toContain("09:00 PM");
+    // The literal UTC digits (D-066's old, now-incorrect behavior).
+    expect(preview.body.html).not.toContain("01/10/2027");
+    expect(preview.body.html).not.toContain("01/12/2027");
+    expect(preview.body.html).not.toContain("02:00 AM");
   });
 
   it("builds rental.assetsTableHtml with one row per rental item and empty string when there is no rental", async () => {
@@ -1522,6 +1525,7 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .set("Cookie", accessCookie)
       .send({
         name: "Acme Rentals",
+        timezone: "America/New_York",
         registrationNumber: "HRB 12345",
         taxNumber: "DE123456789",
         address: "Musterstrasse 1, Berlin",

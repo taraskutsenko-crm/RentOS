@@ -1,7 +1,9 @@
-import { IsDateString, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsOptional, IsString, MaxLength } from "class-validator";
+
+import { IsUnambiguousInstant } from "../../common/is-unambiguous-instant.decorator";
 
 export class CreateExtensionRequestDto {
-  @IsDateString()
+  @IsUnambiguousInstant()
   requestedEnd!: string;
 
   @IsOptional()

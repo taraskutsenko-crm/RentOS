@@ -2,7 +2,6 @@ import { Type } from "class-transformer";
 import {
   ArrayMaxSize,
   IsArray,
-  IsDateString,
   IsInt,
   IsOptional,
   IsString,
@@ -14,6 +13,7 @@ import {
 
 import { EmptyToNull } from "../../common/empty-to-null.transform";
 import { IsSupportedCurrency } from "../../common/is-supported-currency.decorator";
+import { IsUnambiguousInstant } from "../../common/is-unambiguous-instant.decorator";
 import { RentalItemDto } from "./rental-item.dto";
 
 export class UpdateRentalDto {
@@ -22,11 +22,11 @@ export class UpdateRentalDto {
   customerId?: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsUnambiguousInstant()
   plannedStart?: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsUnambiguousInstant()
   plannedEnd?: string;
 
   @IsOptional()

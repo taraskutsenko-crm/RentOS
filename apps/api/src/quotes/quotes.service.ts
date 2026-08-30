@@ -1502,7 +1502,11 @@ export class QuotesService {
       .map((result) => ({ assetId: result.assetId, conflicts: result.conflicts }));
   }
 
-  private buildPublicView(quote: QuoteDetailView): PublicQuoteView {
+  private async buildPublicView(quote: QuoteDetailView): Promise<PublicQuoteView> {
+    const tenant = await this.prisma.tenant.findUniqueOrThrow({
+      where: { id: quote.tenantId },
+      select: { timezone: true },
+    });
     return {
       id: quote.id,
       quoteNumber: quote.quoteNumber,
@@ -1555,6 +1559,7 @@ export class QuotesService {
           sortOrder: item.sortOrder,
         })),
       availabilityWarnings: [],
+      tenantTimezone: tenant.timezone,
     };
   }
 

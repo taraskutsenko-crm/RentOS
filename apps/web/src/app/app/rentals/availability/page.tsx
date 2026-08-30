@@ -7,9 +7,11 @@ import { useTranslation } from "react-i18next";
 
 import { useAssets } from "../../../../hooks/use-assets";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
+import { useTenantTimezone } from "../../../../hooks/use-current-tenant-role";
 import { useAvailability } from "../../../../hooks/use-rentals";
 import { AVAILABILITY_BADGE_ICONS } from "../../../../components/assets/availability-badge";
 import { pickAvailabilityBadgeForDay } from "../../../../lib/asset-availability-badge";
+import { formatDate } from "../../../../lib/date-format";
 import { getAssetDisplayLabel } from "../../../../lib/asset-display-label";
 
 function startOfMonth(date: Date): Date {
@@ -34,6 +36,7 @@ function daysInMonth(date: Date): Date[] {
 export default function AvailabilityCalendarPage() {
   const { t, i18n } = useTranslation();
   const [tenantId] = useCurrentTenantId();
+  const timeZone = useTenantTimezone();
   const [assetSearch, setAssetSearch] = useState("");
   const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
   const [monthCursor, setMonthCursor] = useState(() => startOfMonth(new Date()));
@@ -143,7 +146,7 @@ export default function AvailabilityCalendarPage() {
                     const badge = dayBadge(assetId, day);
                     const dateRange =
                       badge?.startAt && badge.endAt
-                        ? `${new Date(badge.startAt).toLocaleDateString(i18n.language)} – ${new Date(badge.endAt).toLocaleDateString(i18n.language)}`
+                        ? `${formatDate(badge.startAt, i18n.language, timeZone)} – ${formatDate(badge.endAt, i18n.language, timeZone)}`
                         : null;
                     const title = badge
                       ? [t(badge.labelKey), dateRange, badge.reference].filter(Boolean).join(" · ")

@@ -34,7 +34,8 @@ export interface PortalSession {
 // Rentals (Omit<Rental, "internalNotes"> — see PortalRentalsService)
 // ---------------------------------------------------------------------
 
-export type PortalRental = Omit<Rental, "internalNotes">;
+/** `tenantTimezone` is portal-only — see `portal-rental.types.ts` on the API side. */
+export type PortalRental = Omit<Rental, "internalNotes"> & { tenantTimezone: string };
 export type PortalRentalListItem = Omit<RentalListItem, "internalNotes">;
 
 export interface PaginatedPortalRentals {

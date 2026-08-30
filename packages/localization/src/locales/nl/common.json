@@ -151,7 +151,8 @@
     "role": "Rol",
     "errors": {
       "noAccess": "U heeft geen toegang meer tot deze bedrijfswerkruimte. Selecteer een andere.",
-      "nameRequired": "Bedrijfsnaam is verplicht"
+      "nameRequired": "Bedrijfsnaam is verplicht",
+      "timezoneRequired": "Selecteer een tijdzone"
     },
     "companyProfile": {
       "navLabel": "Bedrijfsprofiel",
@@ -164,6 +165,8 @@
       "saveFailed": "Bedrijfsgegevens opslaan mislukt",
       "fields": {
         "name": "Bedrijfsnaam",
+        "timezone": "Tijdzone",
+        "timezoneHelp": "Wordt gebruikt voor verhuurtijden, beschikbaarheid en documenten.",
         "registrationNumber": "Registratienummer",
         "taxNumber": "Btw-/belastingnummer",
         "address": "Adres",
@@ -595,7 +598,9 @@
       "assetRequired": "Selecteer een bezit",
       "selectAtLeastOneAsset": "Selecteer ten minste één bezit",
       "customMonthLengthRequired": "Voer een aantal dagen tussen 1 en 365 in",
-      "priceFieldRequired": "{{field}} is verplicht"
+      "priceFieldRequired": "{{field}} is verplicht",
+      "timezoneNotLoaded": "De tijdzone van het bedrijf wordt nog geladen — wacht even en probeer het opnieuw.",
+      "dstGap": "Die tijd bestaat niet vanwege een overgang naar zomer-/wintertijd. Kies een andere tijd."
     },
     "wizard": {
       "steps": {

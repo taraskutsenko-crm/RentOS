@@ -77,7 +77,7 @@ export default function PublicQuotePage() {
               <CardTitle>{quote.quoteNumber}</CardTitle>
               <CardDescription>
                 {t(`quote.statuses.${quote.status}`)} · {t("quote.fields.validUntil")}:{" "}
-                {formatDate(quote.validUntil, i18n.language)}
+                {formatDate(quote.validUntil, i18n.language, quote.tenantTimezone)}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
@@ -96,8 +96,8 @@ export default function PublicQuotePage() {
                   {t("rental.fields.plannedStart")} — {t("rental.fields.plannedEnd")}
                 </p>
                 <p>
-                  {formatDate(quote.plannedStart, i18n.language)} —{" "}
-                  {formatDate(quote.plannedEnd, i18n.language)}
+                  {formatDate(quote.plannedStart, i18n.language, quote.tenantTimezone)} —{" "}
+                  {formatDate(quote.plannedEnd, i18n.language, quote.tenantTimezone)}
                 </p>
               </div>
 

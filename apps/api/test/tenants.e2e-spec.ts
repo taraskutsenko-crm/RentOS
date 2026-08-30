@@ -14,6 +14,7 @@ interface RegisterResponseBody {
 
 const fullPayload = {
   name: "Acme Rentals GmbH",
+  timezone: "Europe/Berlin",
   registrationNumber: "HRB 12345",
   taxNumber: "DE123456789",
   address: "Musterstrasse 1, 10115 Berlin",

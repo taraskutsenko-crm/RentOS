@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Card, CardContent, CardHeader, CardTitle, DateTimeField } from "@rentos/ui";
+import { tenantLocalToUtc } from "@rentos/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,12 +31,15 @@ const BLOCK_TYPES: AssetAvailabilityBlockType[] = [
  */
 export function AssetAvailabilitySection({
   tenantId,
+  tenantTimezone,
   assetId,
   canManage,
   initialType,
   initialRelatedRentalId,
 }: {
   tenantId: string | null;
+  /** See RentalWizardProps.tenantTimezone's doc comment — identical role here. */
+  tenantTimezone?: string | undefined;
   assetId: string;
   canManage: boolean;
   /** Pre-opens the form with this type/rental link — used by the Return Protocol's "Send to repair" follow-up. */
@@ -57,11 +61,24 @@ export function AssetAvailabilitySection({
   async function handleCreate(): Promise<void> {
     setError(null);
     if (!startAt || !endAt) return;
+    if (!tenantTimezone) {
+      setError(t("rental.errors.timezoneNotLoaded"));
+      return;
+    }
+    let startAtInstant: string;
+    let endAtInstant: string;
+    try {
+      startAtInstant = tenantLocalToUtc(startAt, tenantTimezone).toISOString();
+      endAtInstant = tenantLocalToUtc(endAt, tenantTimezone).toISOString();
+    } catch {
+      setError(t("rental.errors.dstGap"));
+      return;
+    }
     try {
       await createBlock.mutateAsync({
         type,
-        startAt,
-        endAt,
+        startAt: startAtInstant,
+        endAt: endAtInstant,
         notes: notes || null,
         ...(initialRelatedRentalId ? { relatedRentalId: initialRelatedRentalId } : {}),
       });
@@ -101,8 +118,8 @@ export function AssetAvailabilitySection({
                 {t(`asset.availability.${block.type.toLowerCase()}`)}
               </span>
               <span className="text-muted-foreground text-xs">
-                {formatDateTime(block.startAt, i18n.language)} –{" "}
-                {formatDateTime(block.endAt, i18n.language)}
+                {formatDateTime(block.startAt, i18n.language, tenantTimezone)} –{" "}
+                {formatDateTime(block.endAt, i18n.language, tenantTimezone)}
               </span>
               {block.notes && <span className="text-muted-foreground text-xs">{block.notes}</span>}
             </div>
@@ -130,8 +147,8 @@ export function AssetAvailabilitySection({
                   <span className="font-medium">
                     {t(`asset.availability.${block.type.toLowerCase()}`)}
                   </span>{" "}
-                  {formatDateTime(block.startAt, i18n.language)} –{" "}
-                  {formatDateTime(block.endAt, i18n.language)}
+                  {formatDateTime(block.startAt, i18n.language, tenantTimezone)} –{" "}
+                  {formatDateTime(block.endAt, i18n.language, tenantTimezone)}
                   {block.cancelReason ? ` · ${block.cancelReason}` : ""}
                 </div>
               ))}

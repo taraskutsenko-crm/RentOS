@@ -3,7 +3,6 @@ import { Type } from "class-transformer";
 import {
   ArrayMaxSize,
   IsArray,
-  IsDateString,
   IsEnum,
   IsInt,
   IsOptional,
@@ -16,23 +15,30 @@ import {
 
 import { EmptyToNull } from "../../common/empty-to-null.transform";
 import { IsSupportedCurrency } from "../../common/is-supported-currency.decorator";
+import { IsUnambiguousInstant } from "../../common/is-unambiguous-instant.decorator";
 import { QuoteItemDto } from "./quote-item.dto";
 
 export class CreateQuoteDto {
   @IsUUID()
   customerId!: string;
 
+  /**
+   * A real instant (`new Date()` at creation) when omitted, which is what
+   * every real caller does today — no frontend field sets this explicitly.
+   * Validated the same as the tenant-local-derived fields below in case a
+   * caller ever does supply it, for the same anti-ambiguity reason.
+   */
   @IsOptional()
-  @IsDateString()
+  @IsUnambiguousInstant()
   issueDate?: string;
 
-  @IsDateString()
+  @IsUnambiguousInstant()
   validUntil!: string;
 
-  @IsDateString()
+  @IsUnambiguousInstant()
   plannedStart!: string;
 
-  @IsDateString()
+  @IsUnambiguousInstant()
   plannedEnd!: string;
 
   /** Defaults to the tenant's default currency when omitted. */

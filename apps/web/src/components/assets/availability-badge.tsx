@@ -28,15 +28,18 @@ export const AVAILABILITY_BADGE_ICONS: Record<AvailabilityBadgeInfo["kind"], typ
 export function AvailabilityBadge({
   badge,
   locale,
+  timezone,
 }: {
   badge: AvailabilityBadgeInfo;
   locale: string;
+  /** The tenant's real timezone — badge.startAt/endAt are real instants, so displaying them without it would silently fall back to the viewer's own browser timezone (see docs/DECISIONS.md D-115). */
+  timezone?: string | undefined;
 }) {
   const { t } = useTranslation();
   const Icon = AVAILABILITY_BADGE_ICONS[badge.kind];
   const dateRange =
     badge.startAt && badge.endAt
-      ? `${formatDate(badge.startAt, locale)} – ${formatDate(badge.endAt, locale)}`
+      ? `${formatDate(badge.startAt, locale, timezone)} – ${formatDate(badge.endAt, locale, timezone)}`
       : null;
 
   return (

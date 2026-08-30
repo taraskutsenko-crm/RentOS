@@ -168,24 +168,19 @@ export class VariableResolverService {
             customFields: assetCustomFields,
           }
         : {},
-      // Rental.plannedStart/plannedEnd are Prisma DateTime columns mapped to
-      // Postgres "timestamp without time zone" — floating wall-clock values
-      // with no real-world instant attached (the digits typed into the
-      // picker pass straight through unchanged, since the API server runs
-      // with TZ=UTC). Formatting these with the tenant's real IANA zone
-      // (`timezone` — correct for genuine instants like `today` below) would
-      // re-interpret those already-literal digits as a true UTC instant and
-      // shift them again by the tenant's offset — format as "UTC" instead
-      // to read the literal stored digits back exactly (see D-066).
+      // Rental.plannedStart/plannedEnd are real UTC instants (see
+      // docs/DECISIONS.md D-115, superseding D-066's "floating naive"
+      // model) — format with the tenant's real IANA zone, same as every
+      // other genuine instant (`today` below).
       rental: document.rental
         ? {
             number: document.rental.rentalNumber,
-            start: formatDate(document.rental.plannedStart, language, "UTC"),
-            end: formatDate(document.rental.plannedEnd, language, "UTC"),
-            startTime: formatTime(document.rental.plannedStart, language, "UTC"),
-            endTime: formatTime(document.rental.plannedEnd, language, "UTC"),
-            startDateTime: formatDateTime(document.rental.plannedStart, language, "UTC"),
-            endDateTime: formatDateTime(document.rental.plannedEnd, language, "UTC"),
+            start: formatDate(document.rental.plannedStart, language, timezone),
+            end: formatDate(document.rental.plannedEnd, language, timezone),
+            startTime: formatTime(document.rental.plannedStart, language, timezone),
+            endTime: formatTime(document.rental.plannedEnd, language, timezone),
+            startDateTime: formatDateTime(document.rental.plannedStart, language, timezone),
+            endDateTime: formatDateTime(document.rental.plannedEnd, language, timezone),
             subtotal: formatMoney(
               document.rental.subtotalMinor,
               document.rental.currency ?? CURRENCY_FALLBACK,
@@ -226,8 +221,11 @@ export class VariableResolverService {
       quote: document.quote
         ? {
             number: document.quote.quoteNumber,
-            issueDate: formatDate(document.quote.issueDate, language, "UTC"),
-            validUntil: formatDate(document.quote.validUntil, language, "UTC"),
+            // issueDate is a genuine server-generated instant (`new Date()`
+            // at creation — never a user-entered wall-clock value), so it
+            // uses the tenant's real timezone like validUntil does now.
+            issueDate: formatDate(document.quote.issueDate, language, timezone),
+            validUntil: formatDate(document.quote.validUntil, language, timezone),
             total: formatMoney(
               document.quote.totalMinor,
               document.quote.currency ?? CURRENCY_FALLBACK,
@@ -250,7 +248,7 @@ export class VariableResolverService {
               language,
             ),
             receivedAt: rentalDepositRecord.receivedAt
-              ? formatDate(rentalDepositRecord.receivedAt, language, "UTC")
+              ? formatDate(rentalDepositRecord.receivedAt, language, timezone)
               : "",
             receivedAmount:
               rentalDepositRecord.receivedAmountMinor !== null
@@ -265,7 +263,7 @@ export class VariableResolverService {
               : "",
             receivedReference: rentalDepositRecord.receivedReference ?? "",
             returnedAt: rentalDepositRecord.returnedAt
-              ? formatDate(rentalDepositRecord.returnedAt, language, "UTC")
+              ? formatDate(rentalDepositRecord.returnedAt, language, timezone)
               : "",
             returnedAmount:
               rentalDepositRecord.returnedAmountMinor !== null

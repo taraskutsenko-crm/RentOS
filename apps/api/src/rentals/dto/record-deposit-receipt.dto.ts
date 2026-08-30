@@ -1,11 +1,12 @@
-import { IsEnum, IsISO8601, IsInt, IsOptional, IsString, Min, MaxLength } from "class-validator";
+import { IsEnum, IsInt, IsOptional, IsString, Min, MaxLength } from "class-validator";
 
 import { EmptyToNull } from "../../common/empty-to-null.transform";
+import { IsUnambiguousInstant } from "../../common/is-unambiguous-instant.decorator";
 
 const PAYMENT_METHODS = ["BANK_TRANSFER", "CASH", "CARD", "OTHER"] as const;
 
 export class RecordDepositReceiptDto {
-  @IsISO8601()
+  @IsUnambiguousInstant()
   receivedAt!: string;
 
   @IsInt()

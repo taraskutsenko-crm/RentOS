@@ -11,6 +11,7 @@ import {
   Input,
   Label,
 } from "@rentos/ui";
+import { tenantLocalToUtc } from "@rentos/shared";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -66,6 +67,16 @@ function priceFieldLabelKey(
 
 export interface RentalWizardProps {
   tenantId: string | null;
+  /**
+   * The tenant's canonical IANA timezone — every date/time this wizard
+   * collects is a tenant-local wall-clock reading, converted to a real UTC
+   * instant via `tenantLocalToUtc` before it ever reaches the API (both the
+   * live availability check and the final submit; see
+   * docs/DECISIONS.md D-115). `undefined` while the caller's own tenant
+   * fetch is still loading — every conversion below no-ops until it
+   * arrives, exactly like `defaultCurrency`.
+   */
+  tenantTimezone?: string | undefined;
   defaultCurrency?: string | undefined;
   initialValues?: Partial<RentalFormValues>;
   initialItems?: RentalItemFormValues[];
@@ -111,6 +122,7 @@ function emptyItemForm(
 
 export function RentalWizard({
   tenantId,
+  tenantTimezone,
   defaultCurrency,
   initialValues,
   initialItems,
@@ -125,6 +137,22 @@ export function RentalWizard({
   const [assetSearch, setAssetSearch] = useState("");
   const [customerSearch, setCustomerSearch] = useState("");
   const [pricingValidationAttempted, setPricingValidationAttempted] = useState(false);
+  const [dateConversionError, setDateConversionError] = useState<string | null>(null);
+
+  /**
+   * Converts a tenant-local "YYYY-MM-DDTHH:mm" wall-clock reading to a real
+   * UTC instant ISO string, or `null` when the input is incomplete or the
+   * timezone hasn't loaded yet — every API-bound call site below treats
+   * `null` as "not ready to query/submit yet," never as UTC-passthrough.
+   */
+  function toInstant(localDateTime: string): string | null {
+    if (!localDateTime || !tenantTimezone) return null;
+    try {
+      return tenantLocalToUtc(localDateTime, tenantTimezone).toISOString();
+    } catch {
+      return null;
+    }
+  }
   const todayStartIso = useRef(new Date().toISOString().slice(0, 10) + "T00:00:00.000Z");
   const previewWindowEnd30Days = useRef(
     new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10) + "T00:00:00.000Z",
@@ -183,13 +211,15 @@ export function RentalWizard({
     pageSize: 20,
   });
   const selectedAssetIds = items.map((item) => item.assetId);
+  const plannedStartInstant = toInstant(values.plannedStart);
+  const plannedEndInstant = toInstant(values.plannedEnd);
   const { data: availability } = useAvailability(
     tenantId,
-    values.plannedStart && values.plannedEnd && selectedAssetIds.length > 0
+    plannedStartInstant && plannedEndInstant && selectedAssetIds.length > 0
       ? {
           assetIds: selectedAssetIds,
-          plannedStart: values.plannedStart,
-          plannedEnd: values.plannedEnd,
+          plannedStart: plannedStartInstant,
+          plannedEnd: plannedEndInstant,
         }
       : null,
   );
@@ -205,8 +235,8 @@ export function RentalWizard({
   // ever-changing plannedStart/plannedEnd previously caused React Query to
   // treat every render as a new query, hammering the API into 429s.
   const candidateAssetIds = assetsData?.items.map((asset) => asset.id) ?? [];
-  const previewWindowStart = values.plannedStart || todayStartIso.current;
-  const previewWindowEnd = values.plannedEnd || previewWindowEnd30Days.current;
+  const previewWindowStart = plannedStartInstant ?? todayStartIso.current;
+  const previewWindowEnd = plannedEndInstant ?? previewWindowEnd30Days.current;
   const { data: candidateAvailability } = useAvailability(
     tenantId,
     candidateAssetIds.length > 0
@@ -303,10 +333,30 @@ export function RentalWizard({
       return;
     }
 
+    setDateConversionError(null);
+    if (!tenantTimezone) {
+      setDateConversionError(t("rental.errors.timezoneNotLoaded"));
+      return;
+    }
+    let plannedStart: string;
+    let plannedEnd: string;
+    try {
+      plannedStart = tenantLocalToUtc(values.plannedStart, tenantTimezone).toISOString();
+      plannedEnd = tenantLocalToUtc(values.plannedEnd, tenantTimezone).toISOString();
+    } catch {
+      // A DST spring-forward gap (the picked wall-clock reading doesn't
+      // exist in the tenant's timezone) or a malformed value — never
+      // silently save a shifted instant, ask the user to pick a different
+      // time instead (see docs/DECISIONS.md D-115).
+      setDateConversionError(t("rental.errors.dstGap"));
+      setStepIndex(STEPS.indexOf("dates"));
+      return;
+    }
+
     await onSubmit({
       customerId: values.customerId,
-      plannedStart: values.plannedStart,
-      plannedEnd: values.plannedEnd,
+      plannedStart,
+      plannedEnd,
       currency: values.currency,
       discountMinor: toMinor(values.discountDisplay),
       notes: values.notes || null,
@@ -343,9 +393,9 @@ export function RentalWizard({
         ))}
       </ol>
 
-      {errorMessage && (
+      {(errorMessage || dateConversionError) && (
         <Alert variant="destructive">
-          <AlertDescription>{errorMessage}</AlertDescription>
+          <AlertDescription>{dateConversionError || errorMessage}</AlertDescription>
         </Alert>
       )}
 
@@ -401,7 +451,13 @@ export function RentalWizard({
                   >
                     <span className="flex flex-col gap-1">
                       <span>{getAssetDisplayLabel(asset)}</span>
-                      {badge && <AvailabilityBadge badge={badge} locale={i18n.language} />}
+                      {badge && (
+                        <AvailabilityBadge
+                          badge={badge}
+                          locale={i18n.language}
+                          timezone={tenantTimezone}
+                        />
+                      )}
                     </span>
                     <input
                       type="checkbox"

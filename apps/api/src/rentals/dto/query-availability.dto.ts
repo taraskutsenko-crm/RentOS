@@ -1,12 +1,7 @@
 import { Transform } from "class-transformer";
-import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsArray,
-  IsDateString,
-  IsOptional,
-  IsUUID,
-} from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsOptional, IsUUID } from "class-validator";
+
+import { IsUnambiguousInstant } from "../../common/is-unambiguous-instant.decorator";
 
 export class QueryAvailabilityDto {
   /** Comma-separated asset ids, e.g. ?assetIds=uuid1,uuid2 */
@@ -19,10 +14,10 @@ export class QueryAvailabilityDto {
   @IsUUID(undefined, { each: true })
   assetIds!: string[];
 
-  @IsDateString()
+  @IsUnambiguousInstant()
   plannedStart!: string;
 
-  @IsDateString()
+  @IsUnambiguousInstant()
   plannedEnd!: string;
 
   @IsOptional()

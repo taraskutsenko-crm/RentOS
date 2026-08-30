@@ -151,7 +151,8 @@
     "role": "Role",
     "errors": {
       "noAccess": "Již nemáte přístup k tomuto firemnímu pracovnímu prostoru. Vyberte prosím jiný.",
-      "nameRequired": "Název společnosti je povinný"
+      "nameRequired": "Název společnosti je povinný",
+      "timezoneRequired": "Vyberte časové pásmo"
     },
     "companyProfile": {
       "navLabel": "Profil společnosti",
@@ -164,6 +165,8 @@
       "saveFailed": "Uložení údajů o společnosti se nezdařilo",
       "fields": {
         "name": "Název společnosti",
+        "timezone": "Časové pásmo",
+        "timezoneHelp": "Používá se pro časy pronájmu, dostupnost a dokumenty.",
         "registrationNumber": "Registrační číslo",
         "taxNumber": "DIČ / IČ DPH",
         "address": "Adresa",
@@ -595,7 +598,9 @@
       "assetRequired": "Vyberte majetek",
       "selectAtLeastOneAsset": "Vyberte alespoň jeden majetek",
       "customMonthLengthRequired": "Zadejte počet dní mezi 1 a 365",
-      "priceFieldRequired": "Pole {{field}} je povinné"
+      "priceFieldRequired": "Pole {{field}} je povinné",
+      "timezoneNotLoaded": "Časové pásmo společnosti se ještě načítá — počkejte chvíli a zkuste to znovu.",
+      "dstGap": "Tento čas neexistuje kvůli přechodu na letní/zimní čas. Vyberte prosím jiný čas."
     },
     "wizard": {
       "steps": {

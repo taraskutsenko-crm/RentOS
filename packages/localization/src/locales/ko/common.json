@@ -151,7 +151,8 @@
     "role": "역할",
     "errors": {
       "noAccess": "이 회사 작업 공간에 대한 액세스 권한이 더 이상 없습니다. 다른 작업 공간을 선택하세요.",
-      "nameRequired": "회사명은 필수입니다"
+      "nameRequired": "회사명은 필수입니다",
+      "timezoneRequired": "시간대를 선택하세요"
     },
     "companyProfile": {
       "navLabel": "회사 프로필",
@@ -164,6 +165,8 @@
       "saveFailed": "회사 정보 저장에 실패했습니다",
       "fields": {
         "name": "회사명",
+        "timezone": "시간대",
+        "timezoneHelp": "대여 시간, 가용성 및 문서에 사용됩니다.",
         "registrationNumber": "등록 번호",
         "taxNumber": "세금/부가세 번호",
         "address": "주소",
@@ -595,7 +598,9 @@
       "assetRequired": "자산을 선택하세요",
       "selectAtLeastOneAsset": "최소 하나 이상의 자산을 선택하세요",
       "customMonthLengthRequired": "1에서 365 사이의 일수를 입력하세요",
-      "priceFieldRequired": "{{field}}은(는) 필수입니다"
+      "priceFieldRequired": "{{field}}은(는) 필수입니다",
+      "timezoneNotLoaded": "회사 시간대를 아직 불러오는 중입니다 — 잠시 후 다시 시도해 주세요.",
+      "dstGap": "일광 절약 시간제 전환으로 인해 해당 시간이 존재하지 않습니다. 다른 시간을 선택하세요."
     },
     "wizard": {
       "steps": {

@@ -1,9 +1,10 @@
-import { IsISO8601, IsInt, IsOptional, IsString, Min, MaxLength } from "class-validator";
+import { IsInt, IsOptional, IsString, Min, MaxLength } from "class-validator";
 
 import { EmptyToNull } from "../../common/empty-to-null.transform";
+import { IsUnambiguousInstant } from "../../common/is-unambiguous-instant.decorator";
 
 export class RecordDepositReturnDto {
-  @IsISO8601()
+  @IsUnambiguousInstant()
   returnedAt!: string;
 
   @IsInt()

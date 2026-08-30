@@ -151,7 +151,8 @@
     "role": "Rol",
     "errors": {
       "noAccess": "Ya no tienes acceso a este espacio de trabajo de la empresa. Selecciona otro.",
-      "nameRequired": "El nombre de la empresa es obligatorio"
+      "nameRequired": "El nombre de la empresa es obligatorio",
+      "timezoneRequired": "Selecciona una zona horaria"
     },
     "companyProfile": {
       "navLabel": "Perfil de la empresa",
@@ -164,6 +165,8 @@
       "saveFailed": "No se pudieron guardar los datos de la empresa",
       "fields": {
         "name": "Nombre de la empresa",
+        "timezone": "Zona horaria",
+        "timezoneHelp": "Se usa para los horarios de alquiler, la disponibilidad y los documentos.",
         "registrationNumber": "Número de registro",
         "taxNumber": "NIF / número de IVA",
         "address": "Dirección",
@@ -595,7 +598,9 @@
       "assetRequired": "Selecciona un activo",
       "selectAtLeastOneAsset": "Selecciona al menos un activo",
       "customMonthLengthRequired": "Introduce un número de días entre 1 y 365",
-      "priceFieldRequired": "{{field}} es obligatorio"
+      "priceFieldRequired": "{{field}} es obligatorio",
+      "timezoneNotLoaded": "La zona horaria de la empresa todavía se está cargando — espera un momento e inténtalo de nuevo.",
+      "dstGap": "Esa hora no existe debido a un cambio de horario de verano. Elige una hora diferente."
     },
     "wizard": {
       "steps": {

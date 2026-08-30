@@ -1,6 +1,7 @@
-import { IsDateString, IsEnum, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
+import { IsEnum, IsOptional, IsString, IsUUID, MaxLength } from "class-validator";
 
 import { EmptyToNull } from "../../common/empty-to-null.transform";
+import { IsUnambiguousInstant } from "../../common/is-unambiguous-instant.decorator";
 
 const BLOCK_TYPES = ["MAINTENANCE", "REPAIR", "INSPECTION", "RELOCATION", "MANUAL_BLOCK"] as const;
 
@@ -8,10 +9,10 @@ export class CreateAvailabilityBlockDto {
   @IsEnum(BLOCK_TYPES)
   type!: (typeof BLOCK_TYPES)[number];
 
-  @IsDateString()
+  @IsUnambiguousInstant()
   startAt!: string;
 
-  @IsDateString()
+  @IsUnambiguousInstant()
   endAt!: string;
 
   @EmptyToNull()

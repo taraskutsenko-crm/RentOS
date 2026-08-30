@@ -151,7 +151,8 @@
     "role": "角色",
     "errors": {
       "noAccess": "您已无权访问此公司工作区。请选择其他工作区。",
-      "nameRequired": "公司名称为必填项"
+      "nameRequired": "公司名称为必填项",
+      "timezoneRequired": "请选择时区"
     },
     "companyProfile": {
       "navLabel": "公司资料",
@@ -164,6 +165,8 @@
       "saveFailed": "保存公司信息失败",
       "fields": {
         "name": "公司名称",
+        "timezone": "时区",
+        "timezoneHelp": "用于租赁时间、可用性和文档。",
         "registrationNumber": "注册号",
         "taxNumber": "税号/增值税号",
         "address": "地址",
@@ -595,7 +598,9 @@
       "assetRequired": "请选择资产",
       "selectAtLeastOneAsset": "请至少选择一项资产",
       "customMonthLengthRequired": "请输入 1 到 365 之间的天数",
-      "priceFieldRequired": "{{field}}为必填项"
+      "priceFieldRequired": "{{field}}为必填项",
+      "timezoneNotLoaded": "公司时区仍在加载中 — 请稍候再试。",
+      "dstGap": "由于夏令时调整，该时间不存在。请选择其他时间。"
     },
     "wizard": {
       "steps": {

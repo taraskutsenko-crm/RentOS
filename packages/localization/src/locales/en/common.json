@@ -151,7 +151,8 @@
     "role": "Role",
     "errors": {
       "noAccess": "You don't have access to this company workspace anymore. Please select a different one.",
-      "nameRequired": "Company name is required"
+      "nameRequired": "Company name is required",
+      "timezoneRequired": "Select a timezone"
     },
     "companyProfile": {
       "navLabel": "Company Profile",
@@ -164,6 +165,8 @@
       "saveFailed": "Failed to save company details",
       "fields": {
         "name": "Company name",
+        "timezone": "Time zone",
+        "timezoneHelp": "Used for rental times, availability, and documents.",
         "registrationNumber": "Registration number",
         "taxNumber": "Tax / VAT number",
         "address": "Address",
@@ -608,7 +611,9 @@
       "assetRequired": "Select an asset",
       "selectAtLeastOneAsset": "Select at least one asset",
       "customMonthLengthRequired": "Enter a number of days between 1 and 365",
-      "priceFieldRequired": "{{field}} is required"
+      "priceFieldRequired": "{{field}} is required",
+      "timezoneNotLoaded": "Still loading your company's timezone — please wait a moment and try again.",
+      "dstGap": "That time doesn't exist due to a daylight saving time change. Please choose a different time."
     },
     "wizard": {
       "steps": {

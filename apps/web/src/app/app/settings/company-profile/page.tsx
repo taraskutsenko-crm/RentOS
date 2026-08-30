@@ -9,8 +9,10 @@ import {
   CardTitle,
   Input,
   Label,
+  Select,
   useToast,
 } from "@rentos/ui";
+import { listSupportedTimezones } from "@rentos/shared";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -20,6 +22,8 @@ import { useCurrentTenantRole, usePermission } from "../../../../hooks/use-curre
 import { useUpdateCompanyProfile } from "../../../../hooks/use-update-company-profile";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { companyProfileSchema, type CompanyProfileFormValues } from "../../../../lib/validation";
+
+const SUPPORTED_TIMEZONES = listSupportedTimezones();
 
 export default function CompanyProfileSettingsPage() {
   const { t } = useTranslation();
@@ -38,6 +42,7 @@ export default function CompanyProfileSettingsPage() {
     resolver: zodResolver(companyProfileSchema),
     defaultValues: {
       name: "",
+      timezone: "",
       registrationNumber: "",
       taxNumber: "",
       address: "",
@@ -50,6 +55,7 @@ export default function CompanyProfileSettingsPage() {
     if (data?.tenant) {
       reset({
         name: data.tenant.name,
+        timezone: data.tenant.timezone,
         registrationNumber: data.tenant.registrationNumber ?? "",
         taxNumber: data.tenant.taxNumber ?? "",
         address: data.tenant.address ?? "",
@@ -112,6 +118,23 @@ export default function CompanyProfileSettingsPage() {
                 {errors.name && (
                   <p className="text-destructive text-sm">{t(errors.name.message ?? "")}</p>
                 )}
+              </div>
+
+              <div className="flex flex-col gap-1.5 sm:max-w-xs">
+                <Label htmlFor="timezone">{t("tenant.companyProfile.fields.timezone")}</Label>
+                <Select id="timezone" aria-invalid={!!errors.timezone} {...register("timezone")}>
+                  {SUPPORTED_TIMEZONES.map((zone) => (
+                    <option key={zone} value={zone}>
+                      {zone}
+                    </option>
+                  ))}
+                </Select>
+                {errors.timezone && (
+                  <p className="text-destructive text-sm">{t(errors.timezone.message ?? "")}</p>
+                )}
+                <p className="text-muted-foreground text-xs">
+                  {t("tenant.companyProfile.fields.timezoneHelp")}
+                </p>
               </div>
 
               <div className="flex flex-col gap-1.5">

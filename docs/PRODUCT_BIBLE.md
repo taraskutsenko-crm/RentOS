@@ -1160,3 +1160,56 @@ available after the application restarts or is scaled across multiple
 instances, once a production storage provider is configured — this is
 an infrastructure property tenants can rely on, not an implementation
 detail.
+
+## 30. Havelio Time Model
+
+Havelio is international — a rental's schedule must mean the same
+real moment to everyone who looks at it, regardless of which
+timezone the browser, the API host, or the database server happens to
+be running in. The model (see `DECISIONS.md` D-115):
+
+- **Storage: real UTC instants.** Every field that represents a real
+  scheduled or actual moment — a rental's or quote's planned start/end,
+  a quote's validity deadline, a maintenance/repair/inspection/
+  relocation/manual-block window, a deposit's received/returned
+  moment, an actual start/return timestamp, a signature or acceptance
+  timestamp — is stored as a genuine, unambiguous instant. None of
+  these are "floating" wall-clock digits with an implicit or
+  guessed timezone.
+- **Tenant business timezone.** Each tenant has exactly one canonical
+  IANA timezone (`Tenant.timezone`, e.g. `Europe/Warsaw`), set at
+  registration and editable afterward from Company Profile settings.
+  This is the one timezone Havelio's own scheduling behavior is
+  defined in terms of — never the timezone of whichever device happens
+  to be viewing the screen.
+- **Input: tenant-local, always.** When staff enters a rental/quote
+  date and time, that reading means "this wall-clock moment, in the
+  company's own timezone" — never the browser's timezone, even when a
+  staff member is traveling or working from a different country than
+  their company operates in.
+- **Display: tenant-local, always.** A stored instant is always shown
+  back in the tenant's own timezone — to staff in the main app, to a
+  customer in the self-service portal, on a public (token-shared)
+  quote page, and in every generated document/PDF. A customer viewing
+  their rental sees the schedule the company intended, not a version
+  silently reinterpreted in the visitor's own browser timezone.
+- **Date-only stays date-only.** A value that is genuinely just a
+  calendar date — an invoice's issue date, sale date, or due date —
+  is never given a manufactured time-of-day or reinterpreted through a
+  timezone conversion. Converting a pure date can only ever shift it
+  to the wrong day; Havelio never does that.
+- **DST is handled, never approximated.** A daylight-saving transition
+  is resolved using real IANA timezone data, not manual offset
+  arithmetic. A wall-clock reading that doesn't exist because of a
+  spring-forward gap is rejected with a clear message, asking for a
+  different time — Havelio never silently saves a shifted instant in
+  its place. A reading that occurs twice because of a fall-back is
+  resolved by one fixed, documented rule (the earlier of the two real
+  instants), applied consistently every time.
+- **The browser is never the source of truth for business time.** A
+  device's local clock/timezone may differ from the tenant's — that
+  difference must never change what a rental's schedule, an
+  availability check, an overdue determination, or a generated
+  document says. The one narrow exception is genuinely per-viewer UI
+  convenience (e.g. which items are gathered on a screen right now)
+  which is never confused with a business timestamp.

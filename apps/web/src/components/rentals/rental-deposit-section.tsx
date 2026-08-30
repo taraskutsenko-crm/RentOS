@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Card, CardContent, CardHeader, CardTitle, DateTimeField } from "@rentos/ui";
+import { tenantLocalToUtc } from "@rentos/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -27,12 +28,15 @@ const PAYMENT_METHODS: DepositPaymentMethod[] = ["BANK_TRANSFER", "CASH", "CARD"
  */
 export function RentalDepositSection({
   tenantId,
+  tenantTimezone,
   rentalId,
   requiredAmountMinor,
   currency,
   canManage,
 }: {
   tenantId: string | null;
+  /** See RentalWizardProps.tenantTimezone's doc comment — identical role here. */
+  tenantTimezone?: string | undefined;
   rentalId: string;
   requiredAmountMinor: number;
   currency: string;
@@ -69,9 +73,20 @@ export function RentalDepositSection({
   async function handleRecordReceipt(): Promise<void> {
     setError(null);
     if (!receivedAt) return;
+    if (!tenantTimezone) {
+      setError(t("rental.errors.timezoneNotLoaded"));
+      return;
+    }
+    let receivedAtInstant: string;
+    try {
+      receivedAtInstant = tenantLocalToUtc(receivedAt, tenantTimezone).toISOString();
+    } catch {
+      setError(t("rental.errors.dstGap"));
+      return;
+    }
     try {
       await recordReceipt.mutateAsync({
-        receivedAt,
+        receivedAt: receivedAtInstant,
         receivedAmountMinor: toMinor(receivedAmount),
         receivedMethod,
         receivedReference: receivedReference || null,
@@ -85,9 +100,20 @@ export function RentalDepositSection({
   async function handleRecordReturn(): Promise<void> {
     setError(null);
     if (!returnedAt) return;
+    if (!tenantTimezone) {
+      setError(t("rental.errors.timezoneNotLoaded"));
+      return;
+    }
+    let returnedAtInstant: string;
+    try {
+      returnedAtInstant = tenantLocalToUtc(returnedAt, tenantTimezone).toISOString();
+    } catch {
+      setError(t("rental.errors.dstGap"));
+      return;
+    }
     try {
       await recordReturn.mutateAsync({
-        returnedAt,
+        returnedAt: returnedAtInstant,
         returnedAmountMinor: toMinor(returnedAmount),
         retainedAmountMinor: toMinor(retainedAmount),
         retentionReason: retentionReason || null,
@@ -116,7 +142,7 @@ export function RentalDepositSection({
               <span>{formatMoney(deposit.receivedAmountMinor ?? 0, deposit.currency)}</span>
             </div>
             <span className="text-muted-foreground text-xs">
-              {formatDate(deposit.receivedAt, i18n.language)}
+              {formatDate(deposit.receivedAt, i18n.language, tenantTimezone)}
               {deposit.receivedMethod ? ` · ${t(`payment.methods.${deposit.receivedMethod}`)}` : ""}
               {deposit.receivedReference ? ` · ${deposit.receivedReference}` : ""}
             </span>
@@ -139,7 +165,7 @@ export function RentalDepositSection({
               <span className="text-muted-foreground text-xs">{deposit.retentionReason}</span>
             )}
             <span className="text-muted-foreground text-xs">
-              {formatDate(deposit.returnedAt, i18n.language)}
+              {formatDate(deposit.returnedAt, i18n.language, tenantTimezone)}
             </span>
           </div>
         )}

@@ -21,7 +21,7 @@ import {
   useDeleteAsset,
 } from "../../../../hooks/use-assets";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
-import { usePermission } from "../../../../hooks/use-current-tenant-role";
+import { usePermission, useTenantTimezone } from "../../../../hooks/use-current-tenant-role";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import { getAssetStatusLabel } from "../../../../lib/asset-status-label";
 import { formatMoney } from "../../../../lib/money";
@@ -70,6 +70,7 @@ export default function AssetDetailPage() {
   const canManageImages = usePermission("assets.manage_images");
   const canManageDocuments = usePermission("assets.manage_documents");
   const canManageAvailability = usePermission("assets.manage_availability");
+  const tenantTimezone = useTenantTimezone();
   const scheduleBlockParam = searchParams.get("scheduleBlock");
   const initialBlockType = ASSET_AVAILABILITY_BLOCK_TYPES.includes(
     scheduleBlockParam as AssetAvailabilityBlockType,
@@ -314,6 +315,7 @@ export default function AssetDetailPage() {
 
           <AssetAvailabilitySection
             tenantId={tenantId}
+            tenantTimezone={tenantTimezone}
             assetId={asset.id}
             canManage={canManageAvailability}
             {...(initialBlockType ? { initialType: initialBlockType } : {})}

@@ -31,6 +31,7 @@ export default function NewQuotePage() {
         <CardContent>
           <QuoteWizard
             tenantId={tenantId}
+            tenantTimezone={tenantRole?.tenant.timezone}
             defaultCurrency={tenantRole?.tenant.defaultCurrency}
             onSubmit={handleSubmit}
             isPending={createQuote.isPending}

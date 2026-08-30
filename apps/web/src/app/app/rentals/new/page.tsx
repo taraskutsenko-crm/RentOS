@@ -31,6 +31,7 @@ export default function NewRentalPage() {
         <CardContent>
           <RentalWizard
             tenantId={tenantId}
+            tenantTimezone={tenantRole?.tenant.timezone}
             defaultCurrency={tenantRole?.tenant.defaultCurrency}
             onSubmit={handleSubmit}
             isPending={createRental.isPending}

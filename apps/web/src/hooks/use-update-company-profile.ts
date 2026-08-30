@@ -7,6 +7,7 @@ import type { Tenant } from "../types/auth";
 
 export interface CompanyProfileInput {
   name: string;
+  timezone: string;
   registrationNumber: string;
   taxNumber: string;
   address: string;

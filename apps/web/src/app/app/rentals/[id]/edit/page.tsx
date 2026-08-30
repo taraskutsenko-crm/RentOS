@@ -1,12 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
+import { utcToTenantLocal } from "@rentos/shared";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { RentalWizard } from "../../../../../components/rentals/rental-wizard";
 import { useRental, useUpdateRental, type RentalInput } from "../../../../../hooks/use-rentals";
 import { useCurrentTenantId } from "../../../../../hooks/use-current-tenant";
+import { useTenantTimezone } from "../../../../../hooks/use-current-tenant-role";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
 import { fromMinorUnits } from "../../../../../lib/money";
 import type { RentalItemFormValues } from "../../../../../lib/validation";
@@ -17,6 +19,7 @@ export default function EditRentalPage() {
   const params = useParams<{ id: string }>();
   const [tenantId] = useCurrentTenantId();
   const { data: rental, isLoading } = useRental(tenantId, params.id);
+  const tenantTimezone = useTenantTimezone();
   const updateRental = useUpdateRental(tenantId);
 
   async function handleSubmit(input: RentalInput): Promise<void> {
@@ -24,7 +27,11 @@ export default function EditRentalPage() {
     router.push(`/app/rentals/${params.id}`);
   }
 
-  if (isLoading || !rental) {
+  // Gated on `tenantTimezone` too, not just `rental` — `initialValues`
+  // below is read once by react-hook-form at mount, so plannedStart/
+  // plannedEnd must already be converted to tenant-local wall-clock
+  // strings (via a real timezone) before the wizard ever renders.
+  if (isLoading || !rental || !tenantTimezone) {
     return <p className="text-muted-foreground text-sm">{t("common.loading")}</p>;
   }
 
@@ -52,12 +59,13 @@ export default function EditRentalPage() {
         <CardContent>
           <RentalWizard
             tenantId={tenantId}
+            tenantTimezone={tenantTimezone}
             defaultCurrency={rental.currency}
             submitLabelKey="rental.save"
             initialValues={{
               customerId: rental.customerId,
-              plannedStart: rental.plannedStart.slice(0, 16),
-              plannedEnd: rental.plannedEnd.slice(0, 16),
+              plannedStart: utcToTenantLocal(rental.plannedStart, tenantTimezone),
+              plannedEnd: utcToTenantLocal(rental.plannedEnd, tenantTimezone),
               currency: rental.currency,
               discountDisplay: fromMinorUnits(rental.discountMinor),
               notes: rental.notes ?? "",

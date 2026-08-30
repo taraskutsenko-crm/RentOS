@@ -151,7 +151,8 @@
     "role": "Rôle",
     "errors": {
       "noAccess": "Vous n'avez plus accès à cet espace de travail de l'entreprise. Veuillez en sélectionner un autre.",
-      "nameRequired": "Le nom de l'entreprise est requis"
+      "nameRequired": "Le nom de l'entreprise est requis",
+      "timezoneRequired": "Sélectionnez un fuseau horaire"
     },
     "companyProfile": {
       "navLabel": "Profil de l'entreprise",
@@ -164,6 +165,8 @@
       "saveFailed": "Échec de l'enregistrement des coordonnées de l'entreprise",
       "fields": {
         "name": "Nom de l'entreprise",
+        "timezone": "Fuseau horaire",
+        "timezoneHelp": "Utilisé pour les horaires de location, la disponibilité et les documents.",
         "registrationNumber": "Numéro d'immatriculation",
         "taxNumber": "Numéro fiscal / TVA",
         "address": "Adresse",
@@ -595,7 +598,9 @@
       "assetRequired": "Sélectionnez un actif",
       "selectAtLeastOneAsset": "Sélectionnez au moins un actif",
       "customMonthLengthRequired": "Saisissez un nombre de jours entre 1 et 365",
-      "priceFieldRequired": "{{field}} est obligatoire"
+      "priceFieldRequired": "{{field}} est obligatoire",
+      "timezoneNotLoaded": "Le fuseau horaire de l'entreprise est encore en cours de chargement — veuillez patienter et réessayer.",
+      "dstGap": "Cette heure n'existe pas en raison d'un changement d'heure d'été/hiver. Veuillez choisir une autre heure."
     },
     "wizard": {
       "steps": {

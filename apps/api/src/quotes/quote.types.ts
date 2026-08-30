@@ -133,4 +133,6 @@ export interface PublicQuoteView {
   customer: { firstName: string; lastName: string; company: string | null };
   items: PublicQuoteItemView[];
   availabilityWarnings: QuoteAvailabilityWarning[];
+  /** The issuing tenant's IANA timezone — the public quote page has no session/auth to derive it from otherwise (see docs/DECISIONS.md D-115). */
+  tenantTimezone: string;
 }

@@ -151,7 +151,8 @@
     "role": "Ruolo",
     "errors": {
       "noAccess": "Non hai più accesso a quest'area di lavoro aziendale. Seleziona un'altra.",
-      "nameRequired": "Il nome dell'azienda è obbligatorio"
+      "nameRequired": "Il nome dell'azienda è obbligatorio",
+      "timezoneRequired": "Seleziona un fuso orario"
     },
     "companyProfile": {
       "navLabel": "Profilo aziendale",
@@ -164,6 +165,8 @@
       "saveFailed": "Salvataggio dei dati aziendali non riuscito",
       "fields": {
         "name": "Nome dell'azienda",
+        "timezone": "Fuso orario",
+        "timezoneHelp": "Usato per gli orari di noleggio, la disponibilità e i documenti.",
         "registrationNumber": "Numero di registrazione",
         "taxNumber": "Codice fiscale / Partita IVA",
         "address": "Indirizzo",
@@ -595,7 +598,9 @@
       "assetRequired": "Seleziona un bene",
       "selectAtLeastOneAsset": "Seleziona almeno un bene",
       "customMonthLengthRequired": "Inserisci un numero di giorni tra 1 e 365",
-      "priceFieldRequired": "{{field}} è obbligatorio"
+      "priceFieldRequired": "{{field}} è obbligatorio",
+      "timezoneNotLoaded": "Il fuso orario dell'azienda è ancora in fase di caricamento — attendi un momento e riprova.",
+      "dstGap": "Quell'orario non esiste a causa di un cambio dell'ora legale. Scegli un orario diverso."
     },
     "wizard": {
       "steps": {

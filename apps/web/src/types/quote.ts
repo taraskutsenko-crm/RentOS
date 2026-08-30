@@ -221,4 +221,6 @@ export interface PublicQuote {
   customer: { firstName: string; lastName: string; company: string | null };
   items: PublicQuoteItem[];
   availabilityWarnings: QuoteAvailabilityWarning[];
+  /** The issuing tenant's IANA timezone — see PublicQuoteView on the API side. */
+  tenantTimezone: string;
 }

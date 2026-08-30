@@ -116,16 +116,11 @@ export class QuotePdfService {
   ): Promise<Buffer> {
     const t = (path: string, fallback: string) => pdfLabel(language, path, fallback);
     const money = (minor: number) => formatMoney(minor, quote.currency, language);
+    // quote.issueDate/validUntil/plannedStart/plannedEnd are real UTC
+    // instants (see docs/DECISIONS.md D-115, superseding D-066's "floating
+    // naive" model) — format with the tenant's real IANA zone like every
+    // other genuine instant in this document.
     const date = (value: Date) => formatDate(value, language, timezone);
-    // quote.issueDate/validUntil/plannedStart/plannedEnd are Prisma DateTime
-    // columns mapped to "timestamp without time zone" — floating wall-clock
-    // values with no real-world instant attached (the digits typed into the
-    // picker pass straight through, since the API runs with TZ=UTC). Reading
-    // them back with the tenant's real IANA zone (`date` above) would
-    // re-interpret those already-literal digits as a true UTC instant and
-    // shift them again by the tenant's offset. Format with UTC instead to
-    // read the literal stored digits back exactly (see DECISIONS.md D-066).
-    const businessDate = (value: Date) => formatDate(value, language, "UTC");
 
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({ size: "A4", margin: PAGE_MARGIN, bufferPages: true });
@@ -140,7 +135,7 @@ export class QuotePdfService {
         doc.font("body");
 
         this.drawHeader(doc, quote, tenantName, t);
-        this.drawCustomerAndMeta(doc, quote, t, businessDate);
+        this.drawCustomerAndMeta(doc, quote, t, date);
         this.drawItemsTable(doc, quote.items, t, money);
         this.drawTotals(doc, quote, t, money);
         this.drawNotesAndTerms(doc, quote, t);

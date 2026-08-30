@@ -298,6 +298,7 @@ describe("Invoices E2E", () => {
       .set("Cookie", accessCookie)
       .send({
         name: "Renamed Company Ltd",
+        timezone: "America/New_York",
         registrationNumber: "",
         taxNumber: "",
         address: "",

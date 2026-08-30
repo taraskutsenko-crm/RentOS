@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 
 import type { PaginatedResult } from "../../customers/customers.service";
+import { PrismaService } from "../../prisma/prisma.service";
 import { RentalsService } from "../../rentals/rentals.service";
 import type { RentalTimelineEvent } from "../../rentals/timeline.types";
 import type { QueryPortalRentalsDto } from "../dto/query-portal-rentals.dto";
@@ -22,7 +23,10 @@ import {
  */
 @Injectable()
 export class PortalRentalsService {
-  constructor(private readonly rentalsService: RentalsService) {}
+  constructor(
+    private readonly rentalsService: RentalsService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async findMany(
     tenantId: string,
@@ -38,7 +42,11 @@ export class PortalRentalsService {
     if (rental.customerId !== customerId) {
       throw new NotFoundException("Rental not found");
     }
-    return toPortalRentalDetail(rental);
+    const tenant = await this.prisma.tenant.findUniqueOrThrow({
+      where: { id: tenantId },
+      select: { timezone: true },
+    });
+    return toPortalRentalDetail(rental, tenant.timezone);
   }
 
   async timeline(tenantId: string, customerId: string, id: string): Promise<RentalTimelineEvent[]> {

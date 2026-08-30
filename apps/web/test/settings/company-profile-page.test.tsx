@@ -25,6 +25,7 @@ vi.mock("../../src/hooks/use-update-company-profile", () => ({
 const TENANT = {
   id: "tenant-1",
   name: "Closure Pass Rentals",
+  timezone: "America/New_York",
   registrationNumber: null,
   taxNumber: null,
   address: null,

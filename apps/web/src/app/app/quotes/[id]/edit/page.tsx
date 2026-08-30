@@ -1,11 +1,13 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
+import { utcToTenantLocal } from "@rentos/shared";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { QuoteWizard } from "../../../../../components/quotes/quote-wizard";
 import { useCurrentTenantId } from "../../../../../hooks/use-current-tenant";
+import { useTenantTimezone } from "../../../../../hooks/use-current-tenant-role";
 import { useQuote, useUpdateQuote, type QuoteInput } from "../../../../../hooks/use-quotes";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
 import { fromMinorUnits } from "../../../../../lib/money";
@@ -17,6 +19,7 @@ export default function EditQuotePage() {
   const params = useParams<{ id: string }>();
   const [tenantId] = useCurrentTenantId();
   const { data: quote, isLoading } = useQuote(tenantId, params.id);
+  const tenantTimezone = useTenantTimezone();
   const updateQuote = useUpdateQuote(tenantId);
 
   async function handleSubmit(input: QuoteInput): Promise<void> {
@@ -24,7 +27,9 @@ export default function EditQuotePage() {
     router.push(`/app/quotes/${params.id}`);
   }
 
-  if (isLoading || !quote) {
+  // See rentals/[id]/edit/page.tsx's identical fix — `initialValues` below
+  // is read once at mount, so it must already be tenant-local.
+  if (isLoading || !quote || !tenantTimezone) {
     return <p className="text-muted-foreground text-sm">{t("common.loading")}</p>;
   }
 
@@ -62,13 +67,14 @@ export default function EditQuotePage() {
         <CardContent>
           <QuoteWizard
             tenantId={tenantId}
+            tenantTimezone={tenantTimezone}
             defaultCurrency={quote.currency}
             submitLabelKey="quote.save"
             initialValues={{
               customerId: quote.customerId,
-              plannedStart: quote.plannedStart.slice(0, 16),
-              plannedEnd: quote.plannedEnd.slice(0, 16),
-              validUntil: quote.validUntil.slice(0, 16),
+              plannedStart: utcToTenantLocal(quote.plannedStart, tenantTimezone),
+              plannedEnd: utcToTenantLocal(quote.plannedEnd, tenantTimezone),
+              validUntil: utcToTenantLocal(quote.validUntil, tenantTimezone),
               currency: quote.currency,
               discountType: quote.discountType,
               discountValueDisplay: quote.discountValue ? String(quote.discountValue / 100) : "",

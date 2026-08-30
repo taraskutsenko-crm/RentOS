@@ -42,11 +42,7 @@ import { ApiError } from "../../../../lib/api-client";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { getAssetDisplayLabel } from "../../../../lib/asset-display-label";
 import { getAssetStatusLabel } from "../../../../lib/asset-status-label";
-import {
-  formatBusinessDate,
-  formatBusinessDateTime,
-  formatDateTime,
-} from "../../../../lib/date-format";
+import { formatDate, formatDateTime } from "../../../../lib/date-format";
 import {
   CHECKLIST_ITEM_DOCUMENT_TYPE,
   getRentalDocumentChecklist,
@@ -226,8 +222,8 @@ export default function RentalDetailPage() {
               })}
             </span>
             <span className="text-muted-foreground">
-              {formatBusinessDate(rental.plannedStart, i18n.language)} –{" "}
-              {formatBusinessDate(rental.plannedEnd, i18n.language)}
+              {formatDate(rental.plannedStart, i18n.language, timeZone)} –{" "}
+              {formatDate(rental.plannedEnd, i18n.language, timeZone)}
             </span>
           </div>
         }
@@ -587,6 +583,7 @@ export default function RentalDetailPage() {
 
           <RentalDepositSection
             tenantId={tenantId}
+            tenantTimezone={timeZone}
             rentalId={rental.id}
             requiredAmountMinor={depositTotalMinor}
             currency={rental.currency}
@@ -730,11 +727,11 @@ export default function RentalDetailPage() {
             <CardContent className="grid grid-cols-2 gap-3 text-sm">
               <InfoRow
                 label={t("rental.fields.plannedStart")}
-                value={formatBusinessDateTime(rental.plannedStart, i18n.language)}
+                value={formatDateTime(rental.plannedStart, i18n.language, timeZone)}
               />
               <InfoRow
                 label={t("rental.fields.plannedEnd")}
-                value={formatBusinessDateTime(rental.plannedEnd, i18n.language)}
+                value={formatDateTime(rental.plannedEnd, i18n.language, timeZone)}
               />
               <InfoRow
                 label={t("rental.fields.actualStart")}

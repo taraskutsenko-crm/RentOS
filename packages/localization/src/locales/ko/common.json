@@ -527,6 +527,11 @@
       "bannerTitle": "반납이 연체되었습니다",
       "plannedReturn": "예정 반납일: {{date}}"
     },
+    "startDatePassed": {
+      "title": "대여를 활성화할 수 없습니다",
+      "message": "이 대여의 예정 시작 날짜/시간이 이미 지났습니다. 대여를 활성화하기 전에 시작 날짜/시간을 수정하세요.",
+      "editDates": "날짜 수정"
+    },
     "documents": {
       "empty": "이 대여와 연결된 문서가 아직 없습니다",
       "generate": "문서 생성"

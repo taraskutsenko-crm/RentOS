@@ -527,6 +527,11 @@
       "bannerTitle": "Return overdue",
       "plannedReturn": "Planned return: {{date}}"
     },
+    "startDatePassed": {
+      "title": "Rental cannot be activated",
+      "message": "The planned rental start date/time has already passed. Update the start date/time before activating the rental.",
+      "editDates": "Edit dates"
+    },
     "documents": {
       "empty": "No documents linked to this rental yet",
       "generate": "Generate document"

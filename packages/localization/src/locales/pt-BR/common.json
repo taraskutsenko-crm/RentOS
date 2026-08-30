@@ -527,6 +527,11 @@
       "bannerTitle": "Devolução atrasada",
       "plannedReturn": "Devolução prevista: {{date}}"
     },
+    "startDatePassed": {
+      "title": "Não é possível ativar a locação",
+      "message": "A data/hora de início planejada desta locação já passou. Atualize a data/hora de início antes de ativar a locação.",
+      "editDates": "Editar datas"
+    },
     "documents": {
       "empty": "Ainda não há documentos vinculados a esta locação",
       "generate": "Gerar documento"

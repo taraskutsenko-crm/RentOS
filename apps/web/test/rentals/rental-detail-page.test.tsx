@@ -1,8 +1,10 @@
+import { RENTAL_START_DATE_PASSED_MESSAGE } from "@rentos/shared";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import RentalDetailPage from "../../src/app/app/rentals/[id]/page";
+import { ApiError } from "../../src/lib/api-client";
 import { formatMoney } from "../../src/lib/money";
 import { renderWithProviders } from "../test-utils";
 
@@ -17,8 +19,9 @@ function moneyPattern(minor: number, currency: string): RegExp {
   return new RegExp(escaped.replace(/\s+/g, "\\s*"));
 }
 
+const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push: mockPush, replace: vi.fn() }),
   useParams: () => ({ id: "rental-1" }),
 }));
 
@@ -91,6 +94,7 @@ function baseRental(status: string) {
 
 describe("RentalDetailPage", () => {
   beforeEach(() => {
+    mockPush.mockClear();
     useCurrentTenantIdMock.mockReturnValue(["tenant-1", vi.fn()]);
     useRentalTimelineMock.mockReturnValue({ data: [] });
     useDeleteRentalMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
@@ -427,6 +431,65 @@ describe("RentalDetailPage", () => {
     await user.click(screen.getByRole("button", { name: /start rental/i }));
 
     await waitFor(() => expect(startMutateAsync).toHaveBeenCalledWith({ id: "rental-1" }));
+  });
+
+  // 12. Clicking Activate on a rental whose planned start has already
+  // passed must show a dedicated dialog (never make it look like nothing
+  // happened) and never silently activate.
+  it("shows a dedicated dialog (not a generic error) when activation is rejected for a past planned start, and leaves the rental non-active", async () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "rentals.start");
+    useRentalMock.mockReturnValue({ data: baseRental("RESERVED"), isLoading: false });
+    const startMutateAsync = vi
+      .fn()
+      .mockRejectedValue(new ApiError(RENTAL_START_DATE_PASSED_MESSAGE, 409));
+    useStartRentalMock.mockReturnValue({ mutateAsync: startMutateAsync, isPending: false });
+    const user = userEvent.setup();
+
+    renderWithProviders(<RentalDetailPage />);
+    await user.click(screen.getByRole("button", { name: /start rental/i }));
+
+    expect(await screen.findByText("Rental cannot be activated")).toBeInTheDocument();
+    expect(
+      screen.getByText(/planned rental start date\/time has already passed/i),
+    ).toBeInTheDocument();
+    // The generic inline error path must not also fire for this specific case.
+    expect(screen.queryByText(RENTAL_START_DATE_PASSED_MESSAGE)).not.toBeInTheDocument();
+  });
+
+  // 5 (frontend side). "Edit dates" navigates to the existing rental edit
+  // page — never silently changes the dates itself.
+  it("'Edit dates' in the rejected-activation dialog navigates to the rental edit page, without changing any dates itself", async () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "rentals.start");
+    useRentalMock.mockReturnValue({ data: baseRental("RESERVED"), isLoading: false });
+    const startMutateAsync = vi
+      .fn()
+      .mockRejectedValue(new ApiError(RENTAL_START_DATE_PASSED_MESSAGE, 409));
+    useStartRentalMock.mockReturnValue({ mutateAsync: startMutateAsync, isPending: false });
+    const user = userEvent.setup();
+
+    renderWithProviders(<RentalDetailPage />);
+    await user.click(screen.getByRole("button", { name: /start rental/i }));
+    await screen.findByText("Rental cannot be activated");
+    await user.click(screen.getByRole("button", { name: /edit dates/i }));
+
+    expect(mockPush).toHaveBeenCalledWith("/app/rentals/rental-1/edit");
+    // start() was attempted exactly once — the rejected click never retried
+    // or silently succeeded.
+    expect(startMutateAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it("a generic activation failure (unrelated to the past-start rule) still shows the ordinary inline error, not the dialog", async () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "rentals.start");
+    useRentalMock.mockReturnValue({ data: baseRental("RESERVED"), isLoading: false });
+    const startMutateAsync = vi.fn().mockRejectedValue(new ApiError("Rental not found", 404));
+    useStartRentalMock.mockReturnValue({ mutateAsync: startMutateAsync, isPending: false });
+    const user = userEvent.setup();
+
+    renderWithProviders(<RentalDetailPage />);
+    await user.click(screen.getByRole("button", { name: /start rental/i }));
+
+    expect(await screen.findByText("Rental not found")).toBeInTheDocument();
+    expect(screen.queryByText("Rental cannot be activated")).not.toBeInTheDocument();
   });
 
   it("shows the return action for an ACTIVE rental", () => {

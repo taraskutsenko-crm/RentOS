@@ -1,5 +1,6 @@
 "use client";
 
+import { RENTAL_START_DATE_PASSED_MESSAGE } from "@rentos/shared";
 import {
   Alert,
   AlertDescription,
@@ -14,6 +15,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ConfirmDialog } from "../../../../components/data-table/confirm-dialog";
 import { DashboardGrid, DashboardMetric } from "../../../../components/dashboard";
 import { InvoiceStatusBadge } from "../../../../components/invoices/invoice-status-badge";
 import { RentalDepositSection } from "../../../../components/rentals/rental-deposit-section";
@@ -36,6 +38,7 @@ import {
   useReturnRental,
   useStartRental,
 } from "../../../../hooks/use-rentals";
+import { ApiError } from "../../../../lib/api-client";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { getAssetDisplayLabel } from "../../../../lib/asset-display-label";
 import { getAssetStatusLabel } from "../../../../lib/asset-status-label";
@@ -67,6 +70,7 @@ export default function RentalDetailPage() {
   const params = useParams<{ id: string }>();
   const [tenantId] = useCurrentTenantId();
   const [actionError, setActionError] = useState<string | null>(null);
+  const [showStartDatePassedDialog, setShowStartDatePassedDialog] = useState(false);
   // Date.now() cannot be called during render (impure) — a lazy useState
   // initializer is the sanctioned one-time-impure-computation escape hatch.
   const [nowMs] = useState<number>(() => Date.now());
@@ -140,6 +144,24 @@ export default function RentalDetailPage() {
       await action();
     } catch (error) {
       setActionError(apiErrorMessage(error, t("common.error")));
+    }
+  }
+
+  // Activation gets its own handler (not the generic runAction) because a
+  // rejected activation with an already-past planned start needs a
+  // dedicated dialog with an "Edit dates" action — not the generic inline
+  // error text — see RENTAL_START_DATE_PASSED_MESSAGE (backend) /
+  // rentals.service.ts's start() for the source of truth on this rule.
+  async function handleStart(): Promise<void> {
+    setActionError(null);
+    try {
+      await startRental.mutateAsync({ id: rental!.id });
+    } catch (error) {
+      if (error instanceof ApiError && error.message === RENTAL_START_DATE_PASSED_MESSAGE) {
+        setShowStartDatePassedDialog(true);
+      } else {
+        setActionError(apiErrorMessage(error, t("common.error")));
+      }
     }
   }
 
@@ -231,10 +253,7 @@ export default function RentalDetailPage() {
               </Button>
             )}
             {canStart && rental.status === "RESERVED" && (
-              <Button
-                size="sm"
-                onClick={() => void runAction(() => startRental.mutateAsync({ id: rental.id }))}
-              >
+              <Button size="sm" onClick={() => void handleStart()}>
                 {t("rental.actions.start")}
               </Button>
             )}
@@ -282,6 +301,15 @@ export default function RentalDetailPage() {
       )}
 
       {actionError && <p className="text-destructive text-sm">{actionError}</p>}
+
+      <ConfirmDialog
+        open={showStartDatePassedDialog}
+        onOpenChange={setShowStartDatePassedDialog}
+        title={t("rental.startDatePassed.title")}
+        description={t("rental.startDatePassed.message")}
+        confirmLabel={t("rental.startDatePassed.editDates")}
+        onConfirm={() => router.push(`/app/rentals/${rental.id}/edit`)}
+      />
 
       <DashboardGrid>
         <Card>

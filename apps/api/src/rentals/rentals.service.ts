@@ -12,6 +12,7 @@ import type {
   RentalItem,
   RentalStatus,
 } from "@prisma/client";
+import { RENTAL_START_DATE_PASSED_MESSAGE } from "@rentos/shared";
 
 import { AssetStatusesService } from "../asset-statuses/asset-statuses.service";
 import { AssetsService } from "../assets/assets.service";
@@ -52,8 +53,21 @@ type RentalItemSource = Omit<RentalItemDto, "partialMonthPolicy"> & {
   partialMonthPolicy?: PartialMonthPolicy | null;
 };
 
-/** Statuses in which the item list and planned dates may still be edited. */
+/** Statuses in which the item list and planned dates may still be edited via reserve(). */
 const EDITABLE_STATUSES: RentalStatus[] = ["DRAFT", "QUOTE"];
+/**
+ * Statuses in which update() will accept item/date edits. Extends
+ * EDITABLE_STATUSES with RESERVED so staff can correct a RESERVED rental's
+ * plannedStart after start() rejects it as already-past (see D-113) —
+ * without this, such a rental would be permanently stuck (cannot start,
+ * cannot re-date) and the only recourse would be cancelling it, which the
+ * feature explicitly must not force. Deliberately NOT used by reserve()
+ * itself (EDITABLE_STATUSES stays DRAFT/QUOTE-only there) — a RESERVED
+ * rental cannot be "reserved" again. update() re-validates availability
+ * for RESERVED edits below, since (unlike DRAFT/QUOTE) the asset is
+ * already actively held for the current window.
+ */
+const UPDATE_EDITABLE_STATUSES: RentalStatus[] = [...EDITABLE_STATUSES, "RESERVED"];
 /** Statuses in which a rental's plannedEnd may be pushed further out via extendPlannedEnd (TASK-0009). */
 const EXTENDABLE_STATUSES: RentalStatus[] = ["RESERVED", "ACTIVE"];
 /** Statuses whose record may be hard-removed (never RESERVED/ACTIVE/RETURNED/COMPLETED — those are real operational history). */
@@ -252,9 +266,9 @@ export class RentalsService {
 
     const editingLockedFields =
       dto.items !== undefined || dto.plannedStart !== undefined || dto.plannedEnd !== undefined;
-    if (editingLockedFields && !EDITABLE_STATUSES.includes(current.status)) {
+    if (editingLockedFields && !UPDATE_EDITABLE_STATUSES.includes(current.status)) {
       throw new ConflictException(
-        "Items and planned dates can only be edited while the rental is a draft or quote",
+        "Items and planned dates can only be edited while the rental is a draft, quote, or reserved",
       );
     }
 
@@ -272,6 +286,29 @@ export class RentalsService {
       await this.assertAssetsRentable(
         tenantId,
         items.map((item) => item.assetId),
+      );
+    }
+
+    // A RESERVED rental has already claimed its asset(s) for its current
+    // window (see reserve()'s own assertAvailable call above in the
+    // lifecycle). Editing dates/items at this status — allowed above via
+    // UPDATE_EDITABLE_STATUSES — must re-validate availability for the
+    // *new* window, excluding this rental's own claim, exactly as reserve()
+    // does; otherwise a re-dated RESERVED rental could silently collide
+    // with another rental of the same asset. DRAFT/QUOTE hold nothing yet,
+    // so no re-check happens for them here — availability is asserted once,
+    // at reserve() time.
+    if (current.status === "RESERVED" && editingLockedFields && items.length > 0) {
+      await this.assertAssetsRentable(
+        tenantId,
+        items.map((item) => item.assetId),
+      );
+      await this.availabilityService.assertAvailable(
+        tenantId,
+        items.map((item) => item.assetId),
+        plannedStart,
+        plannedEnd,
+        id,
       );
     }
 
@@ -487,6 +524,21 @@ export class RentalsService {
     const current = await this.findOne(tenantId, id);
     if (current.status !== "RESERVED") {
       throw new ConflictException(`Cannot start a rental in ${current.status} status`);
+    }
+    // Activating a rental whose planned start has already elapsed must never
+    // happen silently — the asset's actual custody window (see
+    // rental-overdue.util.ts) would then start "in the past" from day one,
+    // and staff would have no clear signal the schedule is wrong. Comparing
+    // real Date instants (plannedStart is a UTC-backed DateTime column, `now`
+    // a real wall-clock instant) is already tenant-timezone-correct — an
+    // instant comparison needs no timezone conversion; Tenant.timezone only
+    // matters for *displaying* these dates, not for this check. The exact
+    // boundary (plannedStart === now) is deliberately still allowed — only a
+    // start that has *strictly* already passed is rejected, matching the
+    // half-open-interval convention AvailabilityService already uses
+    // elsewhere in this codebase.
+    if (current.plannedStart.getTime() < Date.now()) {
+      throw new ConflictException(RENTAL_START_DATE_PASSED_MESSAGE);
     }
 
     await this.prisma.$transaction(async (tx) => {

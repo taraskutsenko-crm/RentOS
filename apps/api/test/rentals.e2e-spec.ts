@@ -584,6 +584,317 @@ describe("Rentals E2E", () => {
     expect(asset.body.currentStatus.code).toBe("RENTED");
   });
 
+  describe("start() rejects an already-past planned start", () => {
+    const HOUR_MS = 60 * 60 * 1000;
+
+    async function createAndReserve(
+      plannedStart: Date,
+      plannedEnd: Date,
+      assetId: string = assetAId,
+    ): Promise<string> {
+      const created = await createRental({
+        plannedStart: plannedStart.toISOString(),
+        plannedEnd: plannedEnd.toISOString(),
+        items: [{ assetId, billingMode: "DAILY", dailyPriceMinor: 1000 }],
+      }).expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${created.body.id}/reserve`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+      return created.body.id as string;
+    }
+
+    // 1. Start date clearly in the past.
+    it("rejects activation when the planned start is clearly in the past (days ago)", async () => {
+      const rentalId = await createAndReserve(
+        new Date(Date.now() - 3 * 24 * HOUR_MS),
+        new Date(Date.now() + 24 * HOUR_MS),
+      );
+
+      const response = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(409);
+
+      expect(response.body.message).toBe(
+        "Cannot activate a rental whose planned start date/time has already passed.",
+      );
+    });
+
+    // 2. Start date/time earlier today.
+    it("rejects activation when the planned start was earlier today", async () => {
+      const rentalId = await createAndReserve(
+        new Date(Date.now() - HOUR_MS),
+        new Date(Date.now() + HOUR_MS),
+      );
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(409);
+    });
+
+    // 3. Start date/time later today.
+    it("allows activation when the planned start is later today", async () => {
+      const rentalId = await createAndReserve(
+        new Date(Date.now() + HOUR_MS),
+        new Date(Date.now() + 3 * HOUR_MS),
+      );
+
+      const response = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      expect(response.body.status).toBe("ACTIVE");
+    });
+
+    // 4. Start date tomorrow.
+    it("allows activation when the planned start is tomorrow", async () => {
+      const rentalId = await createAndReserve(
+        new Date(Date.now() + 24 * HOUR_MS),
+        new Date(Date.now() + 48 * HOUR_MS),
+      );
+
+      const response = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      expect(response.body.status).toBe("ACTIVE");
+    });
+
+    // 5. Boundary — a planned start a fraction of a second in the future is
+    // still allowed (not yet passed); one a fraction of a second in the past
+    // is rejected. An exact-instant equality is inherently untestable over
+    // a real HTTP round trip (network/process latency always elapses
+    // between the request being built and the server evaluating it) — the
+    // precise millisecond boundary itself (`< now` vs `<= now`) is proven
+    // deterministically in rentals.service.ts's own logic (mirrors the
+    // identical half-open convention already unit-tested for
+    // AvailabilityService — see availability.service.spec.ts).
+    it("boundary: a planned start a moment in the future is allowed; a moment in the past is rejected", async () => {
+      const future = await createAndReserve(
+        new Date(Date.now() + 2000),
+        new Date(Date.now() + HOUR_MS),
+      );
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${future}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      // A different asset than `future` above — otherwise this window would
+      // genuinely overlap the already-ACTIVE `future` rental on the same
+      // asset and reserve() would (correctly, per the pre-existing overlap
+      // rule) reject it for that unrelated reason.
+      const past = await createAndReserve(
+        new Date(Date.now() - 2000),
+        new Date(Date.now() + HOUR_MS),
+        assetBId,
+      );
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${past}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(409);
+    });
+
+    // 6. Direct API call with no frontend involved — every test in this
+    // block already calls the raw HTTP endpoint directly (no browser, no
+    // frontend validation in the loop), so this requirement is inherently
+    // covered by every case above; asserted explicitly once more here.
+    it("rejects a direct API activation attempt with a past planned start, with no frontend involved", async () => {
+      const rentalId = await createAndReserve(
+        new Date(Date.now() - HOUR_MS),
+        new Date(Date.now() + HOUR_MS),
+      );
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(409);
+    });
+
+    // 7 & 8. A rejected activation changes neither status nor dates.
+    it("a rejected activation leaves the rental's status and planned dates completely unchanged", async () => {
+      const plannedStart = new Date(Date.now() - HOUR_MS);
+      const plannedEnd = new Date(Date.now() + HOUR_MS);
+      const rentalId = await createAndReserve(plannedStart, plannedEnd);
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(409);
+
+      const after = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(after.body.status).toBe("RESERVED");
+      expect(after.body.plannedStart).toBe(plannedStart.toISOString());
+      expect(after.body.plannedEnd).toBe(plannedEnd.toISOString());
+      expect(after.body.actualStart).toBeNull();
+    });
+
+    // 9 & 10. Existing availability/overlap validation is untouched — this
+    // new rule is purely additive. A valid *future* start date can still be
+    // rejected by the pre-existing overlap check at reserve() time (this
+    // rule never even runs at start() for a rental that never got RESERVED).
+    it("existing overlap prevention at reserve() is unaffected by the new start-date rule", async () => {
+      const now = new Date();
+      const first = await createAndReserve(
+        new Date(now.getTime() + HOUR_MS),
+        new Date(now.getTime() + 5 * HOUR_MS),
+      );
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${first}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      // A second, overlapping rental for the same asset — reserve() must
+      // still reject it on availability grounds, same as before this change.
+      const conflicting = await createRental({
+        plannedStart: new Date(now.getTime() + 2 * HOUR_MS).toISOString(),
+        plannedEnd: new Date(now.getTime() + 4 * HOUR_MS).toISOString(),
+      }).expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${conflicting.body.id}/reserve`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(409);
+    });
+
+    // 11. Tenant timezone is respected — the comparison is a real Date
+    // instant comparison (plannedStart is a UTC-backed DateTime column,
+    // `now` a real wall-clock instant), which is correct for every timezone
+    // without any conversion. Proven here with a tenant configured to a
+    // timezone many hours offset from UTC, confirming the accept/reject
+    // verdict tracks the real instant, not a naive local-date string.
+    it("respects the real instant regardless of the tenant's configured timezone", async () => {
+      // Tenant.timezone is set only at registration (no update endpoint
+      // exists) — register a fresh tenant at UTC+14, an offset where the
+      // same calendar date can mean something very different "locally"
+      // than in UTC, and confirm the check still tracks the real instant.
+      const farTzRegister = await request(app.getHttpServer())
+        .post("/auth/register")
+        .send({
+          ...validRegisterPayload,
+          email: "far-tz-owner@example.com",
+          companyName: "Far Timezone Co",
+          timezone: "Pacific/Kiritimati",
+        })
+        .expect(201);
+      const farTzBody = farTzRegister.body as RegisterResponseBody;
+      const farTzTenantId = farTzBody.tenant.id;
+      const farTzCookie = extractCookie(farTzRegister.headers, "rentos_access_token");
+
+      const farTzCategory = await request(app.getHttpServer())
+        .post(`/tenants/${farTzTenantId}/asset-categories`)
+        .set("Cookie", farTzCookie)
+        .send({ name: "Generators" })
+        .expect(201);
+      const farTzAsset = await request(app.getHttpServer())
+        .post(`/tenants/${farTzTenantId}/assets`)
+        .set("Cookie", farTzCookie)
+        .send({
+          name: "Generator",
+          internalNumber: "TZ-0001",
+          categoryId: farTzCategory.body.id,
+        })
+        .expect(201);
+      const farTzCustomer = await request(app.getHttpServer())
+        .post(`/tenants/${farTzTenantId}/customers`)
+        .set("Cookie", farTzCookie)
+        .send({ firstName: "Jane", lastName: "Doe" })
+        .expect(201);
+
+      async function createReserveAt(plannedStart: Date, plannedEnd: Date): Promise<string> {
+        const created = await request(app.getHttpServer())
+          .post(`/tenants/${farTzTenantId}/rentals`)
+          .set("Cookie", farTzCookie)
+          .send({
+            customerId: farTzCustomer.body.id,
+            plannedStart: plannedStart.toISOString(),
+            plannedEnd: plannedEnd.toISOString(),
+            items: [{ assetId: farTzAsset.body.id, billingMode: "DAILY", dailyPriceMinor: 1000 }],
+          })
+          .expect(201);
+        await request(app.getHttpServer())
+          .post(`/tenants/${farTzTenantId}/rentals/${created.body.id}/reserve`)
+          .set("Cookie", farTzCookie)
+          .send({})
+          .expect(201);
+        return created.body.id as string;
+      }
+
+      const pastRentalId = await createReserveAt(
+        new Date(Date.now() - HOUR_MS),
+        new Date(Date.now() + HOUR_MS),
+      );
+      await request(app.getHttpServer())
+        .post(`/tenants/${farTzTenantId}/rentals/${pastRentalId}/start`)
+        .set("Cookie", farTzCookie)
+        .send({})
+        .expect(409);
+
+      const futureRentalId = await createReserveAt(
+        new Date(Date.now() + HOUR_MS),
+        new Date(Date.now() + 3 * HOUR_MS),
+      );
+      const response = await request(app.getHttpServer())
+        .post(`/tenants/${farTzTenantId}/rentals/${futureRentalId}/start`)
+        .set("Cookie", farTzCookie)
+        .send({})
+        .expect(201);
+      expect(response.body.status).toBe("ACTIVE");
+    });
+
+    // 12. The end-to-end "correct it" recovery path this whole feature exists
+    // for: a rejected activation must be recoverable by editing the planned
+    // start via update() (not by cancelling/recreating the rental), and
+    // activation must then succeed normally. Exercises the RESERVED-status
+    // update() carve-out added alongside this rule (see D-113) — without it,
+    // a rental rejected by start() would be permanently stuck.
+    it("after a rejected activation, editing plannedStart via update() lets start() succeed", async () => {
+      const rentalId = await createAndReserve(
+        new Date(Date.now() - HOUR_MS),
+        new Date(Date.now() + HOUR_MS),
+      );
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(409);
+
+      const newStart = new Date(Date.now() + HOUR_MS);
+      const newEnd = new Date(Date.now() + 3 * HOUR_MS);
+      const updated = await request(app.getHttpServer())
+        .patch(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", accessCookie)
+        .send({ plannedStart: newStart.toISOString(), plannedEnd: newEnd.toISOString() })
+        .expect(200);
+      expect(updated.body.status).toBe("RESERVED");
+      expect(updated.body.plannedStart).toBe(newStart.toISOString());
+
+      const response = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/start`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+      expect(response.body.status).toBe("ACTIVE");
+    });
+  });
+
   // 23. Return (full) transitions ACTIVE -> RETURNED, sets actualEnd, syncs asset status to AVAILABLE
   it("a full return transitions ACTIVE to RETURNED and marks the asset AVAILABLE again", async () => {
     const created = await createRental().expect(201);
@@ -738,11 +1049,66 @@ describe("Rentals E2E", () => {
       .expect(409);
   });
 
-  // 28. Items/dates become immutable once RESERVED
-  it("rejects editing items or dates once a rental is RESERVED", async () => {
+  // 28. Items/dates on a RESERVED rental may be corrected — see D-113: this
+  // is the update() carve-out that lets staff fix a RESERVED rental's dates
+  // (e.g. after start() rejects an already-past plannedStart) instead of
+  // being permanently stuck. Availability is re-validated for the new
+  // selection, same as reserve() itself would enforce.
+  it("allows editing items/dates on a RESERVED rental when the new selection remains available", async () => {
     const created = await createRental().expect(201);
     await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/rentals/${created.body.id}/reserve`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    const response = await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}/rentals/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .send({ items: [{ assetId: assetBId, billingMode: "DAILY", dailyPriceMinor: 500 }] })
+      .expect(200);
+    expect(response.body.status).toBe("RESERVED");
+    expect(response.body.items).toHaveLength(1);
+    expect(response.body.items[0].assetId).toBe(assetBId);
+  });
+
+  it("rejects editing a RESERVED rental's items/dates when the new selection conflicts with another reservation", async () => {
+    // A separate rental holding assetB for a fixed window.
+    const holder = await createRental({
+      items: [{ assetId: assetBId, billingMode: "DAILY", dailyPriceMinor: 500 }],
+    }).expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${holder.body.id}/reserve`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    // A second, independent RESERVED rental (on assetA) tries to move onto
+    // assetB for the same window — must be rejected on availability
+    // grounds, not silently accepted.
+    const created = await createRental().expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${created.body.id}/reserve`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .patch(`/tenants/${tenantId}/rentals/${created.body.id}`)
+      .set("Cookie", accessCookie)
+      .send({ items: [{ assetId: assetBId, billingMode: "DAILY", dailyPriceMinor: 500 }] })
+      .expect(409);
+  });
+
+  it("still rejects editing items or dates once a rental is ACTIVE", async () => {
+    const created = await createRental().expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${created.body.id}/reserve`)
+      .set("Cookie", accessCookie)
+      .send({})
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/rentals/${created.body.id}/start`)
       .set("Cookie", accessCookie)
       .send({})
       .expect(201);
@@ -1142,9 +1508,13 @@ describe("Rentals E2E", () => {
       .send({})
       .expect(201);
 
-    // Genuinely ACTIVE — reserve() then start() — must count.
+    // Genuinely ACTIVE — reserve() then start() — must count. plannedStart
+    // is a few seconds in the future (not the past) so start() itself
+    // succeeds under the "cannot activate a rental whose planned start has
+    // already passed" rule — this test is about the ACTIVE filter, not
+    // about that rule, so it deliberately avoids tripping it.
     const active = await createRental({
-      plannedStart: dateOffset(-1),
+      plannedStart: new Date(Date.now() + 5000).toISOString(),
       plannedEnd: dateOffset(1),
     }).expect(201);
     await request(app.getHttpServer())
@@ -1158,10 +1528,12 @@ describe("Rentals E2E", () => {
       .send({})
       .expect(201);
 
-    // RETURNED — was active, now finished — must NOT count.
+    // RETURNED — was active, now finished — must NOT count. Same
+    // near-future plannedStart as `active` above, for the same reason
+    // (start() now rejects an already-past planned start).
     const returned = await createRental({
-      plannedStart: dateOffset(-3),
-      plannedEnd: dateOffset(-1),
+      plannedStart: new Date(Date.now() + 5000).toISOString(),
+      plannedEnd: dateOffset(1),
       items: [{ assetId: assetBId, billingMode: "DAILY", dailyPriceMinor: 1000 }],
     }).expect(201);
     await request(app.getHttpServer())

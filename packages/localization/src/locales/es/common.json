@@ -527,6 +527,11 @@
       "bannerTitle": "Devolución vencida",
       "plannedReturn": "Devolución prevista: {{date}}"
     },
+    "startDatePassed": {
+      "title": "No se puede activar el alquiler",
+      "message": "La fecha/hora de inicio prevista de este alquiler ya ha pasado. Actualice la fecha/hora de inicio antes de activar el alquiler.",
+      "editDates": "Editar fechas"
+    },
     "documents": {
       "empty": "Todavía no hay documentos vinculados a este alquiler",
       "generate": "Generar documento"

@@ -527,6 +527,11 @@
       "bannerTitle": "Rückgabe überfällig",
       "plannedReturn": "Geplante Rückgabe: {{date}}"
     },
+    "startDatePassed": {
+      "title": "Vermietung kann nicht aktiviert werden",
+      "message": "Der geplante Startzeitpunkt dieser Vermietung liegt bereits in der Vergangenheit. Aktualisieren Sie den Startzeitpunkt, bevor Sie die Vermietung aktivieren.",
+      "editDates": "Daten bearbeiten"
+    },
     "documents": {
       "empty": "Dieser Vermietung sind noch keine Dokumente zugeordnet",
       "generate": "Dokument erstellen"

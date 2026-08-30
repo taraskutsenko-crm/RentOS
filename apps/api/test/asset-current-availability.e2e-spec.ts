@@ -136,6 +136,35 @@ describe("Asset current availability (Assets list) E2E", () => {
       .expect(201);
   }
 
+  /**
+   * Creates a genuinely ACTIVE rental whose plannedStart/plannedEnd are
+   * whatever the test needs — including in the past, to simulate a rental
+   * that started on schedule and later became overdue. Since RentalsService.
+   * start() itself now rejects an already-past plannedStart (see
+   * rentals.service.ts's "cannot activate a rental whose planned start has
+   * already passed" rule), this creates with a safely-near-future
+   * plannedStart, starts it for real (so the real syncAssetStatuses side
+   * effect — Asset.currentStatusId -> RENTED — genuinely happens), then
+   * backdates plannedStart/plannedEnd directly via Prisma to the values the
+   * test scenario actually needs — exactly mirroring how a real overdue
+   * rental arises (started on time, time passes), never a rental "started"
+   * with an already-past planned start, which the API itself no longer allows.
+   */
+  async function createActiveRental(
+    assetId: string,
+    plannedStart: Date,
+    plannedEnd: Date,
+  ): Promise<string> {
+    const rentalId = await createRental(
+      assetId,
+      new Date(Date.now() + 2000),
+      new Date(Date.now() + HOUR_MS),
+    );
+    await reserveAndStart(rentalId);
+    await prisma.rental.update({ where: { id: rentalId }, data: { plannedStart, plannedEnd } });
+    return rentalId;
+  }
+
   async function createBlock(
     assetId: string,
     type: string,
@@ -167,12 +196,11 @@ describe("Asset current availability (Assets list) E2E", () => {
   it("active rental right now -> Available now = No, reason RENTED", async () => {
     const assetId = await createAsset("GEN-A");
     const now = new Date();
-    const rentalId = await createRental(
+    await createActiveRental(
       assetId,
       new Date(now.getTime() - HOUR_MS),
       new Date(now.getTime() + HOUR_MS),
     );
-    await reserveAndStart(rentalId);
 
     const row = await listRow(assetId);
     expect(row.isAvailableNow).toBe(false);
@@ -206,12 +234,11 @@ describe("Asset current availability (Assets list) E2E", () => {
   it("past rental only (returned) -> Available now = Yes", async () => {
     const assetId = await createAsset("GEN-C");
     const now = new Date();
-    const rentalId = await createRental(
+    const rentalId = await createActiveRental(
       assetId,
       new Date(now.getTime() - 5 * HOUR_MS),
       new Date(now.getTime() - 2 * HOUR_MS),
     );
-    await reserveAndStart(rentalId);
     await request(app.getHttpServer())
       .post(`/tenants/${tenantId}/rentals/${rentalId}/return`)
       .set("Cookie", accessCookie)
@@ -342,12 +369,11 @@ describe("Asset current availability (Assets list) E2E", () => {
     it("rental currently inside its planned period, not returned -> unavailable now, not overdue", async () => {
       const assetId = await createAsset("OD-A");
       const now = new Date();
-      const rentalId = await createRental(
+      await createActiveRental(
         assetId,
         new Date(now.getTime() - HOUR_MS),
         new Date(now.getTime() + HOUR_MS),
       );
-      await reserveAndStart(rentalId);
 
       const row = await listRow(assetId);
       expect(row.isAvailableNow).toBe(false);
@@ -361,12 +387,7 @@ describe("Asset current availability (Assets list) E2E", () => {
       const assetId = await createAsset("OD-B");
       const now = new Date();
       const plannedEnd = new Date(now.getTime() - 2 * HOUR_MS);
-      const rentalId = await createRental(
-        assetId,
-        new Date(now.getTime() - 5 * HOUR_MS),
-        plannedEnd,
-      );
-      await reserveAndStart(rentalId);
+      await createActiveRental(assetId, new Date(now.getTime() - 5 * HOUR_MS), plannedEnd);
 
       const row = await listRow(assetId);
       expect(row.isAvailableNow).toBe(false);
@@ -384,12 +405,11 @@ describe("Asset current availability (Assets list) E2E", () => {
     it("planned end passed, but actually returned -> available now, overdue = false", async () => {
       const assetId = await createAsset("OD-C");
       const now = new Date();
-      const rentalId = await createRental(
+      const rentalId = await createActiveRental(
         assetId,
         new Date(now.getTime() - 5 * HOUR_MS),
         new Date(now.getTime() - 2 * HOUR_MS), // already overdue before the return
       );
-      await reserveAndStart(rentalId);
 
       // Confirm it is genuinely overdue first — proves the return is what fixes it.
       expect((await listRow(assetId)).isOverdue).toBe(true);
@@ -413,12 +433,11 @@ describe("Asset current availability (Assets list) E2E", () => {
     it("a drafted Return Protocol document alone does not release an overdue asset", async () => {
       const assetId = await createAsset("OD-D");
       const now = new Date();
-      const rentalId = await createRental(
+      const rentalId = await createActiveRental(
         assetId,
         new Date(now.getTime() - 5 * HOUR_MS),
         new Date(now.getTime() - 2 * HOUR_MS),
       );
-      await reserveAndStart(rentalId);
 
       // Generate a Return Protocol document — paperwork only, see
       // rental-overdue.util.ts's doc comment: this must never set
@@ -463,12 +482,11 @@ describe("Asset current availability (Assets list) E2E", () => {
     it("a fully-returned past rental -> available now, isOverdue false", async () => {
       const assetId = await createAsset("OD-F");
       const now = new Date();
-      const rentalId = await createRental(
+      const rentalId = await createActiveRental(
         assetId,
         new Date(now.getTime() - 5 * HOUR_MS),
         new Date(now.getTime() - 2 * HOUR_MS),
       );
-      await reserveAndStart(rentalId);
       await request(app.getHttpServer())
         .post(`/tenants/${tenantId}/rentals/${rentalId}/return`)
         .set("Cookie", accessCookie)
@@ -485,12 +503,11 @@ describe("Asset current availability (Assets list) E2E", () => {
     it("overdue rental blocks a future reservation attempt on the same asset (overlap protection preserved)", async () => {
       const assetId = await createAsset("OD-G");
       const now = new Date();
-      const overdueRentalId = await createRental(
+      await createActiveRental(
         assetId,
         new Date(now.getTime() - 5 * HOUR_MS),
         new Date(now.getTime() - 2 * HOUR_MS),
       );
-      await reserveAndStart(overdueRentalId);
 
       // A different customer tries to book the same (still-overdue,
       // never-returned) asset for next week.
@@ -519,12 +536,11 @@ describe("Asset current availability (Assets list) E2E", () => {
     it("overdue rental plus a maintenance block -> still unavailable", async () => {
       const assetId = await createAsset("OD-H");
       const now = new Date();
-      const rentalId = await createRental(
+      await createActiveRental(
         assetId,
         new Date(now.getTime() - 5 * HOUR_MS),
         new Date(now.getTime() - 2 * HOUR_MS),
       );
-      await reserveAndStart(rentalId);
       await createBlock(
         assetId,
         "MAINTENANCE",
@@ -563,12 +579,11 @@ describe("Asset current availability (Assets list) E2E", () => {
       // while still within or at the boundary of the planned window",
       // without depending on hitting an exact millisecond in a live HTTP
       // round trip.
-      const rentalId = await createRental(
+      await createActiveRental(
         assetId,
         new Date(now.getTime() - HOUR_MS),
         new Date(now.getTime() + 30_000),
       );
-      await reserveAndStart(rentalId);
 
       const row = await listRow(assetId);
       expect(row.isAvailableNow).toBe(false); // still blocked — within its planned window
@@ -604,13 +619,17 @@ describe("Asset current availability (Assets list) E2E", () => {
         .send({ firstName: "Other", lastName: "Customer" })
         .expect(201);
       const now = new Date();
+      // plannedStart is safely near-future at creation time (start() itself
+      // now rejects an already-past planned start — see createActiveRental's
+      // doc comment above), then backdated directly via Prisma afterwards to
+      // simulate a rental that started on schedule and later went overdue.
       const otherRental = await request(app.getHttpServer())
         .post(`/tenants/${otherTenantId}/rentals`)
         .set("Cookie", otherCookie)
         .send({
           customerId: otherCustomer.body.id,
-          plannedStart: new Date(now.getTime() - 5 * HOUR_MS).toISOString(),
-          plannedEnd: new Date(now.getTime() - 2 * HOUR_MS).toISOString(),
+          plannedStart: new Date(Date.now() + 2000).toISOString(),
+          plannedEnd: new Date(Date.now() + HOUR_MS).toISOString(),
           items: [{ assetId: otherAsset.body.id, billingMode: "DAILY", dailyPriceMinor: 1000 }],
         })
         .expect(201);
@@ -624,6 +643,13 @@ describe("Asset current availability (Assets list) E2E", () => {
         .set("Cookie", otherCookie)
         .send({})
         .expect(201);
+      await prisma.rental.update({
+        where: { id: otherRental.body.id },
+        data: {
+          plannedStart: new Date(now.getTime() - 5 * HOUR_MS),
+          plannedEnd: new Date(now.getTime() - 2 * HOUR_MS),
+        },
+      });
 
       // This tenant's own, entirely separate asset with the same internal
       // number pattern must be unaffected — never overdue, never blocked.
@@ -638,12 +664,11 @@ describe("Asset current availability (Assets list) E2E", () => {
       const assetId = await createAsset("OD-L");
       const now = new Date();
       const plannedEnd = new Date(now.getTime() - 2 * HOUR_MS);
-      const rentalId = await createRental(
+      const rentalId = await createActiveRental(
         assetId,
         new Date(now.getTime() - 5 * HOUR_MS),
         plannedEnd,
       );
-      await reserveAndStart(rentalId);
 
       const overdueDetail = await rentalDetail(rentalId);
       expect(overdueDetail.isOverdue).toBe(true);

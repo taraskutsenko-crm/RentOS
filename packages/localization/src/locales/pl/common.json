@@ -527,6 +527,11 @@
       "bannerTitle": "Zwrot jest przeterminowany",
       "plannedReturn": "Planowany zwrot: {{date}}"
     },
+    "startDatePassed": {
+      "title": "Nie można aktywować wynajmu",
+      "message": "Planowana data/godzina rozpoczęcia tego wynajmu już minęła. Zaktualizuj datę/godzinę rozpoczęcia przed aktywacją wynajmu.",
+      "editDates": "Edytuj daty"
+    },
     "documents": {
       "empty": "Do tego wynajmu nie przypisano jeszcze żadnych dokumentów",
       "generate": "Generuj dokument"

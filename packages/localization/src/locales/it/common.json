@@ -527,6 +527,11 @@
       "bannerTitle": "Restituzione in ritardo",
       "plannedReturn": "Restituzione prevista: {{date}}"
     },
+    "startDatePassed": {
+      "title": "Impossibile attivare il noleggio",
+      "message": "La data/ora di inizio pianificata di questo noleggio è già trascorsa. Aggiorna la data/ora di inizio prima di attivare il noleggio.",
+      "editDates": "Modifica date"
+    },
     "documents": {
       "empty": "Ancora nessun documento collegato a questo noleggio",
       "generate": "Genera documento"

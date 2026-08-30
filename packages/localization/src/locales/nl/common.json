@@ -527,6 +527,11 @@
       "bannerTitle": "Retour te laat",
       "plannedReturn": "Geplande retour: {{date}}"
     },
+    "startDatePassed": {
+      "title": "Verhuur kan niet worden geactiveerd",
+      "message": "De geplande startdatum/tijd van deze verhuur is al verstreken. Werk de startdatum/tijd bij voordat u de verhuur activeert.",
+      "editDates": "Datums wijzigen"
+    },
     "documents": {
       "empty": "Nog geen documenten gekoppeld aan deze verhuur",
       "generate": "Document genereren"

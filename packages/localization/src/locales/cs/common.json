@@ -527,6 +527,11 @@
       "bannerTitle": "Vrácení je po termínu",
       "plannedReturn": "Plánované vrácení: {{date}}"
     },
+    "startDatePassed": {
+      "title": "Pronájem nelze aktivovat",
+      "message": "Plánované datum/čas zahájení tohoto pronájmu již uplynulo. Před aktivací pronájmu aktualizujte datum/čas zahájení.",
+      "editDates": "Upravit data"
+    },
     "documents": {
       "empty": "K tomuto pronájmu zatím nejsou přiřazeny žádné dokumenty",
       "generate": "Vygenerovat dokument"

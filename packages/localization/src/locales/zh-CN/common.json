@@ -527,6 +527,11 @@
       "bannerTitle": "归还已逾期",
       "plannedReturn": "计划归还时间：{{date}}"
     },
+    "startDatePassed": {
+      "title": "无法激活此租赁",
+      "message": "该租赁的计划开始日期/时间已过。请在激活前更新开始日期/时间。",
+      "editDates": "修改日期"
+    },
     "documents": {
       "empty": "该租赁尚未关联任何文档",
       "generate": "生成文档"

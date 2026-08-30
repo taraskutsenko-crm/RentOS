@@ -527,6 +527,11 @@
       "bannerTitle": "Retour en retard",
       "plannedReturn": "Retour prévu : {{date}}"
     },
+    "startDatePassed": {
+      "title": "Impossible d'activer la location",
+      "message": "La date/heure de début prévue de cette location est déjà passée. Mettez à jour la date/heure de début avant d'activer la location.",
+      "editDates": "Modifier les dates"
+    },
     "documents": {
       "empty": "Aucun document lié à cette location pour l'instant",
       "generate": "Générer un document"

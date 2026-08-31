@@ -372,6 +372,12 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "documents.update",
     "documents.download",
     "documents.render",
+    // Havelio Signature System (docs/PRODUCT_BIBLE.md): TECHNICIAN is the
+    // role that physically performs Handover/Return, so it must be able
+    // to capture an in-person customer signature (and its own
+    // representative signature) directly on the spot, without needing an
+    // OWNER/MANAGER to click "Sign" separately.
+    "documents.sign",
   ],
   ACCOUNTANT: [
     ...ASSET_READ_ONLY,

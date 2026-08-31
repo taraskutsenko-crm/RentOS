@@ -847,7 +847,7 @@ describe("Documents E2E (TASK-0008 Part 1 — Document Management Platform)", ()
       .expect(403);
   });
 
-  it("allows TECHNICIAN to create/update/view/download but blocks send/sign/void/archive", async () => {
+  it("allows TECHNICIAN to create/update/view/download/sign but blocks send/void/archive", async () => {
     const techCookie = await createMemberWithRole("TECHNICIAN", "tech@example.com");
 
     const created = await request(app.getHttpServer())
@@ -874,6 +874,15 @@ describe("Documents E2E (TASK-0008 Part 1 — Document Management Platform)", ()
       .set("Cookie", techCookie)
       .send({})
       .expect(403);
+
+    // documents.sign IS granted to TECHNICIAN (Havelio Signature System —
+    // the role that physically performs Handover/Return can capture an
+    // in-person signature directly, per docs/PRODUCT_BIBLE.md).
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents/${created.body.id}/sign`)
+      .set("Cookie", techCookie)
+      .send({})
+      .expect(201);
   });
 
   it("restricts ACCOUNTANT to view/download only", async () => {

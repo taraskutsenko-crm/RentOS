@@ -212,6 +212,28 @@ table.doc-table tr:last-child td {
   margin-top: 4px;
 }
 
+.doc-signature-block__title {
+  font-size: 12px;
+  color: var(--doc-ink-muted);
+}
+
+/* Havelio Signature System (docs/PRODUCT_BIBLE.md) — the embedded
+   handwritten signature image. Capped size, aspect ratio preserved,
+   never stretched — mirrors .doc-header__logo's own object-fit rule. */
+.doc-signature-block__image {
+  display: block;
+  max-height: 64px;
+  max-width: 220px;
+  object-fit: contain;
+  margin: 8px 0;
+}
+
+.doc-signature-block__signedat {
+  font-size: 11px;
+  color: var(--doc-ink-faint);
+  margin-top: 4px;
+}
+
 .doc-footer {
   margin-top: 56px;
   padding-top: 16px;

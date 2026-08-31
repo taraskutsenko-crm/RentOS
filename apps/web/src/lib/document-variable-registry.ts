@@ -213,6 +213,53 @@ export const DOCUMENT_VARIABLES: DocumentVariableMeta[] = [
     group: "signature",
     labelKey: "documentVariable.signature.employee",
   },
+  {
+    path: "signature.companySignatureImageHtml",
+    group: "signature",
+    labelKey: "documentVariable.signature.companySignatureImageHtml",
+    isRawHtml: true,
+  },
+  {
+    path: "signature.companySignerName",
+    group: "signature",
+    labelKey: "documentVariable.signature.companySignerName",
+  },
+  {
+    path: "signature.companySignerTitle",
+    group: "signature",
+    labelKey: "documentVariable.signature.companySignerTitle",
+  },
+  {
+    path: "signature.companySignedAt",
+    group: "signature",
+    labelKey: "documentVariable.signature.companySignedAt",
+  },
+  {
+    path: "signature.companySignedAtLabel",
+    group: "signature",
+    labelKey: "documentVariable.signature.companySignedAtLabel",
+  },
+  {
+    path: "signature.customerSignatureImageHtml",
+    group: "signature",
+    labelKey: "documentVariable.signature.customerSignatureImageHtml",
+    isRawHtml: true,
+  },
+  {
+    path: "signature.customerSignerName",
+    group: "signature",
+    labelKey: "documentVariable.signature.customerSignerName",
+  },
+  {
+    path: "signature.customerSignedAt",
+    group: "signature",
+    labelKey: "documentVariable.signature.customerSignedAt",
+  },
+  {
+    path: "signature.customerSignedAtLabel",
+    group: "signature",
+    labelKey: "documentVariable.signature.customerSignedAtLabel",
+  },
   { path: "notes", group: "other", labelKey: "documentVariable.other.notes" },
 
   { path: "document.number", group: "document", labelKey: "documentVariable.document.number" },

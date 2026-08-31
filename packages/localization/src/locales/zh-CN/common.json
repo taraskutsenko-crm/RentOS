@@ -173,6 +173,24 @@
         "phone": "电话",
         "email": "公司邮箱",
         "emailHelp": "向客户发送文件时用作回复地址。"
+      },
+      "signature": {
+        "title": "Company representative signature",
+        "subtitle": "This signature can be used when signing documents on behalf of the company.",
+        "fields": {
+          "signerName": "Signer name",
+          "signerTitle": "Position"
+        },
+        "preview": "Current signature",
+        "upload": "Upload signature",
+        "draw": "Draw signature",
+        "drawTitle": "Draw your signature",
+        "delete": "Delete",
+        "deleteConfirm": "Delete the saved company signature? Documents already signed with it keep their signature.",
+        "nameRequired": "Enter the signer's name before saving a signature.",
+        "saved": "Signature saved",
+        "deleted": "Signature deleted",
+        "saveFailed": "Failed to save signature"
       }
     }
   },
@@ -1053,7 +1071,8 @@
       "email_sent": "邮件已发送",
       "email_failed": "邮件发送失败",
       "signature_requested": "已请求签名",
-      "signature_status_changed": "签名状态已变更"
+      "signature_status_changed": "签名状态已变更",
+      "signature_captured": "Signature captured"
     },
     "errors": {
       "customTypeNameRequired": "请输入该自定义文档类型的名称"
@@ -1071,6 +1090,30 @@
         "DAMAGE": "损坏",
         "OTHER": "其他"
       }
+    },
+    "signatures": {
+      "title": "Signatures",
+      "status": {
+        "UNSIGNED": "Unsigned",
+        "COMPANY_ONLY": "Signed by company",
+        "CUSTOMER_ONLY": "Signed by customer",
+        "BOTH": "Signed by both parties"
+      },
+      "signAsCompany": "Sign as company",
+      "customerSigns": "Customer signs",
+      "useStoredSignature": "Use saved signature",
+      "drawNow": "Draw now",
+      "chooseMethod": "How would you like to sign?",
+      "signerNameLabel": "Signer name",
+      "signerTitleLabel": "Position",
+      "companySignature": "Company signature",
+      "customerSignature": "Customer signature",
+      "signedAt": "Signed",
+      "saved": "Signature saved",
+      "documentSigned": "Document signed",
+      "saveFailed": "Failed to save signature",
+      "noCompanySignature": "No saved company signature — draw one now or configure one in Company Profile.",
+      "legalNote": "A signature drawn or uploaded in Havelio is a visual handwritten signature. It does not by itself constitute a qualified electronic signature."
     }
   },
   "documentTemplate": {
@@ -1435,7 +1478,16 @@
     },
     "signature": {
       "company": "公司签署人",
-      "employee": "员工签署人"
+      "employee": "员工签署人",
+      "companySignatureImageHtml": "Company signature image",
+      "companySignerName": "Company signer name",
+      "companySignerTitle": "Company signer position",
+      "companySignedAt": "Company signed at",
+      "companySignedAtLabel": "\"Signed:\" label (company)",
+      "customerSignatureImageHtml": "Customer signature image",
+      "customerSignerName": "Customer signer name",
+      "customerSignedAt": "Customer signed at",
+      "customerSignedAtLabel": "\"Signed:\" label (customer)"
     },
     "document": {
       "number": "文档编号",
@@ -1620,5 +1672,13 @@
         "READY": "已就绪"
       }
     }
+  },
+  "signaturePad": {
+    "title": "Draw your signature",
+    "clear": "Clear",
+    "undo": "Undo",
+    "save": "Save signature",
+    "cancel": "Cancel",
+    "emptyHint": "Draw your signature above"
   }
 }

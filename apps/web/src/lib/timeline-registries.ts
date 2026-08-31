@@ -98,6 +98,7 @@ export const DOCUMENT_TIMELINE_REGISTRY: Record<DocumentTimelineEventType, Timel
     icon: FileSignature,
     labelKey: "document.timeline.signature_status_changed",
   },
+  signature_captured: { icon: FileSignature, labelKey: "document.timeline.signature_captured" },
 };
 
 export const CUSTOMER_TIMELINE_REGISTRY: Record<CustomerTimelineEventType, TimelineEventConfig> = {

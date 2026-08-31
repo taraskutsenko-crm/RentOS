@@ -35,11 +35,16 @@ const DELETABLE_STATUSES: DocumentStatus[] = ["DRAFT", "VOIDED"];
  * intermediate, not a mandatory gate before signing/rejecting — staff may
  * record a signature obtained out-of-band (e.g. a scanned wet-ink
  * signature) without the document ever having gone through an online
- * "viewed" event. See docs/adr/0010-document-management-platform.md.
+ * "viewed" event. DRAFT -> PARTIALLY_SIGNED/SIGNED is also allowed
+ * directly (Havelio Signature System, docs/PRODUCT_BIBLE.md) — an
+ * in-person Handover/Return is typically captured and signed on the spot,
+ * with no separate "send" step ever happening, so requiring READY/SENT
+ * first would force an artificial detour through statuses that mean
+ * nothing in that flow. See docs/adr/0010-document-management-platform.md.
  */
 const ALLOWED_TRANSITIONS: Record<DocumentStatus, DocumentStatus[]> = {
-  DRAFT: ["READY", "VOIDED"],
-  READY: ["SENT", "VOIDED"],
+  DRAFT: ["READY", "PARTIALLY_SIGNED", "SIGNED", "VOIDED"],
+  READY: ["SENT", "PARTIALLY_SIGNED", "SIGNED", "VOIDED"],
   SENT: ["VIEWED", "PARTIALLY_SIGNED", "SIGNED", "REJECTED", "VOIDED"],
   VIEWED: ["PARTIALLY_SIGNED", "SIGNED", "REJECTED", "VOIDED"],
   PARTIALLY_SIGNED: ["SIGNED", "VOIDED"],
@@ -76,6 +81,7 @@ const AUDIT_ACTION_TO_TIMELINE_TYPE: Record<string, DocumentTimelineEventType> =
   "document.email_failed": "email_failed",
   "document.signature_requested": "signature_requested",
   "document.signature_status_changed": "signature_status_changed",
+  "document.signature_captured": "signature_captured",
 };
 
 @Injectable()

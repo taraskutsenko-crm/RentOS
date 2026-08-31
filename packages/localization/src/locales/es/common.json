@@ -173,6 +173,24 @@
         "phone": "Teléfono",
         "email": "Correo electrónico de la empresa",
         "emailHelp": "Se usa como dirección de respuesta al enviar documentos por correo a los clientes."
+      },
+      "signature": {
+        "title": "Company representative signature",
+        "subtitle": "This signature can be used when signing documents on behalf of the company.",
+        "fields": {
+          "signerName": "Signer name",
+          "signerTitle": "Position"
+        },
+        "preview": "Current signature",
+        "upload": "Upload signature",
+        "draw": "Draw signature",
+        "drawTitle": "Draw your signature",
+        "delete": "Delete",
+        "deleteConfirm": "Delete the saved company signature? Documents already signed with it keep their signature.",
+        "nameRequired": "Enter the signer's name before saving a signature.",
+        "saved": "Signature saved",
+        "deleted": "Signature deleted",
+        "saveFailed": "Failed to save signature"
       }
     }
   },
@@ -1053,7 +1071,8 @@
       "email_sent": "Correo enviado",
       "email_failed": "Envío de correo fallido",
       "signature_requested": "Firma solicitada",
-      "signature_status_changed": "Estado de la firma cambiado"
+      "signature_status_changed": "Estado de la firma cambiado",
+      "signature_captured": "Signature captured"
     },
     "errors": {
       "customTypeNameRequired": "Introduce un nombre para este tipo de documento personalizado"
@@ -1071,6 +1090,30 @@
         "DAMAGE": "Daño",
         "OTHER": "Otro"
       }
+    },
+    "signatures": {
+      "title": "Signatures",
+      "status": {
+        "UNSIGNED": "Unsigned",
+        "COMPANY_ONLY": "Signed by company",
+        "CUSTOMER_ONLY": "Signed by customer",
+        "BOTH": "Signed by both parties"
+      },
+      "signAsCompany": "Sign as company",
+      "customerSigns": "Customer signs",
+      "useStoredSignature": "Use saved signature",
+      "drawNow": "Draw now",
+      "chooseMethod": "How would you like to sign?",
+      "signerNameLabel": "Signer name",
+      "signerTitleLabel": "Position",
+      "companySignature": "Company signature",
+      "customerSignature": "Customer signature",
+      "signedAt": "Signed",
+      "saved": "Signature saved",
+      "documentSigned": "Document signed",
+      "saveFailed": "Failed to save signature",
+      "noCompanySignature": "No saved company signature — draw one now or configure one in Company Profile.",
+      "legalNote": "A signature drawn or uploaded in Havelio is a visual handwritten signature. It does not by itself constitute a qualified electronic signature."
     }
   },
   "documentTemplate": {
@@ -1435,7 +1478,16 @@
     },
     "signature": {
       "company": "Firmante por la empresa",
-      "employee": "Firmante empleado"
+      "employee": "Firmante empleado",
+      "companySignatureImageHtml": "Company signature image",
+      "companySignerName": "Company signer name",
+      "companySignerTitle": "Company signer position",
+      "companySignedAt": "Company signed at",
+      "companySignedAtLabel": "\"Signed:\" label (company)",
+      "customerSignatureImageHtml": "Customer signature image",
+      "customerSignerName": "Customer signer name",
+      "customerSignedAt": "Customer signed at",
+      "customerSignedAtLabel": "\"Signed:\" label (customer)"
     },
     "document": {
       "number": "Número de documento",
@@ -1620,5 +1672,13 @@
         "READY": "Listo"
       }
     }
+  },
+  "signaturePad": {
+    "title": "Draw your signature",
+    "clear": "Clear",
+    "undo": "Undo",
+    "save": "Save signature",
+    "cancel": "Cancel",
+    "emptyHint": "Draw your signature above"
   }
 }

@@ -20,6 +20,7 @@ export type DocumentTimelineEventType =
   | "email_sent"
   | "email_failed"
   | "signature_requested"
-  | "signature_status_changed";
+  | "signature_status_changed"
+  | "signature_captured";
 
 export type DocumentTimelineEvent = TimelineEvent<DocumentTimelineEventType>;

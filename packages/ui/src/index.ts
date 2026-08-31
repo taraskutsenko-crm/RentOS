@@ -35,6 +35,11 @@ export {
 export { Input } from "./components/input";
 export { Label } from "./components/label";
 export { Select } from "./components/select";
+export {
+  SignaturePad,
+  type SignaturePadLabels,
+  type SignaturePadProps,
+} from "./components/signature-pad";
 export { Skeleton } from "./components/skeleton";
 export { TimePicker, type TimePickerProps } from "./components/time-picker";
 export { ToastProvider, useToast, type ToastInput, type ToastVariant } from "./components/toast";

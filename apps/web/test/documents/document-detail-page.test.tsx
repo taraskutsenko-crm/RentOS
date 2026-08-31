@@ -1,9 +1,32 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import DocumentDetailPage from "../../src/app/app/documents/[id]/page";
 import { renderWithProviders } from "../test-utils";
+
+// jsdom has neither a real 2D canvas context nor ResizeObserver — this
+// page's Signatures card can mount the shared SignaturePad (Havelio
+// Signature System), so it needs the same minimal stand-ins as
+// test/components/signature-pad.test.tsx (no shared mock exists to reuse
+// across packages).
+HTMLCanvasElement.prototype.getContext = vi.fn(
+  () =>
+    ({
+      setTransform: vi.fn(),
+      clearRect: vi.fn(),
+      fillRect: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+    }) as never,
+) as never;
+global.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -16,8 +39,10 @@ vi.mock("../../src/hooks/use-current-tenant", () => ({
 }));
 
 const usePermissionMock = vi.fn();
+const useTenantTimezoneMock = vi.fn();
 vi.mock("../../src/hooks/use-current-tenant-role", () => ({
   usePermission: (...args: unknown[]) => usePermissionMock(...args),
+  useTenantTimezone: () => useTenantTimezoneMock(),
 }));
 
 const useDocumentMock = vi.fn();
@@ -78,6 +103,22 @@ vi.mock("../../src/hooks/use-documents", () => ({
     `http://api.test/tenants/${tenantId}/documents/${documentId}/files/${fileId}/file`,
 }));
 
+const useCompanySignatureMock = vi.fn();
+vi.mock("../../src/hooks/use-company-signature", () => ({
+  useCompanySignature: (...args: unknown[]) => useCompanySignatureMock(...args),
+  companySignatureFileUrl: (tenantId: string) =>
+    `http://api.test/tenants/${tenantId}/company-signature/file`,
+}));
+
+const useDocumentSignaturesMock = vi.fn();
+const useCaptureDocumentSignatureMock = vi.fn();
+vi.mock("../../src/hooks/use-document-signatures", () => ({
+  useDocumentSignatures: (...args: unknown[]) => useDocumentSignaturesMock(...args),
+  useCaptureDocumentSignature: (...args: unknown[]) => useCaptureDocumentSignatureMock(...args),
+  documentSignatureFileUrl: (tenantId: string, documentId: string, evidenceId: string) =>
+    `http://api.test/tenants/${tenantId}/documents/${documentId}/signatures/${evidenceId}/file`,
+}));
+
 function baseDocument(status: string) {
   return {
     id: "doc-1",
@@ -117,6 +158,10 @@ describe("DocumentDetailPage", () => {
     useCancelDocumentSignatureMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useUploadDocumentFileMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useDeleteDocumentFileMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useTenantTimezoneMock.mockReturnValue("America/New_York");
+    useCompanySignatureMock.mockReturnValue({ data: { signature: null } });
+    useDocumentSignaturesMock.mockReturnValue({ data: [] });
+    useCaptureDocumentSignatureMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
   });
 
   it("renders the document header with number, type, and status", () => {
@@ -318,6 +363,142 @@ describe("DocumentDetailPage", () => {
       expect(screen.getByRole("link", { name: "inspection.pdf" })).toHaveAttribute(
         "href",
         "http://api.test/tenants/tenant-1/documents/doc-1/files/file-doc/file",
+      );
+    });
+  });
+
+  describe("Signatures card (Havelio Signature System)", () => {
+    it("does not render for a document type that isn't signature-eligible", () => {
+      usePermissionMock.mockReturnValue(true);
+      useDocumentMock.mockReturnValue({
+        data: { ...baseDocument("DRAFT"), documentType: "DEPOSIT_RECEIPT" },
+        isLoading: false,
+      });
+
+      renderWithProviders(<DocumentDetailPage />);
+
+      expect(screen.queryByText("Signatures")).not.toBeInTheDocument();
+    });
+
+    it("shows Unsigned and both sign actions for a CONTRACT with no evidence yet", () => {
+      usePermissionMock.mockImplementation((permission: string) => permission === "documents.sign");
+      useDocumentMock.mockReturnValue({ data: baseDocument("SENT"), isLoading: false });
+
+      renderWithProviders(<DocumentDetailPage />);
+
+      expect(screen.getByText("Signatures")).toBeInTheDocument();
+      expect(screen.getByText("Unsigned")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /sign as company/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /customer signs/i })).toBeInTheDocument();
+    });
+
+    it("shows 'Signed by both parties' and both signature previews once evidence exists for both signers", () => {
+      usePermissionMock.mockReturnValue(true);
+      useDocumentMock.mockReturnValue({ data: baseDocument("SIGNED"), isLoading: false });
+      useDocumentSignaturesMock.mockReturnValue({
+        data: [
+          {
+            id: "ev-1",
+            signerType: "TENANT_REPRESENTATIVE",
+            signerName: "Taras Kutsenko",
+            signerTitle: "President",
+            capturedAt: "2026-08-31T15:45:00Z",
+          },
+          {
+            id: "ev-2",
+            signerType: "CUSTOMER",
+            signerName: "John Smith",
+            signerTitle: null,
+            capturedAt: "2026-08-31T15:47:00Z",
+          },
+        ],
+      });
+
+      renderWithProviders(<DocumentDetailPage />);
+
+      expect(screen.getByText("Signed by both parties")).toBeInTheDocument();
+      expect(screen.getByText("Taras Kutsenko")).toBeInTheDocument();
+      expect(screen.getByText("John Smith")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /sign as company/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /customer signs/i })).not.toBeInTheDocument();
+    });
+
+    it("hides both sign actions without documents.sign", () => {
+      usePermissionMock.mockReturnValue(false);
+      useDocumentMock.mockReturnValue({ data: baseDocument("SENT"), isLoading: false });
+
+      renderWithProviders(<DocumentDetailPage />);
+
+      expect(screen.queryByRole("button", { name: /sign as company/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /customer signs/i })).not.toBeInTheDocument();
+    });
+
+    it("opens straight into the drawing pad for the company signature when no saved company signature exists", async () => {
+      usePermissionMock.mockImplementation((permission: string) => permission === "documents.sign");
+      useDocumentMock.mockReturnValue({ data: baseDocument("SENT"), isLoading: false });
+      useCompanySignatureMock.mockReturnValue({ data: { signature: null } });
+      const user = userEvent.setup();
+
+      renderWithProviders(<DocumentDetailPage />);
+      await user.click(screen.getByRole("button", { name: /sign as company/i }));
+
+      const dialog = await screen.findByRole("dialog");
+      expect(within(dialog).getByLabelText(/signer name/i)).toBeInTheDocument();
+      expect(
+        within(dialog).queryByRole("button", { name: /use saved signature/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("offers a choice between the saved company signature and drawing a new one when one is configured", async () => {
+      usePermissionMock.mockImplementation((permission: string) => permission === "documents.sign");
+      useDocumentMock.mockReturnValue({ data: baseDocument("SENT"), isLoading: false });
+      useCompanySignatureMock.mockReturnValue({
+        data: {
+          signature: {
+            id: "sig-1",
+            representativeName: "Taras Kutsenko",
+            representativeTitle: "President",
+          },
+        },
+      });
+      const user = userEvent.setup();
+
+      renderWithProviders(<DocumentDetailPage />);
+      await user.click(screen.getByRole("button", { name: /sign as company/i }));
+
+      expect(
+        await screen.findByRole("button", { name: /use saved signature/i }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /draw now/i })).toBeInTheDocument();
+    });
+
+    it("captures the company signature via 'use saved signature' with the stored signer name/title", async () => {
+      usePermissionMock.mockImplementation((permission: string) => permission === "documents.sign");
+      useDocumentMock.mockReturnValue({ data: baseDocument("SENT"), isLoading: false });
+      useCompanySignatureMock.mockReturnValue({
+        data: {
+          signature: {
+            id: "sig-1",
+            representativeName: "Taras Kutsenko",
+            representativeTitle: "President",
+          },
+        },
+      });
+      const mutateAsync = vi.fn().mockResolvedValue({});
+      useCaptureDocumentSignatureMock.mockReturnValue({ mutateAsync, isPending: false });
+      const user = userEvent.setup();
+
+      renderWithProviders(<DocumentDetailPage />);
+      await user.click(screen.getByRole("button", { name: /sign as company/i }));
+      await user.click(await screen.findByRole("button", { name: /use saved signature/i }));
+
+      await waitFor(() =>
+        expect(mutateAsync).toHaveBeenCalledWith({
+          signerType: "TENANT_REPRESENTATIVE",
+          method: "STORED_SIGNATURE",
+          signerName: "Taras Kutsenko",
+          signerTitle: "President",
+        }),
       );
     });
   });

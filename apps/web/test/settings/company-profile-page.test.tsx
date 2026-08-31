@@ -22,6 +22,17 @@ vi.mock("../../src/hooks/use-update-company-profile", () => ({
   useUpdateCompanyProfile: (...args: unknown[]) => useUpdateCompanyProfileMock(...args),
 }));
 
+const useCompanySignatureMock = vi.fn();
+const useUploadCompanySignatureMock = vi.fn();
+const useDeleteCompanySignatureMock = vi.fn();
+vi.mock("../../src/hooks/use-company-signature", () => ({
+  useCompanySignature: (...args: unknown[]) => useCompanySignatureMock(...args),
+  useUploadCompanySignature: (...args: unknown[]) => useUploadCompanySignatureMock(...args),
+  useDeleteCompanySignature: (...args: unknown[]) => useDeleteCompanySignatureMock(...args),
+  companySignatureFileUrl: (tenantId: string) =>
+    `http://api.test/tenants/${tenantId}/company-signature/file`,
+}));
+
 const TENANT = {
   id: "tenant-1",
   name: "Closure Pass Rentals",
@@ -42,6 +53,10 @@ describe("CompanyProfileSettingsPage", () => {
     useCurrentTenantRoleMock.mockReturnValue({ data: { tenant: TENANT }, isLoading: false });
     mutateAsync.mockReset();
     useUpdateCompanyProfileMock.mockReturnValue({ mutateAsync, isPending: false });
+
+    useCompanySignatureMock.mockReturnValue({ data: { signature: null }, isLoading: false });
+    useUploadCompanySignatureMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useDeleteCompanySignatureMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
   });
 
   it("shows a disabled 'Saving...' button while the save request is in flight", () => {
@@ -132,5 +147,147 @@ describe("CompanyProfileSettingsPage", () => {
     renderWithProviders(<CompanyProfileSettingsPage />);
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
+  });
+
+  describe("Company representative signature (Havelio Signature System)", () => {
+    it("shows no preview and no delete action when nothing is configured yet", () => {
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      expect(screen.getByRole("button", { name: /upload signature/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /draw signature/i })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /^delete$/i })).not.toBeInTheDocument();
+    });
+
+    it("shows a saved-signature preview and a Delete action once one is configured", () => {
+      useCompanySignatureMock.mockReturnValue({
+        data: {
+          signature: {
+            id: "sig-1",
+            representativeName: "Taras Kutsenko",
+            representativeTitle: "President",
+          },
+        },
+        isLoading: false,
+      });
+
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      expect(screen.getByDisplayValue("Taras Kutsenko")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("President")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /^delete$/i })).toBeInTheDocument();
+      expect(screen.getByAltText("")).toHaveAttribute(
+        "src",
+        "http://api.test/tenants/tenant-1/company-signature/file",
+      );
+    });
+
+    it("rejects uploading a file before a signer name is entered", async () => {
+      const mutateAsync = vi.fn();
+      useUploadCompanySignatureMock.mockReturnValue({ mutateAsync, isPending: false });
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const file = new File(["png-bytes"], "sig.png", { type: "image/png" });
+      await userEvent.upload(fileInput, file);
+
+      expect(
+        await screen.findByText("Enter the signer's name before saving a signature."),
+      ).toBeInTheDocument();
+      expect(mutateAsync).not.toHaveBeenCalled();
+    });
+
+    it("uploads a signature file with the entered signer name and shows a success toast", async () => {
+      const mutateAsync = vi.fn().mockResolvedValue({});
+      useUploadCompanySignatureMock.mockReturnValue({ mutateAsync, isPending: false });
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.type(screen.getByLabelText(/signer name/i), "Taras Kutsenko");
+      await user.type(screen.getByLabelText(/position/i), "President");
+
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const file = new File(["png-bytes"], "sig.png", { type: "image/png" });
+      await user.upload(fileInput, file);
+
+      await waitFor(() =>
+        expect(mutateAsync).toHaveBeenCalledWith({
+          file,
+          representativeName: "Taras Kutsenko",
+          representativeTitle: "President",
+          method: "UPLOADED",
+        }),
+      );
+      expect(await screen.findByText("Signature saved")).toBeInTheDocument();
+    });
+
+    it("shows an error toast when saving the signature fails", async () => {
+      const mutateAsync = vi.fn().mockRejectedValue(new Error("boom at line 99"));
+      useUploadCompanySignatureMock.mockReturnValue({ mutateAsync, isPending: false });
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.type(screen.getByLabelText(/signer name/i), "Taras Kutsenko");
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      await user.upload(fileInput, new File(["x"], "sig.png", { type: "image/png" }));
+
+      expect(await screen.findByText("Failed to save signature")).toBeInTheDocument();
+      expect(screen.queryByText(/boom at line 99/i)).not.toBeInTheDocument();
+    });
+
+    it("asks for confirmation and deletes the saved signature", async () => {
+      useCompanySignatureMock.mockReturnValue({
+        data: {
+          signature: { id: "sig-1", representativeName: "Taras", representativeTitle: null },
+        },
+        isLoading: false,
+      });
+      const mutateAsync = vi.fn().mockResolvedValue({});
+      useDeleteCompanySignatureMock.mockReturnValue({ mutateAsync, isPending: false });
+      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.click(screen.getByRole("button", { name: /^delete$/i }));
+
+      expect(confirmSpy).toHaveBeenCalled();
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+      expect(await screen.findByText("Signature deleted")).toBeInTheDocument();
+      confirmSpy.mockRestore();
+    });
+
+    it("does not delete when the confirmation is dismissed", async () => {
+      useCompanySignatureMock.mockReturnValue({
+        data: {
+          signature: { id: "sig-1", representativeName: "Taras", representativeTitle: null },
+        },
+        isLoading: false,
+      });
+      const mutateAsync = vi.fn();
+      useDeleteCompanySignatureMock.mockReturnValue({ mutateAsync, isPending: false });
+      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.click(screen.getByRole("button", { name: /^delete$/i }));
+
+      expect(mutateAsync).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it("hides upload/draw/delete actions without tenant.manage, but still shows the preview", () => {
+      usePermissionMock.mockReturnValue(false);
+      useCompanySignatureMock.mockReturnValue({
+        data: {
+          signature: { id: "sig-1", representativeName: "Taras", representativeTitle: null },
+        },
+        isLoading: false,
+      });
+
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      expect(screen.getByAltText("")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /upload signature/i })).toBeDisabled();
+      expect(screen.getByRole("button", { name: /draw signature/i })).toBeDisabled();
+    });
   });
 });

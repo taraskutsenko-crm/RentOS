@@ -71,6 +71,8 @@ most abstract question (why Havelio exists) to the most concrete one
 **Part F — Core Workflow Behavior**
 
 29. [Rental, Availability, Deposit & Document Behavior](#29-rental-availability-deposit--document-behavior)
+30. [Havelio Time Model](#30-havelio-time-model)
+31. [Havelio Signature System](#31-havelio-signature-system)
 
 ---
 
@@ -1228,3 +1230,76 @@ be running in. The model (see `DECISIONS.md` D-115):
   existing schedule, and never defined in the customer's own browser
   timezone. The request itself never changes the rental's real
   planned end; only an explicit staff approval does.
+
+## 31. Havelio Signature System
+
+Havelio supports **plain visual handwritten signatures** — drawn,
+uploaded, or reused from a saved image — captured for a company
+representative or a customer on a Contract, Handover Protocol, or
+Return Protocol. This is deliberately **not** a qualified electronic
+signature, an eIDAS-qualified signature, a PAdES certificate-based
+signature, or an identity-verified e-signature product like DocuSign
+or Adobe Sign — see `DECISIONS.md` for the entry documenting this
+system, and the explicit legal-wording note below.
+
+- **Stored company signature.** A tenant may configure one reusable
+  signature for an authorized representative (name, position, and a
+  drawn/uploaded image) in Settings → Company Profile. It is a
+  convenience for repeat signing, never applied automatically to any
+  document — a staff member always takes an explicit "Sign as
+  company" action, and may either reuse the saved signature or draw a
+  fresh one for that specific signing.
+- **Document signature is an immutable snapshot.** The moment a
+  signature is captured for a specific Contract/Handover/Return, its
+  image, signer name/title, capture method, and timestamp are copied
+  into a permanent, append-only evidence record tied to that document.
+  Replacing or deleting the tenant's saved company signature later
+  never changes a document that already captured its own copy —
+  a signed document keeps showing exactly the signature that was used
+  when it was signed, forever.
+- **Two-sided signing.** Contract/Handover/Return support one company
+  signature and one customer signature, captured independently.
+  Capturing the second one automatically advances the document to
+  fully signed; capturing only one leaves it partially signed. Once a
+  document is fully signed, its signature evidence can never be
+  added to, replaced, or removed through ordinary editing — the
+  document's business content is already immutable at that point (see
+  the Document Management platform's DRAFT → finalized lifecycle), and
+  the signature evidence is equally permanent.
+- **In-person and remote capture.** A staff member can hand their own
+  device to a customer to sign in person (e.g. at Handover/Return) —
+  no customer Havelio account is required for this. A customer with an
+  active Customer Portal session can also draw their own signature
+  remotely for a document that is genuinely theirs; portal signing is
+  scoped exactly like every other portal resource (a document
+  belonging to a different customer 404s, never revealing it exists).
+- **Private, tenant-isolated storage.** Every signature image — the
+  saved company signature and every document's captured evidence — is
+  stored through the same private, authenticated `StorageService` used
+  for every other tenant file (see the Document Management platform).
+  No signature image is ever served from a public/unauthenticated URL,
+  and no internal storage path is ever returned in an API response.
+- **PDF embedding and integrity.** A fully signed document's PDF is
+  regenerated once both signatures are captured, embedding both
+  signature images (transparent, aspect-ratio preserved, never
+  stretched) with each signer's name, title, and tenant-local signing
+  time. The exact bytes of that generated PDF are hashed (SHA-256) at
+  the moment they're stored — tamper evidence only, not a
+  cryptographic signature in the legal sense — and every subsequent
+  download serves those same stored bytes rather than silently
+  regenerating different ones under the same document.
+- **Audit trail.** Every signature capture and the resulting
+  document-signed transition are recorded in the same audit/timeline
+  architecture every other document event uses — signer type, signer
+  name, capture method, and timestamp, never the signature image bytes
+  themselves.
+- **Legal wording.** A signature drawn or uploaded in Havelio is a
+  visual handwritten signature. It does not by itself constitute a
+  qualified electronic signature. This distinction is stated once, in
+  an appropriate settings/signing context — never repeated on every
+  generated document.
+- **Future: real e-signature providers.** `DocumentSignatureProviderType`
+  already reserves `DOCUSIGN`/`ADOBE_SIGN`/`AUTENTI`/`EIDAS` as named,
+  unbuilt values for a future qualified/identity-verified e-signature
+  integration — a genuinely different capability from this system,
+  never implied or faked by it.

@@ -12,6 +12,13 @@ import {
   type GeneratedDocumentPdf,
 } from "../../documents/rendering/document-pdf.service";
 import { DocumentSignatureService } from "../../documents/signature/document-signature.service";
+import { DocumentSignatureEvidenceService } from "../../documents/signature-evidence/document-signature-evidence.service";
+import {
+  toPublicSignatureEvidence,
+  type PublicDocumentSignatureEvidence,
+} from "../../documents/signature-evidence/document-signature-evidence.mapper";
+import type { UploadedFileLike } from "../../storage/storage.service";
+import type { PublicCustomer } from "../common/public-customer.mapper";
 import type { QueryPortalDocumentsDto } from "../dto/query-portal-documents.dto";
 
 export interface GeneratedRentalDocumentsZip {
@@ -35,6 +42,7 @@ export class PortalDocumentsService {
     private readonly documentRenderer: DocumentRendererService,
     private readonly documentPdfService: DocumentPdfService,
     private readonly documentSignatureService: DocumentSignatureService,
+    private readonly signatureEvidenceService: DocumentSignatureEvidenceService,
   ) {}
 
   async findMany(
@@ -84,6 +92,59 @@ export class PortalDocumentsService {
   ): Promise<DocumentSignatureRequest> {
     await this.findOne(tenantId, customerId, id);
     return this.documentSignatureService.customerSign(tenantId, id, signatureRequestId, customerId);
+  }
+
+  /**
+   * Havelio Signature System (docs/PRODUCT_BIBLE.md), NOT a qualified
+   * electronic signature — Customer Portal remote signing. `findOne`
+   * already enforces `document.customerId === customerId` (404 on
+   * mismatch, never a distinguishing error), so a customer can only ever
+   * list/read/capture signature evidence for a document that is actually
+   * theirs, exactly the same ownership boundary every other portal method
+   * on this service already uses. The signer's identity is always derived
+   * from the authenticated customer's own record — a customer can never
+   * submit an arbitrary signer name for someone else.
+   */
+  async listMySignatures(
+    tenantId: string,
+    customerId: string,
+    id: string,
+  ): Promise<PublicDocumentSignatureEvidence[]> {
+    await this.findOne(tenantId, customerId, id);
+    const evidence = await this.signatureEvidenceService.list(tenantId, id);
+    return evidence.map(toPublicSignatureEvidence);
+  }
+
+  async readMySignatureFile(
+    tenantId: string,
+    customerId: string,
+    id: string,
+    evidenceId: string,
+  ): Promise<{ buffer: Buffer; mimeType: string }> {
+    await this.findOne(tenantId, customerId, id);
+    return this.signatureEvidenceService.readFile(tenantId, id, evidenceId);
+  }
+
+  async captureMySignature(
+    tenantId: string,
+    customer: PublicCustomer,
+    id: string,
+    file: UploadedFileLike,
+  ) {
+    await this.findOne(tenantId, customer.id, id);
+    const { evidence, document } = await this.signatureEvidenceService.capture(
+      tenantId,
+      id,
+      {
+        signerType: "CUSTOMER",
+        method: "DRAWN",
+        signerName: `${customer.firstName} ${customer.lastName}`.trim(),
+        ...(customer.email ? { signerEmail: customer.email } : {}),
+      },
+      file,
+      { actorUserId: null, customerId: customer.id, source: "CUSTOMER_PORTAL" },
+    );
+    return { evidence: toPublicSignatureEvidence(evidence), document };
   }
 
   /**

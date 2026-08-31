@@ -272,6 +272,39 @@ enum DocumentAttachmentCategory {
   OTHER
 }
 
+/// Havelio Signature System (visual handwritten signatures, NOT a
+/// qualified electronic signature — see docs/PRODUCT_BIBLE.md). Who
+/// supplied the visual signature captured for a specific document. Just
+/// two roles: a tenant representative signs on behalf of the company; a
+/// customer signs for themselves. A technician who hands their device to
+/// a customer for an in-person signature still records signerType
+/// CUSTOMER — see SignatureSource for who physically operated the device.
+enum SignatureSignerType {
+  TENANT_REPRESENTATIVE
+  CUSTOMER
+}
+
+/// How the pixels of one signature image were produced. STORED_SIGNATURE
+/// = reused the tenant's saved TenantSignature at the moment of signing
+/// (its bytes are still copied into a fresh DocumentSignatureEvidence row
+/// — never a live reference, see that model's own comment). DRAWN = drawn
+/// live on a canvas (SignaturePad) for this specific signing. UPLOADED =
+/// an image file uploaded for this specific signing.
+enum SignatureCaptureMethod {
+  STORED_SIGNATURE
+  DRAWN
+  UPLOADED
+}
+
+/// Where a signature was captured from — informational audit context
+/// only, never itself a security boundary (the boundary is the
+/// authenticated/tenant-scoped endpoint that wrote the row).
+enum SignatureSource {
+  COMPANY_PROFILE
+  STAFF_DEVICE
+  CUSTOMER_PORTAL
+}
+
 /// Who a DocumentEmailDelivery was addressed to.
 enum DocumentEmailRecipientType {
   CUSTOMER
@@ -787,6 +820,8 @@ model Tenant {
   documentShareLinks        DocumentShareLink[]
   documentEmailDeliveries   DocumentEmailDelivery[]
   documentSignatureRequests DocumentSignatureRequest[]
+  tenantSignatures          TenantSignature[]
+  documentSignatureEvidence DocumentSignatureEvidence[]
   quoteEmailDeliveries      QuoteEmailDelivery[]
   invoiceEmailDeliveries    InvoiceEmailDelivery[]
 
@@ -1788,6 +1823,7 @@ model Document {
   statusHistory     DocumentStatusHistory[]
   emailDeliveries   DocumentEmailDelivery[]
   signatureRequests DocumentSignatureRequest[]
+  signatureEvidence DocumentSignatureEvidence[]
 
   /// Set on the RentalDamageReport this Document formalizes, when a
   /// customer-submitted report was converted by staff (see
@@ -1873,6 +1909,7 @@ model DocumentVersion {
   shareLinks        DocumentShareLink[]
   emailDeliveries   DocumentEmailDelivery[]
   signatureRequests DocumentSignatureRequest[]
+  signatureEvidence DocumentSignatureEvidence[]
 
   @@unique([documentId, versionNumber])
   @@index([tenantId, documentId])
@@ -1896,6 +1933,13 @@ model DocumentFile {
   originalFileName  String
   mimeType          String
   sizeBytes         Int
+  /// SHA-256 hex digest of the exact stored bytes at storageKey — tamper
+  /// evidence only (docs/PRODUCT_BIBLE.md "Havelio Signature System"),
+  /// never a qualified/cryptographic signature. Populated for every
+  /// system-generated PDF rendering (see DocumentPdfService); null for
+  /// staff-uploaded ATTACHMENT/PHOTO files and for any row written before
+  /// this column existed.
+  sha256            String?
   /// Staff-uploaded ATTACHMENT/PHOTO only — see DocumentAttachmentCategory.
   /// Always null for system-generated renderings.
   category          DocumentAttachmentCategory?
@@ -2257,6 +2301,98 @@ model DocumentSignatureRequest {
 
   @@index([tenantId, documentId, requestedAt])
   @@map("document_signature_requests")
+}
+
+/// A tenant's reusable, company-level handwritten signature — configured
+/// once in Settings -> Company Profile and optionally reused when staff
+/// sign a Contract/Handover/Return "as the company" (see
+/// DocumentSignatureEvidence, which copies this image's bytes into its own
+/// row at the moment of use, so a later replacement here never changes an
+/// already-signed document — docs/PRODUCT_BIBLE.md "Havelio Signature
+/// System"). At most one row with deletedAt: null per tenant, enforced in
+/// CompanySignatureService, not at the DB level (mirrors AssetImage's
+/// single-`isPrimary`-per-scope convention). Replacing/deleting this row
+/// never touches any DocumentSignatureEvidence row that already copied its
+/// bytes elsewhere — see that model's own comment.
+///
+/// This is a plain visual handwritten signature (drawn or uploaded), never
+/// a qualified electronic signature / eIDAS / PAdES / certificate-based
+/// signature — see docs/PRODUCT_BIBLE.md.
+model TenantSignature {
+  id                  String                 @id @default(uuid())
+  tenantId            String
+  representativeName  String
+  representativeTitle String?
+  storageKey          String
+  mimeType            String
+  sizeBytes           Int
+  checksumSha256      String
+  method              SignatureCaptureMethod
+  createdByUserId     String
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  deletedAt           DateTime?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, deletedAt])
+  @@map("tenant_signatures")
+}
+
+/// The immutable per-document signature evidence snapshot — the "Document
+/// Signature" concept in docs/PRODUCT_BIBLE.md "Havelio Signature System".
+/// Created once when a signature is captured for a specific
+/// Document/DocumentVersion and NEVER updated or deleted afterward
+/// (append-only, the same durability guarantee DocumentStatusHistory
+/// already has) — this is what makes an already-signed document keep
+/// showing the exact signature that was used at signing time even if the
+/// tenant's saved TenantSignature is later replaced or deleted, and even
+/// if the customer signed with a one-off drawn signature never saved
+/// anywhere else. At most one CUSTOMER and one TENANT_REPRESENTATIVE row
+/// per documentId in the normal flow, enforced in the capturing service,
+/// not the DB (a correction-version workflow may legitimately re-capture).
+///
+/// This is a plain visual handwritten signature (drawn/uploaded/reused
+/// from the tenant's saved one), never a qualified electronic signature —
+/// see docs/PRODUCT_BIBLE.md.
+model DocumentSignatureEvidence {
+  id                String                 @id @default(uuid())
+  tenantId          String
+  documentId        String
+  documentVersionId String
+  signerType        SignatureSignerType
+  signerName        String
+  signerTitle       String?
+  signerEmail       String?
+  method            SignatureCaptureMethod
+  source            SignatureSource
+  storageKey        String
+  mimeType          String
+  sizeBytes         Int
+  checksumSha256    String
+  /// The real UTC instant the signature was captured — see
+  /// docs/PRODUCT_BIBLE.md "Havelio Time Model"; always formatted in the
+  /// tenant's own timezone for display, never the capturing device's.
+  capturedAt        DateTime               @default(now())
+  /// The staff member who captured this signature (present for both
+  /// TENANT_REPRESENTATIVE signatures and staff-facilitated in-person
+  /// CUSTOMER signatures); null for a customer's own portal-drawn
+  /// signature. Plain scalar, no relation declared — mirrors
+  /// DocumentStatusHistory.changedByUserId's existing convention for a
+  /// less-central actor reference.
+  capturedByUserId  String?
+  /// Set when signerType is CUSTOMER — the customer this signature
+  /// belongs to, for portal-side ownership scoping. Plain scalar, no
+  /// relation declared (same convention as capturedByUserId above).
+  customerId        String?
+  createdAt         DateTime               @default(now())
+
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  document        Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentVersion DocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, documentId])
+  @@map("document_signature_evidence")
 }
 
 // ---------------------------------------------------------------------

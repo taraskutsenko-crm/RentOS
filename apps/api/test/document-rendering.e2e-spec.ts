@@ -387,8 +387,25 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     // company.logo is permanently hardcoded to "" in the resolver (no
     // tenant branding field exists yet) — same documented exception as the
     // real-render coverage test below. company.email now resolves from
-    // Tenant.email (set above), so it is no longer in this set.
-    const permanentlyEmpty = new Set(["company.logo", "company.logoHtml"]);
+    // Tenant.email (set above), so it is no longer in this set. The
+    // signature.* fields (Havelio Signature System) are only ever
+    // populated once real DocumentSignatureEvidence exists for a document
+    // — neither a template preview nor this test's document has captured
+    // any, so they stay empty by design, exactly like company.logo before
+    // a branding field exists.
+    const permanentlyEmpty = new Set([
+      "company.logo",
+      "company.logoHtml",
+      "signature.companySignatureImageHtml",
+      "signature.companySignerName",
+      "signature.companySignerTitle",
+      "signature.companySignedAt",
+      "signature.companySignedAtLabel",
+      "signature.customerSignatureImageHtml",
+      "signature.customerSignerName",
+      "signature.customerSignedAt",
+      "signature.customerSignedAtLabel",
+    ]);
     for (const varPath of DOCUMENT_VARIABLE_PATHS) {
       const match = new RegExp(`${varPath.replace(/\./g, "\\.")}::(.*?)::end`, "s").exec(
         response.body.html,
@@ -1689,8 +1706,23 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
     // company.logo is permanently empty by design (no tenant branding field
     // exists yet, see the hardcoded "" value in variable-resolver.service.ts)
     // — every other path, including company.email (set above), must resolve
-    // to real, non-empty content given this fully-populated document.
-    const permanentlyEmpty = new Set(["company.logo", "company.logoHtml"]);
+    // to real, non-empty content given this fully-populated document. The
+    // signature.* fields (Havelio Signature System) stay empty here too —
+    // this document never had a signature captured for it; real end-to-end
+    // signature-field coverage lives in signatures.e2e-spec.ts instead.
+    const permanentlyEmpty = new Set([
+      "company.logo",
+      "company.logoHtml",
+      "signature.companySignatureImageHtml",
+      "signature.companySignerName",
+      "signature.companySignerTitle",
+      "signature.companySignedAt",
+      "signature.companySignedAtLabel",
+      "signature.customerSignatureImageHtml",
+      "signature.customerSignerName",
+      "signature.customerSignedAt",
+      "signature.customerSignedAtLabel",
+    ]);
     for (const varPath of DOCUMENT_VARIABLE_PATHS) {
       const match = new RegExp(`${varPath.replace(/\./g, "\\.")}::(.*?)::end`, "s").exec(
         preview.body.html,

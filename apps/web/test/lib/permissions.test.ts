@@ -55,10 +55,12 @@ describe("roleHasPermission", () => {
     expect(roleHasPermission("MANAGER", "documents.manageTemplates")).toBe(false);
   });
 
-  it("grants TECHNICIAN view/create/update/download but not send/sign", () => {
+  it("grants TECHNICIAN view/create/update/download/sign but not send", () => {
     expect(roleHasPermission("TECHNICIAN", "documents.create")).toBe(true);
     expect(roleHasPermission("TECHNICIAN", "documents.send")).toBe(false);
-    expect(roleHasPermission("TECHNICIAN", "documents.sign")).toBe(false);
+    // Havelio Signature System: TECHNICIAN physically performs
+    // Handover/Return, so it can capture an in-person signature directly.
+    expect(roleHasPermission("TECHNICIAN", "documents.sign")).toBe(true);
   });
 
   it("restricts VIEWER to documents.view/documents.download", () => {

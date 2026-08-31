@@ -131,7 +131,8 @@ export type DocumentTimelineEventType =
   | "email_sent"
   | "email_failed"
   | "signature_requested"
-  | "signature_status_changed";
+  | "signature_status_changed"
+  | "signature_captured";
 
 export type DocumentTimelineEvent = TimelineEvent<DocumentTimelineEventType>;
 
@@ -263,4 +264,46 @@ export interface DocumentSignatureRequest {
   requestedAt: string;
   respondedAt: string | null;
   expiresAt: string | null;
+}
+
+// ---------------------------------------------------------------------
+// Havelio Signature System — visual handwritten signatures, NOT a
+// qualified electronic signature (see docs/PRODUCT_BIBLE.md).
+// ---------------------------------------------------------------------
+
+export type SignatureSignerType = "TENANT_REPRESENTATIVE" | "CUSTOMER";
+export type SignatureCaptureMethod = "STORED_SIGNATURE" | "DRAWN" | "UPLOADED";
+export type SignatureSource = "COMPANY_PROFILE" | "STAFF_DEVICE" | "CUSTOMER_PORTAL";
+
+/** The tenant's reusable, saved company signature — Settings -> Company Profile. */
+export interface TenantSignature {
+  id: string;
+  tenantId: string;
+  representativeName: string;
+  representativeTitle: string | null;
+  mimeType: string;
+  sizeBytes: number;
+  method: SignatureCaptureMethod;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** One immutable signature captured for a specific Document — never editable, never deletable via the API. */
+export interface DocumentSignatureEvidence {
+  id: string;
+  tenantId: string;
+  documentId: string;
+  documentVersionId: string;
+  signerType: SignatureSignerType;
+  signerName: string;
+  signerTitle: string | null;
+  signerEmail: string | null;
+  method: SignatureCaptureMethod;
+  source: SignatureSource;
+  mimeType: string;
+  sizeBytes: number;
+  capturedAt: string;
+  capturedByUserId: string | null;
+  customerId: string | null;
+  createdAt: string;
 }

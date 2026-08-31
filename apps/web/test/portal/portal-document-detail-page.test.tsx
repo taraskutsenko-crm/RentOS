@@ -13,12 +13,19 @@ const usePortalDocumentMock = vi.fn();
 const usePortalDocumentPreviewMock = vi.fn();
 const usePortalDocumentSignatureRequestsMock = vi.fn();
 const useSignPortalDocumentMock = vi.fn();
+const usePortalDocumentSignaturesMock = vi.fn();
+const useCapturePortalDocumentSignatureMock = vi.fn();
 vi.mock("../../src/hooks/use-portal-documents", () => ({
   usePortalDocument: (...args: unknown[]) => usePortalDocumentMock(...args),
   usePortalDocumentPreview: (...args: unknown[]) => usePortalDocumentPreviewMock(...args),
   usePortalDocumentSignatureRequests: (...args: unknown[]) =>
     usePortalDocumentSignatureRequestsMock(...args),
   useSignPortalDocument: () => useSignPortalDocumentMock(),
+  usePortalDocumentSignatures: (...args: unknown[]) => usePortalDocumentSignaturesMock(...args),
+  useCapturePortalDocumentSignature: (...args: unknown[]) =>
+    useCapturePortalDocumentSignatureMock(...args),
+  portalDocumentSignatureFileUrl: (documentId: string, evidenceId: string) =>
+    `http://api.test/portal/documents/${documentId}/signatures/${evidenceId}/file`,
   portalDocumentPdfUrl: (id: string) => `http://api.test/portal/documents/${id}/pdf`,
 }));
 
@@ -37,6 +44,11 @@ describe("PortalDocumentDetailPage", () => {
   beforeEach(() => {
     usePortalDocumentPreviewMock.mockReturnValue({ data: { html: "<p>Preview</p>" } });
     useSignPortalDocumentMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    usePortalDocumentSignaturesMock.mockReturnValue({ data: [] });
+    useCapturePortalDocumentSignatureMock.mockReturnValue({
+      mutateAsync: vi.fn(),
+      isPending: false,
+    });
   });
 
   it("renders the document title and status", () => {
@@ -89,5 +101,45 @@ describe("PortalDocumentDetailPage", () => {
     renderWithProviders(<PortalDocumentDetailPage />);
 
     expect(screen.queryByRole("button", { name: /sign document/i })).not.toBeInTheDocument();
+  });
+
+  describe("Havelio Signature System (Customer Portal remote signing)", () => {
+    beforeEach(() => {
+      usePortalDocumentMock.mockReturnValue({
+        data: baseDocument(),
+        isLoading: false,
+        isError: false,
+      });
+      usePortalDocumentSignatureRequestsMock.mockReturnValue({ data: [] });
+    });
+
+    it("offers a 'Customer signs' action when the customer hasn't signed yet", () => {
+      renderWithProviders(<PortalDocumentDetailPage />);
+
+      expect(screen.getByRole("button", { name: /customer signs/i })).toBeInTheDocument();
+    });
+
+    it("shows the customer's own signature preview once captured, with no sign action left", () => {
+      usePortalDocumentSignaturesMock.mockReturnValue({
+        data: [{ id: "ev-1", signerType: "CUSTOMER", signerName: "Jane Doe" }],
+      });
+
+      renderWithProviders(<PortalDocumentDetailPage />);
+
+      expect(screen.queryByRole("button", { name: /customer signs/i })).not.toBeInTheDocument();
+      expect(screen.getByText(/jane doe/i)).toBeInTheDocument();
+    });
+
+    it("does not offer signing for a document type that isn't signature-eligible", () => {
+      usePortalDocumentMock.mockReturnValue({
+        data: { ...baseDocument(), documentType: "DEPOSIT_RECEIPT" },
+        isLoading: false,
+        isError: false,
+      });
+
+      renderWithProviders(<PortalDocumentDetailPage />);
+
+      expect(screen.queryByRole("button", { name: /customer signs/i })).not.toBeInTheDocument();
+    });
   });
 });

@@ -210,18 +210,22 @@ describe("ROLE_PERMISSIONS", () => {
     }
   });
 
-  it("grants TECHNICIAN view/create/update/download but not send/sign/void/archive", () => {
+  it("grants TECHNICIAN view/create/update/download/sign but not send/void/archive", () => {
     for (const permission of [
       "documents.view",
       "documents.create",
       "documents.update",
       "documents.download",
+      // Havelio Signature System (docs/PRODUCT_BIBLE.md): TECHNICIAN
+      // physically performs Handover/Return, so it can capture an
+      // in-person customer signature (and its own representative
+      // signature) directly, without needing send/void/archive.
+      "documents.sign",
     ] as const) {
       expect(roleHasPermission("TECHNICIAN", permission)).toBe(true);
     }
     for (const permission of [
       "documents.send",
-      "documents.sign",
       "documents.void",
       "documents.archive",
       "documents.delete",

@@ -7,16 +7,27 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   Input,
   Label,
   Select,
+  SignaturePad,
   useToast,
 } from "@rentos/ui";
 import { listSupportedTimezones } from "@rentos/shared";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import {
+  companySignatureFileUrl,
+  useCompanySignature,
+  useDeleteCompanySignature,
+  useUploadCompanySignature,
+} from "../../../../hooks/use-company-signature";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { useCurrentTenantRole, usePermission } from "../../../../hooks/use-current-tenant-role";
 import { useUpdateCompanyProfile } from "../../../../hooks/use-update-company-profile";
@@ -190,6 +201,230 @@ export default function CompanyProfileSettingsPage() {
           </form>
         </CardContent>
       </Card>
+
+      <CompanySignatureCard tenantId={tenantId} canManage={canManage} />
     </div>
+  );
+}
+
+/**
+ * Havelio Signature System (docs/PRODUCT_BIBLE.md) — the tenant's single
+ * reusable, company-level handwritten signature (NOT a qualified
+ * electronic signature). Split out as its own Card rather than folded
+ * into the flat field list above: it has its own preview/replace/delete
+ * lifecycle and its own two-input identity (signer name + position)
+ * distinct from the rest of Company Profile's singleton fields. Loading
+ * state lives here; the actual form is keyed by the loaded signature's id
+ * (see CompanySignatureForm below) so its local input state is always
+ * freshly initialized from real data — no effect syncing query data into
+ * local state (see react-hooks/set-state-in-effect, and the identical
+ * convention already used by InvoiceEditor).
+ */
+function CompanySignatureCard({
+  tenantId,
+  canManage,
+}: {
+  tenantId: string | null;
+  canManage: boolean;
+}) {
+  const { t } = useTranslation();
+  const { data, isLoading } = useCompanySignature(tenantId);
+
+  if (isLoading) {
+    return (
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle>{t("tenant.companyProfile.signature.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-sm">{t("common.loading")}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <CompanySignatureForm
+      key={data?.signature?.id ?? "empty"}
+      tenantId={tenantId}
+      canManage={canManage}
+      signature={data?.signature ?? null}
+    />
+  );
+}
+
+function CompanySignatureForm({
+  tenantId,
+  canManage,
+  signature,
+}: {
+  tenantId: string | null;
+  canManage: boolean;
+  signature: { id: string; representativeName: string; representativeTitle: string | null } | null;
+}) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const upload = useUploadCompanySignature(tenantId);
+  const remove = useDeleteCompanySignature(tenantId);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [drawOpen, setDrawOpen] = useState(false);
+  const [representativeName, setRepresentativeName] = useState(signature?.representativeName ?? "");
+  const [representativeTitle, setRepresentativeTitle] = useState(
+    signature?.representativeTitle ?? "",
+  );
+
+  const nameMissing = representativeName.trim().length === 0;
+
+  async function handleUpload(file: File, method: "DRAWN" | "UPLOADED"): Promise<void> {
+    if (nameMissing) {
+      toast({
+        variant: "destructive",
+        description: t("tenant.companyProfile.signature.nameRequired"),
+      });
+      return;
+    }
+    try {
+      await upload.mutateAsync({
+        file,
+        representativeName: representativeName.trim(),
+        ...(representativeTitle.trim() ? { representativeTitle: representativeTitle.trim() } : {}),
+        method,
+      });
+      setDrawOpen(false);
+      toast({ variant: "success", description: t("tenant.companyProfile.signature.saved") });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: apiErrorMessage(error, t("tenant.companyProfile.signature.saveFailed")),
+      });
+    }
+  }
+
+  async function handleDelete(): Promise<void> {
+    if (!window.confirm(t("tenant.companyProfile.signature.deleteConfirm"))) return;
+    try {
+      await remove.mutateAsync();
+      toast({ variant: "success", description: t("tenant.companyProfile.signature.deleted") });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: apiErrorMessage(error, t("tenant.companyProfile.signature.saveFailed")),
+      });
+    }
+  }
+
+  return (
+    <Card className="w-full max-w-2xl">
+      <CardHeader>
+        <CardTitle>{t("tenant.companyProfile.signature.title")}</CardTitle>
+        <p className="text-muted-foreground text-sm">
+          {t("tenant.companyProfile.signature.subtitle")}
+        </p>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <fieldset className="flex flex-col gap-4" disabled={!canManage}>
+          <legend className="sr-only">{t("tenant.companyProfile.signature.title")}</legend>
+
+          <div className="flex flex-col gap-1.5 sm:max-w-xs">
+            <Label htmlFor="signerName">
+              {t("tenant.companyProfile.signature.fields.signerName")}
+            </Label>
+            <Input
+              id="signerName"
+              value={representativeName}
+              onChange={(event) => setRepresentativeName(event.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5 sm:max-w-xs">
+            <Label htmlFor="signerTitle">
+              {t("tenant.companyProfile.signature.fields.signerTitle")}
+            </Label>
+            <Input
+              id="signerTitle"
+              value={representativeTitle}
+              onChange={(event) => setRepresentativeTitle(event.target.value)}
+            />
+          </div>
+
+          {signature && (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-muted-foreground text-xs">
+                {t("tenant.companyProfile.signature.preview")}
+              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API-served image, not a static asset next/image can optimize */}
+              <img
+                src={companySignatureFileUrl(tenantId ?? "")}
+                alt=""
+                className="border-input bg-muted/30 h-24 w-fit max-w-full rounded-md border object-contain p-2"
+              />
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                if (file) void handleUpload(file, "UPLOADED");
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={upload.isPending}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {t("tenant.companyProfile.signature.upload")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={upload.isPending}
+              onClick={() => setDrawOpen(true)}
+            >
+              {t("tenant.companyProfile.signature.draw")}
+            </Button>
+            {signature && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={remove.isPending}
+                onClick={() => void handleDelete()}
+              >
+                {t("tenant.companyProfile.signature.delete")}
+              </Button>
+            )}
+          </div>
+        </fieldset>
+      </CardContent>
+
+      <Dialog open={drawOpen} onOpenChange={setDrawOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("tenant.companyProfile.signature.drawTitle")}</DialogTitle>
+          </DialogHeader>
+          <SignaturePad
+            isSaving={upload.isPending}
+            labels={{
+              clear: t("signaturePad.clear"),
+              undo: t("signaturePad.undo"),
+              save: t("signaturePad.save"),
+              cancel: t("signaturePad.cancel"),
+              emptyHint: t("signaturePad.emptyHint"),
+            }}
+            onCancel={() => setDrawOpen(false)}
+            onSave={(file) => void handleUpload(file, "DRAWN")}
+          />
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 }

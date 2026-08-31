@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { Injectable } from "@nestjs/common";
 import type { DocumentFile } from "@prisma/client";
@@ -58,6 +58,12 @@ export class DocumentPdfService {
       size: buffer.length,
     });
 
+    // Tamper-evidence only (docs/PRODUCT_BIBLE.md "Havelio Signature
+    // System") — hashed from the exact bytes just written to storageKey,
+    // never a separately-regenerated render, so this hash always matches
+    // what a later download actually returns.
+    const sha256 = createHash("sha256").update(buffer).digest("hex");
+
     const file = await this.prisma.documentFile.create({
       data: {
         tenantId,
@@ -67,6 +73,7 @@ export class DocumentPdfService {
         originalFileName: fileName,
         mimeType: "application/pdf",
         sizeBytes: buffer.length,
+        sha256,
         uploadedByUserId: actorUserId,
       },
     });

@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 
 import { AuditModule } from "../audit/audit.module";
 import { PasswordService } from "../auth/password.service";
+import { CompanySignatureModule } from "../company-signature/company-signature.module";
 import { EmailModule } from "../email/email.module";
 import { PermissionsModule } from "../permissions/permissions.module";
 import { StorageModule } from "../storage/storage.module";
@@ -24,9 +25,18 @@ import { DOCUMENT_SIGNATURE_PROVIDER } from "./signature/document-signature-prov
 import { DocumentSignatureController } from "./signature/document-signature.controller";
 import { DocumentSignatureService } from "./signature/document-signature.service";
 import { LocalMockSignatureProvider } from "./signature/local-mock-signature.provider";
+import { DocumentSignatureEvidenceController } from "./signature-evidence/document-signature-evidence.controller";
+import { DocumentSignatureEvidenceService } from "./signature-evidence/document-signature-evidence.service";
 
 @Module({
-  imports: [TenantsModule, AuditModule, PermissionsModule, StorageModule, EmailModule],
+  imports: [
+    TenantsModule,
+    AuditModule,
+    PermissionsModule,
+    StorageModule,
+    EmailModule,
+    CompanySignatureModule,
+  ],
   controllers: [
     DocumentsController,
     DocumentTemplatesController,
@@ -34,6 +44,7 @@ import { LocalMockSignatureProvider } from "./signature/local-mock-signature.pro
     PublicDocumentsController,
     DocumentEmailController,
     DocumentSignatureController,
+    DocumentSignatureEvidenceController,
   ],
   providers: [
     DocumentsService,
@@ -47,6 +58,7 @@ import { LocalMockSignatureProvider } from "./signature/local-mock-signature.pro
     DocumentSharingService,
     DocumentEmailService,
     DocumentSignatureService,
+    DocumentSignatureEvidenceService,
     { provide: DOCUMENT_SIGNATURE_PROVIDER, useClass: LocalMockSignatureProvider },
   ],
   exports: [
@@ -57,6 +69,7 @@ import { LocalMockSignatureProvider } from "./signature/local-mock-signature.pro
     DocumentPdfService,
     DocumentSharingService,
     DocumentSignatureService,
+    DocumentSignatureEvidenceService,
     // Exported so InvoicesModule can reuse the same Puppeteer-backed PDF
     // engine for invoice PDFs (see invoice-pdf.service.ts) instead of
     // launching a second browser instance.

@@ -13,6 +13,7 @@ import { AssetStatusesModule } from "./asset-statuses/asset-statuses.module";
 import { AssetsModule } from "./assets/assets.module";
 import { AuthModule } from "./auth/auth.module";
 import { CompanyBankAccountsModule } from "./bank-accounts/company-bank-accounts.module";
+import { CompanySignatureModule } from "./company-signature/company-signature.module";
 import { CustomerPortalModule } from "./customer-portal/customer-portal.module";
 import { CustomersModule } from "./customers/customers.module";
 import { DocumentsModule } from "./documents/documents.module";
@@ -56,6 +57,7 @@ import { TenantsModule } from "./tenants/tenants.module";
     DocumentsModule,
     CustomerPortalModule,
     CompanyBankAccountsModule,
+    CompanySignatureModule,
     InvoicesModule,
     PaymentsModule,
     EInvoiceModule,

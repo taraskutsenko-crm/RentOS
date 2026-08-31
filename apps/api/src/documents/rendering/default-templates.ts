@@ -115,10 +115,16 @@ function documentShell(
     <div class="doc-signature-block">
       <div class="doc-signature-block__label">${strings.company}</div>
       <div class="doc-signature-block__name">{{signature.company}}</div>
+      <div class="doc-signature-block__name">{{signature.companySignerName}}</div>
+      <div class="doc-signature-block__title">{{signature.companySignerTitle}}</div>
+      {{signature.companySignatureImageHtml}}
+      <div class="doc-signature-block__signedat">{{signature.companySignedAtLabel}} {{signature.companySignedAt}}</div>
     </div>
     <div class="doc-signature-block">
       <div class="doc-signature-block__label">${strings.customer}</div>
       <div class="doc-signature-block__name">{{customer.name}}</div>
+      {{signature.customerSignatureImageHtml}}
+      <div class="doc-signature-block__signedat">{{signature.customerSignedAtLabel}} {{signature.customerSignedAt}}</div>
     </div>
   </div>
 

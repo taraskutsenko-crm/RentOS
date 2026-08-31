@@ -193,6 +193,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "documents.update",
     "documents.download",
     "documents.render",
+    "documents.sign",
   ],
   ACCOUNTANT: [
     ...ASSET_READ_ONLY,

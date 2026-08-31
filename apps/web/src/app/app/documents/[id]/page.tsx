@@ -1,9 +1,22 @@
 "use client";
 
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from "@rentos/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  SignaturePad,
+} from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PageHeader } from "../../../../components/shell/page-header";
@@ -11,6 +24,15 @@ import { PinButton } from "../../../../components/shell/pin-button";
 import { Timeline } from "../../../../components/timeline/timeline";
 import { DocumentAttachments } from "../../../../components/documents/document-attachments";
 import { DocumentStatusBadge } from "../../../../components/documents/document-status-badge";
+import {
+  companySignatureFileUrl,
+  useCompanySignature,
+} from "../../../../hooks/use-company-signature";
+import {
+  documentSignatureFileUrl,
+  useCaptureDocumentSignature,
+  useDocumentSignatures,
+} from "../../../../hooks/use-document-signatures";
 import { useTrackRecentItem } from "../../../../hooks/use-recent-items";
 import {
   documentPdfUrl,
@@ -39,11 +61,22 @@ import {
   useVoidDocument,
 } from "../../../../hooks/use-documents";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
-import { usePermission } from "../../../../hooks/use-current-tenant-role";
+import { usePermission, useTenantTimezone } from "../../../../hooks/use-current-tenant-role";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatDate, formatDateTime } from "../../../../lib/date-format";
 import { DOCUMENT_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
-import type { DocumentEmailRecipientType } from "../../../../types/document";
+import type {
+  DocumentEmailRecipientType,
+  DocumentSignatureEvidence,
+  DocumentType,
+} from "../../../../types/document";
+
+/** Havelio Signature System (docs/PRODUCT_BIBLE.md) — Contract/Handover/Return support company + customer signatures; other document types don't (see Phase 12 of the signature system task). */
+const SIGNATURE_ELIGIBLE_TYPES = new Set<DocumentType>([
+  "CONTRACT",
+  "HANDOVER_PROTOCOL",
+  "RETURN_PROTOCOL",
+]);
 
 const DELETABLE_STATUSES = new Set(["DRAFT", "VOIDED"]);
 const READY_STATUSES = new Set(["DRAFT"]);
@@ -621,6 +654,19 @@ export default function DocumentDetailPage() {
             </Card>
           )}
 
+          {SIGNATURE_ELIGIBLE_TYPES.has(document.documentType) && (
+            <DocumentSignaturesCard
+              tenantId={tenantId}
+              documentId={document.id}
+              canSign={canSign}
+              customerName={
+                document.customer
+                  ? `${document.customer.firstName} ${document.customer.lastName}`.trim()
+                  : ""
+              }
+            />
+          )}
+
           {canSign && (
             <Card>
               <CardHeader>
@@ -728,6 +774,316 @@ export default function DocumentDetailPage() {
       <Link href="/app/documents" className="text-muted-foreground text-sm underline">
         {t("document.backToList")}
       </Link>
+    </div>
+  );
+}
+
+type SigningStep = null | "chooseCompanyMethod" | "companyDraw" | "customerDraw";
+
+/**
+ * Havelio Signature System (docs/PRODUCT_BIBLE.md) — NOT a qualified
+ * electronic signature. Company and customer signatures are two
+ * independent, one-shot captures: once evidence exists for a signer type,
+ * it is never editable or re-signable from this UI (the backend rejects a
+ * second capture for the same signerType — see
+ * DocumentSignatureEvidenceService). Capturing the second signature
+ * automatically advances the document to SIGNED (both) or leaves it
+ * PARTIALLY_SIGNED (one) — see DocumentsService.sign, driven server-side
+ * by the capture endpoint itself, never toggled separately here.
+ */
+function DocumentSignaturesCard({
+  tenantId,
+  documentId,
+  canSign,
+  customerName,
+}: {
+  tenantId: string | null;
+  documentId: string;
+  canSign: boolean;
+  customerName: string;
+}) {
+  const { t, i18n } = useTranslation();
+  const timeZone = useTenantTimezone();
+  const { data: evidence } = useDocumentSignatures(tenantId, documentId);
+  const { data: companySignatureData } = useCompanySignature(tenantId);
+  const capture = useCaptureDocumentSignature(tenantId, documentId);
+
+  const [step, setStep] = useState<SigningStep>(null);
+  const [companyName, setCompanyName] = useState("");
+  const [companyTitle, setCompanyTitle] = useState("");
+  const [customerSignerName, setCustomerSignerName] = useState(customerName);
+  const [error, setError] = useState<string | null>(null);
+
+  const companyEvidence = evidence?.find((row) => row.signerType === "TENANT_REPRESENTATIVE");
+  const customerEvidence = evidence?.find((row) => row.signerType === "CUSTOMER");
+  const storedSignature = companySignatureData?.signature ?? null;
+
+  const status: "UNSIGNED" | "COMPANY_ONLY" | "CUSTOMER_ONLY" | "BOTH" =
+    companyEvidence && customerEvidence
+      ? "BOTH"
+      : companyEvidence
+        ? "COMPANY_ONLY"
+        : customerEvidence
+          ? "CUSTOMER_ONLY"
+          : "UNSIGNED";
+
+  function openCompanyFlow(): void {
+    setError(null);
+    setCompanyName(storedSignature?.representativeName ?? "");
+    setCompanyTitle(storedSignature?.representativeTitle ?? "");
+    setStep(storedSignature ? "chooseCompanyMethod" : "companyDraw");
+  }
+
+  function openCustomerFlow(): void {
+    setError(null);
+    setCustomerSignerName(customerName);
+    setStep("customerDraw");
+  }
+
+  async function handleUseStoredSignature(): Promise<void> {
+    try {
+      await capture.mutateAsync({
+        signerType: "TENANT_REPRESENTATIVE",
+        method: "STORED_SIGNATURE",
+        signerName: companyName || (storedSignature?.representativeName ?? ""),
+        ...(companyTitle || storedSignature?.representativeTitle
+          ? { signerTitle: companyTitle || (storedSignature?.representativeTitle ?? "") }
+          : {}),
+      });
+      setStep(null);
+    } catch (err) {
+      setError(apiErrorMessage(err, t("document.signatures.saveFailed")));
+    }
+  }
+
+  async function handleDrawSave(
+    signerType: "TENANT_REPRESENTATIVE" | "CUSTOMER",
+    file: File,
+  ): Promise<void> {
+    setError(null);
+    const signerName = signerType === "TENANT_REPRESENTATIVE" ? companyName : customerSignerName;
+    if (!signerName.trim()) {
+      setError(t("document.signatures.signerNameLabel"));
+      return;
+    }
+    try {
+      await capture.mutateAsync({
+        signerType,
+        method: "DRAWN",
+        signerName: signerName.trim(),
+        ...(signerType === "TENANT_REPRESENTATIVE" && companyTitle
+          ? { signerTitle: companyTitle }
+          : {}),
+        file,
+      });
+      setStep(null);
+    } catch (err) {
+      setError(apiErrorMessage(err, t("document.signatures.saveFailed")));
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>{t("document.signatures.title")}</CardTitle>
+        <span className="text-muted-foreground text-sm">
+          {t(`document.signatures.status.${status}`)}
+        </span>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {error && <p className="text-destructive text-sm">{error}</p>}
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <SignatureEvidenceSlot
+            label={t("document.signatures.companySignature")}
+            evidence={companyEvidence}
+            tenantId={tenantId}
+            documentId={documentId}
+            timeZone={timeZone}
+            locale={i18n.language}
+            action={
+              !companyEvidence && canSign ? (
+                <Button size="sm" variant="outline" onClick={openCompanyFlow}>
+                  {t("document.signatures.signAsCompany")}
+                </Button>
+              ) : null
+            }
+          />
+          <SignatureEvidenceSlot
+            label={t("document.signatures.customerSignature")}
+            evidence={customerEvidence}
+            tenantId={tenantId}
+            documentId={documentId}
+            timeZone={timeZone}
+            locale={i18n.language}
+            action={
+              !customerEvidence && canSign ? (
+                <Button size="sm" variant="outline" onClick={openCustomerFlow}>
+                  {t("document.signatures.customerSigns")}
+                </Button>
+              ) : null
+            }
+          />
+        </div>
+
+        <p className="text-muted-foreground text-xs">{t("document.signatures.legalNote")}</p>
+      </CardContent>
+
+      <Dialog open={step !== null} onOpenChange={(open) => !open && setStep(null)}>
+        <DialogContent>
+          {step === "chooseCompanyMethod" && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{t("document.signatures.chooseMethod")}</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API-served preview image */}
+                <img
+                  src={companySignatureFileUrl(tenantId ?? "")}
+                  alt=""
+                  className="border-input bg-muted/30 h-20 w-fit max-w-full rounded-md border object-contain p-2"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    disabled={capture.isPending}
+                    onClick={() => void handleUseStoredSignature()}
+                  >
+                    {t("document.signatures.useStoredSignature")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={capture.isPending}
+                    onClick={() => setStep("companyDraw")}
+                  >
+                    {t("document.signatures.drawNow")}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === "companyDraw" && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{t("document.signatures.signAsCompany")}</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="companySignerName">
+                    {t("document.signatures.signerNameLabel")}
+                  </Label>
+                  <Input
+                    id="companySignerName"
+                    value={companyName}
+                    onChange={(event) => setCompanyName(event.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="companySignerTitle">
+                    {t("document.signatures.signerTitleLabel")}
+                  </Label>
+                  <Input
+                    id="companySignerTitle"
+                    value={companyTitle}
+                    onChange={(event) => setCompanyTitle(event.target.value)}
+                  />
+                </div>
+                <SignaturePad
+                  isSaving={capture.isPending}
+                  labels={{
+                    clear: t("signaturePad.clear"),
+                    undo: t("signaturePad.undo"),
+                    save: t("signaturePad.save"),
+                    cancel: t("signaturePad.cancel"),
+                    emptyHint: t("signaturePad.emptyHint"),
+                  }}
+                  onCancel={() => setStep(null)}
+                  onSave={(file) => void handleDrawSave("TENANT_REPRESENTATIVE", file)}
+                />
+              </div>
+            </>
+          )}
+
+          {step === "customerDraw" && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{t("document.signatures.customerSigns")}</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="customerSignerName">
+                    {t("document.signatures.signerNameLabel")}
+                  </Label>
+                  <Input
+                    id="customerSignerName"
+                    value={customerSignerName}
+                    onChange={(event) => setCustomerSignerName(event.target.value)}
+                  />
+                </div>
+                <SignaturePad
+                  isSaving={capture.isPending}
+                  labels={{
+                    clear: t("signaturePad.clear"),
+                    undo: t("signaturePad.undo"),
+                    save: t("signaturePad.save"),
+                    cancel: t("signaturePad.cancel"),
+                    emptyHint: t("signaturePad.emptyHint"),
+                  }}
+                  onCancel={() => setStep(null)}
+                  onSave={(file) => void handleDrawSave("CUSTOMER", file)}
+                />
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+}
+
+function SignatureEvidenceSlot({
+  label,
+  evidence,
+  tenantId,
+  documentId,
+  timeZone,
+  locale,
+  action,
+}: {
+  label: string;
+  evidence: DocumentSignatureEvidence | undefined;
+  tenantId: string | null;
+  documentId: string;
+  timeZone: string | undefined;
+  locale: string;
+  action: ReactNode;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="border-input flex flex-col gap-2 rounded-md border p-3">
+      <span className="text-muted-foreground text-xs font-medium uppercase">{label}</span>
+      {evidence ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element -- authenticated API-served signature image */}
+          <img
+            src={documentSignatureFileUrl(tenantId ?? "", documentId, evidence.id)}
+            alt=""
+            className="h-16 w-fit max-w-full object-contain"
+          />
+          <span className="text-sm">{evidence.signerName}</span>
+          {evidence.signerTitle && (
+            <span className="text-muted-foreground text-xs">{evidence.signerTitle}</span>
+          )}
+          <span className="text-muted-foreground text-xs">
+            {t("document.signatures.signedAt")}:{" "}
+            {formatDateTime(evidence.capturedAt, locale, timeZone)}
+          </span>
+        </>
+      ) : (
+        action
+      )}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import type { DocumentType } from "@prisma/client";
+import type { DocumentSignatureEvidence, DocumentType } from "@prisma/client";
 
 import { PrismaService } from "../../prisma/prisma.service";
+import { StorageService } from "../../storage/storage.service";
 import type { DocumentDetailView, DocumentVersionWithFiles } from "../document.types";
 import { resolveDefaultDocumentLanguage } from "./document-language-resolver.util";
 
@@ -28,7 +29,10 @@ const CURRENCY_FALLBACK = "USD";
  */
 @Injectable()
 export class VariableResolverService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
 
   async buildContext(
     tenantId: string,
@@ -109,6 +113,25 @@ export class VariableResolverService {
           language,
         )
       : "";
+
+    // Havelio Signature System (visual handwritten signatures — see
+    // docs/PRODUCT_BIBLE.md, never a qualified electronic signature): each
+    // DocumentSignatureEvidence row is itself the immutable snapshot, so
+    // rendering simply reads whatever rows exist right now for this
+    // document — no separate "freeze into businessDataSnapshot" step is
+    // needed. Unsigned documents (no rows yet) render an empty signature
+    // image/timestamp exactly as before this feature existed.
+    const signatureEvidence = await this.prisma.documentSignatureEvidence.findMany({
+      where: { tenantId, documentId: document.id },
+      orderBy: { createdAt: "asc" },
+    });
+    const companySignature = signatureEvidence.filter(
+      (row) => row.signerType === "TENANT_REPRESENTATIVE",
+    );
+    const customerSignature = signatureEvidence.filter((row) => row.signerType === "CUSTOMER");
+    const latestCompanySignature = companySignature[companySignature.length - 1];
+    const latestCustomerSignature = customerSignature[customerSignature.length - 1];
+    const signedLabel = signedAtLabel(language);
 
     return {
       company: {
@@ -287,8 +310,28 @@ export class VariableResolverService {
         : {},
       today: formatDate(new Date(), language, timezone),
       signature: {
+        // Unchanged since before the Havelio Signature System existed —
+        // any tenant-authored template still using these two plain-text
+        // variables keeps working exactly as before.
         company: tenant.name,
         employee: employeeName,
+        companySignatureImageHtml: latestCompanySignature
+          ? await this.buildSignatureImageHtml(latestCompanySignature)
+          : "",
+        companySignerName: latestCompanySignature?.signerName ?? "",
+        companySignerTitle: latestCompanySignature?.signerTitle ?? "",
+        companySignedAt: latestCompanySignature
+          ? formatDateTime(latestCompanySignature.capturedAt, language, timezone)
+          : "",
+        companySignedAtLabel: latestCompanySignature ? signedLabel : "",
+        customerSignatureImageHtml: latestCustomerSignature
+          ? await this.buildSignatureImageHtml(latestCustomerSignature)
+          : "",
+        customerSignerName: latestCustomerSignature?.signerName ?? "",
+        customerSignedAt: latestCustomerSignature
+          ? formatDateTime(latestCustomerSignature.capturedAt, language, timezone)
+          : "",
+        customerSignedAtLabel: latestCustomerSignature ? signedLabel : "",
       },
       notes: typeof businessData.notes === "string" ? businessData.notes : "",
       document: {
@@ -448,6 +491,18 @@ export class VariableResolverService {
       signature: {
         company: tenant.name,
         employee: employeeName,
+        // A template preview has no real signed document behind it, so
+        // the signature image/timestamp fields stay empty — matching what
+        // an actual not-yet-signed document renders (see buildContext).
+        companySignatureImageHtml: "",
+        companySignerName: "",
+        companySignerTitle: "",
+        companySignedAt: "",
+        companySignedAtLabel: "",
+        customerSignatureImageHtml: "",
+        customerSignerName: "",
+        customerSignedAt: "",
+        customerSignedAtLabel: "",
       },
       notes: "Sample notes for preview purposes.",
       document: {
@@ -526,6 +581,22 @@ export class VariableResolverService {
       `<th>${escapeHtml(labels.asset)}</th><th>${escapeHtml(labels.quantity)}</th><th>${escapeHtml(labels.unitPrice)}</th>` +
       `</tr></thead><tbody>${rows}</tbody></table>`
     );
+  }
+
+  /**
+   * Renders one captured signature as an inline `<img>` with the actual
+   * bytes embedded as a base64 data URI — a signed PDF must be a
+   * self-contained, byte-stable artifact (docs/PRODUCT_BIBLE.md "Havelio
+   * Signature System"), never a live `src` pointing back at a mutable
+   * storage object. `mimeType` comes from the evidence row itself (set at
+   * upload/draw time by StorageService.validateImage), never trusted from
+   * anywhere else. CSS (`.doc-signature-block__image`) caps the display
+   * size and preserves aspect ratio — the source image is never stretched.
+   */
+  private async buildSignatureImageHtml(evidence: DocumentSignatureEvidence): Promise<string> {
+    const bytes = await this.storageService.read(evidence.storageKey);
+    const base64 = bytes.toString("base64");
+    return `<img class="doc-signature-block__image" src="data:${evidence.mimeType};base64,${base64}" alt="" />`;
   }
 
   /**
@@ -849,6 +920,28 @@ function paymentMethodLabel(method: string, language: string): string {
   return PAYMENT_METHOD_LABELS[language]?.[method] ?? PAYMENT_METHOD_LABELS.en?.[method] ?? method;
 }
 
+/** "Signed:" label for the signature block's timestamp line — same small-local-dictionary convention as TABLE_LABELS/PAYMENT_METHOD_LABELS. */
+const SIGNED_AT_LABELS: Record<string, string> = {
+  en: "Signed:",
+  cs: "Podepsáno:",
+  de: "Unterschrieben:",
+  es: "Firmado:",
+  fr: "Signé :",
+  it: "Firmato:",
+  ja: "署名日:",
+  ko: "서명일:",
+  nl: "Ondertekend:",
+  pl: "Podpisano:",
+  "pt-BR": "Assinado em:",
+  ru: "Подписано:",
+  uk: "Підписано:",
+  "zh-CN": "签署时间:",
+};
+
+function signedAtLabel(language: string): string {
+  return SIGNED_AT_LABELS[language] ?? SIGNED_AT_LABELS.en!;
+}
+
 /** Same `.doc-table` markup shape as buildAssetsTableHtml/buildServicesTableHtml, built from literal sample rows (see buildPreviewContext). */
 function sampleTableHtml(
   col1: string,
@@ -912,6 +1005,8 @@ const RAW_HTML_VARIABLES = new Set([
   "rental.assetsTableHtml",
   "quote.servicesTableHtml",
   "company.logoHtml",
+  "signature.companySignatureImageHtml",
+  "signature.customerSignatureImageHtml",
 ]);
 
 /**

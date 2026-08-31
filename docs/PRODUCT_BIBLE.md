@@ -1327,9 +1327,31 @@ login/account image.
   Only OWNER/ADMIN-tier staff (`tenant.manage`) may upload, replace,
   or delete it; any active staff member may view it.
 - **Validated, not blindly trusted.** Accepts PNG/JPEG/WebP (SVG is
-  rejected — no sanitizer exists for it). The file is decoded (not
-  just MIME/extension-checked) to confirm it's a real, non-oversized
-  image before it's stored, rejecting corrupted or disguised files.
+  rejected — no sanitizer exists for it). The file is decoded with
+  `sharp` (not just MIME/extension-checked) to confirm it's a real,
+  non-oversized image before it's stored — the REAL decoded format is
+  the authority, never the client's claimed Content-Type, so a
+  disguised or mislabeled file is rejected based on what it actually
+  is. A decompression-bomb guard (`limitInputPixels`) rejects a small,
+  highly-compressed file that would decode into an unreasonably large
+  pixel buffer before any decoding work happens.
+- **One canonical logo pipeline — every accepted upload is normalized
+  server-side.** Whatever format a tenant uploads (PNG/JPEG/WebP), the
+  stored and rendered representation is always a single canonical PNG,
+  contain-resized (never cropped, never stretched, never upscaled past
+  its own resolution) into a 1600×1600px bounding box — see
+  docs/DECISIONS.md D-119. This is what makes logo rendering
+  format-independent everywhere: pdfkit's Quote PDF can only decode
+  PNG/JPEG (never WebP), but by the time any logo reaches storage it
+  has already been normalized to PNG regardless of the original
+  upload's format, so a WebP-sourced logo renders identically on every
+  document type, including the Quote PDF. Transparency (alpha channel)
+  is preserved through normalization; unnecessary source metadata
+  (EXIF, color profiles) is stripped as a side effect of the
+  re-encode. Replacing or removing a logo now deletes the PREVIOUS
+  storage object — proven safe because nothing in this codebase ever
+  re-reads an old logo object once the tenant's pointer moves (see
+  D-119).
 - **Automatic document branding.** The logo is embedded automatically
   into every genuinely customer-facing document type: Quote, Contract,
   Handover Protocol, Return Protocol, Invoice, and Deposit Receipt.
@@ -1345,10 +1367,12 @@ login/account image.
   terminal-status (signed/rejected/voided/archived) document; Invoice's
   already-frozen `sellerSnapshot` JSON, which embeds the logo bytes at
   issue time and is never touched again; and Quote's own regeneration
-  guard once a quote reaches a terminal status. Replacing or removing
-  the tenant's current logo never deletes the underlying storage
-  object, so every document that already embedded those exact bytes
-  keeps working regardless.
+  guard once a quote reaches a terminal status. None of these three
+  mechanisms depends on the original logo storage object continuing to
+  exist — the bytes are already baked into the persisted PDF/snapshot
+  by the time a logo could ever be replaced — so deleting the previous
+  object on replace/remove (see above) never affects a historical
+  document.
 - **Customer Portal branding.** The customer's portal session shows
   the tenant's own logo and name so it's clear whose rental/document
   they're viewing.

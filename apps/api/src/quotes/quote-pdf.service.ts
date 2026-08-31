@@ -117,12 +117,19 @@ export class QuotePdfService {
   }
 
   /**
-   * pdfkit's `doc.image()` only decodes JPEG/PNG (no WebP support) — a
-   * WebP-uploaded logo simply doesn't appear on the Quote PDF specifically
-   * (it still renders correctly on every HTML/Puppeteer-rendered document
-   * type: Contract/Handover/Return/Invoice/Deposit Receipt, which embed it
-   * as a browser-native `<img>` data URI). Resilient to a storage read
-   * failure — degrades to "no logo" rather than failing PDF generation.
+   * Reads the tenant's stored logo — the same canonical, normalized PNG
+   * rendition every other document renderer consumes (see
+   * CompanyLogoService.normalize() and docs/DECISIONS.md D-119), which is
+   * what makes a WebP-*sourced* logo render correctly here too: pdfkit's
+   * `doc.image()` only decodes JPEG/PNG, never WebP, but by the time a
+   * logo reaches storage it has already been normalized to PNG regardless
+   * of what format the tenant originally uploaded — there is no
+   * WebP-specific handling needed in this file. The `logoMimeType` guard
+   * below is defense-in-depth only, for a logo stored before this
+   * normalization pipeline existed (pre-D-119 uploads keep their original,
+   * un-normalized mime type until the tenant re-uploads/replaces). Resilient
+   * to a storage read failure — degrades to "no logo" rather than failing
+   * PDF generation.
    */
   private async loadLogo(tenant: {
     logoStorageKey: string | null;

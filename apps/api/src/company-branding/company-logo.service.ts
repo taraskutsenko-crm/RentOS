@@ -1,19 +1,59 @@
 import { createHash, randomUUID } from "node:crypto";
 
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { imageSize } from "image-size";
+import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import type { Tenant } from "@prisma/client";
+import sharp, { type Metadata } from "sharp";
 
 import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { StorageService, type UploadedFileLike } from "../storage/storage.service";
 
-/** Image-bomb protection — a logo has no legitimate reason to be larger than this in either dimension. */
-const MAX_LOGO_DIMENSION_PX = 8000;
+/**
+ * Canonical stored/rendered format — every accepted source format
+ * (PNG/JPEG/WebP) is normalized to this one on upload (see `normalize()`
+ * below), so every document renderer consumes the exact same representation.
+ * PNG specifically because it's the one format every renderer in this
+ * codebase can decode natively: pdfkit's `doc.image()` (Quote PDF) only
+ * understands PNG/JPEG, never WebP — normalizing away that gap here means
+ * no per-renderer format special-casing is needed anywhere downstream (see
+ * docs/DECISIONS.md D-119). PNG also preserves transparency losslessly,
+ * unlike JPEG.
+ */
+const CANONICAL_LOGO_MIME_TYPE = "image/png";
+
+/**
+ * Contain-style bounding box for the NORMALIZED, stored rendition — well
+ * above anything any document header ever displays a logo at (all renderers
+ * additionally constrain display size themselves, e.g. `.doc-header__logo`
+ * CSS / pdfkit's `fit: [130, 50]`), while keeping the stored file (and
+ * therefore every PDF/email that embeds it) reasonably sized even for a
+ * very large source upload. `withoutEnlargement` in `normalize()` means a
+ * smaller source logo is never upscaled past its own resolution.
+ */
+const MAX_NORMALIZED_DIMENSION_PX = 1600;
+
+/**
+ * Image-bomb protection for the ORIGINAL uploaded file, before
+ * normalization — a legitimate logo has no reason to exceed this in either
+ * dimension. Also used as sharp's own `limitInputPixels` guard so a small,
+ * highly-compressed file that would decode into an enormous pixel buffer
+ * (a decompression bomb) is rejected before any decoding work happens, not
+ * just after.
+ */
+const MAX_SOURCE_DIMENSION_PX = 8000;
+
+/** The only source formats `normalize()` accepts — matches `StorageService.validateImage`'s MIME allowlist, but checked against sharp's own real decoded format, never the client-supplied Content-Type/extension. */
+const ALLOWED_SOURCE_FORMATS = new Set(["png", "jpeg", "webp"]);
 
 export interface ReadCompanyLogoResult {
   buffer: Buffer;
   mimeType: string;
+}
+
+interface NormalizedImage {
+  buffer: Buffer;
+  width: number;
+  height: number;
 }
 
 /**
@@ -24,70 +64,63 @@ export interface ReadCompanyLogoResult {
  * signature system needs) — see CompanySignatureService's own doc comment
  * for why that system needed a separate table and this one doesn't.
  *
- * "Replace" and "remove" only ever update these pointer fields on Tenant —
- * the underlying storage object at the previous key is never deleted, so
- * any document that already embedded those exact bytes (a finalized
- * Document PDF, or an Invoice/Quote's frozen snapshot) is never
- * retroactively affected by a later logo change (see docs/DECISIONS.md).
+ * Every upload is decoded, validated, and normalized server-side into one
+ * canonical raster (`normalize()`) before it's ever stored — see
+ * docs/DECISIONS.md D-119. "Replace" and "remove" delete the PREVIOUS
+ * storage object: unlike the Signature System's per-document evidence
+ * (which must survive a later company-signature change), nothing in this
+ * codebase ever re-reads an old logo object once the tenant's pointer moves
+ * — every consumer either freezes the bytes into a persisted
+ * document/snapshot at generation time (Document PDF, Invoice
+ * `sellerSnapshot`, Quote PDF) or always resolves the CURRENT pointer live
+ * (draft previews, the portal branding endpoint) — so retaining orphaned
+ * objects forever served no purpose and only grew storage unboundedly
+ * across repeated uploads (see D-119 for the full analysis).
  */
 @Injectable()
 export class CompanyLogoService {
+  private readonly logger = new Logger(CompanyLogoService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
     private readonly auditService: AuditService,
   ) {}
 
-  async upload(
-    tenantId: string,
-    actorUserId: string,
-    file: UploadedFileLike,
-  ): Promise<Tenant> {
-    // MIME allowlist (PNG/JPEG/WebP) + size cap — same StorageService
+  async upload(tenantId: string, actorUserId: string, file: UploadedFileLike): Promise<Tenant> {
+    // MIME allowlist (PNG/JPEG/WebP) + 8MB size cap — same StorageService
     // validation every other image upload in this codebase uses. Not
-    // trusted alone: the imageSize() decode below is the actual
-    // "is this really an image" check (a MIME-allowlisted but malformed or
-    // disguised file fails to decode and is rejected there instead).
+    // trusted alone: normalize() below decodes the real bytes with sharp,
+    // which is the actual "is this really an allowed image" check (a
+    // MIME-allowlisted but malformed, disguised, or wrong-format file is
+    // rejected there instead, based on what it truly decodes as).
     this.storageService.validateImage(file);
 
-    let width: number;
-    let height: number;
-    try {
-      const decoded = imageSize(file.buffer);
-      if (!decoded.width || !decoded.height) {
-        throw new Error("missing dimensions");
-      }
-      width = decoded.width;
-      height = decoded.height;
-    } catch {
-      throw new BadRequestException(
-        "The uploaded file could not be decoded as a valid image — it may be corrupted or not a real image",
-      );
-    }
-    if (width > MAX_LOGO_DIMENSION_PX || height > MAX_LOGO_DIMENSION_PX) {
-      throw new BadRequestException(
-        `Image dimensions exceed the maximum allowed (${MAX_LOGO_DIMENSION_PX}px)`,
-      );
-    }
+    const normalized = await this.normalize(file.buffer);
 
     const existing = await this.prisma.tenant.findUniqueOrThrow({
       where: { id: tenantId },
       select: { logoStorageKey: true },
     });
 
-    const storageKey = this.buildKey(tenantId, file.originalname);
-    await this.storageService.store(storageKey, file);
-    const checksumSha256 = createHash("sha256").update(file.buffer).digest("hex");
+    const storageKey = this.buildKey(tenantId);
+    await this.storageService.store(storageKey, {
+      buffer: normalized.buffer,
+      mimetype: CANONICAL_LOGO_MIME_TYPE,
+      originalname: file.originalname,
+      size: normalized.buffer.length,
+    });
+    const checksumSha256 = createHash("sha256").update(normalized.buffer).digest("hex");
 
     const updated = await this.prisma.tenant.update({
       where: { id: tenantId },
       data: {
         logoStorageKey: storageKey,
-        logoMimeType: file.mimetype,
+        logoMimeType: CANONICAL_LOGO_MIME_TYPE,
         logoOriginalFileName: file.originalname,
-        logoWidth: width,
-        logoHeight: height,
-        logoSizeBytes: file.size,
+        logoWidth: normalized.width,
+        logoHeight: normalized.height,
+        logoSizeBytes: normalized.buffer.length,
         logoChecksumSha256: checksumSha256,
         logoUploadedAt: new Date(),
         logoUploadedByUserId: actorUserId,
@@ -100,8 +133,29 @@ export class CompanyLogoService {
       action: existing.logoStorageKey ? "company_logo.replaced" : "company_logo.uploaded",
       entityType: "Tenant",
       entityId: tenantId,
-      metadata: { mimeType: file.mimetype, sizeBytes: file.size, width, height },
+      metadata: {
+        mimeType: CANONICAL_LOGO_MIME_TYPE,
+        sourceMimeType: file.mimetype,
+        sizeBytes: normalized.buffer.length,
+        width: normalized.width,
+        height: normalized.height,
+      },
     });
+
+    // The previous object (if any) is never read again by any code path
+    // once the pointer above has moved — see this class's doc comment and
+    // D-119. Best-effort: a delete failure here must never fail the
+    // upload that already succeeded — it just leaves one orphaned object,
+    // the same outcome the old "never delete" behavior always had.
+    if (existing.logoStorageKey) {
+      try {
+        await this.storageService.delete(existing.logoStorageKey);
+      } catch (error) {
+        this.logger.warn(
+          `Failed to delete the previous company logo object (${existing.logoStorageKey}): ${error instanceof Error ? error.message : error}`,
+        );
+      }
+    }
 
     return updated;
   }
@@ -127,12 +181,6 @@ export class CompanyLogoService {
       throw new NotFoundException("No company logo is configured");
     }
 
-    // Clears the pointer only — the storage object itself is left in
-    // place, same rationale as CompanySignatureService.remove(): any
-    // document/invoice/quote that already captured these bytes (embedded
-    // base64 in a finalized PDF, or a frozen sellerSnapshot) keeps working
-    // regardless, and there is no defined retention policy that would
-    // justify an unrecoverable hard delete here.
     await this.prisma.tenant.update({
       where: { id: tenantId },
       data: {
@@ -148,6 +196,17 @@ export class CompanyLogoService {
       },
     });
 
+    // Safe to delete — see this class's doc comment and D-119: nothing
+    // reads this object again once the pointer is cleared. Best-effort,
+    // same as upload()'s cleanup.
+    try {
+      await this.storageService.delete(tenant.logoStorageKey);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to delete the removed company logo object (${tenant.logoStorageKey}): ${error instanceof Error ? error.message : error}`,
+      );
+    }
+
     await this.auditService.log({
       tenantId,
       userId: actorUserId,
@@ -157,8 +216,84 @@ export class CompanyLogoService {
     });
   }
 
-  private buildKey(tenantId: string, fileName: string): string {
-    const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-150);
-    return `tenants/${tenantId}/branding/logo/${randomUUID()}-${safeName}`;
+  /**
+   * Decodes, validates, and normalizes an uploaded logo into the canonical
+   * document-safe raster every renderer consumes (see this file's top
+   * doc comment and D-119). Contain-style resize (never crops, never
+   * stretches, never upscales a smaller source) into a
+   * `MAX_NORMALIZED_DIMENSION_PX` box, re-encoded as PNG — which also
+   * strips any EXIF/color-profile metadata the source carried, since
+   * sharp's `.png()` only re-emits pixel data by default.
+   */
+  private async normalize(sourceBuffer: Buffer): Promise<NormalizedImage> {
+    let metadata: Metadata;
+    try {
+      metadata = await sharp(sourceBuffer, {
+        // Decompression-bomb guard — rejects before decoding a pixel buffer
+        // larger than this, regardless of how small the compressed file is.
+        limitInputPixels: MAX_SOURCE_DIMENSION_PX * MAX_SOURCE_DIMENSION_PX,
+      }).metadata();
+    } catch {
+      throw new BadRequestException(
+        "The uploaded file could not be decoded as a valid image — it may be corrupted or not a real image",
+      );
+    }
+
+    if (!metadata.width || !metadata.height) {
+      throw new BadRequestException(
+        "The uploaded file could not be decoded as a valid image — it may be corrupted or not a real image",
+      );
+    }
+    // The real decoded format is the authority here, never the client's
+    // claimed Content-Type or the filename's extension — a file whose
+    // bytes don't genuinely decode as one of these three formats is
+    // rejected even if StorageService.validateImage's MIME check passed.
+    if (!metadata.format || !ALLOWED_SOURCE_FORMATS.has(metadata.format)) {
+      throw new BadRequestException(
+        "Unsupported image format — upload a PNG, JPEG, or WebP file",
+      );
+    }
+    if (metadata.width > MAX_SOURCE_DIMENSION_PX || metadata.height > MAX_SOURCE_DIMENSION_PX) {
+      throw new BadRequestException(
+        `Image dimensions exceed the maximum allowed (${MAX_SOURCE_DIMENSION_PX}px)`,
+      );
+    }
+
+    let normalizedBuffer: Buffer;
+    try {
+      normalizedBuffer = await sharp(sourceBuffer, {
+        limitInputPixels: MAX_SOURCE_DIMENSION_PX * MAX_SOURCE_DIMENSION_PX,
+      })
+        .resize({
+          width: MAX_NORMALIZED_DIMENSION_PX,
+          height: MAX_NORMALIZED_DIMENSION_PX,
+          fit: "inside",
+          withoutEnlargement: true,
+        })
+        .png()
+        .toBuffer();
+    } catch {
+      throw new BadRequestException(
+        "The uploaded file could not be decoded as a valid image — it may be corrupted or not a real image",
+      );
+    }
+
+    const normalizedMetadata = await sharp(normalizedBuffer).metadata();
+    if (!normalizedMetadata.width || !normalizedMetadata.height) {
+      throw new BadRequestException(
+        "The uploaded file could not be decoded as a valid image — it may be corrupted or not a real image",
+      );
+    }
+
+    return {
+      buffer: normalizedBuffer,
+      width: normalizedMetadata.width,
+      height: normalizedMetadata.height,
+    };
+  }
+
+  /** Canonical `.png` extension always — the stored format is fixed by normalize(), never dependent on the original upload's filename/format. */
+  private buildKey(tenantId: string): string {
+    return `tenants/${tenantId}/branding/logo/${randomUUID()}.png`;
   }
 }

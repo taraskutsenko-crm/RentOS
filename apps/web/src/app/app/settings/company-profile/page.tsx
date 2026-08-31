@@ -23,6 +23,11 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import {
+  companyLogoFileUrl,
+  useDeleteCompanyLogo,
+  useUploadCompanyLogo,
+} from "../../../../hooks/use-company-logo";
+import {
   companySignatureFileUrl,
   useCompanySignature,
   useDeleteCompanySignature,
@@ -32,6 +37,7 @@ import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { useCurrentTenantRole, usePermission } from "../../../../hooks/use-current-tenant-role";
 import { useUpdateCompanyProfile } from "../../../../hooks/use-update-company-profile";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
+import type { Tenant } from "../../../../types/auth";
 import { companyProfileSchema, type CompanyProfileFormValues } from "../../../../lib/validation";
 
 const SUPPORTED_TIMEZONES = listSupportedTimezones();
@@ -203,7 +209,130 @@ export default function CompanyProfileSettingsPage() {
       </Card>
 
       <CompanySignatureCard tenantId={tenantId} canManage={canManage} />
+
+      <CompanyLogoCard tenantId={tenantId} canManage={canManage} tenant={data?.tenant ?? null} />
     </div>
+  );
+}
+
+/**
+ * Havelio Company Branding (docs/PRODUCT_BIBLE.md) — the tenant's own logo,
+ * shown on its generated customer-facing documents instead of a generic
+ * Havelio placeholder. Simpler than CompanySignatureCard: the logo's
+ * metadata already lives right on the Tenant object the parent page already
+ * fetched (see useCurrentTenantRole) — no dedicated loading state or
+ * separate query needed here.
+ */
+function CompanyLogoCard({
+  tenantId,
+  canManage,
+  tenant,
+}: {
+  tenantId: string | null;
+  canManage: boolean;
+  tenant: Tenant | null;
+}) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const upload = useUploadCompanyLogo(tenantId);
+  const remove = useDeleteCompanyLogo(tenantId);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const hasLogo = !!tenant?.logoMimeType;
+  const busy = upload.isPending || remove.isPending;
+
+  async function handleUpload(file: File): Promise<void> {
+    try {
+      await upload.mutateAsync(file);
+      toast({ variant: "success", description: t("tenant.companyProfile.logo.saved") });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: apiErrorMessage(error, t("tenant.companyProfile.logo.saveFailed")),
+      });
+    }
+  }
+
+  async function handleDelete(): Promise<void> {
+    if (!window.confirm(t("tenant.companyProfile.logo.removeConfirm"))) return;
+    try {
+      await remove.mutateAsync();
+      toast({ variant: "success", description: t("tenant.companyProfile.logo.removed") });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: apiErrorMessage(error, t("tenant.companyProfile.logo.saveFailed")),
+      });
+    }
+  }
+
+  return (
+    <Card className="w-full max-w-2xl">
+      <CardHeader>
+        <CardTitle>{t("tenant.companyProfile.logo.title")}</CardTitle>
+        <p className="text-muted-foreground text-sm">{t("tenant.companyProfile.logo.subtitle")}</p>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <fieldset className="flex flex-col gap-4" disabled={!canManage}>
+          <legend className="sr-only">{t("tenant.companyProfile.logo.title")}</legend>
+
+          <div className="flex flex-col gap-1.5">
+            <span className="text-muted-foreground text-xs">
+              {hasLogo ? t("tenant.companyProfile.logo.preview") : null}
+            </span>
+            {hasLogo && tenantId ? (
+              // eslint-disable-next-line @next/next/no-img-element -- authenticated API-served image, not a static asset next/image can optimize
+              <img
+                src={`${companyLogoFileUrl(tenantId)}?v=${encodeURIComponent(tenant?.updatedAt ?? "")}`}
+                alt=""
+                className="border-input bg-muted/30 h-24 w-fit max-w-full rounded-md border object-contain p-2"
+              />
+            ) : (
+              // Clean neutral placeholder — never a broken image icon.
+              <div className="border-input bg-muted/30 text-muted-foreground flex h-24 w-48 items-center justify-center rounded-md border text-xs">
+                {t("tenant.companyProfile.logo.noLogo")}
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                if (file) void handleUpload(file);
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {hasLogo
+                ? t("tenant.companyProfile.logo.replace")
+                : t("tenant.companyProfile.logo.upload")}
+            </Button>
+            {hasLogo && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={busy}
+                onClick={() => void handleDelete()}
+              >
+                {t("tenant.companyProfile.logo.remove")}
+              </Button>
+            )}
+          </div>
+        </fieldset>
+      </CardContent>
+    </Card>
   );
 }
 

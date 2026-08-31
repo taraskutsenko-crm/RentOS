@@ -51,7 +51,14 @@ export class QuotePdfService {
   ): Promise<GeneratedQuotePdf> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { name: true, countryCode: true, defaultLanguage: true, timezone: true },
+      select: {
+        name: true,
+        countryCode: true,
+        defaultLanguage: true,
+        timezone: true,
+        logoStorageKey: true,
+        logoMimeType: true,
+      },
     });
     if (!tenant) {
       throw new NotFoundException("Tenant not found");
@@ -64,8 +71,9 @@ export class QuotePdfService {
     // happened to be created under (see DECISIONS.md, Commercial Quote PDF
     // localization fix).
     const language = resolveDefaultDocumentLanguage(tenant);
+    const logo = await this.loadLogo(tenant);
 
-    const buffer = await this.renderPdf(quote, tenant.name, language, tenant.timezone);
+    const buffer = await this.renderPdf(quote, tenant.name, language, tenant.timezone, logo);
     const fileName = `${quote.quoteNumber}.pdf`;
     const storageKey = this.buildKey(tenantId, quote.id, fileName);
 
@@ -108,11 +116,33 @@ export class QuotePdfService {
     return `tenants/${tenantId}/quotes/${quoteId}/pdf/${randomUUID()}-${safeName}`;
   }
 
+  /**
+   * pdfkit's `doc.image()` only decodes JPEG/PNG (no WebP support) — a
+   * WebP-uploaded logo simply doesn't appear on the Quote PDF specifically
+   * (it still renders correctly on every HTML/Puppeteer-rendered document
+   * type: Contract/Handover/Return/Invoice/Deposit Receipt, which embed it
+   * as a browser-native `<img>` data URI). Resilient to a storage read
+   * failure — degrades to "no logo" rather than failing PDF generation.
+   */
+  private async loadLogo(tenant: {
+    logoStorageKey: string | null;
+    logoMimeType: string | null;
+  }): Promise<Buffer | null> {
+    if (!tenant.logoStorageKey || !tenant.logoMimeType) return null;
+    if (tenant.logoMimeType !== "image/png" && tenant.logoMimeType !== "image/jpeg") return null;
+    try {
+      return await this.storageService.read(tenant.logoStorageKey);
+    } catch {
+      return null;
+    }
+  }
+
   private renderPdf(
     quote: QuoteDetailView,
     tenantName: string,
     language: string,
     timezone: string,
+    logo: Buffer | null,
   ): Promise<Buffer> {
     const t = (path: string, fallback: string) => pdfLabel(language, path, fallback);
     const money = (minor: number) => formatMoney(minor, quote.currency, language);
@@ -134,7 +164,7 @@ export class QuotePdfService {
         doc.registerFont("bold", FONT_BOLD);
         doc.font("body");
 
-        this.drawHeader(doc, quote, tenantName, t);
+        this.drawHeader(doc, quote, tenantName, t, logo);
         this.drawCustomerAndMeta(doc, quote, t, date);
         this.drawItemsTable(doc, quote.items, t, money);
         this.drawTotals(doc, quote, t, money);
@@ -154,7 +184,23 @@ export class QuotePdfService {
     quote: QuoteDetailView,
     tenantName: string,
     t: (path: string, fallback: string) => string,
+    logo: Buffer | null,
   ): void {
+    // Havelio Company Branding (docs/PRODUCT_BIBLE.md) — placed in the
+    // top-right corner at a fixed position so it never disturbs the
+    // existing left-aligned flowing text below (company name/title/quote
+    // number/status), which reads `doc.y` sequentially. `fit` preserves
+    // aspect ratio and never stretches; the box is a hard cap, never
+    // pixelated/overflowing regardless of the source image's own size.
+    if (logo) {
+      const boxWidth = 130;
+      const boxHeight = 50;
+      doc.image(logo, PAGE_MARGIN + CONTENT_WIDTH - boxWidth, PAGE_MARGIN, {
+        fit: [boxWidth, boxHeight],
+        align: "right",
+      });
+    }
+
     doc.font("bold").fontSize(18).text(tenantName);
     doc.font("bold").fontSize(13).text(t("quote.pdf.title", "Commercial Quote"));
     doc.font("body").fontSize(10);

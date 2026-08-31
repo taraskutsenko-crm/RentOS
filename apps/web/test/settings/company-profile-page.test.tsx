@@ -33,6 +33,14 @@ vi.mock("../../src/hooks/use-company-signature", () => ({
     `http://api.test/tenants/${tenantId}/company-signature/file`,
 }));
 
+const useUploadCompanyLogoMock = vi.fn();
+const useDeleteCompanyLogoMock = vi.fn();
+vi.mock("../../src/hooks/use-company-logo", () => ({
+  useUploadCompanyLogo: (...args: unknown[]) => useUploadCompanyLogoMock(...args),
+  useDeleteCompanyLogo: (...args: unknown[]) => useDeleteCompanyLogoMock(...args),
+  companyLogoFileUrl: (tenantId: string) => `http://api.test/tenants/${tenantId}/company-logo/file`,
+}));
+
 const TENANT = {
   id: "tenant-1",
   name: "Closure Pass Rentals",
@@ -42,6 +50,10 @@ const TENANT = {
   address: null,
   phone: null,
   email: null,
+  logoMimeType: null,
+  logoWidth: null,
+  logoHeight: null,
+  updatedAt: "2026-01-01T00:00:00.000Z",
 };
 
 describe("CompanyProfileSettingsPage", () => {
@@ -57,6 +69,9 @@ describe("CompanyProfileSettingsPage", () => {
     useCompanySignatureMock.mockReturnValue({ data: { signature: null }, isLoading: false });
     useUploadCompanySignatureMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useDeleteCompanySignatureMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+
+    useUploadCompanyLogoMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useDeleteCompanyLogoMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
   });
 
   it("shows a disabled 'Saving...' button while the save request is in flight", () => {
@@ -288,6 +303,112 @@ describe("CompanyProfileSettingsPage", () => {
       expect(screen.getByAltText("")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /upload signature/i })).toBeDisabled();
       expect(screen.getByRole("button", { name: /draw signature/i })).toBeDisabled();
+    });
+  });
+
+  describe("Company logo (Havelio Company Branding)", () => {
+    it("shows an Upload logo button and a neutral placeholder when no logo is configured", () => {
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      expect(screen.getByRole("button", { name: /^upload logo$/i })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /^replace logo$/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /^remove logo$/i })).not.toBeInTheDocument();
+      expect(screen.getByText("No logo uploaded")).toBeInTheDocument();
+      expect(screen.queryByAltText("")).not.toBeInTheDocument();
+    });
+
+    it("shows a logo preview, Replace, and Remove actions once a logo is configured", () => {
+      useCurrentTenantRoleMock.mockReturnValue({
+        data: { tenant: { ...TENANT, logoMimeType: "image/png", logoWidth: 200, logoHeight: 80 } },
+        isLoading: false,
+      });
+
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      expect(screen.getByRole("button", { name: /^replace logo$/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /^remove logo$/i })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /^upload logo$/i })).not.toBeInTheDocument();
+      expect(screen.getByAltText("")).toHaveAttribute(
+        "src",
+        "http://api.test/tenants/tenant-1/company-logo/file?v=2026-01-01T00%3A00%3A00.000Z",
+      );
+    });
+
+    it("uploads a logo file and shows a success toast", async () => {
+      const mutateAsync = vi.fn().mockResolvedValue({});
+      useUploadCompanyLogoMock.mockReturnValue({ mutateAsync, isPending: false });
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      const fileInput = document.querySelectorAll('input[type="file"]')[1] as HTMLInputElement;
+      const file = new File(["png-bytes"], "logo.png", { type: "image/png" });
+      await user.upload(fileInput, file);
+
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(file));
+      expect(await screen.findByText("Company logo saved")).toBeInTheDocument();
+    });
+
+    it("shows an error toast when saving the logo fails, without a stack trace", async () => {
+      const mutateAsync = vi.fn().mockRejectedValue(new Error("boom at line 7"));
+      useUploadCompanyLogoMock.mockReturnValue({ mutateAsync, isPending: false });
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      const fileInput = document.querySelectorAll('input[type="file"]')[1] as HTMLInputElement;
+      await user.upload(fileInput, new File(["x"], "logo.png", { type: "image/png" }));
+
+      expect(await screen.findByText("Failed to save company logo")).toBeInTheDocument();
+      expect(screen.queryByText(/boom at line 7/i)).not.toBeInTheDocument();
+    });
+
+    it("asks for confirmation and removes the logo", async () => {
+      useCurrentTenantRoleMock.mockReturnValue({
+        data: { tenant: { ...TENANT, logoMimeType: "image/png", logoWidth: 200, logoHeight: 80 } },
+        isLoading: false,
+      });
+      const mutateAsync = vi.fn().mockResolvedValue({});
+      useDeleteCompanyLogoMock.mockReturnValue({ mutateAsync, isPending: false });
+      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.click(screen.getByRole("button", { name: /^remove logo$/i }));
+
+      expect(confirmSpy).toHaveBeenCalled();
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+      expect(await screen.findByText("Company logo removed")).toBeInTheDocument();
+      confirmSpy.mockRestore();
+    });
+
+    it("does not remove the logo when the confirmation is dismissed", async () => {
+      useCurrentTenantRoleMock.mockReturnValue({
+        data: { tenant: { ...TENANT, logoMimeType: "image/png", logoWidth: 200, logoHeight: 80 } },
+        isLoading: false,
+      });
+      const mutateAsync = vi.fn();
+      useDeleteCompanyLogoMock.mockReturnValue({ mutateAsync, isPending: false });
+      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.click(screen.getByRole("button", { name: /^remove logo$/i }));
+
+      expect(mutateAsync).not.toHaveBeenCalled();
+      confirmSpy.mockRestore();
+    });
+
+    it("hides upload/replace/remove actions without tenant.manage, but still shows the preview", () => {
+      usePermissionMock.mockReturnValue(false);
+      useCurrentTenantRoleMock.mockReturnValue({
+        data: { tenant: { ...TENANT, logoMimeType: "image/png", logoWidth: 200, logoHeight: 80 } },
+        isLoading: false,
+      });
+
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      expect(screen.getByAltText("")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /^replace logo$/i })).toBeDisabled();
+      expect(screen.getByRole("button", { name: /^remove logo$/i })).toBeDisabled();
     });
   });
 });

@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { AuditService } from "../audit/audit.service";
+import { buildLogoEmailParts } from "../email/email-logo.util";
 import { EmailService } from "../email/email.service";
 import { buildTenantFromName, resolveTenantReplyTo } from "../email/tenant-sender-identity.util";
 import { PrismaService } from "../prisma/prisma.service";
@@ -88,10 +89,27 @@ export class InvoiceEmailService {
       select: { name: true, email: true },
     });
     const replyTo = resolveTenantReplyTo(tenant?.email);
+    // Uses the SAME frozen sellerSnapshot logo the attached invoice PDF
+    // itself renders (see InvoicesService.buildSnapshots) — never a live
+    // re-read of the tenant's current logo, so the email's own branding
+    // always matches the invoice it's delivering, even if the tenant has
+    // since replaced its logo.
+    const snapshotLogoBase64 = invoice.sellerSnapshot.logoBase64 as string | undefined;
+    const snapshotLogoMimeType = invoice.sellerSnapshot.logoMimeType as string | undefined;
+    const logoParts = buildLogoEmailParts(
+      snapshotLogoBase64 && snapshotLogoMimeType
+        ? { buffer: Buffer.from(snapshotLogoBase64, "base64"), mimeType: snapshotLogoMimeType }
+        : null,
+    );
     const result = await this.emailService.send({
       to: recipientEmail,
       subject,
-      html: buildInvoiceEmailHtml(invoice.invoiceNumber, dto.message, tenant?.name ?? null),
+      html: buildInvoiceEmailHtml(
+        invoice.invoiceNumber,
+        dto.message,
+        tenant?.name ?? null,
+        logoParts.imgHtml,
+      ),
       fromName: buildTenantFromName(tenant?.name),
       ...(replyTo ? { replyTo } : {}),
       attachments: [
@@ -100,6 +118,7 @@ export class InvoiceEmailService {
           content: pdfBuffer,
           contentType: "application/pdf",
         },
+        ...logoParts.attachments,
       ],
     });
 
@@ -145,10 +164,11 @@ function buildInvoiceEmailHtml(
   invoiceNumber: string,
   message: string | undefined,
   tenantName: string | null,
+  logoImgHtml: string,
 ): string {
   const escapedMessage = message ? `<p>${escapeHtml(message).replace(/\n/g, "<br />")}</p>` : "";
   const heading = tenantName ? `<h2>${escapeHtml(tenantName)}</h2>` : "";
-  return `${heading}<p>Please find invoice <strong>${escapeHtml(invoiceNumber)}</strong> attached.</p>${escapedMessage}<p style="color:#aaa; font-size: 11px; margin-top: 24px;">Sent via Havelio</p>`;
+  return `${logoImgHtml}${heading}<p>Please find invoice <strong>${escapeHtml(invoiceNumber)}</strong> attached.</p>${escapedMessage}<p style="color:#aaa; font-size: 11px; margin-top: 24px;">Sent via Havelio</p>`;
 }
 
 function escapeHtml(value: string): string {

@@ -5,6 +5,7 @@ import { CompanyBankAccountsModule } from "../bank-accounts/company-bank-account
 import { DocumentsModule } from "../documents/documents.module";
 import { EmailModule } from "../email/email.module";
 import { PermissionsModule } from "../permissions/permissions.module";
+import { StorageModule } from "../storage/storage.module";
 import { TenantsModule } from "../tenants/tenants.module";
 import { InvoiceEmailService } from "./invoice-email.service";
 import { InvoicesController } from "./invoices.controller";
@@ -20,6 +21,7 @@ import { InvoiceRendererService } from "./rendering/invoice-renderer.service";
     CompanyBankAccountsModule,
     DocumentsModule,
     EmailModule,
+    StorageModule,
   ],
   controllers: [InvoicesController],
   providers: [InvoicesService, InvoiceRendererService, InvoicePdfService, InvoiceEmailService],

@@ -16,6 +16,7 @@ import {
   computeItemLineTotalMinor,
   type PricedRentalItemInput,
 } from "../rentals/rental-pricing.util";
+import { StorageService } from "../storage/storage.service";
 import type { CreateInvoiceDto } from "./dto/create-invoice.dto";
 import type { InvoiceItemDto } from "./dto/invoice-item.dto";
 import type { QueryInvoicesDto } from "./dto/query-invoices.dto";
@@ -65,6 +66,7 @@ export class InvoicesService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly bankAccountsService: CompanyBankAccountsService,
+    private readonly storageService: StorageService,
   ) {}
 
   async findMany(tenantId: string, query: QueryInvoicesDto): Promise<PaginatedInvoices> {
@@ -632,7 +634,13 @@ export class InvoicesService {
    * the three snapshot fields — always read live here, never from a
    * previous snapshot, so a DRAFT stays an accurate live preview and
    * `issue()`'s final call captures whatever is true at that exact moment
-   * (see docs/DECISIONS.md).
+   * (see docs/DECISIONS.md). `sellerSnapshot.logoBase64`/`logoMimeType`
+   * (Havelio Company Branding) are embedded the same way — a real
+   * base64-encoded copy of the tenant's CURRENT logo bytes at snapshot
+   * time, not a storage-key reference, so the frozen JSON is fully
+   * self-contained: `InvoiceRendererService.render()` never touches
+   * storage, and an ISSUED invoice's logo can never change later even if
+   * the tenant replaces or deletes its company logo afterward.
    */
   private async buildSnapshots(
     tenantId: string,
@@ -654,8 +662,11 @@ export class InvoicesService {
         taxNumber: true,
         address: true,
         phone: true,
+        logoStorageKey: true,
+        logoMimeType: true,
       },
     });
+    const logo = await this.loadLogoForSnapshot(tenant);
     const customer = await this.prisma.customer.findFirst({
       where: { tenantId, id: customerId, deletedAt: null },
     });
@@ -677,6 +688,8 @@ export class InvoicesService {
         taxNumber: tenant.taxNumber ?? "",
         address: tenant.address ?? "",
         phone: tenant.phone ?? "",
+        logoBase64: logo?.base64 ?? "",
+        logoMimeType: logo?.mimeType ?? "",
       },
       buyerSnapshot: {
         name: customer.company || `${customer.firstName} ${customer.lastName}`.trim(),
@@ -703,6 +716,26 @@ export class InvoicesService {
         : null,
       documentLanguage,
     };
+  }
+
+  /**
+   * Reads the tenant's current company logo and base64-encodes it for
+   * embedding directly into `sellerSnapshot` (see buildSnapshots' own doc
+   * comment for why a copy, not a storage reference). Resilient to a
+   * storage read failure — degrades to "no logo" rather than failing
+   * invoice creation/issuance.
+   */
+  private async loadLogoForSnapshot(tenant: {
+    logoStorageKey: string | null;
+    logoMimeType: string | null;
+  }): Promise<{ base64: string; mimeType: string } | null> {
+    if (!tenant.logoStorageKey || !tenant.logoMimeType) return null;
+    try {
+      const bytes = await this.storageService.read(tenant.logoStorageKey);
+      return { base64: bytes.toString("base64"), mimeType: tenant.logoMimeType };
+    } catch {
+      return null;
+    }
   }
 
   /**

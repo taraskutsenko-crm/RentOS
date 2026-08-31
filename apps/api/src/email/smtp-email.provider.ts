@@ -113,6 +113,10 @@ export class SmtpEmailProvider implements EmailProvider {
           filename: attachment.filename,
           content: attachment.content,
           contentType: attachment.contentType,
+          // nodemailer embeds inline (never a separate downloadable
+          // attachment) when cid is set, matching the html body's
+          // `<img src="cid:...">` reference — see EmailAttachment.cid.
+          ...(attachment.cid ? { cid: attachment.cid } : {}),
         })),
       });
       return { success: true, messageId: info.messageId };

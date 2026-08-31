@@ -55,6 +55,7 @@ export class InvoiceRendererService {
 <div class="doc-page">
   <div class="doc-header">
     <div class="doc-header__brand">
+      ${logoHtml(seller)}
       <div class="doc-header__company">${escapeHtml(String(seller.name ?? ""))}</div>
     </div>
     <div class="doc-header__meta">
@@ -151,6 +152,20 @@ export class InvoiceRendererService {
 
     return { html };
   }
+}
+
+/**
+ * Havelio Company Branding (docs/PRODUCT_BIBLE.md) — renders the tenant's
+ * logo, embedded (see buildSnapshots' own comment) as a base64 data URI
+ * directly inside `sellerSnapshot` at issue time, so this stays a pure,
+ * synchronous string function with no storage access — an already-ISSUED
+ * invoice's rendered logo can never change, since it never re-reads
+ * anything live. Renders nothing at all when no logo was captured, never
+ * a broken-image icon.
+ */
+function logoHtml(seller: Record<string, string>): string {
+  if (!seller.logoBase64 || !seller.logoMimeType) return "";
+  return `<img class="doc-header__logo" src="data:${seller.logoMimeType};base64,${seller.logoBase64}" alt="${escapeHtml(String(seller.name ?? ""))}" />`;
 }
 
 function partyBlock(party: Record<string, string>, strings: InvoiceStrings): string {

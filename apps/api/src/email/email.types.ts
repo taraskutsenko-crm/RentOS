@@ -5,6 +5,15 @@ export interface EmailAttachment {
   filename: string;
   content: Buffer;
   contentType: string;
+  /**
+   * When set, this attachment is embedded inline (never shown as a
+   * separate downloadable attachment) and referenced from the message's
+   * `html` body as `<img src="cid:THIS_VALUE">` — used for the tenant's
+   * company logo in transactional emails (Havelio Company Branding,
+   * docs/PRODUCT_BIBLE.md). Omitted entirely for a normal file attachment
+   * (e.g. the generated PDF).
+   */
+  cid?: string;
 }
 
 export interface EmailMessage {

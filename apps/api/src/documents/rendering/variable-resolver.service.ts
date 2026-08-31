@@ -52,6 +52,8 @@ export class VariableResolverService {
         address: true,
         phone: true,
         email: true,
+        logoStorageKey: true,
+        logoMimeType: true,
       },
     });
 
@@ -132,19 +134,21 @@ export class VariableResolverService {
     const latestCompanySignature = companySignature[companySignature.length - 1];
     const latestCustomerSignature = customerSignature[customerSignature.length - 1];
     const signedLabel = signedAtLabel(language);
+    const tenantLogo = await this.loadTenantLogo(tenant);
 
     return {
       company: {
         name: tenant.name,
-        // No tenant branding/logo field exists yet — resolves empty until
-        // one is added; the template syntax itself needs no change then.
+        // No plain-text "logo URL" is ever exposed (never a raw R2 path) —
+        // this stays "" always; templates use company.logoHtml instead.
         logo: "",
         // Pre-built raw HTML (see RAW_HTML_VARIABLES below) — renders a
-        // real <img> only when a logo URL actually exists, so a tenant
-        // with no logo never emits a broken-image icon in a generated
-        // document. Templates should use this instead of hand-wrapping
-        // {{company.logo}} in their own <img> tag.
-        logoHtml: buildLogoHtml("", tenant.name),
+        // real <img> only when the tenant has actually uploaded a company
+        // logo (Havelio Company Branding, docs/PRODUCT_BIBLE.md), so a
+        // tenant with no logo never emits a broken-image icon in a
+        // generated document. Templates should use this instead of
+        // hand-wrapping {{company.logo}} in their own <img> tag.
+        logoHtml: buildLogoHtml(tenantLogo, tenant.name),
         email: tenant.email ?? "",
         registrationNumber: tenant.registrationNumber ?? "",
         taxNumber: tenant.taxNumber ?? "",
@@ -372,6 +376,8 @@ export class VariableResolverService {
         address: true,
         phone: true,
         email: true,
+        logoStorageKey: true,
+        logoMimeType: true,
       },
     });
 
@@ -386,12 +392,16 @@ export class VariableResolverService {
     const defaultBankAccount = await this.prisma.companyBankAccount.findFirst({
       where: { tenantId, deletedAt: null, isActive: true, isDefault: true },
     });
+    // A preview shows this tenant's actual current letterhead — no
+    // immutability concern applies here since nothing is ever persisted
+    // from a preview render (see DocumentRendererService's own comment).
+    const tenantLogo = await this.loadTenantLogo(tenant);
 
     return {
       company: {
         name: tenant.name,
         logo: "",
-        logoHtml: buildLogoHtml("", tenant.name),
+        logoHtml: buildLogoHtml(tenantLogo, tenant.name),
         email: tenant.email ?? "",
         registrationNumber: tenant.registrationNumber ?? "",
         taxNumber: tenant.taxNumber ?? "",
@@ -597,6 +607,32 @@ export class VariableResolverService {
     const bytes = await this.storageService.read(evidence.storageKey);
     const base64 = bytes.toString("base64");
     return `<img class="doc-signature-block__image" src="data:${evidence.mimeType};base64,${base64}" alt="" />`;
+  }
+
+  /**
+   * Reads the tenant's currently-configured company logo (Havelio Company
+   * Branding, docs/PRODUCT_BIBLE.md) and base64-encodes it for embedding —
+   * `null` when no logo is configured (buildLogoHtml then renders nothing,
+   * never a broken-image icon). Reads the CURRENT tenant row every call,
+   * which is only ever correct for a DRAFT/not-yet-final render — the
+   * caller (DocumentsController.regeneratePdf) is responsible for refusing
+   * to re-render a document that has already reached a terminal status, so
+   * an already-finalized PDF's embedded logo can never change after the
+   * fact. Resilient to a storage read failure (e.g. an object that somehow
+   * no longer exists) — degrades to "no logo" rather than failing the
+   * whole document render.
+   */
+  private async loadTenantLogo(tenant: {
+    logoStorageKey: string | null;
+    logoMimeType: string | null;
+  }): Promise<{ base64: string; mimeType: string } | null> {
+    if (!tenant.logoStorageKey || !tenant.logoMimeType) return null;
+    try {
+      const bytes = await this.storageService.read(tenant.logoStorageKey);
+      return { base64: bytes.toString("base64"), mimeType: tenant.logoMimeType };
+    } catch {
+      return null;
+    }
   }
 
   /**
@@ -980,16 +1016,19 @@ function formatMoney(minor: number, currency: string, language: string): string 
 }
 
 /**
- * Renders the header logo `<img>` only when a real logo URL exists —
+ * Renders the header logo `<img>` only when the tenant has actually
+ * uploaded one (Havelio Company Branding, docs/PRODUCT_BIBLE.md) —
  * otherwise returns "" so no element is emitted at all, never a
  * `src=""` broken-image icon (see docs/DECISIONS.md, logo fallback fix).
- * Every value is individually escaped before assembly, matching the
- * per-cell-escaping convention buildAssetsTableHtml/buildServicesTableHtml
- * already use for their own RAW_HTML_VARIABLES entries.
+ * The image bytes are embedded as a base64 data URI — same reasoning as
+ * `buildSignatureImageHtml` (see below): a rendered/finalized PDF must be
+ * a self-contained, byte-stable artifact, never a live `src` pointing at
+ * mutable/private storage an email client or later viewer couldn't reach
+ * anyway. `alt` is escaped like every other RAW_HTML_VARIABLES entry.
  */
-function buildLogoHtml(logoUrl: string, companyName: string): string {
-  if (!logoUrl) return "";
-  return `<img class="doc-header__logo" src="${escapeHtml(logoUrl)}" alt="${escapeHtml(companyName)}" />`;
+function buildLogoHtml(logo: { base64: string; mimeType: string } | null, companyName: string): string {
+  if (!logo) return "";
+  return `<img class="doc-header__logo" src="data:${logo.mimeType};base64,${logo.base64}" alt="${escapeHtml(companyName)}" />`;
 }
 
 /**

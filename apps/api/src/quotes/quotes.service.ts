@@ -31,8 +31,10 @@ import type { QuoteItemDto } from "./dto/quote-item.dto";
 import type { SendQuoteDto } from "./dto/send-quote.dto";
 import type { StatusActionDto } from "./dto/status-action.dto";
 import type { UpdateQuoteDto } from "./dto/update-quote.dto";
+import { buildLogoEmailParts } from "../email/email-logo.util";
 import { EmailService } from "../email/email.service";
 import { buildTenantFromName, resolveTenantReplyTo } from "../email/tenant-sender-identity.util";
+import { StorageService } from "../storage/storage.service";
 import { generateQuoteNumber } from "./quote-numbering.util";
 import {
   computeQuoteTotals,
@@ -127,6 +129,7 @@ export class QuotesService {
     private readonly pdfService: QuotePdfService,
     private readonly configService: ConfigService<ApiEnv, true>,
     private readonly rentalBillingSettingsService: RentalBillingSettingsService,
+    private readonly storageService: StorageService,
   ) {}
 
   async create(
@@ -652,10 +655,11 @@ export class QuotesService {
       });
     } else {
       const replyTo = resolveTenantReplyTo(tenant.email);
+      const logoParts = buildLogoEmailParts(await this.readTenantLogo(tenant));
       emailResult = await this.emailService.send({
         to: recipientEmail,
         subject,
-        html: buildSendEmailHtml(updated, tenant.name, publicUrl, dto.message),
+        html: buildSendEmailHtml(updated, tenant.name, publicUrl, dto.message, logoParts.imgHtml),
         fromName: buildTenantFromName(tenant.name),
         ...(replyTo ? { replyTo } : {}),
         attachments: [
@@ -664,6 +668,7 @@ export class QuotesService {
             content: pdf.buffer,
             contentType: "application/pdf",
           },
+          ...logoParts.attachments,
         ],
       });
       await this.prisma.quoteEmailDelivery.create({
@@ -1039,12 +1044,25 @@ export class QuotesService {
     return { buffer: generated.buffer, fileName: generated.document.originalFileName };
   }
 
+  /**
+   * Forces regeneration. Blocked once a quote has reached a terminal
+   * status (Havelio Company Branding, docs/PRODUCT_BIBLE.md) — the PDF is
+   * generated live from Tenant.name/logo etc every time (Quote has no
+   * DocumentVersion-style snapshot), so an unrestricted regeneration could
+   * otherwise silently change an already-accepted/rejected quote's
+   * rendered branding after the fact.
+   */
   async regeneratePdf(
     tenantId: string,
     id: string,
     actorUserId: string,
   ): Promise<{ buffer: Buffer; fileName: string }> {
     const quote = await this.findOneRaw(tenantId, id);
+    if (TERMINAL_STATUSES.includes(quote.status)) {
+      throw new ConflictException(
+        `Cannot regenerate the PDF of a ${quote.status} quote — its rendered content is final`,
+      );
+    }
     const generated = await this.pdfService.generateAndStore(tenantId, quote, actorUserId);
     await this.auditService.log({
       tenantId,
@@ -1650,17 +1668,40 @@ export class QuotesService {
     }
   }
 
-  private async resolveTenant(
-    tenantId: string,
-  ): Promise<{ name: string; defaultCurrency: string; email: string | null }> {
+  private async resolveTenant(tenantId: string): Promise<{
+    name: string;
+    defaultCurrency: string;
+    email: string | null;
+    logoStorageKey: string | null;
+    logoMimeType: string | null;
+  }> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { name: true, defaultCurrency: true, email: true },
+      select: {
+        name: true,
+        defaultCurrency: true,
+        email: true,
+        logoStorageKey: true,
+        logoMimeType: true,
+      },
     });
     if (!tenant) {
       throw new NotFoundException("Tenant not found");
     }
     return tenant;
+  }
+
+  /** Resilient to a storage read failure — degrades to "no logo" rather than failing the email send. */
+  private async readTenantLogo(
+    tenant: { logoStorageKey: string | null; logoMimeType: string | null } | null,
+  ): Promise<{ buffer: Buffer; mimeType: string } | null> {
+    if (!tenant?.logoStorageKey || !tenant.logoMimeType) return null;
+    try {
+      const buffer = await this.storageService.read(tenant.logoStorageKey);
+      return { buffer, mimeType: tenant.logoMimeType };
+    } catch {
+      return null;
+    }
   }
 
   /**
@@ -1825,10 +1866,12 @@ function buildSendEmailHtml(
   tenantName: string,
   publicUrl: string,
   message: string | undefined,
+  logoImgHtml: string,
 ): string {
   const escapedMessage = message ? `<p>${escapeHtml(message)}</p>` : "";
   return `
     <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto;">
+      ${logoImgHtml}
       <h2>${escapeHtml(tenantName)}</h2>
       <p>Please find attached your commercial quote <strong>${escapeHtml(quote.quoteNumber)}</strong>.</p>
       ${escapedMessage}

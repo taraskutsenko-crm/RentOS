@@ -24,6 +24,15 @@ export interface Tenant {
   address: string | null;
   phone: string | null;
   email: string | null;
+  /**
+   * Havelio Company Branding (docs/PRODUCT_BIBLE.md) — presence of a mime
+   * type is how the UI knows a logo is configured; the raw storage key is
+   * never sent to the frontend (see PrismaService's global `omit` config).
+   * Width/height let the logo preview reserve layout space without a flash.
+   */
+  logoMimeType: string | null;
+  logoWidth: number | null;
+  logoHeight: number | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

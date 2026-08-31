@@ -24,6 +24,8 @@ export interface PortalTenant {
   id: string;
   name: string;
   timezone: string;
+  /** Havelio Company Branding (docs/PRODUCT_BIBLE.md) — whether this tenant has a logo configured; fetch it via portalLogoFileUrl(). */
+  hasLogo: boolean;
 }
 
 export interface PortalSession {

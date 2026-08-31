@@ -7,6 +7,7 @@ import { AssetFilesModule } from "../asset-files/asset-files.module";
 import { AssetsModule } from "../assets/assets.module";
 import { AuditModule } from "../audit/audit.module";
 import { PasswordService } from "../auth/password.service";
+import { CompanyBrandingModule } from "../company-branding/company-branding.module";
 import { CustomersModule } from "../customers/customers.module";
 import { DocumentsModule } from "../documents/documents.module";
 import { EmailModule } from "../email/email.module";
@@ -17,6 +18,7 @@ import { TenantsModule } from "../tenants/tenants.module";
 import { PortalAssetsController } from "./assets/portal-assets.controller";
 import { PortalAssetsService } from "./assets/portal-assets.service";
 import { CustomerAuthGuard } from "./auth/guards/customer-auth.guard";
+import { PortalBrandingController } from "./branding/portal-branding.controller";
 import { PortalAuthController } from "./auth/portal-auth.controller";
 import { PortalAuthService } from "./auth/portal-auth.service";
 import { CUSTOMER_JWT_SERVICE, CustomerTokenService } from "./auth/customer-token.service";
@@ -60,6 +62,7 @@ import { StaffPortalController } from "./staff/staff-portal.controller";
     StorageModule,
     AuditModule,
     EmailModule,
+    CompanyBrandingModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -73,6 +76,7 @@ import { StaffPortalController } from "./staff/staff-portal.controller";
   ],
   controllers: [
     PortalAuthController,
+    PortalBrandingController,
     CustomerPortalInvitationsController,
     PortalRentalsController,
     PortalDocumentsController,

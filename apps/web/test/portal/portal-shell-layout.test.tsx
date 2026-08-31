@@ -81,4 +81,48 @@ describe("PortalShellLayout", () => {
 
     expect(screen.getByText("3")).toBeInTheDocument();
   });
+
+  describe("Company branding (Havelio Company Branding)", () => {
+    it("shows no logo image when the tenant has no logo configured", () => {
+      usePortalMeMock.mockReturnValue({
+        data: {
+          customer: { id: "c1", firstName: "Jane", lastName: "Doe" },
+          tenant: { id: "t1", name: "Acme Rentals", hasLogo: false },
+        },
+        isLoading: false,
+        isError: false,
+      });
+
+      renderWithProviders(
+        <PortalShellLayout>
+          <div />
+        </PortalShellLayout>,
+      );
+
+      expect(screen.getByText("Acme Rentals")).toBeInTheDocument();
+      expect(screen.queryByAltText("")).not.toBeInTheDocument();
+    });
+
+    it("shows the tenant's logo next to its name once one is configured", () => {
+      usePortalMeMock.mockReturnValue({
+        data: {
+          customer: { id: "c1", firstName: "Jane", lastName: "Doe" },
+          tenant: { id: "t1", name: "Acme Rentals", hasLogo: true },
+        },
+        isLoading: false,
+        isError: false,
+      });
+
+      renderWithProviders(
+        <PortalShellLayout>
+          <div />
+        </PortalShellLayout>,
+      );
+
+      expect(screen.getByAltText("")).toHaveAttribute(
+        "src",
+        "http://localhost:4000/portal/branding/logo/file",
+      );
+    });
+  });
 });

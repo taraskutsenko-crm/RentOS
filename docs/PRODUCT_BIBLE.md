@@ -1303,3 +1303,60 @@ system, and the explicit legal-wording note below.
   unbuilt values for a future qualified/identity-verified e-signature
   integration — a genuinely different capability from this system,
   never implied or faked by it.
+
+## 32. Havelio Company Branding
+
+Each tenant company can upload **one company logo** in Settings →
+Company Profile. Once configured, it automatically appears on that
+company's own generated customer-facing documents — e.g. UnitCore Sp.
+z o.o. uploading its logo means UnitCore's Quotes/Contracts/Handover
+and Return Protocols/Invoices/Deposit Receipts show the UnitCore logo,
+not a generic Havelio placeholder. This is the **tenant company's own
+logo** — not the Havelio platform logo, not a user avatar, and not a
+login/account image.
+
+- **One logo per tenant.** Stored as a small set of nullable fields
+  directly on `Tenant` (mime type, original filename, width/height,
+  size, a SHA-256 checksum, uploaded-at, uploaded-by) — a logo is a
+  true singleton per tenant, so unlike the Signature System's
+  reusable-vs-per-document split, no separate table is needed.
+- **Private, tenant-isolated storage.** The logo image itself is
+  stored through the same private, authenticated `StorageService`
+  every other tenant file uses (signatures, document attachments) —
+  never a public R2 URL, never a raw storage path in an API response.
+  Only OWNER/ADMIN-tier staff (`tenant.manage`) may upload, replace,
+  or delete it; any active staff member may view it.
+- **Validated, not blindly trusted.** Accepts PNG/JPEG/WebP (SVG is
+  rejected — no sanitizer exists for it). The file is decoded (not
+  just MIME/extension-checked) to confirm it's a real, non-oversized
+  image before it's stored, rejecting corrupted or disguised files.
+- **Automatic document branding.** The logo is embedded automatically
+  into every genuinely customer-facing document type: Quote, Contract,
+  Handover Protocol, Return Protocol, Invoice, and Deposit Receipt.
+  Sizing is professional and constrained (a fixed bounding box,
+  aspect-ratio preserved, never stretched or pixelated); a tenant with
+  no logo renders those same documents cleanly with the company name
+  alone — never a broken image icon and never a fake logo.
+- **Historical documents keep their original logo forever.** A signed
+  Contract generated in August with Logo A still shows Logo A after
+  the tenant uploads Logo B in September. Three independent mechanisms
+  guarantee this, one per rendering system: the Document platform's
+  already-persisted PDF bytes plus a regeneration guard on any
+  terminal-status (signed/rejected/voided/archived) document; Invoice's
+  already-frozen `sellerSnapshot` JSON, which embeds the logo bytes at
+  issue time and is never touched again; and Quote's own regeneration
+  guard once a quote reaches a terminal status. Replacing or removing
+  the tenant's current logo never deletes the underlying storage
+  object, so every document that already embedded those exact bytes
+  keeps working regardless.
+- **Customer Portal branding.** The customer's portal session shows
+  the tenant's own logo and name so it's clear whose rental/document
+  they're viewing.
+- **Email branding.** Outgoing transactional email (Quote/Document/
+  Invoice) embeds the logo as an inline CID attachment — the only safe
+  way to show it, since email clients cannot reach Havelio's private,
+  authenticated storage endpoints and the R2 bucket is never made
+  public just to render an email logo.
+- **Audit trail.** Upload/replace/remove are recorded in the same
+  audit architecture every other tenant event uses — actor, timestamp,
+  mime type, and file size, never the image bytes themselves.

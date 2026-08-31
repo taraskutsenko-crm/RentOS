@@ -752,33 +752,54 @@ model User {
 /// Multi-tenancy foundation: the tenant/organization boundary every future
 /// business entity will reference for isolation. Not a business module.
 model Tenant {
-  id                 String    @id @default(uuid())
-  name               String
-  slug               String    @unique
-  countryCode        String    @db.VarChar(2)
-  defaultLanguage    String    @default("en") @db.VarChar(10)
-  defaultCurrency    String    @db.VarChar(3)
-  timezone           String
+  id                   String    @id @default(uuid())
+  name                 String
+  slug                 String    @unique
+  countryCode          String    @db.VarChar(2)
+  defaultLanguage      String    @default("en") @db.VarChar(10)
+  defaultCurrency      String    @db.VarChar(3)
+  timezone             String
   /// Legal-identity fields for rendering into commercial documents (the
   /// Contract "Parties" section, etc.) — all optional/nullable since a
   /// tenant may not have filled them in yet; VariableResolverService
   /// renders "" when null, exactly like every other optional variable.
   /// Edited via the Company Profile settings page (PATCH /tenants/:id).
-  registrationNumber String?
-  taxNumber          String?
-  address            String?
-  phone              String?
+  registrationNumber   String?
+  taxNumber            String?
+  address              String?
+  phone                String?
   /// The tenant's customer-facing company email — canonical source for the
   /// Reply-To address on outbound transactional email (Quote/Document/
   /// Invoice/Handover/Return/portal-invite sends). Deliberately separate
   /// from any User.email (a staff login, not a company identity) and from
   /// SMTP_REPLY_TO (a single global env fallback, never tenant-specific).
   /// See tenant-sender-identity.util.ts / docs/adr/0013-production-storage-and-email.md.
-  email              String?
-  isActive           Boolean   @default(true)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  deletedAt          DateTime?
+  email                String?
+  /// Havelio Company Branding (docs/PRODUCT_BIBLE.md) — the tenant's own
+  /// logo, shown on its generated customer-facing documents instead of a
+  /// generic Havelio placeholder. `logoStorageKey` is a private,
+  /// server-generated StorageService key (never a public R2 URL, never
+  /// exposed to the client) — see CompanyLogoService. All fields are
+  /// nullable together (no logo uploaded yet is the default, valid state)
+  /// and are set/cleared as one unit by that service, never edited
+  /// directly via UpdateTenantDto. Replacing or removing the logo only
+  /// ever updates these pointer fields — the underlying storage object at
+  /// the old key is never deleted, so any document that already embedded
+  /// those exact bytes (a finalized Document PDF, or an Invoice/Quote
+  /// sellerSnapshot's captured logo) is never retroactively affected.
+  logoStorageKey       String?
+  logoMimeType         String?
+  logoOriginalFileName String?
+  logoWidth            Int?
+  logoHeight           Int?
+  logoSizeBytes        Int?
+  logoChecksumSha256   String?
+  logoUploadedAt       DateTime?
+  logoUploadedByUserId String?
+  isActive             Boolean   @default(true)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
 
   memberships   TenantMembership[]
   refreshTokens RefreshToken[]

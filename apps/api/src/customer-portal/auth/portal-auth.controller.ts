@@ -58,7 +58,12 @@ export class PortalAuthController {
     this.setSessionCookies(res, result);
     return {
       customer: result.customer,
-      tenant: { id: result.tenant.id, name: result.tenant.name, timezone: result.tenant.timezone },
+      tenant: {
+        id: result.tenant.id,
+        name: result.tenant.name,
+        timezone: result.tenant.timezone,
+        hasLogo: !!result.tenant.logoMimeType,
+      },
     };
   }
 
@@ -78,7 +83,12 @@ export class PortalAuthController {
     this.setSessionCookies(res, result);
     return {
       customer: result.customer,
-      tenant: { id: result.tenant.id, name: result.tenant.name, timezone: result.tenant.timezone },
+      tenant: {
+        id: result.tenant.id,
+        name: result.tenant.name,
+        timezone: result.tenant.timezone,
+        hasLogo: !!result.tenant.logoMimeType,
+      },
     };
   }
 
@@ -129,6 +139,7 @@ export class PortalAuthController {
         id: session.tenant.id,
         name: session.tenant.name,
         timezone: session.tenant.timezone,
+        hasLogo: !!session.tenant.logoMimeType,
       },
     };
   }

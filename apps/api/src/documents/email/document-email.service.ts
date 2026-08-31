@@ -2,9 +2,11 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import type { DocumentEmailDelivery } from "@prisma/client";
 
 import { AuditService } from "../../audit/audit.service";
+import { buildLogoEmailParts } from "../../email/email-logo.util";
 import { EmailService } from "../../email/email.service";
 import { buildTenantFromName, resolveTenantReplyTo } from "../../email/tenant-sender-identity.util";
 import { PrismaService } from "../../prisma/prisma.service";
+import { StorageService } from "../../storage/storage.service";
 import { DocumentsService } from "../documents.service";
 import type { SendDocumentEmailDto } from "../dto/send-document-email.dto";
 import { DocumentPdfService } from "../rendering/document-pdf.service";
@@ -32,6 +34,7 @@ export class DocumentEmailService {
     private readonly documentsService: DocumentsService,
     private readonly pdfService: DocumentPdfService,
     private readonly emailService: EmailService,
+    private readonly storageService: StorageService,
   ) {}
 
   async send(
@@ -129,14 +132,20 @@ export class DocumentEmailService {
     const { buffer } = await this.pdfService.getOrGenerate(tenantId, document, version);
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { name: true, email: true },
+      select: { name: true, email: true, logoStorageKey: true, logoMimeType: true },
     });
+    const logoParts = buildLogoEmailParts(await this.readLogo(tenant));
 
     const replyTo = resolveTenantReplyTo(tenant?.email);
     const result = await this.emailService.send({
       to: delivery.recipientEmail,
       subject: delivery.subject,
-      html: buildEmailHtml(document.documentNumber, delivery.message, tenant?.name ?? null),
+      html: buildEmailHtml(
+        document.documentNumber,
+        delivery.message,
+        tenant?.name ?? null,
+        logoParts.imgHtml,
+      ),
       fromName: buildTenantFromName(tenant?.name),
       ...(replyTo ? { replyTo } : {}),
       attachments: [
@@ -145,6 +154,7 @@ export class DocumentEmailService {
           content: buffer,
           contentType: "application/pdf",
         },
+        ...logoParts.attachments,
       ],
     });
 
@@ -171,6 +181,19 @@ export class DocumentEmailService {
     });
 
     return updated;
+  }
+
+  /** Resilient to a storage read failure — degrades to "no logo" rather than failing the email send. */
+  private async readLogo(
+    tenant: { logoStorageKey: string | null; logoMimeType: string | null } | null,
+  ): Promise<{ buffer: Buffer; mimeType: string } | null> {
+    if (!tenant?.logoStorageKey || !tenant.logoMimeType) return null;
+    try {
+      const buffer = await this.storageService.read(tenant.logoStorageKey);
+      return { buffer, mimeType: tenant.logoMimeType };
+    } catch {
+      return null;
+    }
   }
 
   private async resolveRecipientEmail(
@@ -211,11 +234,13 @@ function buildEmailHtml(
   documentNumber: string,
   message: string | null,
   tenantName: string | null,
+  logoImgHtml: string,
 ): string {
   const escapedMessage = message ? `<p>${escapeHtml(message)}</p>` : "";
   const heading = tenantName ? `<h2>${escapeHtml(tenantName)}</h2>` : "";
   return `
     <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto;">
+      ${logoImgHtml}
       ${heading}
       <p>Please find attached document <strong>${escapeHtml(documentNumber)}</strong>.</p>
       ${escapedMessage}

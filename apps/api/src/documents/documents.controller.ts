@@ -1,5 +1,6 @@
 import {
   Body,
+  ConflictException,
   Controller,
   Delete,
   Get,
@@ -43,6 +44,21 @@ const multerOptions = {
   storage: memoryStorage(),
   limits: { fileSize: MAX_DOCUMENT_SIZE_BYTES },
 };
+
+/**
+ * Once a document is fully SIGNED (or otherwise reached a terminal
+ * lifecycle state), its rendered content — including the tenant's company
+ * branding/logo at that moment — must stay historically true forever (see
+ * docs/PRODUCT_BIBLE.md "Company Branding"). Re-rendering here would
+ * re-read the tenant's CURRENT logo/company data, silently changing an
+ * already-final document. This is deliberately narrower than "isFinal"
+ * (which becomes true the moment a version leaves DRAFT): the signature
+ * capture flow itself legitimately regenerates a PARTIALLY_SIGNED
+ * document's PDF a second time to embed the second signature — that path
+ * calls DocumentPdfService.generateAndStore directly, bypassing this
+ * controller action entirely, so it is unaffected by this guard.
+ */
+const PDF_REGENERATION_BLOCKED_STATUSES = new Set(["SIGNED", "REJECTED", "VOIDED", "ARCHIVED"]);
 
 /**
  * Tenant-namespaced under /tenants/:tenantId/documents, consistent with
@@ -249,7 +265,14 @@ export class DocumentsController {
     res.type("application/pdf").send(buffer);
   }
 
-  /** Forces regeneration — creates a new DocumentFile row tied to the current version and returns the fresh PDF bytes. */
+  /**
+   * Forces regeneration — creates a new DocumentFile row tied to the
+   * current version and returns the fresh PDF bytes. Blocked once the
+   * document has reached a terminal state (see
+   * PDF_REGENERATION_BLOCKED_STATUSES above) — a finalized document's
+   * rendered content, including its embedded company logo, must never
+   * change after the fact.
+   */
   @RequirePermissions("documents.render")
   @Post(":id/pdf")
   async regeneratePdf(
@@ -259,6 +282,11 @@ export class DocumentsController {
     @Res() res: Response,
   ): Promise<void> {
     const document = await this.documentsService.findOneRaw(tenant.id, id);
+    if (PDF_REGENERATION_BLOCKED_STATUSES.has(document.status)) {
+      throw new ConflictException(
+        `Cannot regenerate the PDF of a ${document.status} document — its rendered content is final`,
+      );
+    }
     const version = document.versions.find(
       (v) => v.versionNumber === document.currentVersionNumber,
     )!;

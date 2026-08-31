@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useDarkMode } from "../../../hooks/use-dark-mode";
 import { usePortalLogout, usePortalMe } from "../../../hooks/use-portal-auth";
 import { usePortalUnreadNotificationCount } from "../../../hooks/use-portal-notifications";
+import { portalLogoFileUrl } from "../../../hooks/use-portal-branding";
 
 const NAV_ITEMS = [
   { href: "/portal/dashboard", labelKey: "portal.nav.dashboard" },
@@ -55,7 +56,18 @@ export default function PortalShellLayout({ children }: { children: React.ReactN
       <header className="bg-background/80 sticky top-0 z-10 border-b backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-8">
-            <Link href="/portal/dashboard" className="text-sm font-semibold tracking-tight">
+            <Link
+              href="/portal/dashboard"
+              className="flex items-center gap-2 text-sm font-semibold tracking-tight"
+            >
+              {data.tenant.hasLogo && (
+                // eslint-disable-next-line @next/next/no-img-element -- authenticated API-served image, not a static asset next/image can optimize
+                <img
+                  src={portalLogoFileUrl()}
+                  alt=""
+                  className="h-7 w-auto max-w-[120px] object-contain"
+                />
+              )}
               {data.tenant.name}
             </Link>
             <nav className="flex items-center gap-5 text-sm">

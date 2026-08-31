@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "Požádat o prodloužení",
       "currentEnd": "Aktuální datum konce",
-      "newEndDate": "Nové datum konce",
+      "newEndDate": "Nové datum vrácení",
+      "newEndTime": "Nový čas vrácení",
       "message": "Zpráva (volitelné)",
       "submit": "Odeslat žádost",
       "submitting": "Odesílání…",
       "submitted": "Vaše žádost o prodloužení byla odeslána.",
       "responseFrom": "Odpověď",
+      "errors": {
+        "mustBeAfterCurrentEnd": "Nové datum a čas vrácení musí být pozdější než aktuální konec pronájmu."
+      },
       "statuses": {
         "PENDING": "Čeká se",
         "APPROVED": "Schváleno",

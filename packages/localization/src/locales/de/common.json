@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "Verlängerung anfragen",
       "currentEnd": "Aktuelles Enddatum",
-      "newEndDate": "Neues Enddatum",
+      "newEndDate": "Neues Rückgabedatum",
+      "newEndTime": "Neue Rückgabezeit",
       "message": "Nachricht (optional)",
       "submit": "Anfrage senden",
       "submitting": "Wird gesendet…",
       "submitted": "Ihre Verlängerungsanfrage wurde übermittelt.",
       "responseFrom": "Antwort",
+      "errors": {
+        "mustBeAfterCurrentEnd": "Das neue Rückgabedatum und die Rückgabezeit müssen nach dem aktuellen Mietende liegen."
+      },
       "statuses": {
         "PENDING": "Ausstehend",
         "APPROVED": "Genehmigt",

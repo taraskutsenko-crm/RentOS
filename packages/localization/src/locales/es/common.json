@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "Solicitar una prórroga",
       "currentEnd": "Fecha de fin actual",
-      "newEndDate": "Nueva fecha de fin",
+      "newEndDate": "Nueva fecha de devolución",
+      "newEndTime": "Nueva hora de devolución",
       "message": "Mensaje (opcional)",
       "submit": "Enviar solicitud",
       "submitting": "Enviando…",
       "submitted": "Tu solicitud de prórroga ha sido enviada.",
       "responseFrom": "Respuesta",
+      "errors": {
+        "mustBeAfterCurrentEnd": "La nueva fecha y hora de devolución deben ser posteriores al final actual del alquiler."
+      },
       "statuses": {
         "PENDING": "Pendiente",
         "APPROVED": "Aprobada",

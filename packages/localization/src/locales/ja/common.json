@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "延長をリクエスト",
       "currentEnd": "現在の終了日",
-      "newEndDate": "新しい終了日",
+      "newEndDate": "新しい返却日",
+      "newEndTime": "新しい返却時刻",
       "message": "メッセージ（任意）",
       "submit": "リクエストを送信",
       "submitting": "送信中…",
       "submitted": "延長リクエストを送信しました。",
       "responseFrom": "回答",
+      "errors": {
+        "mustBeAfterCurrentEnd": "新しい返却日時は、現在のレンタル終了日時より後である必要があります。"
+      },
       "statuses": {
         "PENDING": "保留中",
         "APPROVED": "承認済み",

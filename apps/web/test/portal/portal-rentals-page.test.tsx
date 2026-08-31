@@ -10,6 +10,11 @@ vi.mock("../../src/hooks/use-portal-rentals", () => ({
   usePortalRentals: (...args: unknown[]) => usePortalRentalsMock(...args),
 }));
 
+const usePortalMeMock = vi.fn();
+vi.mock("../../src/hooks/use-portal-auth", () => ({
+  usePortalMe: () => usePortalMeMock(),
+}));
+
 const baseRental = {
   id: "r1",
   rentalNumber: "RNT-000001",
@@ -26,6 +31,9 @@ describe("PortalRentalsPage", () => {
       data: { items: [], total: 0, page: 1, pageSize: 20 },
       isLoading: false,
       isError: false,
+    });
+    usePortalMeMock.mockReturnValue({
+      data: { customer: { firstName: "Jane" }, tenant: { id: "t1", name: "Co", timezone: "UTC" } },
     });
   });
 

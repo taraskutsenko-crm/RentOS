@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "Poproś o przedłużenie",
       "currentEnd": "Aktualna data zakończenia",
-      "newEndDate": "Nowa data zakończenia",
+      "newEndDate": "Nowa data zwrotu",
+      "newEndTime": "Nowa godzina zwrotu",
       "message": "Wiadomość (opcjonalnie)",
       "submit": "Wyślij wniosek",
       "submitting": "Wysyłanie…",
       "submitted": "Twój wniosek o przedłużenie został wysłany.",
       "responseFrom": "Odpowiedź",
+      "errors": {
+        "mustBeAfterCurrentEnd": "Nowa data i godzina zwrotu muszą być późniejsze niż obecny termin zakończenia wynajmu."
+      },
       "statuses": {
         "PENDING": "Oczekujący",
         "APPROVED": "Zatwierdzony",

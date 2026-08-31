@@ -8,8 +8,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  DatePicker,
   Input,
   Label,
+  TimePicker,
 } from "@rentos/ui";
 import { tenantLocalToUtc, utcToTenantLocal } from "@rentos/shared";
 import Link from "next/link";
@@ -35,7 +37,7 @@ import {
 } from "../../../../../hooks/use-portal-rentals";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
 import { getAssetDisplayLabel } from "../../../../../lib/asset-display-label";
-import { formatDate, formatDateTime } from "../../../../../lib/date-format";
+import { formatDateTime } from "../../../../../lib/date-format";
 import { formatMoney } from "../../../../../lib/money";
 
 export default function PortalRentalDetailPage() {
@@ -249,7 +251,7 @@ export default function PortalRentalDetailPage() {
                   <div key={request.id} className="border-l-2 pl-3">
                     <p className="font-medium">
                       {t(`portal.extensionRequests.statuses.${request.status}`)} —{" "}
-                      {formatDate(request.requestedEnd, i18n.language, rental.tenantTimezone)}
+                      {formatDateTime(request.requestedEnd, i18n.language, rental.tenantTimezone)}
                     </p>
                     {request.responseMessage && (
                       <p className="text-muted-foreground text-xs">{request.responseMessage}</p>
@@ -325,24 +327,40 @@ function ExtensionRequestForm({
   onDone: () => void;
 }) {
   const { t, i18n } = useTranslation();
-  const [requestedEnd, setRequestedEnd] = useState("");
+  // Defaults sensibly from the current planned end (read back in the
+  // tenant's real timezone) so the picker never opens empty — but this is
+  // only a starting point the customer must deliberately change; nothing
+  // submits until they press the button below.
+  const currentEndLocal = utcToTenantLocal(currentEnd, tenantTimezone);
+  const [requestedDate, setRequestedDate] = useState(currentEndLocal.slice(0, 10));
+  const [requestedTime, setRequestedTime] = useState(currentEndLocal.slice(11, 16));
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const createRequest = useCreatePortalExtensionRequest();
 
   async function handleSubmit(): Promise<void> {
     setError(null);
+    if (!requestedDate || !requestedTime) return;
+
+    // The customer picks an explicit tenant-local date AND time — never
+    // combined with the browser's own timezone, and never silently
+    // inheriting the rental's existing time-of-day (see
+    // docs/DECISIONS.md D-115/D-116). A DST spring-forward gap is rejected
+    // with a clear message rather than silently saved as a shifted instant.
+    let requestedEndInstant: Date;
     try {
-      // The picker is date-only (no time-of-day control in this compact
-      // portal form) — the requested extension keeps the rental's existing
-      // time-of-day, just on the newly picked date, interpreted in the
-      // *company's* timezone (never the customer's own browser timezone —
-      // see docs/DECISIONS.md D-115 §11). `utcToTenantLocal` reads back
-      // `currentEnd`'s wall-clock time-of-day in that same timezone so the
-      // combined value stays consistent with it.
-      const currentEndLocal = utcToTenantLocal(currentEnd, tenantTimezone);
-      const timeOfDay = currentEndLocal.slice(11, 16);
-      const requestedEndInstant = tenantLocalToUtc(`${requestedEnd}T${timeOfDay}`, tenantTimezone);
+      requestedEndInstant = tenantLocalToUtc(`${requestedDate}T${requestedTime}`, tenantTimezone);
+    } catch {
+      setError(t("rental.errors.dstGap"));
+      return;
+    }
+
+    if (requestedEndInstant.getTime() <= new Date(currentEnd).getTime()) {
+      setError(t("portal.extensionRequests.errors.mustBeAfterCurrentEnd"));
+      return;
+    }
+
+    try {
       await createRequest.mutateAsync({
         rentalId,
         requestedEnd: requestedEndInstant.toISOString(),
@@ -370,18 +388,30 @@ function ExtensionRequestForm({
           <Input
             id="currentEnd"
             type="text"
-            value={formatDate(currentEnd, i18n.language, tenantTimezone)}
+            value={formatDateTime(currentEnd, i18n.language, tenantTimezone)}
             disabled
           />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="requestedEnd">{t("portal.extensionRequests.newEndDate")}</Label>
-          <Input
-            id="requestedEnd"
-            type="date"
-            value={requestedEnd}
-            onChange={(event) => setRequestedEnd(event.target.value)}
-          />
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="requestedDate">{t("portal.extensionRequests.newEndDate")}</Label>
+            <DatePicker
+              id="requestedDate"
+              value={requestedDate}
+              onChange={setRequestedDate}
+              locale={i18n.language}
+              min={currentEndLocal.slice(0, 10)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="requestedTime">{t("portal.extensionRequests.newEndTime")}</Label>
+            <TimePicker
+              id="requestedTime"
+              value={requestedTime}
+              onChange={setRequestedTime}
+              locale={i18n.language}
+            />
+          </div>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="message">{t("portal.extensionRequests.message")}</Label>
@@ -394,7 +424,7 @@ function ExtensionRequestForm({
         </div>
         <Button
           onClick={() => void handleSubmit()}
-          disabled={!requestedEnd || createRequest.isPending}
+          disabled={!requestedDate || !requestedTime || createRequest.isPending}
           className="w-fit"
         >
           {createRequest.isPending

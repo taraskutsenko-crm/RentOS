@@ -48,6 +48,13 @@ export class PortalExtensionRequestsService {
     if (requestedEnd <= rental.plannedEnd) {
       throw new BadRequestException("The requested end date must be after the current planned end");
     }
+    // Guards the one edge case the plannedEnd check alone doesn't cover: an
+    // already-overdue rental (plannedEnd in the past) could otherwise
+    // accept a "later than plannedEnd" request that is itself still in the
+    // past relative to right now.
+    if (requestedEnd <= new Date()) {
+      throw new BadRequestException("The requested end date must be in the future");
+    }
 
     const existingPending = await this.prisma.rentalExtensionRequest.findFirst({
       where: { tenantId, rentalId, status: "PENDING" },

@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "Richiedi una proroga",
       "currentEnd": "Data di fine attuale",
-      "newEndDate": "Nuova data di fine",
+      "newEndDate": "Nuova data di restituzione",
+      "newEndTime": "Nuova ora di restituzione",
       "message": "Messaggio (facoltativo)",
       "submit": "Invia richiesta",
       "submitting": "Invio…",
       "submitted": "La tua richiesta di proroga è stata inviata.",
       "responseFrom": "Risposta",
+      "errors": {
+        "mustBeAfterCurrentEnd": "La nuova data e ora di restituzione devono essere successive alla fine attuale del noleggio."
+      },
       "statuses": {
         "PENDING": "In attesa",
         "APPROVED": "Approvata",

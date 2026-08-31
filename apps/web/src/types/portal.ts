@@ -23,6 +23,7 @@ export interface PortalCustomer {
 export interface PortalTenant {
   id: string;
   name: string;
+  timezone: string;
 }
 
 export interface PortalSession {

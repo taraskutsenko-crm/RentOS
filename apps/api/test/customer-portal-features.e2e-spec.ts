@@ -395,6 +395,129 @@ describe("Customer Portal Features E2E (TASK-0009)", () => {
         .expect(200);
       expect(rentalResponse.body.plannedEnd).toBe(originalPlannedEnd);
     });
+
+    // The following tests exercise the explicit date+time extension request
+    // (see docs/DECISIONS.md D-116) — RentalExtensionRequest.requestedEnd is
+    // already the canonical real-UTC-instant field (no schema change), so
+    // every comparison below is a plain instant comparison, correct for any
+    // tenant timezone with zero extra conversion at this layer.
+
+    it("accepts a requestedEnd on the same calendar day as the current planned end, as long as the real instant is later", async () => {
+      await activateRental();
+      const rentalResponse = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", staffCookie)
+        .expect(200);
+      const currentEnd = new Date(rentalResponse.body.plannedEnd);
+      const laterSameDay = new Date(currentEnd.getTime() + 60 * 60 * 1000).toISOString();
+
+      await request(app.getHttpServer())
+        .post(`/portal/extension-requests/rentals/${rentalId}`)
+        .set("Cookie", portalAccessCookie)
+        .send({ requestedEnd: laterSameDay })
+        .expect(201);
+    });
+
+    it("rejects a requestedEnd exactly equal to the current planned end", async () => {
+      await activateRental();
+      const rentalResponse = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", staffCookie)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .post(`/portal/extension-requests/rentals/${rentalId}`)
+        .set("Cookie", portalAccessCookie)
+        .send({ requestedEnd: rentalResponse.body.plannedEnd })
+        .expect(400);
+    });
+
+    it("rejects a requestedEnd earlier than the current planned end, even by a single hour on the same day", async () => {
+      await activateRental();
+      const rentalResponse = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", staffCookie)
+        .expect(200);
+      const currentEnd = new Date(rentalResponse.body.plannedEnd);
+      const earlierSameDay = new Date(currentEnd.getTime() - 60 * 60 * 1000).toISOString();
+
+      await request(app.getHttpServer())
+        .post(`/portal/extension-requests/rentals/${rentalId}`)
+        .set("Cookie", portalAccessCookie)
+        .send({ requestedEnd: earlierSameDay })
+        .expect(400);
+    });
+
+    it("rejects a bare offset-less local datetime string for requestedEnd (unambiguous API contract)", async () => {
+      await activateRental();
+
+      await request(app.getHttpServer())
+        .post(`/portal/extension-requests/rentals/${rentalId}`)
+        .set("Cookie", portalAccessCookie)
+        .send({ requestedEnd: "2026-09-01T12:30" })
+        .expect(400);
+    });
+
+    it("rejects a requestedEnd that is not in the future, even when it is after an already-overdue planned end", async () => {
+      await activateRental();
+      const overduePlannedEnd = new Date(Date.now() - 48 * 60 * 60 * 1000);
+      await prisma.rental.update({
+        where: { id: rentalId },
+        data: { plannedEnd: overduePlannedEnd },
+      });
+      // After plannedEnd (still passes that check) but still in the past.
+      const stillPast = new Date(overduePlannedEnd.getTime() + 60 * 60 * 1000).toISOString();
+
+      await request(app.getHttpServer())
+        .post(`/portal/extension-requests/rentals/${rentalId}`)
+        .set("Cookie", portalAccessCookie)
+        .send({ requestedEnd: stillPast })
+        .expect(400);
+    });
+
+    it("leaves the rental's planned end completely unchanged while a request is still PENDING", async () => {
+      await activateRental();
+      const before = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", staffCookie)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .post(`/portal/extension-requests/rentals/${rentalId}`)
+        .set("Cookie", portalAccessCookie)
+        .send({ requestedEnd: dateOffset(10) })
+        .expect(201);
+
+      const after = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", staffCookie)
+        .expect(200);
+      expect(after.body.plannedEnd).toBe(before.body.plannedEnd);
+      expect(after.body.status).toBe(before.body.status);
+    });
+
+    it("404s submitting an extension request for a rental belonging to a different customer (public portal isolation)", async () => {
+      const otherCustomer = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/customers`)
+        .set("Cookie", staffCookie)
+        .send({ firstName: "Other", lastName: "Customer" })
+        .expect(201);
+      const otherRental = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals`)
+        .set("Cookie", staffCookie)
+        .send({
+          customerId: otherCustomer.body.id,
+          plannedStart: dateOffset(1),
+          plannedEnd: dateOffset(4),
+        })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/portal/extension-requests/rentals/${otherRental.body.id}`)
+        .set("Cookie", portalAccessCookie)
+        .send({ requestedEnd: dateOffset(10) })
+        .expect(404);
+    });
   });
 
   describe("Damage reports", () => {

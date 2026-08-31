@@ -10,6 +10,7 @@ import {
   useDataTableState,
   type DataTableColumn,
 } from "../../../../components/data-table";
+import { usePortalMe } from "../../../../hooks/use-portal-auth";
 import { usePortalRentals } from "../../../../hooks/use-portal-rentals";
 import { formatDate } from "../../../../lib/date-format";
 import { formatMoney } from "../../../../lib/money";
@@ -29,6 +30,8 @@ const STATUSES: RentalStatus[] = [
 export default function PortalRentalsPage() {
   const { t, i18n } = useTranslation();
   const [status, setStatus] = useState<RentalStatus | "">("");
+  const { data: me } = usePortalMe();
+  const timeZone = me?.tenant?.timezone;
 
   const table = useDataTableState({ initialSortBy: "createdAt", initialSortDirection: "desc" });
   const { data, isLoading, isError, refetch } = usePortalRentals({
@@ -57,13 +60,13 @@ export default function PortalRentalsPage() {
       id: "plannedStart",
       header: t("rental.fields.plannedStart"),
       sortable: true,
-      cell: (rental) => formatDate(rental.plannedStart, i18n.language),
+      cell: (rental) => formatDate(rental.plannedStart, i18n.language, timeZone),
     },
     {
       id: "plannedEnd",
       header: t("rental.fields.plannedEnd"),
       sortable: true,
-      cell: (rental) => formatDate(rental.plannedEnd, i18n.language),
+      cell: (rental) => formatDate(rental.plannedEnd, i18n.language, timeZone),
     },
     {
       id: "total",

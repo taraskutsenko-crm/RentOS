@@ -110,14 +110,15 @@ describe("PortalRentalDetailPage", () => {
 
     renderWithProviders(<PortalRentalDetailPage />);
     await user.click(screen.getByRole("button", { name: /request extension/i }));
-    const dateInput = screen.getByLabelText(/new end date/i);
-    await user.type(dateInput, "2026-08-20");
+    // The date/time pickers default to the current planned end (20:00
+    // America/New_York, i.e. plannedEnd's 00:00 UTC) — only the date is
+    // changed here, keeping the default 20:00 time.
+    await user.click(screen.getByRole("button", { name: /new return date/i }));
+    await user.click(await screen.findByRole("gridcell", { name: "20" }));
     await user.click(screen.getByRole("button", { name: /^submit request$/i }));
 
-    // The picker is date-only — the submitted instant keeps the rental's
-    // existing plannedEnd time-of-day (20:00 America/New_York, i.e.
-    // plannedEnd's 00:00 UTC) on the newly picked date, converted via the
-    // tenant's real timezone (see ExtensionRequestForm's handleSubmit).
+    // Converted via the tenant's real timezone (see ExtensionRequestForm's
+    // handleSubmit) — never the browser's own timezone.
     await waitFor(() =>
       expect(mutateAsync).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -126,6 +127,32 @@ describe("PortalRentalDetailPage", () => {
         }),
       ),
     );
+  });
+
+  it("rejects the same date with an earlier time than the current planned end, without submitting", async () => {
+    usePortalRentalMock.mockReturnValue({
+      data: baseRental("ACTIVE"),
+      isLoading: false,
+      isError: false,
+    });
+    const mutateAsync = vi.fn().mockResolvedValue({ id: "ext-1" });
+    useCreatePortalExtensionRequestMock.mockReturnValue({ mutateAsync, isPending: false });
+    const user = userEvent.setup();
+
+    renderWithProviders(<PortalRentalDetailPage />);
+    await user.click(screen.getByRole("button", { name: /request extension/i }));
+    // Same date (Aug 3, the default), but an earlier time than the current
+    // 20:00 planned end — must be rejected client-side, before any API call.
+    await user.click(screen.getByRole("button", { name: /new return time/i }));
+    const timeInput = screen.getByLabelText(/precise time/i);
+    await user.clear(timeInput);
+    await user.type(timeInput, "10:00{Enter}");
+    await user.click(screen.getByRole("button", { name: /^submit request$/i }));
+
+    expect(
+      await screen.findByText(/must be later than the current rental end/i),
+    ).toBeInTheDocument();
+    expect(mutateAsync).not.toHaveBeenCalled();
   });
 
   it("submits a damage report", async () => {

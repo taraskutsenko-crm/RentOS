@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "Een verlenging aanvragen",
       "currentEnd": "Huidige einddatum",
-      "newEndDate": "Nieuwe einddatum",
+      "newEndDate": "Nieuwe retourdatum",
+      "newEndTime": "Nieuwe retourtijd",
       "message": "Bericht (optioneel)",
       "submit": "Verzoek indienen",
       "submitting": "Bezig met indienen…",
       "submitted": "Je verlengingsverzoek is ingediend.",
       "responseFrom": "Reactie",
+      "errors": {
+        "mustBeAfterCurrentEnd": "De nieuwe retourdatum en -tijd moeten later zijn dan het huidige einde van de huur."
+      },
       "statuses": {
         "PENDING": "In behandeling",
         "APPROVED": "Goedgekeurd",

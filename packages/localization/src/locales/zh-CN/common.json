@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "申请延期",
       "currentEnd": "当前结束日期",
-      "newEndDate": "新的结束日期",
+      "newEndDate": "新的归还日期",
+      "newEndTime": "新的归还时间",
       "message": "备注（可选）",
       "submit": "提交申请",
       "submitting": "提交中…",
       "submitted": "您的延期申请已提交。",
       "responseFrom": "回复",
+      "errors": {
+        "mustBeAfterCurrentEnd": "新的归还日期和时间必须晚于当前租赁结束时间。"
+      },
       "statuses": {
         "PENDING": "待处理",
         "APPROVED": "已批准",

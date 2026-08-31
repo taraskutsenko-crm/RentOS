@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "연장 요청",
       "currentEnd": "현재 종료일",
-      "newEndDate": "새 종료일",
+      "newEndDate": "새 반납 날짜",
+      "newEndTime": "새 반납 시간",
       "message": "메시지（선택 사항）",
       "submit": "요청 제출",
       "submitting": "제출 중…",
       "submitted": "연장 요청이 제출되었습니다.",
       "responseFrom": "답변",
+      "errors": {
+        "mustBeAfterCurrentEnd": "새 반납 날짜와 시간은 현재 대여 종료 시점보다 이후여야 합니다."
+      },
       "statuses": {
         "PENDING": "대기 중",
         "APPROVED": "승인됨",

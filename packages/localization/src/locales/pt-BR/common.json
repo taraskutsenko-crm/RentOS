@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "Solicitar uma prorrogação",
       "currentEnd": "Data de término atual",
-      "newEndDate": "Nova data de término",
+      "newEndDate": "Nova data de devolução",
+      "newEndTime": "Novo horário de devolução",
       "message": "Mensagem (opcional)",
       "submit": "Enviar solicitação",
       "submitting": "Enviando…",
       "submitted": "Sua solicitação de prorrogação foi enviada.",
       "responseFrom": "Resposta",
+      "errors": {
+        "mustBeAfterCurrentEnd": "A nova data e horário de devolução devem ser posteriores ao término atual da locação."
+      },
       "statuses": {
         "PENDING": "Pendente",
         "APPROVED": "Aprovada",

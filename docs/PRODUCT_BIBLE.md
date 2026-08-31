@@ -1213,3 +1213,18 @@ be running in. The model (see `DECISIONS.md` D-115):
   document says. The one narrow exception is genuinely per-viewer UI
   convenience (e.g. which items are gathered on a screen right now)
   which is never confused with a business timestamp.
+- **Availability Calendar.** The calendar's month/day presentation —
+  which month is being browsed, where one calendar day ends and the
+  next begins, month navigation — always follows the tenant's
+  timezone, never UTC and never the viewing browser's timezone (see
+  `DECISIONS.md` D-116). The canonical availability engine's own
+  overlap/conflict rules are never re-implemented in this
+  presentation layer — only the calendar's own date-window math is
+  timezone-aware.
+- **Customer Portal extension requests.** A requested rental
+  extension is an explicit tenant-local date _and_ time the customer
+  picks, converted to a real UTC instant the same canonical way every
+  other rental time is — never silently inherited from the rental's
+  existing schedule, and never defined in the customer's own browser
+  timezone. The request itself never changes the rental's real
+  planned end; only an explicit staff approval does.

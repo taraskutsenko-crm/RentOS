@@ -17,9 +17,9 @@ import {
   useStaffExtensionRequests,
   useStaffPortalMessages,
 } from "../../hooks/use-customer-portal";
-import { usePermission } from "../../hooks/use-current-tenant-role";
+import { usePermission, useTenantTimezone } from "../../hooks/use-current-tenant-role";
 import { apiErrorMessage } from "../../lib/api-error-i18n";
-import { formatDate, formatDateTime } from "../../lib/date-format";
+import { formatDateTime } from "../../lib/date-format";
 
 export function CustomerPortalPanel({
   tenantId,
@@ -138,6 +138,7 @@ function PortalExtensionRequestsCard({
   customerId: string;
 }) {
   const { t, i18n } = useTranslation();
+  const timeZone = useTenantTimezone();
   const { data: allRequests } = useStaffExtensionRequests(tenantId);
   const respond = useRespondToExtensionRequest(tenantId);
   const requests = allRequests?.filter((request) => request.customerId === customerId) ?? [];
@@ -166,7 +167,7 @@ function PortalExtensionRequestsCard({
             <div>
               <p>{t(`portal.extensionRequests.statuses.${request.status}`)}</p>
               <p className="text-muted-foreground text-xs">
-                → {formatDate(request.requestedEnd, i18n.language)}
+                → {formatDateTime(request.requestedEnd, i18n.language, timeZone)}
                 {request.message ? ` · ${request.message}` : ""}
               </p>
             </div>

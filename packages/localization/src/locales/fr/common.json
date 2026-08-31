@@ -1255,12 +1255,16 @@
     "extensionRequests": {
       "title": "Demander une prolongation",
       "currentEnd": "Date de fin actuelle",
-      "newEndDate": "Nouvelle date de fin",
+      "newEndDate": "Nouvelle date de retour",
+      "newEndTime": "Nouvelle heure de retour",
       "message": "Message (facultatif)",
       "submit": "Envoyer la demande",
       "submitting": "Envoi…",
       "submitted": "Votre demande de prolongation a été envoyée.",
       "responseFrom": "Réponse",
+      "errors": {
+        "mustBeAfterCurrentEnd": "La nouvelle date et heure de retour doivent être postérieures à la fin actuelle de la location."
+      },
       "statuses": {
         "PENDING": "En attente",
         "APPROVED": "Approuvée",

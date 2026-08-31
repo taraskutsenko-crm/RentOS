@@ -6,8 +6,10 @@ import { CustomerPortalPanel } from "../../src/components/customers/customer-por
 import { renderWithProviders } from "../test-utils";
 
 const usePermissionMock = vi.fn();
+const useTenantTimezoneMock = vi.fn();
 vi.mock("../../src/hooks/use-current-tenant-role", () => ({
   usePermission: (...args: unknown[]) => usePermissionMock(...args),
+  useTenantTimezone: () => useTenantTimezoneMock(),
 }));
 
 const usePortalAccessStatusMock = vi.fn();
@@ -37,6 +39,7 @@ vi.mock("../../src/hooks/use-customer-portal", () => ({
 
 describe("CustomerPortalPanel", () => {
   beforeEach(() => {
+    useTenantTimezoneMock.mockReturnValue("America/New_York");
     useStaffExtensionRequestsMock.mockReturnValue({ data: [] });
     useStaffDamageReportsMock.mockReturnValue({ data: [] });
     useStaffPortalMessagesMock.mockReturnValue({ data: [] });
@@ -160,5 +163,29 @@ describe("CustomerPortalPanel", () => {
     renderWithProviders(<CustomerPortalPanel tenantId="tenant-1" customerId="customer-1" />);
 
     expect(screen.getAllByRole("button", { name: /approve/i })).toHaveLength(1);
+  });
+
+  it("shows the requested extension end in tenant-local date AND time, not just the date", () => {
+    usePermissionMock.mockReturnValue(true);
+    usePortalAccessStatusMock.mockReturnValue({ data: undefined, isLoading: false });
+    useStaffExtensionRequestsMock.mockReturnValue({
+      data: [
+        {
+          id: "ext-1",
+          customerId: "customer-1",
+          status: "PENDING",
+          // 16:30 UTC = 12:30 America/New_York — the staff panel must show
+          // the tenant-local wall-clock time, not just the date, and not
+          // the browser's own timezone.
+          requestedEnd: "2026-09-03T16:30:00Z",
+          message: null,
+          customer: { id: "customer-1", firstName: "Jane", lastName: "Doe", company: null },
+        },
+      ],
+    });
+
+    renderWithProviders(<CustomerPortalPanel tenantId="tenant-1" customerId="customer-1" />);
+
+    expect(screen.getByText(/12:30/)).toBeInTheDocument();
   });
 });

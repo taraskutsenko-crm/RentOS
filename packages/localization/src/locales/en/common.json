@@ -1385,12 +1385,16 @@
     "extensionRequests": {
       "title": "Request an extension",
       "currentEnd": "Current end date",
-      "newEndDate": "New end date",
+      "newEndDate": "New return date",
+      "newEndTime": "New return time",
       "message": "Message (optional)",
       "submit": "Submit request",
       "submitting": "Submitting…",
       "submitted": "Your extension request has been submitted.",
       "responseFrom": "Response",
+      "errors": {
+        "mustBeAfterCurrentEnd": "The new return date and time must be later than the current rental end."
+      },
       "statuses": {
         "PENDING": "Pending",
         "APPROVED": "Approved",

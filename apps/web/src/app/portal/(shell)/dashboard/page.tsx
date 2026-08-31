@@ -86,8 +86,8 @@ export default function PortalDashboardPage() {
               </span>
               <span className="text-muted-foreground flex items-center justify-between text-xs">
                 <span>
-                  {formatDate(rental.plannedStart, i18n.language)} –{" "}
-                  {formatDate(rental.plannedEnd, i18n.language)}
+                  {formatDate(rental.plannedStart, i18n.language, session?.tenant?.timezone)} –{" "}
+                  {formatDate(rental.plannedEnd, i18n.language, session?.tenant?.timezone)}
                 </span>
                 <span>{formatMoney(rental.totalMinor, rental.currency)}</span>
               </span>

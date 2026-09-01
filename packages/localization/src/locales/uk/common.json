@@ -480,6 +480,8 @@
     },
     "availability": {
       "rentalConflict": "Заброньовано/в оренді",
+      "rentalConflictOverdue": "Недоступно — прострочене повернення",
+      "plannedReturn": "Плановий термін повернення: {{date}}",
       "maintenance": "Обслуговування",
       "repair": "Ремонт",
       "inspection": "Інспекція",
@@ -560,6 +562,22 @@
     "overdue": {
       "bannerTitle": "Повернення прострочено",
       "plannedReturn": "Плановий термін повернення: {{date}}"
+    },
+    "attention": {
+      "overdueReturnTitle": "Прострочене повернення",
+      "endingTodayTitle": "Закінчується сьогодні",
+      "endingTomorrowTitle": "Закінчується завтра",
+      "plannedReturn": "Плановий термін повернення: {{date}}",
+      "overdueByDays": "Прострочення: {{count}} дн.",
+      "overdueReturnDays": "Прострочене повернення · {{count}} дн.",
+      "endsTodayAt": "Закінчується сьогодні · {{time}}",
+      "endsTomorrowAt": "Закінчується завтра · {{time}}",
+      "filter": {
+        "any": "Будь-яка увага",
+        "overdue": "Прострочені повернення",
+        "endingToday": "Закінчується сьогодні",
+        "endingTomorrow": "Закінчується завтра"
+      }
     },
     "startDatePassed": {
       "title": "Оренду не можна активувати",
@@ -1098,6 +1116,20 @@
       "upload": "Завантажити",
       "delete": "Видалити",
       "captionPlaceholder": "Підпис (необов'язково)",
+      "chooseFile": "Обрати файл",
+      "noFileSelected": "Файл не обрано",
+      "changeFile": "Змінити файл",
+      "removeFile": "Видалити",
+      "dropHint": "Перетягніть файл сюди",
+      "or": "або",
+      "supportedTypes": "Підтримуються: {{types}} · Макс. {{maxSize}}",
+      "uploading": "Завантаження…",
+      "uploadSuccess": "Файл успішно завантажено",
+      "error": {
+        "unsupportedType": "Непідтримуваний тип файлу",
+        "tooLarge": "Файл завеликий",
+        "generic": "Не вдалося завантажити файл"
+      },
       "category": {
         "HANDOVER_CONDITION": "Стан при передачі",
         "RETURN_CONDITION": "Стан при поверненні",
@@ -1207,6 +1239,13 @@
   },
   "dashboard": {
     "welcome": "З поверненням, {{name}}",
+    "rentalAttention": {
+      "title": "Потребує уваги",
+      "overdueReturns": "Прострочені повернення",
+      "endingToday": "Закінчується сьогодні",
+      "endingTomorrow": "Закінчується завтра",
+      "oldestOverdue": "Найдавніший: прострочення {{count}} дн."
+    },
     "sections": {
       "overview": "Огляд",
       "quickActions": "Швидкі дії",

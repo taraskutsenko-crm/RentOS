@@ -12,3 +12,20 @@ export const APP_TAGLINE = "One Platform. Every Asset.";
  */
 export const RENTAL_START_DATE_PASSED_MESSAGE =
   "Cannot activate a rental whose planned start date/time has already passed.";
+
+/**
+ * Mirrors `ALLOWED_DOCUMENT_MIME_TYPES`/`MAX_DOCUMENT_SIZE_BYTES` in
+ * apps/api/src/storage/storage.service.ts — that service (StorageService)
+ * remains the sole authoritative enforcement point; these are exported here
+ * so the Document Attachments upload UI can display the *real* constraints
+ * and give instant client-side feedback instead of guessing/inventing its
+ * own frontend-only rule (see docs/DECISIONS.md). If the backend allowlist
+ * or limit ever changes, update both places together.
+ */
+export const DOCUMENT_ATTACHMENT_ALLOWED_MIME_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+export const DOCUMENT_ATTACHMENT_MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB

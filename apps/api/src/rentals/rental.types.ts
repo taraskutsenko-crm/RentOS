@@ -1,5 +1,7 @@
 import type { Customer, Document, Prisma, Quote, Rental } from "@prisma/client";
 
+import type { RentalAttentionCategory } from "./rental-attention.util";
+
 export const RENTAL_ITEM_INCLUDE = {
   asset: { include: { category: true, currentStatus: true } },
 } satisfies Prisma.RentalItemInclude;
@@ -61,9 +63,25 @@ export interface RentalDetailView extends Rental {
   isOverdue: boolean;
   /** Always this rental's own plannedEnd — set only when `isOverdue` is true. */
   overdueSince: string | null;
+  /** Rental Attention System (rental-attention.util.ts) — `null` when the rental needs no attention right now. Superset of `isOverdue`: OVERDUE_RETURN here is exactly `isOverdue: true` above, plus the two "ending soon" categories `isOverdue` never expressed. */
+  attention: RentalAttentionCategory | null;
 }
 
 export interface RentalListItemView extends Rental {
   customer: Customer;
   itemCount: number;
+  /** See RentalDetailView.attention's own doc comment — same canonical classification, computed from the same rental-attention.util.ts. */
+  attention: RentalAttentionCategory | null;
+  /** Set only when attention is OVERDUE_RETURN — always this rental's own plannedEnd, the exact instant it became overdue. Exposed here too (not just on the detail view) so the Rentals list badge never needs its own "days overdue" duplicate calculation. */
+  overdueSince: string | null;
+}
+
+/** One preview row in RentalsService.getAttentionSummary's per-category list. */
+export interface RentalAttentionSummaryItem {
+  rentalId: string;
+  rentalNumber: string;
+  customerName: string;
+  plannedEnd: string;
+  /** Whole days overdue — only set on an OVERDUE_RETURN entry, `null` otherwise. */
+  overdueDays: number | null;
 }

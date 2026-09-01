@@ -43,6 +43,14 @@ export function formatDateTime(
   }).format(toDate(value));
 }
 
+/** Time only, e.g. "2:30 PM" / "14:30" — for a same-day "Ends today · 16:30" style hint where the date itself is already implied. See `formatDate` for `timeZone`. */
+export function formatTime(value: Date | string | number, locale: string, timeZone?: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    timeStyle: "short",
+    ...(timeZone ? { timeZone } : {}),
+  }).format(toDate(value));
+}
+
 /** e.g. "August 2026" — used by month-cursor calendar headers. */
 export function formatMonthYear(value: Date | string | number, locale: string): string {
   return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(toDate(value));

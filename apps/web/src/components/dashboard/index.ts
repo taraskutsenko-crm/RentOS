@@ -6,3 +6,4 @@ export { DashboardSkeleton } from "./dashboard-skeleton";
 export { EmptyDashboardState } from "./empty-dashboard-state";
 export { QuickActions, type QuickAction } from "./quick-actions";
 export { RecentActivity } from "./recent-activity";
+export { RentalAttentionCard, type RentalAttentionTone } from "./rental-attention-card";

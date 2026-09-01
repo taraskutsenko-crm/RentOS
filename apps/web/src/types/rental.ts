@@ -117,11 +117,22 @@ export interface Rental {
   documents: RentalDocument[];
 }
 
+/**
+ * Rental Attention System (see apps/api/src/rentals/rental-attention.util.ts)
+ * — `null` when the rental needs no attention right now. Never computed
+ * independently in the frontend: always the server's own classification,
+ * derived from the tenant's own timezone, never the browser's.
+ */
+export type RentalAttentionCategory = "OVERDUE_RETURN" | "ENDING_TODAY" | "ENDING_TOMORROW";
+
 export interface RentalListItem extends Omit<
   Rental,
   "items" | "sourceQuote" | "generatedQuote" | "documents"
 > {
   itemCount: number;
+  attention: RentalAttentionCategory | null;
+  /** Set only when attention is OVERDUE_RETURN — always this rental's own plannedEnd. */
+  overdueSince: string | null;
 }
 
 /**
@@ -135,6 +146,23 @@ export interface RentalDetail extends Rental {
   isOverdue: boolean;
   /** Always this rental's own plannedEnd — set only when `isOverdue` is true. */
   overdueSince: string | null;
+  attention: RentalAttentionCategory | null;
+}
+
+/** RentalsService.getAttentionSummary's response shape — one entry (Dashboard preview row) per category. */
+export interface RentalAttentionSummaryItem {
+  rentalId: string;
+  rentalNumber: string;
+  customerName: string;
+  plannedEnd: string;
+  /** Whole days overdue — only set on an overdue-category entry. */
+  overdueDays: number | null;
+}
+
+export interface RentalAttentionSummary {
+  overdue: { count: number; oldestOverdueDays: number | null; items: RentalAttentionSummaryItem[] };
+  endingToday: { count: number; items: RentalAttentionSummaryItem[] };
+  endingTomorrow: { count: number; items: RentalAttentionSummaryItem[] };
 }
 
 export interface PaginatedRentals {
@@ -153,6 +181,10 @@ export interface AvailabilityConflict {
   rentalNumber: string;
   plannedStart: string;
   plannedEnd: string;
+  /** True when this rental has started, its planned end has already passed, and it has not actually been returned yet — see AvailabilityService's own doc comment. An overdue conflict blocks every future window too, not just ones overlapping plannedEnd, since the asset's actual return time is unknown until it's really returned. */
+  isOverdue: boolean;
+  /** Always this rental's own plannedEnd — set only when `isOverdue` is true. */
+  overdueSince: string | null;
 }
 
 export type AssetAvailabilityBlockType =

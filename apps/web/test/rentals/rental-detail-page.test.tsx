@@ -89,6 +89,7 @@ function baseRental(status: string) {
     documents: [],
     isOverdue: false,
     overdueSince: null,
+    attention: null,
   };
 }
 
@@ -120,9 +121,11 @@ describe("RentalDetailPage", () => {
 
   // Regression coverage for the exact real case found in live data
   // ("Agregat Honda"): the rental detail page must show a clear overdue
-  // warning banner whenever the backend reports isOverdue — never silently
-  // treat a past plannedEnd as "returned."
-  it("shows a 'Return overdue' warning banner when the rental is overdue, with the planned return date/time", () => {
+  // warning banner whenever the backend reports the OVERDUE_RETURN
+  // attention category — never silently treat a past plannedEnd as
+  // "returned." See rental-attention.util.ts (backend) — the frontend never
+  // recomputes this, only renders the server's own classification.
+  it("shows an 'Overdue return' warning banner when the rental is overdue, with the planned return date/time", () => {
     usePermissionMock.mockReturnValue(false);
     useRentalMock.mockReturnValue({
       data: {
@@ -130,14 +133,16 @@ describe("RentalDetailPage", () => {
         plannedEnd: "2026-08-27T15:00:00Z",
         isOverdue: true,
         overdueSince: "2026-08-27T15:00:00Z",
+        attention: "OVERDUE_RETURN",
       },
       isLoading: false,
     });
 
     renderWithProviders(<RentalDetailPage />);
 
-    expect(screen.getByText("Return overdue")).toBeInTheDocument();
-    expect(screen.getByText(/planned return/i)).toBeInTheDocument();
+    expect(screen.getByText("Overdue return")).toBeInTheDocument();
+    expect(screen.getAllByText(/planned return/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/overdue by/i).length).toBeGreaterThan(0);
   });
 
   it("does not show the overdue banner for a rental that is not overdue", () => {
@@ -146,7 +151,31 @@ describe("RentalDetailPage", () => {
 
     renderWithProviders(<RentalDetailPage />);
 
-    expect(screen.queryByText("Return overdue")).not.toBeInTheDocument();
+    expect(screen.queryByText("Overdue return")).not.toBeInTheDocument();
+  });
+
+  it("shows an 'Ending today' info banner when the rental attention is ENDING_TODAY", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({
+      data: { ...baseRental("ACTIVE"), attention: "ENDING_TODAY" },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    expect(screen.getByText("Ending today")).toBeInTheDocument();
+  });
+
+  it("shows an 'Ending tomorrow' info banner when the rental attention is ENDING_TOMORROW", () => {
+    usePermissionMock.mockReturnValue(false);
+    useRentalMock.mockReturnValue({
+      data: { ...baseRental("ACTIVE"), attention: "ENDING_TOMORROW" },
+      isLoading: false,
+    });
+
+    renderWithProviders(<RentalDetailPage />);
+
+    expect(screen.getByText("Ending tomorrow")).toBeInTheDocument();
   });
 
   // Chapter 7: Customer card links to the customer's own detail page

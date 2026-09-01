@@ -480,6 +480,8 @@
     },
     "availability": {
       "rentalConflict": "Rezervováno / pronajato",
+      "rentalConflictOverdue": "Nedostupné — prodlení s vrácením",
+      "plannedReturn": "Plánované vrácení: {{date}}",
       "maintenance": "Údržba",
       "repair": "Oprava",
       "inspection": "Kontrola",
@@ -560,6 +562,22 @@
     "overdue": {
       "bannerTitle": "Vrácení je po termínu",
       "plannedReturn": "Plánované vrácení: {{date}}"
+    },
+    "attention": {
+      "overdueReturnTitle": "Prodlení s vrácením",
+      "endingTodayTitle": "Končí dnes",
+      "endingTomorrowTitle": "Končí zítra",
+      "plannedReturn": "Plánované vrácení: {{date}}",
+      "overdueByDays": "Zpoždění: {{count}} dní",
+      "overdueReturnDays": "Prodlení s vrácením · {{count}} dní",
+      "endsTodayAt": "Končí dnes · {{time}}",
+      "endsTomorrowAt": "Končí zítra · {{time}}",
+      "filter": {
+        "any": "Jakákoli pozornost",
+        "overdue": "Prodlení s vrácením",
+        "endingToday": "Končí dnes",
+        "endingTomorrow": "Končí zítra"
+      }
     },
     "startDatePassed": {
       "title": "Pronájem nelze aktivovat",
@@ -1098,6 +1116,20 @@
       "upload": "Nahrát",
       "delete": "Odstranit",
       "captionPlaceholder": "Popisek (nepovinné)",
+      "chooseFile": "Vybrat soubor",
+      "noFileSelected": "Není vybrán žádný soubor",
+      "changeFile": "Změnit soubor",
+      "removeFile": "Odebrat",
+      "dropHint": "Přetáhněte soubor sem",
+      "or": "nebo",
+      "supportedTypes": "Podporováno: {{types}} · Max. {{maxSize}}",
+      "uploading": "Nahrávání…",
+      "uploadSuccess": "Nahrání proběhlo úspěšně",
+      "error": {
+        "unsupportedType": "Nepodporovaný typ souboru",
+        "tooLarge": "Soubor je příliš velký",
+        "generic": "Nahrání se nezdařilo"
+      },
       "category": {
         "HANDOVER_CONDITION": "Stav při předání",
         "RETURN_CONDITION": "Stav při vrácení",
@@ -1207,6 +1239,13 @@
   },
   "dashboard": {
     "welcome": "Vítejte zpět, {{name}}",
+    "rentalAttention": {
+      "title": "Vyžaduje pozornost",
+      "overdueReturns": "Prodlení s vrácením",
+      "endingToday": "Končí dnes",
+      "endingTomorrow": "Končí zítra",
+      "oldestOverdue": "Nejstarší: {{count}} dní zpoždění"
+    },
     "sections": {
       "overview": "Přehled",
       "quickActions": "Rychlé akce",

@@ -480,6 +480,8 @@
     },
     "availability": {
       "rentalConflict": "Zarezerwowany/wynajęty",
+      "rentalConflictOverdue": "Niedostępne — przeterminowany zwrot",
+      "plannedReturn": "Planowany zwrot: {{date}}",
       "maintenance": "Serwis",
       "repair": "Naprawa",
       "inspection": "Przegląd",
@@ -560,6 +562,22 @@
     "overdue": {
       "bannerTitle": "Zwrot jest przeterminowany",
       "plannedReturn": "Planowany zwrot: {{date}}"
+    },
+    "attention": {
+      "overdueReturnTitle": "Przeterminowany zwrot",
+      "endingTodayTitle": "Kończy się dziś",
+      "endingTomorrowTitle": "Kończy się jutro",
+      "plannedReturn": "Planowany zwrot: {{date}}",
+      "overdueByDays": "Opóźnienie: {{count}} dni",
+      "overdueReturnDays": "Przeterminowany zwrot · {{count}} dni",
+      "endsTodayAt": "Kończy się dziś · {{time}}",
+      "endsTomorrowAt": "Kończy się jutro · {{time}}",
+      "filter": {
+        "any": "Dowolny status uwagi",
+        "overdue": "Przeterminowane zwroty",
+        "endingToday": "Kończy się dziś",
+        "endingTomorrow": "Kończy się jutro"
+      }
     },
     "startDatePassed": {
       "title": "Nie można aktywować wynajmu",
@@ -1098,6 +1116,20 @@
       "upload": "Prześlij",
       "delete": "Usuń",
       "captionPlaceholder": "Podpis (opcjonalnie)",
+      "chooseFile": "Wybierz plik",
+      "noFileSelected": "Nie wybrano pliku",
+      "changeFile": "Zmień plik",
+      "removeFile": "Usuń",
+      "dropHint": "Przeciągnij plik tutaj",
+      "or": "lub",
+      "supportedTypes": "Obsługiwane: {{types}} · Maks. {{maxSize}}",
+      "uploading": "Przesyłanie…",
+      "uploadSuccess": "Przesłano pomyślnie",
+      "error": {
+        "unsupportedType": "Nieobsługiwany typ pliku",
+        "tooLarge": "Plik jest za duży",
+        "generic": "Przesyłanie nie powiodło się"
+      },
       "category": {
         "HANDOVER_CONDITION": "Stan przy przekazaniu",
         "RETURN_CONDITION": "Stan przy zwrocie",
@@ -1207,6 +1239,13 @@
   },
   "dashboard": {
     "welcome": "Witaj ponownie, {{name}}",
+    "rentalAttention": {
+      "title": "Wymaga uwagi",
+      "overdueReturns": "Przeterminowane zwroty",
+      "endingToday": "Kończy się dziś",
+      "endingTomorrow": "Kończy się jutro",
+      "oldestOverdue": "Najstarszy: {{count}} dni opóźnienia"
+    },
     "sections": {
       "overview": "Przegląd",
       "quickActions": "Szybkie akcje",

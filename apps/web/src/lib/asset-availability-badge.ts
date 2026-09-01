@@ -24,6 +24,14 @@ export interface AvailabilityBadgeInfo {
   endAt: string | null;
   /** Set for a RENTAL_CONFLICT — lets a caller link straight to the conflicting rental. */
   rentalId?: string;
+  /**
+   * True only for a RENTAL_CONFLICT whose blocking rental is itself
+   * OVERDUE_RETURN (see rental-attention.util.ts, backend) — the asset is
+   * physically still with the previous customer, not "available once
+   * plannedEnd passes." The badge must say so explicitly, never imply
+   * availability resumes at `endAt`.
+   */
+  isOverdueConflict?: boolean;
 }
 
 const BLOCK_LABEL_KEYS: Record<AssetAvailabilityBlockType, string> = {
@@ -63,11 +71,14 @@ export function pickAvailabilityBadgeForDay(
   if (rentalConflict) {
     return {
       kind: "RENTAL_CONFLICT",
-      labelKey: "asset.availability.rentalConflict",
+      labelKey: rentalConflict.isOverdue
+        ? "asset.availability.rentalConflictOverdue"
+        : "asset.availability.rentalConflict",
       reference: rentalConflict.rentalNumber,
       startAt: rentalConflict.plannedStart,
       endAt: rentalConflict.plannedEnd,
       rentalId: rentalConflict.rentalId,
+      isOverdueConflict: rentalConflict.isOverdue,
     };
   }
 
@@ -104,15 +115,23 @@ export function pickAvailabilityBadge(
     };
   }
 
-  const rentalConflict = result.conflicts[0];
+  // An overdue conflict is the most operationally urgent thing to surface
+  // — prefer it over an ordinary (still-on-track) conflict when both exist,
+  // rather than picking `conflicts[0]` unconditionally, since "physically
+  // still with the previous customer" outranks "booked but not yet begun."
+  const rentalConflict =
+    result.conflicts.find((conflict) => conflict.isOverdue) ?? result.conflicts[0];
   if (rentalConflict) {
     return {
       kind: "RENTAL_CONFLICT",
-      labelKey: "asset.availability.rentalConflict",
+      labelKey: rentalConflict.isOverdue
+        ? "asset.availability.rentalConflictOverdue"
+        : "asset.availability.rentalConflict",
       reference: rentalConflict.rentalNumber,
       startAt: rentalConflict.plannedStart,
       endAt: rentalConflict.plannedEnd,
       rentalId: rentalConflict.rentalId,
+      isOverdueConflict: rentalConflict.isOverdue,
     };
   }
 

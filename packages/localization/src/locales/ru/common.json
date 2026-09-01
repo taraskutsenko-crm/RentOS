@@ -480,6 +480,8 @@
     },
     "availability": {
       "rentalConflict": "Забронировано/в аренде",
+      "rentalConflictOverdue": "Недоступно — просроченный возврат",
+      "plannedReturn": "Плановый возврат: {{date}}",
       "maintenance": "Обслуживание",
       "repair": "Ремонт",
       "inspection": "Инспекция",
@@ -560,6 +562,22 @@
     "overdue": {
       "bannerTitle": "Возврат просрочен",
       "plannedReturn": "Плановый возврат: {{date}}"
+    },
+    "attention": {
+      "overdueReturnTitle": "Просроченный возврат",
+      "endingTodayTitle": "Заканчивается сегодня",
+      "endingTomorrowTitle": "Заканчивается завтра",
+      "plannedReturn": "Плановый возврат: {{date}}",
+      "overdueByDays": "Просрочка: {{count}} дн.",
+      "overdueReturnDays": "Просрочен возврат · {{count}} дн.",
+      "endsTodayAt": "Заканчивается сегодня · {{time}}",
+      "endsTomorrowAt": "Заканчивается завтра · {{time}}",
+      "filter": {
+        "any": "Любое внимание",
+        "overdue": "Просроченные возвраты",
+        "endingToday": "Заканчивается сегодня",
+        "endingTomorrow": "Заканчивается завтра"
+      }
     },
     "startDatePassed": {
       "title": "Аренду нельзя активировать",
@@ -1122,6 +1140,20 @@
       "upload": "Загрузить",
       "delete": "Удалить",
       "captionPlaceholder": "Подпись (необязательно)",
+      "chooseFile": "Выбрать файл",
+      "noFileSelected": "Файл не выбран",
+      "changeFile": "Изменить файл",
+      "removeFile": "Удалить",
+      "dropHint": "Перетащите файл сюда",
+      "or": "или",
+      "supportedTypes": "Поддерживаются: {{types}} · Макс. {{maxSize}}",
+      "uploading": "Загрузка…",
+      "uploadSuccess": "Файл успешно загружен",
+      "error": {
+        "unsupportedType": "Неподдерживаемый тип файла",
+        "tooLarge": "Файл слишком большой",
+        "generic": "Не удалось загрузить файл"
+      },
       "category": {
         "HANDOVER_CONDITION": "Состояние при передаче",
         "RETURN_CONDITION": "Состояние при возврате",
@@ -1215,6 +1247,13 @@
   },
   "dashboard": {
     "welcome": "С возвращением, {{name}}",
+    "rentalAttention": {
+      "title": "Требует внимания",
+      "overdueReturns": "Просроченные возвраты",
+      "endingToday": "Заканчивается сегодня",
+      "endingTomorrow": "Заканчивается завтра",
+      "oldestOverdue": "Самый старый: просрочка {{count}} дн."
+    },
     "sections": {
       "overview": "Обзор",
       "quickActions": "Быстрые действия",

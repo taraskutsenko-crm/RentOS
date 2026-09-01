@@ -62,7 +62,13 @@ export class RentalsController {
   @RequirePermissions("rentals.view")
   @Get()
   findMany(@CurrentTenant() { tenant }: CurrentTenantContext, @Query() query: QueryRentalsDto) {
-    return this.rentalsService.findMany(tenant.id, query);
+    return this.rentalsService.findMany(tenant.id, query, tenant.timezone);
+  }
+
+  @RequirePermissions("rentals.view")
+  @Get("attention-summary")
+  attentionSummary(@CurrentTenant() { tenant }: CurrentTenantContext) {
+    return this.rentalsService.getAttentionSummary(tenant.id, tenant.timezone);
   }
 
   @RequirePermissions("rentals.view")
@@ -84,7 +90,7 @@ export class RentalsController {
   @RequirePermissions("rentals.view")
   @Get(":id")
   findOne(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("id") id: string) {
-    return this.rentalsService.findOne(tenant.id, id);
+    return this.rentalsService.findOne(tenant.id, id, tenant.timezone);
   }
 
   @RequirePermissions("rentals.update")

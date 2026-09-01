@@ -64,7 +64,12 @@ export class PortalDashboardService {
     ]);
 
     const recentRentals = recentRentalsRaw.map(({ _count, ...rental }) =>
-      toPortalRentalListItem({ ...rental, itemCount: _count.items }),
+      // The customer-facing portal dashboard's "recent rentals" widget
+      // doesn't surface staff-internal attention flagging (Rental
+      // Attention System — see rental-attention.util.ts, a staff-facing
+      // Dashboard/Rentals-list/Rental-detail feature only), so this is
+      // never computed here — always `null`, never a stale/wrong guess.
+      toPortalRentalListItem({ ...rental, itemCount: _count.items, attention: null, overdueSince: null }),
     );
 
     return {

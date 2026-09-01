@@ -1,7 +1,8 @@
 "use client";
 
-import { Button } from "@rentos/ui";
-import { useRef, useState } from "react";
+import { Button, cn } from "@rentos/ui";
+import { CheckCircle2, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -9,7 +10,9 @@ import {
   useDeleteDocumentFile,
   useUploadDocumentFile,
 } from "../../hooks/use-documents";
+import { mapDocumentUploadError, type DocumentUploadErrorKind } from "../../lib/document-file-validation";
 import type { DocumentAttachmentCategory, DocumentFile, DocumentType } from "../../types/document";
+import { FileUploadField } from "./file-upload-field";
 
 export interface DocumentAttachmentsProps {
   tenantId: string | null;
@@ -50,11 +53,13 @@ export function DocumentAttachments({
   canManage,
 }: DocumentAttachmentsProps) {
   const { t } = useTranslation();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [category, setCategory] = useState<DocumentAttachmentCategory>(
     defaultCategoryFor(documentType),
   );
   const [caption, setCaption] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadErrorKind, setUploadErrorKind] = useState<DocumentUploadErrorKind | null>(null);
+  const [uploadSucceeded, setUploadSucceeded] = useState(false);
   const uploadFile = useUploadDocumentFile(tenantId);
   const deleteFile = useDeleteDocumentFile(tenantId);
 
@@ -62,19 +67,39 @@ export function DocumentAttachments({
   const attachments = files.filter((file) => file.format === "ATTACHMENT");
   const canUpload = canManage && isDraft;
 
+  // Visible success feedback (Task C3) that clears itself — mirrors the
+  // "toast fades on its own" pattern used elsewhere rather than requiring a
+  // manual dismiss for a low-stakes confirmation.
+  useEffect(() => {
+    if (!uploadSucceeded) return;
+    const timer = setTimeout(() => setUploadSucceeded(false), 4000);
+    return () => clearTimeout(timer);
+  }, [uploadSucceeded]);
+
+  function handleFileChange(file: File | null): void {
+    setSelectedFile(file);
+    setUploadErrorKind(null);
+    setUploadSucceeded(false);
+  }
+
   async function handleUpload(): Promise<void> {
-    const file = fileInputRef.current?.files?.[0];
-    if (!file) return;
-    const format = file.type.startsWith("image/") ? "PHOTO" : "ATTACHMENT";
-    await uploadFile.mutateAsync({
-      documentId,
-      file,
-      format,
-      category,
-      caption: caption.trim() || undefined,
-    });
-    setCaption("");
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (!selectedFile) return;
+    setUploadErrorKind(null);
+    const format = selectedFile.type.startsWith("image/") ? "PHOTO" : "ATTACHMENT";
+    try {
+      await uploadFile.mutateAsync({
+        documentId,
+        file: selectedFile,
+        format,
+        category,
+        caption: caption.trim() || undefined,
+      });
+      setCaption("");
+      setSelectedFile(null);
+      setUploadSucceeded(true);
+    } catch (error) {
+      setUploadErrorKind(mapDocumentUploadError(error));
+    }
   }
 
   return (
@@ -146,37 +171,60 @@ export function DocumentAttachments({
       )}
 
       {canUpload && (
-        <div className="flex flex-wrap items-end gap-2">
-          <select
-            className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
-            value={category}
-            onChange={(event) => setCategory(event.target.value as DocumentAttachmentCategory)}
-          >
-            {CATEGORIES.map((value) => (
-              <option key={value} value={value}>
-                {t(`document.attachments.category.${value}`)}
-              </option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder={t("document.attachments.captionPlaceholder")}
-            value={caption}
-            onChange={(event) => setCaption(event.target.value)}
-            className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+        <div className="flex flex-col gap-2 rounded-md border p-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+              value={category}
+              onChange={(event) => setCategory(event.target.value as DocumentAttachmentCategory)}
+            >
+              {CATEGORIES.map((value) => (
+                <option key={value} value={value}>
+                  {t(`document.attachments.category.${value}`)}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder={t("document.attachments.captionPlaceholder")}
+              value={caption}
+              onChange={(event) => setCaption(event.target.value)}
+              className="border-input h-9 min-w-40 flex-1 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+            />
+          </div>
+
+          <FileUploadField
+            file={selectedFile}
+            onFileChange={handleFileChange}
+            onValidationError={setUploadErrorKind}
+            disabled={uploadFile.isPending}
           />
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,application/pdf"
-          />
+
+          {uploadErrorKind && (
+            <p className="text-destructive text-sm" role="alert">
+              {t(`document.attachments.error.${uploadErrorKind}`)}
+            </p>
+          )}
+          {uploadSucceeded && (
+            <p className="text-success flex items-center gap-1.5 text-sm">
+              <CheckCircle2 className="size-4" aria-hidden="true" />
+              {t("document.attachments.uploadSuccess")}
+            </p>
+          )}
+
           <Button
             type="button"
             size="sm"
+            className="self-start"
             onClick={() => void handleUpload()}
-            disabled={uploadFile.isPending}
+            disabled={!selectedFile || uploadFile.isPending}
           >
-            {uploadFile.isPending ? t("common.saving") : t("document.attachments.upload")}
+            {uploadFile.isPending && (
+              <Loader2 className={cn("size-4 animate-spin")} aria-hidden="true" />
+            )}
+            {uploadFile.isPending
+              ? t("document.attachments.uploading")
+              : t("document.attachments.upload")}
           </Button>
         </div>
       )}

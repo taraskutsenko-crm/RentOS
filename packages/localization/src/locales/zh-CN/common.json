@@ -480,6 +480,8 @@
     },
     "availability": {
       "rentalConflict": "已预订/已租出",
+      "rentalConflictOverdue": "Unavailable — overdue rental",
+      "plannedReturn": "Planned return: {{date}}",
       "maintenance": "维护",
       "repair": "维修",
       "inspection": "检查",
@@ -560,6 +562,22 @@
     "overdue": {
       "bannerTitle": "归还已逾期",
       "plannedReturn": "计划归还时间：{{date}}"
+    },
+    "attention": {
+      "overdueReturnTitle": "Overdue return",
+      "endingTodayTitle": "Ending today",
+      "endingTomorrowTitle": "Ending tomorrow",
+      "plannedReturn": "Planned return: {{date}}",
+      "overdueByDays": "Overdue by {{count}} days",
+      "overdueReturnDays": "Overdue return · {{count}}d",
+      "endsTodayAt": "Ends today · {{time}}",
+      "endsTomorrowAt": "Ends tomorrow · {{time}}",
+      "filter": {
+        "any": "Any attention",
+        "overdue": "Overdue returns",
+        "endingToday": "Ending today",
+        "endingTomorrow": "Ending tomorrow"
+      }
     },
     "startDatePassed": {
       "title": "无法激活此租赁",
@@ -1098,6 +1116,20 @@
       "upload": "上传",
       "delete": "移除",
       "captionPlaceholder": "说明（可选）",
+      "chooseFile": "Choose file",
+      "noFileSelected": "No file selected",
+      "changeFile": "Change file",
+      "removeFile": "Remove",
+      "dropHint": "Drag a file here",
+      "or": "or",
+      "supportedTypes": "Supported: {{types}} · Max {{maxSize}}",
+      "uploading": "Uploading…",
+      "uploadSuccess": "Upload successful",
+      "error": {
+        "unsupportedType": "Unsupported file type",
+        "tooLarge": "File too large",
+        "generic": "Upload failed"
+      },
       "category": {
         "HANDOVER_CONDITION": "交接时状况",
         "RETURN_CONDITION": "归还时状况",
@@ -1207,6 +1239,13 @@
   },
   "dashboard": {
     "welcome": "欢迎回来，{{name}}",
+    "rentalAttention": {
+      "title": "Rental attention",
+      "overdueReturns": "Overdue returns",
+      "endingToday": "Ending today",
+      "endingTomorrow": "Ending tomorrow",
+      "oldestOverdue": "Oldest: {{count}} days overdue"
+    },
     "sections": {
       "overview": "概览",
       "quickActions": "快捷操作",

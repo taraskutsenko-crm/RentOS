@@ -480,6 +480,8 @@
     },
     "availability": {
       "rentalConflict": "Reserviert/vermietet",
+      "rentalConflictOverdue": "Unavailable — overdue rental",
+      "plannedReturn": "Planned return: {{date}}",
       "maintenance": "Wartung",
       "repair": "Reparatur",
       "inspection": "Inspektion",
@@ -560,6 +562,22 @@
     "overdue": {
       "bannerTitle": "Rückgabe überfällig",
       "plannedReturn": "Geplante Rückgabe: {{date}}"
+    },
+    "attention": {
+      "overdueReturnTitle": "Overdue return",
+      "endingTodayTitle": "Ending today",
+      "endingTomorrowTitle": "Ending tomorrow",
+      "plannedReturn": "Planned return: {{date}}",
+      "overdueByDays": "Overdue by {{count}} days",
+      "overdueReturnDays": "Overdue return · {{count}}d",
+      "endsTodayAt": "Ends today · {{time}}",
+      "endsTomorrowAt": "Ends tomorrow · {{time}}",
+      "filter": {
+        "any": "Any attention",
+        "overdue": "Overdue returns",
+        "endingToday": "Ending today",
+        "endingTomorrow": "Ending tomorrow"
+      }
     },
     "startDatePassed": {
       "title": "Vermietung kann nicht aktiviert werden",
@@ -1098,6 +1116,20 @@
       "upload": "Hochladen",
       "delete": "Entfernen",
       "captionPlaceholder": "Beschriftung (optional)",
+      "chooseFile": "Choose file",
+      "noFileSelected": "No file selected",
+      "changeFile": "Change file",
+      "removeFile": "Remove",
+      "dropHint": "Drag a file here",
+      "or": "or",
+      "supportedTypes": "Supported: {{types}} · Max {{maxSize}}",
+      "uploading": "Uploading…",
+      "uploadSuccess": "Upload successful",
+      "error": {
+        "unsupportedType": "Unsupported file type",
+        "tooLarge": "File too large",
+        "generic": "Upload failed"
+      },
       "category": {
         "HANDOVER_CONDITION": "Zustand bei Übergabe",
         "RETURN_CONDITION": "Zustand bei Rückgabe",
@@ -1207,6 +1239,13 @@
   },
   "dashboard": {
     "welcome": "Willkommen zurück, {{name}}",
+    "rentalAttention": {
+      "title": "Rental attention",
+      "overdueReturns": "Overdue returns",
+      "endingToday": "Ending today",
+      "endingTomorrow": "Ending tomorrow",
+      "oldestOverdue": "Oldest: {{count}} days overdue"
+    },
     "sections": {
       "overview": "Überblick",
       "quickActions": "Schnellaktionen",

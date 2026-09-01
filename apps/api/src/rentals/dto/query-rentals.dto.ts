@@ -22,6 +22,10 @@ export const RENTAL_SORTABLE_FIELDS = [
 ] as const;
 export type RentalSortableField = (typeof RENTAL_SORTABLE_FIELDS)[number];
 
+/** Matches a RentalAttentionCategory (rental-attention.util.ts) — the Rentals list's dashboard-click-through filter, e.g. `?attention=overdue`. */
+export const RENTAL_ATTENTION_FILTERS = ["overdue", "endingToday", "endingTomorrow"] as const;
+export type RentalAttentionFilter = (typeof RENTAL_ATTENTION_FILTERS)[number];
+
 export class QueryRentalsDto {
   @IsOptional()
   @Type(() => Number)
@@ -61,6 +65,10 @@ export class QueryRentalsDto {
   @IsOptional()
   @IsDateString()
   plannedStartTo?: string;
+
+  @IsOptional()
+  @IsIn(RENTAL_ATTENTION_FILTERS)
+  attention?: RentalAttentionFilter;
 
   @IsOptional()
   @IsIn(RENTAL_SORTABLE_FIELDS)

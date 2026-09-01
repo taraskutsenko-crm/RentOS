@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@rentos/ui";
+import { AlertTriangle, CalendarClock, Clock3 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
@@ -42,7 +43,7 @@ import { ApiError } from "../../../../lib/api-client";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { getAssetDisplayLabel } from "../../../../lib/asset-display-label";
 import { getAssetStatusLabel } from "../../../../lib/asset-status-label";
-import { formatDate, formatDateTime } from "../../../../lib/date-format";
+import { formatDate, formatDateTime, formatTime } from "../../../../lib/date-format";
 import {
   CHECKLIST_ITEM_DOCUMENT_TYPE,
   getRentalDocumentChecklist,
@@ -184,6 +185,39 @@ export default function RentalDetailPage() {
   );
   const nextAction = getRentalNextAction(rental);
 
+  // Real elapsed time since a known UTC instant — timezone-agnostic, so
+  // safe to compute client-side, unlike the OVERDUE_RETURN/ENDING_TODAY/
+  // ENDING_TOMORROW classification itself (always `rental.attention`, the
+  // server's own tenant-timezone-derived answer — see
+  // rental-attention.util.ts and its own "never duplicate this calculation"
+  // rule).
+  const overdueDays =
+    rental.attention === "OVERDUE_RETURN"
+      ? Math.max(
+          0,
+          Math.floor(
+            (nowMs - new Date(rental.overdueSince ?? rental.plannedEnd).getTime()) / 86_400_000,
+          ),
+        )
+      : 0;
+
+  // Overrides the header's day-count text only for the 3 attention
+  // categories Task A is about — an ACTIVE rental with plenty of days left
+  // still uses the ordinary (non-attention) `timeIntelligence.days_remaining`
+  // text below, since that case isn't where the browser-timezone bug in
+  // rental-time-intelligence.ts's `relativeToEnd` actually bites.
+  const attentionHeaderText =
+    rental.status === "ACTIVE" && rental.attention
+      ? rental.attention === "OVERDUE_RETURN"
+        ? t("rental.attention.overdueReturnDays", { count: overdueDays })
+        : t(
+            rental.attention === "ENDING_TODAY"
+              ? "rental.attention.endsTodayAt"
+              : "rental.attention.endsTomorrowAt",
+            { time: formatTime(rental.plannedEnd, i18n.language, timeZone) },
+          )
+      : null;
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -217,9 +251,10 @@ export default function RentalDetailPage() {
           <div className="flex flex-wrap items-center gap-3">
             <RentalStatusBadge status={rental.status} />
             <span className="text-muted-foreground">
-              {t(`rental.timeIntelligence.${timeIntelligence.kind}`, {
-                count: timeIntelligence.days,
-              })}
+              {attentionHeaderText ??
+                t(`rental.timeIntelligence.${timeIntelligence.kind}`, {
+                  count: timeIntelligence.days,
+                })}
             </span>
             <span className="text-muted-foreground">
               {formatDate(rental.plannedStart, i18n.language, timeZone)} –{" "}
@@ -281,16 +316,43 @@ export default function RentalDetailPage() {
         }
       />
 
-      {rental.isOverdue && (
-        <Alert variant="warning">
+      {rental.attention === "OVERDUE_RETURN" && (
+        <Alert variant="destructive">
+          <AlertTriangle className="size-4" aria-hidden="true" />
           <AlertDescription>
-            <p className="font-medium">{t("rental.overdue.bannerTitle")}</p>
+            <p className="font-medium">{t("rental.attention.overdueReturnTitle")}</p>
             <p>
-              {t("rental.overdue.plannedReturn", {
+              {t("rental.attention.plannedReturn", {
                 date: formatDateTime(rental.plannedEnd, i18n.language, timeZone),
               })}
               {" — "}
-              {t("rental.timeIntelligence.overdue", { count: timeIntelligence.days })}
+              {t("rental.attention.overdueByDays", { count: overdueDays })}
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
+      {rental.attention === "ENDING_TODAY" && (
+        <Alert variant="warning">
+          <Clock3 className="size-4" aria-hidden="true" />
+          <AlertDescription>
+            <p className="font-medium">{t("rental.attention.endingTodayTitle")}</p>
+            <p>
+              {t("rental.attention.plannedReturn", {
+                date: formatDateTime(rental.plannedEnd, i18n.language, timeZone),
+              })}
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
+      {rental.attention === "ENDING_TOMORROW" && (
+        <Alert variant="info">
+          <CalendarClock className="size-4" aria-hidden="true" />
+          <AlertDescription>
+            <p className="font-medium">{t("rental.attention.endingTomorrowTitle")}</p>
+            <p>
+              {t("rental.attention.plannedReturn", {
+                date: formatDateTime(rental.plannedEnd, i18n.language, timeZone),
+              })}
             </p>
           </AlertDescription>
         </Alert>

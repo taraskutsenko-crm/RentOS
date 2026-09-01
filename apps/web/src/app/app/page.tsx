@@ -11,6 +11,7 @@ import {
   DashboardSection,
   QuickActions,
   RecentActivity,
+  RentalAttentionCard,
   type QuickAction,
 } from "../../components/dashboard";
 import { KpiCard } from "../../components/finance/kpi-card";
@@ -19,6 +20,7 @@ import { useCurrentTenantId } from "../../hooks/use-current-tenant";
 import { usePermission } from "../../hooks/use-current-tenant-role";
 import { useDashboardStats } from "../../hooks/use-dashboard-stats";
 import { useFinanceOverview } from "../../hooks/use-finance-reports";
+import { useRentalAttentionSummary } from "../../hooks/use-rentals";
 import { QUICK_ACTION_DEFINITIONS } from "../../lib/quick-actions";
 
 export default function AppHomePage() {
@@ -46,6 +48,7 @@ export default function AppHomePage() {
   });
   const financeOverview = useFinanceOverview(canViewFinance ? tenantId : null, { period: "THIS_MONTH" });
   const financeRow = financeOverview.data?.rows[0];
+  const attentionSummary = useRentalAttentionSummary(canViewRentals ? tenantId : null);
 
   const permissionByKey: Record<string, boolean> = {
     customer: true,
@@ -72,6 +75,41 @@ export default function AppHomePage() {
         title={t("app.nav.dashboard")}
         subtitle={me ? t("dashboard.welcome", { name: me.user.firstName }) : undefined}
       />
+
+      {canViewRentals && (
+        <DashboardSection title={t("dashboard.rentalAttention.title")}>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <RentalAttentionCard
+              label={t("dashboard.rentalAttention.overdueReturns")}
+              count={attentionSummary.data?.overdue.count ?? 0}
+              tone="danger"
+              href="/app/rentals?attention=overdue"
+              subtext={
+                attentionSummary.data && attentionSummary.data.overdue.oldestOverdueDays !== null
+                  ? t("dashboard.rentalAttention.oldestOverdue", {
+                      count: attentionSummary.data.overdue.oldestOverdueDays,
+                    })
+                  : undefined
+              }
+              isLoading={attentionSummary.isLoading}
+            />
+            <RentalAttentionCard
+              label={t("dashboard.rentalAttention.endingToday")}
+              count={attentionSummary.data?.endingToday.count ?? 0}
+              tone="warning"
+              href="/app/rentals?attention=endingToday"
+              isLoading={attentionSummary.isLoading}
+            />
+            <RentalAttentionCard
+              label={t("dashboard.rentalAttention.endingTomorrow")}
+              count={attentionSummary.data?.endingTomorrow.count ?? 0}
+              tone="info"
+              href="/app/rentals?attention=endingTomorrow"
+              isLoading={attentionSummary.isLoading}
+            />
+          </div>
+        </DashboardSection>
+      )}
 
       <DashboardSection title={t("dashboard.sections.overview")}>
         <DashboardGrid>

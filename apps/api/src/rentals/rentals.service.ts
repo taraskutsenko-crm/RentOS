@@ -28,12 +28,14 @@ import type { RentalItemDto } from "./dto/rental-item.dto";
 import type { ReturnRentalDto } from "./dto/return-rental.dto";
 import type { StatusActionDto } from "./dto/status-action.dto";
 import type { UpdateRentalDto } from "./dto/update-rental.dto";
+import { deriveRentalAttention, resolveTenantDayBoundaries } from "./rental-attention.util";
 import { generateRentalNumber } from "./rental-numbering.util";
 import { deriveOverdueStatus } from "./rental-overdue.util";
 import { computeRentalTotals, type PricedRentalItemInput } from "./rental-pricing.util";
 import {
   RENTAL_DETAIL_INCLUDE,
   RENTAL_DOCUMENT_SELECT,
+  type RentalAttentionSummaryItem,
   type RentalDetailView,
   type RentalListItemView,
 } from "./rental.types";
@@ -163,9 +165,12 @@ export class RentalsService {
   async findMany(
     tenantId: string,
     query: QueryRentalsDto,
+    timezone?: string,
   ): Promise<PaginatedResult<RentalListItemView>> {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
+    const tz = timezone ?? (await this.resolveTenantTimezone(tenantId));
+    const boundaries = resolveTenantDayBoundaries(tz);
 
     const where: Prisma.RentalWhereInput = {
       tenantId,
@@ -191,12 +196,33 @@ export class RentalsService {
             ],
           }
         : {}),
+      // Rental Attention System filters (rental-attention.util.ts) — the
+      // exact same boundary/overdue rules used to classify each rental
+      // below, expressed as a Prisma where-clause so the Dashboard's
+      // click-through lands on a correctly pre-filtered list without
+      // paging through every rental to find the matches client-side.
+      ...(query.attention === "overdue"
+        ? { status: "ACTIVE", plannedEnd: { lt: boundaries.now }, items: { some: { returnedAt: null } } }
+        : {}),
+      ...(query.attention === "endingToday"
+        ? { status: "ACTIVE", plannedEnd: { gt: boundaries.now, lt: boundaries.tomorrowStart } }
+        : {}),
+      ...(query.attention === "endingTomorrow"
+        ? {
+            status: "ACTIVE",
+            plannedEnd: { gte: boundaries.tomorrowStart, lt: boundaries.dayAfterTomorrowStart },
+          }
+        : {}),
     };
 
     const [items, total] = await Promise.all([
       this.prisma.rental.findMany({
         where,
-        include: { customer: true, _count: { select: { items: true } } },
+        include: {
+          customer: true,
+          _count: { select: { items: true } },
+          items: { select: { returnedAt: true } },
+        },
         orderBy: { [query.sortBy ?? "createdAt"]: query.sortDirection ?? "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -205,14 +231,78 @@ export class RentalsService {
     ]);
 
     return {
-      items: items.map(({ _count, ...rental }) => ({ ...rental, itemCount: _count.items })),
+      items: items.map(({ _count, items: rentalItems, ...rental }) => {
+        const result = deriveRentalAttention(rental, rentalItems, boundaries);
+        return {
+          ...rental,
+          itemCount: _count.items,
+          attention: result.category,
+          overdueSince: result.overdueSince?.toISOString() ?? null,
+        };
+      }),
       total,
       page,
       pageSize,
     };
   }
 
-  async findOne(tenantId: string, id: string): Promise<RentalDetailView> {
+  /**
+   * Dashboard "Rental attention" summary — counts plus a small preview list
+   * per category, sorted per docs/PRODUCT_BIBLE.md (overdue: most-overdue
+   * first, i.e. oldest plannedEnd first; ending today/tomorrow: soonest
+   * plannedEnd first). Loads every ACTIVE rental once and classifies
+   * in-memory (the same "load the filtered set, bucket in-memory" idiom
+   * ReceivablesService.getAgingBuckets already uses) rather than three
+   * separate COUNT queries plus three separate preview queries.
+   */
+  async getAttentionSummary(tenantId: string, timezone?: string, previewLimit = 5) {
+    const tz = timezone ?? (await this.resolveTenantTimezone(tenantId));
+    const boundaries = resolveTenantDayBoundaries(tz);
+
+    const activeRentals = await this.prisma.rental.findMany({
+      where: { tenantId, deletedAt: null, status: "ACTIVE" },
+      include: { customer: true, items: { select: { returnedAt: true } } },
+    });
+
+    const overdue: RentalAttentionSummaryItem[] = [];
+    const endingToday: RentalAttentionSummaryItem[] = [];
+    const endingTomorrow: RentalAttentionSummaryItem[] = [];
+
+    for (const rental of activeRentals) {
+      const result = deriveRentalAttention(rental, rental.items, boundaries);
+      if (result.category === null) continue;
+      const entry: RentalAttentionSummaryItem = {
+        rentalId: rental.id,
+        rentalNumber: rental.rentalNumber,
+        customerName: `${rental.customer.firstName} ${rental.customer.lastName}`.trim(),
+        plannedEnd: rental.plannedEnd.toISOString(),
+        overdueDays:
+          result.category === "OVERDUE_RETURN"
+            ? Math.floor((boundaries.now.getTime() - rental.plannedEnd.getTime()) / 86_400_000)
+            : null,
+      };
+      if (result.category === "OVERDUE_RETURN") overdue.push(entry);
+      else if (result.category === "ENDING_TODAY") endingToday.push(entry);
+      else endingTomorrow.push(entry);
+    }
+
+    // Most overdue first (oldest plannedEnd first); ending today/tomorrow: soonest first.
+    overdue.sort((a, b) => new Date(a.plannedEnd).getTime() - new Date(b.plannedEnd).getTime());
+    endingToday.sort((a, b) => new Date(a.plannedEnd).getTime() - new Date(b.plannedEnd).getTime());
+    endingTomorrow.sort((a, b) => new Date(a.plannedEnd).getTime() - new Date(b.plannedEnd).getTime());
+
+    return {
+      overdue: {
+        count: overdue.length,
+        oldestOverdueDays: overdue[0]?.overdueDays ?? null,
+        items: overdue.slice(0, previewLimit),
+      },
+      endingToday: { count: endingToday.length, items: endingToday.slice(0, previewLimit) },
+      endingTomorrow: { count: endingTomorrow.length, items: endingTomorrow.slice(0, previewLimit) },
+    };
+  }
+
+  async findOne(tenantId: string, id: string, timezone?: string): Promise<RentalDetailView> {
     const rental = await this.prisma.rental.findFirst({
       where: { id, tenantId, deletedAt: null },
       include: RENTAL_DETAIL_INCLUDE,
@@ -249,10 +339,13 @@ export class RentalsService {
     }
 
     const overdue = deriveOverdueStatus(rental, rental.items);
+    const tz = timezone ?? (await this.resolveTenantTimezone(tenantId));
+    const attention = deriveRentalAttention(rental, rental.items, resolveTenantDayBoundaries(tz));
     return {
       ...rental,
       isOverdue: overdue.isOverdue,
       overdueSince: overdue.overdueSince?.toISOString() ?? null,
+      attention: attention.category,
     };
   }
 
@@ -907,6 +1000,18 @@ export class RentalsService {
       throw new NotFoundException("Tenant not found");
     }
     return tenant.defaultCurrency;
+  }
+
+  /** Same pattern as resolveTenantDefaultCurrency above — only queried when the caller (an internal `this.findOne`/`this.findMany` call, not the controller entry point, which already has the tenant's own Tenant row via CurrentTenant and passes its timezone through) doesn't already have it. */
+  private async resolveTenantTimezone(tenantId: string): Promise<string> {
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { timezone: true },
+    });
+    if (!tenant) {
+      throw new NotFoundException("Tenant not found");
+    }
+    return tenant.timezone;
   }
 
   /** Only queries RentalBillingSettings when at least one item actually needs it. */

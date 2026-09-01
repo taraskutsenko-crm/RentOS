@@ -1,18 +1,24 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
 
+import {
+  DOCUMENT_ATTACHMENT_ALLOWED_MIME_TYPES,
+  DOCUMENT_ATTACHMENT_MAX_SIZE_BYTES,
+} from "@rentos/shared";
+
 import { STORAGE_ADAPTER, type StorageAdapter } from "./storage.types";
 
 export const ALLOWED_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB
 
-export const ALLOWED_DOCUMENT_MIME_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-] as const;
-export const MAX_DOCUMENT_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+/**
+ * This is the single source of truth for document-file validation — defined
+ * in @rentos/shared (not duplicated here) so the Document Attachments
+ * upload UI can display and pre-check the exact real constraints. See
+ * DOCUMENT_ATTACHMENT_ALLOWED_MIME_TYPES's own doc comment.
+ */
+export const ALLOWED_DOCUMENT_MIME_TYPES = DOCUMENT_ATTACHMENT_ALLOWED_MIME_TYPES;
+export const MAX_DOCUMENT_SIZE_BYTES = DOCUMENT_ATTACHMENT_MAX_SIZE_BYTES;
 
 export interface UploadedFileLike {
   originalname: string;

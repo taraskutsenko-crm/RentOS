@@ -480,6 +480,8 @@
     },
     "availability": {
       "rentalConflict": "예약됨/렌탈 중",
+      "rentalConflictOverdue": "Unavailable — overdue rental",
+      "plannedReturn": "Planned return: {{date}}",
       "maintenance": "정비",
       "repair": "수리",
       "inspection": "점검",
@@ -560,6 +562,22 @@
     "overdue": {
       "bannerTitle": "반납이 연체되었습니다",
       "plannedReturn": "예정 반납일: {{date}}"
+    },
+    "attention": {
+      "overdueReturnTitle": "Overdue return",
+      "endingTodayTitle": "Ending today",
+      "endingTomorrowTitle": "Ending tomorrow",
+      "plannedReturn": "Planned return: {{date}}",
+      "overdueByDays": "Overdue by {{count}} days",
+      "overdueReturnDays": "Overdue return · {{count}}d",
+      "endsTodayAt": "Ends today · {{time}}",
+      "endsTomorrowAt": "Ends tomorrow · {{time}}",
+      "filter": {
+        "any": "Any attention",
+        "overdue": "Overdue returns",
+        "endingToday": "Ending today",
+        "endingTomorrow": "Ending tomorrow"
+      }
     },
     "startDatePassed": {
       "title": "대여를 활성화할 수 없습니다",
@@ -1098,6 +1116,20 @@
       "upload": "업로드",
       "delete": "삭제",
       "captionPlaceholder": "캡션(선택 사항)",
+      "chooseFile": "Choose file",
+      "noFileSelected": "No file selected",
+      "changeFile": "Change file",
+      "removeFile": "Remove",
+      "dropHint": "Drag a file here",
+      "or": "or",
+      "supportedTypes": "Supported: {{types}} · Max {{maxSize}}",
+      "uploading": "Uploading…",
+      "uploadSuccess": "Upload successful",
+      "error": {
+        "unsupportedType": "Unsupported file type",
+        "tooLarge": "File too large",
+        "generic": "Upload failed"
+      },
       "category": {
         "HANDOVER_CONDITION": "인계 시 상태",
         "RETURN_CONDITION": "반납 시 상태",
@@ -1207,6 +1239,13 @@
   },
   "dashboard": {
     "welcome": "다시 오신 것을 환영합니다, {{name}}님",
+    "rentalAttention": {
+      "title": "Rental attention",
+      "overdueReturns": "Overdue returns",
+      "endingToday": "Ending today",
+      "endingTomorrow": "Ending tomorrow",
+      "oldestOverdue": "Oldest: {{count}} days overdue"
+    },
     "sections": {
       "overview": "개요",
       "quickActions": "빠른 작업",

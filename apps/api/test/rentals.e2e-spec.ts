@@ -17,6 +17,7 @@ describe("Rentals E2E", () => {
   let prisma: PrismaClient;
   let accessCookie: string;
   let tenantId: string;
+  let userId: string;
   let customerId: string;
   let assetAId: string;
   let assetBId: string;
@@ -40,6 +41,7 @@ describe("Rentals E2E", () => {
       .expect(201);
     const body = registerResponse.body as RegisterResponseBody;
     tenantId = body.tenant.id;
+    userId = body.user.id;
     accessCookie = extractCookie(registerResponse.headers, "rentos_access_token");
 
     const categoryResponse = await request(app.getHttpServer())
@@ -1559,5 +1561,244 @@ describe("Rentals E2E", () => {
       .expect(200);
     expect(activeOnly.body.total).toBe(1);
     expect(activeOnly.body.items[0].id).toBe(active.body.id);
+  });
+
+  // -----------------------------------------------------------------
+  // Rental Attention System — OVERDUE_RETURN / ENDING_TODAY /
+  // ENDING_TOMORROW (rental-attention.util.ts). plannedEnd values are
+  // seeded directly via Prisma, anchored to the real
+  // resolveTenantDayBoundaries("America/New_York") boundaries (the test
+  // tenant's own fixture timezone — see fixtures.ts) rather than through
+  // the /start endpoint, which deliberately rejects a plannedStart that
+  // has already passed and so cannot itself produce an already-overdue
+  // ACTIVE rental in a deterministic, non-flaky way. This exercises the
+  // exact same read path (RentalsService.findMany/findOne/
+  // getAttentionSummary) real traffic goes through — only the row
+  // creation is seeded, matching the same approach already used
+  // elsewhere in this codebase for "verify the query given known data."
+  // -----------------------------------------------------------------
+  describe("Rental Attention System", () => {
+    async function seedActiveRental(options: {
+      assetId: string;
+      plannedEnd: Date;
+      plannedStart?: Date;
+      returned?: boolean;
+      status?: "ACTIVE" | "RETURNED" | "DRAFT";
+    }) {
+      const status = options.status ?? "ACTIVE";
+      const plannedStart = options.plannedStart ?? new Date(options.plannedEnd.getTime() - 3 * 86_400_000);
+      const rental = await prisma.rental.create({
+        data: {
+          tenantId,
+          customerId,
+          rentalNumber: `RNT-ATT-${Math.random().toString(36).slice(2, 10)}`,
+          status,
+          plannedStart,
+          plannedEnd: options.plannedEnd,
+          actualStart: status === "DRAFT" ? null : plannedStart,
+          actualEnd: status === "RETURNED" ? new Date() : null,
+          currency: "USD",
+          createdByUserId: userId,
+          items: {
+            create: {
+              tenantId,
+              assetId: options.assetId,
+              billingMode: "DAILY",
+              dailyPriceMinor: 1000,
+              returnedAt: options.returned ? new Date() : null,
+            },
+          },
+        },
+      });
+      return rental.id;
+    }
+
+    // 1. ACTIVE, plannedEnd yesterday, not returned -> OVERDUE_RETURN
+    it("flags an ACTIVE rental with a past plannedEnd and no return as OVERDUE_RETURN, with the correct overdue-days count", async () => {
+      const twoDaysAgo = new Date(Date.now() - 2 * 86_400_000 - 3_600_000); // a bit over 2 days, so Math.floor gives a stable whole-day count
+      await seedActiveRental({ assetId: assetAId, plannedEnd: twoDaysAgo });
+
+      const detail = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals`)
+        .query({ status: "ACTIVE" })
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(detail.body.items[0].attention).toBe("OVERDUE_RETURN");
+
+      const summary = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/attention-summary`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(summary.body.overdue.count).toBe(1);
+      expect(summary.body.overdue.oldestOverdueDays).toBeGreaterThanOrEqual(2);
+      expect(summary.body.endingToday.count).toBe(0);
+      expect(summary.body.endingTomorrow.count).toBe(0);
+    });
+
+    // 2. ACTIVE, plannedEnd later today -> ENDING_TODAY, not overdue
+    it("flags an ACTIVE rental ending later today as ENDING_TODAY, never overdue", async () => {
+      const endOfToday = new Date(Date.now() + 60_000); // one minute from now — still "later today" in any real timezone this test runs under
+      const rentalId = await seedActiveRental({ assetId: assetAId, plannedEnd: endOfToday });
+
+      const detail = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(detail.body.attention).toBe("ENDING_TODAY");
+      expect(detail.body.isOverdue).toBe(false);
+
+      const summary = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/attention-summary`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(summary.body.endingToday.count).toBe(1);
+      expect(summary.body.overdue.count).toBe(0);
+    });
+
+    // 3. ACTIVE, plannedEnd tomorrow -> ENDING_TOMORROW
+    it("flags an ACTIVE rental ending tomorrow as ENDING_TOMORROW", async () => {
+      const tomorrow = new Date(Date.now() + 26 * 3_600_000); // comfortably into "tomorrow" regardless of time-of-day this test runs
+      const rentalId = await seedActiveRental({ assetId: assetAId, plannedEnd: tomorrow });
+
+      const detail = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(detail.body.attention).toBe("ENDING_TOMORROW");
+
+      const summary = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/attention-summary`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(summary.body.endingTomorrow.count).toBe(1);
+    });
+
+    // 4. RETURNED with old plannedEnd -> not overdue
+    it("never flags a RETURNED rental, even with a long-past plannedEnd", async () => {
+      const longAgo = new Date(Date.now() - 20 * 86_400_000);
+      const rentalId = await seedActiveRental({
+        assetId: assetAId,
+        plannedEnd: longAgo,
+        status: "RETURNED",
+        returned: true,
+      });
+
+      const detail = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(detail.body.attention).toBeNull();
+      expect(detail.body.isOverdue).toBe(false);
+
+      const summary = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/attention-summary`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(summary.body.overdue.count).toBe(0);
+    });
+
+    // 5. DRAFT with old plannedEnd -> not overdue
+    it("never flags a DRAFT rental, even with a long-past plannedEnd", async () => {
+      const longAgo = new Date(Date.now() - 20 * 86_400_000);
+      const rentalId = await seedActiveRental({
+        assetId: assetAId,
+        plannedEnd: longAgo,
+        status: "DRAFT",
+      });
+
+      const detail = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(detail.body.attention).toBeNull();
+
+      const summary = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/attention-summary`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(summary.body.overdue.count).toBe(0);
+    });
+
+    it("GET /rentals?attention=overdue filters the list to only OVERDUE_RETURN rentals", async () => {
+      const overdueId = await seedActiveRental({
+        assetId: assetAId,
+        plannedEnd: new Date(Date.now() - 86_400_000),
+      });
+      await seedActiveRental({ assetId: assetBId, plannedEnd: new Date(Date.now() + 60_000) }); // ending today — must be excluded
+
+      const response = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals`)
+        .query({ attention: "overdue" })
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(response.body.total).toBe(1);
+      expect(response.body.items[0].id).toBe(overdueId);
+      expect(response.body.items[0].attention).toBe("OVERDUE_RETURN");
+    });
+
+    it("GET /rentals?attention=endingToday filters the list to only ENDING_TODAY rentals", async () => {
+      await seedActiveRental({ assetId: assetAId, plannedEnd: new Date(Date.now() - 86_400_000) }); // overdue — must be excluded
+      const todayId = await seedActiveRental({
+        assetId: assetBId,
+        plannedEnd: new Date(Date.now() + 60_000),
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals`)
+        .query({ attention: "endingToday" })
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(response.body.total).toBe(1);
+      expect(response.body.items[0].id).toBe(todayId);
+    });
+
+    it("GET /rentals?attention=endingTomorrow filters the list to only ENDING_TOMORROW rentals", async () => {
+      await seedActiveRental({ assetId: assetAId, plannedEnd: new Date(Date.now() + 60_000) }); // ending today — must be excluded
+      const tomorrowId = await seedActiveRental({
+        assetId: assetBId,
+        plannedEnd: new Date(Date.now() + 26 * 3_600_000),
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals`)
+        .query({ attention: "endingTomorrow" })
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(response.body.total).toBe(1);
+      expect(response.body.items[0].id).toBe(tomorrowId);
+    });
+
+    // 10. No cross-tenant contamination.
+    it("never leaks another tenant's overdue rentals into this tenant's attention summary or filtered list", async () => {
+      await seedActiveRental({ assetId: assetAId, plannedEnd: new Date(Date.now() - 86_400_000) });
+
+      const other = await registerSecondTenant();
+      const otherCategory = await request(app.getHttpServer())
+        .post(`/tenants/${other.tenantId}/asset-categories`)
+        .set("Cookie", other.cookie)
+        .send({ name: "Other" })
+        .expect(201);
+      const otherAsset = await request(app.getHttpServer())
+        .post(`/tenants/${other.tenantId}/assets`)
+        .set("Cookie", other.cookie)
+        .send({ name: "Other Asset", internalNumber: "OTH-0001", categoryId: otherCategory.body.id })
+        .expect(201);
+
+      const summary = await request(app.getHttpServer())
+        .get(`/tenants/${other.tenantId}/rentals/attention-summary`)
+        .set("Cookie", other.cookie)
+        .expect(200);
+      expect(summary.body.overdue.count).toBe(0);
+      expect(summary.body.endingToday.count).toBe(0);
+      expect(summary.body.endingTomorrow.count).toBe(0);
+
+      const filtered = await request(app.getHttpServer())
+        .get(`/tenants/${other.tenantId}/rentals`)
+        .query({ attention: "overdue" })
+        .set("Cookie", other.cookie)
+        .expect(200);
+      expect(filtered.body.total).toBe(0);
+      expect(otherAsset.body.id).toBeTruthy(); // keep the asset creation from being flagged unused
+    });
   });
 });

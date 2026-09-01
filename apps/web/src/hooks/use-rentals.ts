@@ -8,12 +8,16 @@ import type {
   DepositPaymentMethod,
   PaginatedRentals,
   PartialMonthPolicy,
+  RentalAttentionSummary,
   RentalBillingMode,
   RentalDeposit,
   RentalDetail,
   RentalStatus,
   RentalTimelineEvent,
 } from "../types/rental";
+
+/** Matches apps/api's RENTAL_ATTENTION_FILTERS (query-rentals.dto.ts). */
+export type RentalAttentionFilter = "overdue" | "endingToday" | "endingTomorrow";
 
 export interface RentalListParams {
   page?: number | undefined;
@@ -22,6 +26,7 @@ export interface RentalListParams {
   status?: RentalStatus | undefined;
   customerId?: string | undefined;
   assetId?: string | undefined;
+  attention?: RentalAttentionFilter | undefined;
   sortBy?: string | undefined;
   sortDirection?: "asc" | "desc" | undefined;
 }
@@ -69,6 +74,16 @@ export function useRental(tenantId: string | null, id: string | null) {
     queryKey: [BASE_KEY, tenantId, "detail", id],
     queryFn: () => apiClient.get<RentalDetail>(`/tenants/${tenantId}/rentals/${id}`),
     enabled: !!tenantId && !!id,
+  });
+}
+
+/** Dashboard "Rental attention" section — see RentalsService.getAttentionSummary. */
+export function useRentalAttentionSummary(tenantId: string | null) {
+  return useQuery({
+    queryKey: [BASE_KEY, tenantId, "attention-summary"],
+    queryFn: () =>
+      apiClient.get<RentalAttentionSummary>(`/tenants/${tenantId}/rentals/attention-summary`),
+    enabled: !!tenantId,
   });
 }
 

@@ -728,6 +728,7 @@
       "title": "보증금",
       "required": "필요 금액",
       "received": "수령됨",
+      "available": "사용 가능",
       "returned": "반환됨",
       "retained": "보류됨",
       "recordReceipt": "보증금 수령 기록",
@@ -1654,6 +1655,7 @@
     "applyDepositConfirm": "Apply {{amount}} from the held deposit to this invoice's balance?",
     "applyDepositAmountLabel": "Amount to apply",
     "depositAvailable": "Deposit available: {{amount}}",
+    "applyDepositExceedsAvailable": "Amount cannot exceed the available deposit ({{amount}})",
     "methods": {
       "BANK_TRANSFER": "Bank transfer",
       "CASH": "Cash",

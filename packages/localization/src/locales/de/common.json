@@ -728,6 +728,7 @@
       "title": "Kaution",
       "required": "Erforderlicher Betrag",
       "received": "Erhalten",
+      "available": "Verfügbar",
       "returned": "Zurückerstattet",
       "retained": "Einbehalten",
       "recordReceipt": "Kautionseingang erfassen",
@@ -1654,6 +1655,7 @@
     "applyDepositConfirm": "Apply {{amount}} from the held deposit to this invoice's balance?",
     "applyDepositAmountLabel": "Amount to apply",
     "depositAvailable": "Deposit available: {{amount}}",
+    "applyDepositExceedsAvailable": "Amount cannot exceed the available deposit ({{amount}})",
     "methods": {
       "BANK_TRANSFER": "Bank transfer",
       "CASH": "Cash",

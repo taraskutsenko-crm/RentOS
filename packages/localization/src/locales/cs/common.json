@@ -728,6 +728,7 @@
       "title": "Kauce",
       "required": "Požadovaná částka",
       "received": "Přijato",
+      "available": "Dostupné",
       "returned": "Vráceno",
       "retained": "Zadrženo",
       "recordReceipt": "Zaznamenat přijetí kauce",
@@ -1654,6 +1655,7 @@
     "applyDepositConfirm": "Apply {{amount}} from the held deposit to this invoice's balance?",
     "applyDepositAmountLabel": "Amount to apply",
     "depositAvailable": "Deposit available: {{amount}}",
+    "applyDepositExceedsAvailable": "Částka nesmí překročit dostupnou kauci ({{amount}})",
     "methods": {
       "BANK_TRANSFER": "Bank transfer",
       "CASH": "Cash",

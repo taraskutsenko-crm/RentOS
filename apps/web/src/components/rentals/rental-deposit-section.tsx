@@ -146,6 +146,17 @@ export function RentalDepositSection({
               {deposit.receivedMethod ? ` · ${t(`payment.methods.${deposit.receivedMethod}`)}` : ""}
               {deposit.receivedReference ? ` · ${deposit.receivedReference}` : ""}
             </span>
+            {/* Canonical, server-derived figure — same value the Invoice
+                page's "Deposit available" hint reads, never recomputed
+                here. Shown while the deposit is still open so staff can
+                see, before recording a return, how much is genuinely
+                still held (i.e. not already applied to an invoice). */}
+            {!deposit.returnedAt && deposit.balance && (
+              <div className="flex justify-between border-t pt-1">
+                <span className="text-muted-foreground">{t("rental.deposit.available")}</span>
+                <span>{formatMoney(deposit.balance.availableMinor, deposit.currency)}</span>
+              </div>
+            )}
           </div>
         )}
 

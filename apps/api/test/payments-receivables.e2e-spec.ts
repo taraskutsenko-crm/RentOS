@@ -538,6 +538,328 @@ describe("Payments & Receivables E2E", () => {
         .send({ rentalDepositId: depositId, amountMinor: 150_000 })
         .expect(400);
     });
+
+    // -----------------------------------------------------------------
+    // Canonical "Deposit available" balance (fix for the frontend-hint
+    // regression — the GET .../deposit response now exposes the exact
+    // same server-derived figure applyDeposit itself validates against;
+    // the frontend never recomputes it).
+    // -----------------------------------------------------------------
+
+    it("GET .../deposit exposes the canonical received/returned/retained/applied/available balance", async () => {
+      const { rentalId, depositId } = await createRentalWithDeposit(100_000);
+      const invoiceA = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices`)
+        .set("Cookie", accessCookie)
+        .send({ rentalId, bankAccountId })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${invoiceA.body.id}/issue`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      const before = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}/deposit`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(before.body.balance).toMatchObject({
+        currency: "USD",
+        receivedMinor: 100_000,
+        returnedMinor: 0,
+        retainedMinor: 0,
+        appliedMinor: 0,
+        availableMinor: 100_000,
+      });
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${invoiceA.body.id}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 40_000 })
+        .expect(201);
+
+      const after = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}/deposit`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(after.body.balance).toMatchObject({
+        receivedMinor: 100_000,
+        appliedMinor: 40_000,
+        availableMinor: 60_000,
+      });
+    });
+
+    it("9. cross-invoice case: available balance is shared correctly across multiple invoices funded from the same deposit", async () => {
+      const rental = await createRental();
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rental.body.id}/deposit/receive`)
+        .set("Cookie", accessCookie)
+        .send({ receivedAt: dateOffset(0), receivedAmountMinor: 100_000, receivedMethod: "BANK_TRANSFER" })
+        .expect(201);
+      const depositResponse = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rental.body.id}/deposit`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      const depositId = depositResponse.body.id;
+
+      // Two more invoices on the same rental, each large enough to absorb
+      // the deposit amounts this test applies to them.
+      async function issueInvoice(): Promise<string> {
+        const created = await request(app.getHttpServer())
+          .post(`/tenants/${tenantId}/invoices`)
+          .set("Cookie", accessCookie)
+          .send({ rentalId: rental.body.id, bankAccountId })
+          .expect(201);
+        await request(app.getHttpServer())
+          .post(`/tenants/${tenantId}/invoices/${created.body.id}/issue`)
+          .set("Cookie", accessCookie)
+          .send({})
+          .expect(201);
+        return created.body.id as string;
+      }
+
+      const invoiceA = await issueInvoice();
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${invoiceA}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 40_000 })
+        .expect(201);
+
+      const invoiceB = await issueInvoice();
+      const afterA = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rental.body.id}/deposit`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(afterA.body.balance.availableMinor).toBe(60_000);
+
+      // Invoice B's own total is only 100_000, so apply the remaining
+      // available amount up to what's actually still held (60_000 total
+      // available; apply 50_000, leaving 10_000).
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${invoiceB}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 50_000 })
+        .expect(201);
+
+      const invoiceC = await issueInvoice();
+      const afterB = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rental.body.id}/deposit`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(afterB.body.balance.availableMinor).toBe(10_000);
+
+      // Invoice C sees the same 10_000 — never a stale, per-invoice figure.
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${invoiceC}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 15_000 })
+        .expect(400);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${invoiceC}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 10_000 })
+        .expect(201);
+
+      const final = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rental.body.id}/deposit`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(final.body.balance.availableMinor).toBe(0);
+    });
+
+    it("11. a fully-consumed deposit reports availableMinor: 0, and a further application is rejected", async () => {
+      const { rentalId, depositId } = await createRentalWithDeposit(100_000);
+      const created = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices`)
+        .set("Cookie", accessCookie)
+        .send({ rentalId, bankAccountId })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/issue`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 100_000 })
+        .expect(201);
+
+      const deposit = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}/deposit`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(deposit.body.balance.availableMinor).toBe(0);
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 1 })
+        .expect(400);
+    });
+
+    it("14. voiding a deposit-application payment restores the deposit's available balance", async () => {
+      const { rentalId, depositId } = await createRentalWithDeposit(100_000);
+      const created = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices`)
+        .set("Cookie", accessCookie)
+        .send({ rentalId, bankAccountId })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/issue`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      const applied = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 30_000 })
+        .expect(201);
+
+      const afterApply = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}/deposit`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(afterApply.body.balance.availableMinor).toBe(70_000);
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/payments/${applied.body.id}/void`)
+        .set("Cookie", accessCookie)
+        .send({ reason: "Applied to the wrong invoice" })
+        .expect(201);
+
+      const afterVoid = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}/deposit`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(afterVoid.body.balance).toMatchObject({ appliedMinor: 0, availableMinor: 100_000 });
+
+      // And the invoice's own paid total reverted too — no double-counting.
+      const invoiceDetail = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/invoices/${created.body.id}`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(invoiceDetail.body.paidMinor).toBe(0);
+    });
+
+    it("10. return/retain validation now uses the canonical available balance, not just the original received amount (closes a real double-spend gap)", async () => {
+      const { rentalId, depositId } = await createRentalWithDeposit(100_000);
+      const created = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices`)
+        .set("Cookie", accessCookie)
+        .send({ rentalId, bankAccountId })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/issue`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      // Apply 60_000 of the 100_000 deposit to the invoice — only 40_000
+      // is genuinely still available to be returned/retained.
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 60_000 })
+        .expect(201);
+
+      // Attempting to return the full original 100_000 must be rejected —
+      // 60_000 of it no longer physically exists as "held."
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/deposit/return`)
+        .set("Cookie", accessCookie)
+        .send({ returnedAt: dateOffset(0), returnedAmountMinor: 100_000, retainedAmountMinor: 0 })
+        .expect(400);
+
+      // Returning exactly the still-available 40_000 succeeds.
+      const returned = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/rentals/${rentalId}/deposit/return`)
+        .set("Cookie", accessCookie)
+        .send({ returnedAt: dateOffset(0), returnedAmountMinor: 40_000, retainedAmountMinor: 0 })
+        .expect(201);
+      expect(returned.body.returnedAmountMinor).toBe(40_000);
+    });
+
+    it("decimal/integer precision: applying an odd minor-unit amount never drifts", async () => {
+      const { rentalId, depositId } = await createRentalWithDeposit(100_001);
+      const created = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices`)
+        .set("Cookie", accessCookie)
+        .send({ rentalId, bankAccountId })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/issue`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 33_333 })
+        .expect(201);
+
+      const deposit = await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}/deposit`)
+        .set("Cookie", accessCookie)
+        .expect(200);
+      expect(deposit.body.balance.availableMinor).toBe(66_668);
+    });
+
+    it("Tenant A's deposit applications never affect Tenant B's deposit balance calculation", async () => {
+      const { rentalId, depositId } = await createRentalWithDeposit(100_000);
+      const created = await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices`)
+        .set("Cookie", accessCookie)
+        .send({ rentalId, bankAccountId })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/issue`)
+        .set("Cookie", accessCookie)
+        .send({})
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${tenantId}/invoices/${created.body.id}/payments/apply-deposit`)
+        .set("Cookie", accessCookie)
+        .send({ rentalDepositId: depositId, amountMinor: 40_000 })
+        .expect(201);
+
+      // A second, unrelated tenant sets up its own rental + deposit
+      // independently — its balance must reflect only its own data, and
+      // it must be completely unable to read Tenant A's deposit at all.
+      const other = await setUpTenant({ email: "deposit-other@example.com", companyName: "Deposit Other Co" });
+      const otherRentalResponse = await request(app.getHttpServer())
+        .post(`/tenants/${other.tenantId}/rentals`)
+        .set("Cookie", other.cookie)
+        .send({
+          customerId: other.customerId,
+          currency: "USD",
+          plannedStart: dateOffset(1),
+          plannedEnd: dateOffset(2),
+          items: [{ assetId: other.assetId, billingMode: "CUSTOM", customPriceMinor: 100_000 }],
+        })
+        .expect(201);
+      await request(app.getHttpServer())
+        .post(`/tenants/${other.tenantId}/rentals/${otherRentalResponse.body.id}/deposit/receive`)
+        .set("Cookie", other.cookie)
+        .send({ receivedAt: dateOffset(0), receivedAmountMinor: 50_000, receivedMethod: "BANK_TRANSFER" })
+        .expect(201);
+
+      const otherDeposit = await request(app.getHttpServer())
+        .get(`/tenants/${other.tenantId}/rentals/${otherRentalResponse.body.id}/deposit`)
+        .set("Cookie", other.cookie)
+        .expect(200);
+      // Tenant B's own deposit is untouched by Tenant A's 40_000 application.
+      expect(otherDeposit.body.balance).toMatchObject({ receivedMinor: 50_000, appliedMinor: 0, availableMinor: 50_000 });
+
+      // Tenant B cannot read Tenant A's deposit/rental at all.
+      await request(app.getHttpServer())
+        .get(`/tenants/${tenantId}/rentals/${rentalId}/deposit`)
+        .set("Cookie", other.cookie)
+        .expect(403);
+    });
   });
 
   // -----------------------------------------------------------------

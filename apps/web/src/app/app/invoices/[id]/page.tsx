@@ -217,14 +217,14 @@ function InvoiceEditor({
   const [demandError, setDemandError] = useState<string | null>(null);
 
   const isDraft = invoice.status === "DRAFT";
-  const depositAvailableMinor = rentalDeposit
-    ? Math.max(
-        0,
-        (rentalDeposit.receivedAmountMinor ?? 0) -
-          (rentalDeposit.returnedAmountMinor ?? 0) -
-          (rentalDeposit.retainedAmountMinor ?? 0),
-      )
-    : 0;
+  // Canonical, server-derived figure — never recomputed here. The API's
+  // RentalDepositsService.getBalance already nets out returned/retained
+  // AND everything already applied to any receivable (including other
+  // invoices funded from the same deposit); see docs/DECISIONS.md.
+  const depositAvailableMinor = rentalDeposit?.balance?.availableMinor ?? 0;
+  // The most that can actually be applied here is bounded by BOTH the
+  // canonical available deposit AND this invoice's own remaining balance.
+  const maxApplyDepositMinor = Math.max(0, Math.min(depositAvailableMinor, invoice.remainingMinor));
 
   function updateItemField(index: number, field: keyof EditableItem, value: string): void {
     setItems((current) =>
@@ -389,6 +389,18 @@ function InvoiceEditor({
     const amountMinor = toMinorUnits(applyDepositAmount);
     if (!amountMinor || amountMinor <= 0) {
       setApplyDepositError(t("payment.invalidAmount"));
+      return;
+    }
+    // Frontend-side help only — the API remains authoritative and
+    // re-validates against the same canonical balance inside its own
+    // locked transaction. This just avoids a round-trip for the common
+    // case of typing more than what's actually still available.
+    if (amountMinor > maxApplyDepositMinor) {
+      setApplyDepositError(
+        t("payment.applyDepositExceedsAvailable", {
+          amount: formatMoney(maxApplyDepositMinor, invoice.currency),
+        }),
+      );
       return;
     }
     try {
@@ -711,7 +723,7 @@ function InvoiceEditor({
                 </div>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
-                {canRecordPayment && depositAvailableMinor > 0 && invoice.remainingMinor > 0 && (
+                {canRecordPayment && maxApplyDepositMinor > 0 && (
                   <div className="bg-muted/30 flex items-center justify-between rounded-md border p-3 text-sm">
                     <span>
                       {t("payment.depositAvailable", {
@@ -1046,7 +1058,16 @@ function InvoiceEditor({
               })}
             </p>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="applyDepositAmount">{t("payment.applyDepositAmountLabel")}</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="applyDepositAmount">{t("payment.applyDepositAmountLabel")}</Label>
+                <button
+                  type="button"
+                  className="text-primary text-xs hover:underline"
+                  onClick={() => setApplyDepositAmount(fromMinorUnits(maxApplyDepositMinor))}
+                >
+                  {formatMoney(maxApplyDepositMinor, invoice.currency)}
+                </button>
+              </div>
               <Input
                 id="applyDepositAmount"
                 value={applyDepositAmount}

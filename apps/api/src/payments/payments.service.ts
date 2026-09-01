@@ -8,6 +8,7 @@ import type { InvoiceStatus, Payment, Prisma } from "@prisma/client";
 
 import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { RentalDepositsService } from "../rentals/rental-deposits.service";
 import type { ApplyDepositDto } from "./dto/apply-deposit.dto";
 import type { MarkFullyPaidDto } from "./dto/mark-fully-paid.dto";
 import type { RecordPaymentDto } from "./dto/record-payment.dto";
@@ -28,6 +29,7 @@ export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    private readonly rentalDepositsService: RentalDepositsService,
   ) {}
 
   async findMany(tenantId: string, invoiceId: string): Promise<Payment[]> {
@@ -270,20 +272,15 @@ export class PaymentsService {
         );
       }
 
-      // How much of the received deposit is still available: received
-      // minus whatever has already been applied to any invoice, returned,
-      // or retained — the live sum of Payment rows tagged with this
-      // deposit is the authoritative "already applied" figure, never a
-      // separately stored running total (matches every other derived
-      // total in this codebase).
-      const alreadyApplied = await tx.payment.aggregate({
-        where: { tenantId, sourceRentalDepositId: deposit.id, voidedAt: null },
-        _sum: { amountMinor: true },
-      });
-      const appliedSoFar = alreadyApplied._sum.amountMinor ?? 0;
-      const returnedOrRetained =
-        (deposit.returnedAmountMinor ?? 0) + (deposit.retainedAmountMinor ?? 0);
-      const availableMinor = deposit.receivedAmountMinor - appliedSoFar - returnedOrRetained;
+      // The canonical available-balance calculation — see
+      // RentalDepositsService.getBalance's own doc comment. Never
+      // recomputed here: this is the SAME formula the deposit-read
+      // endpoint and recordReturn's own validation use, called against
+      // this transaction's own client `tx` so the read is part of the
+      // same locked, consistent transaction as the Payment row this
+      // method is about to create.
+      const balance = await this.rentalDepositsService.getBalance(tenantId, deposit.id, tx);
+      const availableMinor = balance?.availableMinor ?? 0;
       if (dto.amountMinor > availableMinor) {
         throw new BadRequestException(
           `Requested amount (${dto.amountMinor}) exceeds the available held deposit balance (${availableMinor})`,

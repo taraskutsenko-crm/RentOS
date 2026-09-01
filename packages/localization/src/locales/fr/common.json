@@ -728,6 +728,7 @@
       "title": "Caution",
       "required": "Montant requis",
       "received": "Reçu",
+      "available": "Disponible",
       "returned": "Restitué",
       "retained": "Retenu",
       "recordReceipt": "Enregistrer la réception de la caution",
@@ -1654,6 +1655,7 @@
     "applyDepositConfirm": "Apply {{amount}} from the held deposit to this invoice's balance?",
     "applyDepositAmountLabel": "Amount to apply",
     "depositAvailable": "Deposit available: {{amount}}",
+    "applyDepositExceedsAvailable": "Amount cannot exceed the available deposit ({{amount}})",
     "methods": {
       "BANK_TRANSFER": "Bank transfer",
       "CASH": "Cash",

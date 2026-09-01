@@ -728,6 +728,7 @@
       "title": "Застава",
       "required": "Необхідна сума",
       "received": "Отримано",
+      "available": "Доступно",
       "returned": "Повернено",
       "retained": "Утримано",
       "recordReceipt": "Зафіксувати отримання застави",
@@ -1654,6 +1655,7 @@
     "applyDepositConfirm": "Apply {{amount}} from the held deposit to this invoice's balance?",
     "applyDepositAmountLabel": "Amount to apply",
     "depositAvailable": "Deposit available: {{amount}}",
+    "applyDepositExceedsAvailable": "Сума не може перевищувати доступну заставу ({{amount}})",
     "methods": {
       "BANK_TRANSFER": "Bank transfer",
       "CASH": "Cash",

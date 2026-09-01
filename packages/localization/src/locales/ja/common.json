@@ -728,6 +728,7 @@
       "title": "保証金",
       "required": "必要金額",
       "received": "受領済み",
+      "available": "利用可能",
       "returned": "返還済み",
       "retained": "保留",
       "recordReceipt": "保証金受領を記録",
@@ -1654,6 +1655,7 @@
     "applyDepositConfirm": "Apply {{amount}} from the held deposit to this invoice's balance?",
     "applyDepositAmountLabel": "Amount to apply",
     "depositAvailable": "Deposit available: {{amount}}",
+    "applyDepositExceedsAvailable": "Amount cannot exceed the available deposit ({{amount}})",
     "methods": {
       "BANK_TRANSFER": "Bank transfer",
       "CASH": "Cash",

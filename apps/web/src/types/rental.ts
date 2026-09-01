@@ -196,6 +196,23 @@ export interface AssetAvailabilityBlock {
 
 export type DepositPaymentMethod = "BANK_TRANSFER" | "CASH" | "CARD" | "OTHER";
 
+/**
+ * The canonical, server-derived "how much of this held deposit is still
+ * available to apply to a receivable" figure — always
+ * `max(0, received − returned − retained − applied)`, computed by
+ * `RentalDepositsService.getBalance` on the API. The frontend must NEVER
+ * recompute this itself (that was the bug this type fixes — see
+ * docs/DECISIONS.md): always read `RentalDeposit.balance.availableMinor`.
+ */
+export interface DepositBalance {
+  currency: string;
+  receivedMinor: number;
+  returnedMinor: number;
+  retainedMinor: number;
+  appliedMinor: number;
+  availableMinor: number;
+}
+
 export interface RentalDeposit {
   id: string;
   tenantId: string;
@@ -213,4 +230,6 @@ export interface RentalDeposit {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
+  /** `null` when no receipt has been recorded yet (nothing to compute a balance from). */
+  balance: DepositBalance | null;
 }

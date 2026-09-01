@@ -728,6 +728,7 @@
       "title": "Kaucja",
       "required": "Wymagana kwota",
       "received": "Przyjęto",
+      "available": "Dostępne",
       "returned": "Zwrócono",
       "retained": "Zatrzymano",
       "recordReceipt": "Zarejestruj przyjęcie kaucji",
@@ -1654,6 +1655,7 @@
     "applyDepositConfirm": "Zaliczyć {{amount}} z zatrzymanej kaucji na poczet tej faktury?",
     "applyDepositAmountLabel": "Kwota do zaliczenia",
     "depositAvailable": "Dostępna kaucja: {{amount}}",
+    "applyDepositExceedsAvailable": "Kwota nie może przekraczać dostępnej kaucji ({{amount}})",
     "methods": {
       "BANK_TRANSFER": "Przelew bankowy",
       "CASH": "Gotówka",

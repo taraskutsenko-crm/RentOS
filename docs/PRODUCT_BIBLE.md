@@ -1431,6 +1431,19 @@ integration remains a separate concern.
   invoice, fully auditable and validated against both the deposit's
   own remaining held balance and the invoice's own remaining balance
   — never automatic, never double-counted.
+- **"Deposit available" is always server-derived, one formula, one
+  place.** A deposit's available balance is
+  `received − returned − retained − applied`, where `applied` is the
+  live sum of every non-voided Payment created via "Apply deposit to
+  balance" against *any* invoice (not just the one currently being
+  viewed) — never negative (clamped at 0). This is computed by a
+  single backend method and returned as part of the deposit itself;
+  no page (Invoice, Rental, or otherwise) is ever allowed to
+  recompute it independently, so a deposit already partly applied to
+  one invoice never appears as still-fully-available on another.
+  Voiding a deposit-sourced payment restores its availability
+  automatically, since `applied` is always a live query, not a
+  stored running total.
 - **Currency is never mixed.** A payment's currency must match its
   invoice's currency exactly; Havelio performs no automatic FX
   conversion. Every aggregate figure (receivable aging, financial

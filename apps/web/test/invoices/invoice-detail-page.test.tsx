@@ -1,8 +1,9 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import InvoiceDetailPage from "../../src/app/app/invoices/[id]/page";
+import { formatMoney } from "../../src/lib/money";
 import { renderWithProviders } from "../test-utils";
 
 const searchParamsMock = vi.fn(() => new URLSearchParams());
@@ -423,6 +424,14 @@ describe("InvoiceDetailPage", () => {
           receivedAmountMinor: 5000,
           returnedAmountMinor: null,
           retainedAmountMinor: null,
+          balance: {
+            currency: "USD",
+            receivedMinor: 5000,
+            returnedMinor: 0,
+            retainedMinor: 0,
+            appliedMinor: 0,
+            availableMinor: 5000,
+          },
         },
       });
       useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
@@ -434,6 +443,110 @@ describe("InvoiceDetailPage", () => {
       renderWithProviders(<InvoiceDetailPage />);
 
       expect(screen.getByRole("button", { name: "Apply deposit to balance" })).toBeInTheDocument();
+    });
+
+    it("shows the canonical server-derived available amount, never the raw received amount", () => {
+      // Received 1000 (100_000 minor), but 400 already applied elsewhere and
+      // 100 returned/100 retained — the canonical available is 400, never
+      // the stale 1000 "received" figure.
+      useRentalDepositMock.mockReturnValue({
+        data: {
+          id: "deposit-1",
+          receivedAmountMinor: 100_000,
+          returnedAmountMinor: 10_000,
+          retainedAmountMinor: 10_000,
+          balance: {
+            currency: "USD",
+            receivedMinor: 100_000,
+            returnedMinor: 10_000,
+            retainedMinor: 10_000,
+            appliedMinor: 40_000,
+            availableMinor: 40_000,
+          },
+        },
+      });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), rentalId: "rental-1", remainingMinor: 70_000 },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(document.body.textContent).toContain(
+        `Deposit available: ${formatMoney(40_000, "USD")}`,
+      );
+      // The stale "raw received" figure (1000, before applied/returned/
+      // retained are netted out) must never appear anywhere on the page.
+      expect(document.body.textContent).not.toContain(formatMoney(100_000, "USD"));
+    });
+
+    it("hides 'Apply deposit to balance' once the canonical available balance is fully consumed, even though the deposit was originally received", () => {
+      useRentalDepositMock.mockReturnValue({
+        data: {
+          id: "deposit-1",
+          receivedAmountMinor: 100_000,
+          returnedAmountMinor: null,
+          retainedAmountMinor: null,
+          balance: {
+            currency: "USD",
+            receivedMinor: 100_000,
+            returnedMinor: 0,
+            retainedMinor: 0,
+            appliedMinor: 100_000,
+            availableMinor: 0,
+          },
+        },
+      });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), rentalId: "rental-1", remainingMinor: 10000 },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(
+        screen.queryByRole("button", { name: "Apply deposit to balance" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("clamps the apply-deposit amount to the canonical available balance, not to a locally-recomputed figure", async () => {
+      const mutateAsync = vi.fn().mockResolvedValue({});
+      useApplyDepositMock.mockReturnValue({ mutateAsync, isPending: false });
+      useRentalDepositMock.mockReturnValue({
+        data: {
+          id: "deposit-1",
+          receivedAmountMinor: 100_000,
+          returnedAmountMinor: null,
+          retainedAmountMinor: null,
+          balance: {
+            currency: "USD",
+            receivedMinor: 100_000,
+            returnedMinor: 0,
+            retainedMinor: 0,
+            appliedMinor: 60_000,
+            availableMinor: 40_000,
+          },
+        },
+      });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), rentalId: "rental-1", remainingMinor: 70_000 },
+        isLoading: false,
+      });
+      const user = userEvent.setup();
+
+      renderWithProviders(<InvoiceDetailPage />);
+      await user.click(screen.getByRole("button", { name: "Apply deposit to balance" }));
+      const dialog = screen.getByRole("dialog");
+      await user.type(within(dialog).getByLabelText("Amount to apply"), "500");
+      await user.click(within(dialog).getByRole("button", { name: "Apply deposit to balance" }));
+
+      expect(mutateAsync).not.toHaveBeenCalled();
+      expect(document.body.textContent).toContain(
+        `Amount cannot exceed the available deposit (${formatMoney(40_000, "USD")})`,
+      );
     });
 
     it("offers 'Create payment demand' only once the invoice is overdue with a remaining balance", () => {

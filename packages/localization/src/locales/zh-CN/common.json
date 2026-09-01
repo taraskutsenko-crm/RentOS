@@ -728,6 +728,7 @@
       "title": "押金",
       "required": "所需金额",
       "received": "已收",
+      "available": "可用",
       "returned": "已退还",
       "retained": "已扣留",
       "recordReceipt": "记录押金收取",
@@ -1654,6 +1655,7 @@
     "applyDepositConfirm": "Apply {{amount}} from the held deposit to this invoice's balance?",
     "applyDepositAmountLabel": "Amount to apply",
     "depositAvailable": "Deposit available: {{amount}}",
+    "applyDepositExceedsAvailable": "Amount cannot exceed the available deposit ({{amount}})",
     "methods": {
       "BANK_TRANSFER": "Bank transfer",
       "CASH": "Cash",

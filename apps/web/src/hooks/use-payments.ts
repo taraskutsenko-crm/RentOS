@@ -85,6 +85,13 @@ export function useVoidPayment(tenantId: string | null) {
         queryKey: [BASE_KEY, tenantId, "payments", variables.invoiceId],
       });
       void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
+      // A voided payment might have been a deposit application (see
+      // sourceRentalDepositId) — voiding one restores the deposit's
+      // canonical available balance (RentalDepositsService.getBalance's
+      // `appliedMinor` is always a live, non-voided sum), so the "Deposit
+      // available" hint must refresh too. No invoiceId → rentalId lookup
+      // is available here, so invalidate broadly like useApplyDeposit does.
+      void queryClient.invalidateQueries({ queryKey: ["rentals", tenantId, "deposit"] });
     },
   });
 }

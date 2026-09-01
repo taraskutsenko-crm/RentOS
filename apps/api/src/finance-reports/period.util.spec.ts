@@ -43,6 +43,28 @@ describe("resolveReportPeriod", () => {
     expect(period.previous!.dateOnlyRange.lt.getTime()).toBe(period.dateOnlyRange.gte!.getTime());
   });
 
+  it("LAST_2_MONTHS spans exactly 2 calendar months ending today, with a same-length previous window", () => {
+    const period = resolveReportPeriod("LAST_2_MONTHS", "UTC");
+    const today = new Date();
+    const endExclusive = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1));
+    const expectedStart = new Date(endExclusive);
+    expectedStart.setUTCMonth(expectedStart.getUTCMonth() - 2);
+    expect(period.dateOnlyRange.gte!.getTime()).toBe(expectedStart.getTime());
+    expect(period.dateOnlyRange.lt.getTime()).toBe(endExclusive.getTime());
+    expect(period.previous!.dateOnlyRange.lt.getTime()).toBe(period.dateOnlyRange.gte!.getTime());
+  });
+
+  it("LAST_3_MONTHS spans exactly 3 calendar months ending today, with a same-length previous window", () => {
+    const period = resolveReportPeriod("LAST_3_MONTHS", "UTC");
+    const today = new Date();
+    const endExclusive = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1));
+    const expectedStart = new Date(endExclusive);
+    expectedStart.setUTCMonth(expectedStart.getUTCMonth() - 3);
+    expect(period.dateOnlyRange.gte!.getTime()).toBe(expectedStart.getTime());
+    expect(period.dateOnlyRange.lt.getTime()).toBe(endExclusive.getTime());
+    expect(period.previous!.dateOnlyRange.lt.getTime()).toBe(period.dateOnlyRange.gte!.getTime());
+  });
+
   it("THIS_QUARTER resolves to a 3-calendar-month span starting on a quarter boundary", () => {
     const period = resolveReportPeriod("THIS_QUARTER", "Europe/Warsaw");
     const startMonth = Number(period.fromDate!.split("-")[1]);

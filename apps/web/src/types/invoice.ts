@@ -4,6 +4,13 @@ export type InvoiceStatus =
 export type EInvoiceStatus = "NOT_SENT" | "PENDING" | "ACCEPTED" | "REJECTED" | "ERROR";
 export type PaymentMethod = "BANK_TRANSFER" | "CASH" | "CARD" | "OTHER";
 
+/**
+ * Havelio Payments & Receivables — a derived read model, independent of
+ * `InvoiceStatus` (see apps/api/src/payments/payment-status.util.ts).
+ * Never persisted, never manually set — only ever computed server-side.
+ */
+export type PaymentStatus = "UNPAID" | "PARTIALLY_PAID" | "PAID" | "OVERDUE" | "PARTIALLY_PAID_OVERDUE";
+
 export interface InvoiceItem {
   id: string;
   description: string;
@@ -68,6 +75,12 @@ export interface Invoice {
   paidMinor: number;
   remainingMinor: number;
 
+  paymentStatus: PaymentStatus;
+  percentagePaid: number;
+  isOverdue: boolean;
+  overdueDays: number;
+  overdueAmountMinor: number;
+
   preferredPaymentMethod: PaymentMethod | null;
   paymentReference: string | null;
   notes: string | null;
@@ -122,6 +135,63 @@ export interface Payment {
   method: PaymentMethod;
   reference: string | null;
   notes: string | null;
+  sourceRentalDepositId: string | null;
+  voidedAt: string | null;
+  voidedByUserId: string | null;
+  voidReason: string | null;
   createdByUserId: string;
   createdAt: string;
+}
+
+export type PaymentDemandStatus = "GENERATED" | "SENT";
+
+export interface PaymentDemandInvoiceSummary {
+  id: string;
+  invoiceNumber: string;
+}
+
+export interface PaymentDemandCustomerSummary {
+  id: string;
+  firstName: string;
+  lastName: string;
+  company: string | null;
+}
+
+/** Havelio International Payment Demand Foundation — a country-aware formal collection notice (Poland's "Wezwanie do zapłaty" is only the first localized template). */
+export interface PaymentDemand {
+  id: string;
+  tenantId: string;
+  customerId: string;
+  invoiceId: string;
+  demandNumber: string;
+  status: PaymentDemandStatus;
+  countryCode: string;
+  documentLanguage: string;
+  issueDate: string;
+  originalDueDate: string | null;
+  requestedDeadline: string;
+  currency: string;
+  originalAmountMinor: number;
+  paidAmountMinor: number;
+  outstandingAmountMinor: number;
+  createdByUserId: string;
+  createdAt: string;
+  sentAt: string | null;
+  invoice: PaymentDemandInvoiceSummary | null;
+  customer: PaymentDemandCustomerSummary | null;
+}
+
+/** Mirrors InvoiceEmailDelivery's shape exactly. */
+export interface PaymentDemandEmailDelivery {
+  id: string;
+  paymentDemandId: string;
+  recipientEmail: string;
+  subject: string;
+  message: string | null;
+  status: "PENDING" | "SENT" | "FAILED" | "NOT_CONFIGURED";
+  errorMessage: string | null;
+  providerMessageId: string | null;
+  createdAt: string;
+  sentAt: string | null;
+  failedAt: string | null;
 }

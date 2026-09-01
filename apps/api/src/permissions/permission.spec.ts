@@ -36,6 +36,9 @@ describe("ROLE_PERMISSIONS", () => {
       "invoices.send",
       "invoices.cancel",
       "payments.record",
+      "payments.void",
+      "payment_demands.create",
+      "payment_demands.send",
       "rentals.manage_deposit",
     ];
     for (const permission of ROLE_PERMISSIONS.ACCOUNTANT) {

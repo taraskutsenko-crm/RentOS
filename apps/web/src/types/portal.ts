@@ -37,8 +37,25 @@ export interface PortalSession {
 // Rentals (Omit<Rental, "internalNotes"> — see PortalRentalsService)
 // ---------------------------------------------------------------------
 
+/** Havelio Payments & Receivables — a customer-safe amount-due/paid/outstanding/overdue summary per Invoice linked to this rental (never a DRAFT invoice). Mirrors the staff app's own derived `PaymentStatus` (see types/invoice.ts). */
+export interface PortalRentalInvoiceFinancials {
+  invoiceId: string;
+  invoiceNumber: string;
+  currency: string;
+  totalMinor: number;
+  paidMinor: number;
+  remainingMinor: number;
+  dueDate: string | null;
+  paymentStatus: "UNPAID" | "PARTIALLY_PAID" | "PAID" | "OVERDUE" | "PARTIALLY_PAID_OVERDUE";
+  isOverdue: boolean;
+  overdueDays: number;
+}
+
 /** `tenantTimezone` is portal-only — see `portal-rental.types.ts` on the API side. */
-export type PortalRental = Omit<Rental, "internalNotes"> & { tenantTimezone: string };
+export type PortalRental = Omit<Rental, "internalNotes"> & {
+  tenantTimezone: string;
+  invoiceFinancials: PortalRentalInvoiceFinancials[];
+};
 export type PortalRentalListItem = Omit<RentalListItem, "internalNotes">;
 
 export interface PaginatedPortalRentals {

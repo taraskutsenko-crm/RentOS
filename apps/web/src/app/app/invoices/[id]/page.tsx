@@ -21,6 +21,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { InvoiceStatusBadge } from "../../../../components/invoices/invoice-status-badge";
+import { PaymentProgressBar } from "../../../../components/invoices/payment-progress-bar";
 import { PageHeader } from "../../../../components/shell/page-header";
 import { useBankAccounts } from "../../../../hooks/use-bank-accounts";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
@@ -38,7 +39,20 @@ import {
   useUpdateInvoice,
   type InvoiceItemInput,
 } from "../../../../hooks/use-invoices";
-import { useRecordPayment, usePayments } from "../../../../hooks/use-payments";
+import {
+  paymentDemandPdfUrl,
+  useCreatePaymentDemand,
+  usePaymentDemands,
+  useSendPaymentDemandEmail,
+} from "../../../../hooks/use-payment-demands";
+import {
+  useApplyDeposit,
+  useMarkFullyPaid,
+  useRecordPayment,
+  useVoidPayment,
+  usePayments,
+} from "../../../../hooks/use-payments";
+import { useRentalDeposit } from "../../../../hooks/use-rentals";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatBusinessDate } from "../../../../lib/date-format";
 import { fromMinorUnits, formatMoney, toMinorUnits } from "../../../../lib/money";
@@ -131,6 +145,13 @@ function InvoiceEditor({
   const { data: bankAccounts } = useBankAccounts(tenantId);
   const { data: payments } = usePayments(tenantId, invoice.id);
   const recordPayment = useRecordPayment(tenantId);
+  const markFullyPaid = useMarkFullyPaid(tenantId);
+  const voidPayment = useVoidPayment(tenantId);
+  const applyDeposit = useApplyDeposit(tenantId);
+  const { data: rentalDeposit } = useRentalDeposit(tenantId, invoice.rentalId);
+  const { data: paymentDemands } = usePaymentDemands(tenantId, invoice.id);
+  const createPaymentDemand = useCreatePaymentDemand(tenantId);
+  const sendPaymentDemandEmail = useSendPaymentDemandEmail(tenantId);
   const { data: preview } = useInvoicePreview(tenantId, invoice.id);
   const previewFrameRef = useRef<HTMLIFrameElement>(null);
   const sendInvoiceEmail = useSendInvoiceEmail(tenantId);
@@ -142,6 +163,9 @@ function InvoiceEditor({
   const canCancel = usePermission("invoices.cancel");
   const canDownload = usePermission("invoices.download");
   const canRecordPayment = usePermission("payments.record");
+  const canVoidPayment = usePermission("payments.void");
+  const canCreateDemand = usePermission("payment_demands.create");
+  const canSendDemand = usePermission("payment_demands.send");
 
   // A "Create additional charge" link from the Return Protocol/Rental
   // Workspace (see rentals/[id]/page.tsx) pre-fills exactly one extra blank
@@ -180,7 +204,27 @@ function InvoiceEditor({
   const [paymentReference, setPaymentReference] = useState("");
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
+  const [voidTargetId, setVoidTargetId] = useState<string | null>(null);
+  const [voidReason, setVoidReason] = useState("");
+  const [voidError, setVoidError] = useState<string | null>(null);
+
+  const [applyDepositDialogOpen, setApplyDepositDialogOpen] = useState(false);
+  const [applyDepositAmount, setApplyDepositAmount] = useState("");
+  const [applyDepositError, setApplyDepositError] = useState<string | null>(null);
+
+  const [demandDialogOpen, setDemandDialogOpen] = useState(false);
+  const [demandDeadline, setDemandDeadline] = useState("");
+  const [demandError, setDemandError] = useState<string | null>(null);
+
   const isDraft = invoice.status === "DRAFT";
+  const depositAvailableMinor = rentalDeposit
+    ? Math.max(
+        0,
+        (rentalDeposit.receivedAmountMinor ?? 0) -
+          (rentalDeposit.returnedAmountMinor ?? 0) -
+          (rentalDeposit.retainedAmountMinor ?? 0),
+      )
+    : 0;
 
   function updateItemField(index: number, field: keyof EditableItem, value: string): void {
     setItems((current) =>
@@ -297,6 +341,92 @@ function InvoiceEditor({
       setPaymentReference("");
     } catch (err) {
       setPaymentError(apiErrorMessage(err, t("common.error")));
+    }
+  }
+
+  /** "Mark as paid" — the exact remaining balance is always computed server-side; this never sends an amount. */
+  async function handleMarkFullyPaid(): Promise<void> {
+    if (
+      !window.confirm(
+        t("payment.markAsPaidConfirm", {
+          amount: formatMoney(invoice.remainingMinor, invoice.currency),
+        }),
+      )
+    ) {
+      return;
+    }
+    setError(null);
+    try {
+      await markFullyPaid.mutateAsync({ invoiceId: invoice.id, input: {} });
+    } catch (err) {
+      setError(apiErrorMessage(err, t("common.error")));
+    }
+  }
+
+  async function handleVoidPayment(): Promise<void> {
+    if (!voidTargetId) return;
+    setVoidError(null);
+    if (!voidReason.trim()) {
+      setVoidError(t("payment.voidReasonRequired"));
+      return;
+    }
+    try {
+      await voidPayment.mutateAsync({
+        invoiceId: invoice.id,
+        paymentId: voidTargetId,
+        reason: voidReason.trim(),
+      });
+      setVoidTargetId(null);
+      setVoidReason("");
+    } catch (err) {
+      setVoidError(apiErrorMessage(err, t("common.error")));
+    }
+  }
+
+  async function handleApplyDeposit(): Promise<void> {
+    setApplyDepositError(null);
+    if (!rentalDeposit) return;
+    const amountMinor = toMinorUnits(applyDepositAmount);
+    if (!amountMinor || amountMinor <= 0) {
+      setApplyDepositError(t("payment.invalidAmount"));
+      return;
+    }
+    try {
+      await applyDeposit.mutateAsync({
+        invoiceId: invoice.id,
+        input: { rentalDepositId: rentalDeposit.id, amountMinor },
+      });
+      setApplyDepositDialogOpen(false);
+      setApplyDepositAmount("");
+    } catch (err) {
+      setApplyDepositError(apiErrorMessage(err, t("common.error")));
+    }
+  }
+
+  async function handleCreatePaymentDemand(): Promise<void> {
+    setDemandError(null);
+    if (!demandDeadline) {
+      setDemandError(t("payment.invalidAmount"));
+      return;
+    }
+    try {
+      await createPaymentDemand.mutateAsync({
+        invoiceId: invoice.id,
+        input: { requestedDeadline: new Date(demandDeadline).toISOString() },
+      });
+      setDemandDialogOpen(false);
+      setDemandDeadline("");
+    } catch (err) {
+      setDemandError(apiErrorMessage(err, t("common.error")));
+    }
+  }
+
+  async function handleSendPaymentDemandEmail(paymentDemandId: string): Promise<void> {
+    setError(null);
+    try {
+      await sendPaymentDemandEmail.mutateAsync({ invoiceId: invoice.id, paymentDemandId });
+    } catch (err) {
+      setError(apiErrorMessage(err, t("common.error")));
     }
   }
 
@@ -563,24 +693,69 @@ function InvoiceEditor({
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>{t("payment.title")}</CardTitle>
-                {canRecordPayment && (
-                  <Button variant="outline" size="sm" onClick={() => setPaymentDialogOpen(true)}>
-                    {t("payment.record")}
-                  </Button>
-                )}
+                <div className="flex gap-2">
+                  {canRecordPayment && invoice.remainingMinor > 0 && (
+                    <Button
+                      size="sm"
+                      onClick={() => void handleMarkFullyPaid()}
+                      disabled={markFullyPaid.isPending}
+                    >
+                      {t("payment.markAsPaid")}
+                    </Button>
+                  )}
+                  {canRecordPayment && (
+                    <Button variant="outline" size="sm" onClick={() => setPaymentDialogOpen(true)}>
+                      {t("payment.record")}
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col gap-4">
+                {canRecordPayment && depositAvailableMinor > 0 && invoice.remainingMinor > 0 && (
+                  <div className="bg-muted/30 flex items-center justify-between rounded-md border p-3 text-sm">
+                    <span>
+                      {t("payment.depositAvailable", {
+                        amount: formatMoney(depositAvailableMinor, invoice.currency),
+                      })}
+                    </span>
+                    <Button variant="outline" size="sm" onClick={() => setApplyDepositDialogOpen(true)}>
+                      {t("payment.applyDeposit")}
+                    </Button>
+                  </div>
+                )}
                 {!payments || payments.length === 0 ? (
                   <p className="text-muted-foreground text-sm">{t("payment.empty")}</p>
                 ) : (
                   <ul className="flex flex-col gap-2 text-sm">
                     {payments.map((payment) => (
-                      <li key={payment.id} className="flex items-center justify-between">
+                      <li
+                        key={payment.id}
+                        className={`flex items-center justify-between gap-2 ${payment.voidedAt ? "text-muted-foreground line-through" : ""}`}
+                      >
                         <span>{formatBusinessDate(payment.paymentDate, i18n.language)}</span>
                         <span className="text-muted-foreground">
                           {t(`payment.methods.${payment.method}`)}
                         </span>
                         <span>{formatMoney(payment.amountMinor, payment.currency)}</span>
+                        {payment.voidedAt ? (
+                          <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs no-underline">
+                            {t("payment.voided")}
+                          </span>
+                        ) : (
+                          canVoidPayment && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setVoidTargetId(payment.id);
+                                setVoidReason("");
+                                setVoidError(null);
+                              }}
+                            >
+                              {t("payment.void")}
+                            </Button>
+                          )
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -588,6 +763,68 @@ function InvoiceEditor({
               </CardContent>
             </Card>
           )}
+
+          {!isDraft && (paymentDemands?.length ?? 0) > 0 || (!isDraft && canCreateDemand) ? (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>{t("payment.demand.navTitle")}</CardTitle>
+                {canCreateDemand && invoice.isOverdue && invoice.remainingMinor > 0 && (
+                  <Button variant="outline" size="sm" onClick={() => setDemandDialogOpen(true)}>
+                    {t("payment.demand.create")}
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent>
+                {!paymentDemands || paymentDemands.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">{t("payment.demand.empty")}</p>
+                ) : (
+                  <ul className="flex flex-col gap-3 text-sm">
+                    {paymentDemands.map((demand) => (
+                      <li key={demand.id} className="flex flex-col gap-1 border-b pb-3 last:border-0">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{demand.demandNumber}</span>
+                          <span className="text-muted-foreground">
+                            {t(`payment.demand.statuses.${demand.status}`)}
+                          </span>
+                        </div>
+                        <div className="text-muted-foreground flex items-center justify-between text-xs">
+                          <span>
+                            {demand.sentAt
+                              ? t("payment.demand.sentAt", {
+                                  date: formatBusinessDate(demand.sentAt, i18n.language),
+                                })
+                              : t("payment.demand.notSentYet")}
+                          </span>
+                          <span>{formatMoney(demand.outstandingAmountMinor, demand.currency)}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button asChild variant="outline" size="sm">
+                            <a
+                              href={paymentDemandPdfUrl(tenantId, invoice.id, demand.id)}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {t("payment.demand.download")}
+                            </a>
+                          </Button>
+                          {canSendDemand && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => void handleSendPaymentDemandEmail(demand.id)}
+                              disabled={sendPaymentDemandEmail.isPending}
+                            >
+                              {t("payment.demand.send")}
+                            </Button>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-6">
@@ -624,6 +861,38 @@ function InvoiceEditor({
                 <span>{t("invoice.fields.remaining")}</span>
                 <span>{formatMoney(invoice.remainingMinor, invoice.currency)}</span>
               </div>
+
+              {!isDraft && (
+                <div className="mt-2 flex flex-col gap-2">
+                  <PaymentProgressBar
+                    percentagePaid={invoice.percentagePaid}
+                    isOverdue={invoice.isOverdue}
+                  />
+                  <div className="text-muted-foreground flex justify-between text-xs">
+                    <span>
+                      {t("payment.paidOf", {
+                        paid: formatMoney(invoice.paidMinor, invoice.currency),
+                        total: formatMoney(invoice.totalMinor, invoice.currency),
+                      })}
+                    </span>
+                    <span>
+                      {t("payment.percentPaid", { percent: Math.round(invoice.percentagePaid) })}
+                    </span>
+                  </div>
+                  {invoice.isOverdue && (
+                    <div className="bg-destructive/10 text-destructive rounded-md p-2 text-xs">
+                      <p className="font-medium">
+                        {t("payment.overdueDays", { count: invoice.overdueDays })}
+                      </p>
+                      <p>
+                        {t("payment.outstandingLabel", {
+                          amount: formatMoney(invoice.overdueAmountMinor, invoice.currency),
+                        })}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -731,6 +1000,99 @@ function InvoiceEditor({
             </Button>
             <Button onClick={() => void handleRecordPayment()} disabled={recordPayment.isPending}>
               {recordPayment.isPending ? t("common.saving") : t("payment.record")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!voidTargetId} onOpenChange={(open) => !open && setVoidTargetId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("payment.void")}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <p className="text-muted-foreground text-sm">{t("payment.voidConfirm")}</p>
+            {voidError && <p className="text-destructive text-sm">{voidError}</p>}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="voidReason">{t("payment.voidReasonLabel")}</Label>
+              <Input
+                id="voidReason"
+                value={voidReason}
+                onChange={(e) => setVoidReason(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setVoidTargetId(null)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={() => void handleVoidPayment()} disabled={voidPayment.isPending}>
+              {voidPayment.isPending ? t("common.saving") : t("payment.void")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={applyDepositDialogOpen} onOpenChange={setApplyDepositDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("payment.applyDeposit")}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            {applyDepositError && <p className="text-destructive text-sm">{applyDepositError}</p>}
+            <p className="text-muted-foreground text-sm">
+              {t("payment.depositAvailable", {
+                amount: formatMoney(depositAvailableMinor, invoice.currency),
+              })}
+            </p>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="applyDepositAmount">{t("payment.applyDepositAmountLabel")}</Label>
+              <Input
+                id="applyDepositAmount"
+                value={applyDepositAmount}
+                onChange={(e) => setApplyDepositAmount(e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setApplyDepositDialogOpen(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button onClick={() => void handleApplyDeposit()} disabled={applyDeposit.isPending}>
+              {applyDeposit.isPending ? t("common.saving") : t("payment.applyDeposit")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={demandDialogOpen} onOpenChange={setDemandDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("payment.demand.create")}</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            {demandError && <p className="text-destructive text-sm">{demandError}</p>}
+            <p className="text-muted-foreground text-sm">{t("payment.demand.createConfirm")}</p>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="demandDeadline">{t("payment.demand.deadlineLabel")}</Label>
+              <Input
+                id="demandDeadline"
+                type="date"
+                value={demandDeadline}
+                onChange={(e) => setDemandDeadline(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDemandDialogOpen(false)}>
+              {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={() => void handleCreatePaymentDemand()}
+              disabled={createPaymentDemand.isPending}
+            >
+              {createPaymentDemand.isPending ? t("common.saving") : t("payment.demand.create")}
             </Button>
           </DialogFooter>
         </DialogContent>

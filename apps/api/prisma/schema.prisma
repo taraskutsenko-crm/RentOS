@@ -555,6 +555,7 @@ model Invoice {
   payments        Payment[]
   statusHistory   InvoiceStatusHistory[]
   emailDeliveries InvoiceEmailDelivery[]
+  paymentDemands  PaymentDemand[]
 
   @@unique([tenantId, invoiceNumber])
   @@index([tenantId, status])
@@ -633,9 +634,13 @@ model InvoiceSequence {
 /// domain (see docs/DECISIONS.md). Deliberately an explicit, staff-recorded
 /// action; Invoice.status is never inferred merely because an Invoice was
 /// created (see PaymentsService, which derives PARTIALLY_PAID/PAID by
-/// summing an invoice's Payment rows). Append-only — a mistaken payment is
-/// corrected by recording an equal-and-opposite negative-amount entry
-/// (documented, see docs/DECISIONS.md), never by editing/deleting history.
+/// summing an invoice's non-voided Payment rows). Append-only — a mistaken
+/// payment is never edited or hard-deleted through normal use; it is either
+/// corrected with an equal-and-opposite negative-amount entry (the
+/// original, still-supported convention) or explicitly voided (`voidedAt`/
+/// `voidedByUserId`/`voidReason`, see docs/DECISIONS.md D-12x) — a voided
+/// row is excluded from every paid-total calculation but is never deleted,
+/// preserving a full, honest audit trail.
 model Payment {
   id          String        @id @default(uuid())
   tenantId    String
@@ -647,14 +652,29 @@ model Payment {
   reference   String?
   notes       String?
 
+  /// Set when this payment was funded by reallocating an already-held
+  /// RentalDeposit rather than new incoming money — see
+  /// RentalDeposit/PaymentsService.applyDeposit and docs/DECISIONS.md.
+  /// Never changes which Invoice this Payment counts against; it is
+  /// provenance only, so the invoice's derived paid/remaining totals stay
+  /// a single, simple sum regardless of a payment's source.
+  sourceRentalDepositId String?
+
+  voidedAt       DateTime?
+  voidedByUserId String?
+  voidReason     String?
+
   createdByUserId String
   createdAt       DateTime @default(now())
 
-  tenant        Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  invoice       Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  createdByUser User    @relation("PaymentRecordedBy", fields: [createdByUserId], references: [id])
+  tenant              Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoice             Invoice        @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  createdByUser       User           @relation("PaymentRecordedBy", fields: [createdByUserId], references: [id])
+  voidedByUser        User?          @relation("PaymentVoidedBy", fields: [voidedByUserId], references: [id])
+  sourceRentalDeposit RentalDeposit? @relation(fields: [sourceRentalDepositId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, invoiceId])
+  @@index([tenantId, sourceRentalDepositId])
   @@map("payments")
 }
 
@@ -739,11 +759,14 @@ model User {
   respondedExtensionRequests RentalExtensionRequest[] @relation("RentalExtensionRequestRespondedBy")
   reviewedDamageReports      RentalDamageReport[]     @relation("RentalDamageReportReviewedBy")
 
-  createdInvoices            Invoice[]              @relation("InvoiceCreatedBy")
-  updatedInvoices            Invoice[]              @relation("InvoiceUpdatedBy")
-  invoiceStatusChanges       InvoiceStatusHistory[] @relation("InvoiceStatusHistoryChangedBy")
-  recordedPayments           Payment[]              @relation("PaymentRecordedBy")
-  sentInvoiceEmailDeliveries InvoiceEmailDelivery[] @relation("InvoiceEmailDeliverySentBy")
+  createdInvoices            Invoice[]                    @relation("InvoiceCreatedBy")
+  updatedInvoices            Invoice[]                    @relation("InvoiceUpdatedBy")
+  invoiceStatusChanges       InvoiceStatusHistory[]       @relation("InvoiceStatusHistoryChangedBy")
+  recordedPayments           Payment[]                    @relation("PaymentRecordedBy")
+  voidedPayments             Payment[]                    @relation("PaymentVoidedBy")
+  sentInvoiceEmailDeliveries InvoiceEmailDelivery[]       @relation("InvoiceEmailDeliverySentBy")
+  createdPaymentDemands      PaymentDemand[]              @relation("PaymentDemandCreatedBy")
+  sentPaymentDemandEmails    PaymentDemandEmailDelivery[] @relation("PaymentDemandEmailDeliverySentBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -853,13 +876,16 @@ model Tenant {
   rentalDamageReports         RentalDamageReport[]
   rentalDamageReportPhotos    RentalDamageReportPhoto[]
 
-  companyBankAccounts  CompanyBankAccount[]
-  invoices             Invoice[]
-  invoiceItems         InvoiceItem[]
-  invoiceSequences     InvoiceSequence[]
-  payments             Payment[]
-  invoiceStatusHistory InvoiceStatusHistory[]
-  eInvoiceConnections  EInvoiceConnection[]
+  companyBankAccounts          CompanyBankAccount[]
+  invoices                     Invoice[]
+  invoiceItems                 InvoiceItem[]
+  invoiceSequences             InvoiceSequence[]
+  payments                     Payment[]
+  invoiceStatusHistory         InvoiceStatusHistory[]
+  eInvoiceConnections          EInvoiceConnection[]
+  paymentDemands               PaymentDemand[]
+  paymentDemandSequences       PaymentDemandSequence[]
+  paymentDemandEmailDeliveries PaymentDemandEmailDelivery[]
 
   @@index([deletedAt])
   @@map("tenants")
@@ -963,11 +989,12 @@ model Customer {
   portalActivatedAt         DateTime?
   portalLastLoginAt         DateTime?
 
-  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  rentals   Rental[]
-  quotes    Quote[]
-  documents Document[]
-  invoices  Invoice[]
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rentals        Rental[]
+  quotes         Quote[]
+  documents      Document[]
+  invoices       Invoice[]
+  paymentDemands PaymentDemand[]
 
   portalRefreshTokens CustomerRefreshToken[]
   portalMessages      CustomerPortalMessage[]
@@ -1548,10 +1575,15 @@ model RentalDeposit {
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 
-  tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  rental        Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
-  createdByUser User   @relation("RentalDepositCreatedBy", fields: [createdByUserId], references: [id])
-  updatedByUser User?  @relation("RentalDepositUpdatedBy", fields: [updatedByUserId], references: [id])
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rental        Rental    @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  createdByUser User      @relation("RentalDepositCreatedBy", fields: [createdByUserId], references: [id])
+  updatedByUser User?     @relation("RentalDepositUpdatedBy", fields: [updatedByUserId], references: [id])
+  /// Payments funded by reallocating this held deposit (see
+  /// PaymentsService.applyDeposit) — how much has already been applied is
+  /// always the live sum of these rows, never a separately stored running
+  /// total, matching every other derived-not-stored total in this schema.
+  applications  Payment[]
 
   @@index([tenantId, rentalId])
   @@map("rental_deposits")
@@ -2291,6 +2323,121 @@ model InvoiceEmailDelivery {
 
   @@index([tenantId, invoiceId, createdAt])
   @@map("invoice_email_deliveries")
+}
+
+/// Generated, sent — a Payment Demand is created once with everything it
+/// needs already frozen and is never edited afterward; a mistaken one is
+/// simply not sent, or a corrected new one is generated.
+enum PaymentDemandStatus {
+  GENERATED
+  SENT
+}
+
+/// Havelio Payments & Receivables — International Payment Demand Foundation
+/// (docs/PRODUCT_BIBLE.md, docs/DECISIONS.md). A country-aware formal
+/// collection notice for an overdue Invoice — deliberately NOT a
+/// Poland-only "Wezwanie do zapłaty": that is only the Polish PRESENTATION
+/// (see `countryCode` + payment-demand-renderer.service.ts's template
+/// registry), never a hard-coded global concept. Modeled the same way as
+/// Invoice (its own first-class object, its own numbering, its own frozen
+/// snapshot) rather than through the generic Document `{{placeholder}}`
+/// platform, for the same reason Invoice isn't: it needs its own
+/// country/amount-breakdown-specific data shape, not a Rental-shaped
+/// variable set (see docs/DECISIONS.md). Every amount/date field below is
+/// a snapshot captured at generation time — exactly like
+/// Invoice.sellerSnapshot/buyerSnapshot/bankSnapshot — so a demand's
+/// rendered PDF is byte-for-byte reproducible forever regardless of any
+/// later payment, void, or Company Profile edit; it reflects the true state
+/// of the debt at the moment it was issued, on purpose. Always references
+/// exactly one Invoice — the authoritative receivable in this codebase
+/// (see docs/DECISIONS.md) — never a Rental directly.
+model PaymentDemand {
+  id           String              @id @default(uuid())
+  tenantId     String
+  customerId   String
+  invoiceId    String
+  demandNumber String
+  status       PaymentDemandStatus @default(GENERATED)
+
+  /// The tenant's company country at generation time — selects which
+  /// wordingtemplate rendered this demand (see
+  /// payment-demand-renderer.service.ts). Frozen: a later Company Profile
+  /// country change never changes how an already-generated demand reads.
+  countryCode      String @db.VarChar(2)
+  documentLanguage String @db.VarChar(10)
+
+  issueDate         DateTime
+  /// Copied from Invoice.dueDate at generation time — frozen, see model doc.
+  originalDueDate   DateTime?
+  /// The new deadline staff is giving the customer in this demand — a
+  /// plain staff-entered date, never auto-computed from a jurisdiction's
+  /// statutory grace period (no such calculation exists yet, see
+  /// docs/DECISIONS.md).
+  requestedDeadline DateTime
+
+  currency               String @db.VarChar(3)
+  originalAmountMinor    Int
+  paidAmountMinor        Int
+  outstandingAmountMinor Int
+
+  creditorSnapshot Json
+  debtorSnapshot   Json
+  bankSnapshot     Json?
+
+  createdByUserId String
+  createdAt       DateTime  @default(now())
+  sentAt          DateTime?
+
+  tenant          Tenant                       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer        Customer                     @relation(fields: [customerId], references: [id])
+  invoice         Invoice                      @relation(fields: [invoiceId], references: [id])
+  createdByUser   User                         @relation("PaymentDemandCreatedBy", fields: [createdByUserId], references: [id])
+  emailDeliveries PaymentDemandEmailDelivery[]
+
+  @@unique([tenantId, demandNumber])
+  @@index([tenantId, invoiceId])
+  @@index([tenantId, customerId])
+  @@map("payment_demands")
+}
+
+/// Backs concurrency-safe demand-number generation — identical pattern to
+/// InvoiceSequence/QuoteSequence (one counter row per tenant/year/month).
+model PaymentDemandSequence {
+  id         String @id @default(uuid())
+  tenantId   String
+  year       Int
+  month      Int
+  lastNumber Int    @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, year, month])
+  @@map("payment_demand_sequences")
+}
+
+/// Mirrors InvoiceEmailDelivery exactly — see that model's doc comment for
+/// the truthful-delivery-status rationale (never a fabricated SENT).
+model PaymentDemandEmailDelivery {
+  id                String              @id @default(uuid())
+  tenantId          String
+  paymentDemandId   String
+  recipientEmail    String
+  subject           String
+  message           String?
+  status            DocumentEmailStatus @default(PENDING)
+  errorMessage      String?
+  providerMessageId String?
+  sentByUserId      String
+  createdAt         DateTime            @default(now())
+  sentAt            DateTime?
+  failedAt          DateTime?
+
+  tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  paymentDemand PaymentDemand @relation(fields: [paymentDemandId], references: [id], onDelete: Cascade)
+  sentByUser    User          @relation("PaymentDemandEmailDeliverySentBy", fields: [sentByUserId], references: [id])
+
+  @@index([tenantId, paymentDemandId, createdAt])
+  @@map("payment_demand_email_deliveries")
 }
 
 /// Tracks one e-signature request for a specific DocumentVersion, decoupled

@@ -1294,6 +1294,10 @@
       "damageReports": "파손 신고",
       "noRentals": "대여 내역을 찾을 수 없습니다",
       "quantity": "수량",
+      "balance": {
+        "title": "Balance",
+        "dueDate": "Due {{date}}"
+      },
       "statuses": {
         "DRAFT": "임시 저장",
         "QUOTE": "견적",
@@ -1634,21 +1638,65 @@
     }
   },
   "payment": {
-    "title": "결제",
-    "record": "결제 기록",
-    "empty": "아직 기록된 결제가 없습니다",
-    "invalidAmount": "올바른 결제 금액을 입력하세요",
+    "title": "Payments",
+    "record": "Add payment",
+    "empty": "No payments recorded yet",
+    "invalidAmount": "Enter a valid payment amount",
+    "markAsPaid": "Mark as paid",
+    "markAsPaidConfirm": "Mark this invoice as fully paid? A payment of {{amount}} will be recorded for today.",
+    "void": "Void",
+    "voidConfirm": "Void this payment? It will be excluded from the paid total but kept in the record.",
+    "voidReasonLabel": "Reason",
+    "voidReasonRequired": "Enter a reason before voiding this payment",
+    "voided": "Voided",
+    "voidedOn": "Voided {{date}}",
+    "applyDeposit": "Apply deposit to balance",
+    "applyDepositConfirm": "Apply {{amount}} from the held deposit to this invoice's balance?",
+    "applyDepositAmountLabel": "Amount to apply",
+    "depositAvailable": "Deposit available: {{amount}}",
     "methods": {
-      "BANK_TRANSFER": "계좌이체",
-      "CASH": "현금",
-      "CARD": "카드",
-      "OTHER": "기타"
+      "BANK_TRANSFER": "Bank transfer",
+      "CASH": "Cash",
+      "CARD": "Card",
+      "OTHER": "Other"
     },
     "fields": {
-      "amount": "금액",
-      "date": "날짜",
-      "method": "결제 방법",
-      "reference": "참조번호"
+      "amount": "Amount",
+      "date": "Date",
+      "method": "Method",
+      "reference": "Reference"
+    },
+    "statuses": {
+      "UNPAID": "Unpaid",
+      "PARTIALLY_PAID": "Partially paid",
+      "PAID": "Paid",
+      "OVERDUE": "Overdue",
+      "PARTIALLY_PAID_OVERDUE": "Partially paid — overdue"
+    },
+    "progressBar": {
+      "label": "{{percent}}% paid"
+    },
+    "paidOf": "{{paid}} / {{total}}",
+    "percentPaid": "{{percent}}% paid",
+    "remainingLabel": "Remaining",
+    "outstandingLabel": "Outstanding: {{amount}}",
+    "overdueDays": "{{count}} days overdue",
+    "demand": {
+      "navTitle": "Payment demands",
+      "create": "Create payment demand",
+      "createConfirm": "Generate a formal payment demand for the outstanding balance?",
+      "deadlineLabel": "New payment deadline",
+      "empty": "No payment demands generated yet",
+      "generated": "Payment demand generated",
+      "notOverdue": "A formal payment demand can only be generated once this invoice is overdue",
+      "send": "Send by email",
+      "download": "Download PDF",
+      "sentAt": "Sent {{date}}",
+      "notSentYet": "Not sent yet",
+      "statuses": {
+        "GENERATED": "Generated",
+        "SENT": "Sent"
+      }
     }
   },
   "integration": {

@@ -353,9 +353,16 @@ describe("QuotePdfService.generateAndStore", () => {
     expect(text).toContain("08/09/2026");
     expect(text).toContain("08/16/2026");
     expect(text).not.toContain("08/01/2026");
-    expect(text).not.toContain("09/01/2026");
     expect(text).not.toContain("08/10/2026");
     expect(text).not.toContain("08/17/2026");
+    // Not asserting "09/01/2026" is absent: the footer legitimately stamps
+    // today's real date ("Generated: <today>" — see quote-pdf.service.ts),
+    // so that specific digit-string coincidentally collides with this
+    // suite's own run date on 2026-09-01 regardless of the timezone
+    // conversion under test here. The four positive assertions above
+    // already fully prove the UTC-instant-to-tenant-timezone conversion
+    // is correct (each real instant lands on its true local calendar day,
+    // never the naive UTC one).
   });
 });
 

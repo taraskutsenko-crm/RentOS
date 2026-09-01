@@ -1294,6 +1294,10 @@
       "damageReports": "Zgłoszenia uszkodzeń",
       "noRentals": "Nie znaleziono wynajmów",
       "quantity": "Ilość",
+      "balance": {
+        "title": "Saldo",
+        "dueDate": "Termin płatności: {{date}}"
+      },
       "statuses": {
         "DRAFT": "Wersja robocza",
         "QUOTE": "Wycena",
@@ -1635,9 +1639,21 @@
   },
   "payment": {
     "title": "Płatności",
-    "record": "Zarejestruj płatność",
+    "record": "Dodaj płatność",
     "empty": "Nie zarejestrowano jeszcze żadnej płatności",
     "invalidAmount": "Podaj prawidłową kwotę płatności",
+    "markAsPaid": "Oznacz jako opłacone",
+    "markAsPaidConfirm": "Oznaczyć tę fakturę jako w pełni opłaconą? Zostanie zarejestrowana płatność na kwotę {{amount}} z dzisiejszą datą.",
+    "void": "Anuluj",
+    "voidConfirm": "Anulować tę płatność? Zostanie wykluczona z sumy wpłat, ale pozostanie w historii.",
+    "voidReasonLabel": "Powód",
+    "voidReasonRequired": "Podaj powód przed anulowaniem płatności",
+    "voided": "Anulowana",
+    "voidedOn": "Anulowano {{date}}",
+    "applyDeposit": "Zaliczyć kaucję na poczet należności",
+    "applyDepositConfirm": "Zaliczyć {{amount}} z zatrzymanej kaucji na poczet tej faktury?",
+    "applyDepositAmountLabel": "Kwota do zaliczenia",
+    "depositAvailable": "Dostępna kaucja: {{amount}}",
     "methods": {
       "BANK_TRANSFER": "Przelew bankowy",
       "CASH": "Gotówka",
@@ -1649,6 +1665,38 @@
       "date": "Data",
       "method": "Metoda",
       "reference": "Tytuł"
+    },
+    "statuses": {
+      "UNPAID": "Nieopłacona",
+      "PARTIALLY_PAID": "Częściowo opłacona",
+      "PAID": "Opłacona",
+      "OVERDUE": "Po terminie",
+      "PARTIALLY_PAID_OVERDUE": "Częściowo opłacona — po terminie"
+    },
+    "progressBar": {
+      "label": "Opłacono {{percent}}%"
+    },
+    "paidOf": "{{paid}} / {{total}}",
+    "percentPaid": "Opłacono {{percent}}%",
+    "remainingLabel": "Pozostało",
+    "outstandingLabel": "Pozostało do zapłaty: {{amount}}",
+    "overdueDays": "{{count}} dni po terminie",
+    "demand": {
+      "navTitle": "Wezwania do zapłaty",
+      "create": "Utwórz wezwanie do zapłaty",
+      "createConfirm": "Wygenerować formalne wezwanie do zapłaty zaległej kwoty?",
+      "deadlineLabel": "Nowy termin płatności",
+      "empty": "Nie wygenerowano jeszcze żadnego wezwania do zapłaty",
+      "generated": "Wezwanie do zapłaty zostało wygenerowane",
+      "notOverdue": "Formalne wezwanie do zapłaty można wygenerować dopiero po przekroczeniu terminu płatności faktury",
+      "send": "Wyślij e-mailem",
+      "download": "Pobierz PDF",
+      "sentAt": "Wysłano {{date}}",
+      "notSentYet": "Jeszcze nie wysłano",
+      "statuses": {
+        "GENERATED": "Wygenerowane",
+        "SENT": "Wysłane"
+      }
     }
   },
   "integration": {

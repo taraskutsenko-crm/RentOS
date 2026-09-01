@@ -24,6 +24,7 @@ import type { UpdateInvoiceDto } from "./dto/update-invoice.dto";
 import { computeInvoiceTotals, type PricedInvoiceItemInput } from "./invoice-pricing.util";
 import type { InvoiceDetailView, InvoiceWithRelations, PaginatedInvoices } from "./invoice.types";
 import { generateInvoiceNumber } from "./invoice-numbering.util";
+import { derivePaymentStatus } from "../payments/payment-status.util";
 
 /** Statuses from which an already-issued invoice may still be voided — PAID/CANCELLED/CORRECTED cannot. */
 const CANCELLABLE_STATUSES: InvoiceStatus[] = [
@@ -520,9 +521,10 @@ export class InvoicesService {
     return { ...invoice, status: "OVERDUE" };
   }
 
+  /** Excludes voided payments — matches PaymentsService.recalculateInvoiceStatus exactly, so a displayed paidMinor/status is never inconsistent with what actually moved the invoice's own persisted status. */
   private async sumPayments(tenantId: string, invoiceId: string): Promise<number> {
     const result = await this.prisma.payment.aggregate({
-      where: { tenantId, invoiceId },
+      where: { tenantId, invoiceId, voidedAt: null },
       _sum: { amountMinor: true },
     });
     return result._sum.amountMinor ?? 0;
@@ -535,7 +537,7 @@ export class InvoicesService {
     if (invoiceIds.length === 0) return new Map();
     const rows = await this.prisma.payment.groupBy({
       by: ["invoiceId"],
-      where: { tenantId, invoiceId: { in: invoiceIds } },
+      where: { tenantId, invoiceId: { in: invoiceIds }, voidedAt: null },
       _sum: { amountMinor: true },
     });
     return new Map(rows.map((row) => [row.invoiceId, row._sum.amountMinor ?? 0]));
@@ -543,6 +545,11 @@ export class InvoicesService {
 
   private toDetailView(invoice: InvoiceWithRelations, paidMinor: number): InvoiceDetailView {
     const remainingMinor = Math.max(0, invoice.totalMinor - paidMinor);
+    const derived = derivePaymentStatus({
+      totalMinor: invoice.totalMinor,
+      paidMinor,
+      dueDate: invoice.dueDate,
+    });
     return {
       id: invoice.id,
       tenantId: invoice.tenantId,
@@ -568,6 +575,11 @@ export class InvoicesService {
       totalMinor: invoice.totalMinor,
       paidMinor,
       remainingMinor,
+      paymentStatus: derived.status,
+      percentagePaid: derived.percentagePaid,
+      isOverdue: derived.isOverdue,
+      overdueDays: derived.overdueDays,
+      overdueAmountMinor: derived.overdueAmountMinor,
       preferredPaymentMethod: invoice.preferredPaymentMethod,
       paymentReference: invoice.paymentReference,
       notes: invoice.notes,

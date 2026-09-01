@@ -74,9 +74,9 @@ describe("QuoteWizard", () => {
         onSubmit={vi.fn()}
         isPending={false}
         initialValues={{
-          plannedStart: "2026-08-01T00:00",
-          plannedEnd: "2026-08-04T00:00",
-          validUntil: "2026-09-01T00:00",
+          plannedStart: "2031-08-01T00:00",
+          plannedEnd: "2031-08-04T00:00",
+          validUntil: "2031-09-01T00:00",
         }}
       />,
     );
@@ -97,9 +97,9 @@ describe("QuoteWizard", () => {
         onSubmit={vi.fn()}
         isPending={false}
         initialValues={{
-          plannedStart: "2026-08-01T00:00",
-          plannedEnd: "2026-08-04T00:00",
-          validUntil: "2026-09-01T00:00",
+          plannedStart: "2031-08-01T00:00",
+          plannedEnd: "2031-08-04T00:00",
+          validUntil: "2031-09-01T00:00",
         }}
       />,
     );

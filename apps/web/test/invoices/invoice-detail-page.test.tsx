@@ -34,9 +34,31 @@ vi.mock("../../src/hooks/use-bank-accounts", () => ({
 
 const usePaymentsMock = vi.fn();
 const useRecordPaymentMock = vi.fn();
+const useMarkFullyPaidMock = vi.fn();
+const useVoidPaymentMock = vi.fn();
+const useApplyDepositMock = vi.fn();
 vi.mock("../../src/hooks/use-payments", () => ({
   usePayments: (...args: unknown[]) => usePaymentsMock(...args),
   useRecordPayment: () => useRecordPaymentMock(),
+  useMarkFullyPaid: () => useMarkFullyPaidMock(),
+  useVoidPayment: () => useVoidPaymentMock(),
+  useApplyDeposit: () => useApplyDepositMock(),
+}));
+
+const usePaymentDemandsMock = vi.fn();
+const useCreatePaymentDemandMock = vi.fn();
+const useSendPaymentDemandEmailMock = vi.fn();
+vi.mock("../../src/hooks/use-payment-demands", () => ({
+  usePaymentDemands: (...args: unknown[]) => usePaymentDemandsMock(...args),
+  useCreatePaymentDemand: () => useCreatePaymentDemandMock(),
+  useSendPaymentDemandEmail: () => useSendPaymentDemandEmailMock(),
+  paymentDemandPdfUrl: (tenantId: string, invoiceId: string, id: string) =>
+    `https://example.com/${tenantId}/${invoiceId}/${id}.pdf`,
+}));
+
+const useRentalDepositMock = vi.fn();
+vi.mock("../../src/hooks/use-rentals", () => ({
+  useRentalDeposit: (...args: unknown[]) => useRentalDepositMock(...args),
 }));
 
 const useInvoiceMock = vi.fn();
@@ -85,6 +107,11 @@ function baseInvoice(status: string) {
     totalMinor: 10000,
     paidMinor: 0,
     remainingMinor: 10000,
+    paymentStatus: "UNPAID",
+    percentagePaid: 0,
+    isOverdue: false,
+    overdueDays: 0,
+    overdueAmountMinor: 0,
     preferredPaymentMethod: null,
     paymentReference: null,
     notes: null,
@@ -128,6 +155,13 @@ describe("InvoiceDetailPage", () => {
     useBankAccountsMock.mockReturnValue({ data: [] });
     usePaymentsMock.mockReturnValue({ data: [] });
     useRecordPaymentMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useMarkFullyPaidMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useVoidPaymentMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useApplyDepositMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    usePaymentDemandsMock.mockReturnValue({ data: [] });
+    useCreatePaymentDemandMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useSendPaymentDemandEmailMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useRentalDepositMock.mockReturnValue({ data: null });
     useIssueInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useSendInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useCancelInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
@@ -260,5 +294,215 @@ describe("InvoiceDetailPage", () => {
 
     expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
     expect(screen.getByText("Issued")).toBeInTheDocument();
+  });
+
+  describe("Payments & Receivables", () => {
+    it("shows the payment progress bar with paid/total/percent text", () => {
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: {
+          ...baseInvoice("ISSUED"),
+          paidMinor: 3000,
+          remainingMinor: 7000,
+          paymentStatus: "PARTIALLY_PAID",
+          percentagePaid: 30,
+        },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "30");
+      expect(screen.getByText("30% paid")).toBeInTheDocument();
+      expect(document.body.textContent).toMatch(/30,00\s\$\s\/\s100,00\s\$/);
+    });
+
+    it("shows an overdue banner with days overdue and the outstanding amount", () => {
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: {
+          ...baseInvoice("OVERDUE"),
+          paidMinor: 3000,
+          remainingMinor: 7000,
+          paymentStatus: "PARTIALLY_PAID_OVERDUE",
+          percentagePaid: 30,
+          isOverdue: true,
+          overdueDays: 6,
+          overdueAmountMinor: 7000,
+        },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(screen.getByText("6 days overdue")).toBeInTheDocument();
+      expect(document.body.textContent).toMatch(/Outstanding:\s70,00\s\$/);
+    });
+
+    it("offers a one-click 'Mark as paid' action that records the server-computed remaining balance", async () => {
+      const mutateAsync = vi.fn().mockResolvedValue({});
+      useMarkFullyPaidMock.mockReturnValue({ mutateAsync, isPending: false });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), remainingMinor: 10000 },
+        isLoading: false,
+      });
+      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+      const user = userEvent.setup();
+
+      renderWithProviders(<InvoiceDetailPage />);
+      await user.click(screen.getByRole("button", { name: "Mark as paid" }));
+
+      expect(confirmSpy).toHaveBeenCalled();
+      await waitFor(() =>
+        expect(mutateAsync).toHaveBeenCalledWith({ invoiceId: "invoice-1", input: {} }),
+      );
+      confirmSpy.mockRestore();
+    });
+
+    it("hides 'Mark as paid' once the invoice has no remaining balance", () => {
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("PAID"), paidMinor: 10000, remainingMinor: 0 },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(screen.queryByRole("button", { name: "Mark as paid" })).not.toBeInTheDocument();
+    });
+
+    it("lets staff void a payment with a reason, and shows it struck through with a Voided tag afterward", async () => {
+      const mutateAsync = vi.fn().mockResolvedValue({});
+      useVoidPaymentMock.mockReturnValue({ mutateAsync, isPending: false });
+      usePaymentsMock.mockReturnValue({
+        data: [
+          {
+            id: "pay-1",
+            invoiceId: "invoice-1",
+            amountMinor: 3000,
+            currency: "USD",
+            paymentDate: "2026-08-05T00:00:00Z",
+            method: "BANK_TRANSFER",
+            reference: null,
+            notes: null,
+            sourceRentalDepositId: null,
+            voidedAt: null,
+            voidedByUserId: null,
+            voidReason: null,
+            createdByUserId: "user-1",
+            createdAt: "2026-08-05T00:00:00Z",
+          },
+        ],
+      });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), paidMinor: 3000, remainingMinor: 7000 },
+        isLoading: false,
+      });
+      const user = userEvent.setup();
+
+      renderWithProviders(<InvoiceDetailPage />);
+      await user.click(screen.getByRole("button", { name: "Void" }));
+      await user.type(screen.getByLabelText("Reason"), "Entered by mistake");
+      await user.click(screen.getByRole("dialog").querySelector("button:last-child")!);
+
+      await waitFor(() =>
+        expect(mutateAsync).toHaveBeenCalledWith({
+          invoiceId: "invoice-1",
+          paymentId: "pay-1",
+          reason: "Entered by mistake",
+        }),
+      );
+    });
+
+    it("offers 'Apply deposit to balance' only when the linked rental has an available held deposit", () => {
+      useRentalDepositMock.mockReturnValue({
+        data: {
+          id: "deposit-1",
+          receivedAmountMinor: 5000,
+          returnedAmountMinor: null,
+          retainedAmountMinor: null,
+        },
+      });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), rentalId: "rental-1", remainingMinor: 10000 },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(screen.getByRole("button", { name: "Apply deposit to balance" })).toBeInTheDocument();
+    });
+
+    it("offers 'Create payment demand' only once the invoice is overdue with a remaining balance", () => {
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: {
+          ...baseInvoice("OVERDUE"),
+          remainingMinor: 7000,
+          isOverdue: true,
+          overdueDays: 3,
+          overdueAmountMinor: 7000,
+        },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(screen.getByRole("button", { name: "Create payment demand" })).toBeInTheDocument();
+    });
+
+    it("does not offer 'Create payment demand' when the invoice is not yet overdue", () => {
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), remainingMinor: 10000, isOverdue: false },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(
+        screen.queryByRole("button", { name: "Create payment demand" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("VIEWER (no payments.record/void permission) sees no Mark as paid, Add payment, or Void actions", () => {
+      usePermissionMock.mockImplementation(
+        (permission: string) => permission === "invoices.download" || permission === "invoices.view",
+      );
+      usePaymentsMock.mockReturnValue({
+        data: [
+          {
+            id: "pay-1",
+            invoiceId: "invoice-1",
+            amountMinor: 3000,
+            currency: "USD",
+            paymentDate: "2026-08-05T00:00:00Z",
+            method: "BANK_TRANSFER",
+            reference: null,
+            notes: null,
+            sourceRentalDepositId: null,
+            voidedAt: null,
+            voidedByUserId: null,
+            voidReason: null,
+            createdByUserId: "user-1",
+            createdAt: "2026-08-05T00:00:00Z",
+          },
+        ],
+      });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), paidMinor: 3000, remainingMinor: 7000 },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(screen.queryByRole("button", { name: "Mark as paid" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Add payment" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Void" })).not.toBeInTheDocument();
+    });
   });
 });

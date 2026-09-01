@@ -19,6 +19,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PaymentProgressBar } from "../../../../../components/invoices/payment-progress-bar";
 import {
   useCreatePortalDamageReport,
   useUploadPortalDamageReportPhoto,
@@ -37,7 +38,7 @@ import {
 } from "../../../../../hooks/use-portal-rentals";
 import { apiErrorMessage } from "../../../../../lib/api-error-i18n";
 import { getAssetDisplayLabel } from "../../../../../lib/asset-display-label";
-import { formatDateTime } from "../../../../../lib/date-format";
+import { formatBusinessDate, formatDateTime } from "../../../../../lib/date-format";
 import { formatMoney } from "../../../../../lib/money";
 
 export default function PortalRentalDetailPage() {
@@ -212,6 +213,61 @@ export default function PortalRentalDetailPage() {
               />
             </CardContent>
           </Card>
+
+          {rental.invoiceFinancials.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("portal.rentals.balance.title")}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                {rental.invoiceFinancials.map((financials) => (
+                  <div key={financials.invoiceId} className="flex flex-col gap-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{financials.invoiceNumber}</span>
+                      <span className="text-muted-foreground">
+                        {t(`payment.statuses.${financials.paymentStatus}`)}
+                      </span>
+                    </div>
+                    <PaymentProgressBar
+                      percentagePaid={
+                        financials.totalMinor > 0
+                          ? Math.min(100, (financials.paidMinor / financials.totalMinor) * 100)
+                          : 0
+                      }
+                      isOverdue={financials.isOverdue}
+                    />
+                    <div className="text-muted-foreground flex justify-between text-xs">
+                      <span>
+                        {t("payment.paidOf", {
+                          paid: formatMoney(financials.paidMinor, financials.currency),
+                          total: formatMoney(financials.totalMinor, financials.currency),
+                        })}
+                      </span>
+                      {financials.dueDate && (
+                        <span>
+                          {t("portal.rentals.balance.dueDate", {
+                            date: formatBusinessDate(financials.dueDate, i18n.language),
+                          })}
+                        </span>
+                      )}
+                    </div>
+                    {financials.isOverdue && (
+                      <div className="bg-destructive/10 text-destructive rounded-md p-2 text-xs">
+                        <p className="font-medium">
+                          {t("payment.overdueDays", { count: financials.overdueDays })}
+                        </p>
+                        <p>
+                          {t("payment.outstandingLabel", {
+                            amount: formatMoney(financials.remainingMinor, financials.currency),
+                          })}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

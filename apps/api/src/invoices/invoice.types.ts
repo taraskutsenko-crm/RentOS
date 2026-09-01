@@ -7,6 +7,8 @@ import type {
   PaymentMethod,
 } from "@prisma/client";
 
+import type { PaymentStatus } from "../payments/payment-status.util";
+
 export interface InvoiceItemView {
   id: string;
   description: string;
@@ -76,6 +78,20 @@ export interface InvoiceDetailView {
   totalMinor: number;
   paidMinor: number;
   remainingMinor: number;
+
+  /**
+   * Havelio Payments & Receivables — a derived read model computed live
+   * from (totalMinor, paidMinor, dueDate) on every read, never stored (see
+   * apps/api/src/payments/payment-status.util.ts). Deliberately separate
+   * from `status` (InvoiceStatus — the persisted business-lifecycle field):
+   * `paymentStatus` only ever answers "how much has been paid, and is it
+   * overdue," independent of DRAFT/ISSUED/SENT/CANCELLED/CORRECTED.
+   */
+  paymentStatus: PaymentStatus;
+  percentagePaid: number;
+  isOverdue: boolean;
+  overdueDays: number;
+  overdueAmountMinor: number;
 
   preferredPaymentMethod: PaymentMethod | null;
   paymentReference: string | null;

@@ -3,6 +3,9 @@ import { Prisma, type PrismaClient } from "@prisma/client";
 /** Deletes all rows in dependency order. Test database only. */
 async function deleteAllRows(prisma: PrismaClient): Promise<void> {
   await prisma.auditLog.deleteMany();
+  await prisma.paymentDemandEmailDelivery.deleteMany();
+  await prisma.paymentDemand.deleteMany();
+  await prisma.paymentDemandSequence.deleteMany();
   await prisma.invoiceStatusHistory.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.invoiceItem.deleteMany();

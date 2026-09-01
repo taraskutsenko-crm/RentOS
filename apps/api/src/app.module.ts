@@ -21,9 +21,11 @@ import { DocumentsModule } from "./documents/documents.module";
 import { EInvoiceModule } from "./einvoice/einvoice.module";
 import { HealthModule } from "./health/health.module";
 import { InvoicesModule } from "./invoices/invoices.module";
+import { PaymentDemandsModule } from "./payment-demands/payment-demands.module";
 import { PaymentsModule } from "./payments/payments.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { QuotesModule } from "./quotes/quotes.module";
+import { ReceivablesModule } from "./receivables/receivables.module";
 import { RentalBillingSettingsModule } from "./rental-billing-settings/rental-billing-settings.module";
 import { RentalsModule } from "./rentals/rentals.module";
 import { TenantsModule } from "./tenants/tenants.module";
@@ -62,6 +64,8 @@ import { TenantsModule } from "./tenants/tenants.module";
     CompanySignatureModule,
     InvoicesModule,
     PaymentsModule,
+    PaymentDemandsModule,
+    ReceivablesModule,
     EInvoiceModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

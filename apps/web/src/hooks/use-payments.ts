@@ -37,3 +37,81 @@ export function useRecordPayment(tenantId: string | null) {
     },
   });
 }
+
+export interface MarkFullyPaidInput {
+  paymentDate?: string | undefined;
+  method?: PaymentMethod | undefined;
+  reference?: string | null | undefined;
+  notes?: string | null | undefined;
+}
+
+/** "Mark as paid" — one-click full payment. The remaining balance is always computed server-side; no amount is ever sent from here. */
+export function useMarkFullyPaid(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ invoiceId, input }: { invoiceId: string; input: MarkFullyPaidInput }) =>
+      apiClient.post<Payment>(
+        `/tenants/${tenantId}/invoices/${invoiceId}/payments/mark-fully-paid`,
+        input,
+      ),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: [BASE_KEY, tenantId, "payments", variables.invoiceId],
+      });
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
+    },
+  });
+}
+
+/** Voids a mistaken payment — the row is never deleted, only marked reversed. */
+export function useVoidPayment(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      invoiceId,
+      paymentId,
+      reason,
+    }: {
+      invoiceId: string;
+      paymentId: string;
+      reason: string;
+    }) =>
+      apiClient.post<Payment>(
+        `/tenants/${tenantId}/invoices/${invoiceId}/payments/${paymentId}/void`,
+        { reason },
+      ),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: [BASE_KEY, tenantId, "payments", variables.invoiceId],
+      });
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
+    },
+  });
+}
+
+export interface ApplyDepositInput {
+  rentalDepositId: string;
+  amountMinor: number;
+  paymentDate?: string | undefined;
+}
+
+/** "Apply deposit to balance" — an explicit financial event, never automatic (see docs/PRODUCT_BIBLE.md). */
+export function useApplyDeposit(tenantId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ invoiceId, input }: { invoiceId: string; input: ApplyDepositInput }) =>
+      apiClient.post<Payment>(
+        `/tenants/${tenantId}/invoices/${invoiceId}/payments/apply-deposit`,
+        input,
+      ),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: [BASE_KEY, tenantId, "payments", variables.invoiceId],
+      });
+      void queryClient.invalidateQueries({ queryKey: [BASE_KEY, tenantId] });
+      // The rental's held-deposit balance changed too — broad invalidation
+      // (no rentalId is known here) rather than guessing the exact key.
+      void queryClient.invalidateQueries({ queryKey: ["rentals", tenantId, "deposit"] });
+    },
+  });
+}

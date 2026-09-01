@@ -76,7 +76,13 @@ export const INVOICE_PERMISSIONS = [
   "invoices.download",
 ] as const;
 
-export const PAYMENT_PERMISSIONS = ["payments.view", "payments.record"] as const;
+export const PAYMENT_PERMISSIONS = ["payments.view", "payments.record", "payments.void"] as const;
+
+export const PAYMENT_DEMAND_PERMISSIONS = [
+  "payment_demands.view",
+  "payment_demands.create",
+  "payment_demands.send",
+] as const;
 
 export const BANK_ACCOUNT_PERMISSIONS = ["bankAccounts.view", "bankAccounts.manage"] as const;
 
@@ -91,6 +97,7 @@ export const ALL_PERMISSIONS = [
   ...TENANT_PERMISSIONS,
   ...INVOICE_PERMISSIONS,
   ...PAYMENT_PERMISSIONS,
+  ...PAYMENT_DEMAND_PERMISSIONS,
   ...BANK_ACCOUNT_PERMISSIONS,
   ...INTEGRATION_PERMISSIONS,
 ] as const;
@@ -113,6 +120,7 @@ const DOCUMENT_READ_ONLY: Permission[] = [
 ];
 const INVOICE_READ_ONLY: Permission[] = ["invoices.view", "invoices.download"];
 const PAYMENT_READ_ONLY: Permission[] = ["payments.view"];
+const PAYMENT_DEMAND_READ_ONLY: Permission[] = ["payment_demands.view"];
 const BANK_ACCOUNT_READ_ONLY: Permission[] = ["bankAccounts.view"];
 
 /**
@@ -173,6 +181,10 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "invoices.download",
     "payments.view",
     "payments.record",
+    "payments.void",
+    "payment_demands.view",
+    "payment_demands.create",
+    "payment_demands.send",
     "bankAccounts.view",
   ],
   TECHNICIAN: [
@@ -209,6 +221,10 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "invoices.download",
     "payments.view",
     "payments.record",
+    "payments.void",
+    "payment_demands.view",
+    "payment_demands.create",
+    "payment_demands.send",
     "bankAccounts.view",
     "rentals.manage_deposit",
   ],
@@ -219,6 +235,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     ...DOCUMENT_READ_ONLY,
     ...INVOICE_READ_ONLY,
     ...PAYMENT_READ_ONLY,
+    ...PAYMENT_DEMAND_READ_ONLY,
     ...BANK_ACCOUNT_READ_ONLY,
   ],
 };

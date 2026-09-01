@@ -1,4 +1,24 @@
 import type { RentalDetailView, RentalListItemView } from "../../rentals/rental.types";
+import type { PaymentStatus } from "../../payments/payment-status.util";
+
+/**
+ * Havelio Payments & Receivables — a compact, customer-safe financial
+ * summary per Invoice linked to this Rental (never exposing internal
+ * notes/audit metadata, see docs/PRODUCT_BIBLE.md). A DRAFT invoice is
+ * never included: it isn't a real customer-facing obligation yet.
+ */
+export interface PortalRentalInvoiceFinancials {
+  invoiceId: string;
+  invoiceNumber: string;
+  currency: string;
+  totalMinor: number;
+  paidMinor: number;
+  remainingMinor: number;
+  dueDate: string | null;
+  paymentStatus: PaymentStatus;
+  isOverdue: boolean;
+  overdueDays: number;
+}
 
 /**
  * `internalNotes` is staff-only free text (see Rental.internalNotes's
@@ -18,6 +38,8 @@ import type { RentalDetailView, RentalListItemView } from "../../rentals/rental.
 export type PortalRentalListItem = Omit<RentalListItemView, "internalNotes">;
 export type PortalRentalDetail = Omit<RentalDetailView, "internalNotes"> & {
   tenantTimezone: string;
+  /** One entry per non-DRAFT Invoice linked to this Rental — see PortalRentalInvoiceFinancials. */
+  invoiceFinancials: PortalRentalInvoiceFinancials[];
 };
 
 export function toPortalRentalListItem(rental: RentalListItemView): PortalRentalListItem {
@@ -28,7 +50,8 @@ export function toPortalRentalListItem(rental: RentalListItemView): PortalRental
 export function toPortalRentalDetail(
   rental: RentalDetailView,
   tenantTimezone: string,
+  invoiceFinancials: PortalRentalInvoiceFinancials[],
 ): PortalRentalDetail {
   const { internalNotes: _internalNotes, ...rest } = rental;
-  return { ...rest, tenantTimezone };
+  return { ...rest, tenantTimezone, invoiceFinancials };
 }

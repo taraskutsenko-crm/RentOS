@@ -47,6 +47,7 @@ function baseRental(status: string) {
     plannedStart: "2026-08-01T00:00:00Z",
     plannedEnd: "2026-08-04T00:00:00Z",
     tenantTimezone: "America/New_York",
+    invoiceFinancials: [],
     actualStart: null,
     actualEnd: null,
     currency: "USD",
@@ -175,5 +176,50 @@ describe("PortalRentalDetailPage", () => {
         expect.objectContaining({ rentalId: "rental-1", description: "Cracked panel" }),
       ),
     );
+  });
+
+  describe("Balance (Havelio Payments & Receivables)", () => {
+    it("shows amount paid/total and an overdue banner for an overdue linked invoice", () => {
+      usePortalRentalMock.mockReturnValue({
+        data: {
+          ...baseRental("ACTIVE"),
+          invoiceFinancials: [
+            {
+              invoiceId: "invoice-1",
+              invoiceNumber: "INV-2026-08-000001",
+              currency: "USD",
+              totalMinor: 100_000,
+              paidMinor: 30_000,
+              remainingMinor: 70_000,
+              dueDate: "2026-08-01T00:00:00Z",
+              paymentStatus: "PARTIALLY_PAID_OVERDUE",
+              isOverdue: true,
+              overdueDays: 6,
+            },
+          ],
+        },
+        isLoading: false,
+        isError: false,
+      });
+
+      renderWithProviders(<PortalRentalDetailPage />);
+
+      expect(screen.getByText("INV-2026-08-000001")).toBeInTheDocument();
+      expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "30");
+      expect(screen.getByText("6 days overdue")).toBeInTheDocument();
+      expect(document.body.textContent).toMatch(/Outstanding:\s700,00\s\$/);
+    });
+
+    it("shows no balance card when the rental has no linked invoices yet", () => {
+      usePortalRentalMock.mockReturnValue({
+        data: { ...baseRental("ACTIVE"), invoiceFinancials: [] },
+        isLoading: false,
+        isError: false,
+      });
+
+      renderWithProviders(<PortalRentalDetailPage />);
+
+      expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    });
   });
 });

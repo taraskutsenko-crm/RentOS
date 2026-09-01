@@ -1384,3 +1384,92 @@ login/account image.
 - **Audit trail.** Upload/replace/remove are recorded in the same
   audit architecture every other tenant event uses — actor, timestamp,
   mime type, and file size, never the image bytes themselves.
+
+## 33. Havelio Payments & Receivables
+
+This is payment tracking, receivables, outstanding-debt management, and
+payment demands — deliberately not called "accounting" or
+"bookkeeping," since Havelio does not implement general-ledger,
+tax-filing, or statutory-bookkeeping capabilities. A future accounting
+integration remains a separate concern.
+
+- **A real payment ledger, never a `paid` boolean.** Every recorded
+  payment is its own append-only `Payment` row (amount, currency,
+  date, method, reference, who recorded it) against a specific
+  Invoice — the authoritative receivable in Havelio. An Invoice's
+  payment status is always derived live from the sum of its
+  non-voided Payment rows, never inferred just because the invoice
+  exists.
+- **Derived payment status, never manually typed.** UNPAID,
+  PARTIALLY_PAID, PAID, OVERDUE, and PARTIALLY_PAID_OVERDUE are
+  computed on every read from (total, paid so far, due date) — kept
+  deliberately separate from the Invoice's own persisted business
+  lifecycle (DRAFT/ISSUED/SENT/CANCELLED/CORRECTED). Every money
+  figure is an integer minor-currency-unit count; nothing here ever
+  uses floating-point arithmetic for a financial total.
+- **One-click "Mark as paid."** The exact remaining balance is always
+  computed server-side, inside the same database transaction that
+  locks the invoice row and creates the payment — a double-click or
+  any concurrent duplicate request can never create two payments for
+  the same remaining balance.
+- **Partial payments, full history, no silent overpayment.** Staff
+  record any number of partial payments; the running paid/remaining
+  total and percentage update immediately. A payment that would
+  exceed the remaining balance is rejected outright — Havelio never
+  silently accepts an overpayment or invents a credit-balance concept.
+- **Void, never delete.** A mistaken payment is voided
+  (`voidedAt`/`voidedByUserId`/`voidReason`) rather than edited or
+  hard-deleted — the original row, and the full truth of what
+  happened, is preserved forever; a voided payment is simply excluded
+  from every paid-total calculation from that point on.
+- **A held deposit is not rental revenue.** The existing refundable
+  security-deposit ledger (see §"Rental Deposits") stays completely
+  separate from paid invoice revenue — receiving a deposit never
+  reduces an invoice's outstanding balance by itself. **Apply deposit
+  to balance** is the one explicit action that reallocates part of an
+  already-held deposit into a real Payment against a specific
+  invoice, fully auditable and validated against both the deposit's
+  own remaining held balance and the invoice's own remaining balance
+  — never automatic, never double-counted.
+- **Currency is never mixed.** A payment's currency must match its
+  invoice's currency exactly; Havelio performs no automatic FX
+  conversion. Every aggregate figure (receivable aging, financial
+  summaries) is grouped by currency — never a misleading total across
+  mixed currencies.
+- **Visual payment progress.** A two-segment progress bar (green =
+  paid proportion, red = unpaid proportion) always appears alongside
+  real numbers ("750 / 1,000 PLN", "75% paid", "250 PLN remaining") —
+  color is never the only cue. An overdue invoice is highlighted with
+  the number of days overdue and the outstanding amount.
+- **International Payment Demand foundation.** A country-aware formal
+  collection notice for an overdue invoice — the international core
+  concept is "Payment Demand"/"Collection Notice," never a
+  hard-coded, globally-applied Polish concept. Poland's own
+  "WEZWANIE DO ZAPŁATY" is the first localized template, selected by
+  the tenant's company country at generation time; every other
+  country safely falls back to a generic international template
+  (English/Russian) rather than ever showing Polish legal wording to
+  a non-Polish tenant. Deliberately does not calculate statutory
+  interest or claim automatic legal/court action — that is explicit,
+  disclosed future work requiring its own legal/rate configuration.
+  Eligible only for a genuinely overdue invoice with a remaining
+  balance, so a formal legal-style demand is never confused with a
+  softer reminder. Every amount/date on a generated demand is a
+  frozen snapshot, exactly like an Invoice — a demand's rendered PDF
+  never changes after generation, regardless of later payments.
+- **Receivable aging and financial summary foundation.** Server-side
+  domain queries (outstanding-debt aging buckets: not due, 1–7, 8–30,
+  31–60, 61–90, 90+ days overdue; per-currency invoiced/paid/
+  outstanding/overdue totals for a date range) exist as a foundation
+  for a future Financial Reports module — this pass does not ship a
+  full analytics/reporting UI.
+- **Customer Portal balance.** A customer's own rental detail page
+  shows the same amount-due/paid/outstanding/overdue figures for its
+  linked invoice(s) — never a DRAFT invoice, never internal notes or
+  audit metadata.
+- **RBAC and tenant isolation.** Recording/voiding a payment, applying
+  a deposit, and generating/sending a payment demand are gated the
+  same way invoicing already is (OWNER/ADMIN/MANAGER/ACCOUNTANT;
+  VIEWER is read-only). Every payment/deposit-application/payment-
+  demand action is tenant-scoped and independently re-verified
+  server-side.

@@ -161,12 +161,30 @@ export const INVOICE_PERMISSIONS = [
 ] as const;
 
 /**
- * `payments.record` gates POST-ing a new Payment row against an Invoice.
- * There is deliberately no update/delete — Payment is an append-only
- * ledger (see docs/DECISIONS.md); correcting a mistaken entry means
- * recording an equal-and-opposite entry, not editing history.
+ * `payments.record` gates POST-ing a new Payment row against an Invoice
+ * (including the one-click "Mark as paid" action and "Apply deposit to
+ * balance" — both are just specific, safer ways to create a Payment row,
+ * not a separate capability tier). `payments.void` is deliberately
+ * separate and not implied by `payments.record`: reversing a payment is a
+ * more sensitive action than recording a new one, even though the ledger
+ * itself stays append-only (see docs/DECISIONS.md) — nothing is ever
+ * edited or hard-deleted, `payments.void` only gates layering
+ * `voidedAt`/`voidedByUserId`/`voidReason` onto an existing row.
  */
-export const PAYMENT_PERMISSIONS = ["payments.view", "payments.record"] as const;
+export const PAYMENT_PERMISSIONS = ["payments.view", "payments.record", "payments.void"] as const;
+
+/**
+ * Gates the Havelio Payment Demand / Collection Notice system (see
+ * docs/PRODUCT_BIBLE.md) — an international core concept, Poland's
+ * "Wezwanie do zapłaty" being only its first localized template.
+ * `payment_demands.create` also covers generating the PDF; `.send` gates
+ * emailing it, matching the existing `invoices.send` split.
+ */
+export const PAYMENT_DEMAND_PERMISSIONS = [
+  "payment_demands.view",
+  "payment_demands.create",
+  "payment_demands.send",
+] as const;
 
 /**
  * Gates the Company Profile "Banking" settings page (multiple
@@ -193,6 +211,7 @@ export const ALL_PERMISSIONS = [
   ...TENANT_PERMISSIONS,
   ...INVOICE_PERMISSIONS,
   ...PAYMENT_PERMISSIONS,
+  ...PAYMENT_DEMAND_PERMISSIONS,
   ...BANK_ACCOUNT_PERMISSIONS,
   ...INTEGRATION_PERMISSIONS,
 ] as const;
@@ -221,6 +240,8 @@ const DOCUMENT_READ_ONLY: Permission[] = [
 const INVOICE_READ_ONLY: Permission[] = ["invoices.view", "invoices.download"];
 
 const PAYMENT_READ_ONLY: Permission[] = ["payments.view"];
+
+const PAYMENT_DEMAND_READ_ONLY: Permission[] = ["payment_demands.view"];
 
 const BANK_ACCOUNT_READ_ONLY: Permission[] = ["bankAccounts.view"];
 
@@ -352,6 +373,10 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "invoices.download",
     "payments.view",
     "payments.record",
+    "payments.void",
+    "payment_demands.view",
+    "payment_demands.create",
+    "payment_demands.send",
     "bankAccounts.view",
   ],
   TECHNICIAN: [
@@ -393,6 +418,10 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "invoices.download",
     "payments.view",
     "payments.record",
+    "payments.void",
+    "payment_demands.view",
+    "payment_demands.create",
+    "payment_demands.send",
     "bankAccounts.view",
     "rentals.manage_deposit",
   ],
@@ -403,6 +432,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     ...DOCUMENT_READ_ONLY,
     ...INVOICE_READ_ONLY,
     ...PAYMENT_READ_ONLY,
+    ...PAYMENT_DEMAND_READ_ONLY,
     ...BANK_ACCOUNT_READ_ONLY,
   ],
 };

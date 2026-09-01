@@ -19,6 +19,7 @@ import { CustomerPortalModule } from "./customer-portal/customer-portal.module";
 import { CustomersModule } from "./customers/customers.module";
 import { DocumentsModule } from "./documents/documents.module";
 import { EInvoiceModule } from "./einvoice/einvoice.module";
+import { FinanceReportsModule } from "./finance-reports/finance-reports.module";
 import { HealthModule } from "./health/health.module";
 import { InvoicesModule } from "./invoices/invoices.module";
 import { PaymentDemandsModule } from "./payment-demands/payment-demands.module";
@@ -67,6 +68,7 @@ import { TenantsModule } from "./tenants/tenants.module";
     PaymentDemandsModule,
     ReceivablesModule,
     EInvoiceModule,
+    FinanceReportsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

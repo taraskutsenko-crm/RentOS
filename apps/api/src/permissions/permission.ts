@@ -202,6 +202,17 @@ export const BANK_ACCOUNT_PERMISSIONS = ["bankAccounts.view", "bankAccounts.mana
  */
 export const INTEGRATION_PERMISSIONS = ["integrations.view", "integrations.manage"] as const;
 
+/**
+ * Gates the Financial Reports & Analytics module (docs/PRODUCT_BIBLE.md) —
+ * a read-only aggregation layer over the existing Invoice/Payment/
+ * RentalDeposit/PaymentDemand data, never a new write surface.
+ * `finance.export` is deliberately separate from `finance.read` (mirrors
+ * `payments.void` vs `payments.record`): downloading a CSV/XLSX/PDF copy of
+ * tenant financial data is a more sensitive action than viewing it on
+ * screen, even though both are read-only against the ledger.
+ */
+export const FINANCE_REPORTS_PERMISSIONS = ["finance.read", "finance.export"] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
@@ -214,6 +225,7 @@ export const ALL_PERMISSIONS = [
   ...PAYMENT_DEMAND_PERMISSIONS,
   ...BANK_ACCOUNT_PERMISSIONS,
   ...INTEGRATION_PERMISSIONS,
+  ...FINANCE_REPORTS_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
@@ -244,6 +256,8 @@ const PAYMENT_READ_ONLY: Permission[] = ["payments.view"];
 const PAYMENT_DEMAND_READ_ONLY: Permission[] = ["payment_demands.view"];
 
 const BANK_ACCOUNT_READ_ONLY: Permission[] = ["bankAccounts.view"];
+
+const FINANCE_REPORTS_READ_ONLY: Permission[] = ["finance.read"];
 
 /**
  * Default role -> permission mapping. OWNER and ADMIN get every permission.
@@ -315,6 +329,13 @@ const BANK_ACCOUNT_READ_ONLY: Permission[] = ["bankAccounts.view"];
  * receipt/return is commercial/financial, matching their existing
  * invoice/payment grants); TECHNICIAN does not.
  *
+ * Financial Reports & Analytics V1: MANAGER and ACCOUNTANT get both
+ * `finance.read`/`finance.export` — same tier as their invoicing/payment
+ * grants, since financial reporting is exactly this work. VIEWER gets
+ * `finance.read` only (can see the dashboard but not download a copy),
+ * matching its read-only-everywhere pattern. TECHNICIAN gets neither —
+ * consistent with it having no invoice/payment visibility at all.
+ *
  * Known limitation: the permission model is resource-level, not field- or
  * value-level (e.g. TECHNICIAN's asset `update` isn't restricted to only
  * condition/location fields). See ADR references in each module's
@@ -378,6 +399,8 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "payment_demands.create",
     "payment_demands.send",
     "bankAccounts.view",
+    "finance.read",
+    "finance.export",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -424,6 +447,8 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "payment_demands.send",
     "bankAccounts.view",
     "rentals.manage_deposit",
+    "finance.read",
+    "finance.export",
   ],
   VIEWER: [
     ...ASSET_READ_ONLY,
@@ -434,6 +459,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     ...PAYMENT_READ_ONLY,
     ...PAYMENT_DEMAND_READ_ONLY,
     ...BANK_ACCOUNT_READ_ONLY,
+    ...FINANCE_REPORTS_READ_ONLY,
   ],
 };
 

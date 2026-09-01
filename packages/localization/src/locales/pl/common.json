@@ -1701,6 +1701,182 @@
       }
     }
   },
+  "finance": {
+    "nav": "Finanse",
+    "title": "Raporty finansowe",
+    "subtitle": "Zafakturowano, otrzymane wpłaty, należności i analityka — pogrupowane wg waluty, nigdy łączone.",
+    "tabs": {
+      "overview": "Podsumowanie",
+      "revenue": "Przychody",
+      "receivables": "Należności",
+      "payments": "Płatności",
+      "customers": "Klienci",
+      "assets": "Zasoby"
+    },
+    "period": {
+      "label": "Okres",
+      "THIS_MONTH": "Ten miesiąc",
+      "PREVIOUS_MONTH": "Poprzedni miesiąc",
+      "LAST_30_DAYS": "Ostatnie 30 dni",
+      "LAST_2_MONTHS": "Ostatnie 2 miesiące",
+      "LAST_3_MONTHS": "Ostatnie 3 miesiące",
+      "LAST_90_DAYS": "Ostatnie 90 dni",
+      "THIS_QUARTER": "Ten kwartał",
+      "PREVIOUS_QUARTER": "Poprzedni kwartał",
+      "THIS_YEAR": "Ten rok",
+      "PREVIOUS_YEAR": "Poprzedni rok",
+      "ALL_TIME": "Cały czas",
+      "CUSTOM": "Zakres niestandardowy",
+      "from": "Od",
+      "to": "Do",
+      "range": "{{from}} – {{to}}"
+    },
+    "currency": {
+      "label": "Waluta",
+      "all": "Wszystkie waluty"
+    },
+    "kpi": {
+      "invoiced": "Zafakturowano",
+      "cashReceived": "Otrzymane wpłaty",
+      "outstanding": "Należności",
+      "overdue": "Przeterminowane",
+      "tax": "Podatek",
+      "collectionRate": "Wskaźnik spłacalności",
+      "collectionRateTooltip": "Otrzymane wpłaty w tym okresie ÷ kwota zafakturowana w tym okresie"
+    },
+    "comparison": {
+      "new": "Nowe",
+      "vsPreviousPeriod": "vs poprzedni okres"
+    },
+    "chart": {
+      "title": "Zafakturowano vs otrzymane wpłaty",
+      "invoiced": "Zafakturowano",
+      "cashReceived": "Otrzymane wpłaty",
+      "noData": "Brak aktywności w tym okresie",
+      "selectCurrency": "Wybierz walutę, aby zobaczyć wykres"
+    },
+    "aging": {
+      "title": "Wiekowanie należności",
+      "NOT_DUE": "Nieprzeterminowane",
+      "1_7_DAYS": "1–7 dni",
+      "8_30_DAYS": "8–30 dni",
+      "31_60_DAYS": "31–60 dni",
+      "61_90_DAYS": "61–90 dni",
+      "90_PLUS_DAYS": "90+ dni"
+    },
+    "debtors": {
+      "title": "Najwięksi dłużnicy",
+      "customer": "Klient",
+      "outstanding": "Należności",
+      "overdue": "Przeterminowane",
+      "oldestDueDate": "Najstarszy termin płatności",
+      "oldestOverdueDays": "Najdłużej przeterminowane",
+      "unpaidInvoices": "Niezapłacone faktury",
+      "overdueDaysValue": "{{count}} dni"
+    },
+    "paymentMethods": {
+      "title": "Podział wg metody płatności",
+      "BANK_TRANSFER": "Przelew bankowy",
+      "CASH": "Gotówka",
+      "CARD": "Karta",
+      "OTHER": "Nieznane / inne",
+      "manual": "Płatności ręczne",
+      "depositApplication": "Z zatrzymanej kaucji",
+      "totalReceived": "Suma otrzymana",
+      "paymentCount": "Płatności",
+      "average": "Średnia płatność"
+    },
+    "topCustomers": {
+      "title": "Najwięksi klienci",
+      "metric": "Ranking wg",
+      "invoiced": "Zafakturowano",
+      "cashReceived": "Otrzymane wpłaty",
+      "outstanding": "Należności",
+      "amount": "Kwota"
+    },
+    "assets": {
+      "title": "Najbardziej zarabiające zasoby",
+      "asset": "Zasób",
+      "invoiced": "Zafakturowano",
+      "rentalDays": "Dni wynajmu",
+      "rentalCount": "Wynajmy",
+      "attributionNote": "Uwzględniane są tylko pozycje faktury powiązane z konkretnym wynajętym zasobem — ręcznie wpisanych pozycji faktury nie można wiarygodnie przypisać do jednego zasobu."
+    },
+    "categories": {
+      "title": "Najlepsze kategorie",
+      "category": "Kategoria"
+    },
+    "utilization": {
+      "title": "Wykorzystanie zasobów",
+      "usableDays": "Dostępne dni zasobów",
+      "rentedDays": "Wynajęte (zrealizowane)",
+      "blockedDays": "Niedostępność operacyjna",
+      "idleDays": "Bezczynne",
+      "rentalUtilization": "Wykorzystanie wynajmu",
+      "topIdle": "Najbardziej bezczynne zasoby",
+      "note": "Wykorzystanie wynajmu liczy tylko wynajmy ACTIVE/RETURNED/COMPLETED — rezerwacja, która się jeszcze nie rozpoczęła, nie jest liczona jako zrealizowane użycie. Niedostępność operacyjna (konserwacja/naprawa/inspekcja/przemieszczenie/blokada ręczna) jest raportowana osobno i nigdy nie wliczana do wskaźnika wykorzystania wynajmu."
+    },
+    "deposits": {
+      "title": "Kaucje",
+      "notRevenue": "Kaucje nigdy nie są przychodem — pokazane osobno",
+      "received": "Przyjęto",
+      "returned": "Zwrócono",
+      "retained": "Zatrzymano",
+      "applied": "Zaliczono na poczet należności",
+      "currentlyHeld": "Obecnie zatrzymane"
+    },
+    "receivablesTable": {
+      "title": "Otwarte należności",
+      "invoice": "Faktura",
+      "customer": "Klient",
+      "issueDate": "Data wystawienia",
+      "dueDate": "Termin płatności",
+      "total": "Razem",
+      "paid": "Zapłacono",
+      "outstanding": "Należność",
+      "status": "Status",
+      "overdueDays": "Dni przeterminowania",
+      "search": "Szukaj faktury lub klienta…",
+      "empty": "Brak otwartych należności"
+    },
+    "cashReceivedTable": {
+      "title": "Otrzymane wpłaty",
+      "paymentDate": "Data",
+      "customer": "Klient",
+      "invoice": "Faktura",
+      "amount": "Kwota",
+      "method": "Metoda",
+      "source": "Źródło",
+      "sourceManual": "Ręczne",
+      "sourceDepositApplication": "Zaliczenie kaucji",
+      "enteredBy": "Wprowadził(a)",
+      "search": "Szukaj faktury lub klienta…",
+      "empty": "Brak wpłat w tym okresie"
+    },
+    "export": {
+      "csv": "Eksportuj CSV",
+      "xlsx": "Eksportuj Excel",
+      "pdf": "Eksportuj PDF",
+      "report": "Raport",
+      "summary": "Podsumowanie",
+      "receivables": "Należności",
+      "payments": "Płatności",
+      "topCustomers": "Najwięksi klienci",
+      "deposits": "Kaucje"
+    },
+    "empty": {
+      "noData": "Brak aktywności finansowej w tym okresie",
+      "noAssetAttribution": "Żadna pozycja faktury nie jest powiązana z konkretnym zasobem w tym okresie",
+      "singleCurrencyNote": "Ten najemca ma aktywność tylko w jednej walucie"
+    },
+    "dashboardWidget": {
+      "title": "Ten miesiąc",
+      "cashReceived": "Otrzymane wpłaty",
+      "outstanding": "Należności",
+      "overdue": "Przeterminowane",
+      "viewReports": "Zobacz raporty finansowe"
+    }
+  },
   "integration": {
     "settings": {
       "title": "Integracje",

@@ -1701,6 +1701,182 @@
       }
     }
   },
+  "finance": {
+    "nav": "Finance",
+    "title": "Financial Reports",
+    "subtitle": "Invoiced, cash received, receivables, and analytics — grouped by currency, never combined.",
+    "tabs": {
+      "overview": "Overview",
+      "revenue": "Revenue",
+      "receivables": "Receivables",
+      "payments": "Payments",
+      "customers": "Customers",
+      "assets": "Assets"
+    },
+    "period": {
+      "label": "Period",
+      "THIS_MONTH": "This month",
+      "PREVIOUS_MONTH": "Previous month",
+      "LAST_30_DAYS": "Last 30 days",
+      "LAST_2_MONTHS": "Last 2 months",
+      "LAST_3_MONTHS": "Last 3 months",
+      "LAST_90_DAYS": "Last 90 days",
+      "THIS_QUARTER": "This quarter",
+      "PREVIOUS_QUARTER": "Previous quarter",
+      "THIS_YEAR": "This year",
+      "PREVIOUS_YEAR": "Previous year",
+      "ALL_TIME": "All time",
+      "CUSTOM": "Custom range",
+      "from": "From",
+      "to": "To",
+      "range": "{{from}} – {{to}}"
+    },
+    "currency": {
+      "label": "Currency",
+      "all": "All currencies"
+    },
+    "kpi": {
+      "invoiced": "Invoiced",
+      "cashReceived": "Cash received",
+      "outstanding": "Outstanding",
+      "overdue": "Overdue",
+      "tax": "Tax",
+      "collectionRate": "Collection rate",
+      "collectionRateTooltip": "Cash received this period ÷ amount invoiced this period"
+    },
+    "comparison": {
+      "new": "New",
+      "vsPreviousPeriod": "vs previous period"
+    },
+    "chart": {
+      "title": "Invoiced vs cash received",
+      "invoiced": "Invoiced",
+      "cashReceived": "Cash received",
+      "noData": "No activity in this period",
+      "selectCurrency": "Select a currency to see the chart"
+    },
+    "aging": {
+      "title": "Receivable aging",
+      "NOT_DUE": "Not due",
+      "1_7_DAYS": "1–7 days",
+      "8_30_DAYS": "8–30 days",
+      "31_60_DAYS": "31–60 days",
+      "61_90_DAYS": "61–90 days",
+      "90_PLUS_DAYS": "90+ days"
+    },
+    "debtors": {
+      "title": "Biggest debtors",
+      "customer": "Customer",
+      "outstanding": "Outstanding",
+      "overdue": "Overdue",
+      "oldestDueDate": "Oldest due date",
+      "oldestOverdueDays": "Oldest overdue",
+      "unpaidInvoices": "Unpaid invoices",
+      "overdueDaysValue": "{{count}} days"
+    },
+    "paymentMethods": {
+      "title": "Payment method breakdown",
+      "BANK_TRANSFER": "Bank transfer",
+      "CASH": "Cash",
+      "CARD": "Card",
+      "OTHER": "Unknown / other",
+      "manual": "Manual payments",
+      "depositApplication": "From held deposits",
+      "totalReceived": "Total received",
+      "paymentCount": "Payments",
+      "average": "Average payment"
+    },
+    "topCustomers": {
+      "title": "Top customers",
+      "metric": "Rank by",
+      "invoiced": "Invoiced",
+      "cashReceived": "Cash received",
+      "outstanding": "Outstanding",
+      "amount": "Amount"
+    },
+    "assets": {
+      "title": "Top earning assets",
+      "asset": "Asset",
+      "invoiced": "Invoiced",
+      "rentalDays": "Rental days",
+      "rentalCount": "Rentals",
+      "attributionNote": "Only invoice lines linked to a specific rented asset are included — manually typed invoice lines cannot be reliably attributed to one asset."
+    },
+    "categories": {
+      "title": "Top categories",
+      "category": "Category"
+    },
+    "utilization": {
+      "title": "Asset utilization",
+      "usableDays": "Usable asset-days",
+      "rentedDays": "Rented (realized)",
+      "blockedDays": "Operational unavailability",
+      "idleDays": "Idle",
+      "rentalUtilization": "Rental utilization",
+      "topIdle": "Most idle assets",
+      "note": "Rental utilization counts only ACTIVE/RETURNED/COMPLETED rentals — a reservation that hasn't started yet is not counted as realized usage. Operational unavailability (maintenance/repair/inspection/relocation/manual blocks) is reported separately and never folded into the rental utilization percentage."
+    },
+    "deposits": {
+      "title": "Deposits",
+      "notRevenue": "Deposits are never revenue — shown separately",
+      "received": "Received",
+      "returned": "Returned",
+      "retained": "Retained",
+      "applied": "Applied to receivables",
+      "currentlyHeld": "Currently held"
+    },
+    "receivablesTable": {
+      "title": "Open receivables",
+      "invoice": "Invoice",
+      "customer": "Customer",
+      "issueDate": "Issue date",
+      "dueDate": "Due date",
+      "total": "Total",
+      "paid": "Paid",
+      "outstanding": "Outstanding",
+      "status": "Status",
+      "overdueDays": "Overdue days",
+      "search": "Search invoice or customer…",
+      "empty": "No open receivables"
+    },
+    "cashReceivedTable": {
+      "title": "Cash received",
+      "paymentDate": "Date",
+      "customer": "Customer",
+      "invoice": "Invoice",
+      "amount": "Amount",
+      "method": "Method",
+      "source": "Source",
+      "sourceManual": "Manual",
+      "sourceDepositApplication": "Deposit application",
+      "enteredBy": "Entered by",
+      "search": "Search invoice or customer…",
+      "empty": "No payments received in this period"
+    },
+    "export": {
+      "csv": "Export CSV",
+      "xlsx": "Export Excel",
+      "pdf": "Export PDF",
+      "report": "Report",
+      "summary": "Summary",
+      "receivables": "Receivables",
+      "payments": "Payments",
+      "topCustomers": "Top customers",
+      "deposits": "Deposits"
+    },
+    "empty": {
+      "noData": "No financial activity for this period",
+      "noAssetAttribution": "No invoice lines are linked to a specific asset for this period",
+      "singleCurrencyNote": "This tenant only has activity in one currency"
+    },
+    "dashboardWidget": {
+      "title": "This month",
+      "cashReceived": "Cash received",
+      "outstanding": "Outstanding",
+      "overdue": "Overdue",
+      "viewReports": "View financial reports"
+    }
+  },
   "integration": {
     "settings": {
       "title": "集成",

@@ -1473,9 +1473,9 @@ integration remains a separate concern.
 - **Receivable aging and financial summary foundation.** Server-side
   domain queries (outstanding-debt aging buckets: not due, 1–7, 8–30,
   31–60, 61–90, 90+ days overdue; per-currency invoiced/paid/
-  outstanding/overdue totals for a date range) exist as a foundation
-  for a future Financial Reports module — this pass does not ship a
-  full analytics/reporting UI.
+  outstanding/overdue totals for a date range) — the canonical building
+  blocks the full Financial Reports & Analytics module (§34) is built
+  on, never recomputed a second time there.
 - **Customer Portal balance.** A customer's own rental detail page
   shows the same amount-due/paid/outstanding/overdue figures for its
   linked invoice(s) — never a DRAFT invoice, never internal notes or
@@ -1486,3 +1486,120 @@ integration remains a separate concern.
   VIEWER is read-only). Every payment/deposit-application/payment-
   demand action is tenant-scoped and independently re-verified
   server-side.
+
+## 34. Havelio Financial Reports & Analytics
+
+A read-only analytics layer over the already-canonical financial data
+(§33) — never a second source of truth, never a parallel ledger. Every
+figure here is derived, on demand, from the same Invoice/Payment/
+RentalDeposit/PaymentDemand rows the rest of the product already
+writes and validates.
+
+**Core definitions — every metric is explicitly one of these, never
+left ambiguous:**
+
+- **Invoiced.** How much was formally billed to customers — the sum of
+  `totalMinor` on every non-DRAFT, non-cancelled, non-corrected
+  invoice, scoped by its `issueDate`. A cancelled or still-DRAFT
+  invoice never inflates this figure.
+- **Cash received.** How much actual, valid payment value was
+  received in the selected period — the sum of every non-voided
+  Payment row's `amountMinor`, scoped by its `paymentDate`. A voided
+  payment is always excluded; a received-but-not-yet-applied deposit
+  is never included (see "Deposits" below).
+- **Outstanding receivables.** The current unpaid balance across every
+  non-DRAFT, non-cancelled invoice — always a live snapshot, not
+  scoped to the selected period's date range (see "Snapshot vs flow"
+  below).
+- **Overdue receivables.** The subset of Outstanding whose due date
+  has passed — also a snapshot.
+- **Tax.** The tax/VAT component of Invoiced, shown as its own figure,
+  never silently folded into a gross total. No Poland-specific VAT
+  logic is applied anywhere in this module — every tenant's own
+  stored invoice tax lines/amounts are used exactly as recorded,
+  whatever the country.
+- **Deposits.** Received/returned/retained/applied/currently-held,
+  always shown in their own section, never as revenue. A deposit
+  receipt itself is never counted in Cash Received — only an explicit
+  "Apply deposit to balance" action (§33) creates a real Payment row
+  that counts.
+
+**Snapshot vs flow metrics — never blended.** Invoiced/Cash received
+are FLOW metrics: they answer "how much happened during the selected
+period," scoped by the relevant date field. Outstanding/Overdue/
+Currently-held-deposits are SNAPSHOT metrics: they answer "what is
+true right now (or as of the end of the selected period)," and are
+never pretended to be reconstructable at an arbitrary past instant
+from the current schema. The UI labels these explicitly (never a bare
+"Revenue" without qualification) so a viewer never has to guess which
+kind of number they're looking at.
+
+**Period semantics.** "Invoiced in September" means `issueDate` within
+September; "Cash received in September" means `paymentDate` within
+September; "Outstanding as of today" is always current, regardless of
+the selected period. Twelve period presets are supported (this/
+previous month, last 30/90 days, last 2/3 months, this/previous
+quarter, this/previous year, all time, and a custom range), every one
+resolved against the TENANT's own IANA timezone — never the viewing
+browser's — so a Poland tenant (Europe/Warsaw) and a USA tenant
+(America/New_York) each see their own correct "this month," and the
+same report never changes depending on who is looking at it or from
+where. Every eligible preset also computes the immediately-preceding
+equivalent period for a comparison figure; when the previous period had
+no activity (or doesn't exist, e.g. "all time"), the UI shows "New"
+rather than a misleading `Infinity%`.
+
+**Currency — never mixed, never a fake grand total.** Every
+aggregation is grouped per currency; a tenant with PLN and EUR activity
+sees two entirely separate sections (PLN totals, EUR totals), never one
+blended number. No FX conversion exists anywhere in this module.
+
+**Asset/category attribution — honest, not fabricated.** An invoice
+line is only attributed to a specific asset when it carries a real,
+explicit link back to the `RentalItem` it was generated from (the
+"create from Rental" prefill flow). A manually typed, ad-hoc invoice
+line has no such link and is correctly excluded from asset/category
+performance rather than guessed at via proportional splitting.
+Cash-received attribution per asset is not implemented at all: a
+Payment is invoice-level, not line-level, so there is no reliable way
+to say which line of a multi-line invoice a given payment actually
+paid down.
+
+**Asset utilization — a real, disclosed formula, not a vague
+percentage.** Rental utilization counts only realized usage (rentals
+that are ACTIVE, RETURNED, or COMPLETED) against the usable time of
+every non-LOST/RETIRED asset; a reservation that hasn't started yet is
+never counted as usage. Operational unavailability (maintenance,
+repair, inspection, relocation, and manual blocks) is measured and
+reported entirely separately, never folded into the rental-utilization
+percentage — the two answer different questions and are never
+conflated. Idle time is the genuine remainder (usable − rented −
+blocked), derived from real interval data, never "period days minus a
+record count."
+
+**Exports.** CSV, a real multi-sheet Excel workbook (Summary, Payments,
+Receivables, Customers, Deposits), and a purpose-built A4 PDF report
+(tenant logo, period, currency-grouped summary, aging, top customers,
+deposits) are all generated on demand from live data, respecting the
+caller's current period/currency filters — never a screenshot of the
+live UI, never a persisted file with a public URL. Every export sits
+behind the same tenant-scoping and permission guards as every other
+endpoint in this codebase; a dedicated `finance.export` permission,
+separate from `finance.read`, gates the three export actions
+specifically (view-only access does not imply download access).
+
+**RBAC.** `finance.read` (view the reports) and `finance.export`
+(download a copy) are separate permissions, granted the same way the
+rest of the invoicing/payments module already is: OWNER/ADMIN get
+everything; MANAGER/ACCOUNTANT get both `finance.read` and
+`finance.export` (this is their operational job); VIEWER gets
+`finance.read` only; TECHNICIAN gets neither.
+
+**Explicitly out of scope for this pass** (disclosed, not silently
+missing): FX conversion, statutory-interest/legal-collection
+calculations, tax filing/e-invoice reporting integration, bank feed
+reconciliation, external BI tool integration, a branch/warehouse
+filter (no such model exists in the schema today), and an employee/
+salesperson attribution filter (no reliable ownership field exists on
+Invoice/Rental beyond `createdByUserId`, which would misleadingly
+conflate "who clicked create" with "who owns this deal").

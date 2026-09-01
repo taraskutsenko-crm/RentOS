@@ -562,6 +562,10 @@ model Invoice {
   @@index([tenantId, rentalId])
   @@index([tenantId, customerId])
   @@index([tenantId, dueDate])
+  /// Backs Financial Reports & Analytics V1's period-scoped "invoiced in
+  /// range" queries (FinanceReportsService), which always filter on
+  /// (tenantId, issueDate) — see docs/DECISIONS.md.
+  @@index([tenantId, issueDate])
   @@index([tenantId, deletedAt])
   @@map("invoices")
 }
@@ -675,6 +679,10 @@ model Payment {
 
   @@index([tenantId, invoiceId])
   @@index([tenantId, sourceRentalDepositId])
+  /// Backs Financial Reports & Analytics V1's period-scoped "cash received
+  /// in range" queries (FinanceReportsService), which always filter on
+  /// (tenantId, paymentDate) — see docs/DECISIONS.md.
+  @@index([tenantId, paymentDate])
   @@map("payments")
 }
 
@@ -1586,6 +1594,9 @@ model RentalDeposit {
   applications  Payment[]
 
   @@index([tenantId, rentalId])
+  /// Backs Financial Reports & Analytics V1's "deposits received in range"
+  /// query (FinanceReportsService.getDepositSummary) — see docs/DECISIONS.md.
+  @@index([tenantId, receivedAt])
   @@map("rental_deposits")
 }
 

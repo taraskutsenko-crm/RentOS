@@ -3,10 +3,10 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { classifyAgingBucket, derivePaymentStatus, type AgingBucket } from "../payments/payment-status.util";
 
-/** Invoice statuses that represent a genuine outstanding receivable — never DRAFT (not yet issued) or a terminal void/replace state. Matches PaymentsService.PAYABLE_STATUSES minus the fully-resolved PAID state, since a PAID invoice contributes nothing to outstanding/aging by definition. */
-const OUTSTANDING_STATUSES = ["ISSUED", "SENT", "PARTIALLY_PAID", "OVERDUE"] as const;
-/** Every non-DRAFT, non-terminal-void status a real invoiced amount was ever issued under — used by the financial summary's "amount invoiced" figure, deliberately including PAID (an invoice that has since been fully paid was still genuinely invoiced). */
-const ISSUED_STATUSES = ["ISSUED", "SENT", "PARTIALLY_PAID", "OVERDUE", "PAID"] as const;
+/** Invoice statuses that represent a genuine outstanding receivable — never DRAFT (not yet issued) or a terminal void/replace state. Matches PaymentsService.PAYABLE_STATUSES minus the fully-resolved PAID state, since a PAID invoice contributes nothing to outstanding/aging by definition. Exported so FinanceReportsService reuses the exact same list rather than redeclaring it (see docs/DECISIONS.md — no parallel financial truth). */
+export const OUTSTANDING_STATUSES = ["ISSUED", "SENT", "PARTIALLY_PAID", "OVERDUE"] as const;
+/** Every non-DRAFT, non-terminal-void status a real invoiced amount was ever issued under — used by the financial summary's "amount invoiced" figure, deliberately including PAID (an invoice that has since been fully paid was still genuinely invoiced). CANCELLED/CORRECTED/DRAFT are always excluded — a cancelled or draft invoice never counts as billed. Exported for the same reason as OUTSTANDING_STATUSES above. */
+export const ISSUED_STATUSES = ["ISSUED", "SENT", "PARTIALLY_PAID", "OVERDUE", "PAID"] as const;
 
 export interface AgingBucketRow {
   bucket: AgingBucket;
@@ -166,7 +166,7 @@ export class ReceivablesService {
   }
 }
 
-const AGING_BUCKET_ORDER: Record<AgingBucket, number> = {
+export const AGING_BUCKET_ORDER: Record<AgingBucket, number> = {
   NOT_DUE: 0,
   "1_7_DAYS": 1,
   "8_30_DAYS": 2,

@@ -28,7 +28,7 @@ describe("ROLE_PERMISSIONS", () => {
     }
   });
 
-  it("restricts ACCOUNTANT to read-only everywhere except invoicing/payments/deposits (its real operational job)", () => {
+  it("restricts ACCOUNTANT to read-only everywhere except invoicing/payments/deposits/finance-export (its real operational job)", () => {
     const invoicingException = [
       "invoices.create",
       "invoices.update",
@@ -40,6 +40,10 @@ describe("ROLE_PERMISSIONS", () => {
       "payment_demands.create",
       "payment_demands.send",
       "rentals.manage_deposit",
+      // Financial Reports & Analytics V1 — downloading a CSV/XLSX/PDF copy
+      // of tenant financial data is a real operational action for this
+      // role, same tier as its other export-adjacent grants above.
+      "finance.export",
     ];
     for (const permission of ROLE_PERMISSIONS.ACCOUNTANT) {
       const isReadOnly =

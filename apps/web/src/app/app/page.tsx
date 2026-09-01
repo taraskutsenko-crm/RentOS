@@ -13,10 +13,12 @@ import {
   RecentActivity,
   type QuickAction,
 } from "../../components/dashboard";
+import { KpiCard } from "../../components/finance/kpi-card";
 import { useMe } from "../../hooks/use-auth";
 import { useCurrentTenantId } from "../../hooks/use-current-tenant";
 import { usePermission } from "../../hooks/use-current-tenant-role";
 import { useDashboardStats } from "../../hooks/use-dashboard-stats";
+import { useFinanceOverview } from "../../hooks/use-finance-reports";
 import { QUICK_ACTION_DEFINITIONS } from "../../lib/quick-actions";
 
 export default function AppHomePage() {
@@ -29,6 +31,7 @@ export default function AppHomePage() {
   const canViewQuotes = usePermission("quotes.view");
   const canViewDocuments = usePermission("documents.view");
   const canManagePortal = usePermission("customers.portal.manage");
+  const canViewFinance = usePermission("finance.read");
   const canCreateAsset = usePermission("assets.create");
   const canCreateRental = usePermission("rentals.create");
   const canCreateQuote = usePermission("quotes.create");
@@ -41,6 +44,8 @@ export default function AppHomePage() {
     canViewDocuments,
     canManagePortal,
   });
+  const financeOverview = useFinanceOverview(canViewFinance ? tenantId : null, { period: "THIS_MONTH" });
+  const financeRow = financeOverview.data?.rows[0];
 
   const permissionByKey: Record<string, boolean> = {
     customer: true,
@@ -114,6 +119,37 @@ export default function AppHomePage() {
           )}
         </DashboardGrid>
       </DashboardSection>
+
+      {canViewFinance && financeRow && (
+        <DashboardSection
+          title={t("finance.dashboardWidget.title")}
+          action={
+            <Link href="/app/finance" className="text-primary text-sm hover:underline">
+              {t("finance.dashboardWidget.viewReports")}
+            </Link>
+          }
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <KpiCard
+              label={t("finance.dashboardWidget.cashReceived")}
+              valueMinor={financeRow.cashReceived.currentMinor}
+              currency={financeRow.currency}
+              tone="positive"
+            />
+            <KpiCard
+              label={t("finance.dashboardWidget.outstanding")}
+              valueMinor={financeRow.outstandingMinor}
+              currency={financeRow.currency}
+            />
+            <KpiCard
+              label={t("finance.dashboardWidget.overdue")}
+              valueMinor={financeRow.overdueMinor}
+              currency={financeRow.currency}
+              tone={financeRow.overdueMinor > 0 ? "negative" : "neutral"}
+            />
+          </div>
+        </DashboardSection>
+      )}
 
       {hasQuickActions && (
         <DashboardSection title={t("dashboard.sections.quickActions")}>

@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import AppHomePage from "../../src/app/app/page";
 import { renderWithProviders } from "../test-utils";
@@ -23,6 +23,11 @@ vi.mock("../../src/hooks/use-dashboard-stats", () => ({
   useDashboardStats: () => useDashboardStatsMock(),
 }));
 
+const useFinanceOverviewMock = vi.fn();
+vi.mock("../../src/hooks/use-finance-reports", () => ({
+  useFinanceOverview: (...args: unknown[]) => useFinanceOverviewMock(...args),
+}));
+
 const EMPTY_STAT = { value: 0, isLoading: false, isError: false };
 const EMPTY_LIST = { items: [], isLoading: false, isError: false, refetch: vi.fn() };
 
@@ -39,6 +44,10 @@ function baseStats() {
 }
 
 describe("AppHomePage", () => {
+  beforeEach(() => {
+    useFinanceOverviewMock.mockReturnValue({ data: undefined, isLoading: false, isError: false });
+  });
+
   it("always shows the Customers metric and the welcome header, even with no other permissions", () => {
     useMeMock.mockReturnValue({ data: { user: { firstName: "Ada" } } });
     permissionsMock.mockReturnValue(false);
@@ -110,5 +119,45 @@ describe("AppHomePage", () => {
 
     expect(screen.getByText(/needs attention/i)).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
+  });
+
+  it("shows a compact Finance widget with a link to the full report when the user can read finance data", () => {
+    useMeMock.mockReturnValue({ data: { user: { firstName: "Ada" } } });
+    permissionsMock.mockImplementation((permission: string) => permission === "finance.read");
+    useDashboardStatsMock.mockReturnValue(baseStats());
+    useFinanceOverviewMock.mockReturnValue({
+      data: {
+        period: { preset: "THIS_MONTH", fromDate: "2026-09-01", toDate: "2026-09-30", previous: null },
+        rows: [
+          {
+            currency: "PLN",
+            invoiced: { currentMinor: 0, previousMinor: 0, absoluteChangeMinor: null, percentChange: null, hasPrevious: false },
+            cashReceived: { currentMinor: 180_000, previousMinor: 0, absoluteChangeMinor: null, percentChange: null, hasPrevious: false },
+            tax: { currentMinor: 0, previousMinor: 0, absoluteChangeMinor: null, percentChange: null, hasPrevious: false },
+            outstandingMinor: 320_000,
+            overdueMinor: 150_000,
+            outstandingMinorPeriodAgo: null,
+            overdueMinorPeriodAgo: null,
+            collectionRatePercent: null,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    renderWithProviders(<AppHomePage />);
+
+    expect(screen.getByRole("link", { name: "View financial reports" })).toHaveAttribute("href", "/app/finance");
+  });
+
+  it("hides the Finance widget entirely without finance.read", () => {
+    useMeMock.mockReturnValue({ data: { user: { firstName: "Ada" } } });
+    permissionsMock.mockReturnValue(false);
+    useDashboardStatsMock.mockReturnValue(baseStats());
+
+    renderWithProviders(<AppHomePage />);
+
+    expect(screen.queryByRole("link", { name: "View financial reports" })).not.toBeInTheDocument();
   });
 });

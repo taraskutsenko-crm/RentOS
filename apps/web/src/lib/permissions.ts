@@ -88,6 +88,8 @@ export const BANK_ACCOUNT_PERMISSIONS = ["bankAccounts.view", "bankAccounts.mana
 
 export const INTEGRATION_PERMISSIONS = ["integrations.view", "integrations.manage"] as const;
 
+export const FINANCE_REPORTS_PERMISSIONS = ["finance.read", "finance.export"] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
@@ -100,6 +102,7 @@ export const ALL_PERMISSIONS = [
   ...PAYMENT_DEMAND_PERMISSIONS,
   ...BANK_ACCOUNT_PERMISSIONS,
   ...INTEGRATION_PERMISSIONS,
+  ...FINANCE_REPORTS_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
@@ -122,6 +125,7 @@ const INVOICE_READ_ONLY: Permission[] = ["invoices.view", "invoices.download"];
 const PAYMENT_READ_ONLY: Permission[] = ["payments.view"];
 const PAYMENT_DEMAND_READ_ONLY: Permission[] = ["payment_demands.view"];
 const BANK_ACCOUNT_READ_ONLY: Permission[] = ["bankAccounts.view"];
+const FINANCE_REPORTS_READ_ONLY: Permission[] = ["finance.read"];
 
 /**
  * Mirrors apps/api/src/permissions/permission.ts. This is a UX convenience
@@ -186,6 +190,8 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "payment_demands.create",
     "payment_demands.send",
     "bankAccounts.view",
+    "finance.read",
+    "finance.export",
   ],
   TECHNICIAN: [
     "assets.read",
@@ -227,6 +233,8 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     "payment_demands.send",
     "bankAccounts.view",
     "rentals.manage_deposit",
+    "finance.read",
+    "finance.export",
   ],
   VIEWER: [
     ...ASSET_READ_ONLY,
@@ -237,6 +245,7 @@ export const ROLE_PERMISSIONS: Record<MembershipRole, Permission[]> = {
     ...PAYMENT_READ_ONLY,
     ...PAYMENT_DEMAND_READ_ONLY,
     ...BANK_ACCOUNT_READ_ONLY,
+    ...FINANCE_REPORTS_READ_ONLY,
   ],
 };
 

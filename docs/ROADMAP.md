@@ -335,16 +335,23 @@ boundaries.
 
 ### TASK-0016 — Analytics & Business Intelligence
 
-**Status: PLANNED**
+**Status: V1 BUILT** (Financial Reports & Analytics — see
+docs/PRODUCT_BIBLE.md §34, docs/DECISIONS.md D-122)
 
-- Revenue, utilization, profitability, asset performance, and
-  customer metrics.
-- Forecasts.
-- Export.
-- Must read from existing canonical data sources (pricing snapshots,
-  audit logs, status history) rather than introducing a second,
-  competing computation of any value that already has one — see
-  [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md) 1.4 and Part 2.
+- Invoiced/cash-received/outstanding/overdue/tax, receivable aging,
+  biggest debtors, payment-method breakdown, top customers, asset/
+  category earning attribution, asset utilization/idle-days, and
+  deposit analytics — built, reading entirely from the existing
+  canonical Invoice/Payment/RentalDeposit ledger (D-120) and
+  `ReceivablesService` (no second computation of any value that
+  already has one, per
+  [`ARCHITECTURE_LOCK.md`](ARCHITECTURE_LOCK.md) 1.4 and Part 2).
+- CSV/XLSX/PDF export — built.
+- **Remaining, explicitly out of scope for V1**: forecasts/predictive
+  analytics, profitability (cost data isn't tracked anywhere in the
+  schema yet), a branch/warehouse filter (no such model exists), and
+  an employee/salesperson attribution filter (no reliable ownership
+  field exists beyond `createdByUserId`).
 
 ### TASK-0017 — Accounting & External Integrations
 

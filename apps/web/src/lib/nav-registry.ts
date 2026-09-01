@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   Boxes,
   Building2,
   CalendarRange,
@@ -97,6 +98,13 @@ export const NAV_GROUPS: NavGroup[] = [
         labelKey: "invoice.title",
         icon: Receipt,
         permission: "invoices.view",
+      },
+      {
+        id: "finance",
+        href: "/app/finance",
+        labelKey: "finance.nav",
+        icon: BarChart3,
+        permission: "finance.read",
       },
     ],
   },

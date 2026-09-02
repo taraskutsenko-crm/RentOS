@@ -41,4 +41,13 @@ describe("QuoteStatusBadge", () => {
 
     expect(rejectedClass).not.toBe(acceptedClass);
   });
+
+  // Task 3 A8 — a lightweight, keyboard-accessible tooltip explaining what
+  // each status means, on top of the (never color-only) text label.
+  it("shows an explanatory tooltip for ACCEPTED on keyboard focus", async () => {
+    renderWithProviders(<QuoteStatusBadge status="ACCEPTED" />);
+    screen.getByText("Accepted").focus();
+
+    expect(await screen.findByText("The customer accepted this quote.")).toBeInTheDocument();
+  });
 });

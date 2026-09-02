@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-import { cn } from "@rentos/ui";
+import { cn, Tooltip } from "@rentos/ui";
 
 import type { QuoteStatus } from "../../types/quote";
 
@@ -40,14 +40,20 @@ export function QuoteStatusBadge({
 }) {
   const { t } = useTranslation();
   return (
-    <span
-      className={cn(
-        "rounded px-2 py-0.5 text-xs font-medium",
-        TONE_CLASSES[STATUS_TONE[status]],
-        className,
-      )}
-    >
-      {t(`quote.statuses.${status}`)}
-    </span>
+    // Task A8 — a lightweight tooltip explaining what each status means,
+    // never the whole redesign; the text label (not just color) already
+    // carries the status, so this only adds an explanation on top.
+    <Tooltip content={t(`quote.statusTooltips.${status}`)}>
+      <span
+        tabIndex={0}
+        className={cn(
+          "rounded px-2 py-0.5 text-xs font-medium",
+          TONE_CLASSES[STATUS_TONE[status]],
+          className,
+        )}
+      >
+        {t(`quote.statuses.${status}`)}
+      </span>
+    </Tooltip>
   );
 }

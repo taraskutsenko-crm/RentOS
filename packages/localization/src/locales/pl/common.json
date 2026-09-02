@@ -64,6 +64,7 @@
     "cancel": "Anuluj",
     "confirm": "Potwierdź",
     "dismiss": "Odrzuć",
+    "close": "Zamknij",
     "table": {
       "columns": "Kolumny",
       "permissionDenied": "Nie masz uprawnień do wyświetlenia tych danych.",
@@ -882,7 +883,13 @@
       "addServiceItem": "Dodaj produkt lub usługę",
       "viewPdf": "Zobacz PDF",
       "regeneratePdf": "Wygeneruj ponownie PDF",
-      "downloadPdf": "Pobierz PDF"
+      "downloadPdf": "Pobierz PDF",
+      "sendTooltip": "Wyślij tę ofertę klientowi e-mailem.",
+      "acceptTooltip": "Oznacz, że klient zaakceptował tę ofertę.",
+      "regeneratePdfTooltip": "Utwórz nowy plik PDF na podstawie bieżących danych oferty.",
+      "duplicateTooltip": "Utwórz kopię tej oferty jako nowy szkic.",
+      "cancelTooltip": "Anuluj tę ofertę bez usuwania jej z historii.",
+      "deleteTooltip": "Usuń tę ofertę."
     },
     "timeline": {
       "created": "Oferta utworzona",
@@ -963,6 +970,33 @@
     },
     "email": {
       "deliveryHistory": "Historia wysyłki e-maili"
+    },
+    "acceptConfirmTitle": "Klient zaakceptował ofertę?",
+    "acceptConfirmBody": "Potwierdź, że klient zaakceptował warunki tej oferty. Status oferty zmieni się na „Zaakceptowana”.",
+    "acceptConfirmButton": "Tak, oznacz jako zaakceptowaną",
+    "cancelConfirmTitle": "Anulować tę ofertę?",
+    "cancelConfirmBody": "Pozostanie w historii, ale nie będzie już aktywna.",
+    "deleteConfirmTitle": "Usunąć ofertę?",
+    "sendDialog": {
+      "title": "Wyślij ofertę e-mailem",
+      "recipientLabel": "E-mail odbiorcy",
+      "messageLabel": "Wiadomość (opcjonalnie)",
+      "attachmentNote": "Plik PDF oferty zostanie automatycznie załączony.",
+      "send": "Wyślij",
+      "sending": "Wysyłanie…",
+      "successMessage": "Wiadomość wysłana na {{email}}.",
+      "failureMessage": "Błąd dostarczenia: {{error}}",
+      "notConfiguredMessage": "Wysyłanie e-maili nie jest jeszcze skonfigurowane dla tej organizacji — nic nie zostało wysłane."
+    },
+    "statusTooltips": {
+      "DRAFT": "Jeszcze nie wysłano do klienta.",
+      "SENT": "Wysłano do klienta, oczekiwanie na odpowiedź.",
+      "VIEWED": "Klient otworzył tę ofertę.",
+      "ACCEPTED": "Klient zaakceptował tę ofertę.",
+      "REJECTED": "Klient odrzucił tę ofertę.",
+      "EXPIRED": "Okres ważności minął.",
+      "CONVERTED": "Przekształcona w wynajem.",
+      "CANCELLED": "Anulowana przez pracownika — nieaktywna."
     }
   },
   "document": {

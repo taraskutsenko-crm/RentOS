@@ -221,6 +221,45 @@ export class AssetsService {
     return { items: itemsWithFields, total, page, pageSize };
   }
 
+  /**
+   * Task B (Dashboard "Available assets" KPI): the count of assets that
+   * are genuinely available RIGHT NOW per the canonical engine — the exact
+   * same per-row derivation `findMany`'s "Available now" column uses
+   * (`AvailabilityService.checkAvailableNow` +
+   * `deriveAssetCurrentAvailability`), just aggregated to a single number
+   * instead of returned per-row. Never a catalog `Asset.currentStatusId`/
+   * `isRentable`-only approximation — that was the confirmed bug (a
+   * "status=AVAILABLE" catalog filter can disagree with real-time
+   * availability, e.g. an ACTIVE-unreturned asset whose catalog status
+   * hadn't been separately reconciled). One batched availability call for
+   * every non-deleted asset in the tenant (via the same `checkAvailability`
+   * used everywhere else), not one query per asset — see
+   * AvailabilityService's own doc comment on why per-date-range/point-in-
+   * time availability can never be a single persisted column.
+   */
+  async countAvailableNow(tenantId: string): Promise<number> {
+    const assets = await this.prisma.asset.findMany({
+      where: { tenantId, deletedAt: null },
+      select: { id: true, isRentable: true },
+    });
+    if (assets.length === 0) return 0;
+
+    const availabilityByAssetId = new Map(
+      (
+        await this.availabilityService.checkAvailableNow(
+          tenantId,
+          assets.map((asset) => asset.id),
+        )
+      ).map((result) => [result.assetId, result]),
+    );
+
+    return assets.filter(
+      (asset) =>
+        deriveAssetCurrentAvailability(asset.isRentable, availabilityByAssetId.get(asset.id))
+          .isAvailableNow,
+    ).length;
+  }
+
   async findOne(tenantId: string, id: string): Promise<AssetDetailView> {
     const asset = await this.prisma.asset.findFirst({
       where: { id, tenantId, deletedAt: null },

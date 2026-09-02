@@ -1,13 +1,15 @@
 "use client";
 
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@rentos/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Tooltip } from "@rentos/ui";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ConfirmDialog } from "../../../../components/data-table/confirm-dialog";
 import { DashboardGrid, DashboardMetric } from "../../../../components/dashboard";
 import { QuoteStatusBadge } from "../../../../components/quotes/quote-status-badge";
+import { SendQuoteDialog } from "../../../../components/quotes/send-quote-dialog";
 import { PageHeader } from "../../../../components/shell/page-header";
 import { PinButton } from "../../../../components/shell/pin-button";
 import { Timeline } from "../../../../components/timeline/timeline";
@@ -26,7 +28,6 @@ import {
   useRegenerateQuotePdf,
   useRejectQuote,
   useQuoteEmailDeliveries,
-  useSendQuote,
 } from "../../../../hooks/use-quotes";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatDate, formatDateTime } from "../../../../lib/date-format";
@@ -52,6 +53,14 @@ export default function QuoteDetailPage() {
   // initializer is the sanctioned one-time-impure-computation escape hatch.
   const [nowMs] = useState<number>(() => Date.now());
 
+  // Task 3 Part A — every lifecycle-changing action (send/accept/cancel/
+  // delete) now goes through an explicit dialog instead of firing on a
+  // single click, so the real consequence is visible before it happens.
+  const [sendDialogOpen, setSendDialogOpen] = useState(false);
+  const [acceptConfirmOpen, setAcceptConfirmOpen] = useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
   const { data: quote, isLoading, isError } = useQuote(tenantId, params.id);
   const { data: timeline } = useQuoteTimeline(tenantId, params.id);
   const { data: emailDeliveries } = useQuoteEmailDeliveries(tenantId, params.id);
@@ -70,7 +79,6 @@ export default function QuoteDetailPage() {
   }, [quote?.id]);
 
   const deleteQuote = useDeleteQuote(tenantId);
-  const sendQuote = useSendQuote(tenantId);
   const acceptQuote = useAcceptQuote(tenantId);
   const rejectQuote = useRejectQuote(tenantId);
   const cancelQuote = useCancelQuote(tenantId);
@@ -107,11 +115,21 @@ export default function QuoteDetailPage() {
   }
 
   async function handleDelete(): Promise<void> {
-    if (!window.confirm(t("quote.deleteConfirm"))) return;
     await runAction(async () => {
       await deleteQuote.mutateAsync(quote!.id);
       router.push("/app/quotes");
     });
+    setDeleteConfirmOpen(false);
+  }
+
+  async function handleAccept(): Promise<void> {
+    await runAction(() => acceptQuote.mutateAsync({ id: quote!.id }));
+    setAcceptConfirmOpen(false);
+  }
+
+  async function handleCancel(): Promise<void> {
+    await runAction(() => cancelQuote.mutateAsync({ id: quote!.id }));
+    setCancelConfirmOpen(false);
   }
 
   async function handleDuplicate(): Promise<void> {
@@ -183,29 +201,29 @@ export default function QuoteDetailPage() {
               </Button>
             )}
             {canDownload && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => void runAction(() => regeneratePdf.mutateAsync(quote!.id))}
-              >
-                {t("quote.actions.regeneratePdf")}
-              </Button>
+              <Tooltip content={t("quote.actions.regeneratePdfTooltip")}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void runAction(() => regeneratePdf.mutateAsync(quote!.id))}
+                >
+                  {t("quote.actions.regeneratePdf")}
+                </Button>
+              </Tooltip>
             )}
             {canSend && SENDABLE_STATUSES.has(quote.status) && (
-              <Button
-                size="sm"
-                onClick={() => void runAction(() => sendQuote.mutateAsync({ id: quote!.id }))}
-              >
-                {t("quote.actions.send")}
-              </Button>
+              <Tooltip content={t("quote.actions.sendTooltip")}>
+                <Button size="sm" onClick={() => setSendDialogOpen(true)}>
+                  {t("quote.actions.send")}
+                </Button>
+              </Tooltip>
             )}
             {canAccept && DECIDABLE_STATUSES.has(quote.status) && (
-              <Button
-                size="sm"
-                onClick={() => void runAction(() => acceptQuote.mutateAsync({ id: quote!.id }))}
-              >
-                {t("quote.actions.accept")}
-              </Button>
+              <Tooltip content={t("quote.actions.acceptTooltip")}>
+                <Button size="sm" onClick={() => setAcceptConfirmOpen(true)}>
+                  {t("quote.actions.accept")}
+                </Button>
+              </Tooltip>
             )}
             {canReject && DECIDABLE_STATUSES.has(quote.status) && (
               <Button variant="outline" size="sm" onClick={() => void handleReject()}>
@@ -213,23 +231,25 @@ export default function QuoteDetailPage() {
               </Button>
             )}
             {canDuplicate && (
-              <Button variant="outline" size="sm" onClick={() => void handleDuplicate()}>
-                {t("quote.actions.duplicate")}
-              </Button>
+              <Tooltip content={t("quote.actions.duplicateTooltip")}>
+                <Button variant="outline" size="sm" onClick={() => void handleDuplicate()}>
+                  {t("quote.actions.duplicate")}
+                </Button>
+              </Tooltip>
             )}
             {canUpdate && CANCELLABLE_STATUSES.has(quote.status) && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => void runAction(() => cancelQuote.mutateAsync({ id: quote!.id }))}
-              >
-                {t("quote.actions.cancel")}
-              </Button>
+              <Tooltip content={t("quote.actions.cancelTooltip")}>
+                <Button variant="outline" size="sm" onClick={() => setCancelConfirmOpen(true)}>
+                  {t("quote.actions.cancel")}
+                </Button>
+              </Tooltip>
             )}
             {canDelete && DELETABLE_STATUSES.has(quote.status) && (
-              <Button size="sm" variant="outline" onClick={() => void handleDelete()}>
-                {t("customer.delete")}
-              </Button>
+              <Tooltip content={t("quote.actions.deleteTooltip")}>
+                <Button size="sm" variant="outline" onClick={() => setDeleteConfirmOpen(true)}>
+                  {t("customer.delete")}
+                </Button>
+              </Tooltip>
             )}
           </>
         }
@@ -570,6 +590,39 @@ export default function QuoteDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      <SendQuoteDialog
+        open={sendDialogOpen}
+        onOpenChange={setSendDialogOpen}
+        tenantId={tenantId}
+        quote={quote}
+      />
+      <ConfirmDialog
+        open={acceptConfirmOpen}
+        onOpenChange={setAcceptConfirmOpen}
+        title={t("quote.acceptConfirmTitle")}
+        description={t("quote.acceptConfirmBody")}
+        confirmLabel={t("quote.acceptConfirmButton")}
+        isLoading={acceptQuote.isPending}
+        onConfirm={() => void handleAccept()}
+      />
+      <ConfirmDialog
+        open={cancelConfirmOpen}
+        onOpenChange={setCancelConfirmOpen}
+        title={t("quote.cancelConfirmTitle")}
+        description={t("quote.cancelConfirmBody")}
+        isLoading={cancelQuote.isPending}
+        onConfirm={() => void handleCancel()}
+      />
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title={t("quote.deleteConfirmTitle")}
+        description={t("quote.deleteConfirm")}
+        destructive
+        isLoading={deleteQuote.isPending}
+        onConfirm={() => void handleDelete()}
+      />
     </div>
   );
 }

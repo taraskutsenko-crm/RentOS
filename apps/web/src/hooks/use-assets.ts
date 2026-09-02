@@ -63,6 +63,18 @@ export function useAssets(tenantId: string | null, params: AssetListParams = {})
   });
 }
 
+// Dashboard "Available assets" KPI — the canonical count from
+// AssetsService.countAvailableNow (real-time AvailabilityService result,
+// never a catalog isRentable/currentStatusId filter). See
+// use-dashboard-stats.ts's availableAssets computation, the only consumer.
+export function useAvailableAssetsCount(tenantId: string | null) {
+  return useQuery({
+    queryKey: ["assets", tenantId, "available-count"],
+    queryFn: () => apiClient.get<{ count: number }>(`/tenants/${tenantId}/assets/available-count`),
+    enabled: !!tenantId,
+  });
+}
+
 export function useAsset(tenantId: string | null, id: string | null) {
   return useQuery({
     queryKey: ["assets", tenantId, "detail", id],

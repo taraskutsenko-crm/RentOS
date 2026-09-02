@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -247,10 +247,22 @@ describe("QuoteDetailPage", () => {
     expect(screen.queryByRole("button", { name: /^accept$/i })).not.toBeInTheDocument();
   });
 
-  it("shows accept/reject actions for a SENT quote when the user has those permissions", async () => {
+  it("shows accept/reject actions for a SENT quote when the user has those permissions", () => {
     usePermissionMock.mockImplementation(
       (permission: string) => permission === "quotes.accept" || permission === "quotes.reject",
     );
+    useQuoteMock.mockReturnValue({ data: baseQuote("SENT"), isLoading: false });
+
+    renderWithProviders(<QuoteDetailPage />);
+
+    expect(screen.getByRole("button", { name: /^accept$/i })).toBeInTheDocument();
+  });
+
+  // Task 3 A3/A11 — Accept no longer fires on a single click; a
+  // confirmation dialog must appear first, and the status only actually
+  // changes once the user confirms it there.
+  it("accepted status changes only after confirming the Accept dialog", async () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "quotes.accept");
     useQuoteMock.mockReturnValue({ data: baseQuote("SENT"), isLoading: false });
     const acceptMutateAsync = vi.fn().mockResolvedValue(undefined);
     useAcceptQuoteMock.mockReturnValue({ mutateAsync: acceptMutateAsync, isPending: false });
@@ -259,7 +271,72 @@ describe("QuoteDetailPage", () => {
     renderWithProviders(<QuoteDetailPage />);
     await user.click(screen.getByRole("button", { name: /^accept$/i }));
 
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/customer accepted the quote/i)).toBeInTheDocument();
+    expect(acceptMutateAsync).not.toHaveBeenCalled(); // not yet — only the dialog opened
+
+    await user.click(within(dialog).getByRole("button", { name: /yes, mark as accepted/i }));
+
     await waitFor(() => expect(acceptMutateAsync).toHaveBeenCalledWith({ id: "quote-1" }));
+  });
+
+  // Task 3 A3/A12 — dismissing the confirmation dialog's own Cancel button
+  // (not the quote's separate "Cancel quote" action) must leave the quote's
+  // status untouched.
+  it("cancelling the Accept confirmation dialog leaves the quote's status unchanged", async () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "quotes.accept");
+    useQuoteMock.mockReturnValue({ data: baseQuote("SENT"), isLoading: false });
+    const acceptMutateAsync = vi.fn().mockResolvedValue(undefined);
+    useAcceptQuoteMock.mockReturnValue({ mutateAsync: acceptMutateAsync, isPending: false });
+    const user = userEvent.setup();
+
+    renderWithProviders(<QuoteDetailPage />);
+    await user.click(screen.getByRole("button", { name: /^accept$/i }));
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: /^cancel$/i }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(acceptMutateAsync).not.toHaveBeenCalled();
+    expect(screen.getByText("Sent")).toBeInTheDocument(); // status still SENT, never optimistically changed
+  });
+
+  // Task 3 A5 — "Cancel quote" also changes lifecycle, so it now requires
+  // its own confirmation before firing.
+  it("shows a confirmation dialog before actually cancelling the quote", async () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "quotes.update");
+    useQuoteMock.mockReturnValue({ data: baseQuote("SENT"), isLoading: false });
+    const cancelMutateAsync = vi.fn().mockResolvedValue(undefined);
+    useCancelQuoteMock.mockReturnValue({ mutateAsync: cancelMutateAsync, isPending: false });
+    const user = userEvent.setup();
+
+    renderWithProviders(<QuoteDetailPage />);
+    await user.click(screen.getByRole("button", { name: /cancel quote/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/cancel this quote\?/i)).toBeInTheDocument();
+    expect(cancelMutateAsync).not.toHaveBeenCalled();
+
+    await user.click(within(dialog).getByRole("button", { name: /^confirm$/i }));
+    await waitFor(() => expect(cancelMutateAsync).toHaveBeenCalledWith({ id: "quote-1" }));
+  });
+
+  // Task 3 A6 — Delete now uses the same accessible ConfirmDialog as every
+  // other destructive action instead of the native window.confirm.
+  it("shows a destructive confirmation dialog before deleting the quote", async () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "quotes.delete");
+    useQuoteMock.mockReturnValue({ data: baseQuote("DRAFT"), isLoading: false });
+    const deleteMutateAsync = vi.fn().mockResolvedValue(undefined);
+    useDeleteQuoteMock.mockReturnValue({ mutateAsync: deleteMutateAsync, isPending: false });
+    const user = userEvent.setup();
+
+    renderWithProviders(<QuoteDetailPage />);
+    await user.click(screen.getByRole("button", { name: /delete/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(deleteMutateAsync).not.toHaveBeenCalled();
+
+    await user.click(within(dialog).getByRole("button", { name: /^confirm$/i }));
+    await waitFor(() => expect(deleteMutateAsync).toHaveBeenCalledWith("quote-1"));
   });
 
   it("shows the convert action only for an ACCEPTED quote", () => {
@@ -298,16 +375,18 @@ describe("QuoteDetailPage", () => {
   });
 
   it("shows the error message when a lifecycle action fails", async () => {
-    usePermissionMock.mockImplementation((permission: string) => permission === "quotes.send");
+    usePermissionMock.mockImplementation(
+      (permission: string) => permission === "quotes.duplicate",
+    );
     useQuoteMock.mockReturnValue({ data: baseQuote("DRAFT"), isLoading: false });
-    useSendQuoteMock.mockReturnValue({
-      mutateAsync: vi.fn().mockRejectedValue(new Error("Cannot send a quote with no items")),
+    useDuplicateQuoteMock.mockReturnValue({
+      mutateAsync: vi.fn().mockRejectedValue(new Error("Something failed")),
       isPending: false,
     });
     const user = userEvent.setup();
 
     renderWithProviders(<QuoteDetailPage />);
-    await user.click(screen.getByRole("button", { name: /send quote/i }));
+    await user.click(screen.getByRole("button", { name: /duplicate/i }));
 
     expect(await screen.findByText(/something went wrong/i)).toBeInTheDocument();
   });
@@ -351,5 +430,175 @@ describe("QuoteDetailPage", () => {
 
     expect(screen.getByText(/jane@example.com/)).toBeInTheDocument();
     expect(screen.getByText(/Not configured/)).toBeInTheDocument();
+  });
+
+  // Task 3 A2/A9/E — accessible tooltips on every quote action, truthful
+  // about what each button actually does. Triggered via keyboard focus
+  // here (not just mouse hover) — the same accessible path a screen-reader
+  // or keyboard-only user relies on (Part E's explicit requirement).
+  describe("action tooltips (keyboard-focus accessible)", () => {
+    it("shows the Send quote tooltip on focus", async () => {
+      usePermissionMock.mockImplementation((permission: string) => permission === "quotes.send");
+      useQuoteMock.mockReturnValue({ data: baseQuote("DRAFT"), isLoading: false });
+      renderWithProviders(<QuoteDetailPage />);
+
+      screen.getByRole("button", { name: /send quote/i }).focus();
+
+      expect(
+        await screen.findByText("Send this quote to the customer by email."),
+      ).toBeInTheDocument();
+    });
+
+    it("shows the Accept quote tooltip on focus", async () => {
+      usePermissionMock.mockImplementation(
+        (permission: string) => permission === "quotes.accept",
+      );
+      useQuoteMock.mockReturnValue({ data: baseQuote("SENT"), isLoading: false });
+      renderWithProviders(<QuoteDetailPage />);
+
+      screen.getByRole("button", { name: /^accept$/i }).focus();
+
+      expect(
+        await screen.findByText("Mark this quote as accepted by the customer."),
+      ).toBeInTheDocument();
+    });
+
+    it("shows the Regenerate PDF tooltip on focus", async () => {
+      usePermissionMock.mockImplementation(
+        (permission: string) => permission === "quotes.download",
+      );
+      useQuoteMock.mockReturnValue({ data: baseQuote("DRAFT"), isLoading: false });
+      renderWithProviders(<QuoteDetailPage />);
+
+      screen.getByRole("button", { name: /regenerate pdf/i }).focus();
+
+      expect(
+        await screen.findByText("Create a new PDF from the current quote data."),
+      ).toBeInTheDocument();
+    });
+
+    it("shows the Duplicate tooltip on focus", async () => {
+      usePermissionMock.mockImplementation(
+        (permission: string) => permission === "quotes.duplicate",
+      );
+      useQuoteMock.mockReturnValue({ data: baseQuote("DRAFT"), isLoading: false });
+      renderWithProviders(<QuoteDetailPage />);
+
+      screen.getByRole("button", { name: /duplicate/i }).focus();
+
+      expect(
+        await screen.findByText("Create a copy of this quote as a new draft."),
+      ).toBeInTheDocument();
+    });
+
+    it("shows the Cancel quote tooltip on focus", async () => {
+      usePermissionMock.mockImplementation(
+        (permission: string) => permission === "quotes.update",
+      );
+      useQuoteMock.mockReturnValue({ data: baseQuote("SENT"), isLoading: false });
+      renderWithProviders(<QuoteDetailPage />);
+
+      screen.getByRole("button", { name: /cancel quote/i }).focus();
+
+      expect(
+        await screen.findByText("Cancel this quote without deleting its history."),
+      ).toBeInTheDocument();
+    });
+
+    it("shows the Delete tooltip on focus (keyboard-focus accessible, same as mouse hover)", async () => {
+      usePermissionMock.mockImplementation(
+        (permission: string) => permission === "quotes.delete",
+      );
+      useQuoteMock.mockReturnValue({ data: baseQuote("DRAFT"), isLoading: false });
+      renderWithProviders(<QuoteDetailPage />);
+
+      screen.getByRole("button", { name: /delete/i }).focus();
+
+      expect(await screen.findByText("Delete this quote.")).toBeInTheDocument();
+    });
+  });
+
+  // Task 3 A4/A13/A14 — Send quote opens a real compose flow instead of
+  // firing an email on a single click.
+  describe("Send quote email dialog", () => {
+    function sentQuoteWithEmail() {
+      return {
+        ...baseQuote("DRAFT"),
+        customer: {
+          id: "customer-1",
+          firstName: "Jane",
+          lastName: "Doe",
+          company: null,
+          phone: null,
+          email: "jane@example.com",
+        },
+      };
+    }
+
+    it("opens a compose dialog showing the real recipient, message field, and attachment note", async () => {
+      usePermissionMock.mockImplementation((permission: string) => permission === "quotes.send");
+      useQuoteMock.mockReturnValue({ data: sentQuoteWithEmail(), isLoading: false });
+      const user = userEvent.setup();
+      renderWithProviders(<QuoteDetailPage />);
+
+      await user.click(screen.getByRole("button", { name: /send quote/i }));
+
+      const dialog = await screen.findByRole("dialog");
+      expect(within(dialog).getByDisplayValue("jane@example.com")).toBeInTheDocument();
+      expect(within(dialog).getByText(/will be attached automatically/i)).toBeInTheDocument();
+      expect(within(dialog).getByRole("button", { name: /^send$/i })).toBeInTheDocument();
+    });
+
+    it("sends with the edited recipient and message, and reports the real delivery outcome", async () => {
+      usePermissionMock.mockImplementation((permission: string) => permission === "quotes.send");
+      useQuoteMock.mockReturnValue({ data: sentQuoteWithEmail(), isLoading: false });
+      const sendMutateAsync = vi.fn().mockResolvedValue({ emailSent: true });
+      useSendQuoteMock.mockReturnValue({ mutateAsync: sendMutateAsync, isPending: false });
+      const user = userEvent.setup();
+      renderWithProviders(<QuoteDetailPage />);
+
+      await user.click(screen.getByRole("button", { name: /send quote/i }));
+      const dialog = await screen.findByRole("dialog");
+      const recipientInput = within(dialog).getByLabelText(/recipient email/i);
+      await user.clear(recipientInput);
+      await user.type(recipientInput, "other@example.com");
+      await user.type(within(dialog).getByLabelText(/message/i), "Please review");
+      await user.click(within(dialog).getByRole("button", { name: /^send$/i }));
+
+      await waitFor(() =>
+        expect(sendMutateAsync).toHaveBeenCalledWith({
+          id: "quote-1",
+          recipientEmail: "other@example.com",
+          message: "Please review",
+        }),
+      );
+      expect(
+        await within(dialog).findByText("Email sent to other@example.com."),
+      ).toBeInTheDocument();
+    });
+
+    // Task 3 A14 / Part C — a NOT_CONFIGURED delivery must show a truthful,
+    // localized "not configured" message, never the raw backend string
+    // leaked straight to the user.
+    it("shows a truthful, translated message (never raw backend text) when email isn't configured", async () => {
+      usePermissionMock.mockImplementation((permission: string) => permission === "quotes.send");
+      useQuoteMock.mockReturnValue({ data: sentQuoteWithEmail(), isLoading: false });
+      const sendMutateAsync = vi.fn().mockResolvedValue({
+        emailSent: false,
+        emailError: "No email provider is configured",
+      });
+      useSendQuoteMock.mockReturnValue({ mutateAsync: sendMutateAsync, isPending: false });
+      const user = userEvent.setup();
+      renderWithProviders(<QuoteDetailPage />);
+
+      await user.click(screen.getByRole("button", { name: /send quote/i }));
+      const dialog = await screen.findByRole("dialog");
+      await user.click(within(dialog).getByRole("button", { name: /^send$/i }));
+
+      expect(
+        await within(dialog).findByText(/isn.t configured for this workspace yet/i),
+      ).toBeInTheDocument();
+      expect(within(dialog).queryByText("No email provider is configured")).not.toBeInTheDocument();
+    });
   });
 });

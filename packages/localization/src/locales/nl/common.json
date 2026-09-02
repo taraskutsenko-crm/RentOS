@@ -64,6 +64,7 @@
     "cancel": "Annuleren",
     "confirm": "Bevestigen",
     "dismiss": "Sluiten",
+    "close": "Close",
     "table": {
       "columns": "Kolommen",
       "permissionDenied": "Je hebt geen toestemming om deze gegevens te bekijken.",
@@ -882,7 +883,13 @@
       "addServiceItem": "Product of dienst toevoegen",
       "viewPdf": "PDF bekijken",
       "regeneratePdf": "PDF opnieuw genereren",
-      "downloadPdf": "PDF downloaden"
+      "downloadPdf": "PDF downloaden",
+      "sendTooltip": "Send this quote to the customer by email.",
+      "acceptTooltip": "Mark this quote as accepted by the customer.",
+      "regeneratePdfTooltip": "Create a new PDF from the current quote data.",
+      "duplicateTooltip": "Create a copy of this quote as a new draft.",
+      "cancelTooltip": "Cancel this quote without deleting its history.",
+      "deleteTooltip": "Delete this quote."
     },
     "timeline": {
       "created": "Offerte aangemaakt",
@@ -963,6 +970,33 @@
     },
     "email": {
       "deliveryHistory": "E-mailbezorggeschiedenis"
+    },
+    "acceptConfirmTitle": "Customer accepted the quote?",
+    "acceptConfirmBody": "Confirm the customer has agreed to the terms of this quote. The quote’s status will change to “Accepted”.",
+    "acceptConfirmButton": "Yes, mark as accepted",
+    "cancelConfirmTitle": "Cancel this quote?",
+    "cancelConfirmBody": "It will remain in history but will no longer be active.",
+    "deleteConfirmTitle": "Delete quote?",
+    "sendDialog": {
+      "title": "Send quote by email",
+      "recipientLabel": "Recipient email",
+      "messageLabel": "Message (optional)",
+      "attachmentNote": "The quote PDF will be attached automatically.",
+      "send": "Send",
+      "sending": "Sending…",
+      "successMessage": "Email sent to {{email}}.",
+      "failureMessage": "Delivery failed: {{error}}",
+      "notConfiguredMessage": "Email sending isn’t configured for this workspace yet — nothing was sent."
+    },
+    "statusTooltips": {
+      "DRAFT": "Not yet sent to the customer.",
+      "SENT": "Sent to the customer, awaiting a response.",
+      "VIEWED": "The customer has opened this quote.",
+      "ACCEPTED": "The customer accepted this quote.",
+      "REJECTED": "The customer rejected this quote.",
+      "EXPIRED": "The validity period has passed.",
+      "CONVERTED": "Converted into a rental.",
+      "CANCELLED": "Cancelled by staff — no longer active."
     }
   },
   "document": {

@@ -49,6 +49,17 @@ export class AssetsController {
     return this.assetsService.findMany(tenant.id, query);
   }
 
+  // Dashboard "Available assets" KPI (must be declared before the
+  // parameterized :assetId route below, per this controller's existing
+  // route-ordering convention). Returns the canonical count — see
+  // AssetsService.countAvailableNow's doc comment for why this can never be
+  // a catalog isRentable/currentStatusId filter.
+  @RequirePermissions("assets.read")
+  @Get("available-count")
+  async availableCount(@CurrentTenant() { tenant }: CurrentTenantContext) {
+    return { count: await this.assetsService.countAvailableNow(tenant.id) };
+  }
+
   @RequirePermissions("assets.read")
   @Get(":assetId")
   findOne(@CurrentTenant() { tenant }: CurrentTenantContext, @Param("assetId") assetId: string) {

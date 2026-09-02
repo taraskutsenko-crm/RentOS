@@ -64,6 +64,7 @@
     "cancel": "Zrušit",
     "confirm": "Potvrdit",
     "dismiss": "Zavřít",
+    "close": "Zavřít",
     "table": {
       "columns": "Sloupce",
       "permissionDenied": "Nemáte oprávnění zobrazit tato data.",
@@ -882,7 +883,13 @@
       "addServiceItem": "Přidat produkt nebo službu",
       "viewPdf": "Zobrazit PDF",
       "regeneratePdf": "Znovu vygenerovat PDF",
-      "downloadPdf": "Stáhnout PDF"
+      "downloadPdf": "Stáhnout PDF",
+      "sendTooltip": "Odeslat tuto nabídku zákazníkovi e-mailem.",
+      "acceptTooltip": "Označit, že zákazník tuto nabídku přijal.",
+      "regeneratePdfTooltip": "Vytvořit nové PDF z aktuálních dat nabídky.",
+      "duplicateTooltip": "Vytvořit kopii této nabídky jako nový koncept.",
+      "cancelTooltip": "Zrušit tuto nabídku, aniž by byla odstraněna z historie.",
+      "deleteTooltip": "Smazat tuto nabídku."
     },
     "timeline": {
       "created": "Nabídka vytvořena",
@@ -963,6 +970,33 @@
     },
     "email": {
       "deliveryHistory": "Historie odeslání e-mailu"
+    },
+    "acceptConfirmTitle": "Zákazník nabídku přijal?",
+    "acceptConfirmBody": "Potvrďte, že zákazník souhlasil s podmínkami této nabídky. Stav nabídky se změní na „Přijato“.",
+    "acceptConfirmButton": "Ano, označit jako přijatou",
+    "cancelConfirmTitle": "Zrušit tuto nabídku?",
+    "cancelConfirmBody": "Zůstane v historii, ale už nebude aktivní.",
+    "deleteConfirmTitle": "Smazat nabídku?",
+    "sendDialog": {
+      "title": "Odeslat nabídku e-mailem",
+      "recipientLabel": "E-mail příjemce",
+      "messageLabel": "Zpráva (volitelné)",
+      "attachmentNote": "PDF nabídky bude automaticky přiloženo.",
+      "send": "Odeslat",
+      "sending": "Odesílání…",
+      "successMessage": "E-mail odeslán na {{email}}.",
+      "failureMessage": "Doručení selhalo: {{error}}",
+      "notConfiguredMessage": "Odesílání e-mailů zatím není pro tento pracovní prostor nastaveno — nic nebylo odesláno."
+    },
+    "statusTooltips": {
+      "DRAFT": "Zatím nebylo odesláno zákazníkovi.",
+      "SENT": "Odesláno zákazníkovi, čeká se na odpověď.",
+      "VIEWED": "Zákazník tuto nabídku otevřel.",
+      "ACCEPTED": "Zákazník tuto nabídku přijal.",
+      "REJECTED": "Zákazník tuto nabídku zamítl.",
+      "EXPIRED": "Platnost vypršela.",
+      "CONVERTED": "Převedeno na pronájem.",
+      "CANCELLED": "Zrušeno zaměstnancem — již není aktivní."
     }
   },
   "document": {

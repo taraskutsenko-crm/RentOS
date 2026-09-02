@@ -1,7 +1,6 @@
 "use client";
 
-import { useAssetStatuses } from "./use-asset-statuses";
-import { useAssets } from "./use-assets";
+import { useAvailableAssetsCount } from "./use-assets";
 import { useCustomers } from "./use-customers";
 import { useStaffDamageReports, useStaffExtensionRequests } from "./use-customer-portal";
 import { useDocuments } from "./use-documents";
@@ -46,19 +45,15 @@ export function useDashboardStats(tenantId: string | null, permissions: Dashboar
     isError: permissions.canViewRentals && activeRentalsQuery.isError,
   };
 
-  const assetStatusesQuery = useAssetStatuses(permissions.canViewAssets ? tenantId : null);
-  const availableStatusId =
-    assetStatusesQuery.data?.find((status) => status.code === "AVAILABLE")?.id ?? null;
-  const availableAssetsQuery = useAssets(
-    permissions.canViewAssets && availableStatusId ? tenantId : null,
-    { pageSize: 1, statusId: availableStatusId ?? undefined },
-  );
+  // Task B — "Available assets" is the canonical, real-time count from
+  // AssetsService.countAvailableNow (AvailabilityService.checkAvailableNow +
+  // deriveAssetCurrentAvailability), never a catalog status=AVAILABLE
+  // filter — see use-assets.ts's useAvailableAssetsCount doc comment.
+  const availableAssetsQuery = useAvailableAssetsCount(permissions.canViewAssets ? tenantId : null);
   const availableAssets: DashboardStatResult = {
-    value: availableAssetsQuery.data?.total ?? 0,
-    isLoading:
-      permissions.canViewAssets && (assetStatusesQuery.isLoading || availableAssetsQuery.isLoading),
-    isError:
-      permissions.canViewAssets && (assetStatusesQuery.isError || availableAssetsQuery.isError),
+    value: availableAssetsQuery.data?.count ?? 0,
+    isLoading: permissions.canViewAssets && availableAssetsQuery.isLoading,
+    isError: permissions.canViewAssets && availableAssetsQuery.isError,
   };
 
   const sentQuotesQuery = useQuotes(permissions.canViewQuotes ? tenantId : null, {

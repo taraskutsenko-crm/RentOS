@@ -141,6 +141,8 @@
       "emailInUse": "该邮箱已被注册",
       "invalidCredentials": "邮箱或密码不正确",
       "accountInactive": "该账户已停用",
+      "sessionExpired": "Your session has expired. Please sign in again.",
+      "permissionDenied": "You don't have permission to do that.",
       "generic": "出现了一些问题，请重试。"
     }
   },
@@ -388,7 +390,8 @@
       "changeLocation": "更改位置",
       "deleteImage": "删除图片",
       "deleteDocument": "删除",
-      "uploadDocument": "上传"
+      "uploadDocument": "上传",
+      "uploadImage": "Upload"
     },
     "errors": {
       "customFieldRequired": "此字段为必填项",
@@ -610,6 +613,10 @@
         "generated": "已生成",
         "sent": "已发送",
         "signed": "已签署"
+      },
+      "notReady": {
+        "beforeReservation": "Available once the rental is reserved",
+        "beforeHandover": "Available after handover"
       },
       "generate": "生成",
       "open": "打开",

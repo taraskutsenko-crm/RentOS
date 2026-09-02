@@ -5,14 +5,20 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { FileUploadField } from "../shared/file-upload-field";
 import {
   documentFileUrl,
   useDeleteDocumentFile,
   useUploadDocumentFile,
 } from "../../hooks/use-documents";
-import { mapDocumentUploadError, type DocumentUploadErrorKind } from "../../lib/document-file-validation";
+import {
+  DOCUMENT_UPLOAD_ALLOWED_MIME_TYPES,
+  DOCUMENT_UPLOAD_MAX_SIZE_BYTES,
+  DOCUMENT_UPLOAD_TYPE_LABELS,
+  mapDocumentUploadError,
+  type DocumentUploadErrorKind,
+} from "../../lib/document-file-validation";
 import type { DocumentAttachmentCategory, DocumentFile, DocumentType } from "../../types/document";
-import { FileUploadField } from "./file-upload-field";
 
 export interface DocumentAttachmentsProps {
   tenantId: string | null;
@@ -197,7 +203,21 @@ export function DocumentAttachments({
             file={selectedFile}
             onFileChange={handleFileChange}
             onValidationError={setUploadErrorKind}
+            allowedMimeTypes={DOCUMENT_UPLOAD_ALLOWED_MIME_TYPES}
+            maxSizeBytes={DOCUMENT_UPLOAD_MAX_SIZE_BYTES}
             disabled={uploadFile.isPending}
+            labels={{
+              chooseFile: t("document.attachments.chooseFile"),
+              noFileSelected: t("document.attachments.noFileSelected"),
+              changeFile: t("document.attachments.changeFile"),
+              removeFile: t("document.attachments.removeFile"),
+              dropHint: t("document.attachments.dropHint"),
+              or: t("document.attachments.or"),
+              supportedTypes: t("document.attachments.supportedTypes", {
+                types: DOCUMENT_UPLOAD_TYPE_LABELS.join(", "),
+                maxSize: `${Math.floor(DOCUMENT_UPLOAD_MAX_SIZE_BYTES / (1024 * 1024))} MB`,
+              }),
+            }}
           />
 
           {uploadErrorKind && (

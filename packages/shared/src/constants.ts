@@ -29,3 +29,15 @@ export const DOCUMENT_ATTACHMENT_ALLOWED_MIME_TYPES = [
   "image/webp",
 ] as const;
 export const DOCUMENT_ATTACHMENT_MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+
+/**
+ * Mirrors `ALLOWED_IMAGE_MIME_TYPES`/`MAX_IMAGE_SIZE_BYTES` in
+ * apps/api/src/storage/storage.service.ts — the same real constraints
+ * `StorageService.validateImage` enforces for Asset Images, the Company
+ * Logo, and the Company Signature upload (all three route through
+ * `validateImage`). See DOCUMENT_ATTACHMENT_ALLOWED_MIME_TYPES's own doc
+ * comment for why this lives here rather than being duplicated per upload
+ * surface.
+ */
+export const IMAGE_UPLOAD_ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const IMAGE_UPLOAD_MAX_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB

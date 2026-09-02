@@ -39,7 +39,10 @@ async function fetchPublicDocumentPdf(token: string, password?: string): Promise
     } catch {
       // Non-JSON error body — fall back to the generic message.
     }
-    throw new ApiError(message, response.status);
+    // Public/unauthenticated route — its 401/403 responses are about the
+    // share-link password, never a staff/customer session, so this path is
+    // never treated as a session-expiry signal (see session-expiry.ts).
+    throw new ApiError(message, response.status, `/public/documents/${token}/pdf`);
   }
 
   return response.blob();

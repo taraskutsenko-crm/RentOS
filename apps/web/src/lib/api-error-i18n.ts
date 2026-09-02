@@ -13,6 +13,20 @@ const KNOWN_MESSAGES: Record<string, string> = {
   "No tenant context provided": "tenant.errors.noAccess",
   "You do not have access to this tenant": "tenant.errors.noAccess",
   "This tenant is not available": "tenant.errors.noAccess",
+  // PermissionsGuard (apps/api/src/permissions/permissions.guard.ts) — the
+  // one message thrown for every 403 permission-denied response app-wide.
+  "You do not have permission to perform this action": "auth.errors.permissionDenied",
+  // JwtAuthGuard/CustomerAuthGuard 401 messages — the global session-expiry
+  // redirect (see session-expiry.ts/query-provider.tsx) is the primary fix
+  // for these (the user never sees this text at all, they're redirected to
+  // a friendly login banner first); mapped here too as defense in depth for
+  // any caller that reads `apiErrorKey` directly instead of going through
+  // the global handler.
+  "Authentication required": "auth.errors.sessionExpired",
+  "Invalid or expired session": "auth.errors.sessionExpired",
+  "Account is no longer active": "auth.errors.sessionExpired",
+  "Portal authentication required": "auth.errors.sessionExpired",
+  "Portal account is no longer active": "auth.errors.sessionExpired",
 };
 
 export function apiErrorKey(error: unknown): string {

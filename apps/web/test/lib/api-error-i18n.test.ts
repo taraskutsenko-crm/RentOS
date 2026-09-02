@@ -37,6 +37,31 @@ describe("apiErrorKey", () => {
       "auth.errors.emailInUse",
     );
   });
+
+  // Task F1/F4 — every real 401 "session expired" message JwtAuthGuard/
+  // CustomerAuthGuard can throw maps to the same friendly key (defense in
+  // depth alongside the global redirect in query-provider.tsx — see
+  // session-expiry.ts).
+  it("maps every real session-expiry 401 message to the friendly sessionExpired key", () => {
+    const messages = [
+      "Authentication required",
+      "Invalid or expired session",
+      "Account is no longer active",
+      "Portal authentication required",
+      "Portal account is no longer active",
+    ];
+    for (const message of messages) {
+      expect(apiErrorKey(new ApiError(message, 401))).toBe("auth.errors.sessionExpired");
+    }
+  });
+
+  // Task F3/F4 — a 403 permission-denied response gets its own friendly
+  // key, distinct from session expiry.
+  it("maps PermissionsGuard's 403 message to the permissionDenied key", () => {
+    expect(
+      apiErrorKey(new ApiError("You do not have permission to perform this action", 403)),
+    ).toBe("auth.errors.permissionDenied");
+  });
 });
 
 describe("apiErrorMessage", () => {

@@ -632,7 +632,9 @@ export default function RentalDetailPage() {
                                   : "text-muted-foreground"
                             }
                           >
-                            {t(`rental.documentChecklist.states.${item.state}`)}
+                            {item.state === "notRequiredYet" && item.notReadyReasonKey
+                              ? t(item.notReadyReasonKey)
+                              : t(`rental.documentChecklist.states.${item.state}`)}
                           </span>
                         )}
                       </li>

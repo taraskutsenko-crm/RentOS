@@ -9,13 +9,27 @@ interface ApiErrorBody {
 export class ApiError extends Error {
   readonly statusCode: number;
   readonly details?: ApiErrorBody | undefined;
+  /**
+   * The request path (e.g. "/tenants/x/rentals"), stripped of its leading
+   * origin/query — lets a global handler (see session-expiry.ts) tell "a
+   * 401 from an already-authenticated area of the app" (a real session
+   * expiry) apart from "a 401 from the login/register form itself" (an
+   * expected, ordinary invalid-credentials outcome that must never trigger
+   * a redirect away from the very form reporting it).
+   */
+  readonly path: string;
 
-  constructor(message: string, statusCode: number, details?: ApiErrorBody) {
+  constructor(message: string, statusCode: number, path: string = "", details?: ApiErrorBody) {
     super(message);
     this.name = "ApiError";
     this.statusCode = statusCode;
+    this.path = path;
     this.details = details;
   }
+}
+
+function pathOnly(path: string): string {
+  return path.split("?")[0]!;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -37,7 +51,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const message = Array.isArray(rawMessage)
       ? rawMessage.join(", ")
       : (rawMessage ?? "Request failed");
-    throw new ApiError(message, response.status, errorBody);
+    throw new ApiError(message, response.status, pathOnly(path), errorBody);
   }
 
   return body as T;
@@ -79,7 +93,7 @@ async function requestForm<T>(
     const message = Array.isArray(rawMessage)
       ? rawMessage.join(", ")
       : (rawMessage ?? "Request failed");
-    throw new ApiError(message, response.status, errorBody);
+    throw new ApiError(message, response.status, pathOnly(path), errorBody);
   }
 
   return body as T;

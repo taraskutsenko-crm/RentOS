@@ -141,6 +141,8 @@
       "emailInUse": "Já existe uma conta com este e-mail",
       "invalidCredentials": "E-mail ou senha inválidos",
       "accountInactive": "Esta conta está inativa",
+      "sessionExpired": "Your session has expired. Please sign in again.",
+      "permissionDenied": "You don't have permission to do that.",
       "generic": "Algo deu errado. Tente novamente."
     }
   },
@@ -388,7 +390,8 @@
       "changeLocation": "Alterar localização",
       "deleteImage": "Excluir imagem",
       "deleteDocument": "Excluir",
-      "uploadDocument": "Enviar"
+      "uploadDocument": "Enviar",
+      "uploadImage": "Upload"
     },
     "errors": {
       "customFieldRequired": "Este campo é obrigatório",
@@ -610,6 +613,10 @@
         "generated": "Gerado",
         "sent": "Enviado",
         "signed": "Assinado"
+      },
+      "notReady": {
+        "beforeReservation": "Available once the rental is reserved",
+        "beforeHandover": "Available after handover"
       },
       "generate": "Gerar",
       "open": "Abrir",

@@ -2,73 +2,27 @@ import { describe, expect, it } from "vitest";
 
 import { ApiError } from "../../src/lib/api-client";
 import {
+  DOCUMENT_UPLOAD_ALLOWED_MIME_TYPES,
   DOCUMENT_UPLOAD_MAX_SIZE_BYTES,
   DOCUMENT_UPLOAD_TYPE_LABELS,
-  formatFileSize,
-  isAllowedDocumentFileType,
-  isWithinDocumentFileSizeLimit,
   mapDocumentUploadError,
-  validateDocumentFileLocally,
 } from "../../src/lib/document-file-validation";
 
-function makeFile(name: string, type: string, sizeBytes: number): File {
-  const file = new File([new Uint8Array(1)], name, { type });
-  Object.defineProperty(file, "size", { value: sizeBytes });
-  return file;
-}
-
+// Client-side file-selection validation itself now lives once, generically,
+// in components/shared/file-upload-field.tsx (see its own tests) — this
+// file only covers document-attachment-specific constants/error mapping
+// that isn't shared with Asset Images/Documents (different MIME/size
+// constraints per surface).
 describe("document-file-validation", () => {
-  it("mirrors the real backend allowlist (PDF, JPEG, PNG, WEBP)", () => {
+  it("mirrors the real backend document-attachment allowlist and size limit (PDF, JPEG, PNG, WEBP · 20 MB)", () => {
+    expect(DOCUMENT_UPLOAD_ALLOWED_MIME_TYPES).toEqual([
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ]);
+    expect(DOCUMENT_UPLOAD_MAX_SIZE_BYTES).toBe(20 * 1024 * 1024);
     expect(DOCUMENT_UPLOAD_TYPE_LABELS).toEqual(["PDF", "JPG", "PNG", "WEBP"]);
-  });
-
-  it("accepts every allowed MIME type", () => {
-    for (const type of ["application/pdf", "image/jpeg", "image/png", "image/webp"]) {
-      expect(isAllowedDocumentFileType(makeFile("f", type, 100))).toBe(true);
-    }
-  });
-
-  it("rejects an unsupported MIME type", () => {
-    expect(isAllowedDocumentFileType(makeFile("f.exe", "application/x-msdownload", 100))).toBe(
-      false,
-    );
-  });
-
-  it("accepts a file within the size limit and rejects one over it", () => {
-    expect(isWithinDocumentFileSizeLimit(makeFile("f.pdf", "application/pdf", 1024))).toBe(true);
-    expect(
-      isWithinDocumentFileSizeLimit(
-        makeFile("f.pdf", "application/pdf", DOCUMENT_UPLOAD_MAX_SIZE_BYTES + 1),
-      ),
-    ).toBe(false);
-  });
-
-  it("rejects an empty file", () => {
-    expect(isWithinDocumentFileSizeLimit(makeFile("f.pdf", "application/pdf", 0))).toBe(false);
-  });
-
-  it("validateDocumentFileLocally returns unsupportedType before tooLarge", () => {
-    const hugeUnsupported = makeFile(
-      "f.exe",
-      "application/x-msdownload",
-      DOCUMENT_UPLOAD_MAX_SIZE_BYTES + 1,
-    );
-    expect(validateDocumentFileLocally(hugeUnsupported)).toBe("unsupportedType");
-  });
-
-  it("validateDocumentFileLocally returns tooLarge for an oversized allowed type", () => {
-    const huge = makeFile("f.pdf", "application/pdf", DOCUMENT_UPLOAD_MAX_SIZE_BYTES + 1);
-    expect(validateDocumentFileLocally(huge)).toBe("tooLarge");
-  });
-
-  it("validateDocumentFileLocally returns null for a valid file", () => {
-    expect(validateDocumentFileLocally(makeFile("f.pdf", "application/pdf", 2048))).toBeNull();
-  });
-
-  it("formats file sizes the way the spec examples show", () => {
-    expect(formatFileSize(500)).toBe("500 B");
-    expect(formatFileSize(2_400_000)).toBe("2.3 MB");
-    expect(formatFileSize(480 * 1024)).toBe("480 KB");
   });
 
   it("maps a backend 'unsupported type' 400 to unsupportedType, never the raw message", () => {

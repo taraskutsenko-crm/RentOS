@@ -4,12 +4,20 @@ import { randomUUID } from "node:crypto";
 import {
   DOCUMENT_ATTACHMENT_ALLOWED_MIME_TYPES,
   DOCUMENT_ATTACHMENT_MAX_SIZE_BYTES,
+  IMAGE_UPLOAD_ALLOWED_MIME_TYPES,
+  IMAGE_UPLOAD_MAX_SIZE_BYTES,
 } from "@rentos/shared";
 
 import { STORAGE_ADAPTER, type StorageAdapter } from "./storage.types";
 
-export const ALLOWED_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
-export const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB
+/**
+ * Single source of truth for image-file validation — defined in
+ * @rentos/shared (not duplicated here) so Asset Images/Company Logo/Company
+ * Signature upload UI can display and pre-check the exact real constraints.
+ * See IMAGE_UPLOAD_ALLOWED_MIME_TYPES's own doc comment.
+ */
+export const ALLOWED_IMAGE_MIME_TYPES = IMAGE_UPLOAD_ALLOWED_MIME_TYPES;
+export const MAX_IMAGE_SIZE_BYTES = IMAGE_UPLOAD_MAX_SIZE_BYTES;
 
 /**
  * This is the single source of truth for document-file validation — defined

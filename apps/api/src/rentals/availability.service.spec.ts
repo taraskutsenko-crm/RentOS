@@ -415,7 +415,16 @@ describe("AvailabilityService.checkAvailableNow", () => {
     expect(prisma.rentalItem.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          rental: expect.objectContaining({ plannedStart: { lt: now } }),
+          // The candidate query considers actualStart when present (an
+          // ACTIVE rental's real occupancy window) and only falls back to
+          // plannedStart for a not-yet-started RESERVED rental — see
+          // checkAvailability's own doc comment on this exact fix.
+          rental: expect.objectContaining({
+            OR: [
+              { actualStart: { lt: now } },
+              { actualStart: null, plannedStart: { lt: now } },
+            ],
+          }),
         }),
       }),
     );
@@ -438,7 +447,10 @@ describe("AvailabilityService.checkAvailableNow", () => {
         expect.objectContaining({
           where: expect.objectContaining({
             rental: expect.objectContaining({
-              plannedStart: { lt: new Date("2026-08-29T12:00:00Z") },
+              OR: [
+                { actualStart: { lt: new Date("2026-08-29T12:00:00Z") } },
+                { actualStart: null, plannedStart: { lt: new Date("2026-08-29T12:00:00Z") } },
+              ],
             }),
           }),
         }),

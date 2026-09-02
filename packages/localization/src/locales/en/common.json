@@ -141,6 +141,8 @@
       "emailInUse": "An account with this email already exists",
       "invalidCredentials": "Invalid email or password",
       "accountInactive": "This account is inactive",
+      "sessionExpired": "Your session has expired. Please sign in again.",
+      "permissionDenied": "You don't have permission to do that.",
       "generic": "Something went wrong. Please try again."
     }
   },
@@ -388,7 +390,8 @@
       "changeLocation": "Change location",
       "deleteImage": "Delete image",
       "deleteDocument": "Delete",
-      "uploadDocument": "Upload"
+      "uploadDocument": "Upload",
+      "uploadImage": "Upload"
     },
     "errors": {
       "customFieldRequired": "This field is required",
@@ -624,6 +627,10 @@
         "generated": "Generated",
         "sent": "Sent",
         "signed": "Signed"
+      },
+      "notReady": {
+        "beforeReservation": "Available once the rental is reserved",
+        "beforeHandover": "Available after handover"
       },
       "open": "Open",
       "generateQuote": "Generate Quote"

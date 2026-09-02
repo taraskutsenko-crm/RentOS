@@ -141,6 +141,8 @@
       "emailInUse": "Акаунт із цією поштою вже існує",
       "invalidCredentials": "Неправильна пошта або пароль",
       "accountInactive": "Цей акаунт неактивний",
+      "sessionExpired": "Сеанс закінчився. Увійдіть знову.",
+      "permissionDenied": "У вас немає прав для цієї дії.",
       "generic": "Щось пішло не так. Спробуйте ще раз."
     }
   },
@@ -388,7 +390,8 @@
       "changeLocation": "Змінити розташування",
       "deleteImage": "Видалити зображення",
       "deleteDocument": "Видалити",
-      "uploadDocument": "Завантажити"
+      "uploadDocument": "Завантажити",
+      "uploadImage": "Завантажити"
     },
     "errors": {
       "customFieldRequired": "Це поле обов'язкове",
@@ -610,6 +613,10 @@
         "generated": "Створено",
         "sent": "Надіслано",
         "signed": "Підписано"
+      },
+      "notReady": {
+        "beforeReservation": "Доступно після резервування оренди",
+        "beforeHandover": "Доступно після видачі"
       },
       "generate": "Створити",
       "open": "Відкрити",

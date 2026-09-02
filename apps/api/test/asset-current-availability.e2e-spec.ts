@@ -208,6 +208,38 @@ describe("Asset current availability (Assets list) E2E", () => {
     expect(row.currentStatus.code).toBe("RENTED");
   });
 
+  // A2: REGRESSION — reproduces the real production case ("Mieszkanie 119" /
+  // RNT-000006, 2026-09-02 walkthrough): a rental whose plannedStart is
+  // still in the future gets started early for real (RentalsService.start()
+  // explicitly allows this — it only rejects an already-*past* plannedStart,
+  // see its own doc comment). AvailabilityService.checkAvailability's
+  // candidate query used to filter solely on `rental.plannedStart < now`,
+  // so an item whose rental had a *future* plannedStart was silently
+  // excluded from consideration entirely — even though the rental was
+  // genuinely ACTIVE and actualStart had already happened. Root cause:
+  // the query never considered `actualStart` (the real occupancy start for
+  // an ACTIVE rental) as an alternative to plannedStart. Fixed in
+  // AvailabilityService.checkAvailability's candidate query (see its own
+  // doc comment) — this test would have failed before that fix (isAvailableNow
+  // would have wrongly been `true`).
+  it("REGRESSION: an ACTIVE rental started early (actualStart before its own future plannedStart) still makes the asset unavailable now", async () => {
+    const assetId = await createAsset("GEN-A2");
+    const now = new Date();
+    const futurePlannedStart = new Date(now.getTime() + 2 * HOUR_MS);
+    const rentalId = await createRental(
+      assetId,
+      futurePlannedStart,
+      new Date(now.getTime() + 26 * HOUR_MS),
+    );
+    await reserveAndStart(rentalId); // real /start call — actualStart = now, well before plannedStart
+
+    const row = await listRow(assetId);
+    expect(row.isAvailableNow).toBe(false);
+    expect(row.unavailableReason).toBe("RENTED");
+    expect(row.currentStatus.code).toBe("RENTED");
+    expect(row.isOverdue).toBe(false); // started early, still well within its planned window
+  });
+
   // B: future rental only -> today unaffected.
   it("future rental only -> Available now = Yes (today unaffected by a future booking)", async () => {
     const assetId = await createAsset("GEN-B");

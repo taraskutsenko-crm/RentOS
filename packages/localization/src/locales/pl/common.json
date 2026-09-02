@@ -141,6 +141,8 @@
       "emailInUse": "Konto z tym adresem e-mail już istnieje",
       "invalidCredentials": "Nieprawidłowy e-mail lub hasło",
       "accountInactive": "To konto jest nieaktywne",
+      "sessionExpired": "Twoja sesja wygasła. Zaloguj się ponownie.",
+      "permissionDenied": "Nie masz uprawnień do wykonania tej czynności.",
       "generic": "Coś poszło nie tak. Spróbuj ponownie."
     }
   },
@@ -388,7 +390,8 @@
       "changeLocation": "Zmień lokalizację",
       "deleteImage": "Usuń zdjęcie",
       "deleteDocument": "Usuń",
-      "uploadDocument": "Prześlij"
+      "uploadDocument": "Prześlij",
+      "uploadImage": "Prześlij"
     },
     "errors": {
       "customFieldRequired": "To pole jest wymagane",
@@ -610,6 +613,10 @@
         "generated": "Wygenerowany",
         "sent": "Wysłany",
         "signed": "Podpisany"
+      },
+      "notReady": {
+        "beforeReservation": "Dostępne po zarezerwowaniu wynajmu",
+        "beforeHandover": "Dostępne po wydaniu"
       },
       "generate": "Generuj",
       "open": "Otwórz",

@@ -5,8 +5,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import PortalLoginPage from "../../src/app/portal/login/page";
 import { renderWithProviders } from "../test-utils";
 
+const pushMock = vi.fn();
+let searchParams = new URLSearchParams();
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push: pushMock, replace: vi.fn() }),
+  useSearchParams: () => searchParams,
 }));
 
 const usePortalLoginMock = vi.fn();
@@ -17,6 +20,34 @@ vi.mock("../../src/hooks/use-portal-auth", () => ({
 describe("PortalLoginPage", () => {
   beforeEach(() => {
     usePortalLoginMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false, isError: false });
+    pushMock.mockReset();
+    searchParams = new URLSearchParams();
+  });
+
+  // Task F1/F2 — same friendly-banner/preserved-returnTo behavior as the
+  // staff LoginForm, for the customer portal's own session expiry.
+  it("shows the friendly session-expired banner when redirected here after a portal 401", () => {
+    searchParams = new URLSearchParams({ reason: "session_expired" });
+    renderWithProviders(<PortalLoginPage />);
+
+    expect(
+      screen.getByText("Your session has expired. Please sign in again."),
+    ).toBeInTheDocument();
+  });
+
+  it("redirects to the preserved returnTo path after a successful portal login", async () => {
+    searchParams = new URLSearchParams({ returnTo: "/portal/rentals/r1" });
+    const mutateAsync = vi.fn().mockResolvedValue(undefined);
+    usePortalLoginMock.mockReturnValue({ mutateAsync, isPending: false, isError: false });
+    const user = userEvent.setup();
+
+    renderWithProviders(<PortalLoginPage />);
+    await user.type(screen.getByLabelText(/company/i), "acme");
+    await user.type(screen.getByLabelText(/^email$/i), "jane@example.com");
+    await user.type(screen.getByLabelText(/^password$/i), "hunter2");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith("/portal/rentals/r1"));
   });
 
   it("renders the company, email, and password fields", () => {

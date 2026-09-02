@@ -141,6 +141,8 @@
       "emailInUse": "이 이메일로 가입된 계정이 이미 있습니다",
       "invalidCredentials": "이메일 또는 비밀번호가 올바르지 않습니다",
       "accountInactive": "이 계정은 비활성 상태입니다",
+      "sessionExpired": "Your session has expired. Please sign in again.",
+      "permissionDenied": "You don't have permission to do that.",
       "generic": "문제가 발생했습니다. 다시 시도해 주세요."
     }
   },
@@ -388,7 +390,8 @@
       "changeLocation": "위치 변경",
       "deleteImage": "이미지 삭제",
       "deleteDocument": "삭제",
-      "uploadDocument": "업로드"
+      "uploadDocument": "업로드",
+      "uploadImage": "Upload"
     },
     "errors": {
       "customFieldRequired": "필수 입력 항목입니다",
@@ -610,6 +613,10 @@
         "generated": "생성됨",
         "sent": "발송됨",
         "signed": "서명됨"
+      },
+      "notReady": {
+        "beforeReservation": "Available once the rental is reserved",
+        "beforeHandover": "Available after handover"
       },
       "generate": "생성",
       "open": "열기",

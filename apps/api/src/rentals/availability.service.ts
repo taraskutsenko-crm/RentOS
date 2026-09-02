@@ -99,7 +99,23 @@ export class AvailabilityService {
           rental: {
             status: { in: BLOCKING_STATUSES },
             deletedAt: null,
-            plannedStart: { lt: plannedEnd },
+            // The rental's real occupancy of the asset begins at
+            // `actualStart` once it exists (an ACTIVE rental that was
+            // started — possibly *before* its own plannedStart, e.g. an
+            // early handover), not at `plannedStart`. A RESERVED rental
+            // has no actualStart yet, so it still candidates on its
+            // planned window as before. Using `plannedStart` alone here
+            // was the exact root cause of a real production bug: an
+            // ACTIVE, started, unreturned rental whose plannedStart was
+            // still in the future (started early) was silently excluded
+            // as a candidate entirely, so the asset showed "Available
+            // now: Yes" while genuinely handed out — see
+            // availability.service.spec.ts / asset-current-availability
+            // .e2e-spec.ts's "started early" regression tests.
+            OR: [
+              { actualStart: { lt: plannedEnd } },
+              { actualStart: null, plannedStart: { lt: plannedEnd } },
+            ],
             ...(excludeRentalId ? { id: { not: excludeRentalId } } : {}),
           },
         },

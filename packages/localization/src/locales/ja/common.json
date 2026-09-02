@@ -141,6 +141,8 @@
       "emailInUse": "このメールアドレスのアカウントはすでに存在します",
       "invalidCredentials": "メールアドレスまたはパスワードが正しくありません",
       "accountInactive": "このアカウントは無効化されています",
+      "sessionExpired": "Your session has expired. Please sign in again.",
+      "permissionDenied": "You don't have permission to do that.",
       "generic": "問題が発生しました。もう一度お試しください。"
     }
   },
@@ -388,7 +390,8 @@
       "changeLocation": "所在地を変更",
       "deleteImage": "画像を削除",
       "deleteDocument": "削除",
-      "uploadDocument": "アップロード"
+      "uploadDocument": "アップロード",
+      "uploadImage": "Upload"
     },
     "errors": {
       "customFieldRequired": "この項目は必須です",
@@ -610,6 +613,10 @@
         "generated": "生成済み",
         "sent": "送信済み",
         "signed": "署名済み"
+      },
+      "notReady": {
+        "beforeReservation": "Available once the rental is reserved",
+        "beforeHandover": "Available after handover"
       },
       "generate": "生成",
       "open": "開く",

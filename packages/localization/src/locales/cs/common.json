@@ -141,6 +141,8 @@
       "emailInUse": "Účet s tímto e-mailem již existuje",
       "invalidCredentials": "Neplatný e-mail nebo heslo",
       "accountInactive": "Tento účet je neaktivní",
+      "sessionExpired": "Vaše relace vypršela. Přihlaste se prosím znovu.",
+      "permissionDenied": "K této akci nemáte oprávnění.",
       "generic": "Něco se pokazilo. Zkuste to prosím znovu."
     }
   },
@@ -388,7 +390,8 @@
       "changeLocation": "Změnit umístění",
       "deleteImage": "Odstranit obrázek",
       "deleteDocument": "Odstranit",
-      "uploadDocument": "Nahrát"
+      "uploadDocument": "Nahrát",
+      "uploadImage": "Nahrát"
     },
     "errors": {
       "customFieldRequired": "Toto pole je povinné",
@@ -610,6 +613,10 @@
         "generated": "Vygenerováno",
         "sent": "Odesláno",
         "signed": "Podepsáno"
+      },
+      "notReady": {
+        "beforeReservation": "Dostupné po rezervaci pronájmu",
+        "beforeHandover": "Dostupné po předání"
       },
       "generate": "Vygenerovat",
       "open": "Otevřít",

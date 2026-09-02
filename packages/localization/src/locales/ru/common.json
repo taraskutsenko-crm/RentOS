@@ -141,6 +141,8 @@
       "emailInUse": "Аккаунт с этим email уже существует",
       "invalidCredentials": "Неверный email или пароль",
       "accountInactive": "Этот аккаунт неактивен",
+      "sessionExpired": "Сессия истекла. Войдите снова.",
+      "permissionDenied": "У вас нет прав для этого действия.",
       "generic": "Что-то пошло не так. Попробуйте ещё раз."
     }
   },
@@ -388,7 +390,8 @@
       "changeLocation": "Изменить местоположение",
       "deleteImage": "Удалить изображение",
       "deleteDocument": "Удалить",
-      "uploadDocument": "Загрузить"
+      "uploadDocument": "Загрузить",
+      "uploadImage": "Загрузить"
     },
     "errors": {
       "customFieldRequired": "Это поле обязательно",
@@ -610,6 +613,10 @@
         "generated": "Создан",
         "sent": "Отправлен",
         "signed": "Подписан"
+      },
+      "notReady": {
+        "beforeReservation": "Доступно после резервирования аренды",
+        "beforeHandover": "Доступно после выдачи"
       },
       "generate": "Создать",
       "open": "Открыть",

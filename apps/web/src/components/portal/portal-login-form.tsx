@@ -2,12 +2,13 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@rentos/ui";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { usePortalLogin } from "../../hooks/use-portal-auth";
 import { apiErrorMessage } from "../../lib/api-error-i18n";
+import { isSessionExpiredReason, sanitizeReturnTo } from "../../lib/session-expiry";
 import { portalLoginSchema, type PortalLoginFormValues } from "../../lib/validation";
 import { AuthAlert } from "../auth/auth-alert";
 import { AuthField, PasswordField } from "../auth/auth-field";
@@ -15,7 +16,13 @@ import { AuthField, PasswordField } from "../auth/auth-field";
 export function PortalLoginForm() {
   const { t } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const loginMutation = usePortalLogin();
+
+  // See LoginForm's identical handling — the global 401 handler in
+  // query-provider.tsx sends the customer back here with these params.
+  const sessionExpired = isSessionExpiredReason(searchParams?.get("reason") ?? null);
+  const returnTo = sanitizeReturnTo(searchParams?.get("returnTo") ?? null, "/portal/dashboard");
 
   const {
     register,
@@ -28,7 +35,7 @@ export function PortalLoginForm() {
   async function onSubmit(values: PortalLoginFormValues): Promise<void> {
     try {
       await loginMutation.mutateAsync(values);
-      router.push("/portal/dashboard");
+      router.push(returnTo);
     } catch {
       // Surfaced below via loginMutation.error.
     }
@@ -38,6 +45,9 @@ export function PortalLoginForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+      {!loginMutation.isError && sessionExpired && (
+        <AuthAlert variant="info">{t("auth.errors.sessionExpired")}</AuthAlert>
+      )}
       {loginMutation.isError && (
         <AuthAlert>
           {apiErrorMessage(loginMutation.error, t("portal.auth.errors.invalidCredentials"))}

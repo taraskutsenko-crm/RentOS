@@ -174,6 +174,7 @@ describe("getRentalDocumentChecklist", () => {
           key: "handoverProtocol",
           state: "notRequiredYet",
           document: null,
+          notReadyReasonKey: "rental.documentChecklist.notReady.beforeReservation",
         });
       },
     );
@@ -193,6 +194,23 @@ describe("getRentalDocumentChecklist", () => {
         });
       },
     );
+
+    // Task B3: a specific, honest reason instead of a generic dead-end
+    // label — CANCELLED is also "not ready" but for the same underlying
+    // "never reserved this far" bucket as DRAFT/QUOTE.
+    it("is notRequiredYet with the beforeReservation reason for a CANCELLED rental too", () => {
+      const checklist = getRentalDocumentChecklist({
+        status: "CANCELLED",
+        sourceQuote: null,
+        documents: [],
+      });
+      expect(checklist.find((item) => item.key === "handoverProtocol")).toEqual({
+        key: "handoverProtocol",
+        state: "notRequiredYet",
+        document: null,
+        notReadyReasonKey: "rental.documentChecklist.notReady.beforeReservation",
+      });
+    });
 
     it("is generated once a HANDOVER_PROTOCOL document exists for an active rental", () => {
       const handoverDoc = doc({ id: "doc-2", documentType: "HANDOVER_PROTOCOL" });
@@ -235,6 +253,7 @@ describe("getRentalDocumentChecklist", () => {
           key: "returnProtocol",
           state: "notRequiredYet",
           document: null,
+          notReadyReasonKey: "rental.documentChecklist.notReady.beforeHandover",
         });
       },
     );

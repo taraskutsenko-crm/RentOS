@@ -1,15 +1,27 @@
 "use client";
 
-import { Button } from "@rentos/ui";
-import { useRef, useState } from "react";
+import { Button, cn } from "@rentos/ui";
+import { CheckCircle2, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { FileUploadField } from "../shared/file-upload-field";
 import {
   useDeleteAssetDocument,
   useDeleteAssetImage,
   useUploadAssetDocument,
   useUploadAssetImage,
 } from "../../hooks/use-assets";
+import {
+  ASSET_DOCUMENT_UPLOAD_ALLOWED_MIME_TYPES,
+  ASSET_DOCUMENT_UPLOAD_MAX_SIZE_BYTES,
+  ASSET_IMAGE_UPLOAD_ALLOWED_MIME_TYPES,
+  ASSET_IMAGE_UPLOAD_MAX_SIZE_BYTES,
+  ASSET_IMAGE_UPLOAD_TYPE_LABELS,
+  mapAssetImageUploadError,
+} from "../../lib/asset-file-validation";
+import { DOCUMENT_UPLOAD_TYPE_LABELS, mapDocumentUploadError } from "../../lib/document-file-validation";
+import type { DocumentUploadErrorKind } from "../../lib/document-file-validation";
 import type { AssetDocument, AssetDocumentType, AssetImage } from "../../types/asset";
 
 export interface AssetFilesManagerProps {
@@ -31,6 +43,18 @@ const DOCUMENT_TYPES: AssetDocumentType[] = [
   "OTHER",
 ];
 
+/**
+ * Task C: replaces the raw native "Browse... No file chosen" controls this
+ * component used to render directly with the one shared Havelio upload
+ * primitive (see components/shared/file-upload-field.tsx) — the same
+ * component Document Attachments uses, just with each section's own real
+ * backend-derived MIME/size constraints (images vs. supporting documents
+ * use different StorageService validators — see asset-file-validation.ts).
+ * Both sections now use the same select-then-confirm-Upload pattern
+ * (previously Images silently uploaded on selection, an inconsistency with
+ * every other upload surface in the app) with visible
+ * pending/success/error feedback.
+ */
 export function AssetFilesManager({
   tenantId,
   assetId,
@@ -40,30 +64,10 @@ export function AssetFilesManager({
   canManageDocuments,
 }: AssetFilesManagerProps) {
   const { t } = useTranslation();
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const documentInputRef = useRef<HTMLInputElement>(null);
-  const [documentType, setDocumentType] = useState<AssetDocumentType>("OTHER");
-  const [documentTitle, setDocumentTitle] = useState("");
-
   const uploadImage = useUploadAssetImage(tenantId);
   const deleteImage = useDeleteAssetImage(tenantId);
   const uploadDocument = useUploadAssetDocument(tenantId);
   const deleteDocument = useDeleteAssetDocument(tenantId);
-
-  async function handleImageChange(event: React.ChangeEvent<HTMLInputElement>): Promise<void> {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    await uploadImage.mutateAsync({ assetId, file });
-    if (imageInputRef.current) imageInputRef.current.value = "";
-  }
-
-  async function handleDocumentUpload(): Promise<void> {
-    const file = documentInputRef.current?.files?.[0];
-    if (!file || !documentTitle.trim()) return;
-    await uploadDocument.mutateAsync({ assetId, file, documentType, title: documentTitle.trim() });
-    setDocumentTitle("");
-    if (documentInputRef.current) documentInputRef.current.value = "";
-  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -99,14 +103,7 @@ export function AssetFilesManager({
           )}
         </div>
         {canManageImages && (
-          <div>
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(e) => void handleImageChange(e)}
-            />
-          </div>
+          <ImageUploadRow assetId={assetId} uploadImage={uploadImage} />
         )}
       </section>
 
@@ -144,32 +141,215 @@ export function AssetFilesManager({
           )}
         </ul>
         {canManageDocuments && (
-          <div className="flex flex-wrap items-center gap-2">
-            <select
-              className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
-              value={documentType}
-              onChange={(event) => setDocumentType(event.target.value as AssetDocumentType)}
-            >
-              {DOCUMENT_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {t(`asset.documentTypes.${type}`)}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              placeholder={t("asset.fields.documentTitle")}
-              value={documentTitle}
-              onChange={(event) => setDocumentTitle(event.target.value)}
-              className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
-            />
-            <input ref={documentInputRef} type="file" />
-            <Button type="button" size="sm" onClick={() => void handleDocumentUpload()}>
-              {t("asset.actions.uploadDocument")}
-            </Button>
-          </div>
+          <DocumentUploadRow assetId={assetId} uploadDocument={uploadDocument} />
         )}
       </section>
+    </div>
+  );
+}
+
+/**
+ * Success feedback that clears itself after a few seconds — mirrors
+ * DocumentAttachments' identical convention (a low-stakes confirmation
+ * doesn't need a manual dismiss).
+ */
+function useSelfClearingSuccess(): [boolean, (value: boolean) => void] {
+  const [succeeded, setSucceeded] = useState(false);
+  useEffect(() => {
+    if (!succeeded) return;
+    const timer = setTimeout(() => setSucceeded(false), 4000);
+    return () => clearTimeout(timer);
+  }, [succeeded]);
+  return [succeeded, setSucceeded];
+}
+
+function ImageUploadRow({
+  assetId,
+  uploadImage,
+}: {
+  assetId: string;
+  uploadImage: ReturnType<typeof useUploadAssetImage>;
+}) {
+  const { t } = useTranslation();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [errorKind, setErrorKind] = useState<DocumentUploadErrorKind | null>(null);
+  const [succeeded, setSucceeded] = useSelfClearingSuccess();
+
+  function handleFileChange(file: File | null): void {
+    setSelectedFile(file);
+    setErrorKind(null);
+    setSucceeded(false);
+  }
+
+  async function handleUpload(): Promise<void> {
+    if (!selectedFile) return;
+    setErrorKind(null);
+    try {
+      await uploadImage.mutateAsync({ assetId, file: selectedFile });
+      setSelectedFile(null);
+      setSucceeded(true);
+    } catch (error) {
+      setErrorKind(mapAssetImageUploadError(error));
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2 rounded-md border p-3 sm:max-w-sm">
+      <FileUploadField
+        file={selectedFile}
+        onFileChange={handleFileChange}
+        onValidationError={setErrorKind}
+        allowedMimeTypes={ASSET_IMAGE_UPLOAD_ALLOWED_MIME_TYPES}
+        maxSizeBytes={ASSET_IMAGE_UPLOAD_MAX_SIZE_BYTES}
+        disabled={uploadImage.isPending}
+        labels={{
+          // Reuses the Document Attachments upload copy — generic file-
+          // picker wording ("Choose file", "No file selected", ...) that
+          // applies identically here; see document-attachments.tsx's own
+          // use of the same keys.
+          chooseFile: t("document.attachments.chooseFile"),
+          noFileSelected: t("document.attachments.noFileSelected"),
+          changeFile: t("document.attachments.changeFile"),
+          removeFile: t("document.attachments.removeFile"),
+          dropHint: t("document.attachments.dropHint"),
+          or: t("document.attachments.or"),
+          supportedTypes: t("document.attachments.supportedTypes", {
+            types: ASSET_IMAGE_UPLOAD_TYPE_LABELS.join(", "),
+            maxSize: `${Math.floor(ASSET_IMAGE_UPLOAD_MAX_SIZE_BYTES / (1024 * 1024))} MB`,
+          }),
+        }}
+      />
+      {errorKind && (
+        <p className="text-destructive text-sm" role="alert">
+          {t(`document.attachments.error.${errorKind}`)}
+        </p>
+      )}
+      {succeeded && (
+        <p className="text-success flex items-center gap-1.5 text-sm">
+          <CheckCircle2 className="size-4" aria-hidden="true" />
+          {t("document.attachments.uploadSuccess")}
+        </p>
+      )}
+      <Button
+        type="button"
+        size="sm"
+        className="self-start"
+        onClick={() => void handleUpload()}
+        disabled={!selectedFile || uploadImage.isPending}
+      >
+        {uploadImage.isPending && <Loader2 className={cn("size-4 animate-spin")} aria-hidden="true" />}
+        {uploadImage.isPending ? t("document.attachments.uploading") : t("asset.actions.uploadImage")}
+      </Button>
+    </div>
+  );
+}
+
+function DocumentUploadRow({
+  assetId,
+  uploadDocument,
+}: {
+  assetId: string;
+  uploadDocument: ReturnType<typeof useUploadAssetDocument>;
+}) {
+  const { t } = useTranslation();
+  const [documentType, setDocumentType] = useState<AssetDocumentType>("OTHER");
+  const [documentTitle, setDocumentTitle] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [errorKind, setErrorKind] = useState<DocumentUploadErrorKind | null>(null);
+  const [succeeded, setSucceeded] = useSelfClearingSuccess();
+
+  function handleFileChange(file: File | null): void {
+    setSelectedFile(file);
+    setErrorKind(null);
+    setSucceeded(false);
+  }
+
+  async function handleUpload(): Promise<void> {
+    if (!selectedFile || !documentTitle.trim()) return;
+    setErrorKind(null);
+    try {
+      await uploadDocument.mutateAsync({
+        assetId,
+        file: selectedFile,
+        documentType,
+        title: documentTitle.trim(),
+      });
+      setDocumentTitle("");
+      setSelectedFile(null);
+      setSucceeded(true);
+    } catch (error) {
+      setErrorKind(mapDocumentUploadError(error));
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2 rounded-md border p-3 sm:max-w-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          className="border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+          value={documentType}
+          onChange={(event) => setDocumentType(event.target.value as AssetDocumentType)}
+        >
+          {DOCUMENT_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {t(`asset.documentTypes.${type}`)}
+            </option>
+          ))}
+        </select>
+        <input
+          type="text"
+          placeholder={t("asset.fields.documentTitle")}
+          value={documentTitle}
+          onChange={(event) => setDocumentTitle(event.target.value)}
+          className="border-input h-9 min-w-40 flex-1 rounded-md border bg-transparent px-3 text-sm shadow-xs"
+        />
+      </div>
+
+      <FileUploadField
+        file={selectedFile}
+        onFileChange={handleFileChange}
+        onValidationError={setErrorKind}
+        allowedMimeTypes={ASSET_DOCUMENT_UPLOAD_ALLOWED_MIME_TYPES}
+        maxSizeBytes={ASSET_DOCUMENT_UPLOAD_MAX_SIZE_BYTES}
+        disabled={uploadDocument.isPending}
+        labels={{
+          chooseFile: t("document.attachments.chooseFile"),
+          noFileSelected: t("document.attachments.noFileSelected"),
+          changeFile: t("document.attachments.changeFile"),
+          removeFile: t("document.attachments.removeFile"),
+          dropHint: t("document.attachments.dropHint"),
+          or: t("document.attachments.or"),
+          supportedTypes: t("document.attachments.supportedTypes", {
+            types: DOCUMENT_UPLOAD_TYPE_LABELS.join(", "),
+            maxSize: `${Math.floor(ASSET_DOCUMENT_UPLOAD_MAX_SIZE_BYTES / (1024 * 1024))} MB`,
+          }),
+        }}
+      />
+      {errorKind && (
+        <p className="text-destructive text-sm" role="alert">
+          {t(`document.attachments.error.${errorKind}`)}
+        </p>
+      )}
+      {succeeded && (
+        <p className="text-success flex items-center gap-1.5 text-sm">
+          <CheckCircle2 className="size-4" aria-hidden="true" />
+          {t("document.attachments.uploadSuccess")}
+        </p>
+      )}
+      <Button
+        type="button"
+        size="sm"
+        className="self-start"
+        onClick={() => void handleUpload()}
+        disabled={!selectedFile || !documentTitle.trim() || uploadDocument.isPending}
+      >
+        {uploadDocument.isPending && (
+          <Loader2 className={cn("size-4 animate-spin")} aria-hidden="true" />
+        )}
+        {uploadDocument.isPending
+          ? t("document.attachments.uploading")
+          : t("asset.actions.uploadDocument")}
+      </Button>
     </div>
   );
 }

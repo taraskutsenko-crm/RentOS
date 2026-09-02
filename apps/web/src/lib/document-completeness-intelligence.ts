@@ -48,6 +48,15 @@ export interface DocumentChecklistItem {
   state: DocumentChecklistState;
   /** The specific document driving `state`, when one exists — lets the UI link straight to it instead of only offering "Generate". */
   document: RentalDocument | null;
+  /**
+   * Set only when `state` is `notRequiredYet` — an i18n key explaining
+   * specifically WHY this row isn't ready yet (e.g. "available once
+   * reserved" vs "available after handover"), rather than one generic
+   * "Not required yet" label for every row/reason. The caller renders
+   * `t(notReadyReasonKey)`; falls back to the generic
+   * `documentChecklist.states.notRequiredYet` label when absent.
+   */
+  notReadyReasonKey?: string;
 }
 
 /**
@@ -156,33 +165,46 @@ export function getRentalDocumentChecklist(rental: {
         state: handoverDocument.state,
         document: handoverDocument.document,
       }
-    : {
-        key: "handoverProtocol",
-        state: HANDOVER_PREPARABLE_STATUSES.includes(status) ? "readyToGenerate" : "notRequiredYet",
-        document: null,
-      };
+    : HANDOVER_PREPARABLE_STATUSES.includes(status)
+      ? { key: "handoverProtocol", state: "readyToGenerate", document: null }
+      : {
+          key: "handoverProtocol",
+          state: "notRequiredYet",
+          document: null,
+          // Every non-preparable handover status (DRAFT/QUOTE/CANCELLED)
+          // is "not yet reserved" — the accurate, specific reason, not a
+          // vague catch-all (see DocumentChecklistItem's own doc comment).
+          notReadyReasonKey: "rental.documentChecklist.notReady.beforeReservation",
+        };
 
   const returnDocument = mostAdvancedDocument(documents, "RETURN_PROTOCOL");
   const returnProtocol: DocumentChecklistItem = returnDocument
     ? { key: "returnProtocol", state: returnDocument.state, document: returnDocument.document }
-    : {
-        key: "returnProtocol",
-        state: RETURN_PREPARABLE_STATUSES.includes(status) ? "readyToGenerate" : "notRequiredYet",
-        document: null,
-      };
+    : RETURN_PREPARABLE_STATUSES.includes(status)
+      ? { key: "returnProtocol", state: "readyToGenerate", document: null }
+      : {
+          key: "returnProtocol",
+          state: "notRequiredYet",
+          document: null,
+          // Every non-preparable return status (DRAFT/QUOTE/RESERVED/
+          // CANCELLED) is "not yet handed over" — RESERVED specifically
+          // means committed but the asset hasn't physically gone out yet.
+          notReadyReasonKey: "rental.documentChecklist.notReady.beforeHandover",
+        };
 
   const depositDocument = mostAdvancedDocument(documents, "DEPOSIT_RECEIPT");
   const depositReceipt: DocumentChecklistItem = depositDocument
     ? { key: "depositReceipt", state: depositDocument.state, document: depositDocument.document }
-    : {
-        key: "depositReceipt",
-        state: !depositRequired
-          ? "notApplicable"
-          : DEPOSIT_PREPARABLE_STATUSES.includes(status)
-            ? "readyToGenerate"
-            : "notRequiredYet",
-        document: null,
-      };
+    : !depositRequired
+      ? { key: "depositReceipt", state: "notApplicable", document: null }
+      : DEPOSIT_PREPARABLE_STATUSES.includes(status)
+        ? { key: "depositReceipt", state: "readyToGenerate", document: null }
+        : {
+            key: "depositReceipt",
+            state: "notRequiredYet",
+            document: null,
+            notReadyReasonKey: "rental.documentChecklist.notReady.beforeReservation",
+          };
 
   return [commercialOffer, contract, handoverProtocol, returnProtocol, depositReceipt];
 }

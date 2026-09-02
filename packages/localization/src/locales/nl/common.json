@@ -141,6 +141,8 @@
       "emailInUse": "Er bestaat al een account met dit e-mailadres",
       "invalidCredentials": "Ongeldige e-mail of wachtwoord",
       "accountInactive": "Dit account is inactief",
+      "sessionExpired": "Your session has expired. Please sign in again.",
+      "permissionDenied": "You don't have permission to do that.",
       "generic": "Er is iets misgegaan. Probeer het opnieuw."
     }
   },
@@ -388,7 +390,8 @@
       "changeLocation": "Locatie wijzigen",
       "deleteImage": "Afbeelding verwijderen",
       "deleteDocument": "Verwijderen",
-      "uploadDocument": "Uploaden"
+      "uploadDocument": "Uploaden",
+      "uploadImage": "Upload"
     },
     "errors": {
       "customFieldRequired": "Dit veld is verplicht",
@@ -610,6 +613,10 @@
         "generated": "Gegenereerd",
         "sent": "Verzonden",
         "signed": "Ondertekend"
+      },
+      "notReady": {
+        "beforeReservation": "Available once the rental is reserved",
+        "beforeHandover": "Available after handover"
       },
       "generate": "Genereren",
       "open": "Openen",

@@ -1104,6 +1104,16 @@
         "SENT": "Gesendet",
         "FAILED": "Fehlgeschlagen",
         "NOT_CONFIGURED": "Nicht konfiguriert"
+      },
+      "errorCategories": {
+        "AUTH_FAILED": "The email account's credentials were rejected.",
+        "DOMAIN_NOT_VERIFIED": "The sending domain isn't verified with the email provider.",
+        "SMTP_REJECTED": "The email provider rejected this message.",
+        "CONNECTION_TIMEOUT": "Could not connect to the email provider in time.",
+        "RECIPIENT_REJECTED": "The recipient address was rejected.",
+        "ATTACHMENT_GENERATION_FAILED": "The document's PDF attachment could not be generated.",
+        "PROVIDER_ERROR": "The email provider reported an error.",
+        "UNKNOWN": "Delivery failed."
       }
     },
     "signature": {

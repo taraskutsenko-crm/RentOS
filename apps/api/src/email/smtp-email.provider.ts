@@ -4,8 +4,51 @@ import type { ApiEnv } from "@rentos/shared";
 import { isEmail } from "class-validator";
 import nodemailer, { type Transporter } from "nodemailer";
 
-import type { EmailMessage, EmailProvider, EmailSendResult } from "./email.types";
+import type {
+  EmailErrorCategory,
+  EmailMessage,
+  EmailProvider,
+  EmailSendResult,
+} from "./email.types";
 import { stripControlChars } from "./tenant-sender-identity.util";
+
+/**
+ * Classifies a nodemailer/SMTP send failure into a safe, coded category —
+ * never from the raw response text (see this provider's own doc comment on
+ * why that's never surfaced). nodemailer's SMTP transport sets `.code` on
+ * the thrown error for the well-known failure classes; `.responseCode` is
+ * the numeric SMTP reply code when the server actually responded. Falls
+ * back to PROVIDER_ERROR for anything not recognized — this function must
+ * never throw.
+ */
+function classifySmtpError(error: unknown): EmailErrorCategory {
+  const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+  const responseCode =
+    typeof error === "object" && error && "responseCode" in error
+      ? Number((error as { responseCode: unknown }).responseCode)
+      : undefined;
+
+  switch (code) {
+    case "EAUTH":
+      return "AUTH_FAILED";
+    case "ECONNECTION":
+    case "ETIMEDOUT":
+    case "ESOCKET":
+      return "CONNECTION_TIMEOUT";
+    case "EENVELOPE":
+      // nodemailer uses EENVELOPE for both "all recipients rejected" and
+      // certain envelope-level 5xx responses — a 550-class response code
+      // (mailbox unavailable / doesn't exist) narrows this to the
+      // recipient specifically; otherwise treat as a generic rejection.
+      return responseCode && responseCode >= 550 && responseCode < 560
+        ? "RECIPIENT_REJECTED"
+        : "SMTP_REJECTED";
+    case "EMESSAGE":
+      return "SMTP_REJECTED";
+    default:
+      return "PROVIDER_ERROR";
+  }
+}
 
 /**
  * Provider-neutral SMTP transport — works with any transactional-SMTP
@@ -123,11 +166,13 @@ export class SmtpEmailProvider implements EmailProvider {
     } catch (error) {
       // Never surface the raw SMTP error to callers/UI verbatim — it can
       // include the auth username or other transport detail. A short,
-      // generic message is enough for staff to know it failed and retry.
+      // generic message is enough for staff to know it failed and retry;
+      // `errorCategory` carries the safe, coded reason separately.
       this.logger.error(`SMTP send failed: ${error instanceof Error ? error.message : error}`);
       return {
         success: false,
         error: "The email provider rejected or failed to send this message",
+        errorCategory: classifySmtpError(error),
       };
     }
   }

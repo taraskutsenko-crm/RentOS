@@ -31,6 +31,7 @@ import {
 } from "../../../../hooks/use-quotes";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatDate, formatDateTime } from "../../../../lib/date-format";
+import { emailDeliveryDetailText } from "../../../../lib/email-delivery-status";
 import { formatMoney } from "../../../../lib/money";
 import { getQuoteNextAction } from "../../../../lib/quote-next-action";
 import { getQuoteValidityIntelligence } from "../../../../lib/quote-validity-intelligence";
@@ -521,7 +522,8 @@ export default function QuoteDetailPage() {
                       <span>
                         {delivery.recipientEmail} ·{" "}
                         {t(`document.email.statuses.${delivery.status}`)}
-                        {delivery.errorMessage ? ` · ${delivery.errorMessage}` : ""}
+                        {emailDeliveryDetailText(t, delivery) &&
+                          ` · ${emailDeliveryDetailText(t, delivery)}`}
                       </span>
                     </li>
                   ))}

@@ -602,11 +602,24 @@ export class VariableResolverService {
    * upload/draw time by StorageService.validateImage), never trusted from
    * anywhere else. CSS (`.doc-signature-block__image`) caps the display
    * size and preserves aspect ratio — the source image is never stretched.
+   *
+   * Resilient to a storage read failure exactly like loadTenantLogo below
+   * (e.g. a storage-backend migration that didn't carry an older object
+   * forward) — degrades to an empty string (no `<img>`) rather than failing
+   * the whole document render, per this class's own doc comment. The
+   * signer name/title/date come from the evidence row itself, not from
+   * storage, so they still render correctly even when the image can't be
+   * read — never a total, uncaught failure for every caller of this render
+   * (view/print/email) over one unreadable image.
    */
   private async buildSignatureImageHtml(evidence: DocumentSignatureEvidence): Promise<string> {
-    const bytes = await this.storageService.read(evidence.storageKey);
-    const base64 = bytes.toString("base64");
-    return `<img class="doc-signature-block__image" src="data:${evidence.mimeType};base64,${base64}" alt="" />`;
+    try {
+      const bytes = await this.storageService.read(evidence.storageKey);
+      const base64 = bytes.toString("base64");
+      return `<img class="doc-signature-block__image" src="data:${evidence.mimeType};base64,${base64}" alt="" />`;
+    } catch {
+      return "";
+    }
   }
 
   /**

@@ -55,6 +55,7 @@ import {
 import { useRentalDeposit } from "../../../../hooks/use-rentals";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatBusinessDate } from "../../../../lib/date-format";
+import { emailDeliveryDetailText } from "../../../../lib/email-delivery-status";
 import { fromMinorUnits, formatMoney, toMinorUnits } from "../../../../lib/money";
 import type { Invoice, PaymentMethod } from "../../../../types/invoice";
 
@@ -947,7 +948,8 @@ function InvoiceEditor({
                         <span>
                           {delivery.recipientEmail} ·{" "}
                           {t(`document.email.statuses.${delivery.status}`)}
-                          {delivery.errorMessage ? ` · ${delivery.errorMessage}` : ""}
+                          {emailDeliveryDetailText(t, delivery) &&
+                            ` · ${emailDeliveryDetailText(t, delivery)}`}
                         </span>
                       </li>
                     ))}

@@ -248,4 +248,63 @@ describe("SmtpEmailProvider", () => {
     expect(result.error).not.toContain("apikey");
     expect(result.error).not.toContain("535");
   });
+
+  // Email-delivery diagnosis task — classifySmtpError, exercised through
+  // send()'s public result shape (never exported directly): a safe, coded
+  // `errorCategory` distinct from the generic, always-the-same `error`
+  // text, so the UI/DB can tell failure classes apart without ever showing
+  // raw provider text.
+  describe("errorCategory classification (never from raw response text)", () => {
+    function errorWithCode(code: string, extra: Record<string, unknown> = {}): Error {
+      const error = new Error("boom") as Error & { code?: string };
+      error.code = code;
+      Object.assign(error, extra);
+      return error;
+    }
+
+    it("classifies EAUTH as AUTH_FAILED", async () => {
+      sendMail.mockRejectedValue(errorWithCode("EAUTH"));
+      const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+      const result = await provider.send({ to: "a@b.com", subject: "s", html: "<p>x</p>" });
+      expect(result).toMatchObject({ success: false, errorCategory: "AUTH_FAILED" });
+    });
+
+    it.each(["ECONNECTION", "ETIMEDOUT", "ESOCKET"])(
+      "classifies %s as CONNECTION_TIMEOUT",
+      async (code) => {
+        sendMail.mockRejectedValue(errorWithCode(code));
+        const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+        const result = await provider.send({ to: "a@b.com", subject: "s", html: "<p>x</p>" });
+        expect(result).toMatchObject({ success: false, errorCategory: "CONNECTION_TIMEOUT" });
+      },
+    );
+
+    it("classifies EENVELOPE with a 550-class response as RECIPIENT_REJECTED", async () => {
+      sendMail.mockRejectedValue(errorWithCode("EENVELOPE", { responseCode: 550 }));
+      const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+      const result = await provider.send({ to: "a@b.com", subject: "s", html: "<p>x</p>" });
+      expect(result).toMatchObject({ success: false, errorCategory: "RECIPIENT_REJECTED" });
+    });
+
+    it("classifies EENVELOPE without a 550-class response as SMTP_REJECTED", async () => {
+      sendMail.mockRejectedValue(errorWithCode("EENVELOPE"));
+      const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+      const result = await provider.send({ to: "a@b.com", subject: "s", html: "<p>x</p>" });
+      expect(result).toMatchObject({ success: false, errorCategory: "SMTP_REJECTED" });
+    });
+
+    it("classifies EMESSAGE as SMTP_REJECTED", async () => {
+      sendMail.mockRejectedValue(errorWithCode("EMESSAGE"));
+      const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+      const result = await provider.send({ to: "a@b.com", subject: "s", html: "<p>x</p>" });
+      expect(result).toMatchObject({ success: false, errorCategory: "SMTP_REJECTED" });
+    });
+
+    it("classifies an unrecognized error code as PROVIDER_ERROR", async () => {
+      sendMail.mockRejectedValue(new Error("something unexpected"));
+      const provider = new SmtpEmailProvider(configFrom(FULL_CONFIG));
+      const result = await provider.send({ to: "a@b.com", subject: "s", html: "<p>x</p>" });
+      expect(result).toMatchObject({ success: false, errorCategory: "PROVIDER_ERROR" });
+    });
+  });
 });

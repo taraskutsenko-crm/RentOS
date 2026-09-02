@@ -1,6 +1,20 @@
 /** DI token for the bound EmailProvider — mirrors STORAGE_ADAPTER's pattern exactly. */
 export const EMAIL_PROVIDER = Symbol("EMAIL_PROVIDER");
 
+/**
+ * Coarse, safe-to-display reason a send failed — mirrors the Prisma
+ * `EmailErrorCategory` enum exactly (see schema.prisma's own doc comment).
+ * Never derived from raw provider/SMTP response text.
+ */
+export type EmailErrorCategory =
+  | "AUTH_FAILED"
+  | "DOMAIN_NOT_VERIFIED"
+  | "SMTP_REJECTED"
+  | "CONNECTION_TIMEOUT"
+  | "RECIPIENT_REJECTED"
+  | "ATTACHMENT_GENERATION_FAILED"
+  | "PROVIDER_ERROR";
+
 export interface EmailAttachment {
   filename: string;
   content: Buffer;
@@ -46,6 +60,8 @@ export interface EmailSendResult {
   success: boolean;
   /** Present only when success is false. */
   error?: string;
+  /** Present only when success is false — see EmailErrorCategory's own doc comment. */
+  errorCategory?: EmailErrorCategory;
   /**
    * The transport-level id a real provider returns on acceptance (e.g.
    * SMTP's Message-ID) — present only when a real (non-logging) provider

@@ -1,5 +1,6 @@
 import type { Asset } from "./asset";
 import type { Customer } from "./customer";
+import type { EmailErrorCategory } from "./email-delivery";
 import type { TimelineEvent } from "./timeline";
 
 export type DocumentType =
@@ -237,6 +238,7 @@ export interface DocumentEmailDelivery {
   message: string | null;
   status: DocumentEmailStatus;
   errorMessage: string | null;
+  errorCategory: EmailErrorCategory | null;
   sentByUserId: string;
   createdAt: string;
   sentAt: string | null;

@@ -64,6 +64,7 @@ import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission, useTenantTimezone } from "../../../../hooks/use-current-tenant-role";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatDate, formatDateTime } from "../../../../lib/date-format";
+import { emailDeliveryDetailText } from "../../../../lib/email-delivery-status";
 import { DOCUMENT_TIMELINE_REGISTRY } from "../../../../lib/timeline-registries";
 import type {
   DocumentEmailRecipientType,
@@ -624,7 +625,8 @@ export default function DocumentDetailPage() {
                       <span>
                         {delivery.recipientEmail} ·{" "}
                         {t(`document.email.statuses.${delivery.status}`)}
-                        {delivery.errorMessage ? ` · ${delivery.errorMessage}` : ""}
+                        {emailDeliveryDetailText(t, delivery) &&
+                          ` · ${emailDeliveryDetailText(t, delivery)}`}
                       </span>
                       {(delivery.status === "FAILED" || delivery.status === "NOT_CONFIGURED") && (
                         <Button

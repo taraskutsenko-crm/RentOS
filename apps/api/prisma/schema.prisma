@@ -322,6 +322,29 @@ enum DocumentEmailStatus {
   NOT_CONFIGURED
 }
 
+/// Coarse, safe-to-display reason a FAILED email delivery failed — never
+/// derived from raw provider/SMTP response text (see SmtpEmailProvider's own
+/// doc comment on never surfacing that verbatim). Set only when
+/// status=FAILED; null for PENDING/SENT/NOT_CONFIGURED. See DECISIONS.md,
+/// email-delivery diagnosis fix.
+enum EmailErrorCategory {
+  /// SMTP authentication rejected the configured credentials.
+  AUTH_FAILED
+  /// The provider rejected the From/sending domain as unverified.
+  DOMAIN_NOT_VERIFIED
+  /// The SMTP server rejected the message itself (e.g. after DATA).
+  SMTP_REJECTED
+  /// Could not establish or maintain a connection within a reasonable time.
+  CONNECTION_TIMEOUT
+  /// The recipient address was rejected by the provider.
+  RECIPIENT_REJECTED
+  /// The message's PDF/attachment could not be generated — the send was
+  /// never attempted (see DocumentEmailService.dispatch's doc comment).
+  ATTACHMENT_GENERATION_FAILED
+  /// Any other provider-side failure not covered above.
+  PROVIDER_ERROR
+}
+
 // ===========================================================================
 // Invoicing, Bank Details & E-Invoice Architecture (PRE-CHAPTER-10 addition).
 // Invoice is deliberately a standalone business model, NOT a Document row —
@@ -2255,6 +2278,7 @@ model DocumentEmailDelivery {
   message           String?
   status            DocumentEmailStatus        @default(PENDING)
   errorMessage      String?
+  errorCategory     EmailErrorCategory?
   /// Present only once a real (non-logging) provider actually accepts the
   /// message — the transport-level id (e.g. SMTP's returned Message-ID),
   /// never fabricated. Null for NOT_CONFIGURED/FAILED and for every send
@@ -2293,6 +2317,7 @@ model QuoteEmailDelivery {
   message           String?
   status            DocumentEmailStatus @default(PENDING)
   errorMessage      String?
+  errorCategory     EmailErrorCategory?
   providerMessageId String?
   sentByUserId      String
   createdAt         DateTime            @default(now())
@@ -2322,6 +2347,7 @@ model InvoiceEmailDelivery {
   message           String?
   status            DocumentEmailStatus @default(PENDING)
   errorMessage      String?
+  errorCategory     EmailErrorCategory?
   providerMessageId String?
   sentByUserId      String
   createdAt         DateTime            @default(now())
@@ -2437,6 +2463,7 @@ model PaymentDemandEmailDelivery {
   message           String?
   status            DocumentEmailStatus @default(PENDING)
   errorMessage      String?
+  errorCategory     EmailErrorCategory?
   providerMessageId String?
   sentByUserId      String
   createdAt         DateTime            @default(now())

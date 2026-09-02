@@ -1104,6 +1104,16 @@
         "SENT": "Odesláno",
         "FAILED": "Selhalo",
         "NOT_CONFIGURED": "Nenakonfigurováno"
+      },
+      "errorCategories": {
+        "AUTH_FAILED": "Přihlašovací údaje e-mailového účtu byly odmítnuty.",
+        "DOMAIN_NOT_VERIFIED": "Doména odesílatele není u poskytovatele e-mailu ověřena.",
+        "SMTP_REJECTED": "Poskytovatel e-mailu tuto zprávu odmítl.",
+        "CONNECTION_TIMEOUT": "Nepodařilo se včas připojit k poskytovateli e-mailu.",
+        "RECIPIENT_REJECTED": "Adresa příjemce byla odmítnuta.",
+        "ATTACHMENT_GENERATION_FAILED": "Nepodařilo se vygenerovat PDF přílohu dokumentu.",
+        "PROVIDER_ERROR": "Poskytovatel e-mailu nahlásil chybu.",
+        "UNKNOWN": "Doručení se nezdařilo."
       }
     },
     "signature": {

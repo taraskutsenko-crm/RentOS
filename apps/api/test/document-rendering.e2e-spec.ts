@@ -1,3 +1,6 @@
+import { unlinkSync } from "node:fs";
+import { resolve } from "node:path";
+
 import type { INestApplication } from "@nestjs/common";
 import { PrismaClient } from "@prisma/client";
 import request from "supertest";
@@ -12,6 +15,14 @@ interface RegisterResponseBody {
   user: { id: string };
   tenant: { id: string };
 }
+
+// A minimal valid 1x1 PNG — just enough bytes for StorageService.validateImage
+// and an actual image/png upload; the pixel content itself is irrelevant to
+// every test that uses it.
+const TINY_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+  "base64",
+);
 
 describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-0008 Part 2)", () => {
   let app: INestApplication;
@@ -994,6 +1005,56 @@ describe("Document Rendering, Templates, Sharing, Email, Signature E2E (TASK-000
       .expect(200);
     expect(history.body).toHaveLength(2);
   }, 30000);
+
+  // Email-delivery diagnosis task — real-world regression: a captured
+  // signature's evidence row can outlive its underlying storage object
+  // (e.g. a storage-backend migration that didn't carry an older file
+  // forward — see DECISIONS.md). Before this fix, VariableResolverService.
+  // buildSignatureImageHtml threw uncaught for a missing object, which
+  // propagated all the way out of every renderer of that document
+  // (preview/PDF/email) as an unhandled 500. It must now degrade to an
+  // empty image instead — the render still succeeds, and the signer name
+  // (which comes from the evidence row, not storage) still appears.
+  it("a document whose signature image is missing from storage still renders (degrades to no image) instead of throwing", async () => {
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/company-signature`)
+      .set("Cookie", accessCookie)
+      .field("representativeName", "Taras Kutsenko")
+      .field("representativeTitle", "Owner")
+      .field("method", "UPLOADED")
+      .attach("file", TINY_PNG, { filename: "sig.png", contentType: "image/png" })
+      .expect(201);
+
+    const created = await createDocument().expect(201);
+    await request(app.getHttpServer())
+      .post(`/tenants/${tenantId}/documents/${created.body.id}/signatures`)
+      .set("Cookie", accessCookie)
+      .send({
+        signerType: "TENANT_REPRESENTATIVE",
+        signerName: "Taras Kutsenko",
+        method: "STORED_SIGNATURE",
+      })
+      .expect(201);
+
+    // Simulate the real production scenario directly: the evidence row
+    // exists, but its storage object is gone (e.g. a storage-backend
+    // migration gap). Delete the file this test's own local storage
+    // backend just wrote, matching apps/api/.env.test's STORAGE_LOCAL_DIR.
+    const evidence = await prisma.documentSignatureEvidence.findFirstOrThrow({
+      where: { tenantId, documentId: created.body.id, signerType: "TENANT_REPRESENTATIVE" },
+    });
+    unlinkSync(resolve("./storage-uploads-test", evidence.storageKey));
+
+    const preview = await request(app.getHttpServer())
+      .get(`/tenants/${tenantId}/documents/${created.body.id}/preview`)
+      .set("Cookie", accessCookie)
+      .expect(200);
+
+    // The signer's name (from the DB row, not storage) still renders — only
+    // the <img> itself is silently absent.
+    expect(preview.body.html).toContain("Taras Kutsenko");
+    expect(preview.body.html).toContain("doc-signature-block");
+  });
 
   // ---------------------------------------------------------------------
   // E-signature foundation (Part 6)

@@ -1104,6 +1104,16 @@
         "SENT": "Wysłany",
         "FAILED": "Nieudany",
         "NOT_CONFIGURED": "Nieskonfigurowane"
+      },
+      "errorCategories": {
+        "AUTH_FAILED": "Dane uwierzytelniające konta e-mail zostały odrzucone.",
+        "DOMAIN_NOT_VERIFIED": "Domena nadawcy nie jest zweryfikowana u dostawcy poczty.",
+        "SMTP_REJECTED": "Dostawca poczty odrzucił tę wiadomość.",
+        "CONNECTION_TIMEOUT": "Nie udało się połączyć z dostawcą poczty w wyznaczonym czasie.",
+        "RECIPIENT_REJECTED": "Adres odbiorcy został odrzucony.",
+        "ATTACHMENT_GENERATION_FAILED": "Nie udało się wygenerować załącznika PDF dokumentu.",
+        "PROVIDER_ERROR": "Dostawca poczty zgłosił błąd.",
+        "UNKNOWN": "Dostarczenie nie powiodło się."
       }
     },
     "signature": {

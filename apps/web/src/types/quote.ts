@@ -1,6 +1,7 @@
 import type { Asset } from "./asset";
 import type { Customer } from "./customer";
 import type { DocumentStatus, DocumentType } from "./document";
+import type { EmailErrorCategory } from "./email-delivery";
 import type { MonthlyBillingStrategy, PartialMonthPolicy } from "./rental";
 import type { TimelineEvent } from "./timeline";
 
@@ -156,6 +157,7 @@ export interface QuoteEmailDelivery {
   message: string | null;
   status: "PENDING" | "SENT" | "FAILED" | "NOT_CONFIGURED";
   errorMessage: string | null;
+  errorCategory: EmailErrorCategory | null;
   providerMessageId: string | null;
   createdAt: string;
   sentAt: string | null;

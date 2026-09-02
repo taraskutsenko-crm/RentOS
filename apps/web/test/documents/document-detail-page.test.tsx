@@ -175,6 +175,34 @@ describe("DocumentDetailPage", () => {
     expect(screen.getByText(/draft/i)).toBeInTheDocument();
   });
 
+  // Email-delivery diagnosis task — a FAILED delivery's reason must be a
+  // real, translated sentence via the coded errorCategory, never the raw
+  // backend errorMessage string (which is always English regardless of the
+  // UI's language — see DECISIONS.md, raw-text-leak fix).
+  it("shows a translated, categorized reason for a FAILED delivery — never the raw errorMessage", () => {
+    usePermissionMock.mockImplementation((permission: string) => permission === "documents.send");
+    useDocumentMock.mockReturnValue({ data: baseDocument("SENT"), isLoading: false });
+    useDocumentEmailDeliveriesMock.mockReturnValue({
+      data: [
+        {
+          id: "delivery-1",
+          recipientEmail: "customer@example.com",
+          status: "FAILED",
+          errorMessage: "535 Authentication failed for user apikey@smtp.example.com",
+          errorCategory: "AUTH_FAILED",
+        },
+      ],
+    });
+
+    renderWithProviders(<DocumentDetailPage />);
+
+    expect(
+      screen.getByText(/the email account's credentials were rejected/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/apikey/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/535/)).not.toBeInTheDocument();
+  });
+
   it("shows the mark ready action for a DRAFT document with documents.update", async () => {
     usePermissionMock.mockImplementation((permission: string) => permission === "documents.update");
     useDocumentMock.mockReturnValue({ data: baseDocument("DRAFT"), isLoading: false });

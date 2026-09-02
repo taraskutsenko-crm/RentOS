@@ -33,6 +33,7 @@ import type { StatusActionDto } from "./dto/status-action.dto";
 import type { UpdateQuoteDto } from "./dto/update-quote.dto";
 import { buildLogoEmailParts } from "../email/email-logo.util";
 import { EmailService } from "../email/email.service";
+import type { EmailErrorCategory } from "../email/email.types";
 import { buildTenantFromName, resolveTenantReplyTo } from "../email/tenant-sender-identity.util";
 import { StorageService } from "../storage/storage.service";
 import { generateQuoteNumber } from "./quote-numbering.util";
@@ -638,7 +639,12 @@ export class QuotesService {
     // block only tracks the truthful outcome of the *email* attempt itself
     // — a durable, retryable row, not just an audit-log line on failure
     // (see QuoteEmailDelivery / DECISIONS.md production-infrastructure pass).
-    let emailResult: { success: boolean; error?: string; messageId?: string };
+    let emailResult: {
+      success: boolean;
+      error?: string;
+      errorCategory?: EmailErrorCategory;
+      messageId?: string;
+    };
     if (!this.emailService.isConfigured()) {
       emailResult = { success: false, error: "No email provider is configured" };
       await this.prisma.quoteEmailDelivery.create({
@@ -680,6 +686,7 @@ export class QuotesService {
           message: dto.message ?? null,
           status: emailResult.success ? "SENT" : "FAILED",
           errorMessage: emailResult.error ?? null,
+          errorCategory: emailResult.success ? null : (emailResult.errorCategory ?? "PROVIDER_ERROR"),
           providerMessageId: emailResult.messageId ?? null,
           sentByUserId: actorUserId,
           sentAt: emailResult.success ? new Date() : null,

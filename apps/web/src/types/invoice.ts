@@ -1,3 +1,5 @@
+import type { EmailErrorCategory } from "./email-delivery";
+
 export type InvoiceType = "STANDARD" | "PROFORMA" | "CORRECTION";
 export type InvoiceStatus =
   "DRAFT" | "ISSUED" | "SENT" | "PARTIALLY_PAID" | "PAID" | "OVERDUE" | "CANCELLED" | "CORRECTED";
@@ -119,6 +121,7 @@ export interface InvoiceEmailDelivery {
   message: string | null;
   status: "PENDING" | "SENT" | "FAILED" | "NOT_CONFIGURED";
   errorMessage: string | null;
+  errorCategory: EmailErrorCategory | null;
   providerMessageId: string | null;
   createdAt: string;
   sentAt: string | null;
@@ -190,6 +193,7 @@ export interface PaymentDemandEmailDelivery {
   message: string | null;
   status: "PENDING" | "SENT" | "FAILED" | "NOT_CONFIGURED";
   errorMessage: string | null;
+  errorCategory: EmailErrorCategory | null;
   providerMessageId: string | null;
   createdAt: string;
   sentAt: string | null;

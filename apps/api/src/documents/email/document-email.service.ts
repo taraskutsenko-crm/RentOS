@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import type { DocumentEmailDelivery } from "@prisma/client";
 
 import { AuditService } from "../../audit/audit.service";
 import { buildLogoEmailParts } from "../../email/email-logo.util";
 import { EmailService } from "../../email/email.service";
+import type { EmailErrorCategory } from "../../email/email.types";
 import { buildTenantFromName, resolveTenantReplyTo } from "../../email/tenant-sender-identity.util";
 import { PrismaService } from "../../prisma/prisma.service";
 import { StorageService } from "../../storage/storage.service";
@@ -28,6 +29,8 @@ import { DocumentPdfService } from "../rendering/document-pdf.service";
  */
 @Injectable()
 export class DocumentEmailService {
+  private readonly logger = new Logger(DocumentEmailService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
@@ -129,41 +132,73 @@ export class DocumentEmailService {
       return notConfigured;
     }
 
-    const { buffer } = await this.pdfService.getOrGenerate(tenantId, document, version);
-    const tenant = await this.prisma.tenant.findUnique({
-      where: { id: tenantId },
-      select: { name: true, email: true, logoStorageKey: true, logoMimeType: true },
-    });
-    const logoParts = buildLogoEmailParts(await this.readLogo(tenant));
+    // Everything from here on is real network/storage I/O that can throw
+    // for reasons that have nothing to do with SMTP (a missing/unreadable
+    // attachment source being the concrete case this guards — see
+    // DECISIONS.md, email-delivery diagnosis fix). `delivery` was already
+    // persisted as PENDING above; without this try/catch, an exception here
+    // would propagate uncaught to the controller (the caller sees a 500)
+    // while the delivery row itself is never revisited by anything — there
+    // is no queue/worker in this codebase to retry it later, so it would
+    // stay PENDING forever. This is the single guarantee that can never
+    // happen: dispatch() always ends in a terminal, truthful status.
+    let result: { success: boolean; error?: string; errorCategory?: EmailErrorCategory; messageId?: string };
+    try {
+      const { buffer } = await this.pdfService.getOrGenerate(tenantId, document, version);
+      const tenant = await this.prisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: { name: true, email: true, logoStorageKey: true, logoMimeType: true },
+      });
+      const logoParts = buildLogoEmailParts(await this.readLogo(tenant));
+      const replyTo = resolveTenantReplyTo(tenant?.email);
 
-    const replyTo = resolveTenantReplyTo(tenant?.email);
-    const result = await this.emailService.send({
-      to: delivery.recipientEmail,
-      subject: delivery.subject,
-      html: buildEmailHtml(
-        document.documentNumber,
-        delivery.message,
-        tenant?.name ?? null,
-        logoParts.imgHtml,
-      ),
-      fromName: buildTenantFromName(tenant?.name),
-      ...(replyTo ? { replyTo } : {}),
-      attachments: [
-        {
-          filename: `${document.documentNumber}.pdf`,
-          content: buffer,
-          contentType: "application/pdf",
-        },
-        ...logoParts.attachments,
-      ],
-    });
+      result = await this.emailService.send({
+        to: delivery.recipientEmail,
+        subject: delivery.subject,
+        html: buildEmailHtml(
+          document.documentNumber,
+          delivery.message,
+          tenant?.name ?? null,
+          logoParts.imgHtml,
+        ),
+        fromName: buildTenantFromName(tenant?.name),
+        ...(replyTo ? { replyTo } : {}),
+        attachments: [
+          {
+            filename: `${document.documentNumber}.pdf`,
+            content: buffer,
+            contentType: "application/pdf",
+          },
+          ...logoParts.attachments,
+        ],
+      });
+    } catch (error) {
+      // The send was never even attempted — most commonly the document's
+      // PDF could not be rendered (e.g. a referenced signature/logo image
+      // is unreadable from storage). Never log the raw error (may contain
+      // storage keys/paths); a coded category is enough for staff to
+      // understand this failed before reaching the email provider at all.
+      this.logger.error(
+        `Document email attachment generation failed for delivery ${delivery.id}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      result = {
+        success: false,
+        error: "Could not generate this document's PDF attachment",
+        errorCategory: "ATTACHMENT_GENERATION_FAILED",
+      };
+    }
 
     const updated = await this.prisma.documentEmailDelivery.update({
       where: { id: delivery.id },
       data: {
         status: result.success ? "SENT" : "FAILED",
         errorMessage: result.success ? null : (result.error ?? "Unknown error"),
+        errorCategory: result.success ? null : (result.errorCategory ?? "PROVIDER_ERROR"),
+        providerMessageId: result.messageId ?? null,
         sentAt: result.success ? new Date() : null,
+        failedAt: result.success ? null : new Date(),
       },
     });
 
@@ -177,6 +212,7 @@ export class DocumentEmailService {
         emailDeliveryId: delivery.id,
         recipientEmail: delivery.recipientEmail,
         error: result.success ? null : result.error,
+        errorCategory: result.success ? null : result.errorCategory,
       },
     });
 

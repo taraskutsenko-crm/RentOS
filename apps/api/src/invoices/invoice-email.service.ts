@@ -131,6 +131,7 @@ export class InvoiceEmailService {
         message: dto.message ?? null,
         status: result.success ? "SENT" : "FAILED",
         errorMessage: result.error ?? null,
+        errorCategory: result.success ? null : (result.errorCategory ?? "PROVIDER_ERROR"),
         providerMessageId: result.messageId ?? null,
         sentByUserId: actorUserId,
         sentAt: result.success ? new Date() : null,

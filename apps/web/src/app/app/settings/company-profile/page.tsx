@@ -13,12 +13,16 @@ import {
   DialogTitle,
   Input,
   Label,
-  Select,
   SignaturePad,
+  TimezoneSelect,
   useToast,
 } from "@rentos/ui";
-import { listSupportedTimezones } from "@rentos/shared";
-import { useEffect, useRef, useState } from "react";
+import {
+  buildTimezoneOptions,
+  groupTimezoneOptionsByOffset,
+  searchTimezoneOptions,
+} from "@rentos/shared";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -40,8 +44,6 @@ import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import type { Tenant } from "../../../../types/auth";
 import { companyProfileSchema, type CompanyProfileFormValues } from "../../../../lib/validation";
 
-const SUPPORTED_TIMEZONES = listSupportedTimezones();
-
 export default function CompanyProfileSettingsPage() {
   const { t } = useTranslation();
   const [tenantId] = useCurrentTenantId();
@@ -50,10 +52,25 @@ export default function CompanyProfileSettingsPage() {
   const updateProfile = useUpdateCompanyProfile(tenantId);
   const { toast } = useToast();
 
+  // Computed once per page load (mirrors DatePicker's lazy "today" —
+  // recomputing on every keystroke would be pointless work; the current
+  // UTC offset for a zone doesn't change meaningfully within one editing
+  // session). See @rentos/shared timezone-options.ts — the canonical IANA
+  // id remains the only value ever stored/submitted; this is presentation
+  // only (Task A1).
+  const [timezoneOptions] = useState(() => buildTimezoneOptions());
+  const [timezoneSearch, setTimezoneSearch] = useState("");
+  const timezoneGroups = useMemo(
+    () => groupTimezoneOptionsByOffset(searchTimezoneOptions(timezoneOptions, timezoneSearch)),
+    [timezoneOptions, timezoneSearch],
+  );
+
   const {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CompanyProfileFormValues>({
     resolver: zodResolver(companyProfileSchema),
@@ -139,13 +156,24 @@ export default function CompanyProfileSettingsPage() {
 
               <div className="flex flex-col gap-1.5 sm:max-w-xs">
                 <Label htmlFor="timezone">{t("tenant.companyProfile.fields.timezone")}</Label>
-                <Select id="timezone" aria-invalid={!!errors.timezone} {...register("timezone")}>
-                  {SUPPORTED_TIMEZONES.map((zone) => (
-                    <option key={zone} value={zone}>
-                      {zone}
-                    </option>
-                  ))}
-                </Select>
+                <TimezoneSelect
+                  id="timezone"
+                  value={watch("timezone")}
+                  onChange={(value) =>
+                    setValue("timezone", value, { shouldValidate: true, shouldDirty: true })
+                  }
+                  groups={timezoneGroups}
+                  search={timezoneSearch}
+                  onSearchChange={setTimezoneSearch}
+                  selectedOption={timezoneOptions.find((option) => option.value === watch("timezone"))}
+                  disabled={!canManage}
+                  aria-invalid={!!errors.timezone}
+                  labels={{
+                    placeholder: t("tenant.companyProfile.timezoneSelector.placeholder"),
+                    searchPlaceholder: t("tenant.companyProfile.timezoneSelector.searchPlaceholder"),
+                    noResults: t("tenant.companyProfile.timezoneSelector.noResults"),
+                  }}
+                />
                 {errors.timezone && (
                   <p className="text-destructive text-sm">{t(errors.timezone.message ?? "")}</p>
                 )}

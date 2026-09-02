@@ -174,6 +174,11 @@
         "email": "E-mail firmy",
         "emailHelp": "Używany jako adres do odpowiedzi podczas wysyłania dokumentów do klientów e-mailem."
       },
+      "timezoneSelector": {
+        "placeholder": "Wybierz strefę czasową",
+        "searchPlaceholder": "Szukaj stref czasowych…",
+        "noResults": "Brak pasujących stref czasowych"
+      },
       "signature": {
         "title": "Company representative signature",
         "subtitle": "This signature can be used when signing documents on behalf of the company.",
@@ -1942,12 +1947,21 @@
     "email": {
       "title": "E-mail",
       "status": "Status",
-      "hint": "Dostawca poczty e-mail jest konfigurowany na poziomie środowiska (zmienne SMTP_*). Zarządzanie danymi uwierzytelniającymi na poziomie najemcy nie jest jeszcze obsługiwane.",
+      "hint": "Wysyłka wiadomości e-mail jest konfigurowana przez Havelio na poziomie systemu. Adres e-mail Twojej firmy jest używany jako adres Odpowiedz-do w wychodzących wiadomościach.",
       "statuses": {
         "NOT_CONFIGURED": "Nieskonfigurowane",
         "CONFIGURED": "Skonfigurowane",
-        "CONNECTION_TEST_FAILED": "Test połączenia nie powiódł się",
-        "READY": "Gotowe"
+        "CONNECTION_TEST_FAILED": "Błąd połączenia",
+        "READY": "Połączono"
+      },
+      "sendTest": "Wyślij wiadomość testową",
+      "testDialog": {
+        "title": "Wyślij wiadomość testową",
+        "description": "Wysyła prawdziwą wiadomość testową za pośrednictwem skonfigurowanego dostawcy poczty Havelio, aby potwierdzić działanie dostarczania.",
+        "recipient": "Odbiorca",
+        "sending": "Wysyłanie…",
+        "success": "Wiadomość testowa została pomyślnie wysłana na adres {{email}}.",
+        "failure": "Nie udało się wysłać wiadomości testowej."
       }
     }
   },

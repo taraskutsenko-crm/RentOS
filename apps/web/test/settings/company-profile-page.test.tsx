@@ -164,6 +164,83 @@ describe("CompanyProfileSettingsPage", () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
+  describe("Time zone selector (Task A)", () => {
+    it("shows a friendly 'UTC±HH:MM — City' display for the tenant's stored IANA timezone", () => {
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      // TENANT.timezone is "America/New_York" — the trigger must show a
+      // friendly label, never the raw IANA id as the primary text.
+      const trigger = screen.getByRole("combobox", { name: /time zone/i });
+      expect(trigger.textContent).toMatch(/UTC[+-]\d{2}:00 — New York/);
+    });
+
+    it("shows every option's current UTC offset, grouped by offset", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.click(screen.getByRole("combobox", { name: /time zone/i }));
+
+      // At least one real offset group header renders (e.g. "UTC+02:00" or
+      // "UTC±00:00") — never a raw IANA-only list.
+      expect(screen.getAllByText(/^UTC[+-±]\d{2}:00$/).length).toBeGreaterThan(0);
+      // Each visible option row shows its own offset next to the city name.
+      expect(screen.getAllByText(/^[+-]\d{2}:00$/).length).toBeGreaterThan(0);
+    });
+
+    it("searching 'Warsaw' narrows the list to Warsaw", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.click(screen.getByRole("combobox", { name: /time zone/i }));
+      await user.type(screen.getByRole("searchbox"), "Warsaw");
+
+      expect(screen.getByRole("option", { name: /Warsaw/ })).toBeInTheDocument();
+      expect(screen.queryByRole("option", { name: /^Tokyo/ })).not.toBeInTheDocument();
+    });
+
+    it("searching the raw IANA id 'Europe/Warsaw' also finds it", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.click(screen.getByRole("combobox", { name: /time zone/i }));
+      await user.type(screen.getByRole("searchbox"), "Europe/Warsaw");
+
+      expect(screen.getByRole("option", { name: /Warsaw/ })).toBeInTheDocument();
+    });
+
+    it("searching '+2' / 'UTC+2' finds zones currently at UTC+02:00", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.click(screen.getByRole("combobox", { name: /time zone/i }));
+      await user.type(screen.getByRole("searchbox"), "UTC+2");
+
+      expect(screen.getByRole("option", { name: /Warsaw/ })).toBeInTheDocument();
+    });
+
+    it("selecting a zone from the popover saves the unchanged IANA identifier", async () => {
+      mutateAsync.mockResolvedValue({});
+      const user = userEvent.setup();
+      renderWithProviders(<CompanyProfileSettingsPage />);
+
+      await user.click(screen.getByRole("combobox", { name: /time zone/i }));
+      await user.type(screen.getByRole("searchbox"), "Europe/Warsaw");
+      await user.click(screen.getByRole("option", { name: /Warsaw/ }));
+
+      // The trigger now shows the friendly label for the newly selected zone...
+      expect(screen.getByRole("combobox", { name: /time zone/i }).textContent).toMatch(/Warsaw/);
+
+      await user.click(screen.getByRole("button", { name: /^save$/i }));
+
+      // ...but the value actually submitted is the exact, unmodified IANA id.
+      await waitFor(() =>
+        expect(mutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({ timezone: "Europe/Warsaw" }),
+        ),
+      );
+    });
+  });
+
   describe("Company representative signature (Havelio Signature System)", () => {
     it("shows no preview and no delete action when nothing is configured yet", () => {
       renderWithProviders(<CompanyProfileSettingsPage />);

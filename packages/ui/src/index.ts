@@ -42,5 +42,12 @@ export {
 } from "./components/signature-pad";
 export { Skeleton } from "./components/skeleton";
 export { TimePicker, type TimePickerProps } from "./components/time-picker";
+export {
+  TimezoneSelect,
+  type TimezoneSelectGroup,
+  type TimezoneSelectLabels,
+  type TimezoneSelectOption,
+  type TimezoneSelectProps,
+} from "./components/timezone-select";
 export { ToastProvider, useToast, type ToastInput, type ToastVariant } from "./components/toast";
 export { cn } from "./lib/utils";

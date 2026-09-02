@@ -174,6 +174,11 @@
         "email": "Company email",
         "emailHelp": "Used as the reply address when documents are emailed to customers."
       },
+      "timezoneSelector": {
+        "placeholder": "Select a time zone",
+        "searchPlaceholder": "Search time zones…",
+        "noResults": "No matching time zones"
+      },
       "signature": {
         "title": "Company representative signature",
         "subtitle": "This signature can be used when signing documents on behalf of the company.",
@@ -1942,12 +1947,21 @@
     "email": {
       "title": "Email",
       "status": "Status",
-      "hint": "The email provider is configured at the environment level (SMTP_* variables). Tenant-managed credentials aren't supported in this phase.",
+      "hint": "Email delivery is configured by Havelio at the system level. Your company email is used as the Reply-To address on outgoing messages.",
       "statuses": {
         "NOT_CONFIGURED": "Not configured",
         "CONFIGURED": "Configured",
-        "CONNECTION_TEST_FAILED": "Connection test failed",
-        "READY": "Ready"
+        "CONNECTION_TEST_FAILED": "Connection error",
+        "READY": "Connected"
+      },
+      "sendTest": "Send test email",
+      "testDialog": {
+        "title": "Send test email",
+        "description": "Sends a real test message through Havelio's configured email provider so you can confirm delivery is working.",
+        "recipient": "Recipient",
+        "sending": "Sending…",
+        "success": "Test email sent successfully to {{email}}.",
+        "failure": "Unable to send the test email."
       }
     }
   },

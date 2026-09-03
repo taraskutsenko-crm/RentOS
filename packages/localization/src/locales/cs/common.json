@@ -2037,5 +2037,89 @@
     "save": "Save signature",
     "cancel": "Cancel",
     "emptyHint": "Draw your signature above"
+  },
+  "billing": {
+    "settings": {
+      "title": "Fakturace",
+      "subtitle": "Váš plán, zkušební období a předplatné Havelio.",
+      "navLabel": "Fakturace"
+    },
+    "stripeNotConfigured": "Platby přes Stripe nejsou v tomto prostředí nakonfigurovány.",
+    "trial": {
+      "daysLeft": "Zbývá {{count}} dní zkušební verze Havelio",
+      "endsToday": "Vaše zkušební verze Havelio dnes končí",
+      "ended": "Vaše zkušební verze Havelio skončila."
+    },
+    "pastDue": "Platba selhala — toto předplatné je po splatnosti.",
+    "canceled": "Toto předplatné bylo zrušeno.",
+    "cancelsOn": "Zrušení: {{date}}",
+    "grandfathered": "Přechodný plán",
+    "perMonth": "měsíc",
+    "perYear": "rok",
+    "nextBillingDate": "Další platba: {{date}}",
+    "currentPlan": {
+      "title": "Aktuální plán"
+    },
+    "usage": {
+      "assets": "Majetek",
+      "users": "Uživatelé",
+      "unlimited": "{{current}} (neomezeno)",
+      "unlimitedUsers": "Neomezený počet uživatelů",
+      "unlimitedAssets": "Neomezený majetek",
+      "currentCount": "{{count}} (žádný aktivní plán)"
+    },
+    "limits": {
+      "users": "Až {{count}} uživatelů",
+      "assets": "Až {{count}} položek majetku"
+    },
+    "actions": {
+      "manageBilling": "Spravovat platby",
+      "cancel": "Zrušit předplatné",
+      "resume": "Obnovit předplatné",
+      "currentPlan": "Aktuální plán",
+      "choose": "Vybrat plán"
+    },
+    "chooseAPlan": "Vyberte plán",
+    "changePlan": "Změnit plán",
+    "interval": {
+      "monthly": "Měsíčně",
+      "annual": "Ročně",
+      "annualDiscount": "Ušetřete 20 % při roční platbě"
+    },
+    "promoCode": {
+      "label": "Promo kód",
+      "placeholder": "např. RENTAL20",
+      "thenPrice": "Poté {{price}}/měsíc po {{months}} měsících",
+      "forever": "Poté {{price}} — natrvalo",
+      "valid": "Kód byl použit.",
+      "invalid": "Tento kód není platný."
+    },
+    "mostPopular": "Nejoblíbenější",
+    "contactSales": "Kontaktovat obchod",
+    "plans": {
+      "STARTER": "Starter",
+      "BUSINESS": "Business",
+      "PROFESSIONAL": "Professional",
+      "ENTERPRISE": "Enterprise"
+    },
+    "status": {
+      "TRIALING": "Zkušební",
+      "ACTIVE": "Aktivní",
+      "PAST_DUE": "Po splatnosti",
+      "CANCELED": "Zrušeno",
+      "EXPIRED": "Zkušební verze vypršela",
+      "INCOMPLETE": "Nedokončeno"
+    },
+    "cancelDialog": {
+      "title": "Zrušit předplatné?",
+      "description": "Vaše předplatné zůstane aktivní do {{date}}. Nebudete znovu obtěžováni platbou.",
+      "confirm": "Zrušit předplatné"
+    },
+    "toast": {
+      "upgraded": "Plán byl povýšen.",
+      "downgradeScheduled": "Snížení plánu naplánováno na konec aktuálního fakturačního období.",
+      "canceled": "Vaše předplatné skončí na konci aktuálního období.",
+      "resumed": "Vaše předplatné bylo obnoveno."
+    }
   }
 }

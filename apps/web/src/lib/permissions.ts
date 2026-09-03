@@ -90,6 +90,8 @@ export const INTEGRATION_PERMISSIONS = ["integrations.view", "integrations.manag
 
 export const FINANCE_REPORTS_PERMISSIONS = ["finance.read", "finance.export"] as const;
 
+export const BILLING_PERMISSIONS = ["billing.view", "billing.manage"] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
@@ -103,6 +105,7 @@ export const ALL_PERMISSIONS = [
   ...BANK_ACCOUNT_PERMISSIONS,
   ...INTEGRATION_PERMISSIONS,
   ...FINANCE_REPORTS_PERMISSIONS,
+  ...BILLING_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];

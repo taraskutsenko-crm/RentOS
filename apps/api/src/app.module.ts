@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 import { apiEnvSchema } from "@rentos/shared";
 
+import { AffiliateModule } from "./affiliate/affiliate.module";
 import { AssetAvailabilityModule } from "./asset-availability/asset-availability.module";
 import { AssetCategoriesModule } from "./asset-categories/asset-categories.module";
 import { AssetCustomFieldsModule } from "./asset-custom-fields/asset-custom-fields.module";
@@ -13,6 +14,8 @@ import { AssetStatusesModule } from "./asset-statuses/asset-statuses.module";
 import { AssetsModule } from "./assets/assets.module";
 import { AuthModule } from "./auth/auth.module";
 import { CompanyBankAccountsModule } from "./bank-accounts/company-bank-accounts.module";
+import { BillingModule } from "./billing/billing.module";
+import { StripeWebhooksModule } from "./billing/stripe-webhooks.module";
 import { CompanyBrandingModule } from "./company-branding/company-branding.module";
 import { CompanySignatureModule } from "./company-signature/company-signature.module";
 import { CustomerPortalModule } from "./customer-portal/customer-portal.module";
@@ -69,6 +72,9 @@ import { TenantsModule } from "./tenants/tenants.module";
     ReceivablesModule,
     EInvoiceModule,
     FinanceReportsModule,
+    BillingModule,
+    AffiliateModule,
+    StripeWebhooksModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

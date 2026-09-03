@@ -1,5 +1,5 @@
 import { supportedLanguages } from "@rentos/localization";
-import { IsEmail, IsIn, IsString, Length, Matches, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsIn, IsOptional, IsString, Length, Matches, MaxLength, MinLength } from "class-validator";
 
 export class RegisterDto {
   @IsEmail()
@@ -45,4 +45,18 @@ export class RegisterDto {
   @MinLength(1)
   @MaxLength(100)
   timezone!: string;
+
+  /**
+   * Havelio Affiliate/Partner attribution (Stage 17) — either a human
+   * promotion code (e.g. "RENTAL20") or a referral-campaign slug (e.g.
+   * "rentalpro", from `?ref=rentalpro`). Optional: most tenants register
+   * with neither. See AffiliateAttributionService.recordFromSignup — a
+   * value here that doesn't match anything is silently ignored (never
+   * blocks registration), matching a plain marketing code with no
+   * affiliate behind it.
+   */
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  affiliateCode?: string;
 }

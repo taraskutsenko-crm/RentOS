@@ -3,8 +3,10 @@ import { ConfigService } from "@nestjs/config";
 import type { Prisma, RefreshToken } from "@prisma/client";
 import { isSupportedCountryCode, type ApiEnv } from "@rentos/shared";
 
+import { AffiliateAttributionService } from "../affiliate/affiliate-attribution.service";
 import { AssetStatusesService } from "../asset-statuses/asset-statuses.service";
 import { AuditService } from "../audit/audit.service";
+import { SubscriptionsService } from "../billing/subscriptions.service";
 import { MembershipsService } from "../memberships/memberships.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { TenantsService } from "../tenants/tenants.service";
@@ -35,6 +37,8 @@ export class AuthService {
     private readonly auditService: AuditService,
     private readonly passwordService: PasswordService,
     private readonly tokenService: TokenService,
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly affiliateAttributionService: AffiliateAttributionService,
   ) {}
 
   async register(dto: RegisterDto, meta: RequestMeta) {
@@ -76,6 +80,14 @@ export class AuthService {
         });
 
         await this.assetStatusesService.seedSystemStatuses(tenant.id, tx);
+
+        // Havelio Billing (Stage 17) — every new tenant starts a 14-day,
+        // no-card trial immediately (see SubscriptionsService.startTrial),
+        // and an optional affiliate/promo code from signup is attributed
+        // here, server-side, before this transaction commits — see
+        // RegisterDto.affiliateCode's own doc comment.
+        await this.subscriptionsService.startTrial(tx, tenant.id);
+        await this.affiliateAttributionService.recordFromSignup(tx, tenant.id, dto.affiliateCode);
 
         const refreshToken = await this.issueRefreshToken(tx, user.id, tenant.id, meta);
 

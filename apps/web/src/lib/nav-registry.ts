@@ -16,6 +16,7 @@ import {
   Tags,
   ToggleLeft,
   Users,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -118,6 +119,17 @@ export const NAV_GROUPS: NavGroup[] = [
         labelKey: "tenant.companyProfile.navLabel",
         icon: Building2,
         permission: "tenant.manage",
+      },
+      {
+        // Havelio's OWN subscription/plan/billing — never to be confused
+        // with "rental-billing" below (the tenant's RENTAL FINANCE monthly
+        // billing strategy for its own customers). See docs/DECISIONS.md
+        // "three financial domains".
+        id: "havelio-billing",
+        href: "/app/settings/billing",
+        labelKey: "billing.settings.navLabel",
+        icon: Wallet,
+        permission: "billing.view",
       },
       {
         id: "company-banking",

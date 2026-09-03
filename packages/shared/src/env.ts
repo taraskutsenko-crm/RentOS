@@ -105,6 +105,31 @@ export const apiEnvSchema = z.object({
   KSEF_ENCRYPTION_KEY: z
     .string()
     .length(64, "KSEF_ENCRYPTION_KEY must be a 64-character hex string (32 bytes for AES-256)"),
+
+  // Havelio Billing (Stage 17) — Stripe is the billing provider for money
+  // HAVELIO receives from tenant companies (never the tenant's own rental
+  // customers — see HavelioSubscription's doc comment in schema.prisma).
+  // All optional, matching the STORAGE_*/SMTP_* precedent: StripeProvider's
+  // own isConfigured() gates real functionality, and the Billing UI shows a
+  // truthful "Stripe billing is not configured" message when unset — see
+  // docs/DECISIONS.md.
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  // Verifies inbound webhook signatures (Stripe.webhooks.constructEvent) —
+  // required for any webhook to be accepted once STRIPE_SECRET_KEY is set,
+  // but kept independently optional here so schema validation itself never
+  // blocks booting without Stripe configured at all.
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  // Deterministic Havelio-plan + billing-interval → Stripe Price mapping
+  // (see docs/DECISIONS.md "do not dynamically create duplicate Stripe
+  // products/prices on every runtime"). Enterprise has no self-service
+  // Price — Contact Sales only in V1.
+  STRIPE_PRICE_STARTER_MONTHLY: z.string().optional(),
+  STRIPE_PRICE_STARTER_ANNUAL: z.string().optional(),
+  STRIPE_PRICE_BUSINESS_MONTHLY: z.string().optional(),
+  STRIPE_PRICE_BUSINESS_ANNUAL: z.string().optional(),
+  STRIPE_PRICE_PROFESSIONAL_MONTHLY: z.string().optional(),
+  STRIPE_PRICE_PROFESSIONAL_ANNUAL: z.string().optional(),
 });
 export type ApiEnv = z.infer<typeof apiEnvSchema>;
 

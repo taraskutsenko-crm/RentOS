@@ -745,6 +745,15 @@ model User {
   preferredLanguage String    @default("en") @db.VarChar(10)
   emailVerifiedAt   DateTime?
   isActive          Boolean   @default(true)
+  /// Havelio PLATFORM administration (Stage 17) — grants access to
+  /// cross-tenant platform-admin surfaces (all subscriptions, affiliate
+  /// partners/campaigns/commissions, global revenue). Deliberately a
+  /// distinct, explicit column checked by its own PlatformAdminGuard —
+  /// never inferred from a `MembershipRole` (which is always scoped to one
+  /// tenant) and never an email-address allowlist. Defaults false; only
+  /// ever set by direct database/ops action or an already-platform-admin
+  /// user, never self-service. See docs/DECISIONS.md.
+  isPlatformAdmin   Boolean   @default(false)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   deletedAt         DateTime?
@@ -798,6 +807,11 @@ model User {
   sentInvoiceEmailDeliveries InvoiceEmailDelivery[]       @relation("InvoiceEmailDeliverySentBy")
   createdPaymentDemands      PaymentDemand[]              @relation("PaymentDemandCreatedBy")
   sentPaymentDemandEmails    PaymentDemandEmailDelivery[] @relation("PaymentDemandEmailDeliverySentBy")
+
+  createdAffiliatePartners AffiliatePartner[]      @relation("AffiliatePartnerCreatedBy")
+  adminAttributions        AffiliateAttribution[]  @relation("AffiliateAttributionCreatedBy")
+  recordedAffiliatePayouts AffiliatePayout[]       @relation("AffiliatePayoutRecordedBy")
+  legalAcceptanceRecords   LegalAcceptanceRecord[] @relation("LegalAcceptanceAcceptedBy")
 
   @@index([deletedAt])
   @@map("users")
@@ -917,6 +931,16 @@ model Tenant {
   paymentDemands               PaymentDemand[]
   paymentDemandSequences       PaymentDemandSequence[]
   paymentDemandEmailDeliveries PaymentDemandEmailDelivery[]
+
+  /// Havelio Billing (Stage 17) — money Havelio itself receives from this
+  /// tenant for using the product. Deliberately a completely separate
+  /// domain from Invoice/Payment above (RENTAL FINANCE: money the tenant's
+  /// own rental customers pay the tenant) — never the same tables, never
+  /// combined in a report. See HavelioSubscription's own doc comment.
+  havelioSubscription    HavelioSubscription?
+  affiliateAttribution   AffiliateAttribution?
+  affiliateCommissions   AffiliateCommissionEntry[]
+  legalAcceptanceRecords LegalAcceptanceRecord[]
 
   @@index([deletedAt])
   @@map("tenants")
@@ -2797,4 +2821,441 @@ model RentalDamageReportPhoto {
 
   @@index([tenantId, damageReportId])
   @@map("rental_damage_report_photos")
+}
+
+// ===========================================================================
+// Stage 17 — Havelio Monetization & Billing V1.
+//
+// THREE separate financial domains exist in this codebase. Never mix their
+// tables, ledgers, terminology, or reports:
+//
+//   A) RENTAL FINANCE — money a Havelio TENANT receives from ITS OWN rental
+//      customers. Invoice/Payment/RentalDeposit/PaymentDemand above (Stage
+//      16). Unchanged by this section.
+//   B) HAVELIO BILLING — money HAVELIO receives from tenant companies for
+//      using Havelio. HavelioSubscription/StripeWebhookEvent/PromoCode below.
+//   C) AFFILIATE COMMISSIONS — money Havelio may owe a partner who referred
+//      a paying Havelio customer. AffiliatePartner/AffiliateCampaign/
+//      AffiliateAttribution/AffiliateCommissionEntry/AffiliatePayout below.
+//
+// Platform-admin surfaces over (B)/(C) are gated by User.isPlatformAdmin —
+// a distinct, explicit flag, never a tenant MembershipRole and never an
+// email allowlist (see PlatformAdminGuard).
+// ===========================================================================
+
+enum HavelioPlan {
+  STARTER
+  BUSINESS
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum BillingInterval {
+  MONTHLY
+  ANNUAL
+}
+
+/// Mirrors the subset of Stripe subscription lifecycle states this product
+/// actually models, plus TRIALING/EXPIRED for the card-less trial (which
+/// Stripe never sees at all — see HavelioSubscription's own doc comment).
+enum HavelioSubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+  INCOMPLETE
+}
+
+/// One row per tenant — the tenant's relationship with HAVELIO's own
+/// billing (never the tenant's rental customers' money; see this section's
+/// header comment). Created automatically (TRIALING, no Stripe fields) the
+/// moment a tenant registers — see TenantsService.register /
+/// SubscriptionsService.startTrial. Stripe/webhook state is the ONLY thing
+/// that ever moves a row to ACTIVE/PAST_DUE — never the browser returning
+/// to a success URL (see docs/DECISIONS.md, StripeWebhooksController).
+model HavelioSubscription {
+  id       String @id @default(uuid())
+  tenantId String @unique
+
+  plan            HavelioPlan
+  billingInterval BillingInterval?
+  status          HavelioSubscriptionStatus
+
+  /// Safely stored Stripe identifiers — never a secret, always safe to read
+  /// back to an OWNER/ADMIN's own Billing page.
+  stripeCustomerId     String?
+  stripeSubscriptionId String? @unique
+  stripePriceId        String?
+
+  trialStartedAt     DateTime?
+  /// Server-computed at trial start (`trialStartedAt + 14 days`) — never
+  /// derived from or trusted from the browser clock. See
+  /// SubscriptionsService.isTrialExpired.
+  trialEndsAt        DateTime?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+  canceledAt         DateTime?
+
+  /// A pending DOWNGRADE, scheduled to take effect at `currentPeriodEnd`
+  /// (see docs/DECISIONS.md "Upgrade/downgrade" V1 policy: upgrades apply
+  /// immediately with provider-calculated proration; downgrades never take
+  /// effect immediately, so a tenant already using more than the lower
+  /// plan's limits is never suddenly locked out). Applied lazily — the same
+  /// pattern as trial expiry — by SubscriptionsService.getSubscription the
+  /// first time it's read after `currentPeriodEnd` has passed (this
+  /// codebase has no job scheduler; see docs/DECISIONS.md). Both null when
+  /// no downgrade is scheduled.
+  scheduledPlan            HavelioPlan?
+  scheduledBillingInterval BillingInterval?
+
+  /// True only for the one-time Stage-17 migration row created for a
+  /// tenant that already existed before Havelio billing existed (see
+  /// docs/DECISIONS.md "existing tenant migration strategy") — an
+  /// internal/development entitlement, never reachable via any ordinary
+  /// signup/checkout path, and never checked by any code path as a
+  /// security bypass (PlatformAdminGuard/entitlement checks do not treat
+  /// this specially — it behaves exactly like a real ACTIVE PROFESSIONAL
+  /// subscription with no expiry, nothing more).
+  isGrandfathered Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([stripeCustomerId])
+  @@map("havelio_subscriptions")
+}
+
+/// Idempotency guard for Stripe webhook delivery (Stripe's own "at least
+/// once" guarantee means every handler must tolerate redelivery) — the
+/// primary key is the real Stripe event id (`evt_...`) itself; a second
+/// delivery of the same event is a duplicate-key insert the webhook
+/// handler treats as "already processed, return 200, do nothing more."
+model StripeWebhookEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now())
+
+  @@map("stripe_webhook_events")
+}
+
+enum PromoDiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+/// Mirrors the three Stripe Coupon duration semantics this product
+/// supports — never a duration Stripe itself doesn't offer. See
+/// docs/DECISIONS.md for exactly how each maps to a Stripe Coupon.
+enum PromoDuration {
+  ONCE
+  REPEATING
+  FOREVER
+}
+
+/// A discount code redeemable at Havelio checkout — Stripe (Coupon +
+/// Promotion Code) is the system of record for the actual discount
+/// mechanics whenever `stripeCouponId`/`stripePromotionCodeId` are set;
+/// this row is Havelio's own local metadata for validation, eligibility,
+/// and attribution reporting (see docs/DECISIONS.md — "Havelio must still
+/// store enough local metadata for attribution/reporting"). A code MAY be
+/// tied to an AffiliateCampaign (an influencer's code) or stand alone (a
+/// plain marketing code like WELCOME20).
+model PromoCode {
+  id   String @id @default(uuid())
+  /// Always stored upper-cased — see promo-codes.service.ts's own
+  /// normalization, so lookup is never case-sensitive by accident.
+  code String @unique
+
+  discountType       PromoDiscountType
+  /// Integer basis points for PERCENTAGE (2000 = 20%); null for FIXED_AMOUNT.
+  discountValueBp    Int?
+  /// Integer minor units for FIXED_AMOUNT (never a float); null for PERCENTAGE.
+  discountValueMinor Int?
+  /// Only meaningful for FIXED_AMOUNT — a fixed-amount discount is
+  /// currency-specific by nature.
+  currency           String?           @db.VarChar(3)
+
+  duration         PromoDuration
+  /// Only meaningful for REPEATING (Stripe's `duration_in_months`).
+  durationInMonths Int?
+
+  isActive              Boolean   @default(true)
+  validFrom             DateTime?
+  validUntil            DateTime?
+  maxRedemptions        Int?
+  redemptionCount       Int       @default(0)
+  /// "New customer" restriction — true is the safe default; a promo code
+  /// is opt-in to being reusable by an already-attributed tenant.
+  firstTimeCustomerOnly Boolean   @default(true)
+
+  /// Empty array (default) means "eligible for every plan".
+  eligiblePlans    HavelioPlan[]
+  /// Null means "eligible for both monthly and annual".
+  eligibleInterval BillingInterval?
+
+  /// Present once this code has a real Stripe Coupon/Promotion Code
+  /// provisioned (see docs/DECISIONS.md "do not implement unsupported
+  /// Stripe semantics by pretending they exist") — null when Stripe isn't
+  /// configured in this environment, or the code hasn't been provisioned
+  /// yet.
+  stripeCouponId        String?
+  stripePromotionCodeId String?
+
+  affiliateCampaignId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  affiliateCampaign AffiliateCampaign?     @relation(fields: [affiliateCampaignId], references: [id])
+  attributions      AffiliateAttribution[]
+
+  @@index([affiliateCampaignId])
+  @@map("promo_codes")
+}
+
+enum AffiliateStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+/// Havelio PLATFORM-level partner (blogger/influencer/consultant/agency/
+/// referral-partner/future-reseller) — belongs to Havelio's own business
+/// administration, never a tenant's rental-business settings (see this
+/// section's header comment). Visible only through platform-admin
+/// surfaces, gated by User.isPlatformAdmin.
+model AffiliatePartner {
+  id            String          @id @default(uuid())
+  displayName   String
+  legalName     String?
+  email         String
+  contactInfo   String?
+  status        AffiliateStatus @default(ACTIVE)
+  internalNotes String?
+
+  createdByUserId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  createdByUser User @relation("AffiliatePartnerCreatedBy", fields: [createdByUserId], references: [id])
+
+  campaigns         AffiliateCampaign[]
+  attributions      AffiliateAttribution[]
+  commissionEntries AffiliateCommissionEntry[]
+  payouts           AffiliatePayout[]
+
+  @@map("affiliate_partners")
+}
+
+/// A partner may run several campaigns over time (e.g. "YouTube September
+/// 2026"), each with its own commission rate/duration and its own promo
+/// code(s) — the human-readable code itself is never the relational key
+/// (see docs/DECISIONS.md); PromoCode.affiliateCampaignId is.
+model AffiliateCampaign {
+  id     String          @id @default(uuid())
+  name   String
+  status AffiliateStatus @default(ACTIVE)
+
+  /// The referral-link identifier — `havelio.net/signup?ref=<slug>` (see
+  /// docs/DECISIONS.md "referral links" — a query-param is sufficient for
+  /// V1, no short-link infrastructure). Unique across every campaign of
+  /// every partner. Distinct from PromoCode.code: a visitor following a
+  /// referral link is attributed to this campaign even if they never type
+  /// a discount code at all.
+  slug String @unique
+
+  partnerId String
+
+  /// Integer basis points (2500 = 25%) — V1 only supports PERCENTAGE
+  /// commission (see docs/DECISIONS.md "do not overbuild unless easy").
+  commissionRateBp         Int
+  /// How many months after a tenant's first paid conversion this
+  /// campaign's referrals keep earning commission (e.g. 12).
+  commissionDurationMonths Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  partner AffiliatePartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  promoCodes        PromoCode[]
+  attributions      AffiliateAttribution[]
+  commissionEntries AffiliateCommissionEntry[]
+
+  @@index([partnerId])
+  @@map("affiliate_campaigns")
+}
+
+/// Which affiliate a tenant is attributed to, if any — always the FIRST
+/// valid attribution (see docs/DECISIONS.md "do not silently replace it
+/// later"); the unique `tenantId` enforces this at the database level, not
+/// just in application code. An ADMIN-sourced row is the one explicit,
+/// audited override path (createdByUserId records who).
+model AffiliateAttribution {
+  id String @id @default(uuid())
+
+  tenantId String @unique
+
+  partnerId   String
+  campaignId  String?
+  promoCodeId String?
+
+  source       AttributionSource
+  attributedAt DateTime          @default(now())
+
+  /// Set only when source=ADMIN.
+  createdByUserId String?
+
+  createdAt DateTime @default(now())
+
+  tenant        Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  partner       AffiliatePartner   @relation(fields: [partnerId], references: [id])
+  campaign      AffiliateCampaign? @relation(fields: [campaignId], references: [id])
+  promoCode     PromoCode?         @relation(fields: [promoCodeId], references: [id])
+  createdByUser User?              @relation("AffiliateAttributionCreatedBy", fields: [createdByUserId], references: [id])
+
+  @@index([partnerId])
+  @@index([campaignId])
+  @@map("affiliate_attributions")
+}
+
+enum AttributionSource {
+  PROMO_CODE
+  REFERRAL_LINK
+  ADMIN
+}
+
+enum CommissionEventType {
+  COMMISSION_EARNED
+  COMMISSION_REVERSED
+  MANUAL_ADJUSTMENT
+  PAYOUT
+}
+
+/// The auditable affiliate commission ledger (see docs/DECISIONS.md "do
+/// not silently rewrite history" — mirrors Payment's void-never-mutate
+/// convention exactly, one append-only row per financial event). A
+/// partner's current payable balance is always the live sum of this
+/// table's `amountMinor`, never a separately stored running total. The
+/// `@@unique([stripeInvoiceId, eventType])` below is the actual database-
+/// level idempotency guarantee behind "duplicate webhook cannot create
+/// duplicate commission" — not just application-code care.
+model AffiliateCommissionEntry {
+  id         String  @id @default(uuid())
+  partnerId  String
+  /// Null only for a PAYOUT/MANUAL_ADJUSTMENT row that isn't tied to one
+  /// specific tenant (a manual payout is partner-level — see
+  /// AffiliatePayoutsService). Always set for COMMISSION_EARNED/
+  /// COMMISSION_REVERSED.
+  tenantId   String?
+  campaignId String?
+
+  eventType CommissionEventType
+
+  /// The Stripe invoice this entry was computed from — null for
+  /// MANUAL_ADJUSTMENT/PAYOUT rows not tied to one specific invoice.
+  stripeInvoiceId String?
+
+  currency             String @db.VarChar(3)
+  /// The real collected revenue (Stripe invoice `amount_paid`, never the
+  /// nominal plan price) this commission was computed against — 0 for
+  /// MANUAL_ADJUSTMENT/PAYOUT rows.
+  eligibleRevenueMinor Int    @default(0)
+  /// Integer basis points AT THE TIME this entry was created — never
+  /// re-derived from the campaign's current rate later, so history stays
+  /// reconstructable even after a campaign's rate is edited.
+  commissionRateBp     Int    @default(0)
+  /// This entry's own signed effect on the partner's payable balance:
+  /// positive for COMMISSION_EARNED/a positive MANUAL_ADJUSTMENT, negative
+  /// for COMMISSION_REVERSED/PAYOUT/a negative MANUAL_ADJUSTMENT.
+  amountMinor          Int
+
+  /// Set only on a COMMISSION_REVERSED row — the original COMMISSION_EARNED
+  /// entry being reversed. The original row is NEVER edited or deleted.
+  reversesEntryId String?
+  /// Set only on a PAYOUT row — links to the richer AffiliatePayout record
+  /// (method/reference/note/recordedBy).
+  payoutId        String? @unique
+
+  note String?
+
+  earnedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  partner       AffiliatePartner           @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  tenant        Tenant?                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  campaign      AffiliateCampaign?         @relation(fields: [campaignId], references: [id])
+  reversesEntry AffiliateCommissionEntry?  @relation("CommissionReversal", fields: [reversesEntryId], references: [id])
+  reversedBy    AffiliateCommissionEntry[] @relation("CommissionReversal")
+  payout        AffiliatePayout?           @relation(fields: [payoutId], references: [id])
+
+  @@unique([stripeInvoiceId, eventType])
+  @@index([partnerId, earnedAt])
+  @@index([tenantId])
+  @@map("affiliate_commission_entries")
+}
+
+enum AffiliatePayoutMethod {
+  BANK_TRANSFER
+  PAYPAL
+  OTHER
+}
+
+/// Stage 17 V1 payouts are always a MANUAL record of money the platform
+/// admin already sent the partner OUTSIDE Havelio (see docs/DECISIONS.md
+/// "never pretend Havelio transferred money") — no Stripe Connect, no
+/// automated transfer. Recording one here creates exactly one
+/// AffiliateCommissionEntry(eventType=PAYOUT, amountMinor negative) so the
+/// partner's payable balance drops by the recorded amount.
+model AffiliatePayout {
+  id        String @id @default(uuid())
+  partnerId String
+
+  amountMinor Int
+  currency    String                @db.VarChar(3)
+  payoutDate  DateTime
+  method      AffiliatePayoutMethod
+  reference   String?
+  note        String?
+
+  recordedByUserId String
+  createdAt        DateTime @default(now())
+
+  partner        AffiliatePartner          @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  recordedByUser User                      @relation("AffiliatePayoutRecordedBy", fields: [recordedByUserId], references: [id])
+  ledgerEntry    AffiliateCommissionEntry?
+
+  @@index([partnerId, payoutDate])
+  @@map("affiliate_payouts")
+}
+
+/// Stage 18 hook, per this task's explicit "prepare, do not write" scope —
+/// no legal pages/UI exist yet, but signup/checkout acceptance can already
+/// record which terms/privacy-policy VERSION a tenant accepted, when, and
+/// through which flow, so Stage 18 has real data to build on rather than a
+/// backfill problem. `termsVersion`/`source` are free-text (no fixed
+/// version registry exists yet — Stage 18's job) rather than a fabricated
+/// enum pretending final versions already exist.
+model LegalAcceptanceRecord {
+  id       String  @id @default(uuid())
+  tenantId String?
+
+  termsVersion   String
+  privacyVersion String?
+
+  acceptedByUserId String?
+  acceptedAt       DateTime @default(now())
+  /// e.g. "SIGNUP", "CHECKOUT" — free text, see model doc comment.
+  source           String
+
+  tenant         Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  acceptedByUser User?   @relation("LegalAcceptanceAcceptedBy", fields: [acceptedByUserId], references: [id])
+
+  @@index([tenantId])
+  @@map("legal_acceptance_records")
 }

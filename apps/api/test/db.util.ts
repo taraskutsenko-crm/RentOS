@@ -52,6 +52,17 @@ async function deleteAllRows(prisma: PrismaClient): Promise<void> {
   await prisma.customerNotification.deleteMany();
   await prisma.customerRefreshToken.deleteMany();
   await prisma.customer.deleteMany();
+  // Havelio Billing / Affiliate domains (Stage 17) — deleted before
+  // tenant/user, in child-before-parent order.
+  await prisma.affiliateCommissionEntry.deleteMany();
+  await prisma.affiliatePayout.deleteMany();
+  await prisma.affiliateAttribution.deleteMany();
+  await prisma.promoCode.deleteMany();
+  await prisma.affiliateCampaign.deleteMany();
+  await prisma.affiliatePartner.deleteMany();
+  await prisma.legalAcceptanceRecord.deleteMany();
+  await prisma.havelioSubscription.deleteMany();
+  await prisma.stripeWebhookEvent.deleteMany();
   await prisma.refreshToken.deleteMany();
   await prisma.tenantMembership.deleteMany();
   await prisma.tenant.deleteMany();

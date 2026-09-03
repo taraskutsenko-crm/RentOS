@@ -15,6 +15,7 @@ import type {
 
 import { AssetStatusesService } from "../asset-statuses/asset-statuses.service";
 import { AuditService } from "../audit/audit.service";
+import { EntitlementsService } from "../billing/entitlements.service";
 import type { PaginatedResult } from "../customers/customers.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { AvailabilityService } from "../rentals/availability.service";
@@ -77,6 +78,7 @@ export class AssetsService {
     private readonly assetStatusesService: AssetStatusesService,
     private readonly fieldValuesService: AssetFieldValuesService,
     private readonly availabilityService: AvailabilityService,
+    private readonly entitlementsService: EntitlementsService,
   ) {}
 
   async create(
@@ -116,6 +118,11 @@ export class AssetsService {
     const { customFields: _customFields, statusId: _statusId, ...assetData } = dto;
 
     const asset = await this.prisma.$transaction(async (tx) => {
+      // Havelio Billing (Stage 17) — server-enforced, concurrency-safe plan
+      // limit. Must run inside this same transaction, before the insert —
+      // see EntitlementsService.assertCanCreateAsset's own doc comment.
+      await this.entitlementsService.assertCanCreateAsset(tenantId, tx);
+
       const created = await tx.asset.create({
         data: {
           ...assetData,

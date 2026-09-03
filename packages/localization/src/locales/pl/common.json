@@ -2037,5 +2037,89 @@
     "save": "Save signature",
     "cancel": "Cancel",
     "emptyHint": "Draw your signature above"
+  },
+  "billing": {
+    "settings": {
+      "title": "Rozliczenia",
+      "subtitle": "Twój plan, okres próbny i subskrypcja Havelio.",
+      "navLabel": "Rozliczenia"
+    },
+    "stripeNotConfigured": "Płatności Stripe nie są skonfigurowane w tym środowisku.",
+    "trial": {
+      "daysLeft": "Pozostało {{count}} dni okresu próbnego Havelio",
+      "endsToday": "Twój okres próbny Havelio kończy się dzisiaj",
+      "ended": "Twój okres próbny Havelio zakończył się."
+    },
+    "pastDue": "Płatność nieudana — ta subskrypcja jest zaległa.",
+    "canceled": "Ta subskrypcja została anulowana.",
+    "cancelsOn": "Anulowanie: {{date}}",
+    "grandfathered": "Plan przejściowy",
+    "perMonth": "miesiąc",
+    "perYear": "rok",
+    "nextBillingDate": "Kolejna płatność: {{date}}",
+    "currentPlan": {
+      "title": "Aktualny plan"
+    },
+    "usage": {
+      "assets": "Zasoby",
+      "users": "Użytkownicy",
+      "unlimited": "{{current}} (bez limitu)",
+      "unlimitedUsers": "Nielimitowani użytkownicy",
+      "unlimitedAssets": "Nielimitowane zasoby",
+      "currentCount": "{{count}} (brak aktywnego planu)"
+    },
+    "limits": {
+      "users": "Do {{count}} użytkowników",
+      "assets": "Do {{count}} zasobów"
+    },
+    "actions": {
+      "manageBilling": "Zarządzaj płatnościami",
+      "cancel": "Anuluj subskrypcję",
+      "resume": "Wznów subskrypcję",
+      "currentPlan": "Aktualny plan",
+      "choose": "Wybierz plan"
+    },
+    "chooseAPlan": "Wybierz plan",
+    "changePlan": "Zmień plan",
+    "interval": {
+      "monthly": "Miesięcznie",
+      "annual": "Rocznie",
+      "annualDiscount": "Oszczędź 20% przy rozliczeniu rocznym"
+    },
+    "promoCode": {
+      "label": "Kod promocyjny",
+      "placeholder": "np. RENTAL20",
+      "thenPrice": "Następnie {{price}}/miesiąc po {{months}} miesiącach",
+      "forever": "Następnie {{price}} — na zawsze",
+      "valid": "Kod zastosowany.",
+      "invalid": "Ten kod jest nieprawidłowy."
+    },
+    "mostPopular": "Najpopularniejszy",
+    "contactSales": "Skontaktuj się z działem sprzedaży",
+    "plans": {
+      "STARTER": "Starter",
+      "BUSINESS": "Business",
+      "PROFESSIONAL": "Professional",
+      "ENTERPRISE": "Enterprise"
+    },
+    "status": {
+      "TRIALING": "Okres próbny",
+      "ACTIVE": "Aktywna",
+      "PAST_DUE": "Zaległa",
+      "CANCELED": "Anulowana",
+      "EXPIRED": "Okres próbny wygasł",
+      "INCOMPLETE": "Niekompletna"
+    },
+    "cancelDialog": {
+      "title": "Anulować subskrypcję?",
+      "description": "Twoja subskrypcja pozostanie aktywna do {{date}}. Nie zostaniesz ponownie obciążony.",
+      "confirm": "Anuluj subskrypcję"
+    },
+    "toast": {
+      "upgraded": "Plan podwyższony.",
+      "downgradeScheduled": "Obniżenie planu zaplanowano na koniec bieżącego okresu rozliczeniowego.",
+      "canceled": "Twoja subskrypcja zakończy się na koniec bieżącego okresu.",
+      "resumed": "Twoja subskrypcja została wznowiona."
+    }
   }
 }

@@ -213,6 +213,19 @@ export const INTEGRATION_PERMISSIONS = ["integrations.view", "integrations.manag
  */
 export const FINANCE_REPORTS_PERMISSIONS = ["finance.read", "finance.export"] as const;
 
+/**
+ * Gates Settings -> Billing (Stage 17 Havelio Monetization & Billing V1) —
+ * the tenant's own subscription to HAVELIO itself (plan/trial/checkout/
+ * upgrade/downgrade/cancel/resume), never the tenant's RENTAL FINANCE data
+ * (Invoice/Payment above, which stays gated by `invoices.*`/`payments.*`).
+ * `billing.view` shows the current plan/status/trial/price; `billing.manage`
+ * gates every mutating action (choose plan, upgrade, downgrade, cancel,
+ * resume, redeem a promo code, open the Stripe billing portal) — OWNER/ADMIN
+ * only, same tier as `tenant.manage`: this is company-wide financial
+ * configuration, not an operational action any other role should touch.
+ */
+export const BILLING_PERMISSIONS = ["billing.view", "billing.manage"] as const;
+
 export const ALL_PERMISSIONS = [
   ...ASSET_PERMISSIONS,
   ...RENTAL_PERMISSIONS,
@@ -226,6 +239,7 @@ export const ALL_PERMISSIONS = [
   ...BANK_ACCOUNT_PERMISSIONS,
   ...INTEGRATION_PERMISSIONS,
   ...FINANCE_REPORTS_PERMISSIONS,
+  ...BILLING_PERMISSIONS,
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];

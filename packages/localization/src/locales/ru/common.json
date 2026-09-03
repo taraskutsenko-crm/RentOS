@@ -2037,5 +2037,89 @@
         "failure": "Не удалось отправить тестовое письмо."
       }
     }
+  },
+  "billing": {
+    "settings": {
+      "title": "Оплата",
+      "subtitle": "Ваш план, пробный период и подписка Havelio.",
+      "navLabel": "Оплата"
+    },
+    "stripeNotConfigured": "Оплата через Stripe не настроена в этом окружении.",
+    "trial": {
+      "daysLeft": "Осталось {{count}} дней пробного периода Havelio",
+      "endsToday": "Ваш пробный период Havelio заканчивается сегодня",
+      "ended": "Ваш пробный период Havelio завершён."
+    },
+    "pastDue": "Платёж не прошёл — подписка просрочена.",
+    "canceled": "Эта подписка отменена.",
+    "cancelsOn": "Отмена: {{date}}",
+    "grandfathered": "Переходный план",
+    "perMonth": "месяц",
+    "perYear": "год",
+    "nextBillingDate": "Следующее списание: {{date}}",
+    "currentPlan": {
+      "title": "Текущий план"
+    },
+    "usage": {
+      "assets": "Активы",
+      "users": "Пользователи",
+      "unlimited": "{{current}} (без ограничений)",
+      "unlimitedUsers": "Неограниченно пользователей",
+      "unlimitedAssets": "Неограниченно активов",
+      "currentCount": "{{count}} (нет активного плана)"
+    },
+    "limits": {
+      "users": "До {{count}} пользователей",
+      "assets": "До {{count}} активов"
+    },
+    "actions": {
+      "manageBilling": "Управление оплатой",
+      "cancel": "Отменить подписку",
+      "resume": "Возобновить подписку",
+      "currentPlan": "Текущий план",
+      "choose": "Выбрать план"
+    },
+    "chooseAPlan": "Выберите план",
+    "changePlan": "Изменить план",
+    "interval": {
+      "monthly": "Ежемесячно",
+      "annual": "Ежегодно",
+      "annualDiscount": "Скидка 20% при годовой оплате"
+    },
+    "promoCode": {
+      "label": "Промокод",
+      "placeholder": "например, RENTAL20",
+      "thenPrice": "Затем {{price}}/месяц через {{months}} мес.",
+      "forever": "Затем {{price}} — навсегда",
+      "valid": "Код применён.",
+      "invalid": "Этот код недействителен."
+    },
+    "mostPopular": "Самый популярный",
+    "contactSales": "Связаться с отделом продаж",
+    "plans": {
+      "STARTER": "Starter",
+      "BUSINESS": "Business",
+      "PROFESSIONAL": "Professional",
+      "ENTERPRISE": "Enterprise"
+    },
+    "status": {
+      "TRIALING": "Пробный период",
+      "ACTIVE": "Активна",
+      "PAST_DUE": "Просрочена",
+      "CANCELED": "Отменена",
+      "EXPIRED": "Пробный период истёк",
+      "INCOMPLETE": "Не завершена"
+    },
+    "cancelDialog": {
+      "title": "Отменить подписку?",
+      "description": "Ваша подписка останется активной до {{date}}. Повторное списание не произойдёт.",
+      "confirm": "Отменить подписку"
+    },
+    "toast": {
+      "upgraded": "План повышен.",
+      "downgradeScheduled": "Понижение плана запланировано на конец текущего расчётного периода.",
+      "canceled": "Ваша подписка завершится в конце текущего периода.",
+      "resumed": "Ваша подписка возобновлена."
+    }
   }
 }

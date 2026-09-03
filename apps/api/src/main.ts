@@ -10,7 +10,13 @@ import { AppModule } from "./app.module";
 import { HELMET_OPTIONS } from "./security-headers";
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  // rawBody: true preserves the raw request-body Buffer on req.rawBody
+  // alongside Nest's normal JSON body parsing — needed for
+  // StripeWebhooksController to verify Stripe's signature against the
+  // exact bytes Stripe signed (a re-serialized/parsed JSON body would not
+  // byte-match). Every other route is unaffected. See
+  // docs/DECISIONS.md and billing/stripe-webhooks.controller.ts.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const configService = app.get(ConfigService<ApiEnv, true>);
 
   // Web and API are always different origins in this deployment (different

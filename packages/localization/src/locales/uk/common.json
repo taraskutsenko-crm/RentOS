@@ -2037,5 +2037,89 @@
     "save": "Save signature",
     "cancel": "Cancel",
     "emptyHint": "Draw your signature above"
+  },
+  "billing": {
+    "settings": {
+      "title": "Оплата",
+      "subtitle": "Ваш план, пробний період і підписка Havelio.",
+      "navLabel": "Оплата"
+    },
+    "stripeNotConfigured": "Оплату через Stripe не налаштовано в цьому середовищі.",
+    "trial": {
+      "daysLeft": "Залишилось {{count}} днів пробного періоду Havelio",
+      "endsToday": "Ваш пробний період Havelio закінчується сьогодні",
+      "ended": "Ваш пробний період Havelio завершився."
+    },
+    "pastDue": "Платіж не пройшов — підписка прострочена.",
+    "canceled": "Цю підписку скасовано.",
+    "cancelsOn": "Скасування: {{date}}",
+    "grandfathered": "Перехідний план",
+    "perMonth": "місяць",
+    "perYear": "рік",
+    "nextBillingDate": "Наступне списання: {{date}}",
+    "currentPlan": {
+      "title": "Поточний план"
+    },
+    "usage": {
+      "assets": "Активи",
+      "users": "Користувачі",
+      "unlimited": "{{current}} (без обмежень)",
+      "unlimitedUsers": "Необмежено користувачів",
+      "unlimitedAssets": "Необмежено активів",
+      "currentCount": "{{count}} (немає активного плану)"
+    },
+    "limits": {
+      "users": "До {{count}} користувачів",
+      "assets": "До {{count}} активів"
+    },
+    "actions": {
+      "manageBilling": "Керування оплатою",
+      "cancel": "Скасувати підписку",
+      "resume": "Відновити підписку",
+      "currentPlan": "Поточний план",
+      "choose": "Обрати план"
+    },
+    "chooseAPlan": "Оберіть план",
+    "changePlan": "Змінити план",
+    "interval": {
+      "monthly": "Щомісячно",
+      "annual": "Щорічно",
+      "annualDiscount": "Знижка 20% при річній оплаті"
+    },
+    "promoCode": {
+      "label": "Промокод",
+      "placeholder": "напр., RENTAL20",
+      "thenPrice": "Потім {{price}}/місяць через {{months}} міс.",
+      "forever": "Потім {{price}} — назавжди",
+      "valid": "Код застосовано.",
+      "invalid": "Цей код недійсний."
+    },
+    "mostPopular": "Найпопулярніший",
+    "contactSales": "Звʼязатися з відділом продажів",
+    "plans": {
+      "STARTER": "Starter",
+      "BUSINESS": "Business",
+      "PROFESSIONAL": "Professional",
+      "ENTERPRISE": "Enterprise"
+    },
+    "status": {
+      "TRIALING": "Пробний період",
+      "ACTIVE": "Активна",
+      "PAST_DUE": "Прострочена",
+      "CANCELED": "Скасована",
+      "EXPIRED": "Пробний період закінчився",
+      "INCOMPLETE": "Не завершена"
+    },
+    "cancelDialog": {
+      "title": "Скасувати підписку?",
+      "description": "Ваша підписка залишиться активною до {{date}}. Повторного списання не буде.",
+      "confirm": "Скасувати підписку"
+    },
+    "toast": {
+      "upgraded": "План підвищено.",
+      "downgradeScheduled": "Пониження плану заплановано на кінець поточного розрахункового періоду.",
+      "canceled": "Ваша підписка завершиться наприкінці поточного періоду.",
+      "resumed": "Вашу підписку відновлено."
+    }
   }
 }

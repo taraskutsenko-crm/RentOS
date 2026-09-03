@@ -29,7 +29,11 @@ export async function createTestApp(
 
   const moduleRef = await builder.compile();
 
-  const app = moduleRef.createNestApplication();
+  // rawBody: true mirrors main.ts's real bootstrap — required for
+  // StripeWebhooksController's signature verification (see
+  // stripe-webhooks.e2e-spec.ts), which needs the exact raw bytes Stripe
+  // signed, not Nest's re-serialized parsed body.
+  const app = moduleRef.createNestApplication({ rawBody: true });
   app.use(helmet(HELMET_OPTIONS));
   app.use(cookieParser());
   app.useGlobalPipes(

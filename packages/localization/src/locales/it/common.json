@@ -2037,5 +2037,89 @@
     "save": "Save signature",
     "cancel": "Cancel",
     "emptyHint": "Draw your signature above"
+  },
+  "billing": {
+    "settings": {
+      "title": "Billing",
+      "subtitle": "Your Havelio plan, trial, and subscription.",
+      "navLabel": "Billing"
+    },
+    "stripeNotConfigured": "Stripe billing is not configured in this environment.",
+    "trial": {
+      "daysLeft": "{{count}} days left in your Havelio trial",
+      "endsToday": "Your Havelio trial ends today",
+      "ended": "Your Havelio trial has ended."
+    },
+    "pastDue": "Payment failed — this subscription is past due.",
+    "canceled": "This subscription has been canceled.",
+    "cancelsOn": "Cancels on {{date}}",
+    "grandfathered": "Grandfathered plan",
+    "perMonth": "month",
+    "perYear": "year",
+    "nextBillingDate": "Next billing date: {{date}}",
+    "currentPlan": {
+      "title": "Current plan"
+    },
+    "usage": {
+      "assets": "Assets",
+      "users": "Users",
+      "unlimited": "{{current}} (unlimited)",
+      "unlimitedUsers": "Unlimited users",
+      "unlimitedAssets": "Unlimited assets",
+      "currentCount": "{{count}} (no active plan)"
+    },
+    "limits": {
+      "users": "Up to {{count}} users",
+      "assets": "Up to {{count}} assets"
+    },
+    "actions": {
+      "manageBilling": "Manage billing",
+      "cancel": "Cancel subscription",
+      "resume": "Resume subscription",
+      "currentPlan": "Current plan",
+      "choose": "Choose plan"
+    },
+    "chooseAPlan": "Choose a plan",
+    "changePlan": "Change plan",
+    "interval": {
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "annualDiscount": "Save 20% billed annually"
+    },
+    "promoCode": {
+      "label": "Promotion code",
+      "placeholder": "e.g. RENTAL20",
+      "thenPrice": "Then {{price}}/month after {{months}} months",
+      "forever": "Then {{price}} — forever",
+      "valid": "Code applied.",
+      "invalid": "This code isn't valid."
+    },
+    "mostPopular": "Most popular",
+    "contactSales": "Contact sales",
+    "plans": {
+      "STARTER": "Starter",
+      "BUSINESS": "Business",
+      "PROFESSIONAL": "Professional",
+      "ENTERPRISE": "Enterprise"
+    },
+    "status": {
+      "TRIALING": "Trial",
+      "ACTIVE": "Active",
+      "PAST_DUE": "Past due",
+      "CANCELED": "Canceled",
+      "EXPIRED": "Trial expired",
+      "INCOMPLETE": "Incomplete"
+    },
+    "cancelDialog": {
+      "title": "Cancel subscription?",
+      "description": "Your subscription will remain active until {{date}}. You will not be charged again.",
+      "confirm": "Cancel subscription"
+    },
+    "toast": {
+      "upgraded": "Plan upgraded.",
+      "downgradeScheduled": "Downgrade scheduled for the end of your current billing period.",
+      "canceled": "Your subscription will end at the end of the current period.",
+      "resumed": "Your subscription has been resumed."
+    }
   }
 }

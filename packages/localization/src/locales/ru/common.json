@@ -1769,7 +1769,8 @@
       "amount": "Сумма",
       "date": "Дата",
       "method": "Способ",
-      "reference": "Назначение"
+      "reference": "Назначение",
+      "notes": "Примечание"
     },
     "statuses": {
       "UNPAID": "Не оплачено",
@@ -1801,8 +1802,21 @@
       "statuses": {
         "GENERATED": "Сформировано",
         "SENT": "Отправлено"
+      },
+      "sendDialog": {
+        "title": "Отправить требование об оплате по email",
+        "recipientLabel": "Email получателя",
+        "messageLabel": "Сообщение (необязательно)",
+        "attachmentNote": "PDF требования об оплате будет прикреплён автоматически.",
+        "send": "Отправить",
+        "sending": "Отправка…",
+        "successMessage": "Письмо отправлено на {{email}}.",
+        "failureMessage": "Ошибка доставки: {{error}}",
+        "notConfiguredMessage": "Отправка email пока не настроена для этого рабочего пространства — письмо не отправлено."
       }
-    }
+    },
+    "markAsPaidConfirmTitle": "Отметить как полностью оплаченную?",
+    "fromDeposit": "Из депозита"
   },
   "finance": {
     "nav": "Финансы",

@@ -20,8 +20,10 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ConfirmDialog } from "../../../../components/data-table/confirm-dialog";
 import { InvoiceStatusBadge } from "../../../../components/invoices/invoice-status-badge";
 import { PaymentProgressBar } from "../../../../components/invoices/payment-progress-bar";
+import { SendPaymentDemandEmailDialog } from "../../../../components/payment-demands/send-payment-demand-email-dialog";
 import { PageHeader } from "../../../../components/shell/page-header";
 import { useBankAccounts } from "../../../../hooks/use-bank-accounts";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
@@ -42,8 +44,8 @@ import {
 import {
   paymentDemandPdfUrl,
   useCreatePaymentDemand,
+  usePaymentDemandEmailDeliveries,
   usePaymentDemands,
-  useSendPaymentDemandEmail,
 } from "../../../../hooks/use-payment-demands";
 import {
   useApplyDeposit,
@@ -57,7 +59,7 @@ import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatBusinessDate } from "../../../../lib/date-format";
 import { emailDeliveryDetailText } from "../../../../lib/email-delivery-status";
 import { fromMinorUnits, formatMoney, toMinorUnits } from "../../../../lib/money";
-import type { Invoice, PaymentMethod } from "../../../../types/invoice";
+import type { Invoice, PaymentDemand, PaymentMethod } from "../../../../types/invoice";
 
 interface EditableItem {
   description: string;
@@ -152,7 +154,6 @@ function InvoiceEditor({
   const { data: rentalDeposit } = useRentalDeposit(tenantId, invoice.rentalId);
   const { data: paymentDemands } = usePaymentDemands(tenantId, invoice.id);
   const createPaymentDemand = useCreatePaymentDemand(tenantId);
-  const sendPaymentDemandEmail = useSendPaymentDemandEmail(tenantId);
   const { data: preview } = useInvoicePreview(tenantId, invoice.id);
   const previewFrameRef = useRef<HTMLIFrameElement>(null);
   const sendInvoiceEmail = useSendInvoiceEmail(tenantId);
@@ -199,11 +200,30 @@ function InvoiceEditor({
   const [error, setError] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [wasPaymentDialogOpen, setWasPaymentDialogOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10));
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("BANK_TRANSFER");
   const [paymentReference, setPaymentReference] = useState("");
+  const [paymentNotes, setPaymentNotes] = useState("");
   const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  // Task 16 Part 3 — the dialog always opens pre-filled with the exact
+  // remaining balance (still freely editable for a partial payment): state
+  // adjustment during render (React's documented pattern for resetting
+  // state on a prop/condition change), never a setState-in-effect — see
+  // command-palette.tsx's identical `wasOpen` convention.
+  if (paymentDialogOpen !== wasPaymentDialogOpen) {
+    setWasPaymentDialogOpen(paymentDialogOpen);
+    if (paymentDialogOpen) {
+      setPaymentAmount(fromMinorUnits(invoice.remainingMinor));
+      setPaymentDate(new Date().toISOString().slice(0, 10));
+      setPaymentMethod("BANK_TRANSFER");
+      setPaymentReference("");
+      setPaymentNotes("");
+      setPaymentError(null);
+    }
+  }
 
   const [voidTargetId, setVoidTargetId] = useState<string | null>(null);
   const [voidReason, setVoidReason] = useState("");
@@ -216,6 +236,9 @@ function InvoiceEditor({
   const [demandDialogOpen, setDemandDialogOpen] = useState(false);
   const [demandDeadline, setDemandDeadline] = useState("");
   const [demandError, setDemandError] = useState<string | null>(null);
+
+  const [markFullyPaidConfirmOpen, setMarkFullyPaidConfirmOpen] = useState(false);
+  const [demandEmailTargetId, setDemandEmailTargetId] = useState<string | null>(null);
 
   const isDraft = invoice.status === "DRAFT";
   // Canonical, server-derived figure — never recomputed here. The API's
@@ -335,11 +358,10 @@ function InvoiceEditor({
           paymentDate: new Date(paymentDate).toISOString(),
           method: paymentMethod,
           reference: paymentReference || null,
+          notes: paymentNotes || null,
         },
       });
       setPaymentDialogOpen(false);
-      setPaymentAmount("");
-      setPaymentReference("");
     } catch (err) {
       setPaymentError(apiErrorMessage(err, t("common.error")));
     }
@@ -347,18 +369,10 @@ function InvoiceEditor({
 
   /** "Mark as paid" — the exact remaining balance is always computed server-side; this never sends an amount. */
   async function handleMarkFullyPaid(): Promise<void> {
-    if (
-      !window.confirm(
-        t("payment.markAsPaidConfirm", {
-          amount: formatMoney(invoice.remainingMinor, invoice.currency),
-        }),
-      )
-    ) {
-      return;
-    }
     setError(null);
     try {
       await markFullyPaid.mutateAsync({ invoiceId: invoice.id, input: {} });
+      setMarkFullyPaidConfirmOpen(false);
     } catch (err) {
       setError(apiErrorMessage(err, t("common.error")));
     }
@@ -434,14 +448,6 @@ function InvoiceEditor({
     }
   }
 
-  async function handleSendPaymentDemandEmail(paymentDemandId: string): Promise<void> {
-    setError(null);
-    try {
-      await sendPaymentDemandEmail.mutateAsync({ invoiceId: invoice.id, paymentDemandId });
-    } catch (err) {
-      setError(apiErrorMessage(err, t("common.error")));
-    }
-  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -710,7 +716,7 @@ function InvoiceEditor({
                   {canRecordPayment && invoice.remainingMinor > 0 && (
                     <Button
                       size="sm"
-                      onClick={() => void handleMarkFullyPaid()}
+                      onClick={() => setMarkFullyPaidConfirmOpen(true)}
                       disabled={markFullyPaid.isPending}
                     >
                       {t("payment.markAsPaid")}
@@ -741,32 +747,57 @@ function InvoiceEditor({
                 ) : (
                   <ul className="flex flex-col gap-2 text-sm">
                     {payments.map((payment) => (
-                      <li
-                        key={payment.id}
-                        className={`flex items-center justify-between gap-2 ${payment.voidedAt ? "text-muted-foreground line-through" : ""}`}
-                      >
-                        <span>{formatBusinessDate(payment.paymentDate, i18n.language)}</span>
-                        <span className="text-muted-foreground">
-                          {t(`payment.methods.${payment.method}`)}
-                        </span>
-                        <span>{formatMoney(payment.amountMinor, payment.currency)}</span>
-                        {payment.voidedAt ? (
-                          <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs no-underline">
-                            {t("payment.voided")}
+                      <li key={payment.id} className="flex flex-col gap-0.5 border-b pb-2 last:border-0">
+                        <div
+                          className={`flex items-center justify-between gap-2 ${payment.voidedAt ? "text-muted-foreground line-through" : ""}`}
+                        >
+                          <span>{formatBusinessDate(payment.paymentDate, i18n.language)}</span>
+                          <span className="text-muted-foreground">
+                            {t(`payment.methods.${payment.method}`)}
                           </span>
+                          <span>{formatMoney(payment.amountMinor, payment.currency)}</span>
+                          {payment.voidedAt ? (
+                            <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs no-underline">
+                              {t("payment.voided")}
+                            </span>
+                          ) : (
+                            canVoidPayment && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setVoidTargetId(payment.id);
+                                  setVoidReason("");
+                                  setVoidError(null);
+                                }}
+                              >
+                                {t("payment.void")}
+                              </Button>
+                            )
+                          )}
+                        </div>
+                        {/* Task 16 Part 7 — reference/note/deposit-source shown
+                            for a live payment; the void reason (never the raw
+                            payment detail — that stays visible above, struck
+                            through) shown for a voided one, so the audit
+                            history stays reconstructable in the UI, not just
+                            in the database. */}
+                        {payment.voidedAt ? (
+                          <p className="text-muted-foreground text-xs">
+                            {t("payment.voidedOn", {
+                              date: formatBusinessDate(payment.voidedAt, i18n.language),
+                            })}
+                            {payment.voidReason ? ` — ${payment.voidReason}` : ""}
+                          </p>
                         ) : (
-                          canVoidPayment && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setVoidTargetId(payment.id);
-                                setVoidReason("");
-                                setVoidError(null);
-                              }}
-                            >
-                              {t("payment.void")}
-                            </Button>
+                          (payment.reference || payment.notes || payment.sourceRentalDepositId) && (
+                            <p className="text-muted-foreground text-xs">
+                              {payment.sourceRentalDepositId && `${t("payment.fromDeposit")} · `}
+                              {payment.reference &&
+                                `${t("payment.fields.reference")}: ${payment.reference}`}
+                              {payment.reference && payment.notes ? " · " : ""}
+                              {payment.notes}
+                            </p>
                           )
                         )}
                       </li>
@@ -793,45 +824,14 @@ function InvoiceEditor({
                 ) : (
                   <ul className="flex flex-col gap-3 text-sm">
                     {paymentDemands.map((demand) => (
-                      <li key={demand.id} className="flex flex-col gap-1 border-b pb-3 last:border-0">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{demand.demandNumber}</span>
-                          <span className="text-muted-foreground">
-                            {t(`payment.demand.statuses.${demand.status}`)}
-                          </span>
-                        </div>
-                        <div className="text-muted-foreground flex items-center justify-between text-xs">
-                          <span>
-                            {demand.sentAt
-                              ? t("payment.demand.sentAt", {
-                                  date: formatBusinessDate(demand.sentAt, i18n.language),
-                                })
-                              : t("payment.demand.notSentYet")}
-                          </span>
-                          <span>{formatMoney(demand.outstandingAmountMinor, demand.currency)}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button asChild variant="outline" size="sm">
-                            <a
-                              href={paymentDemandPdfUrl(tenantId, invoice.id, demand.id)}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {t("payment.demand.download")}
-                            </a>
-                          </Button>
-                          {canSendDemand && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => void handleSendPaymentDemandEmail(demand.id)}
-                              disabled={sendPaymentDemandEmail.isPending}
-                            >
-                              {t("payment.demand.send")}
-                            </Button>
-                          )}
-                        </div>
-                      </li>
+                      <PaymentDemandListItem
+                        key={demand.id}
+                        tenantId={tenantId}
+                        invoiceId={invoice.id}
+                        demand={demand}
+                        canSendDemand={canSendDemand}
+                        onSendEmail={() => setDemandEmailTargetId(demand.id)}
+                      />
                     ))}
                   </ul>
                 )}
@@ -1007,6 +1007,15 @@ function InvoiceEditor({
                 onChange={(e) => setPaymentReference(e.target.value)}
               />
             </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="paymentNotes">{t("payment.fields.notes")}</Label>
+              <textarea
+                id="paymentNotes"
+                className="border-input bg-background min-h-16 rounded-md border px-3 py-2 text-sm"
+                value={paymentNotes}
+                onChange={(e) => setPaymentNotes(e.target.value)}
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPaymentDialogOpen(false)}>
@@ -1120,6 +1129,89 @@ function InvoiceEditor({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={markFullyPaidConfirmOpen}
+        onOpenChange={setMarkFullyPaidConfirmOpen}
+        title={t("payment.markAsPaidConfirmTitle")}
+        description={t("payment.markAsPaidConfirm", {
+          amount: formatMoney(invoice.remainingMinor, invoice.currency),
+        })}
+        confirmLabel={t("payment.markAsPaid")}
+        isLoading={markFullyPaid.isPending}
+        onConfirm={() => void handleMarkFullyPaid()}
+      />
+
+      {demandEmailTargetId && (
+        <SendPaymentDemandEmailDialog
+          open={!!demandEmailTargetId}
+          onOpenChange={(open) => !open && setDemandEmailTargetId(null)}
+          tenantId={tenantId}
+          invoiceId={invoice.id}
+          paymentDemandId={demandEmailTargetId}
+          defaultRecipientEmail={
+            customers?.items.find((c) => c.id === invoice.customerId)?.email ?? ""
+          }
+        />
+      )}
     </div>
+  );
+}
+
+function PaymentDemandListItem({
+  tenantId,
+  invoiceId,
+  demand,
+  canSendDemand,
+  onSendEmail,
+}: {
+  tenantId: string;
+  invoiceId: string;
+  demand: PaymentDemand;
+  canSendDemand: boolean;
+  onSendEmail: () => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const { data: deliveries } = usePaymentDemandEmailDeliveries(tenantId, invoiceId, demand.id);
+
+  return (
+    <li className="flex flex-col gap-1 border-b pb-3 last:border-0">
+      <div className="flex items-center justify-between">
+        <span className="font-medium">{demand.demandNumber}</span>
+        <span className="text-muted-foreground">{t(`payment.demand.statuses.${demand.status}`)}</span>
+      </div>
+      <div className="text-muted-foreground flex items-center justify-between text-xs">
+        <span>
+          {demand.sentAt
+            ? t("payment.demand.sentAt", { date: formatBusinessDate(demand.sentAt, i18n.language) })
+            : t("payment.demand.notSentYet")}
+        </span>
+        <span>{formatMoney(demand.outstandingAmountMinor, demand.currency)}</span>
+      </div>
+      <div className="flex gap-2">
+        <Button asChild variant="outline" size="sm">
+          <a href={paymentDemandPdfUrl(tenantId, invoiceId, demand.id)} target="_blank" rel="noreferrer">
+            {t("payment.demand.download")}
+          </a>
+        </Button>
+        {canSendDemand && (
+          <Button variant="outline" size="sm" onClick={onSendEmail}>
+            {t("payment.demand.send")}
+          </Button>
+        )}
+      </div>
+      {deliveries && deliveries.length > 0 && (
+        <ul className="flex flex-col gap-1 pt-1 text-xs">
+          {deliveries.map((delivery) => (
+            <li key={delivery.id} className="text-muted-foreground flex justify-between gap-2">
+              <span>
+                {delivery.recipientEmail} · {t(`document.email.statuses.${delivery.status}`)}
+                {emailDeliveryDetailText(t, delivery) && ` · ${emailDeliveryDetailText(t, delivery)}`}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
   );
 }

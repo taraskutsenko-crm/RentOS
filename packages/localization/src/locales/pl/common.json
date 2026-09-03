@@ -1761,7 +1761,8 @@
       "amount": "Kwota",
       "date": "Data",
       "method": "Metoda",
-      "reference": "Tytuł"
+      "reference": "Tytuł",
+      "notes": "Notatka"
     },
     "statuses": {
       "UNPAID": "Nieopłacona",
@@ -1793,8 +1794,21 @@
       "statuses": {
         "GENERATED": "Wygenerowane",
         "SENT": "Wysłane"
+      },
+      "sendDialog": {
+        "title": "Wyślij wezwanie do zapłaty e-mailem",
+        "recipientLabel": "E-mail odbiorcy",
+        "messageLabel": "Wiadomość (opcjonalnie)",
+        "attachmentNote": "Plik PDF wezwania do zapłaty zostanie automatycznie załączony.",
+        "send": "Wyślij",
+        "sending": "Wysyłanie…",
+        "successMessage": "Wiadomość wysłana na {{email}}.",
+        "failureMessage": "Błąd dostarczenia: {{error}}",
+        "notConfiguredMessage": "Wysyłanie e-maili nie jest jeszcze skonfigurowane dla tej organizacji — nic nie zostało wysłane."
       }
-    }
+    },
+    "markAsPaidConfirmTitle": "Oznaczyć jako w pełni opłaconą?",
+    "fromDeposit": "Z kaucji"
   },
   "finance": {
     "nav": "Finanse",

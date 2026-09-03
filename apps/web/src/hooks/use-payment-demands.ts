@@ -61,19 +61,28 @@ export function usePaymentDemandEmailDeliveries(
   });
 }
 
+export interface SendPaymentDemandEmailResult {
+  sent: boolean;
+  error?: string;
+}
+
 export function useSendPaymentDemandEmail(tenantId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
       invoiceId,
       paymentDemandId,
+      recipientEmail,
+      message,
     }: {
       invoiceId: string;
       paymentDemandId: string;
+      recipientEmail?: string;
+      message?: string;
     }) =>
-      apiClient.post<{ sent: boolean; error?: string }>(
+      apiClient.post<SendPaymentDemandEmailResult>(
         `/tenants/${tenantId}/invoices/${invoiceId}/payment-demands/${paymentDemandId}/email`,
-        {},
+        { recipientEmail, message },
       ),
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({

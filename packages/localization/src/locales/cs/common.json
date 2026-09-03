@@ -1761,7 +1761,8 @@
       "amount": "Amount",
       "date": "Date",
       "method": "Method",
-      "reference": "Reference"
+      "reference": "Reference",
+      "notes": "Poznámka"
     },
     "statuses": {
       "UNPAID": "Unpaid",
@@ -1793,8 +1794,21 @@
       "statuses": {
         "GENERATED": "Generated",
         "SENT": "Sent"
+      },
+      "sendDialog": {
+        "title": "Odeslat výzvu k úhradě e-mailem",
+        "recipientLabel": "E-mail příjemce",
+        "messageLabel": "Zpráva (volitelné)",
+        "attachmentNote": "PDF výzvy k úhradě bude automaticky přiloženo.",
+        "send": "Odeslat",
+        "sending": "Odesílání…",
+        "successMessage": "E-mail odeslán na {{email}}.",
+        "failureMessage": "Doručení selhalo: {{error}}",
+        "notConfiguredMessage": "Odesílání e-mailů zatím není pro tento pracovní prostor nastaveno — nic nebylo odesláno."
       }
-    }
+    },
+    "markAsPaidConfirmTitle": "Označit jako plně uhrazenou?",
+    "fromDeposit": "Z kauce"
   },
   "finance": {
     "nav": "Finance",

@@ -1761,7 +1761,8 @@
       "amount": "Amount",
       "date": "Date",
       "method": "Method",
-      "reference": "Reference"
+      "reference": "Reference",
+      "notes": "Note"
     },
     "statuses": {
       "UNPAID": "Unpaid",
@@ -1793,8 +1794,21 @@
       "statuses": {
         "GENERATED": "Generated",
         "SENT": "Sent"
+      },
+      "sendDialog": {
+        "title": "Send payment demand by email",
+        "recipientLabel": "Recipient email",
+        "messageLabel": "Message (optional)",
+        "attachmentNote": "The payment demand PDF will be attached automatically.",
+        "send": "Send",
+        "sending": "Sending…",
+        "successMessage": "Email sent to {{email}}.",
+        "failureMessage": "Delivery failed: {{error}}",
+        "notConfiguredMessage": "Email sending isn’t configured for this workspace yet — nothing was sent."
       }
-    }
+    },
+    "markAsPaidConfirmTitle": "Mark as fully paid?",
+    "fromDeposit": "From deposit"
   },
   "finance": {
     "nav": "Finance",

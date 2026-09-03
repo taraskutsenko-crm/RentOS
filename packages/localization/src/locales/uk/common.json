@@ -1761,7 +1761,8 @@
       "amount": "Amount",
       "date": "Date",
       "method": "Method",
-      "reference": "Reference"
+      "reference": "Reference",
+      "notes": "Примітка"
     },
     "statuses": {
       "UNPAID": "Unpaid",
@@ -1793,8 +1794,21 @@
       "statuses": {
         "GENERATED": "Generated",
         "SENT": "Sent"
+      },
+      "sendDialog": {
+        "title": "Надіслати вимогу про оплату електронною поштою",
+        "recipientLabel": "Email отримувача",
+        "messageLabel": "Повідомлення (необов'язково)",
+        "attachmentNote": "PDF вимоги про оплату буде додано автоматично.",
+        "send": "Надіслати",
+        "sending": "Надсилання…",
+        "successMessage": "Лист надіслано на {{email}}.",
+        "failureMessage": "Помилка доставки: {{error}}",
+        "notConfiguredMessage": "Надсилання email ще не налаштоване для цього робочого простору — нічого не надіслано."
       }
-    }
+    },
+    "markAsPaidConfirmTitle": "Позначити як повністю сплачену?",
+    "fromDeposit": "Із застави"
   },
   "finance": {
     "nav": "Finance",

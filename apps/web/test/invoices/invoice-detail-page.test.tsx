@@ -49,10 +49,13 @@ vi.mock("../../src/hooks/use-payments", () => ({
 const usePaymentDemandsMock = vi.fn();
 const useCreatePaymentDemandMock = vi.fn();
 const useSendPaymentDemandEmailMock = vi.fn();
+const usePaymentDemandEmailDeliveriesMock = vi.fn();
 vi.mock("../../src/hooks/use-payment-demands", () => ({
   usePaymentDemands: (...args: unknown[]) => usePaymentDemandsMock(...args),
   useCreatePaymentDemand: () => useCreatePaymentDemandMock(),
   useSendPaymentDemandEmail: () => useSendPaymentDemandEmailMock(),
+  usePaymentDemandEmailDeliveries: (...args: unknown[]) =>
+    usePaymentDemandEmailDeliveriesMock(...args),
   paymentDemandPdfUrl: (tenantId: string, invoiceId: string, id: string) =>
     `https://example.com/${tenantId}/${invoiceId}/${id}.pdf`,
 }));
@@ -162,6 +165,7 @@ describe("InvoiceDetailPage", () => {
     usePaymentDemandsMock.mockReturnValue({ data: [] });
     useCreatePaymentDemandMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useSendPaymentDemandEmailMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    usePaymentDemandEmailDeliveriesMock.mockReturnValue({ data: [] });
     useRentalDepositMock.mockReturnValue({ data: null });
     useIssueInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useSendInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
@@ -340,7 +344,7 @@ describe("InvoiceDetailPage", () => {
       expect(document.body.textContent).toMatch(/Outstanding:\s70,00\s\$/);
     });
 
-    it("offers a one-click 'Mark as paid' action that records the server-computed remaining balance", async () => {
+    it("offers 'Mark as paid' behind an accessible confirmation dialog that records the server-computed remaining balance", async () => {
       const mutateAsync = vi.fn().mockResolvedValue({});
       useMarkFullyPaidMock.mockReturnValue({ mutateAsync, isPending: false });
       useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
@@ -348,17 +352,42 @@ describe("InvoiceDetailPage", () => {
         data: { ...baseInvoice("ISSUED"), remainingMinor: 10000 },
         isLoading: false,
       });
-      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
       const user = userEvent.setup();
 
       renderWithProviders(<InvoiceDetailPage />);
       await user.click(screen.getByRole("button", { name: "Mark as paid" }));
 
-      expect(confirmSpy).toHaveBeenCalled();
+      // Task 16 Part 4/19 — an accessible confirmation dialog (never
+      // window.confirm), stating the exact server-computed amount before
+      // anything is recorded.
+      const dialog = await screen.findByRole("dialog");
+      expect(within(dialog).getByText(/100,00/)).toBeInTheDocument();
+      expect(mutateAsync).not.toHaveBeenCalled();
+
+      await user.click(within(dialog).getByRole("button", { name: "Mark as paid" }));
+
       await waitFor(() =>
         expect(mutateAsync).toHaveBeenCalledWith({ invoiceId: "invoice-1", input: {} }),
       );
-      confirmSpy.mockRestore();
+    });
+
+    it("cancelling the 'Mark as paid' confirmation dialog never records a payment", async () => {
+      const mutateAsync = vi.fn().mockResolvedValue({});
+      useMarkFullyPaidMock.mockReturnValue({ mutateAsync, isPending: false });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), remainingMinor: 10000 },
+        isLoading: false,
+      });
+      const user = userEvent.setup();
+
+      renderWithProviders(<InvoiceDetailPage />);
+      await user.click(screen.getByRole("button", { name: "Mark as paid" }));
+      const dialog = await screen.findByRole("dialog");
+      await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+      expect(mutateAsync).not.toHaveBeenCalled();
     });
 
     it("hides 'Mark as paid' once the invoice has no remaining balance", () => {
@@ -415,6 +444,132 @@ describe("InvoiceDetailPage", () => {
           reason: "Entered by mistake",
         }),
       );
+    });
+
+    // Task 16 Part 3 — the dialog always opens pre-filled with the exact
+    // remaining balance (a smaller amount is still freely typeable for a
+    // partial payment).
+    it("defaults the Add payment amount to the exact remaining balance", async () => {
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), remainingMinor: 30750 },
+        isLoading: false,
+      });
+      const user = userEvent.setup();
+
+      renderWithProviders(<InvoiceDetailPage />);
+      await user.click(screen.getByRole("button", { name: "Add payment" }));
+
+      expect(screen.getByLabelText("Amount")).toHaveValue("307.50");
+    });
+
+    it("records a payment with an optional note", async () => {
+      const mutateAsync = vi.fn().mockResolvedValue({});
+      useRecordPaymentMock.mockReturnValue({ mutateAsync, isPending: false });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), remainingMinor: 30750 },
+        isLoading: false,
+      });
+      const user = userEvent.setup();
+
+      renderWithProviders(<InvoiceDetailPage />);
+      await user.click(screen.getByRole("button", { name: "Add payment" }));
+      const dialog = await screen.findByRole("dialog");
+      await user.type(within(dialog).getByLabelText("Note"), "Paid at the counter");
+      await user.click(within(dialog).getByRole("button", { name: "Add payment" }));
+
+      await waitFor(() =>
+        expect(mutateAsync).toHaveBeenCalledWith({
+          invoiceId: "invoice-1",
+          input: expect.objectContaining({ notes: "Paid at the counter" }),
+        }),
+      );
+    });
+
+    // Task 16 Part 15 — double-click/duplicate-submission UX protection:
+    // the same isPending-disables-the-button convention every other
+    // mutation in this codebase already relies on.
+    it("disables the Add payment submit button while the request is in flight", async () => {
+      useRecordPaymentMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: true });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), remainingMinor: 30750 },
+        isLoading: false,
+      });
+      const user = userEvent.setup();
+
+      renderWithProviders(<InvoiceDetailPage />);
+      await user.click(screen.getByRole("button", { name: "Add payment" }));
+      const dialog = await screen.findByRole("dialog");
+
+      expect(within(dialog).getByRole("button", { name: "Saving…" })).toBeDisabled();
+    });
+
+    it("shows the reference, note, and deposit-source badge for a live payment", () => {
+      usePaymentsMock.mockReturnValue({
+        data: [
+          {
+            id: "pay-1",
+            invoiceId: "invoice-1",
+            amountMinor: 3000,
+            currency: "USD",
+            paymentDate: "2026-08-05T00:00:00Z",
+            method: "BANK_TRANSFER",
+            reference: "INV-2026-000001",
+            notes: "Paid via office transfer",
+            sourceRentalDepositId: "deposit-1",
+            voidedAt: null,
+            voidedByUserId: null,
+            voidReason: null,
+            createdByUserId: "user-1",
+            createdAt: "2026-08-05T00:00:00Z",
+          },
+        ],
+      });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), paidMinor: 3000, remainingMinor: 7000 },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(screen.getByText(/From deposit/)).toBeInTheDocument();
+      expect(screen.getByText(/Reference: INV-2026-000001/)).toBeInTheDocument();
+      expect(screen.getByText(/Paid via office transfer/)).toBeInTheDocument();
+    });
+
+    it("shows the void reason and date for a voided payment", () => {
+      usePaymentsMock.mockReturnValue({
+        data: [
+          {
+            id: "pay-1",
+            invoiceId: "invoice-1",
+            amountMinor: 3000,
+            currency: "USD",
+            paymentDate: "2026-08-05T00:00:00Z",
+            method: "BANK_TRANSFER",
+            reference: null,
+            notes: null,
+            sourceRentalDepositId: null,
+            voidedAt: "2026-08-06T00:00:00Z",
+            voidedByUserId: "user-1",
+            voidReason: "Wrong amount entered",
+            createdByUserId: "user-1",
+            createdAt: "2026-08-05T00:00:00Z",
+          },
+        ],
+      });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("ISSUED"), paidMinor: 0, remainingMinor: 10000 },
+        isLoading: false,
+      });
+
+      renderWithProviders(<InvoiceDetailPage />);
+
+      expect(screen.getByText(/Wrong amount entered/)).toBeInTheDocument();
     });
 
     it("offers 'Apply deposit to balance' only when the linked rental has an available held deposit", () => {
@@ -579,6 +734,83 @@ describe("InvoiceDetailPage", () => {
       expect(
         screen.queryByRole("button", { name: "Create payment demand" }),
       ).not.toBeInTheDocument();
+    });
+
+    // Task 16 Part 12 — "Send by email" opens a real compose flow (recipient/
+    // message/attachment note) instead of firing an email on a single click,
+    // mirroring the fixed Quote/Document send-clarity pattern.
+    it("opens a compose dialog for 'Send by email' showing the recipient, message, and attachment note", async () => {
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("OVERDUE"), remainingMinor: 7000, isOverdue: true },
+        isLoading: false,
+      });
+      useCustomersMock.mockReturnValue({
+        data: { items: [{ id: "customer-1", email: "jane@example.com" }] },
+      });
+      usePaymentDemandsMock.mockReturnValue({
+        data: [
+          {
+            id: "demand-1",
+            demandNumber: "DEM-2026-000001",
+            status: "GENERATED",
+            currency: "USD",
+            outstandingAmountMinor: 7000,
+            sentAt: null,
+          },
+        ],
+      });
+      const user = userEvent.setup();
+
+      renderWithProviders(<InvoiceDetailPage />);
+      await user.click(screen.getByRole("button", { name: "Send by email" }));
+
+      const dialog = await screen.findByRole("dialog");
+      expect(within(dialog).getByDisplayValue("jane@example.com")).toBeInTheDocument();
+      expect(within(dialog).getByText(/will be attached automatically/i)).toBeInTheDocument();
+      expect(within(dialog).getByRole("button", { name: /^send$/i })).toBeInTheDocument();
+    });
+
+    it("sends the payment demand email with the edited recipient/message and reports the real outcome", async () => {
+      const mutateAsync = vi.fn().mockResolvedValue({ sent: true });
+      useSendPaymentDemandEmailMock.mockReturnValue({ mutateAsync, isPending: false });
+      useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+      useInvoiceMock.mockReturnValue({
+        data: { ...baseInvoice("OVERDUE"), remainingMinor: 7000, isOverdue: true },
+        isLoading: false,
+      });
+      useCustomersMock.mockReturnValue({
+        data: { items: [{ id: "customer-1", email: "jane@example.com" }] },
+      });
+      usePaymentDemandsMock.mockReturnValue({
+        data: [
+          {
+            id: "demand-1",
+            demandNumber: "DEM-2026-000001",
+            status: "GENERATED",
+            currency: "USD",
+            outstandingAmountMinor: 7000,
+            sentAt: null,
+          },
+        ],
+      });
+      const user = userEvent.setup();
+
+      renderWithProviders(<InvoiceDetailPage />);
+      await user.click(screen.getByRole("button", { name: "Send by email" }));
+      const dialog = await screen.findByRole("dialog");
+      await user.type(within(dialog).getByLabelText(/message/i), "Please settle this balance");
+      await user.click(within(dialog).getByRole("button", { name: /^send$/i }));
+
+      await waitFor(() =>
+        expect(mutateAsync).toHaveBeenCalledWith({
+          invoiceId: "invoice-1",
+          paymentDemandId: "demand-1",
+          recipientEmail: "jane@example.com",
+          message: "Please settle this balance",
+        }),
+      );
+      expect(await within(dialog).findByText("Email sent to jane@example.com.")).toBeInTheDocument();
     });
 
     it("VIEWER (no payments.record/void permission) sees no Mark as paid, Add payment, or Void actions", () => {

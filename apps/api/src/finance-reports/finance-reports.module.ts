@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { BillingModule } from "../billing/billing.module";
 import { CompanyBrandingModule } from "../company-branding/company-branding.module";
 import { DocumentsModule } from "../documents/documents.module";
 import { PermissionsModule } from "../permissions/permissions.module";
@@ -20,7 +21,14 @@ import { FinanceReportRendererService } from "./rendering/finance-report-rendere
   // own sellerSnapshot logo embedding. DocumentsModule exports
   // PdfRendererService, the shared Puppeteer wrapper every PDF in this
   // codebase renders through.
-  imports: [TenantsModule, PermissionsModule, ReceivablesModule, CompanyBrandingModule, DocumentsModule],
+  imports: [
+    TenantsModule,
+    PermissionsModule,
+    ReceivablesModule,
+    CompanyBrandingModule,
+    DocumentsModule,
+    BillingModule,
+  ],
   controllers: [FinanceReportsController],
   providers: [
     FinanceReportsService,

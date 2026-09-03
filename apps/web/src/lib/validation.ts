@@ -27,6 +27,14 @@ export const registerSchema = z
       .refine((value): boolean => isSupportedLanguage(value), "auth.errors.required"),
     defaultCurrency: z.string().min(1, "auth.errors.required"),
     timezone: z.string().min(1, "auth.errors.required"),
+    /**
+     * Havelio Affiliate/Partner domain (Stage 17 closure pass) — a
+     * referral-campaign slug (from `?ref=`) or a promo code, entered
+     * manually. Always optional: registration must succeed with none, and
+     * an unrecognized value is silently ignored server-side rather than
+     * blocking signup (see RegisterDto.affiliateCode's own doc comment).
+     */
+    affiliateCode: z.string().max(64).optional(),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     path: ["passwordConfirmation"],

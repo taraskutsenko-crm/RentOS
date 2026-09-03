@@ -10,7 +10,8 @@ import {
   DropdownMenuTrigger,
   Select,
 } from "@rentos/ui";
-import { LogOut, Moon, Sun } from "lucide-react";
+import { LogOut, Moon, ShieldCheck, Sun } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
@@ -90,6 +91,18 @@ export function UserMenu() {
             ))}
           </Select>
         </div>
+        {user.isPlatformAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            {/* Havelio PLATFORM administration (Stage 17 closure pass) — visible only to a real platform admin (see PlatformAdminLayout's own independent server-enforced gate); never a tenant-scoped nav item. */}
+            <DropdownMenuItem asChild>
+              <Link href="/platform-admin">
+                <ShieldCheck className="size-4" />
+                {t("platformAdmin.title")}
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onSelect={() => void handleLogout()}>
           <LogOut className="size-4" />

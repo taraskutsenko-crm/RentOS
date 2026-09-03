@@ -3,7 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import FinanceReportsPage from "../../src/app/app/finance/page";
+import { ApiError } from "../../src/lib/api-client";
 import { renderWithProviders } from "../test-utils";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+}));
 
 const useCurrentTenantIdMock = vi.fn();
 vi.mock("../../src/hooks/use-current-tenant", () => ({
@@ -159,6 +164,32 @@ describe("FinanceReportsPage", () => {
   it("shows an empty state when there is no financial activity", () => {
     renderWithProviders(<FinanceReportsPage />);
     expect(screen.getByText("No financial activity for this period")).toBeInTheDocument();
+  });
+
+  it("shows a full-page upgrade notice with a 'View plans' action when the plan doesn't include Financial Reports", () => {
+    useFinanceOverviewMock.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: new ApiError(
+        "This feature is available on the BUSINESS plan. Upgrade to unlock it.",
+        403,
+        "/tenants/tenant-1/finance-reports/overview",
+        {
+          code: "ENTITLEMENT_DENIED",
+          reason: { type: "FEATURE", feature: "FINANCIAL_REPORTS", availableFromPlan: "BUSINESS" },
+        },
+      ),
+    });
+
+    renderWithProviders(<FinanceReportsPage />);
+
+    expect(
+      screen.getByText("This feature is available on the BUSINESS plan. Upgrade to unlock it."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "View plans" })).toBeInTheDocument();
+    // The broken multi-widget rendering never happens — only the notice.
+    expect(screen.queryByRole("tab", { name: "Receivables" })).not.toBeInTheDocument();
   });
 
   it("switching to the custom period preset reveals from/to date pickers", async () => {

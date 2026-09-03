@@ -15,6 +15,8 @@ import {
   type CurrentTenantContext,
 } from "../auth/decorators/current-tenant.decorator";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { FeatureEntitlementGuard } from "../billing/feature-entitlement.guard";
+import { RequireFeature } from "../billing/require-feature.decorator";
 import { PermissionsGuard } from "../permissions/permissions.guard";
 import { RequirePermissions } from "../permissions/require-permissions.decorator";
 import { TenantGuard } from "../tenants/tenant.guard";
@@ -26,7 +28,13 @@ import { PaymentDemandsService } from "./payment-demands.service";
 import { PaymentDemandPdfService } from "./rendering/payment-demand-pdf.service";
 import { PaymentDemandRendererService } from "./rendering/payment-demand-renderer.service";
 
-@UseGuards(TenantGuard, PermissionsGuard)
+/**
+ * Havelio Billing (Stage 17 closure pass) — creating/sending a Payment
+ * Demand requires the PAYMENT_DEMANDS feature (Business+); viewing an
+ * already-created demand (list/preview/PDF/email-deliveries) never does —
+ * see docs/DECISIONS.md "existing records must remain safe".
+ */
+@UseGuards(TenantGuard, PermissionsGuard, FeatureEntitlementGuard)
 @Controller("tenants/:tenantId/invoices/:invoiceId/payment-demands")
 export class PaymentDemandsController {
   constructor(
@@ -46,6 +54,7 @@ export class PaymentDemandsController {
   }
 
   @RequirePermissions("payment_demands.create")
+  @RequireFeature("PAYMENT_DEMANDS")
   @Post()
   create(
     @CurrentTenant() { tenant }: CurrentTenantContext,
@@ -83,6 +92,7 @@ export class PaymentDemandsController {
   }
 
   @RequirePermissions("payment_demands.send")
+  @RequireFeature("PAYMENT_DEMANDS")
   @Post(":id/email")
   sendEmail(
     @CurrentTenant() { tenant }: CurrentTenantContext,

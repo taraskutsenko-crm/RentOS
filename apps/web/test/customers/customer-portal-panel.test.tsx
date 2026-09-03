@@ -1,9 +1,14 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CustomerPortalPanel } from "../../src/components/customers/customer-portal-panel";
+import { ApiError } from "../../src/lib/api-client";
 import { renderWithProviders } from "../test-utils";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+}));
 
 const usePermissionMock = vi.fn();
 const useTenantTimezoneMock = vi.fn();
@@ -114,6 +119,45 @@ describe("CustomerPortalPanel", () => {
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith({ customerId: "customer-1" }));
     expect(await screen.findByText(/abc123/)).toBeInTheDocument();
+  });
+
+  it("shows an actionable 'View plans' toast when inviting is denied by plan entitlement", async () => {
+    usePermissionMock.mockReturnValue(true);
+    usePortalAccessStatusMock.mockReturnValue({
+      data: {
+        invited: false,
+        activated: false,
+        invitedAt: null,
+        activatedAt: null,
+        lastLoginAt: null,
+        invitationExpired: null,
+      },
+      isLoading: false,
+    });
+    const mutateAsync = vi.fn().mockRejectedValue(
+      new ApiError(
+        "This feature is available on the BUSINESS plan. Upgrade to unlock it.",
+        403,
+        "/tenants/tenant-1/customers/customer-1/portal/invite",
+        {
+          code: "ENTITLEMENT_DENIED",
+          reason: { type: "FEATURE", feature: "CUSTOMER_PORTAL", availableFromPlan: "BUSINESS" },
+        },
+      ),
+    );
+    useInviteCustomerToPortalMock.mockReturnValue({ mutateAsync, isPending: false });
+    const user = userEvent.setup();
+
+    renderWithProviders(<CustomerPortalPanel tenantId="tenant-1" customerId="customer-1" />);
+    await user.click(screen.getByRole("button", { name: /invite to portal/i }));
+
+    const toastViewport = await screen.findByTestId("toast-viewport");
+    expect(
+      await within(toastViewport).findByText(
+        "This feature is available on the BUSINESS plan. Upgrade to unlock it.",
+      ),
+    ).toBeInTheDocument();
+    expect(within(toastViewport).getByRole("button", { name: "View plans" })).toBeInTheDocument();
   });
 
   it("shows the revoke action once a customer is activated", () => {

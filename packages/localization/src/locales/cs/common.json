@@ -95,7 +95,8 @@
     },
     "save": "Uložit",
     "edit": "Upravit",
-    "remove": "Odebrat"
+    "remove": "Odebrat",
+    "create": "Vytvořit"
   },
   "nav": {
     "logout": "Odhlásit se",
@@ -119,7 +120,9 @@
       "submitting": "Vytváření účtu…",
       "haveAccount": "Máte již účet?",
       "signIn": "Přihlásit se",
-      "companySection": "Firma"
+      "companySection": "Firma",
+      "affiliateCode": "Doporučující nebo promo kód (volitelné)",
+      "affiliateCodePlaceholder": "např. RENTAL20"
     },
     "login": {
       "title": "Přihlásit se",
@@ -2077,7 +2080,8 @@
       "cancel": "Zrušit předplatné",
       "resume": "Obnovit předplatné",
       "currentPlan": "Aktuální plán",
-      "choose": "Vybrat plán"
+      "choose": "Vybrat plán",
+      "viewPlans": "Zobrazit plány"
     },
     "chooseAPlan": "Vyberte plán",
     "changePlan": "Změnit plán",
@@ -2120,6 +2124,145 @@
       "downgradeScheduled": "Snížení plánu naplánováno na konec aktuálního fakturačního období.",
       "canceled": "Vaše předplatné skončí na konci aktuálního období.",
       "resumed": "Vaše předplatné bylo obnoveno."
+    },
+    "entitlementDenied": {
+      "fallback": "Tato funkce není ve vašem aktuálním plánu dostupná."
+    }
+  },
+  "platformAdmin": {
+    "title": "Havelio – Správa platformy",
+    "nav": {
+      "affiliates": "Partneři"
+    },
+    "accessDenied": {
+      "title": "Vyžadován přístup správce platformy",
+      "description": "Tato oblast je určena pouze pro zaměstnance Havelio. Váš účet nemá přístup správce platformy.",
+      "backToApp": "Zpět do Havelio"
+    },
+    "affiliates": {
+      "title": "Affiliate partneři",
+      "subtitle": "Účty blogerů, influencerů a doporučujících partnerů, kampaně a provize.",
+      "createPartner": "Vytvořit partnera",
+      "partnerCreated": "Partner vytvořen.",
+      "empty": "Zatím žádní affiliate partneři.",
+      "columns": {
+        "name": "Název",
+        "email": "E-mail",
+        "status": "Stav"
+      },
+      "status": {
+        "ACTIVE": "Aktivní",
+        "PAUSED": "Pozastaveno",
+        "ENDED": "Ukončeno"
+      },
+      "form": {
+        "displayName": "Zobrazované jméno",
+        "email": "E-mail"
+      },
+      "backToList": "Zpět na seznam partnerů",
+      "pausePartner": "Pozastavit partnera",
+      "activatePartner": "Aktivovat partnera",
+      "endPartner": "Ukončit spolupráci",
+      "statusUpdated": "Stav partnera aktualizován.",
+      "campaigns": {
+        "title": "Kampaně",
+        "empty": "Zatím žádné kampaně.",
+        "createCampaign": "Vytvořit kampaň",
+        "created": "Kampaň vytvořena.",
+        "form": {
+          "name": "Název kampaně",
+          "slug": "Referral slug",
+          "slugHint": "havelio.net/register?ref=<slug>",
+          "commissionRate": "Sazba provize (%)",
+          "commissionDuration": "Doba trvání provize (měsíce)"
+        },
+        "columns": {
+          "name": "Název",
+          "slug": "Slug",
+          "rate": "Sazba",
+          "duration": "Doba trvání",
+          "status": "Stav"
+        }
+      },
+      "promoCodes": {
+        "title": "Promo kódy",
+        "empty": "Zatím žádné promo kódy pro tuto kampaň.",
+        "createCode": "Vytvořit promo kód",
+        "created": "Promo kód vytvořen.",
+        "form": {
+          "code": "Kód",
+          "discountType": "Typ slevy",
+          "percentage": "Procentuální",
+          "fixedAmount": "Pevná částka",
+          "discountValueBp": "Sleva (%)",
+          "discountValueMinor": "Výše slevy (minoritní jednotky)",
+          "currency": "Měna",
+          "duration": "Doba trvání",
+          "once": "Jednorázově",
+          "repeating": "Opakovaně",
+          "forever": "Natrvalo",
+          "durationInMonths": "Doba trvání (měsíce)"
+        },
+        "columns": {
+          "code": "Kód",
+          "discount": "Sleva",
+          "redemptions": "Uplatnění",
+          "stripeLinked": "Stripe"
+        },
+        "stripeLinked": "Propojeno",
+        "stripeNotLinked": "Nepropojeno"
+      },
+      "metrics": {
+        "title": "Metriky",
+        "registrations": "Registrace",
+        "trialsStarted": "Zahájené zkušební verze",
+        "paidConversions": "Placené konverze",
+        "activeSubscribers": "Aktivní odběratelé",
+        "cancellations": "Zrušení"
+      },
+      "ledger": {
+        "title": "Registr provizí",
+        "empty": "Zatím žádné položky registru pro tuto měnu.",
+        "earned": "Získáno",
+        "adjustments": "Úpravy",
+        "paid": "Vyplaceno",
+        "payable": "K výplatě"
+      },
+      "attribution": {
+        "title": "Vyhledávání referral atribuce",
+        "tenantIdLabel": "ID nájemce",
+        "search": "Vyhledat",
+        "notFound": "Pro tohoto nájemce nebyla nalezena žádná atribuce.",
+        "found": "Atribuce nalezena",
+        "partner": "Partner",
+        "campaign": "Kampaň",
+        "source": "Zdroj",
+        "attributedAt": "Datum atribuce"
+      },
+      "payouts": {
+        "title": "Historie výplat",
+        "empty": "Zatím nejsou zaznamenány žádné výplaty.",
+        "recordPayout": "Zaznamenat výplatu",
+        "recorded": "Výplata zaznamenána. Havelio nepřevedlo žádné skutečné prostředky — jde pouze o záznam platby, kterou administrátor již odeslal externě.",
+        "form": {
+          "amount": "Částka",
+          "currency": "Měna",
+          "date": "Datum výplaty",
+          "method": "Metoda",
+          "bankTransfer": "Bankovní převod",
+          "paypal": "PayPal",
+          "other": "Jiné",
+          "reference": "Reference",
+          "note": "Poznámka"
+        },
+        "columns": {
+          "date": "Datum",
+          "amount": "Částka",
+          "method": "Metoda",
+          "reference": "Reference"
+        },
+        "disclaimer": "Zaznamenání výplaty pouze eviduje, že administrátor tuto částku již odeslal externě — Havelio nikdy nepřevádí prostředky automaticky."
+      }
     }
   }
 }

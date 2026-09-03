@@ -5,6 +5,8 @@ import {
   type CurrentTenantContext,
 } from "../../auth/decorators/current-tenant.decorator";
 import { CurrentUser } from "../../auth/decorators/current-user.decorator";
+import { FeatureEntitlementGuard } from "../../billing/feature-entitlement.guard";
+import { RequireFeature } from "../../billing/require-feature.decorator";
 import { PermissionsGuard } from "../../permissions/permissions.guard";
 import { RequirePermissions } from "../../permissions/require-permissions.decorator";
 import { TenantGuard } from "../../tenants/tenant.guard";
@@ -12,12 +14,21 @@ import type { PublicUser } from "../../users/user.mapper";
 import { RequestDocumentSignatureDto } from "../dto/request-document-signature.dto";
 import { DocumentSignatureService } from "./document-signature.service";
 
-@UseGuards(TenantGuard, PermissionsGuard)
+/**
+ * Havelio Billing (Stage 17 closure pass) — requesting a NEW electronic
+ * signature requires the ELECTRONIC_SIGNATURES feature (Business+);
+ * viewing/polling/cancelling an already-requested signature never does —
+ * see docs/DECISIONS.md "existing records must remain safe". Distinct from
+ * CompanySignatureController (the tenant's own saved stamp image, used to
+ * render documents — core functionality, never feature-gated).
+ */
+@UseGuards(TenantGuard, PermissionsGuard, FeatureEntitlementGuard)
 @Controller("tenants/:tenantId/documents/:id/signature-requests")
 export class DocumentSignatureController {
   constructor(private readonly signatureService: DocumentSignatureService) {}
 
   @RequirePermissions("documents.sign")
+  @RequireFeature("ELECTRONIC_SIGNATURES")
   @Post()
   request(
     @CurrentTenant() { tenant }: CurrentTenantContext,

@@ -6,8 +6,10 @@ import { RegisterForm } from "../../src/components/auth/register-form";
 import { renderWithProviders } from "../test-utils";
 
 const pushMock = vi.fn();
+const searchParamsMock = vi.fn(() => new URLSearchParams());
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock, replace: vi.fn() }),
+  useSearchParams: () => searchParamsMock(),
 }));
 
 const useRegisterMock = vi.fn();
@@ -19,6 +21,7 @@ describe("RegisterForm", () => {
   beforeEach(() => {
     pushMock.mockReset();
     useRegisterMock.mockReset();
+    searchParamsMock.mockReturnValue(new URLSearchParams());
   });
 
   it("shows validation errors for invalid email, weak password, and mismatched confirmation", async () => {
@@ -75,6 +78,86 @@ describe("RegisterForm", () => {
     const submittedPayload = mutateAsyncMock.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(submittedPayload).not.toHaveProperty("passwordConfirmation");
     expect(submittedPayload.email).toBe("ada@example.com");
+  });
+
+  it("omits affiliateCode entirely when the field is left empty (no ?ref= and nothing typed)", async () => {
+    const mutateAsyncMock = vi.fn().mockResolvedValue({ user: {}, tenant: {} });
+    useRegisterMock.mockReturnValue({
+      mutateAsync: mutateAsyncMock,
+      isPending: false,
+      isError: false,
+      error: null,
+    });
+
+    const user = userEvent.setup();
+    renderWithProviders(<RegisterForm />);
+
+    await user.type(screen.getByLabelText(/first name/i), "Ada");
+    await user.type(screen.getByLabelText(/last name/i), "Lovelace");
+    await user.type(screen.getByLabelText(/^email$/i), "ada@example.com");
+    await user.type(screen.getByLabelText(/^password$/i), "SuperSecret123");
+    await user.type(screen.getByLabelText(/confirm password/i), "SuperSecret123");
+    await user.type(screen.getByLabelText(/company name/i), "Acme Rentals");
+    await user.click(screen.getByRole("button", { name: /create account/i }));
+
+    await waitFor(() => expect(mutateAsyncMock).toHaveBeenCalledTimes(1));
+    const submittedPayload = mutateAsyncMock.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(submittedPayload).not.toHaveProperty("affiliateCode");
+  });
+
+  it("pre-fills the referral/promo code field from ?ref= and submits it as affiliateCode", async () => {
+    searchParamsMock.mockReturnValue(new URLSearchParams("ref=rentalpro"));
+    const mutateAsyncMock = vi.fn().mockResolvedValue({ user: {}, tenant: {} });
+    useRegisterMock.mockReturnValue({
+      mutateAsync: mutateAsyncMock,
+      isPending: false,
+      isError: false,
+      error: null,
+    });
+
+    const user = userEvent.setup();
+    renderWithProviders(<RegisterForm />);
+
+    const affiliateField = screen.getByLabelText(/referral or promo code/i) as HTMLInputElement;
+    expect(affiliateField.value).toBe("rentalpro");
+
+    await user.type(screen.getByLabelText(/first name/i), "Ada");
+    await user.type(screen.getByLabelText(/last name/i), "Lovelace");
+    await user.type(screen.getByLabelText(/^email$/i), "ada@example.com");
+    await user.type(screen.getByLabelText(/^password$/i), "SuperSecret123");
+    await user.type(screen.getByLabelText(/confirm password/i), "SuperSecret123");
+    await user.type(screen.getByLabelText(/company name/i), "Acme Rentals");
+    await user.click(screen.getByRole("button", { name: /create account/i }));
+
+    await waitFor(() => expect(mutateAsyncMock).toHaveBeenCalledTimes(1));
+    const submittedPayload = mutateAsyncMock.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(submittedPayload.affiliateCode).toBe("rentalpro");
+  });
+
+  it("registration succeeds normally even when a promo/referral code is invalid or absent — never blocks signup", async () => {
+    const mutateAsyncMock = vi.fn().mockResolvedValue({ user: {}, tenant: {} });
+    useRegisterMock.mockReturnValue({
+      mutateAsync: mutateAsyncMock,
+      isPending: false,
+      isError: false,
+      error: null,
+    });
+
+    const user = userEvent.setup();
+    renderWithProviders(<RegisterForm />);
+
+    await user.type(screen.getByLabelText(/first name/i), "Ada");
+    await user.type(screen.getByLabelText(/last name/i), "Lovelace");
+    await user.type(screen.getByLabelText(/^email$/i), "ada@example.com");
+    await user.type(screen.getByLabelText(/^password$/i), "SuperSecret123");
+    await user.type(screen.getByLabelText(/confirm password/i), "SuperSecret123");
+    await user.type(screen.getByLabelText(/company name/i), "Acme Rentals");
+    await user.type(screen.getByLabelText(/referral or promo code/i), "NOPE-DOES-NOT-EXIST");
+    await user.click(screen.getByRole("button", { name: /create account/i }));
+
+    await waitFor(() => expect(mutateAsyncMock).toHaveBeenCalledTimes(1));
+    const submittedPayload = mutateAsyncMock.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(submittedPayload.affiliateCode).toBe("NOPE-DOES-NOT-EXIST");
   });
 
   it("toggles visibility independently for the password and confirmation fields", async () => {

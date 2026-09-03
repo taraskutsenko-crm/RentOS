@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -251,11 +251,17 @@ describe("InvoiceDetailPage", () => {
   it("offers a Send email action on an ISSUED invoice but not on a DRAFT one", () => {
     useUpdateInvoiceMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useInvoiceMock.mockReturnValue({ data: baseInvoice("ISSUED"), isLoading: false });
-    const { rerender } = renderWithProviders(<InvoiceDetailPage />);
+    renderWithProviders(<InvoiceDetailPage />);
     expect(screen.getByRole("button", { name: "Send email" })).toBeInTheDocument();
 
     useInvoiceMock.mockReturnValue({ data: baseInvoice("DRAFT"), isLoading: false });
-    rerender(<InvoiceDetailPage />);
+    // A fresh renderWithProviders() call (with an explicit cleanup() first),
+    // not RTL's own `rerender` — that would replace the whole tree with
+    // just <InvoiceDetailPage/>, quietly stripping the QueryClientProvider/
+    // ToastProvider wrapper the first render set up (rerender doesn't
+    // re-wrap; it renders exactly what it's given into the same root).
+    cleanup();
+    renderWithProviders(<InvoiceDetailPage />);
     expect(screen.queryByRole("button", { name: "Send email" })).not.toBeInTheDocument();
   });
 

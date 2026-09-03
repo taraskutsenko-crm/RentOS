@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 
 import { AuditModule } from "../audit/audit.module";
 import { PasswordService } from "../auth/password.service";
+import { BillingModule } from "../billing/billing.module";
 import { CompanySignatureModule } from "../company-signature/company-signature.module";
 import { EmailModule } from "../email/email.module";
 import { PermissionsModule } from "../permissions/permissions.module";
@@ -36,6 +37,7 @@ import { DocumentSignatureEvidenceService } from "./signature-evidence/document-
     StorageModule,
     EmailModule,
     CompanySignatureModule,
+    BillingModule,
   ],
   controllers: [
     DocumentsController,

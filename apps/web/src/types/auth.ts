@@ -6,6 +6,8 @@ export interface User {
   preferredLanguage: string;
   emailVerifiedAt: string | null;
   isActive: boolean;
+  /** Havelio PLATFORM administration (Stage 17) — never a tenant-scoped role; see PlatformAdminGuard. Gates visibility of the /platform-admin UI (frontend hiding only — the API independently enforces this on every request). */
+  isPlatformAdmin: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

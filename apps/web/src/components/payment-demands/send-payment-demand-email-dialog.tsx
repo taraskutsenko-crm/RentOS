@@ -14,6 +14,7 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useEntitlementErrorToast } from "../../hooks/use-entitlement-error-toast";
 import { useSendPaymentDemandEmail } from "../../hooks/use-payment-demands";
 import { apiErrorMessage } from "../../lib/api-error-i18n";
 
@@ -51,6 +52,7 @@ export function SendPaymentDemandEmailDialog({
 }: SendPaymentDemandEmailDialogProps) {
   const { t } = useTranslation();
   const sendEmail = useSendPaymentDemandEmail(tenantId);
+  const showEntitlementError = useEntitlementErrorToast();
   const [recipientEmail, setRecipientEmail] = useState(defaultRecipientEmail);
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<{ sent: boolean; error?: string } | null>(null);
@@ -84,6 +86,7 @@ export function SendPaymentDemandEmailDialog({
       setResult(sendResult);
     } catch (caught) {
       setError(apiErrorMessage(caught, t("common.error")));
+      showEntitlementError(caught);
     }
   }
 

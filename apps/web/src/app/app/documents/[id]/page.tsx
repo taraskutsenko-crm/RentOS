@@ -62,6 +62,7 @@ import {
 } from "../../../../hooks/use-documents";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission, useTenantTimezone } from "../../../../hooks/use-current-tenant-role";
+import { useEntitlementErrorToast } from "../../../../hooks/use-entitlement-error-toast";
 import { apiErrorMessage } from "../../../../lib/api-error-i18n";
 import { formatDate, formatDateTime } from "../../../../lib/date-format";
 import { emailDeliveryDetailText } from "../../../../lib/email-delivery-status";
@@ -142,6 +143,7 @@ export default function DocumentDetailPage() {
   const requestSignature = useRequestDocumentSignature(tenantId);
   const refreshSignature = useRefreshDocumentSignature(tenantId);
   const cancelSignature = useCancelDocumentSignature(tenantId);
+  const showEntitlementError = useEntitlementErrorToast();
 
   const canUpdate = usePermission("documents.update");
   const canDelete = usePermission("documents.delete");
@@ -168,6 +170,7 @@ export default function DocumentDetailPage() {
       await action();
     } catch (error) {
       setActionError(apiErrorMessage(error, t("common.error")));
+      showEntitlementError(error);
     }
   }
 

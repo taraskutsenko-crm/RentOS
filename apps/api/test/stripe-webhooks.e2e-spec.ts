@@ -62,6 +62,24 @@ function fakeSubscriptionUpdatedEvent(eventId: string, tenantId: string) {
   };
 }
 
+function fakeInvoicePaidEvent(eventId: string, invoiceId: string, subscriptionId: string) {
+  return {
+    id: eventId,
+    object: "event",
+    type: "invoice.paid",
+    data: {
+      object: {
+        id: invoiceId,
+        object: "invoice",
+        currency: "eur",
+        amount_paid: 5520,
+        total_excluding_tax: 5520,
+        parent: { type: "subscription_details", subscription_details: { subscription: subscriptionId } },
+      },
+    },
+  };
+}
+
 /**
  * Havelio Billing (Stage 17) — proves signature verification and webhook
  * idempotency without any real Stripe network call (see docs/DECISIONS.md
@@ -135,5 +153,103 @@ describe("Stripe webhooks E2E — signature verification + idempotency", () => {
       where: { tenantId, action: "billing.subscription.activated" },
     });
     expect(activationLogs).toBe(1);
+  });
+});
+
+/**
+ * Havelio Affiliate/Partner domain (Stage 17 closure pass) — proves the
+ * webhook-driven commission path end-to-end: exactly one
+ * AffiliateCommissionEntry AND exactly one corresponding AuditLog row are
+ * ever created, even when Stripe redelivers the same `invoice.paid` event —
+ * matching item 8/G of the closure task ("exactly one financial ledger
+ * effect -> exactly one corresponding audit event").
+ */
+describe("Stripe webhooks E2E — affiliate commission idempotency + audit", () => {
+  let app: INestApplication;
+  let prisma: PrismaClient;
+  let tenantId: string;
+  let partnerId: string;
+  let campaignId: string;
+
+  beforeAll(async () => {
+    app = await createTestApp();
+    prisma = new PrismaClient();
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
+    await app.close();
+  });
+
+  beforeEach(async () => {
+    await cleanDatabase(prisma);
+    const registerResponse = await request(app.getHttpServer())
+      .post("/auth/register")
+      .send(validRegisterPayload)
+      .expect(201);
+    const body = registerResponse.body as RegisterResponseBody;
+    tenantId = body.tenant.id;
+
+    const partner = await prisma.affiliatePartner.create({
+      data: { displayName: "RentalPro", email: "partner@rentalpro.example.com", createdByUserId: body.user.id },
+    });
+    partnerId = partner.id;
+    const campaign = await prisma.affiliateCampaign.create({
+      data: { partnerId, name: "Test Campaign", slug: "rentalpro-e2e", commissionRateBp: 2500, commissionDurationMonths: 12 },
+    });
+    campaignId = campaign.id;
+    await prisma.affiliateAttribution.create({
+      data: { tenantId, partnerId, campaignId, source: "REFERRAL_LINK" },
+    });
+
+    // Link the tenant's HavelioSubscription to a real Stripe subscription
+    // id first (via the already-proven subscription.updated path), so
+    // SubscriptionsService.findTenantIdForSubscription can resolve it.
+    await signedRequest(app, fakeSubscriptionUpdatedEvent("evt_setup_sub", tenantId)).expect(200);
+  });
+
+  it("earns a commission from a real invoice.paid event, computed from actual collected revenue", async () => {
+    const invoiceId = "in_e2e_1";
+    const event = fakeInvoicePaidEvent("evt_invoice_1", invoiceId, `sub_fake_${tenantId}`);
+    await signedRequest(app, event).expect(200);
+
+    const entries = await prisma.affiliateCommissionEntry.findMany({ where: { partnerId } });
+    expect(entries).toHaveLength(1);
+    expect(entries[0]).toMatchObject({
+      eventType: "COMMISSION_EARNED",
+      tenantId,
+      campaignId,
+      eligibleRevenueMinor: 5520,
+      commissionRateBp: 2500,
+      amountMinor: 1380, // 25% of €55.20
+    });
+
+    const auditLogs = await prisma.auditLog.count({
+      where: { tenantId, action: "billing.affiliate_commission.earned" },
+    });
+    expect(auditLogs).toBe(1);
+  });
+
+  it("is idempotent at the ledger level: two DIFFERENT Stripe events for the SAME invoice still create only one commission entry", async () => {
+    // Deliberately two distinct event ids (not a literal redelivery of the
+    // same event, already proven above and covered by the top-level
+    // StripeWebhookEvent guard) — this exercises the second, independent
+    // idempotency guarantee: AffiliateCommissionEntry's own
+    // @@unique([stripeInvoiceId, eventType]) constraint, for the case where
+    // Stripe legitimately sends more than one event referencing the same
+    // invoice.
+    const invoiceId = "in_e2e_2";
+    await signedRequest(app, fakeInvoicePaidEvent("evt_invoice_2a", invoiceId, `sub_fake_${tenantId}`)).expect(200);
+    await signedRequest(app, fakeInvoicePaidEvent("evt_invoice_2b", invoiceId, `sub_fake_${tenantId}`)).expect(200);
+
+    const entries = await prisma.affiliateCommissionEntry.count({
+      where: { partnerId, eventType: "COMMISSION_EARNED" },
+    });
+    expect(entries).toBe(1);
+
+    const auditLogs = await prisma.auditLog.count({
+      where: { tenantId, action: "billing.affiliate_commission.earned" },
+    });
+    expect(auditLogs).toBe(1);
   });
 });

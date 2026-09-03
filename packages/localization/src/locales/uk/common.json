@@ -95,7 +95,8 @@
     },
     "save": "Зберегти",
     "edit": "Змінити",
-    "remove": "Видалити"
+    "remove": "Видалити",
+    "create": "Створити"
   },
   "nav": {
     "logout": "Вийти",
@@ -119,7 +120,9 @@
       "submitting": "Створення акаунта…",
       "haveAccount": "Вже маєте акаунт?",
       "signIn": "Увійти",
-      "companySection": "Компанія"
+      "companySection": "Компанія",
+      "affiliateCode": "Реферальний або промокод (необов'язково)",
+      "affiliateCodePlaceholder": "напр., RENTAL20"
     },
     "login": {
       "title": "Вхід",
@@ -2077,7 +2080,8 @@
       "cancel": "Скасувати підписку",
       "resume": "Відновити підписку",
       "currentPlan": "Поточний план",
-      "choose": "Обрати план"
+      "choose": "Обрати план",
+      "viewPlans": "Переглянути тарифи"
     },
     "chooseAPlan": "Оберіть план",
     "changePlan": "Змінити план",
@@ -2120,6 +2124,145 @@
       "downgradeScheduled": "Пониження плану заплановано на кінець поточного розрахункового періоду.",
       "canceled": "Ваша підписка завершиться наприкінці поточного періоду.",
       "resumed": "Вашу підписку відновлено."
+    },
+    "entitlementDenied": {
+      "fallback": "Ця функція недоступна на вашому поточному тарифі."
+    }
+  },
+  "platformAdmin": {
+    "title": "Адміністрування платформи Havelio",
+    "nav": {
+      "affiliates": "Партнери"
+    },
+    "accessDenied": {
+      "title": "Потрібен доступ адміністратора платформи",
+      "description": "Цей розділ призначений лише для співробітників Havelio. Ваш обліковий запис не має доступу адміністратора платформи.",
+      "backToApp": "Повернутися до Havelio"
+    },
+    "affiliates": {
+      "title": "Партнери по рефералах",
+      "subtitle": "Облікові записи блогерів, інфлюенсерів і реферальних партнерів, кампанії та комісії.",
+      "createPartner": "Створити партнера",
+      "partnerCreated": "Партнера створено.",
+      "empty": "Партнерів поки немає.",
+      "columns": {
+        "name": "Ім'я",
+        "email": "Email",
+        "status": "Статус"
+      },
+      "status": {
+        "ACTIVE": "Активний",
+        "PAUSED": "Призупинено",
+        "ENDED": "Завершено"
+      },
+      "form": {
+        "displayName": "Відображуване ім'я",
+        "email": "Email"
+      },
+      "backToList": "Назад до списку партнерів",
+      "pausePartner": "Призупинити партнера",
+      "activatePartner": "Активувати партнера",
+      "endPartner": "Завершити співпрацю",
+      "statusUpdated": "Статус партнера оновлено.",
+      "campaigns": {
+        "title": "Кампанії",
+        "empty": "Кампаній поки немає.",
+        "createCampaign": "Створити кампанію",
+        "created": "Кампанію створено.",
+        "form": {
+          "name": "Назва кампанії",
+          "slug": "Реферальний slug",
+          "slugHint": "havelio.net/register?ref=<slug>",
+          "commissionRate": "Ставка комісії (%)",
+          "commissionDuration": "Тривалість комісії (міс.)"
+        },
+        "columns": {
+          "name": "Назва",
+          "slug": "Slug",
+          "rate": "Ставка",
+          "duration": "Тривалість",
+          "status": "Статус"
+        }
+      },
+      "promoCodes": {
+        "title": "Промокоди",
+        "empty": "Промокодів для цієї кампанії поки немає.",
+        "createCode": "Створити промокод",
+        "created": "Промокод створено.",
+        "form": {
+          "code": "Код",
+          "discountType": "Тип знижки",
+          "percentage": "Відсоток",
+          "fixedAmount": "Фіксована сума",
+          "discountValueBp": "Знижка (%)",
+          "discountValueMinor": "Сума знижки (мінімальні одиниці)",
+          "currency": "Валюта",
+          "duration": "Тривалість",
+          "once": "Один раз",
+          "repeating": "Повторювана",
+          "forever": "Назавжди",
+          "durationInMonths": "Тривалість (міс.)"
+        },
+        "columns": {
+          "code": "Код",
+          "discount": "Знижка",
+          "redemptions": "Використань",
+          "stripeLinked": "Stripe"
+        },
+        "stripeLinked": "Пов'язано",
+        "stripeNotLinked": "Не пов'язано"
+      },
+      "metrics": {
+        "title": "Метрики",
+        "registrations": "Реєстрації",
+        "trialsStarted": "Розпочаті пробні періоди",
+        "paidConversions": "Платні конверсії",
+        "activeSubscribers": "Активні підписники",
+        "cancellations": "Скасування"
+      },
+      "ledger": {
+        "title": "Реєстр комісій",
+        "empty": "Записів у реєстрі для цієї валюти поки немає.",
+        "earned": "Нараховано",
+        "adjustments": "Коригування",
+        "paid": "Виплачено",
+        "payable": "До виплати"
+      },
+      "attribution": {
+        "title": "Пошук реферальної атрибуції",
+        "tenantIdLabel": "ID орендаря",
+        "search": "Знайти",
+        "notFound": "Атрибуцію для цього орендаря не знайдено.",
+        "found": "Атрибуцію знайдено",
+        "partner": "Партнер",
+        "campaign": "Кампанія",
+        "source": "Джерело",
+        "attributedAt": "Дата атрибуції"
+      },
+      "payouts": {
+        "title": "Історія виплат",
+        "empty": "Виплат поки не зареєстровано.",
+        "recordPayout": "Зареєструвати виплату",
+        "recorded": "Виплату зареєстровано. Havelio не переказувало реальні кошти — це лише запис про платіж, уже надісланий адміністратором поза системою.",
+        "form": {
+          "amount": "Сума",
+          "currency": "Валюта",
+          "date": "Дата виплати",
+          "method": "Метод",
+          "bankTransfer": "Банківський переказ",
+          "paypal": "PayPal",
+          "other": "Інше",
+          "reference": "Референс",
+          "note": "Примітка"
+        },
+        "columns": {
+          "date": "Дата",
+          "amount": "Сума",
+          "method": "Метод",
+          "reference": "Референс"
+        },
+        "disclaimer": "Запис виплати лише фіксує, що адміністратор уже надіслав цю суму поза системою — Havelio ніколи не переказує кошти автоматично."
+      }
     }
   }
 }

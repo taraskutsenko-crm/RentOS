@@ -49,6 +49,12 @@ export {
   type TimezoneSelectOption,
   type TimezoneSelectProps,
 } from "./components/timezone-select";
-export { ToastProvider, useToast, type ToastInput, type ToastVariant } from "./components/toast";
+export {
+  ToastProvider,
+  useToast,
+  type ToastAction,
+  type ToastInput,
+  type ToastVariant,
+} from "./components/toast";
 export { Tooltip, type TooltipProps } from "./components/tooltip";
 export { cn } from "./lib/utils";

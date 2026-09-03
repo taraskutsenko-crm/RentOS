@@ -95,7 +95,8 @@
     },
     "save": "Save",
     "edit": "Edit",
-    "remove": "Remove"
+    "remove": "Remove",
+    "create": "Create"
   },
   "nav": {
     "logout": "Log out",
@@ -119,7 +120,9 @@
       "submitting": "Creating account…",
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
-      "companySection": "Company"
+      "companySection": "Company",
+      "affiliateCode": "Referral or promo code (optional)",
+      "affiliateCodePlaceholder": "e.g. RENTAL20"
     },
     "login": {
       "title": "Sign in",
@@ -2077,7 +2080,8 @@
       "cancel": "Cancel subscription",
       "resume": "Resume subscription",
       "currentPlan": "Current plan",
-      "choose": "Choose plan"
+      "choose": "Choose plan",
+      "viewPlans": "View plans"
     },
     "chooseAPlan": "Choose a plan",
     "changePlan": "Change plan",
@@ -2120,6 +2124,145 @@
       "downgradeScheduled": "Downgrade scheduled for the end of your current billing period.",
       "canceled": "Your subscription will end at the end of the current period.",
       "resumed": "Your subscription has been resumed."
+    },
+    "entitlementDenied": {
+      "fallback": "This feature isn't available on your current plan."
+    }
+  },
+  "platformAdmin": {
+    "title": "Havelio Platform Admin",
+    "nav": {
+      "affiliates": "Affiliates"
+    },
+    "accessDenied": {
+      "title": "Platform administration access required",
+      "description": "This area is for Havelio staff only. Your account doesn't have platform administrator access.",
+      "backToApp": "Back to Havelio"
+    },
+    "affiliates": {
+      "title": "Affiliate Partners",
+      "subtitle": "Blogger, influencer, and referral partner accounts, campaigns, and commissions.",
+      "createPartner": "Create partner",
+      "partnerCreated": "Partner created.",
+      "empty": "No affiliate partners yet.",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "status": "Status"
+      },
+      "status": {
+        "ACTIVE": "Active",
+        "PAUSED": "Paused",
+        "ENDED": "Ended"
+      },
+      "form": {
+        "displayName": "Display name",
+        "email": "Email"
+      },
+      "backToList": "Back to partners",
+      "pausePartner": "Pause partner",
+      "activatePartner": "Activate partner",
+      "endPartner": "End partner",
+      "statusUpdated": "Partner status updated.",
+      "campaigns": {
+        "title": "Campaigns",
+        "empty": "No campaigns yet.",
+        "createCampaign": "Create campaign",
+        "created": "Campaign created.",
+        "form": {
+          "name": "Campaign name",
+          "slug": "Referral slug",
+          "slugHint": "havelio.net/register?ref=<slug>",
+          "commissionRate": "Commission rate (%)",
+          "commissionDuration": "Commission duration (months)"
+        },
+        "columns": {
+          "name": "Name",
+          "slug": "Slug",
+          "rate": "Rate",
+          "duration": "Duration",
+          "status": "Status"
+        }
+      },
+      "promoCodes": {
+        "title": "Promotion codes",
+        "empty": "No promotion codes for this campaign yet.",
+        "createCode": "Create promo code",
+        "created": "Promotion code created.",
+        "form": {
+          "code": "Code",
+          "discountType": "Discount type",
+          "percentage": "Percentage",
+          "fixedAmount": "Fixed amount",
+          "discountValueBp": "Discount (%)",
+          "discountValueMinor": "Discount amount (minor units)",
+          "currency": "Currency",
+          "duration": "Duration",
+          "once": "Once",
+          "repeating": "Repeating",
+          "forever": "Forever",
+          "durationInMonths": "Duration (months)"
+        },
+        "columns": {
+          "code": "Code",
+          "discount": "Discount",
+          "redemptions": "Redemptions",
+          "stripeLinked": "Stripe"
+        },
+        "stripeLinked": "Linked",
+        "stripeNotLinked": "Not linked"
+      },
+      "metrics": {
+        "title": "Metrics",
+        "registrations": "Registrations",
+        "trialsStarted": "Trials started",
+        "paidConversions": "Paid conversions",
+        "activeSubscribers": "Active subscribers",
+        "cancellations": "Cancellations"
+      },
+      "ledger": {
+        "title": "Commission ledger",
+        "empty": "No ledger entries for this currency yet.",
+        "earned": "Earned",
+        "adjustments": "Adjustments",
+        "paid": "Paid",
+        "payable": "Payable"
+      },
+      "attribution": {
+        "title": "Referral attribution lookup",
+        "tenantIdLabel": "Tenant ID",
+        "search": "Look up",
+        "notFound": "No attribution found for this tenant.",
+        "found": "Attribution found",
+        "partner": "Partner",
+        "campaign": "Campaign",
+        "source": "Source",
+        "attributedAt": "Attributed at"
+      },
+      "payouts": {
+        "title": "Payout history",
+        "empty": "No payouts recorded yet.",
+        "recordPayout": "Record payout",
+        "recorded": "Payout recorded. No real money was transferred by Havelio — this only records a payment the admin already sent externally.",
+        "form": {
+          "amount": "Amount",
+          "currency": "Currency",
+          "date": "Payout date",
+          "method": "Method",
+          "bankTransfer": "Bank transfer",
+          "paypal": "PayPal",
+          "other": "Other",
+          "reference": "Reference",
+          "note": "Note"
+        },
+        "columns": {
+          "date": "Date",
+          "amount": "Amount",
+          "method": "Method",
+          "reference": "Reference"
+        },
+        "disclaimer": "Recording a payout only logs that the admin already sent this amount externally — Havelio never transfers money automatically."
+      }
     }
   }
 }

@@ -7,6 +7,11 @@ import { cn } from "../lib/utils";
 
 export type ToastVariant = "default" | "success" | "destructive";
 
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 export interface ToastInput {
   /** The main message — always shown. */
   description: string;
@@ -15,6 +20,14 @@ export interface ToastInput {
   variant?: ToastVariant;
   /** Auto-dismiss delay in ms. Set to `0` to require manual dismissal. */
   duration?: number;
+  /**
+   * An optional single call-to-action button (e.g. "View plans" on an
+   * entitlement-denied error — see docs/DECISIONS.md "never a generic
+   * 403"). Clicking it also dismisses the toast. When set, `duration`
+   * should usually be `0` (require manual dismissal) so the action has
+   * time to be seen/used — callers decide, this component doesn't force it.
+   */
+  action?: ToastAction;
 }
 
 interface ToastRecord extends ToastInput {
@@ -100,6 +113,18 @@ function ToastItem({ toast, onDismiss }: { toast: ToastRecord; onDismiss: () => 
       <div className="flex-1">
         {toast.title && <p className="font-medium">{toast.title}</p>}
         <p className={cn(toast.title ? "text-muted-foreground" : undefined)}>{toast.description}</p>
+        {toast.action && (
+          <button
+            type="button"
+            onClick={() => {
+              toast.action?.onClick();
+              onDismiss();
+            }}
+            className="mt-1.5 text-sm font-medium underline underline-offset-2 hover:no-underline"
+          >
+            {toast.action.label}
+          </button>
+        )}
       </div>
       <button
         type="button"

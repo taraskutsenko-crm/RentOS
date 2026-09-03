@@ -4,6 +4,16 @@ interface ApiErrorBody {
   message?: string | string[];
   error?: string;
   statusCode?: number;
+  /**
+   * A machine-readable error kind, when the backend sends one — currently
+   * only `"ENTITLEMENT_DENIED"` (see EntitlementDeniedException /
+   * entitlement-error.ts's `isEntitlementDeniedError`). Every other error
+   * this codebase throws omits `code` entirely; do not assume it's always
+   * present.
+   */
+  code?: string;
+  /** Present only alongside `code: "ENTITLEMENT_DENIED"` — see EntitlementDeniedException's own doc comment. */
+  reason?: unknown;
 }
 
 export class ApiError extends Error {

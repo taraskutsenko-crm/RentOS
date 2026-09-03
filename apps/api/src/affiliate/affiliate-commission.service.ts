@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import type { AffiliateCommissionEntry } from "@prisma/client";
 import type Stripe from "stripe";
 
+import { AuditService } from "../audit/audit.service";
 import type { IAffiliateInvoiceEventHandler } from "../billing/affiliate-invoice-event-handler.types";
 import { extractChargeInvoiceId, extractInvoiceSubscriptionId } from "../billing/stripe-subscription.util";
 import { SubscriptionsService } from "../billing/subscriptions.service";
@@ -38,6 +39,7 @@ export class AffiliateCommissionService implements IAffiliateInvoiceEventHandler
   constructor(
     private readonly prisma: PrismaService,
     private readonly subscriptionsService: SubscriptionsService,
+    private readonly auditService: AuditService,
   ) {}
 
   async handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
@@ -67,7 +69,7 @@ export class AffiliateCommissionService implements IAffiliateInvoiceEventHandler
     if (commissionAmountMinor <= 0) return;
 
     try {
-      await this.prisma.affiliateCommissionEntry.create({
+      const entry = await this.prisma.affiliateCommissionEntry.create({
         data: {
           partnerId: attribution.partnerId,
           tenantId,
@@ -77,6 +79,26 @@ export class AffiliateCommissionService implements IAffiliateInvoiceEventHandler
           currency: invoice.currency.toUpperCase(),
           eligibleRevenueMinor,
           commissionRateBp: campaign.commissionRateBp,
+          amountMinor: commissionAmountMinor,
+        },
+      });
+      // AuditLog is observational metadata only — the ledger entry above
+      // (already committed, unique-constrained on stripeInvoiceId+eventType)
+      // is the canonical financial record; this never duplicates or
+      // re-derives its effect, and a duplicate webhook that hits the
+      // catch branch below never reaches this line, so at most one
+      // "commission earned" audit event exists per invoice (see
+      // docs/DECISIONS.md).
+      await this.auditService.log({
+        tenantId,
+        action: "billing.affiliate_commission.earned",
+        entityType: "AffiliateCommissionEntry",
+        entityId: entry.id,
+        metadata: {
+          partnerId: attribution.partnerId,
+          campaignId: campaign.id,
+          stripeInvoiceId: invoice.id,
+          currency: entry.currency,
           amountMinor: commissionAmountMinor,
         },
       });
@@ -115,7 +137,7 @@ export class AffiliateCommissionService implements IAffiliateInvoiceEventHandler
     if (!original) return;
 
     try {
-      await this.prisma.affiliateCommissionEntry.create({
+      const reversal = await this.prisma.affiliateCommissionEntry.create({
         data: {
           partnerId: original.partnerId,
           tenantId: original.tenantId,
@@ -128,6 +150,23 @@ export class AffiliateCommissionService implements IAffiliateInvoiceEventHandler
           amountMinor: -original.amountMinor,
           reversesEntryId: original.id,
           note: `Reversal for refunded invoice ${invoiceId}`,
+        },
+      });
+      // Same idempotency guarantee as the "earned" audit event above — the
+      // unique constraint on (stripeInvoiceId, eventType) means at most one
+      // COMMISSION_REVERSED row (and therefore at most one audit event) can
+      // ever exist per invoice.
+      await this.auditService.log({
+        tenantId: original.tenantId,
+        action: "billing.affiliate_commission.reversed",
+        entityType: "AffiliateCommissionEntry",
+        entityId: reversal.id,
+        metadata: {
+          partnerId: original.partnerId,
+          reversesEntryId: original.id,
+          stripeInvoiceId: invoiceId,
+          currency: original.currency,
+          amountMinor: -original.amountMinor,
         },
       });
     } catch (error) {

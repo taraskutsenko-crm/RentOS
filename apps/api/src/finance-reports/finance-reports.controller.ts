@@ -2,6 +2,8 @@ import { BadRequestException, Controller, Get, Query, Res, UseGuards } from "@ne
 import type { Response } from "express";
 
 import { CurrentTenant, type CurrentTenantContext } from "../auth/decorators/current-tenant.decorator";
+import { FeatureEntitlementGuard } from "../billing/feature-entitlement.guard";
+import { RequireFeature } from "../billing/require-feature.decorator";
 import { PermissionsGuard } from "../permissions/permissions.guard";
 import { RequirePermissions } from "../permissions/require-permissions.decorator";
 import { TenantGuard } from "../tenants/tenant.guard";
@@ -31,8 +33,16 @@ const CSV_REPORT_NAMES: CsvReportName[] = ["summary", "receivables", "payments",
  * export endpoints additionally require `finance.export` (a more
  * sensitive action — downloading a copy of tenant financial data — than
  * viewing it on screen).
+ *
+ * Havelio Billing (Stage 17 closure pass): the entire module requires the
+ * FINANCIAL_REPORTS feature (Business+) — unlike Payments/Payment Demands,
+ * there is no "existing record" to preserve here (every report is computed
+ * live from Invoice/Payment/RentalDeposit data, never stored), so gating
+ * the whole controller class-wide is correct rather than gating individual
+ * write endpoints.
  */
-@UseGuards(TenantGuard, PermissionsGuard)
+@UseGuards(TenantGuard, PermissionsGuard, FeatureEntitlementGuard)
+@RequireFeature("FINANCIAL_REPORTS")
 @Controller("tenants/:tenantId/finance-reports")
 export class FinanceReportsController {
   constructor(

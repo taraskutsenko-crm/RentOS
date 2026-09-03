@@ -35,8 +35,13 @@ function buildService(overrides: {
   const subscriptionsService = {
     findTenantIdForSubscription: vi.fn().mockResolvedValue("tenant-1"),
   };
-  const service = new AffiliateCommissionService(prisma as never, subscriptionsService as never);
-  return { service, prisma, created };
+  const auditService = { log: vi.fn() };
+  const service = new AffiliateCommissionService(
+    prisma as never,
+    subscriptionsService as never,
+    auditService as never,
+  );
+  return { service, prisma, created, auditService };
 }
 
 function fakeInvoice(overrides: Record<string, unknown> = {}) {
@@ -52,7 +57,7 @@ function fakeInvoice(overrides: Record<string, unknown> = {}) {
 
 describe("AffiliateCommissionService", () => {
   it("computes commission from REAL collected revenue, never the nominal plan price — 25% x €55.20 = €13.80", async () => {
-    const { service, created } = buildService();
+    const { service, created, auditService } = buildService();
     await service.handleInvoicePaid(fakeInvoice());
 
     expect(created).toHaveLength(1);
@@ -63,6 +68,17 @@ describe("AffiliateCommissionService", () => {
       amountMinor: 1380,
       currency: "EUR",
     });
+
+    // Observational AuditLog metadata alongside the canonical ledger entry
+    // — never a second financial effect.
+    expect(auditService.log).toHaveBeenCalledTimes(1);
+    expect(auditService.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: "tenant-1",
+        action: "billing.affiliate_commission.earned",
+        metadata: expect.objectContaining({ amountMinor: 1380 }),
+      }),
+    );
   });
 
   it("earns no commission when there is no affiliate attribution for the tenant", async () => {
@@ -77,8 +93,8 @@ describe("AffiliateCommissionService", () => {
     expect(created).toHaveLength(0);
   });
 
-  it("is idempotent: a duplicate invoice.paid for the same invoice never creates a second commission entry", async () => {
-    const { service, prisma, created } = buildService();
+  it("is idempotent: a duplicate invoice.paid for the same invoice never creates a second commission entry or a second audit event", async () => {
+    const { service, prisma, created, auditService } = buildService();
     // Simulate the DB's own unique constraint (stripeInvoiceId, eventType)
     // rejecting the second insert.
     prisma.affiliateCommissionEntry.create
@@ -96,6 +112,7 @@ describe("AffiliateCommissionService", () => {
     await service.handleInvoicePaid(fakeInvoice());
 
     expect(created).toHaveLength(1);
+    expect(auditService.log).toHaveBeenCalledTimes(1);
   });
 
   it("skips commission once the eligibility window (commissionDurationMonths) has passed", async () => {
@@ -125,7 +142,8 @@ describe("AffiliateCommissionService", () => {
         create: vi.fn().mockImplementation(({ data }) => Promise.resolve(data)),
       },
     };
-    const service = new AffiliateCommissionService(prisma as never, {} as never);
+    const auditService = { log: vi.fn() };
+    const service = new AffiliateCommissionService(prisma as never, {} as never, auditService as never);
 
     const charge = { invoice: "in_1" } as never;
     await service.handleChargeRefunded(charge);
@@ -137,6 +155,12 @@ describe("AffiliateCommissionService", () => {
           amountMinor: -1380,
           reversesEntryId: "entry-1",
         }),
+      }),
+    );
+    expect(auditService.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "billing.affiliate_commission.reversed",
+        metadata: expect.objectContaining({ amountMinor: -1380, reversesEntryId: "entry-1" }),
       }),
     );
   });

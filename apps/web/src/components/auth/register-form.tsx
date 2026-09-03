@@ -5,7 +5,7 @@ import { localeRegistry } from "@rentos/localization";
 import { Button, Label } from "@rentos/ui";
 import { countries } from "@rentos/shared";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -20,8 +20,17 @@ import { AuthFooter } from "./auth-card";
 export function RegisterForm() {
   const { t } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const registerMutation = useRegister();
   const [, setCurrentTenantId] = useCurrentTenantId();
+
+  // Havelio Affiliate/Partner domain (Stage 17 closure pass) — a referral
+  // link (`/register?ref=rentalpro`) pre-fills the field below, still
+  // freely editable; a visitor with no `?ref=` at all just sees an empty,
+  // optional field. Read once at mount (a query param a user navigates
+  // away from and back to mid-form shouldn't silently overwrite what
+  // they've already typed).
+  const referralCode = searchParams.get("ref") ?? "";
 
   const {
     register,
@@ -35,6 +44,7 @@ export function RegisterForm() {
       defaultLanguage: "en",
       defaultCurrency: "USD",
       timezone: "America/New_York",
+      affiliateCode: referralCode,
     },
   });
 
@@ -48,9 +58,13 @@ export function RegisterForm() {
   }
 
   async function onSubmit(values: RegisterFormValues): Promise<void> {
-    const { passwordConfirmation: _passwordConfirmation, ...registerInput } = values;
+    const { passwordConfirmation: _passwordConfirmation, affiliateCode, ...registerInput } = values;
+    const trimmedAffiliateCode = affiliateCode?.trim();
     try {
-      const result = await registerMutation.mutateAsync(registerInput);
+      const result = await registerMutation.mutateAsync({
+        ...registerInput,
+        ...(trimmedAffiliateCode ? { affiliateCode: trimmedAffiliateCode } : {}),
+      });
       setCurrentTenantId(result.tenant.id);
       router.push("/app");
     } catch {
@@ -179,6 +193,19 @@ export function RegisterForm() {
             {...register("timezone")}
           />
         </div>
+
+        {/* Havelio Affiliate/Partner domain (Stage 17 closure pass) — a
+            referral slug or promo code, optional, pre-filled from `?ref=`
+            when present. Registration always succeeds with none or with an
+            unrecognized value; see RegisterDto.affiliateCode's own doc
+            comment. */}
+        <AuthField
+          id="affiliateCode"
+          label={t("auth.register.affiliateCode")}
+          placeholder={t("auth.register.affiliateCodePlaceholder")}
+          error={errors.affiliateCode && t(errors.affiliateCode.message ?? "")}
+          {...register("affiliateCode")}
+        />
       </div>
 
       <Button type="submit" disabled={pending}>

@@ -29,6 +29,7 @@ import { useBankAccounts } from "../../../../hooks/use-bank-accounts";
 import { useCurrentTenantId } from "../../../../hooks/use-current-tenant";
 import { usePermission } from "../../../../hooks/use-current-tenant-role";
 import { useCustomers } from "../../../../hooks/use-customers";
+import { useEntitlementErrorToast } from "../../../../hooks/use-entitlement-error-toast";
 import {
   invoicePdfUrl,
   useCancelInvoice,
@@ -154,6 +155,7 @@ function InvoiceEditor({
   const { data: rentalDeposit } = useRentalDeposit(tenantId, invoice.rentalId);
   const { data: paymentDemands } = usePaymentDemands(tenantId, invoice.id);
   const createPaymentDemand = useCreatePaymentDemand(tenantId);
+  const showEntitlementError = useEntitlementErrorToast();
   const { data: preview } = useInvoicePreview(tenantId, invoice.id);
   const previewFrameRef = useRef<HTMLIFrameElement>(null);
   const sendInvoiceEmail = useSendInvoiceEmail(tenantId);
@@ -364,6 +366,7 @@ function InvoiceEditor({
       setPaymentDialogOpen(false);
     } catch (err) {
       setPaymentError(apiErrorMessage(err, t("common.error")));
+      showEntitlementError(err);
     }
   }
 
@@ -375,6 +378,7 @@ function InvoiceEditor({
       setMarkFullyPaidConfirmOpen(false);
     } catch (err) {
       setError(apiErrorMessage(err, t("common.error")));
+      showEntitlementError(err);
     }
   }
 
@@ -395,6 +399,7 @@ function InvoiceEditor({
       setVoidReason("");
     } catch (err) {
       setVoidError(apiErrorMessage(err, t("common.error")));
+      showEntitlementError(err);
     }
   }
 
@@ -427,6 +432,7 @@ function InvoiceEditor({
       setApplyDepositAmount("");
     } catch (err) {
       setApplyDepositError(apiErrorMessage(err, t("common.error")));
+      showEntitlementError(err);
     }
   }
 
@@ -445,6 +451,7 @@ function InvoiceEditor({
       setDemandDeadline("");
     } catch (err) {
       setDemandError(apiErrorMessage(err, t("common.error")));
+      showEntitlementError(err);
     }
   }
 

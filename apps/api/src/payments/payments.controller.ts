@@ -13,6 +13,8 @@ import {
   type CurrentTenantContext,
 } from "../auth/decorators/current-tenant.decorator";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { FeatureEntitlementGuard } from "../billing/feature-entitlement.guard";
+import { RequireFeature } from "../billing/require-feature.decorator";
 import { PermissionsGuard } from "../permissions/permissions.guard";
 import { RequirePermissions } from "../permissions/require-permissions.decorator";
 import { TenantGuard } from "../tenants/tenant.guard";
@@ -23,7 +25,15 @@ import { RecordPaymentDto } from "./dto/record-payment.dto";
 import { VoidPaymentDto } from "./dto/void-payment.dto";
 import { PaymentsService } from "./payments.service";
 
-@UseGuards(TenantGuard, PermissionsGuard)
+/**
+ * Havelio Billing (Stage 17 closure pass) — recording/voiding a payment
+ * requires the tenant's Havelio plan to include PAYMENTS_DEBT_MANAGEMENT
+ * (Business+); `findMany` (viewing already-recorded payments) is
+ * deliberately NOT feature-gated — a downgraded tenant's existing payment
+ * history stays visible, only creating NEW payment records is blocked (see
+ * docs/DECISIONS.md "existing records must remain safe").
+ */
+@UseGuards(TenantGuard, PermissionsGuard, FeatureEntitlementGuard)
 @Controller("tenants/:tenantId/invoices/:invoiceId/payments")
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
@@ -38,6 +48,7 @@ export class PaymentsController {
   }
 
   @RequirePermissions("payments.record")
+  @RequireFeature("PAYMENTS_DEBT_MANAGEMENT")
   @Post()
   record(
     @CurrentTenant() { tenant }: CurrentTenantContext,
@@ -50,6 +61,7 @@ export class PaymentsController {
 
   /** "Mark as paid" — the one-click full-payment action (see PaymentsService.markFullyPaid). */
   @RequirePermissions("payments.record")
+  @RequireFeature("PAYMENTS_DEBT_MANAGEMENT")
   @Post("mark-fully-paid")
   markFullyPaid(
     @CurrentTenant() { tenant }: CurrentTenantContext,
@@ -62,6 +74,7 @@ export class PaymentsController {
 
   /** "Apply deposit to balance" (Phase 10) — see PaymentsService.applyDeposit. */
   @RequirePermissions("payments.record")
+  @RequireFeature("PAYMENTS_DEBT_MANAGEMENT")
   @Post("apply-deposit")
   applyDeposit(
     @CurrentTenant() { tenant }: CurrentTenantContext,
@@ -73,6 +86,7 @@ export class PaymentsController {
   }
 
   @RequirePermissions("payments.void")
+  @RequireFeature("PAYMENTS_DEBT_MANAGEMENT")
   @Post(":paymentId/void")
   void(
     @CurrentTenant() { tenant }: CurrentTenantContext,

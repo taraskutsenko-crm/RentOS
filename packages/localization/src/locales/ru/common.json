@@ -95,7 +95,8 @@
     },
     "save": "Сохранить",
     "edit": "Изменить",
-    "remove": "Удалить"
+    "remove": "Удалить",
+    "create": "Создать"
   },
   "nav": {
     "logout": "Выйти",
@@ -119,7 +120,9 @@
       "submitting": "Создание аккаунта…",
       "haveAccount": "Уже есть аккаунт?",
       "signIn": "Войти",
-      "companySection": "Компания"
+      "companySection": "Компания",
+      "affiliateCode": "Реферальный или промокод (необязательно)",
+      "affiliateCodePlaceholder": "например, RENTAL20"
     },
     "login": {
       "title": "Вход",
@@ -2077,7 +2080,8 @@
       "cancel": "Отменить подписку",
       "resume": "Возобновить подписку",
       "currentPlan": "Текущий план",
-      "choose": "Выбрать план"
+      "choose": "Выбрать план",
+      "viewPlans": "Посмотреть тарифы"
     },
     "chooseAPlan": "Выберите план",
     "changePlan": "Изменить план",
@@ -2120,6 +2124,145 @@
       "downgradeScheduled": "Понижение плана запланировано на конец текущего расчётного периода.",
       "canceled": "Ваша подписка завершится в конце текущего периода.",
       "resumed": "Ваша подписка возобновлена."
+    },
+    "entitlementDenied": {
+      "fallback": "Эта функция недоступна на вашем текущем тарифе."
+    }
+  },
+  "platformAdmin": {
+    "title": "Администрирование платформы Havelio",
+    "nav": {
+      "affiliates": "Партнёры"
+    },
+    "accessDenied": {
+      "title": "Требуется доступ администратора платформы",
+      "description": "Этот раздел предназначен только для сотрудников Havelio. У вашей учётной записи нет доступа администратора платформы.",
+      "backToApp": "Вернуться в Havelio"
+    },
+    "affiliates": {
+      "title": "Партнёры по рефералам",
+      "subtitle": "Аккаунты блогеров, инфлюенсеров и реферальных партнёров, кампании и комиссии.",
+      "createPartner": "Создать партнёра",
+      "partnerCreated": "Партнёр создан.",
+      "empty": "Партнёров пока нет.",
+      "columns": {
+        "name": "Имя",
+        "email": "Email",
+        "status": "Статус"
+      },
+      "status": {
+        "ACTIVE": "Активен",
+        "PAUSED": "Приостановлен",
+        "ENDED": "Завершён"
+      },
+      "form": {
+        "displayName": "Отображаемое имя",
+        "email": "Email"
+      },
+      "backToList": "Назад к списку партнёров",
+      "pausePartner": "Приостановить партнёра",
+      "activatePartner": "Активировать партнёра",
+      "endPartner": "Завершить сотрудничество",
+      "statusUpdated": "Статус партнёра обновлён.",
+      "campaigns": {
+        "title": "Кампании",
+        "empty": "Кампаний пока нет.",
+        "createCampaign": "Создать кампанию",
+        "created": "Кампания создана.",
+        "form": {
+          "name": "Название кампании",
+          "slug": "Реферальный slug",
+          "slugHint": "havelio.net/register?ref=<slug>",
+          "commissionRate": "Ставка комиссии (%)",
+          "commissionDuration": "Срок действия комиссии (мес.)"
+        },
+        "columns": {
+          "name": "Название",
+          "slug": "Slug",
+          "rate": "Ставка",
+          "duration": "Срок",
+          "status": "Статус"
+        }
+      },
+      "promoCodes": {
+        "title": "Промокоды",
+        "empty": "Промокодов для этой кампании пока нет.",
+        "createCode": "Создать промокод",
+        "created": "Промокод создан.",
+        "form": {
+          "code": "Код",
+          "discountType": "Тип скидки",
+          "percentage": "Процент",
+          "fixedAmount": "Фиксированная сумма",
+          "discountValueBp": "Скидка (%)",
+          "discountValueMinor": "Сумма скидки (минимальные единицы)",
+          "currency": "Валюта",
+          "duration": "Длительность",
+          "once": "Один раз",
+          "repeating": "Повторяющаяся",
+          "forever": "Навсегда",
+          "durationInMonths": "Длительность (мес.)"
+        },
+        "columns": {
+          "code": "Код",
+          "discount": "Скидка",
+          "redemptions": "Использований",
+          "stripeLinked": "Stripe"
+        },
+        "stripeLinked": "Связан",
+        "stripeNotLinked": "Не связан"
+      },
+      "metrics": {
+        "title": "Метрики",
+        "registrations": "Регистрации",
+        "trialsStarted": "Начатые пробные периоды",
+        "paidConversions": "Платные конверсии",
+        "activeSubscribers": "Активные подписчики",
+        "cancellations": "Отмены"
+      },
+      "ledger": {
+        "title": "Реестр комиссий",
+        "empty": "Записей в реестре для этой валюты пока нет.",
+        "earned": "Начислено",
+        "adjustments": "Корректировки",
+        "paid": "Выплачено",
+        "payable": "К выплате"
+      },
+      "attribution": {
+        "title": "Поиск реферальной атрибуции",
+        "tenantIdLabel": "ID арендатора",
+        "search": "Найти",
+        "notFound": "Атрибуция для этого арендатора не найдена.",
+        "found": "Атрибуция найдена",
+        "partner": "Партнёр",
+        "campaign": "Кампания",
+        "source": "Источник",
+        "attributedAt": "Дата атрибуции"
+      },
+      "payouts": {
+        "title": "История выплат",
+        "empty": "Выплат пока не зарегистрировано.",
+        "recordPayout": "Зарегистрировать выплату",
+        "recorded": "Выплата зарегистрирована. Havelio не переводило реальные средства — это лишь запись о платеже, уже отправленном администратором вне системы.",
+        "form": {
+          "amount": "Сумма",
+          "currency": "Валюта",
+          "date": "Дата выплаты",
+          "method": "Метод",
+          "bankTransfer": "Банковский перевод",
+          "paypal": "PayPal",
+          "other": "Другое",
+          "reference": "Референс",
+          "note": "Примечание"
+        },
+        "columns": {
+          "date": "Дата",
+          "amount": "Сумма",
+          "method": "Метод",
+          "reference": "Референс"
+        },
+        "disclaimer": "Запись выплаты лишь фиксирует, что администратор уже отправил эту сумму вне системы — Havelio никогда не переводит средства автоматически."
+      }
     }
   }
 }

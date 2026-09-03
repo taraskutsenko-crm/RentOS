@@ -8,6 +8,7 @@ import { TenantsModule } from "../tenants/tenants.module";
 import { BillingController } from "./billing.controller";
 import { STRIPE_PROVIDER } from "./billing.types";
 import { EntitlementsService } from "./entitlements.service";
+import { FeatureEntitlementGuard } from "./feature-entitlement.guard";
 import { PlatformAdminBillingController } from "./platform-admin-billing.controller";
 import { PlatformAdminGuard } from "./platform-admin.guard";
 import { PromoCodesService } from "./promo-codes.service";
@@ -39,7 +40,15 @@ import { SubscriptionsService } from "./subscriptions.service";
     EntitlementsService,
     PromoCodesService,
     PlatformAdminGuard,
+    FeatureEntitlementGuard,
   ],
-  exports: [SubscriptionsService, EntitlementsService, PromoCodesService, STRIPE_PROVIDER, PlatformAdminGuard],
+  exports: [
+    SubscriptionsService,
+    EntitlementsService,
+    PromoCodesService,
+    STRIPE_PROVIDER,
+    PlatformAdminGuard,
+    FeatureEntitlementGuard,
+  ],
 })
 export class BillingModule {}

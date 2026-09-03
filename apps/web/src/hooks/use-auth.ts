@@ -15,6 +15,8 @@ export interface RegisterInput {
   defaultLanguage: string;
   defaultCurrency: string;
   timezone: string;
+  /** Havelio Affiliate/Partner domain (Stage 17 closure pass) — see RegisterDto.affiliateCode's own doc comment. */
+  affiliateCode?: string;
 }
 
 export interface LoginInput {

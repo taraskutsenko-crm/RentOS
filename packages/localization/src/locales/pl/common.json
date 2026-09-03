@@ -95,7 +95,8 @@
     },
     "save": "Zapisz",
     "edit": "Edytuj",
-    "remove": "Usuń"
+    "remove": "Usuń",
+    "create": "Utwórz"
   },
   "nav": {
     "logout": "Wyloguj się",
@@ -119,7 +120,9 @@
       "submitting": "Tworzenie konta…",
       "haveAccount": "Masz już konto?",
       "signIn": "Zaloguj się",
-      "companySection": "Firma"
+      "companySection": "Firma",
+      "affiliateCode": "Kod polecający lub promocyjny (opcjonalnie)",
+      "affiliateCodePlaceholder": "np. RENTAL20"
     },
     "login": {
       "title": "Zaloguj się",
@@ -2077,7 +2080,8 @@
       "cancel": "Anuluj subskrypcję",
       "resume": "Wznów subskrypcję",
       "currentPlan": "Aktualny plan",
-      "choose": "Wybierz plan"
+      "choose": "Wybierz plan",
+      "viewPlans": "Zobacz plany"
     },
     "chooseAPlan": "Wybierz plan",
     "changePlan": "Zmień plan",
@@ -2120,6 +2124,145 @@
       "downgradeScheduled": "Obniżenie planu zaplanowano na koniec bieżącego okresu rozliczeniowego.",
       "canceled": "Twoja subskrypcja zakończy się na koniec bieżącego okresu.",
       "resumed": "Twoja subskrypcja została wznowiona."
+    },
+    "entitlementDenied": {
+      "fallback": "Ta funkcja nie jest dostępna w Twoim obecnym planie."
+    }
+  },
+  "platformAdmin": {
+    "title": "Havelio – Administracja platformy",
+    "nav": {
+      "affiliates": "Partnerzy"
+    },
+    "accessDenied": {
+      "title": "Wymagany dostęp administratora platformy",
+      "description": "Ten obszar jest przeznaczony wyłącznie dla pracowników Havelio. Twoje konto nie ma dostępu administratora platformy.",
+      "backToApp": "Powrót do Havelio"
+    },
+    "affiliates": {
+      "title": "Partnerzy afiliacyjni",
+      "subtitle": "Konta blogerów, influencerów i partnerów polecających, kampanie i prowizje.",
+      "createPartner": "Utwórz partnera",
+      "partnerCreated": "Partner utworzony.",
+      "empty": "Brak partnerów afiliacyjnych.",
+      "columns": {
+        "name": "Nazwa",
+        "email": "E-mail",
+        "status": "Status"
+      },
+      "status": {
+        "ACTIVE": "Aktywny",
+        "PAUSED": "Wstrzymany",
+        "ENDED": "Zakończony"
+      },
+      "form": {
+        "displayName": "Nazwa wyświetlana",
+        "email": "E-mail"
+      },
+      "backToList": "Powrót do listy partnerów",
+      "pausePartner": "Wstrzymaj partnera",
+      "activatePartner": "Aktywuj partnera",
+      "endPartner": "Zakończ współpracę",
+      "statusUpdated": "Status partnera zaktualizowany.",
+      "campaigns": {
+        "title": "Kampanie",
+        "empty": "Brak kampanii.",
+        "createCampaign": "Utwórz kampanię",
+        "created": "Kampania utworzona.",
+        "form": {
+          "name": "Nazwa kampanii",
+          "slug": "Slug polecenia",
+          "slugHint": "havelio.net/register?ref=<slug>",
+          "commissionRate": "Stawka prowizji (%)",
+          "commissionDuration": "Czas trwania prowizji (miesiące)"
+        },
+        "columns": {
+          "name": "Nazwa",
+          "slug": "Slug",
+          "rate": "Stawka",
+          "duration": "Czas trwania",
+          "status": "Status"
+        }
+      },
+      "promoCodes": {
+        "title": "Kody promocyjne",
+        "empty": "Brak kodów promocyjnych dla tej kampanii.",
+        "createCode": "Utwórz kod promocyjny",
+        "created": "Kod promocyjny utworzony.",
+        "form": {
+          "code": "Kod",
+          "discountType": "Typ zniżki",
+          "percentage": "Procentowa",
+          "fixedAmount": "Kwota stała",
+          "discountValueBp": "Zniżka (%)",
+          "discountValueMinor": "Kwota zniżki (jednostki pomocnicze)",
+          "currency": "Waluta",
+          "duration": "Czas trwania",
+          "once": "Jednorazowo",
+          "repeating": "Powtarzalnie",
+          "forever": "Bezterminowo",
+          "durationInMonths": "Czas trwania (miesiące)"
+        },
+        "columns": {
+          "code": "Kod",
+          "discount": "Zniżka",
+          "redemptions": "Wykorzystania",
+          "stripeLinked": "Stripe"
+        },
+        "stripeLinked": "Powiązany",
+        "stripeNotLinked": "Niepowiązany"
+      },
+      "metrics": {
+        "title": "Metryki",
+        "registrations": "Rejestracje",
+        "trialsStarted": "Rozpoczęte okresy próbne",
+        "paidConversions": "Płatne konwersje",
+        "activeSubscribers": "Aktywni subskrybenci",
+        "cancellations": "Anulowania"
+      },
+      "ledger": {
+        "title": "Rejestr prowizji",
+        "empty": "Brak wpisów w rejestrze dla tej waluty.",
+        "earned": "Naliczone",
+        "adjustments": "Korekty",
+        "paid": "Wypłacone",
+        "payable": "Do wypłaty"
+      },
+      "attribution": {
+        "title": "Wyszukiwanie atrybucji polecenia",
+        "tenantIdLabel": "ID najemcy",
+        "search": "Szukaj",
+        "notFound": "Nie znaleziono atrybucji dla tego najemcy.",
+        "found": "Znaleziono atrybucję",
+        "partner": "Partner",
+        "campaign": "Kampania",
+        "source": "Źródło",
+        "attributedAt": "Data atrybucji"
+      },
+      "payouts": {
+        "title": "Historia wypłat",
+        "empty": "Brak zarejestrowanych wypłat.",
+        "recordPayout": "Zarejestruj wypłatę",
+        "recorded": "Wypłata zarejestrowana. Havelio nie przekazało żadnych realnych środków — to tylko rejestruje płatność już wysłaną zewnętrznie przez administratora.",
+        "form": {
+          "amount": "Kwota",
+          "currency": "Waluta",
+          "date": "Data wypłaty",
+          "method": "Metoda",
+          "bankTransfer": "Przelew bankowy",
+          "paypal": "PayPal",
+          "other": "Inna",
+          "reference": "Numer referencyjny",
+          "note": "Notatka"
+        },
+        "columns": {
+          "date": "Data",
+          "amount": "Kwota",
+          "method": "Metoda",
+          "reference": "Referencja"
+        },
+        "disclaimer": "Zarejestrowanie wypłaty jedynie odnotowuje, że administrator wysłał tę kwotę zewnętrznie — Havelio nigdy nie przekazuje środków automatycznie."
+      }
     }
   }
 }

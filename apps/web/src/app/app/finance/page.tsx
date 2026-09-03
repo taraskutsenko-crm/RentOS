@@ -1,9 +1,10 @@
 "use client";
 
-import { Button, Card, CardContent, CardHeader, CardTitle, Select, cn } from "@rentos/ui";
+import { Alert, AlertDescription, Button, Card, CardContent, CardHeader, CardTitle, Select, cn } from "@rentos/ui";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { DataTable } from "../../../components/data-table/data-table";
 import { DataTablePagination } from "../../../components/data-table/data-table-pagination";
@@ -31,6 +32,8 @@ import {
   useFinanceUtilization,
   type PeriodFilter,
 } from "../../../hooks/use-finance-reports";
+import { apiErrorMessage } from "../../../lib/api-error-i18n";
+import { isEntitlementDeniedError } from "../../../lib/entitlement-error";
 import { formatMoney } from "../../../lib/money";
 import type { ReportPeriodPreset, TopCustomersMetric } from "../../../types/finance-reports";
 
@@ -39,6 +42,7 @@ const TABS: FinanceTab[] = ["overview", "revenue", "receivables", "payments", "c
 
 export default function FinanceReportsPage() {
   const { t, i18n } = useTranslation();
+  const router = useRouter();
   const [tenantId] = useCurrentTenantId();
   const canExport = usePermission("finance.export");
 
@@ -91,6 +95,29 @@ export default function FinanceReportsPage() {
       ? t("finance.period.range", { from: overview.data.period.fromDate, to: overview.data.period.toDate })
       : t("finance.period.ALL_TIME")
     : "";
+
+  // Havelio Billing (Stage 17 closure pass) — Financial Reports is gated
+  // entirely behind the FINANCIAL_REPORTS feature server-side
+  // (FinanceReportsController). A tenant with `finance.read` RBAC but no
+  // Business+ plan can still reach this route (the nav item is only
+  // permission-gated, matching the rest of the app's nav — see
+  // docs/DECISIONS.md); rather than render a dozen broken per-widget error
+  // states, show one clear, actionable full-page notice.
+  if (isEntitlementDeniedError(overview.error)) {
+    return (
+      <div className="flex flex-col gap-6">
+        <PageHeader title={t("finance.title")} subtitle={t("finance.subtitle")} />
+        <Alert variant="warning">
+          <AlertDescription className="flex flex-col items-start gap-3">
+            <span>{apiErrorMessage(overview.error, t("billing.entitlementDenied.fallback"))}</span>
+            <Button size="sm" onClick={() => router.push("/app/settings/billing")}>
+              {t("billing.actions.viewPlans")}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

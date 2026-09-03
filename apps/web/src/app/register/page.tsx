@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 
 import { RegisterForm } from "../../components/auth/register-form";
@@ -13,7 +14,12 @@ export default function RegisterPage() {
     <AuthShell tone="primary" tagline={t("app.tagline")}>
       <AuthCard className="max-w-lg">
         <AuthHeader title={t("auth.register.title")} subtitle={t("auth.register.subtitle")} />
-        <RegisterForm />
+        {/* RegisterForm reads `?ref=` via useSearchParams() (Havelio
+            referral links, Stage 17 closure pass) — Next.js requires that
+            hook's consumer to sit inside a Suspense boundary. */}
+        <Suspense fallback={null}>
+          <RegisterForm />
+        </Suspense>
       </AuthCard>
     </AuthShell>
   );

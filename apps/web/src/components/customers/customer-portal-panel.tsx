@@ -18,6 +18,7 @@ import {
   useStaffPortalMessages,
 } from "../../hooks/use-customer-portal";
 import { usePermission, useTenantTimezone } from "../../hooks/use-current-tenant-role";
+import { useEntitlementErrorToast } from "../../hooks/use-entitlement-error-toast";
 import { apiErrorMessage } from "../../lib/api-error-i18n";
 import { formatDateTime } from "../../lib/date-format";
 
@@ -52,6 +53,7 @@ function PortalAccessCard({ tenantId, customerId }: { tenantId: string; customer
   const { data: status, isLoading } = usePortalAccessStatus(tenantId, customerId);
   const invite = useInviteCustomerToPortal(tenantId);
   const revoke = useRevokeCustomerPortalAccess(tenantId);
+  const showEntitlementError = useEntitlementErrorToast();
 
   async function handleInvite(): Promise<void> {
     setError(null);
@@ -60,6 +62,7 @@ function PortalAccessCard({ tenantId, customerId }: { tenantId: string; customer
       setInviteLink(result.inviteLink);
     } catch (err) {
       setError(apiErrorMessage(err, t("common.error")));
+      showEntitlementError(err);
     }
   }
 

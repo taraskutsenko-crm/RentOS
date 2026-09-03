@@ -7,6 +7,7 @@ import { AssetFilesModule } from "../asset-files/asset-files.module";
 import { AssetsModule } from "../assets/assets.module";
 import { AuditModule } from "../audit/audit.module";
 import { PasswordService } from "../auth/password.service";
+import { BillingModule } from "../billing/billing.module";
 import { CompanyBrandingModule } from "../company-branding/company-branding.module";
 import { CustomersModule } from "../customers/customers.module";
 import { DocumentsModule } from "../documents/documents.module";
@@ -63,6 +64,7 @@ import { StaffPortalController } from "./staff/staff-portal.controller";
     AuditModule,
     EmailModule,
     CompanyBrandingModule,
+    BillingModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

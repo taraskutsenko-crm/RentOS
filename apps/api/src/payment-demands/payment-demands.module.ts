@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 
 import { AuditModule } from "../audit/audit.module";
+import { BillingModule } from "../billing/billing.module";
 import { DocumentsModule } from "../documents/documents.module";
 import { EmailModule } from "../email/email.module";
 import { PermissionsModule } from "../permissions/permissions.module";
@@ -13,7 +14,15 @@ import { PaymentDemandPdfService } from "./rendering/payment-demand-pdf.service"
 import { PaymentDemandRendererService } from "./rendering/payment-demand-renderer.service";
 
 @Module({
-  imports: [TenantsModule, AuditModule, PermissionsModule, DocumentsModule, EmailModule, StorageModule],
+  imports: [
+    TenantsModule,
+    AuditModule,
+    PermissionsModule,
+    DocumentsModule,
+    EmailModule,
+    StorageModule,
+    BillingModule,
+  ],
   controllers: [PaymentDemandsController],
   providers: [
     PaymentDemandsService,

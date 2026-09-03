@@ -98,6 +98,25 @@ export class EntitlementsService {
     return client.asset.count({ where: { tenantId, deletedAt: null, isActive: true } });
   }
 
+  /**
+   * The canonical `PlanLimits.maxUsers` values (Starter 2 / Business 5 /
+   * Professional 15 — see plan-config.ts) already exist and are correctly
+   * exposed here and on `GET .../billing/subscription`'s `usage.users`
+   * field (rendered on the Billing page today). There is deliberately NO
+   * enforcement point yet: no staff-invite/add-team-member endpoint exists
+   * ANYWHERE in the product (Customer Portal invitations are a completely
+   * different, customer-facing feature — see
+   * CustomerPortalInvitationsController). **Future integration point**:
+   * when Stage 19 Team Management / Permissions V2 adds a real
+   * "POST /tenants/:tenantId/memberships/invite"-style endpoint, that
+   * controller's create action should call this method's result against
+   * `PlanLimits.maxUsers` the exact same way `AssetsService.create` uses
+   * `EntitlementsService.assertCanCreateAsset` — including the same
+   * `pg_advisory_xact_lock`-based concurrency pattern (keyed on
+   * `tenantId + ':membership'` instead of `':asset'`) inside that
+   * endpoint's own transaction. No code change is needed here for that to
+   * work; only a new call site.
+   */
   async countActiveUsers(tenantId: string, client: Prisma.TransactionClient | PrismaService = this.prisma): Promise<number> {
     return client.tenantMembership.count({ where: { tenantId, status: "ACTIVE" } });
   }

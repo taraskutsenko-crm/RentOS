@@ -14,6 +14,7 @@ const useUpdatePartnerStatusMock = vi.fn();
 const useCreateCampaignMock = vi.fn();
 const usePlatformAdminPromoCodesMock = vi.fn();
 const useCreatePromoCodeMock = vi.fn();
+const useRetryPromoCodeProvisioningMock = vi.fn();
 const useAttributionMock = vi.fn();
 const usePartnerPayableMock = vi.fn();
 const usePartnerPayoutsMock = vi.fn();
@@ -25,6 +26,7 @@ vi.mock("../../src/hooks/use-platform-admin", () => ({
   useCreateCampaign: () => useCreateCampaignMock(),
   usePlatformAdminPromoCodes: () => usePlatformAdminPromoCodesMock(),
   useCreatePromoCode: () => useCreatePromoCodeMock(),
+  useRetryPromoCodeProvisioning: () => useRetryPromoCodeProvisioningMock(),
   useAttribution: () => useAttributionMock(),
   usePartnerPayable: () => usePartnerPayableMock(),
   usePartnerPayouts: () => usePartnerPayoutsMock(),
@@ -73,6 +75,7 @@ describe("PlatformAdminPartnerDetailPage", () => {
     useCreateCampaignMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     usePlatformAdminPromoCodesMock.mockReturnValue({ data: [], isLoading: false });
     useCreatePromoCodeMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
+    useRetryPromoCodeProvisioningMock.mockReturnValue({ mutateAsync: vi.fn(), isPending: false });
     useAttributionMock.mockReturnValue({ data: undefined, isFetched: false });
     usePartnerPayableMock.mockReturnValue({
       data: { earnedMinor: 124000, adjustmentsMinor: 0, paidMinor: 80000, payableMinor: 44000 },

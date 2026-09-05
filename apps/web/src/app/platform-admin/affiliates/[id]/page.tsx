@@ -32,6 +32,7 @@ import {
   usePlatformAdminPartner,
   usePlatformAdminPromoCodes,
   useRecordPayout,
+  useRetryPromoCodeProvisioning,
   useUpdatePartnerStatus,
   type AffiliateCampaign,
   type AffiliateStatus,
@@ -353,8 +354,25 @@ function CreateCampaignDialog({
 
 function PromoCodesCard({ campaignId }: { campaignId: string }) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { data: promoCodes, isLoading } = usePlatformAdminPromoCodes(campaignId);
+  const retryProvisioning = useRetryPromoCodeProvisioning(campaignId);
   const [createOpen, setCreateOpen] = useState(false);
+
+  async function handleRetry(promoCodeId: string): Promise<void> {
+    try {
+      const result = await retryProvisioning.mutateAsync(promoCodeId);
+      toast({
+        description:
+          result.provisioningStatus === "PROVISIONED"
+            ? t("platformAdmin.affiliates.promoCodes.provisioningRetrySucceeded")
+            : t("platformAdmin.affiliates.promoCodes.provisioningRetryStillFailing"),
+        variant: result.provisioningStatus === "PROVISIONED" ? "success" : "destructive",
+      });
+    } catch (error) {
+      toast({ description: apiErrorMessage(error, t("common.error")), variant: "destructive" });
+    }
+  }
 
   return (
     <div className="border-t pt-4">
@@ -380,6 +398,7 @@ function PromoCodesCard({ campaignId }: { campaignId: string }) {
               <th className="py-2 pr-4 font-medium">
                 {t("platformAdmin.affiliates.promoCodes.columns.stripeLinked")}
               </th>
+              <th className="py-2 pr-4 font-medium" />
             </tr>
           </thead>
           <tbody>
@@ -398,9 +417,27 @@ function PromoCodesCard({ campaignId }: { campaignId: string }) {
                   {code.maxRedemptions ? `/${code.maxRedemptions}` : ""}
                 </td>
                 <td className="py-2 pr-4">
-                  {code.stripePromotionCodeId
-                    ? t("platformAdmin.affiliates.promoCodes.stripeLinked")
-                    : t("platformAdmin.affiliates.promoCodes.stripeNotLinked")}
+                  {code.provisioningStatus === "PROVISIONED" ? (
+                    t("platformAdmin.affiliates.promoCodes.stripeLinked")
+                  ) : code.provisioningStatus === "FAILED" ? (
+                    <span className="text-destructive" title={code.provisioningError ?? undefined}>
+                      {t("platformAdmin.affiliates.promoCodes.provisioningFailed")}
+                    </span>
+                  ) : (
+                    t("platformAdmin.affiliates.promoCodes.stripeNotLinked")
+                  )}
+                </td>
+                <td className="py-2 pr-4">
+                  {code.provisioningStatus === "FAILED" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={retryProvisioning.isPending}
+                      onClick={() => void handleRetry(code.id)}
+                    >
+                      {t("platformAdmin.affiliates.promoCodes.retryProvisioning")}
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}

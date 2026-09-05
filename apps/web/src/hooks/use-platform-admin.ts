@@ -50,7 +50,10 @@ export interface PromoCode {
   maxRedemptions: number | null;
   redemptionCount: number;
   affiliateCampaignId: string | null;
+  stripeCouponId: string | null;
   stripePromotionCodeId: string | null;
+  provisioningStatus: "PENDING" | "PROVISIONED" | "FAILED";
+  provisioningError: string | null;
 }
 
 export interface AffiliateAttribution {
@@ -193,6 +196,16 @@ export function useCreatePromoCode() {
     }) => apiClient.post<PromoCode>("/platform-admin/affiliate/promo-codes", input),
     onSuccess: (_data, variables) =>
       void queryClient.invalidateQueries({ queryKey: [PROMO_CODES_KEY, variables.affiliateCampaignId] }),
+  });
+}
+
+/** Admin-facing recovery for a PENDING/FAILED promo code — see PromoCodesService.provisionStripeObjects. */
+export function useRetryPromoCodeProvisioning(campaignId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (promoCodeId: string) =>
+      apiClient.post<PromoCode>(`/platform-admin/affiliate/promo-codes/${promoCodeId}/retry-provisioning`),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: [PROMO_CODES_KEY, campaignId] }),
   });
 }
 

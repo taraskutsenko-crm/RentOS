@@ -2210,7 +2210,11 @@
           "stripeLinked": "Stripe"
         },
         "stripeLinked": "Пов'язано",
-        "stripeNotLinked": "Не пов'язано"
+        "stripeNotLinked": "Не пов'язано",
+        "provisioningFailed": "Не вдалося налаштувати Stripe",
+        "retryProvisioning": "Повторити",
+        "provisioningRetrySucceeded": "Налаштування Stripe виконано успішно.",
+        "provisioningRetryStillFailing": "Налаштування Stripe знову не вдалося — див. статус коду для деталей."
       },
       "metrics": {
         "title": "Метрики",

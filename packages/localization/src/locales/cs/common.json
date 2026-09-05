@@ -2210,7 +2210,11 @@
           "stripeLinked": "Stripe"
         },
         "stripeLinked": "Propojeno",
-        "stripeNotLinked": "Nepropojeno"
+        "stripeNotLinked": "Nepropojeno",
+        "provisioningFailed": "Nastavení Stripe selhalo",
+        "retryProvisioning": "Zkusit znovu",
+        "provisioningRetrySucceeded": "Nastavení Stripe bylo úspěšné.",
+        "provisioningRetryStillFailing": "Nastavení Stripe opět selhalo — podrobnosti viz stav kódu."
       },
       "metrics": {
         "title": "Metriky",

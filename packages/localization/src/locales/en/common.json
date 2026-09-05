@@ -2210,7 +2210,11 @@
           "stripeLinked": "Stripe"
         },
         "stripeLinked": "Linked",
-        "stripeNotLinked": "Not linked"
+        "stripeNotLinked": "Not linked",
+        "provisioningFailed": "Stripe provisioning failed",
+        "retryProvisioning": "Retry",
+        "provisioningRetrySucceeded": "Stripe provisioning succeeded.",
+        "provisioningRetryStillFailing": "Stripe provisioning failed again — see the code's status for details."
       },
       "metrics": {
         "title": "Metrics",

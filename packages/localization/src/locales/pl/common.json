@@ -2210,7 +2210,11 @@
           "stripeLinked": "Stripe"
         },
         "stripeLinked": "Powiązany",
-        "stripeNotLinked": "Niepowiązany"
+        "stripeNotLinked": "Niepowiązany",
+        "provisioningFailed": "Nie udało się skonfigurować Stripe",
+        "retryProvisioning": "Ponów",
+        "provisioningRetrySucceeded": "Konfiguracja Stripe powiodła się.",
+        "provisioningRetryStillFailing": "Konfiguracja Stripe ponownie się nie powiodła — sprawdź status kodu, aby uzyskać szczegóły."
       },
       "metrics": {
         "title": "Metryki",

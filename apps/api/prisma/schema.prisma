@@ -2957,6 +2957,14 @@ enum PromoDuration {
   FOREVER
 }
 
+/// Real-Stripe-provisioning lifecycle for a PromoCode's Coupon/Promotion
+/// Code pair (see PromoCode.provisioningStatus's own doc comment).
+enum PromoProvisioningStatus {
+  PENDING
+  PROVISIONED
+  FAILED
+}
+
 /// A discount code redeemable at Havelio checkout — Stripe (Coupon +
 /// Promotion Code) is the system of record for the actual discount
 /// mechanics whenever `stripeCouponId`/`stripePromotionCodeId` are set;
@@ -3002,9 +3010,21 @@ model PromoCode {
   /// provisioned (see docs/DECISIONS.md "do not implement unsupported
   /// Stripe semantics by pretending they exist") — null when Stripe isn't
   /// configured in this environment, or the code hasn't been provisioned
-  /// yet.
+  /// yet. Set independently (not both-or-nothing) so a partial failure
+  /// (Coupon created, PromotionCode creation failed) can safely resume at
+  /// the step that didn't complete — see PromoCodesService.provisionStripeObjects.
   stripeCouponId        String?
   stripePromotionCodeId String?
+
+  /// Truthful admin-facing provisioning state — see
+  /// PromoCodesService.provisionStripeObjects. PENDING covers both "not
+  /// attempted yet" and "Stripe isn't configured in this environment";
+  /// never PROVISIONED unless both Stripe IDs above are actually set.
+  provisioningStatus PromoProvisioningStatus @default(PENDING)
+  /// Last provisioning error message, truncated, for admin display —
+  /// never a raw Stripe error object (could carry request internals).
+  /// Null once PROVISIONED.
+  provisioningError String?
 
   affiliateCampaignId String?
 

@@ -73,6 +73,39 @@ export interface IStripeProvider {
   findActivePromotionCode(code: string): Promise<Stripe.PromotionCode | null>;
 
   /**
+   * Provisions the real Stripe Coupon backing a Havelio PromoCode's
+   * customer discount (see PromoCodesService.provisionStripeObjects). Never
+   * called with both `percentOffBp` and `amountOffMinor` — exactly one
+   * discount shape per PromoCode.discountType. `idempotencyKey` is derived
+   * from the PromoCode's own id so a retry (double-click, process restart,
+   * timeout-after-success) always resolves to the SAME Stripe object
+   * instead of creating a duplicate.
+   */
+  createCoupon(input: {
+    idempotencyKey: string;
+    percentOffBp?: number;
+    amountOffMinor?: number;
+    currency?: string;
+    duration: "ONCE" | "REPEATING" | "FOREVER";
+    durationInMonths?: number | null;
+  }): Promise<{ id: string }>;
+
+  /**
+   * Provisions the real Stripe Promotion Code (the customer-facing `code`)
+   * pointing at an already-provisioned Coupon. Same idempotency-key
+   * contract as createCoupon. Stripe itself enforces global code
+   * uniqueness — a genuine duplicate surfaces as a normal thrown error for
+   * the caller to record as PromoCode.provisioningError, never silently
+   * swallowed.
+   */
+  createPromotionCode(input: {
+    idempotencyKey: string;
+    code: string;
+    stripeCouponId: string;
+    maxRedemptions?: number | null;
+  }): Promise<{ id: string }>;
+
+  /**
    * Resolves the Invoice a Charge paid, for `charge.refunded` handling (see
    * AffiliateCommissionService.handleChargeRefunded). As of the pinned API
    * version (2026-08-26.dahlia), `Charge.invoice` no longer exists at all —

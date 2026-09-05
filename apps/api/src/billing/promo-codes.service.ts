@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import type { BillingInterval, HavelioPlan, PromoCode } from "@prisma/client";
 
 import { PrismaService } from "../prisma/prisma.service";
+import { STRIPE_PROVIDER, type IStripeProvider } from "./billing.types";
 import { getPriceMinor } from "./plan-config";
 
 export interface PromoCodeValidationResult {
@@ -29,10 +30,96 @@ export interface DiscountPreview {
  */
 @Injectable()
 export class PromoCodesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(STRIPE_PROVIDER) private readonly stripeProvider: IStripeProvider,
+  ) {}
 
   async findByCode(code: string): Promise<PromoCode | null> {
     return this.prisma.promoCode.findUnique({ where: { code: code.trim().toUpperCase() } });
+  }
+
+  /**
+   * Provisions the real Stripe Coupon + Promotion Code backing a Havelio
+   * PromoCode's customer discount — see PromoCode.provisioningStatus's own
+   * doc comment for the full contract. Called once right after
+   * AffiliatePartnersService.createPromoCode inserts the local row, and
+   * again by retryProvisioning for a previously-FAILED code. Safe to call
+   * repeatedly: each Stripe call carries an idempotency key derived from
+   * this PromoCode's own (stable) id, and each of the two steps is skipped
+   * once its ID is already saved — so a partial failure (Coupon created,
+   * PromotionCode creation failed) resumes at exactly the step that didn't
+   * complete, never re-creating the Coupon.
+   *
+   * Leaves the row untouched at PENDING (never fabricates PROVISIONED) when
+   * Stripe isn't configured in this environment — see
+   * docs/DECISIONS.md "never fake a successful checkout/subscription/
+   * cancellation/refund/webhook delivery", applied here to provisioning.
+   */
+  async provisionStripeObjects(promoCode: PromoCode): Promise<PromoCode> {
+    if (!this.stripeProvider.isConfigured()) {
+      return promoCode;
+    }
+
+    try {
+      let current = promoCode;
+
+      if (!current.stripeCouponId) {
+        const coupon = await this.stripeProvider.createCoupon({
+          idempotencyKey: `havelio-promo-coupon-${current.id}`,
+          ...(current.discountType === "PERCENTAGE" && current.discountValueBp !== null
+            ? { percentOffBp: current.discountValueBp }
+            : {}),
+          ...(current.discountType === "FIXED_AMOUNT" && current.discountValueMinor !== null
+            ? { amountOffMinor: current.discountValueMinor, currency: current.currency ?? "USD" }
+            : {}),
+          duration: current.duration,
+          durationInMonths: current.durationInMonths,
+        });
+        current = await this.prisma.promoCode.update({
+          where: { id: current.id },
+          data: { stripeCouponId: coupon.id },
+        });
+      }
+
+      if (!current.stripePromotionCodeId) {
+        const promotionCode = await this.stripeProvider.createPromotionCode({
+          idempotencyKey: `havelio-promo-code-${current.id}`,
+          code: current.code,
+          stripeCouponId: current.stripeCouponId!,
+          maxRedemptions: current.maxRedemptions,
+        });
+        current = await this.prisma.promoCode.update({
+          where: { id: current.id },
+          data: { stripePromotionCodeId: promotionCode.id },
+        });
+      }
+
+      return await this.prisma.promoCode.update({
+        where: { id: current.id },
+        data: { provisioningStatus: "PROVISIONED", provisioningError: null },
+      });
+    } catch (error) {
+      // Never a raw Stripe error object (could carry request internals) —
+      // just its message, truncated, truthfully surfaced to the admin.
+      const message = error instanceof Error ? error.message : "Unknown Stripe provisioning error.";
+      return this.prisma.promoCode.update({
+        where: { id: promoCode.id },
+        data: { provisioningStatus: "FAILED", provisioningError: message.slice(0, 500) },
+      });
+    }
+  }
+
+  /** Re-attempts provisioning for a PromoCode currently PENDING or FAILED — the admin-facing recovery path (see provisionStripeObjects's own doc comment for why this is always safe to call again). */
+  async retryProvisioning(id: string): Promise<PromoCode> {
+    const promoCode = await this.prisma.promoCode.findUnique({ where: { id } });
+    if (!promoCode) {
+      throw new NotFoundException("Promotion code not found.");
+    }
+    if (promoCode.provisioningStatus === "PROVISIONED") {
+      return promoCode;
+    }
+    return this.provisionStripeObjects(promoCode);
   }
 
   /**

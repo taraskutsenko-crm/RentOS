@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGua
 
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { PlatformAdminGuard } from "../billing/platform-admin.guard";
+import { PromoCodesService } from "../billing/promo-codes.service";
 import type { PublicUser } from "../users/user.mapper";
 import { AffiliateAnalyticsService } from "./affiliate-analytics.service";
 import { AffiliateAttributionService } from "./affiliate-attribution.service";
@@ -31,6 +32,7 @@ export class PlatformAdminAffiliateController {
     private readonly commissionService: AffiliateCommissionService,
     private readonly payoutsService: AffiliatePayoutsService,
     private readonly analyticsService: AffiliateAnalyticsService,
+    private readonly promoCodesService: PromoCodesService,
   ) {}
 
   @Get("partners")
@@ -80,6 +82,12 @@ export class PlatformAdminAffiliateController {
   @Get("promo-codes")
   listPromoCodes(@Query("campaignId") campaignId?: string) {
     return this.partnersService.listPromoCodes(campaignId);
+  }
+
+  /** Admin-facing recovery for a PENDING/FAILED promo code — see PromoCodesService.provisionStripeObjects for why this is always safe to call again. */
+  @Post("promo-codes/:id/retry-provisioning")
+  retryPromoCodeProvisioning(@Param("id", ParseUUIDPipe) id: string) {
+    return this.promoCodesService.retryProvisioning(id);
   }
 
   @Get("attributions/:tenantId")

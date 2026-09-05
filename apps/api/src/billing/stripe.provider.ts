@@ -151,6 +151,51 @@ export class StripeProvider implements IStripeProvider {
     return result.data[0] ?? null;
   }
 
+  async createCoupon(input: {
+    idempotencyKey: string;
+    percentOffBp?: number;
+    amountOffMinor?: number;
+    currency?: string;
+    duration: "ONCE" | "REPEATING" | "FOREVER";
+    durationInMonths?: number | null;
+  }): Promise<{ id: string }> {
+    const client = this.requireClient();
+    const coupon = await client.coupons.create(
+      {
+        // Basis points -> Stripe's percent_off (a 0-100 float, up to 4
+        // decimal places) — exact for any 2-decimal-precision bp value.
+        ...(input.percentOffBp !== undefined ? { percent_off: input.percentOffBp / 100 } : {}),
+        ...(input.amountOffMinor !== undefined
+          ? { amount_off: input.amountOffMinor, currency: input.currency }
+          : {}),
+        duration: input.duration.toLowerCase() as Stripe.CouponCreateParams.Duration,
+        ...(input.duration === "REPEATING" && input.durationInMonths
+          ? { duration_in_months: input.durationInMonths }
+          : {}),
+      },
+      { idempotencyKey: input.idempotencyKey },
+    );
+    return { id: coupon.id };
+  }
+
+  async createPromotionCode(input: {
+    idempotencyKey: string;
+    code: string;
+    stripeCouponId: string;
+    maxRedemptions?: number | null;
+  }): Promise<{ id: string }> {
+    const client = this.requireClient();
+    const promotionCode = await client.promotionCodes.create(
+      {
+        code: input.code,
+        promotion: { type: "coupon", coupon: input.stripeCouponId },
+        ...(input.maxRedemptions ? { max_redemptions: input.maxRedemptions } : {}),
+      },
+      { idempotencyKey: input.idempotencyKey },
+    );
+    return { id: promotionCode.id };
+  }
+
   async findInvoiceIdForCharge(charge: Stripe.Charge): Promise<string | null> {
     const client = this.requireClient();
     const customerId = typeof charge.customer === "string" ? charge.customer : charge.customer?.id;

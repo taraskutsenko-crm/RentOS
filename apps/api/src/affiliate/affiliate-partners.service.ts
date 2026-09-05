@@ -11,6 +11,7 @@ import type {
 } from "@prisma/client";
 
 import { AuditService } from "../audit/audit.service";
+import { PromoCodesService } from "../billing/promo-codes.service";
 import { PrismaService } from "../prisma/prisma.service";
 
 /** Havelio Affiliate/Partner domain (Stage 17) — Partner/Campaign/PromoCode CRUD for Platform Admin. Never visible to ordinary tenants. */
@@ -19,6 +20,7 @@ export class AffiliatePartnersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    private readonly promoCodesService: PromoCodesService,
   ) {}
 
   listPartners(): Promise<AffiliatePartner[]> {
@@ -112,7 +114,10 @@ export class AffiliatePartnersService {
       entityId: promoCode.id,
       metadata: { code: promoCode.code, affiliateCampaignId: input.affiliateCampaignId ?? null },
     });
-    return promoCode;
+    // Provision the real Stripe Coupon/Promotion Code immediately — never
+    // a separate "activate" step, and never left for Checkout time to
+    // discover it's missing (see PromoCodesService.provisionStripeObjects).
+    return this.promoCodesService.provisionStripeObjects(promoCode);
   }
 
   listPromoCodes(affiliateCampaignId?: string): Promise<PromoCode[]> {

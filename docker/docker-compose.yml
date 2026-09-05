@@ -66,6 +66,19 @@ services:
       SMTP_FROM_NAME: ${SMTP_FROM_NAME:-}
       SMTP_REPLY_TO: ${SMTP_REPLY_TO:-}
       KSEF_ENCRYPTION_KEY: ${KSEF_ENCRYPTION_KEY:-467bc28bf643d5e05d8f7bb4b03b2e531be5659d65c009d64b7ef188828393e4}
+      # Havelio Billing (Stage 17) — Stripe. All optional (StripeProvider.
+      # isConfigured() gates real functionality); STRIPE_PUBLISHABLE_KEY is
+      # deliberately NOT wired here — it's declared in the env schema but
+      # unused by the application (server-redirect Checkout/Portal only,
+      # no Stripe.js in the browser). See docs/DECISIONS.md.
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRICE_STARTER_MONTHLY: ${STRIPE_PRICE_STARTER_MONTHLY:-}
+      STRIPE_PRICE_STARTER_ANNUAL: ${STRIPE_PRICE_STARTER_ANNUAL:-}
+      STRIPE_PRICE_BUSINESS_MONTHLY: ${STRIPE_PRICE_BUSINESS_MONTHLY:-}
+      STRIPE_PRICE_BUSINESS_ANNUAL: ${STRIPE_PRICE_BUSINESS_ANNUAL:-}
+      STRIPE_PRICE_PROFESSIONAL_MONTHLY: ${STRIPE_PRICE_PROFESSIONAL_MONTHLY:-}
+      STRIPE_PRICE_PROFESSIONAL_ANNUAL: ${STRIPE_PRICE_PROFESSIONAL_ANNUAL:-}
     ports:
       - "${API_PORT:-4000}:4000"
     volumes:

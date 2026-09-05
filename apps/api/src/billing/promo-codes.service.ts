@@ -160,7 +160,7 @@ export class PromoCodesService {
       discountedPriceMinor =
         originalPriceMinor - Math.round((originalPriceMinor * promoCode.discountValueBp) / 10000);
     } else if (promoCode.discountType === "FIXED_AMOUNT" && promoCode.discountValueMinor !== null) {
-      if (promoCode.currency && promoCode.currency !== "EUR") {
+      if (promoCode.currency && promoCode.currency !== "USD") {
         throw new BadRequestException("This promotion code's currency does not match this plan.");
       }
       discountedPriceMinor = Math.max(0, originalPriceMinor - promoCode.discountValueMinor);
@@ -168,7 +168,7 @@ export class PromoCodesService {
 
     return {
       code: promoCode.code,
-      currency: "EUR",
+      currency: "USD",
       originalPriceMinor,
       discountedPriceMinor,
       thenPriceMinor: promoCode.duration === "FOREVER" ? discountedPriceMinor : originalPriceMinor,

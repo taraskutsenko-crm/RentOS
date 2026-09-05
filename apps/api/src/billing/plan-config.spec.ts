@@ -4,17 +4,17 @@ import { getPlanDefinition, getPriceMinor, planHasFeature, PLAN_DEFINITIONS } fr
 
 describe("plan-config", () => {
   describe("annual pricing (20% off 12 monthly payments)", () => {
-    it("Starter: 29 x 12 x 0.80 = 278.40 EUR", () => {
+    it("Starter: 29 x 12 x 0.80 = 278.40 USD", () => {
       expect(getPriceMinor("STARTER", "MONTHLY")).toBe(2900);
       expect(getPriceMinor("STARTER", "ANNUAL")).toBe(27840);
     });
 
-    it("Business: 69 x 12 x 0.80 = 662.40 EUR", () => {
+    it("Business: 69 x 12 x 0.80 = 662.40 USD", () => {
       expect(getPriceMinor("BUSINESS", "MONTHLY")).toBe(6900);
       expect(getPriceMinor("BUSINESS", "ANNUAL")).toBe(66240);
     });
 
-    it("Professional: 149 x 12 x 0.80 = 1,430.40 EUR", () => {
+    it("Professional: 149 x 12 x 0.80 = 1,430.40 USD", () => {
       expect(getPriceMinor("PROFESSIONAL", "MONTHLY")).toBe(14900);
       expect(getPriceMinor("PROFESSIONAL", "ANNUAL")).toBe(143040);
     });
@@ -23,6 +23,12 @@ describe("plan-config", () => {
       expect(getPriceMinor("ENTERPRISE", "MONTHLY")).toBeNull();
       expect(getPriceMinor("ENTERPRISE", "ANNUAL")).toBeNull();
     });
+  });
+
+  it("every plan is priced in USD — Havelio SaaS billing is USD-only, never EUR", () => {
+    for (const definition of Object.values(PLAN_DEFINITIONS)) {
+      expect(definition.currency).toBe("USD");
+    }
   });
 
   it("exactly one plan is marked MOST POPULAR: Business", () => {

@@ -58,7 +58,7 @@ describe("PromoCodesService", () => {
         discountType: "FIXED_AMOUNT",
         discountValueBp: null,
         discountValueMinor: 1000,
-        currency: "EUR",
+        currency: "USD",
       });
       const preview = await service.previewDiscount("RENTAL20", "STARTER", "MONTHLY");
       expect(preview.originalPriceMinor).toBe(2900);

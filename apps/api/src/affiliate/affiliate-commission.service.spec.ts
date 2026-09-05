@@ -47,7 +47,7 @@ function buildService(overrides: {
 function fakeInvoice(overrides: Record<string, unknown> = {}) {
   return {
     id: "in_1",
-    currency: "eur",
+    currency: "usd",
     amount_paid: 5520,
     total_excluding_tax: 5520,
     parent: { type: "subscription_details", subscription_details: { subscription: "sub_1" } },
@@ -56,7 +56,7 @@ function fakeInvoice(overrides: Record<string, unknown> = {}) {
 }
 
 describe("AffiliateCommissionService", () => {
-  it("computes commission from REAL collected revenue, never the nominal plan price — 25% x €55.20 = €13.80", async () => {
+  it("computes commission from REAL collected revenue, never the nominal plan price — 25% x $55.20 = $13.80", async () => {
     const { service, created, auditService } = buildService();
     await service.handleInvoicePaid(fakeInvoice());
 
@@ -66,7 +66,7 @@ describe("AffiliateCommissionService", () => {
       eligibleRevenueMinor: 5520,
       commissionRateBp: 2500,
       amountMinor: 1380,
-      currency: "EUR",
+      currency: "USD",
     });
 
     // Observational AuditLog metadata alongside the canonical ledger entry
@@ -132,7 +132,7 @@ describe("AffiliateCommissionService", () => {
       tenantId: "tenant-1",
       campaignId: "campaign-1",
       stripeInvoiceId: "in_1",
-      currency: "EUR",
+      currency: "USD",
       commissionRateBp: 2500,
       amountMinor: 1380,
     };

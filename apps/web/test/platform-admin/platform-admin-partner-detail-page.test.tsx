@@ -63,7 +63,7 @@ const PARTNER_DETAIL = {
     cancellations: 6,
     byCurrency: {},
   },
-  balances: { EUR: 44000 },
+  balances: { USD: 44000 },
 };
 
 describe("PlatformAdminPartnerDetailPage", () => {
@@ -98,9 +98,9 @@ describe("PlatformAdminPartnerDetailPage", () => {
   it("shows the real per-currency payable summary (Earned 1240.00, Paid 800.00, Payable 440.00)", () => {
     renderWithProviders(<PlatformAdminPartnerDetailPage />);
 
-    expect(screen.getByText("€1,240.00")).toBeInTheDocument();
-    expect(screen.getByText("€800.00")).toBeInTheDocument();
-    expect(screen.getByText("€440.00")).toBeInTheDocument();
+    expect(screen.getByText("$1,240.00")).toBeInTheDocument();
+    expect(screen.getByText("$800.00")).toBeInTheDocument();
+    expect(screen.getByText("$440.00")).toBeInTheDocument();
   });
 
   it("records a manual payout via the dialog, with the never-real-transfer disclaimer shown", async () => {
@@ -125,7 +125,7 @@ describe("PlatformAdminPartnerDetailPage", () => {
     await user.click(within(dialog).getByRole("button", { name: "Record payout" }));
 
     expect(mutateAsync).toHaveBeenCalledWith(
-      expect.objectContaining({ amountMinor: 44000, currency: "EUR", method: "BANK_TRANSFER" }),
+      expect.objectContaining({ amountMinor: 44000, currency: "USD", method: "BANK_TRANSFER" }),
     );
   });
 });

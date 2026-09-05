@@ -48,14 +48,14 @@ export default function PlatformAdminPartnerDetailPage() {
   const { data, isLoading } = usePlatformAdminPartner(partnerId);
   const updateStatus = useUpdatePartnerStatus(partnerId);
   const { toast } = useToast();
-  const [currency, setCurrency] = useState("EUR");
+  const [currency, setCurrency] = useState("USD");
 
   if (isLoading || !data) {
     return <p className="text-muted-foreground text-sm">{t("common.loading")}</p>;
   }
 
   const { partner, campaigns, analytics } = data;
-  const currencies = Object.keys(data.balances).length > 0 ? Object.keys(data.balances) : ["EUR"];
+  const currencies = Object.keys(data.balances).length > 0 ? Object.keys(data.balances) : ["USD"];
 
   async function handleStatusChange(status: AffiliateStatus): Promise<void> {
     try {

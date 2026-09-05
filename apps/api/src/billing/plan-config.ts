@@ -50,7 +50,7 @@ export interface PlanDefinition {
   monthlyPriceMinor: number | null;
   /** Annual price in minor units — `monthlyPriceMinor * 12 * 0.8`, rounded. `null` for ENTERPRISE. */
   annualPriceMinor: number | null;
-  currency: "EUR";
+  currency: "USD";
   limits: PlanLimits;
   /** Features this plan unlocks — see HavelioFeature. */
   features: HavelioFeature[];
@@ -65,7 +65,7 @@ export interface PlanDefinition {
  * model (never a separately-typed number — always derived from the monthly
  * price so the two can never silently drift). Integer-cents arithmetic only:
  * `monthlyMinor * 12 * 80` is always exactly divisible by 100 for every
- * plan price actually used in V1 (29/69/149 EUR), so `Math.round` here is a
+ * plan price actually used in V1 (29/69/149 USD), so `Math.round` here is a
  * defensive no-op, not a source of rounding error — verified in
  * plan-config.spec.ts.
  */
@@ -100,7 +100,7 @@ export const PLAN_DEFINITIONS: Record<HavelioPlan, PlanDefinition> = {
     name: "Starter",
     monthlyPriceMinor: STARTER_MONTHLY_MINOR,
     annualPriceMinor: annualFromMonthly(STARTER_MONTHLY_MINOR),
-    currency: "EUR",
+    currency: "USD",
     limits: { maxUsers: 2, maxActiveAssets: 50, maxLocations: 1 },
     features: [],
     isMostPopular: false,
@@ -111,7 +111,7 @@ export const PLAN_DEFINITIONS: Record<HavelioPlan, PlanDefinition> = {
     name: "Business",
     monthlyPriceMinor: BUSINESS_MONTHLY_MINOR,
     annualPriceMinor: annualFromMonthly(BUSINESS_MONTHLY_MINOR),
-    currency: "EUR",
+    currency: "USD",
     limits: { maxUsers: 5, maxActiveAssets: 500, maxLocations: 1 },
     features: BUSINESS_FEATURES,
     isMostPopular: true,
@@ -122,7 +122,7 @@ export const PLAN_DEFINITIONS: Record<HavelioPlan, PlanDefinition> = {
     name: "Professional",
     monthlyPriceMinor: PROFESSIONAL_MONTHLY_MINOR,
     annualPriceMinor: annualFromMonthly(PROFESSIONAL_MONTHLY_MINOR),
-    currency: "EUR",
+    currency: "USD",
     // "Unlimited/high practical asset limit" per spec — modeled as `null`
     // (no cap enforced), not a large-but-fake number.
     limits: { maxUsers: 15, maxActiveAssets: null, maxLocations: null },
@@ -140,7 +140,7 @@ export const PLAN_DEFINITIONS: Record<HavelioPlan, PlanDefinition> = {
     name: "Enterprise",
     monthlyPriceMinor: null,
     annualPriceMinor: null,
-    currency: "EUR",
+    currency: "USD",
     limits: { maxUsers: null, maxActiveAssets: null, maxLocations: null },
     features: BUSINESS_FEATURES,
     isMostPopular: false,

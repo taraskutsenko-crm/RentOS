@@ -121,7 +121,7 @@ export class PlatformAdminAffiliateController {
 
   @Get("partners/:id/payable")
   getPayable(@Param("id", ParseUUIDPipe) id: string, @Query("currency") currency: string) {
-    return this.payoutsService.getPayableSummary(id, currency ?? "EUR");
+    return this.payoutsService.getPayableSummary(id, currency ?? "USD");
   }
 
   /**

@@ -337,7 +337,7 @@ function CurrentPlanCard({
 
         {priceMinor !== null && priceMinor !== undefined && subscription.billingInterval && (
           <p className="text-sm">
-            {formatMoney(priceMinor, plan?.currency ?? "EUR", locale)}
+            {formatMoney(priceMinor, plan?.currency ?? "USD", locale)}
             {" / "}
             {t(subscription.billingInterval === "ANNUAL" ? "billing.perYear" : "billing.perMonth")}
           </p>

@@ -166,6 +166,7 @@ export default function BillingSettingsPage() {
         <PlanChooser
           plans={plansData.plans}
           currentPlan={subscription.plan}
+          currentBillingInterval={subscription.billingInterval}
           currentStatus={subscription.status}
           interval={interval}
           onIntervalChange={setInterval}
@@ -422,6 +423,7 @@ function PromoCodeStatus({
 function PlanChooser({
   plans,
   currentPlan,
+  currentBillingInterval,
   currentStatus,
   interval,
   onIntervalChange,
@@ -435,6 +437,7 @@ function PlanChooser({
 }: {
   plans: NonNullable<ReturnType<typeof usePlans>["data"]>["plans"];
   currentPlan: HavelioPlan;
+  currentBillingInterval: BillingInterval | null;
   currentStatus: string;
   interval: BillingInterval;
   onIntervalChange: (interval: BillingInterval) => void;
@@ -494,7 +497,9 @@ function PlanChooser({
               plan={plan}
               interval={interval}
               locale={locale}
-              isCurrent={plan.plan === currentPlan && hasActiveSubscription}
+              isCurrent={
+                plan.plan === currentPlan && interval === currentBillingInterval && hasActiveSubscription
+              }
               onSubscribe={() => onSubscribe(plan.plan)}
               isPending={pendingPlan === plan.plan}
               stripeConfigured={stripeConfigured}

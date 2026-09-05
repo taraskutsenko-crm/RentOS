@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
@@ -219,6 +219,35 @@ describe("BillingSettingsPage", () => {
     renderWithProviders(<BillingSettingsPage />);
 
     expect(screen.getByText("48/50")).toBeInTheDocument();
+  });
+
+  it("lets a Business Monthly subscriber switch to Annual — the plan card is not falsely disabled as 'Current plan' just because the tier matches", async () => {
+    const user = userEvent.setup();
+    useBillingSubscriptionMock.mockReturnValue({
+      data: {
+        subscription: baseSubscription({ status: "ACTIVE", plan: "BUSINESS", billingInterval: "MONTHLY" }),
+        access: "GRANTED",
+        plan: PLANS[1],
+        usage: { assets: 3, users: 1 },
+        stripeConfigured: true,
+      },
+      isLoading: false,
+    });
+
+    renderWithProviders(<BillingSettingsPage />);
+
+    await user.click(screen.getByRole("button", { name: "Annual" }));
+
+    // Business/Monthly is genuinely current -> disabled "Current plan"
+    // under Monthly; Business/Annual is a real, clickable upgrade path for
+    // this same tenant and must never render as "Current plan" merely
+    // because the plan tier matches (see billing-interval-switch fix).
+    // "Most popular" only decorates the Business plan card, so it uniquely
+    // identifies that card regardless of the (duplicate) "Business" text
+    // also shown in the Current Plan summary above.
+    const businessCard = screen.getByText("Most popular").closest("div");
+    expect(businessCard).not.toBeNull();
+    expect(within(businessCard!).getByRole("button", { name: "Choose plan" })).toBeEnabled();
   });
 
   it("shows a truthful 'cancels on' banner when cancelAtPeriodEnd is set", () => {

@@ -1,10 +1,11 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import type { AffiliateCommissionEntry } from "@prisma/client";
 import type Stripe from "stripe";
 
 import { AuditService } from "../audit/audit.service";
 import type { IAffiliateInvoiceEventHandler } from "../billing/affiliate-invoice-event-handler.types";
-import { extractChargeInvoiceId, extractInvoiceSubscriptionId } from "../billing/stripe-subscription.util";
+import { STRIPE_PROVIDER, type IStripeProvider } from "../billing/billing.types";
+import { extractInvoiceSubscriptionId, extractInvoiceTenantId } from "../billing/stripe-subscription.util";
 import { SubscriptionsService } from "../billing/subscriptions.service";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -40,13 +41,21 @@ export class AffiliateCommissionService implements IAffiliateInvoiceEventHandler
     private readonly prisma: PrismaService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly auditService: AuditService,
+    @Inject(STRIPE_PROVIDER) private readonly stripeProvider: IStripeProvider,
   ) {}
 
   async handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
     const subscriptionId = extractInvoiceSubscriptionId(invoice);
     if (!subscriptionId) return;
 
-    const tenantId = await this.subscriptionsService.findTenantIdForSubscription(subscriptionId);
+    // Stripe does not guarantee invoice.paid arrives after customer.
+    // subscription.created for a brand-new subscription's first invoice —
+    // fall back to the tenantId Havelio itself stamped into the invoice's
+    // own embedded subscription metadata when the local row isn't upserted
+    // yet (see extractInvoiceTenantId's own doc comment).
+    const tenantId =
+      (await this.subscriptionsService.findTenantIdForSubscription(subscriptionId)) ??
+      extractInvoiceTenantId(invoice);
     if (!tenantId) return;
 
     const attribution = await this.prisma.affiliateAttribution.findUnique({ where: { tenantId } });
@@ -128,7 +137,7 @@ export class AffiliateCommissionService implements IAffiliateInvoiceEventHandler
   }
 
   async handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
-    const invoiceId = extractChargeInvoiceId(charge);
+    const invoiceId = await this.stripeProvider.findInvoiceIdForCharge(charge);
     if (!invoiceId) return;
 
     const original = await this.prisma.affiliateCommissionEntry.findFirst({

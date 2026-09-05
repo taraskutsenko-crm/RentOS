@@ -6,6 +6,7 @@ function buildService(overrides: {
   attribution?: Record<string, unknown> | null;
   campaign?: Record<string, unknown> | null;
   earliestEntry?: Record<string, unknown> | null;
+  findTenantIdForSubscription?: string | null;
 } = {}) {
   const created: Record<string, unknown>[] = [];
   const prisma = {
@@ -33,13 +34,17 @@ function buildService(overrides: {
     },
   };
   const subscriptionsService = {
-    findTenantIdForSubscription: vi.fn().mockResolvedValue("tenant-1"),
+    findTenantIdForSubscription: vi
+      .fn()
+      .mockResolvedValue(overrides.findTenantIdForSubscription === undefined ? "tenant-1" : overrides.findTenantIdForSubscription),
   };
   const auditService = { log: vi.fn() };
+  const stripeProvider = { findInvoiceIdForCharge: vi.fn().mockResolvedValue(null) };
   const service = new AffiliateCommissionService(
     prisma as never,
     subscriptionsService as never,
     auditService as never,
+    stripeProvider as never,
   );
   return { service, prisma, created, auditService };
 }
@@ -79,6 +84,26 @@ describe("AffiliateCommissionService", () => {
         metadata: expect.objectContaining({ amountMinor: 1380 }),
       }),
     );
+  });
+
+  it("falls back to the invoice's own embedded tenantId when the local subscription row isn't upserted yet (real Stripe delivery-order race on a brand-new subscription's first invoice)", async () => {
+    const { service, created } = buildService({ findTenantIdForSubscription: null });
+    await service.handleInvoicePaid(
+      fakeInvoice({
+        parent: {
+          type: "subscription_details",
+          subscription_details: { subscription: "sub_1", metadata: { tenantId: "tenant-1" } },
+        },
+      }),
+    );
+    expect(created).toHaveLength(1);
+    expect(created[0]).toMatchObject({ tenantId: "tenant-1", eventType: "COMMISSION_EARNED" });
+  });
+
+  it("earns no commission when neither the local row nor the invoice's own metadata resolves a tenantId", async () => {
+    const { service, created } = buildService({ findTenantIdForSubscription: null });
+    await service.handleInvoicePaid(fakeInvoice());
+    expect(created).toHaveLength(0);
   });
 
   it("earns no commission when there is no affiliate attribution for the tenant", async () => {
@@ -143,9 +168,15 @@ describe("AffiliateCommissionService", () => {
       },
     };
     const auditService = { log: vi.fn() };
-    const service = new AffiliateCommissionService(prisma as never, {} as never, auditService as never);
+    const stripeProvider = { findInvoiceIdForCharge: vi.fn().mockResolvedValue("in_1") };
+    const service = new AffiliateCommissionService(
+      prisma as never,
+      {} as never,
+      auditService as never,
+      stripeProvider as never,
+    );
 
-    const charge = { invoice: "in_1" } as never;
+    const charge = { id: "ch_1" } as never;
     await service.handleChargeRefunded(charge);
 
     expect(prisma.affiliateCommissionEntry.create).toHaveBeenCalledWith(
@@ -163,5 +194,25 @@ describe("AffiliateCommissionService", () => {
         metadata: expect.objectContaining({ amountMinor: -1380, reversesEntryId: "entry-1" }),
       }),
     );
+  });
+
+  it("resolves the refunded invoice via IStripeProvider, never a direct Charge.invoice field — the pinned Stripe API version (2026-08-26.dahlia) removed that field entirely, which previously made every refund reversal silently no-op (found via real Stripe Sandbox testing)", async () => {
+    const prisma = {
+      affiliateCommissionEntry: { findFirst: vi.fn(), create: vi.fn() },
+    };
+    const stripeProvider = { findInvoiceIdForCharge: vi.fn().mockResolvedValue(null) };
+    const service = new AffiliateCommissionService(
+      prisma as never,
+      {} as never,
+      { log: vi.fn() } as never,
+      stripeProvider as never,
+    );
+
+    await service.handleChargeRefunded({ id: "ch_1" } as never);
+
+    expect(stripeProvider.findInvoiceIdForCharge).toHaveBeenCalledWith({ id: "ch_1" });
+    // No invoice resolved -> no lookup attempted, never a crash on a
+    // Charge object that (correctly, in this API version) has no .invoice.
+    expect(prisma.affiliateCommissionEntry.findFirst).not.toHaveBeenCalled();
   });
 });

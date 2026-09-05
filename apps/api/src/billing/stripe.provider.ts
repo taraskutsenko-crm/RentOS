@@ -151,6 +151,25 @@ export class StripeProvider implements IStripeProvider {
     return result.data[0] ?? null;
   }
 
+  async findInvoiceIdForCharge(charge: Stripe.Charge): Promise<string | null> {
+    const client = this.requireClient();
+    const customerId = typeof charge.customer === "string" ? charge.customer : charge.customer?.id;
+    const paymentIntentId =
+      typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
+    if (!customerId || !paymentIntentId) return null;
+
+    const invoices = await client.invoices.list({ customer: customerId, limit: 20, expand: ["data.payments"] });
+    for (const invoice of invoices.data) {
+      const matches = invoice.payments?.data?.some((entry) => {
+        const payment = entry.payment;
+        const pi = typeof payment?.payment_intent === "string" ? payment.payment_intent : payment?.payment_intent?.id;
+        return pi === paymentIntentId;
+      });
+      if (matches) return invoice.id ?? null;
+    }
+    return null;
+  }
+
   constructWebhookEvent(rawBody: Buffer, signature: string): Stripe.Event {
     const client = this.requireClient();
     if (!this.webhookSecret) {

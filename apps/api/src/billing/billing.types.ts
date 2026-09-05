@@ -73,6 +73,18 @@ export interface IStripeProvider {
   findActivePromotionCode(code: string): Promise<Stripe.PromotionCode | null>;
 
   /**
+   * Resolves the Invoice a Charge paid, for `charge.refunded` handling (see
+   * AffiliateCommissionService.handleChargeRefunded). As of the pinned API
+   * version (2026-08-26.dahlia), `Charge.invoice` no longer exists at all —
+   * Stripe moved invoice/payment linkage the other direction, onto
+   * `Invoice.payments[].payment.payment_intent` — so this looks up the
+   * charge's customer's recent invoices and matches by PaymentIntent id
+   * rather than reading a direct back-reference field. Null when the charge
+   * has no payment_intent/customer, or no match is found.
+   */
+  findInvoiceIdForCharge(charge: Stripe.Charge): Promise<string | null>;
+
+  /**
    * Verifies an inbound webhook's signature and parses it — throws
    * `Stripe.errors.StripeSignatureVerificationError` on an invalid/forged
    * signature (see StripeWebhooksController, which must return 400 rather

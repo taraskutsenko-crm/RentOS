@@ -29,22 +29,6 @@ export function extractPriceId(subscription: Stripe.Subscription): string | null
 }
 
 /**
- * The Stripe Invoice ID a Charge belongs to. Stripe's public REST API still
- * returns `invoice` on a Charge object for a charge that paid an invoice,
- * but the pinned SDK's TypeScript types (2026-08-26.dahlia) no longer model
- * it on `Stripe.Charge` — the field moved out of the strictly-typed surface
- * along with the other 2025 Invoice/Subscription restructuring (see
- * extractCurrentPeriod/extractInvoiceSubscriptionId above for the same
- * pattern). Read defensively via an unknown-typed view rather than `any`.
- */
-export function extractChargeInvoiceId(charge: Stripe.Charge): string | null {
-  const withInvoice = charge as unknown as { invoice?: string | { id: string } | null };
-  const invoice = withInvoice.invoice;
-  if (!invoice) return null;
-  return typeof invoice === "string" ? invoice : invoice.id;
-}
-
-/**
  * The Stripe Subscription ID an Invoice belongs to. Also moved off the
  * top-level Invoice object in the pinned API version (2026-08-26.dahlia) —
  * now nested under `invoice.parent.subscription_details.subscription`. Null
@@ -58,4 +42,28 @@ export function extractInvoiceSubscriptionId(invoice: Stripe.Invoice): string | 
   const subscription = parent.subscription_details?.subscription;
   if (!subscription) return null;
   return typeof subscription === "string" ? subscription : subscription.id;
+}
+
+/**
+ * The `tenantId` Havelio stamped onto the subscription at creation time
+ * (see StripeProvider.createCheckoutSession's `subscription_data.metadata`),
+ * read directly off the invoice's own embedded `subscription_details`
+ * snapshot rather than a fresh Subscription fetch. Exists because Stripe
+ * does not guarantee `invoice.paid` is delivered after `customer.
+ * subscription.created`/checkout.session.completed for a brand-new
+ * subscription's first invoice — when it arrives first, `HavelioSubscription
+ * .stripeSubscriptionId` isn't populated yet, so a local-DB-only lookup
+ * (SubscriptionsService.findTenantIdForSubscription) can miss a real
+ * tenant that unambiguously exists. See AffiliateCommissionService
+ * .handleInvoicePaid, whose first-conversion commission this ordering race
+ * was silently dropping (found via real Stripe Sandbox testing, not
+ * inferred).
+ */
+export function extractInvoiceTenantId(invoice: Stripe.Invoice): string | null {
+  const parent = invoice.parent;
+  if (!parent || parent.type !== "subscription_details") {
+    return null;
+  }
+  const tenantId = parent.subscription_details?.metadata?.tenantId;
+  return typeof tenantId === "string" && tenantId.length > 0 ? tenantId : null;
 }
